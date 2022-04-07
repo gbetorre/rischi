@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# MODIFICARE LE VARIABILI COME SERVE
+# SORGENTE_PATH=/Users/gabrielepozzani/Projects/processiunivr/webapp/processi
+# TOMCAT_DESTINAZIONE_PATH=/Users/gabrielepozzani/Projects/apache-tomcat-8.0.53
+# LOCAL_JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_202.jdk/Contents/Home
+
+SORGENTE_PATH=/home/outer-root/git/rischi
+LOCAL_JAVA_HOME=/home/outer-root/Programs/jdk1.8.0_271
+TOMCAT_DESTINAZIONE_PATH=/home/outer-root/Programs/apache-tomcat-8.5.60
+TOMCAT_CONTESTO_DESTINAZIONE_PATH=$TOMCAT_DESTINAZIONE_PATH/webapps/rischi
+mkdir -p "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/web/
+mkdir -p "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/WEB-INF/lib/
+mkdir -p "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/WEB-INF/classes/
+
+# ************** Script per ROL ************** 
+echo "ELIMINA TUTTE LE CLASSI COMPILATE IN PRECEDENZA..."
+rm -rf "$TOMCAT_DESTINAZIONE_PATH"/WEB-INF/classes/*
+#echo "COPIA TUTTE LE CLASSI PRECOMPILATE DA ECLIPSE"
+#cp -R "$SORGENTE_PATH"/classes/it/rol/ "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/web/WEB-INF/classes/it/rol/
+echo "fatto!"
+
+echo "COPIA TUTTE LE RISORSE STATICHE..."
+cp -R "$SORGENTE_PATH"/web/style    "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/web/
+cp -R "$SORGENTE_PATH"/web/js       "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/web/
+cp -R "$SORGENTE_PATH"/web/html     "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/web/
+cp -R "$SORGENTE_PATH"/web/img      "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/web/
+cp -R "$SORGENTE_PATH"/web/jsp      "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/
+cp "$SORGENTE_PATH"/WEB-INF/web.xml "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/WEB-INF/
+cp -R "$SORGENTE_PATH"/META-INF     "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/
+echo "fatto!"
+
+#echo "RICOPIA LE LIBRERIE"
+#cp  "$SORGENTE_PATH"/WEB-INF/lib/*.jar  "$TOMCAT_CONTESTO_DESTINAZIONE_PATH"/WEB-INF/lib
+
+LOCAL_CLASSPATH=$TOMCAT_CONTESTO_DESTINAZIONE_PATH/WEB-INF/classes/
+LOCAL_CLASSPATH=$LOCAL_CLASSPATH:$TOMCAT_CONTESTO_DESTINAZIONE_PATH/WEB-INF/lib/*
+LOCAL_CLASSPATH=$LOCAL_CLASSPATH:$TOMCAT_DESTINAZIONE_PATH/lib/servlet-api.jar
+
+DESTINAZIONE_CLASSES=$TOMCAT_CONTESTO_DESTINAZIONE_PATH/WEB-INF/classes/
+
+echo "COMPILA TUTTE LE CLASSI JAVA..."
+$LOCAL_JAVA_HOME/bin/javac "$SORGENTE_PATH"/src/it/rol/ConfigManager.java -g -d "$DESTINAZIONE_CLASSES" -classpath "$CLASSPATH:$LOCAL_CLASSPATH"
+$LOCAL_JAVA_HOME/bin/javac "$SORGENTE_PATH"/src/it/rol/exception/*.java -g -d "$DESTINAZIONE_CLASSES" -classpath "$CLASSPATH:$LOCAL_CLASSPATH"
+$LOCAL_JAVA_HOME/bin/javac "$SORGENTE_PATH"/src/it/rol/Constants.java -g -d "$DESTINAZIONE_CLASSES" -classpath "$CLASSPATH:$LOCAL_CLASSPATH"
+$LOCAL_JAVA_HOME/bin/javac "$SORGENTE_PATH"/src/it/rol/Utils.java -g -d "$DESTINAZIONE_CLASSES" -classpath "$CLASSPATH:$LOCAL_CLASSPATH"
+$LOCAL_JAVA_HOME/bin/javac "$SORGENTE_PATH"/src/it/rol/Query.java -g -d "$DESTINAZIONE_CLASSES" -classpath "$CLASSPATH:$LOCAL_CLASSPATH"
+$LOCAL_JAVA_HOME/bin/javac "$SORGENTE_PATH"/src/it/rol/bean/*.java -g -d "$DESTINAZIONE_CLASSES" -classpath "$CLASSPATH:$LOCAL_CLASSPATH"
+$LOCAL_JAVA_HOME/bin/javac "$SORGENTE_PATH"/src/it/rol/command/Command.java -g -d "$DESTINAZIONE_CLASSES" -classpath "$CLASSPATH:$LOCAL_CLASSPATH"
+$LOCAL_JAVA_HOME/bin/javac "$SORGENTE_PATH"/src/it/rol/DBWrapper.java "$SORGENTE_PATH"/src/it/rol/Main.java -g -d "$DESTINAZIONE_CLASSES" -classpath "$CLASSPATH:$LOCAL_CLASSPATH"
+$LOCAL_JAVA_HOME/bin/javac "$SORGENTE_PATH"/src/it/rol/command/*.java -g -d "$DESTINAZIONE_CLASSES" -classpath "$CLASSPATH:$LOCAL_CLASSPATH"
+$LOCAL_JAVA_HOME/bin/javac "$SORGENTE_PATH"/src/it/rol/*.java -g -d "$DESTINAZIONE_CLASSES" -classpath "$CLASSPATH:$LOCAL_CLASSPATH"
+
+# Qualora committassi il package etc bisogna ricordarsi di decommentare la riga seguente:
+#cp  $SORGENTE_PATH/web/etc/*.*     $TOMCAT_CONTESTO_DESTINAZIONE_PATH/web/etc/
+echo "fatto! SCRIPT CONCLUSO - " `date -R`

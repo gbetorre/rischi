@@ -1,0 +1,873 @@
+/*=====================================================
+Style.css - Global Stylesheet for /processi application 
+=====================================================*/
+html, body {
+    font-family: Verdana,sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+pm.body {
+    background-color:#fffaf0;
+    color:#353833;
+    font-family: "Trebuchet MS", sans-serif;
+    font-size:90%;
+    margin:0;
+}
+
+h3.heading {
+	border-color: #d9d6d6;
+	border-style: groove;
+	border-width: 2px;
+}
+
+h4.heading {
+	border-color: #99CCCC;
+	border-style: groove;
+	border-width: 1px;
+}
+
+body {
+  background-color: white;
+  font-size: medium;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.landing-card-body {
+	text-align: center;
+	height: 28ex;
+}
+
+.card {
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)
+}
+
+.card:hover {
+	transform: scale(1.05);
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)
+}
+
+ul.processo {
+	display: none;
+	margin-left: 4em;
+}
+
+ul.list-group > li {
+	background: none;
+}
+
+/*=====================================================
+=            		< 768px     MOBILE         =
+=====================================================*/
+@media only screen and (max-width : 767px) {
+body {
+	background-color: white;
+	font-size: medium;
+	width: 100%;
+	overflow-x: scroll;
+}
+}
+
+body.loginbody {
+	background-image: radial-gradient(#ffffff, #ddeeff);
+}
+
+a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.helpInfo):not(.helpInfoTop):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu), 
+a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):not(.helpInfo):not(.helpInfoTop):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu) {
+	color: #005c99; 
+}
+
+a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.helpInfoTop):not(.page-link):not(.ico):not(.linkHeader):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu) {
+	text-decoration: underline;
+	color: #002e4d;
+	background-color: #d7d9d9;
+}
+
+a:hover.linkHeader {
+	color: #002e4d;
+	text-decoration: underline;
+}
+
+a:link.linkFooter, a:visited.linkFooter {
+	color: #729fa5;
+}
+
+a:hover.linkFooter {
+	color: #c6ceda;
+	background-color: transparent;
+	text-decoration: underline;
+}
+
+a:link.cc-link, a:visited.cc-link {
+	color: #ffff33;
+	
+}
+
+a:hover.cc-link {
+	color: #ffff99;
+	background-color: transparent;
+	text-decoration: underline;
+}
+
+a:link:not(.btnNav):not(.btn-outline-danger):not(.btn-warning).btn, a:visited:not(.btnNav):not(.btn-outline-danger):not(.btn-warning).btn {
+	color: white;
+}
+
+a:link.active.tabactive, a:visited.active.tabactive {
+	border-top-width: medium;
+	border-top-color: #007bff;
+}
+
+a:link.nav-link, a:visited.nav-link {
+	background-color: #f3f3f3;
+	border-color: #ffffff;
+	color: #484f51;
+}
+
+a:hover.nav-link {
+	background-color: #007bff;
+	color: white;
+}
+
+a:link.btn-outline-danger, a:visited.btn-outline-danger {
+	color: red;
+}
+
+a:hover.btn-outline-danger {
+	background-color: red;
+	color: white;
+}
+
+a:not([href]):not([tabindex]), a:hover:not([href]):not([tabindex]) {
+	color:white;
+}
+
+a:not([href]).nav-link {
+	color: #999999;
+}
+
+a:hover:not([href]).nav-link {
+	background-color: gray;
+}
+
+a.btn-disabled {
+  background: #999999;
+}
+
+#goTop {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 30px;
+  z-index: 99;
+  border: none;
+  outline: none;
+  background-color: #ccc;
+  color: white;
+  cursor: pointer;
+  padding: 15px;
+  border-radius: 4px;
+  text-decoration: none;
+  webkit-transition: all .3s ease;
+    -moz-transition: all .3s ease;
+    -o-transition: all .3s ease;
+    -ms-transition: all .3s ease;
+  transition: all .3s ease;
+    transition-property: all;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+    transition-delay: 0s;
+}
+
+#goTop:hover {
+	background-color: #b3b3b3;
+}
+
+.fixedTop {
+	position: fixed;
+	top: 0;
+	width: 100%;
+	z-index: 1000;
+	box-shadow: 0 3px 0 rgba(0,0,0,0);
+}
+
+.fixedTopTable {
+	position: sticky;
+	top: 50px;
+	z-index: 1000;
+}
+
+.fixedTopState {
+	position: sticky;
+	top: 80px;
+	z-index: 1000;
+}
+
+label.linkStatus {
+	background-color: #ccccff;
+}
+
+label.error { 
+	width: 100%; 
+	display: block; 
+	float: left; 
+	padding-left: 10px;
+	color: red; 
+}
+
+label.profileLabel {
+	font-weight: bold;
+	margin-left: 50px;
+}
+
+.monospace {
+  font-size: 10pt;
+	font-family: Consolas, sans-serif;
+}
+
+.marginBottom {
+	margin-bottom: 10px;
+}
+
+div.actstate{
+	float: right;
+	position: relative;
+	font-weight: bold;
+	color: black;
+}
+
+div.noHeader {
+	font-size: 18pt;
+	padding-left: 20px;
+	color: black;
+}
+
+div.substatus {
+  background-image: linear-gradient(to top, #ccffcc, white);
+	border-style: groove;
+	border-radius: 10px 10px 10px 10px;
+}
+
+div.charNum {
+	color: red;
+	padding-left: 10px;
+}
+
+div.errorPwd {
+	color: #721c24;
+	padding: 10px;
+	border: 1px solid red;
+	background-color: #ffcccc;
+	width: 100%;
+}
+
+div.successPwd {
+	color: #004d00;
+	padding: 10px;
+	border: 1px solid #2eb82e;
+	background-color: #adebad;
+	width: 100%;
+}
+
+div.additional-fields {
+  display:none;
+}
+
+div.centerlayout {
+	text-align: center;
+}
+
+div.centre {
+  text-align: left;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.expandedTree {
+	margin-top: -11px;
+	margin-bottom: -11px;
+}
+
+p.profileInfo {
+	color: #003e80;
+	font-weight: bold;
+}
+
+span.right {
+	margin-top: 5px;
+	float: right;
+}
+
+img.logo {
+	width: 100%;
+	height: 100%;
+}
+
+img.logoHeader{
+	width: 197px;
+	height: 71px;
+}
+
+img.profile {
+	width: 50px;
+	height: 62px;
+}
+
+.imgTop {
+	width: 25px;
+	height: 25px;
+}
+
+/* ----------------- Tables ---------------- */
+table.google-visualization-orgchart-table {
+    border-collapse: separate;
+}
+
+table.thin {
+    border-width: thin;
+    border-spacing: 2px;
+    border-style: ridge;
+    border-color: black;
+    border-collapse: collapse;
+    vertical-align: middle;
+    line-height: 4px;
+}
+
+@media only screen and (max-width : 1220px) {
+table.thin {
+    border-width: thin;
+    border-spacing: 2px;
+    border-style: ridge;
+    border-color: black;
+    border-collapse: collapse;
+    vertical-align: middle;
+    line-height: normal;
+}
+}
+
+tr.thin {
+    line-height: 16px;
+    border: 1px solid black;
+}
+
+td.thin, th.thin {
+    line-height: 6px;
+    border: 1px solid black;
+}
+
+tr.selected {
+  background-color: #f2f9fb;  
+}
+
+/* ------------ Background Colors ---------- */
+.bgcolor1 {
+	background-color: #99ff66;
+}
+
+select:disabled.bgcolor1 {
+	background-color: #00cc44;
+}
+
+.bgcolor2 {
+	background-color: #ffff4d;
+}
+
+select:disabled.bgcolor2 {
+	background-color: #ffd633;
+}
+
+.bgcolor3 {
+	background-color: #ff5232;
+}
+
+select:disabled.bgcolor3 {
+	background-color: #ff1a1a;
+	color: white;
+}
+
+.bgcolorgreen {
+	background-image: linear-gradient(to right,  #ccffcc, #198754);
+}
+
+.bgcolorred {
+	background-image: linear-gradient(to right, white, #ff5232);
+}
+
+.textcolorred {
+	color: red;
+}
+
+/* ----------------- Panes ---------------- */
+.panel {
+	margin: 1% auto;
+	border: insect;
+	border-radius: 10px;
+	padding-bottom: 20px;
+	width: 80%;
+}
+
+.panel-heading {
+  padding: 10px 15px;
+  border-bottom: 1px solid transparent;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  min-height: 70px;
+}
+
+.panel-body {
+	padding-right: 15px;
+	padding-left: 15px;
+	padding-top: 20px;
+}
+
+/* ------------- Report Format ------------- */
+.reportHead {
+	background-color: #bfbfbf;
+	font-weight: bold;
+	border-top-style: groove;
+	border-bottom-style: groove;
+}
+
+.reportStateAct {
+	background-color: #bfbfbf;
+	font-size: 9pt;
+	font-weight: bold;
+	border-top-style: groove;
+	border-bottom-style: groove;
+}
+
+.reportWpHead {
+	background-color: #bfbfbf;
+	font-weight: bold;
+	border-top-style: groove;
+}
+
+.reportWpRow {
+	background-color: #bfbfbf;
+	font-weight: bold;
+}
+
+.reportWp {
+	background-image: linear-gradient(to right, #cccccc, #ffffff);
+}
+
+.reportRow {
+  background-color: #dcdcdc;
+  font-weight: bold;
+  border-bottom-style: groove;
+  border-color: #929aa0;
+}
+
+.reportAct {
+	border-top: 2px solid #8c8c8c;
+}
+
+/* ------------ Bu''ns'n'forms ------------- */
+.btn-lightgray {
+  color: #fff;
+  background-color: #929aa0;
+  border-color: #929aa0;
+}
+
+.btn-lightgray:hover {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btnNav {
+  color: white;
+  background-color: #4da6ff;
+}
+
+.btnNav:hover {
+  color: #fff;
+  background-color: #007bff;
+}
+
+.btn-spacer {
+  margin-bottom: 5px;
+  font-size: 11pt;
+}
+
+button[type="submit"]:disabled, #btnMod:disabled {
+  background: #999999;
+}
+
+textarea {
+  box-sizing: border-box;
+  min-height: 75px;
+  max-height: 200px;
+  overflow-x: hidden; /* for Firefox (issue #5) */
+}
+
+.label { 
+	display: block; 
+	float: left; 
+	width: 120px;
+	text-align: right; 
+	margin-right: 5px; 
+}
+
+.pHeader {
+	font-family: sans-serif; 
+	font-size: 1.0em;
+	font-style: italic;
+	font-weight: bold;
+}
+
+.container {
+	background-color: white;
+	border-style: groove;
+	margin-top: 2%;
+	max-width: 250px; 
+	min-height: 300px;
+	border-radius: 10px 10px 10px 10px;
+}
+
+.noDisplay {
+	display: none;
+}
+
+.page {
+	width: 60%;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 20px; /* margin-top: 25px; */
+}
+
+/* ----------------- Scroll bar ---------------- */
+.scrollX {
+	overflow-x: scroll; 
+}
+
+.scrollY {
+	overflow-y: scroll;
+}
+
+/* -----------------  Margins -------------------- */
+.marginLeftSmall {
+	margin-left: 10px;
+}
+
+.marginLeft {
+	margin-left: 25px;
+}
+
+.marginLeftLarge {
+	margin-left: 50px;
+}
+
+.marginBoth {
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+/* -------- Page header and footer styles -------- */
+.header, .footer {
+    clear: both;
+    margin: 0 0;
+    padding: 0 0 0 0;
+}
+
+.header {
+	 background-color: #b7b7a4; /*linear-gradient(to bottom, #b2cfcd, #ffffff);*/
+	 height: 80px;
+}
+
+/*---------------------- Additional styles ------------------------*/
+.mandatory {
+	font-weight: bold;
+}
+
+.mandatory:after {
+	font-weight: bold;
+	font-size: 15pt;
+	content: '*';
+}
+
+.btn-del {
+    width: 30px;
+}
+
+.ico-home {
+	width: 40px;
+}
+
+.ico-func {
+	height: 50px;
+}
+
+.ico-save {
+	height: 20px;  
+	background-size: contain;
+  background-repeat: no-repeat;
+ 	background-position: center center;
+  background-image: url(../img/ico-save.png);
+}
+
+.form-custom {
+  background: #E8E6D8;
+  border: 1px solid #DFDAB7;
+  padding: 0.5em 1em;
+  border-radius: 3px;
+  margin-bottom: 1em;
+}
+
+.form-control-custom {
+	background:transparent;
+	border:none;
+}
+
+.bordo {
+  color: #000;
+  text-transform: uppercase;
+  font-weight: normal;
+  border-left-width: 3px;
+  border-left-style: solid;
+  border-left-color: #990000;
+  padding-left: 15px;
+  line-height: 1.45em;
+  }
+
+.file-data {color: #999;  font-style: italic;}
+
+/*---------------------- Righe Orizzontali ------------------------*/
+hr  {
+  clear: both; height: 1px;
+  border-top: 1px solid transparent;
+  border-right: 0 solid #FFFFFF;
+  border-bottom: 0 solid #FFFFFF;
+  border-left: 0 solid #FFFFFF;
+}
+
+hr.separatore {
+  height: 1px; 
+  border-style: none;
+  background-color: transparent; 
+  display: block; 
+  clear: both;  
+  margin-bottom: 10px;  
+  margin-top: 10px;
+}
+
+hr.home {
+  height: 1px;
+  border-style: none;
+  background-color: transparent; 
+  display: block; 
+  clear: both;
+  margin-top: -10px;
+}
+
+hr.hrclear {
+	margin: 0; 
+	padding: 0; 
+	clear: both;  
+	visibility: hidden;
+}
+
+hr.riga       {
+  clear: left;
+  margin: 15px 0; 
+  border-top-width: 1px;
+  border-top-style: dotted;
+  border-top-color: #CCC;
+}
+
+/*---------------------- Blocchetti ------------------------*/
+.subfields {
+  background-image: linear-gradient(to top, #ffd380, white);
+  border-style: groove;
+  border-radius: 10px 10px 10px 10px;
+  padding: 10px 10px 10px 10px;
+}
+
+/*---------------------- Lists ------------------------*/
+.sezioneElenco {
+  padding: 0;
+  margin: 0 0 40px 0;
+  font-size: smaller;
+}
+
+.sezioneElenco dt {
+  float: left;
+  clear: left;
+  width: 180px;
+  padding-left: 5px;
+  color: #666;
+  font-weight: bold;
+  line-height: 1.5em;
+}
+
+.sezioneElenco dt, .sezioneElenco dd  {
+  padding-top: 3px;
+  margin-bottom: 5px;
+  border-top: 1px solid #eaeaef;
+}
+
+.sezioneElenco dt a {
+	color: #996600;
+	text-decoration: none;
+}
+
+.sezioneElenco dt a:hover {
+	color: #09c;
+}
+
+.sezioneElenco dd {
+	color: #333;
+  padding-left: 180px;
+}
+
+.lightTable{
+	border-color: #d9d9d9;
+	border-style: solid;
+	border-width: 2px;
+	background-color: #f2f2f2;
+	padding: 10px 15px;
+}
+
+.lightTableHead{
+	border-top-style: solid;
+	border-top-width: 1px;
+	border-bottom-style: solid;
+	border-bottom-width: 1px;
+	border-color: #d9d9d9;
+}
+
+.verticalCenter{
+	vertical-align: middle;
+}
+
+.rowBottomLine{
+	border-bottom-style: dotted;
+	border-bottom-width: 1px;
+	border-color: #d9d9d9;
+}
+
+.bg-note{
+	background-color: #ffc;
+}
+
+/*---------------------- POP-UP ------------------------*/
+.popup {
+	font-size: 12px;
+	display: none;
+	background-color: rgba(0,0,0,0.7);
+	/*background-image: url("../image/nero_85.png");*/
+	position: absolute;
+	width:230px;
+	height:auto;
+	z-index: 999;
+	color: #fff;
+	border-radius: 10px;
+	box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+}
+
+.popup1 {
+	font-size: 12px;
+	display: none;
+	background-color: rgba(0,0,0,0.7);
+	/*background-image: url("../image/nero_85.png");*/
+	position: absolute;
+	width:190px;
+	height:auto;
+	z-index: 999;
+	color: #fff;
+	border-radius: 10px;
+	box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+}
+      
+.popupundertitle {
+	background: #333;
+	border-radius: 10px 10px 0 0;
+	height: 30px;
+	padding: 0;
+}
+        
+#titolopopup1Under {
+	position:relative; float:right; top:3px; padding:4px;
+}
+
+.popuptitle {
+	color: #ff0;
+	font-size: 12px;
+	text-transform: uppercase;
+	height: 30px; line-height: 30px;
+	padding-left: 10px;
+	position:relative;
+	float:left;
+	top:0;
+}
+        
+.popupbody {
+	position: absolute;
+	padding: 5px;
+	margin: 5px;
+	height: auto;
+}
+
+.popupMenu {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.popupMenuContent {
+	border-bottom: 1px solid #d9d9d9;
+	margin: 0;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.lastMenuContent {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}     
+
+.helpInfo {
+	background: transparent url("../img/ico-help.png") no-repeat right top;
+	background-size: 18px;
+	padding: 3px 20px 3px 0;
+	color: #484f51;
+}
+
+.helpInfoTop {
+	background: transparent url("../img/ico-help.png") no-repeat right top;
+	background-size: 18px;
+	padding: 20px 0 3px 0;
+	color: #484f51;
+}
+
+a.linkPopup {
+	color: white;
+}
+
+a:hover.linkPopup {
+	text-decoration: underline;
+}
+ 
+.popup dd {
+	margin-left: 18px;
+	margin-bottom: 0;
+} 
+ 
+/*---------------------- Tot risultati ------------------------*/
+.avvisiTot {
+  font-weight: bold; 
+  font-style: italic;
+  padding: 3px;
+  margin-bottom: 10px;
+  border-top: 1px dotted #ddd;
+  background: #cccc99;
+  /*text-align: right;*/
+  }
+  
+ .heading {
+  border-color: #99CCCC;
+  border-style: groove;
+  border-width: 1px;
+}

@@ -1,0 +1,15 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+    <hr class="separatore" />
+      <p id="ragSociale"> 
+        &copy; <!-- 2018 &ndash; --> <c:out value="${requestScope.theCurrentYear}" />&nbsp;
+        Universit&agrave; degli studi di Verona
+        Via dell'Artigliere 8, 37129 Verona &nbsp;|&nbsp; 
+        Partita IVA IT01541040232 &nbsp;|&nbsp; 
+        Codice Fiscale 93009870234 
+      </p>
+      <div id="footer">
+        &nbsp;
+        <a class="linkFooter" href="https://www.univr.it/it/privacy" target="_blank">Privacy / Policy</a>
+        <%-- |&nbsp; <a class="linkFooter" href="${credits}">Credits</a> --%>
+        <br /><br />
+      </div>
