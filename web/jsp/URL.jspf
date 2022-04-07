@@ -1,0 +1,56 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="ril" value="${param['r']}" scope="page" />
+<c:set var="zero" value="0" scope="page" />
+
+<c:url var="pr" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="pr" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="mac" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="pr" />
+  <c:param name="p" value="mac" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="pro" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="pr" />
+  <c:param name="p" value="pro" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="mul" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="pr" />
+  <c:param name="p" value="mul" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="st" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="st" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="pe" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="pe" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="pes" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="pe" />
+  <c:param name="p" value="pes" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="usr" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ho" />
+  <c:param name="p" value="usr" />
+</c:url>
+<c:url var="macCSV" context="${initParam.appName}" value="/data" scope="page">
+  <c:param name="q" value="pr" />
+  <c:param name="p" value="mac" />
+  <c:param name="r" value="${ril}" />
+  <c:param name="out" value="csv" />
+</c:url>
+<c:url var="stCSV" context="${initParam.appName}" value="/data" scope="page">
+  <c:param name="q" value="st" />
+  <c:param name="r" value="${ril}" />
+  <c:param name="out" value="csv" />
+</c:url>
+
+<c:url var="credits" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="pr" />
+  <c:param name="p" value="credits" />
+</c:url>

@@ -1,0 +1,42 @@
+<%@ include file="URL.jspf" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="bg" value="bg-success" scope="page" />
+    <c:if test="${not empty sessionScope.usr.id}">    
+      <div class="header">
+        <div class="row justify-content-center">
+          <div class="col-3">
+            <a class="logoHeader" href="${project}"><img class="logoHeader" src="${initParam.urlDirectoryImmagini}/logo1.png" /></a>
+          </div>
+          <div class="col-9">
+            <p class="pHeader">
+              <span class="right">
+              <c:set var="benve" value="BENVENUTO" scope="page" />
+              <c:if test="${sessionScope.usr.sesso eq 'F'}">
+                <c:set var="benve" value="BENVENUTA" scope="page" />
+              </c:if>
+                <label class="hidden-xs"><c:out value="${benve}" /></label>
+                <a href="${utente}" class="linkHeader" title="Clicca per dettagli e cambio password">
+                  <c:out value="${sessionScope.usr.nome}" />
+                  <c:out value="${sessionScope.usr.cognome}" />
+                </a>&nbsp;
+                <a class="btn btn-outline-danger" href="${initParam.appName}/auth?q=logout" ><i class="fas fa-sign-out-alt"></i> Esci</a>
+              </span>
+<%--               <c:if test="${fn:startsWith(pageContext.servletContext.getRealPath('/'), 'C:')}"> --%>
+                <c:if test="${not fn:endsWith(applicationScope.db, 'dev')}">
+                  <c:set var="bg" value="bg-danger" scope="page" />
+                </c:if>
+              <span class="${bg}">
+                <c:out value="${applicationScope.db}" />
+              </span>
+<%--               </c:if> --%>
+              <c:set var="strToSubst" value="${fn:substring(applicationScope.db, fn:length(applicationScope.db)-3, fn:length(applicationScope.db))}" scope="page" />
+              <%--c:out value="${fn:replace(applicationScope.db, strToSubst, 'los')}" /--%>
+              <!-- Questo commento viene stampato nel codice della pagina
+                <c:out value="${fn:replace(applicationScope.db, strToSubst, 'los')}" />
+              -->
+            </p>
+          </div>
+        </div>
+      </div>
+    </c:if>
