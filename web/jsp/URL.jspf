@@ -2,6 +2,16 @@
 <c:set var="ril" value="${param['r']}" scope="page" />
 <c:set var="zero" value="0" scope="page" />
 
+<c:url var="ri" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ri" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="sel" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ri" />
+  <c:param name="p" value="sel" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+
 <c:url var="pr" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pr" />
   <c:param name="r" value="${ril}" />
