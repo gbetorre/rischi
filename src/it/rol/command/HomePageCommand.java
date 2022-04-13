@@ -243,14 +243,15 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *                          Recupera i parametri                        *
          * ******************************************************************** */
-        /* Imposta una variabile di applicazione, se non è già stata valorizzata (singleton)
+        /* Imposta una variabile di applicazione, se non è già stata valorizzata (singleton).
          * Il contenuto in sé della variabile è stato sicuramente creato, altrimenti
          * non sarebbe stato possibile arrivare a questo punto del codice,
          * ma, se questa è la prima richiesta che viene fatta all'applicazione
          * (e siamo quindi in presenza dell'"handicap del primo uomo")
          * non è detto che la variabile stessa sia stata memorizzata a livello
          * di application scope. Ci serve a questo livello per controllare,
-         * in tutte le pagine dell'applicazione, che stiamo puntando al db giusto.  */
+         * in tutte le pagine dell'applicazione, che stiamo puntando al db giusto.  
+         * ATTENZIONE: crea una variabile di applicazione                       */
         dbName = (String) req.getServletContext().getAttribute("dbName");
         if (dbName == null || dbName.isEmpty()) {
             // Uso la stessa stringa perché, se non valorizzata in application, non sarà mai empty ma sarà null
@@ -547,6 +548,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         Vector<ItemBean> classiCommand = ConfigManager.getClassiCommand();
         LinkedHashMap<String, String> allowedParams = new LinkedHashMap<String, String>(prime);
         allowedParams.put(PART_SEARCH_PERSON, "Ricerca");
+        allowedParams.put(PART_SEARCH_ENT, "Scelta");
         try {
             String[] tokens = pageParams.split(AND);
             Map<String, String> tokensAsMap = new LinkedHashMap<String, String>(prime);
