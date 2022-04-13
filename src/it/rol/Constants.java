@@ -86,47 +86,55 @@ public interface Constants extends Serializable {
     /**
      * <p>Costante identificante il parametro della rilevazione.</p>
      */
-    public static final String PARAM_SURVEY                 = "r";
+    public static final String PARAM_SURVEY             = "r";
     /**
      * <p>Costante per il parametro identificante la HomePageCommand.</p>
      */
-    public static final String COMMAND_HOME                 = "home";
-    /**
-     * <p>Costante per il parametro identificante la Command dei processi.</p>
-     */
-    public static final String COMMAND_PROCESS              = "pr";
+    public static final String COMMAND_HOME             = "home";
     /**
      * <p>Costante per il parametro identificante la Command delle persone.</p>
      */
-    public static final String COMMAND_PERSON               = "pe";
+    public static final String COMMAND_PERSON           = "pe";    
     /**
+     * <p>Costante per il parametro identificante la Command dei processi.</p>
+     */
+    public static final String COMMAND_PROCESS          = "pr";
+    /**
+     * <p>Costante per il parametro identificante la Command dei rischi.</p>
+     */
+    public static final String COMMAND_RISK             = "ri";
+      /**
      * <p>Costante per il parametro identificante la Command delle strutture.</p>
      */
-    public static final String COMMAND_STRUCTURES           = "st";
+    public static final String COMMAND_STRUCTURES       = "st";
     /**
      * <p>Costante per il parametro identificante la parte dei macroprocessi.</p>
      */
-    public static final String PART_MACROPROCESS            = "mac";
+    public static final String PART_MACROPROCESS        = "mac";
     /**
      * <p>Costante per il parametro identificante parte applicazione legata a un processo.</p>
      */
-    public static final String PART_PROCESS                 = "pro";
+    public static final String PART_PROCESS             = "pro";
     /**
      * <p>Costante per il parametro identificante la parte della multi-rilevazione.</p>
      */
-    public static final String PART_MULTIFACT               = "mul";
+    public static final String PART_MULTIFACT           = "mul";
     /**
      * <p>Costante per il parametro identificante la parte di ricerca sulle persone.</p>
      */
-    public static final String PART_SEARCH_PERSON           = "pes";    
+    public static final String PART_SEARCH_PERSON       = "pes";
+    /**
+     * <p>Costante per il parametro identificante la parte di selezione entit&agrave; (p.es. strutture e processi).</p>
+     */
+    public static final String PART_SEARCH_ENT          = "sel";
     /**
      * <p>Costante per il parametro identificante la pagina dell'utente.</p>
      */
-    public static final String PART_USR                     = "usr";
+    public static final String PART_USR                 = "usr";
     /**
      * <p>Costante per il parametro identificante la pagina dei credits dell'applicazione.</p>
      */
-    public static final String PART_CREDITS                 = "cre";
+    public static final String PART_CREDITS             = "cre";
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
