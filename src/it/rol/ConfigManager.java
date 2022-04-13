@@ -193,7 +193,7 @@ public class ConfigManager extends HttpServlet {
     /**
      * <p>Stringa per il puntamento al db di produzione</p>
      */
-    private static StringBuffer contextDbName = new StringBuffer("java:comp/env/jdbc/prol");
+    private static StringBuffer contextDbName = new StringBuffer("java:comp/env/jdbc/rol");
 
 
     /**
@@ -271,8 +271,8 @@ public class ConfigManager extends HttpServlet {
         log.info("==>" + getServletContext().getRealPath("/") + "<==");
         // Prima deve capire su quale database deve insistere
         // Di default va in produzione, ma se non siamo in produzione deve andare in locale
-        if ( !getServletContext().getRealPath("/").equals("/var/lib/tomcat8/webapps/processi/") ) {
-            contextDbName = new StringBuffer("java:comp/env/jdbc/proldev");
+        if ( !getServletContext().getRealPath("/").equals("/var/lib/tomcat8/webapps/rischi/") ) {
+            contextDbName = new StringBuffer("java:comp/env/jdbc/roldev");
         }
         try {
             db = new DBWrapper();
