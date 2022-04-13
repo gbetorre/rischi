@@ -5,7 +5,7 @@
   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
     
     <servlet>
-      <description>Servlet centrale dell'applicazione processi</description>        
+      <description>Servlet centrale dell'applicazione rischi corruttivi</description>        
       <servlet-name>main</servlet-name>
       <servlet-class>it.rol.Main</servlet-class>
       <load-on-startup>5</load-on-startup>
@@ -192,7 +192,7 @@
     <context-param>
         <description>Root dell'applicazione</description>
         <param-name>appName</param-name>
-        <param-value>/processi</param-value>
+        <param-value>/rischi</param-value>
     </context-param>
 
     <resource-ref>
@@ -202,7 +202,7 @@
             database that is configured in the context.xml file.
         </description>
         <res-ref-name>
-            jdbc/proldev
+            jdbc/roldev
         </res-ref-name>
         <res-type>
             javax.sql.DataSource
@@ -219,7 +219,7 @@
             database that is configured in the context.xml file.
         </description>
         <res-ref-name>
-            jdbc/prol
+            jdbc/rol
         </res-ref-name>
         <res-type>
             javax.sql.DataSource
