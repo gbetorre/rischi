@@ -19,9 +19,9 @@
     <br />
     <div class="row justify-content-center">
       <div class="col text-center">
-        <h1>Processi e competenze</h1>
+        <h1>Mappatura dei rischi corruttivi</h1>
         <hr class="separatore" />
-        <h1>di Ateneo</h1>
+<!--         <h1>cui sono esposti i processi organizzativi</h1> -->
         <br />
         <div class="container justify-content-center">
           <br /><br />
