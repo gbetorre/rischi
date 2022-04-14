@@ -1,5 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
 <c:set var="structs" value="${requestScope.strutture}" scope="page" />
 <c:set var="dir" value="${structs.get(zero)}" />
@@ -10,22 +10,22 @@
   <div class="form-custom" id="status_form">
     <div>
       <select id="liv1">
-        <option value="0">-- scelta struttura -- </option>
+        <option value="0">-- scelta tipologia struttura -- </option>
         <option value="${dir.id}"><c:out value="${dir.nome}" /></option>
         <option value="${cen.id}"><c:out value="${cen.nome}" /></option>
         <option value="${dip.id}"><c:out value="${dip.nome}" /></option>
       </select>
       &nbsp;
       <select id="liv2">
-        <option value="">-- select one -- </option>
+        <option value="">-- struttura II livello -- </option>
       </select>
       &nbsp;
       <select id="liv3">
-        <option value="">-- select one -- </option>
+        <option value="">-- struttura III livello -- </option>
       </select>
       &nbsp;
       <select id="liv4">
-        <option value="">-- select one -- </option>
+        <option value="">-- struttura IV livello -- </option>
       </select>
     </div>
     <br />
@@ -33,7 +33,7 @@
 </form>
 <script>
     function blank() {
-        return "<option value=''>-- scegli una --</option>";
+        return "<option value=''>-- scegli una struttura --</option>";
     }
     
     function fill(structs) {
@@ -44,13 +44,15 @@
         return "<option value=''>-- scegli una --</option>";
      }
 </script>
-<c:forEach var="l1" items="${structs}">
-         ===
-            <c:forEach var="l2" items="${l1.figlie}">***
-            <input type="text" value='${l2.id}'>${l2.nome}
-            </c:forEach>
-
-        </c:forEach>
+<%-->c:forEach var="l1" items="${structs}">
+  <c:forEach var="l2" items="${l1.figlie}">
+    "option value='${l2.id}'${l2.nome}</option>";
+  </c:forEach>
+</c:forEach--%>
+<c:set var="singleQuote" value="'" scope="page" />
+<c:set var="singleQuoteEsc" value="''" scope="page" />
+<c:set var="doubleQuote" value='"' scope="page" />
+<c:set var="doubleQuoteEsc" value='\\"' scope="page" />
 <script>
 $(document).ready(function() {
 
@@ -81,27 +83,13 @@ $(document).ready(function() {
         $(child4).html(blank());
         switch (parent) {
         <c:forEach var="l1" items="${structs}">
-        case "${l1.id}": 
-            <c:forEach var="l2" items="${l1.figlie}">
-            innerHTML_L2 = innerHTML_L2 + "<option value='${l2.id}'>${l2.nome}</option>";
-            </c:forEach>
-            $(child2).html(innerHTML_L2);
-            $(child3).html("<option value='are1'>Area 1</option><option value='are2'>Area 2</option>");
+        case "${l1.id}":
+            $(child2).html("<c:forEach var="l2" items="${l1.figlie}"><c:set var="l2nome" value="${fn:replace(l2.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l2.id}'>${fn:replace(l2nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach>");
+            //$(child2).html("<option value='dir1'>Direzione \"MIRIAM\" 1</option><option value='dir2'>Direzione DALL''ORO 2</option>");
+            $(child3).html("<c:forEach var="l2" items="${l1.figlie}" begin="0" end="4">*<c:forEach var="l3" items="${l2.figlie}">-<c:set var="l3nome" value="${fn:replace(l3.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l3.id}'>${fn:replace(l3nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach>");
             $(child4).html("<option value='uo1'>UO 1</option><option value='uo2'>UO 2</option>");
             break;
         </c:forEach>
-          case "nove": 
-              $(child2).html("<option value='dir1'>Direzione 1</option><option value='dir2'>Direzione 2</option>");
-              $(child3).html("<option value='are1'>Area 1</option><option value='are2'>Area 2</option>");
-              $(child4).html("<option value='uo1'>UO 1</option><option value='uo2'>UO 2</option>");
-              break;
-          case "dip":  
-              $(child2).html("<option value='dip1'>Dipartimento 1</option><option value='dip2'>Dipartimento 2</option>");
-              $(child3).html("<option value='seg1'>Segreteria 1</option><option value='seg2'>Segreteria 2</option>");
-              break;
-          case "bib":
-              $(child2).html("<option value='bib1'>BiblioCR 1</option><option value='bib2'>BiblioCR 2</option>");
-              break;
         }
     });
     
