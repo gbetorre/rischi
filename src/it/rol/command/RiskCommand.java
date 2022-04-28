@@ -56,6 +56,7 @@ import it.rol.Utils;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
+import it.rol.bean.ProcessBean;
 import it.rol.bean.RiskBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
@@ -163,6 +164,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         GregorianCalendar today = Utils.getCurrentDate();
         // Elenco strutture collegate alla rilevazione
         ArrayList<DepartmentBean> structs = null;
+        // Elenco strutture collegate alla rilevazione
+        HashMap<String, Vector<DepartmentBean>> flatStructs = null;
         // Variabile contenente l'indirizzo alla pagina di reindirizzamento
         String redirect = null;
         /* ******************************************************************** *
@@ -267,6 +270,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                     if (nomeFile.containsKey(part)) {   // Aggiungere condizioni più specifiche se ci sarà più di una "part"
                         // Recupera le strutture della rilevazione corrente
                         structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
+                        flatStructs = decant(structs);
                         fileJspT = nomeFile.get(part);
                     } else {
                         //riskOfRuntimeProject = db.getRisks(idPrj, user);
@@ -309,6 +313,10 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         if (structs != null) {
             req.setAttribute("strutture", structs);
         }
+        // Imposta nella request elenco strutture sotto forma di dictionary
+        if (flatStructs != null) {
+            req.setAttribute("elencoStrutture", flatStructs);
+        }
         // Imposta nella request data di oggi 
         req.setAttribute("now", Utils.format(today));
         // Imposta la Pagina JSP di forwarding
@@ -320,6 +328,61 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
         }
+    }
+    
+    
+    /**
+     * <p>Travasa una struttura vettoriale matriciale (Vector con Vector con Vector etc.) 
+     * di DepartmentBean, ciascuno dei quali pu&ograve; contenere un Vector di 
+     * figlie, in una corrispondente struttura di tipo Dictionary, HashMap, 
+     * in cui le chiavi sono rappresentate da oggetti String e i valori
+     * sono rappresentati dalle figlie del nodo avente codice corrispondente
+     * alla chiave.</p>
+     * <p>&Egrave; utile per un accesso pi&uacute; diretto alle figlie
+     * di ogni struttura, evitando di dover ogni volta ciclare la struttura
+     * matriciale fino al nodo di cui si vogliono ottenere le strutture figlie.</p>
+     *
+     * @param structs Vector di DepartmentBean da travasare in HashMap
+     * @return <code>HashMap&lt;String&comma; Vector&lt;DepartmentBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
+     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
+     */
+    private static HashMap<String, Vector<DepartmentBean>> decant(ArrayList<DepartmentBean> structs)
+                                                           throws CommandException {
+        HashMap<String, Vector<DepartmentBean>> flatStructs = new HashMap<>();
+        try {
+            for (DepartmentBean l1 : structs) {
+                String keyL1 = l1.getExtraInfo().getCodice(); 
+                Vector<DepartmentBean> vL2 = l1.getFiglie();
+                flatStructs.put(keyL1, vL2);
+                for (DepartmentBean l2 : vL2) {
+                    String keyL2 = l2.getExtraInfo().getCodice(); 
+                    Vector<DepartmentBean> vL3 = l2.getFiglie();
+                    flatStructs.put(keyL2, vL3);
+                    for (DepartmentBean l3 : vL3) {
+                        String keyL3 = l3.getExtraInfo().getCodice(); 
+                        Vector<DepartmentBean> vL4 = l3.getFiglie();
+                        flatStructs.put(keyL3, vL4);
+                    }
+                }
+            }
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento fuori tabella.\n" + aiobe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, aiobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di conversione di tipo.\n" + cce.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n" + npe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel travaso di un Vector in un Dictionary.\n" + e.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, e);
+        }
+        return flatStructs;
     }
     
     
