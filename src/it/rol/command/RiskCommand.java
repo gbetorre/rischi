@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -74,6 +75,10 @@ import it.rol.exception.WebStorageException;
 public class RiskCommand extends ItemBean implements Command, Constants {
     
     /**
+     * 
+     */
+    private static final long serialVersionUID = 6619103818860851921L;
+    /**
      *  Nome di questa classe 
      *  (utilizzato per contestualizzare i messaggi di errore)
      */
@@ -87,14 +92,17 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileElenco = "/jsp/riElenco.jsp";
     /**
-     * Pagina a cui la command fa riferimento per permettere l'aggiunta o la modifica
-     * di un nuovo rischio al progetto
+     * Pagina a cui la command fa riferimento per permettere la selezione di una struttura
      */
-    private static final String nomeFileSelectEntities = "/jsp/riScelta.jsp";
+    private static final String nomeFileSelectStruct = "/jsp/riStruttura.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per permettere la selezione di un processo
+     */
+    private static final String nomeFileSelectProcess = "/jsp/riProcesso.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
-    private static final HashMap<String, String> nomeFile = new HashMap<String, String>();
+    private static final HashMap<String, String> nomeFile = new HashMap<>();
     /**
      *  Rischi del progetto di dato id
      */
@@ -117,8 +125,9 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      * e li passa a questa classe command.</p>
      *
      * @param voceMenu la VoceMenuBean pari alla Command presente.
-     * @throws it.alma.exception.CommandException se l'attributo paginaJsp di questa command non e' stato valorizzato.
+     * @throws CommandException se l'attributo paginaJsp di questa command non e' stato valorizzato.
      */
+    @Override
     public void init(ItemBean voceMenu) throws CommandException {
         this.setId(voceMenu.getId());
         this.setNome(voceMenu.getNome());
@@ -132,7 +141,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         nomeFile.put(COMMAND_RISK, nomeFileElenco);
-        nomeFile.put(PART_SEARCH_ENT, nomeFileSelectEntities);
+        nomeFile.put(PART_SELECT_STR, nomeFileSelectStruct);
+        nomeFile.put(PART_PROCESS, nomeFileSelectProcess);
         //nomeFile.put(Query.MODIFY_PART, nomeFileRisk);
     }  
   
@@ -145,6 +155,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      * @param req la HttpServletRequest contenente la richiesta del client
      * @throws CommandException se si verifica un problema, tipicamente nell'accesso a campi non accessibili o in qualche altro tipo di puntamento 
      */
+    @Override
     public void execute(HttpServletRequest req) 
                  throws CommandException {
         /* ******************************************************************** *
@@ -229,7 +240,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                 // Verifica se deve eseguire un'operazione di scrittura
                 if (write) {
                     // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-                    HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
+                    //HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
                     // Recupera i progetti su cui l'utente ha diritti di scrittura
                     //Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
                     // Se non ci sono progetti scrivibili e il flag "write" è true c'è qualcosa che non va...
@@ -243,16 +254,25 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                     // Controllo quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
                         // Creazione della tabella che conterrà i valori dei parametri passati dalle form
-                        HashMap<String, HashMap<String, String>> params = new HashMap<>();
-                        loadParams(part, parser, params);
+                        HashMap<String, LinkedHashMap<String, String>> params = new HashMap<>();
+                        //loadParams(part, parser, params);
                         // Controlla se deve effettuare un inserimento o un aggiornamento
-                        /*if (part.equalsIgnoreCase(MODIFY_PART)) {
+                        if (part.equalsIgnoreCase(PART_SELECT_STR)) {
                             /* ************************************************ *
-                             *                  UPDATE Risk Part                *
-                             * ************************************************ *
+                             *                  SELECT Process Part                *
+                             * ************************************************ */
+                            // Devono essere possibile identificare la struttura
                             loadParams(part, parser, params);
-                            redirect = "q=" + Query.PART_RISK + "&id=" + idPrj;
-                        } else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT)) {
+                            LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
+                            //String par = HomePageCommand.getParameters(req, MIME_TYPE_TEXT);
+                            StringBuffer paramsStruct = new StringBuffer();
+                            for (Map.Entry<String, String> set : struct.entrySet()) {
+                                // Printing all elements of a Map
+                                paramsStruct.append("&");
+                                paramsStruct.append("s" + set.getKey() + "=" + set.getValue());
+                            }
+                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_PROCESS + paramsStruct.toString() + "&r=AT2022";
+                        }/* else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT)) {
                             /* ************************************************ *
                              *                  INSERT Risk Part                *
                              * ************************************************ *
@@ -397,22 +417,19 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      */
     private static void loadParams(String part, 
                                    ParameterParser parser,
-                                   HashMap<String, HashMap<String, String>> formParams)
+                                   HashMap<String, LinkedHashMap<String, String>> formParams)
                             throws CommandException {
         /* **************************************************** *
-         *               Ramo di UPDATE di una Wbs              *
-         * **************************************************** *
-        if (part.equalsIgnoreCase(Query.MODIFY_PART)) {
-            // Recupero e caricamento parametri di project charter/milestone
-            HashMap<String, String> wbs = new HashMap<String, String>();
-            wbs.put("wbs-id",           parser.getStringParameter("wbs-id", Utils.VOID_STRING));
-            wbs.put("wbs-name",         parser.getStringParameter("wbs-name", Utils.VOID_STRING));
-            wbs.put("wbs-descr",        parser.getStringParameter("wbs-descr", Utils.VOID_STRING));
-            wbs.put("wbs-workpackage",  parser.getStringParameter("wbs-workpackage", Utils.VOID_STRING));
-            wbs.put("wbs-idpadre",      parser.getStringParameter("wbs-idpadre", Utils.VOID_STRING));
-            wbs.put("wbs-note",         parser.getStringParameter("wbs-note", Utils.VOID_STRING));
-            wbs.put("wbs-result",       parser.getStringParameter("wbs-result", Utils.VOID_STRING));
-            formParams.put(Query.MODIFY_PART, wbs);
+         *           Ramo di SELECT di una Struttura            *
+         * **************************************************** */
+        if (part.equalsIgnoreCase(PART_SELECT_STR)) {
+            // Recupero e caricamento parametri di struttura
+            LinkedHashMap<String, String> struct = new LinkedHashMap<>();
+            struct.put("liv1",  parser.getStringParameter("str-liv1", VOID_STRING));
+            struct.put("liv2",  parser.getStringParameter("str-liv2", VOID_STRING));
+            struct.put("liv3",  parser.getStringParameter("str-liv3", VOID_STRING));
+            struct.put("liv4",  parser.getStringParameter("str-liv4", VOID_STRING));
+            formParams.put(PART_SELECT_STR, struct);
         } 
         /* **************************************************** *
          *              Ramo di INSERT di una Wbs               *
