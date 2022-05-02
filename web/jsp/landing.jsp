@@ -8,7 +8,7 @@
 	            <i class="fa-solid fa-microphone-lines fa-5x"></i>&nbsp;&nbsp;
 	            <span class="h3 landing-card-title">&nbsp;&nbsp;&nbsp;&nbsp;Nuova Intervista</span>
 	          </div>
-	          <a class="small stretched-link" href="${sel}"></a>
+	          <a class="small stretched-link" href="${str}"></a>
 	        </div>
 	      </div>
         <div class="col-xl-3 col-md-6 mx-auto">
