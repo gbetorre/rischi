@@ -6,9 +6,14 @@
   <c:param name="q" value="ri" />
   <c:param name="r" value="${ril}" />
 </c:url>
-<c:url var="sel" context="${initParam.appName}" value="/" scope="page">
+<c:url var="str" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="ri" />
-  <c:param name="p" value="sel" />
+  <c:param name="p" value="str" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="pro" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ri" />
+  <c:param name="p" value="pro" />
   <c:param name="r" value="${ril}" />
 </c:url>
 
@@ -21,11 +26,13 @@
   <c:param name="p" value="mac" />
   <c:param name="r" value="${ril}" />
 </c:url>
+<%-- 
 <c:url var="pro" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pr" />
   <c:param name="p" value="pro" />
   <c:param name="r" value="${ril}" />
 </c:url>
+--%>
 <c:url var="mul" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pr" />
   <c:param name="p" value="mul" />
