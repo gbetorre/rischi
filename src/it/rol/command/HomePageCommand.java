@@ -433,7 +433,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         vO.setNome(COMMAND_PROCESS);
         vO.setNomeReale(PART_MACROPROCESS);
         vO.setLabelWeb("Macroprocessi");
-        vO.setInformativa("La navigazione per macroprocessi fornisce un quadro d\'insieme");
+        vO.setInformativa("La navigazione per macroprocessi fornisce un quadro d\'insieme dei rischi");
         vO.setUrl(makeUrl(appName, vO, vO.getNomeReale(), surCode));
         vO.setIcona("pc.png");
         vO.setLivello(MAIN_MENU);
@@ -460,14 +460,14 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         vO.setIcona("per.png");
         vO.setLivello(MAIN_MENU);
         mO.add(vO);
-        // MULTIFATTORIALE
+        // REPORT
         vO = null;
         vO = new ItemBean();
         vO.setId(++nextId);
         vO.setNome(COMMAND_PROCESS);
         vO.setNomeReale(PART_MULTIFACT);
-        vO.setLabelWeb("Multifattoriale");
-        vO.setInformativa("La navigazione multifattoriale permette di incrociare varie dimensioni");
+        vO.setLabelWeb("Report");
+        vO.setInformativa("La reportistica permette di incrociare varie dimensioni");
         vO.setUrl(makeUrl(appName, vO, vO.getNomeReale(), surCode));
         vO.setIcona("mon.png");
         vO.setLivello(MAIN_MENU);
@@ -547,8 +547,10 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         String codeSurvey, tokenSurvey = null;
         Vector<ItemBean> classiCommand = ConfigManager.getClassiCommand();
         LinkedHashMap<String, String> allowedParams = new LinkedHashMap<String, String>(prime);
+        String deniedPattern = "sliv";
         allowedParams.put(PART_SEARCH_PERSON, "Ricerca");
-        allowedParams.put(PART_SEARCH_ENT, "Scelta");
+        allowedParams.put(PART_SELECT_STR, "Scelta Struttura");
+        allowedParams.put(PART_PROCESS, "Scelta Processi");
         try {
             String[] tokens = pageParams.split(AND);
             Map<String, String> tokensAsMap = new LinkedHashMap<String, String>(prime);
@@ -556,8 +558,10 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
                 String couple = tokens[i];
                 String paramName = couple.substring(NOTHING, couple.indexOf(EQ));
                 String paramValue = couple.substring(couple.indexOf(EQ));
-                tokensAsMap.put(paramName, paramValue);
-                couple = paramName = paramValue = null;
+                if (!paramName.startsWith(deniedPattern)) {
+                    tokensAsMap.put(paramName, paramValue);
+                    couple = paramName = paramValue = null;
+                }
             }
             codeSurvey = tokensAsMap.get(PARAM_SURVEY).substring(SUB_MENU);
             // Controllo sull'input (il codice rilevazione deve essere valido!)
