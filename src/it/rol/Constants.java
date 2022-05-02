@@ -124,9 +124,9 @@ public interface Constants extends Serializable {
      */
     public static final String PART_SEARCH_PERSON       = "pes";
     /**
-     * <p>Costante per il parametro identificante la parte di selezione entit&agrave; (p.es. strutture e processi).</p>
+     * <p>Costante per il parametro identificante la parte di selezione strutture.</p>
      */
-    public static final String PART_SEARCH_ENT          = "sel";
+    public static final String PART_SELECT_STR          = "str";
     /**
      * <p>Costante per il parametro identificante la pagina dell'utente.</p>
      */
