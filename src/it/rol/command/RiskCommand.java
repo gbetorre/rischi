@@ -165,8 +165,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         DBWrapper db = null;
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
-        // Recupera o inizializza 'codice rilevazione' (Survey)
-        String codeSur = parser.getStringParameter("r", DASH);
         // Dichiara la pagina a cui reindirizzare
         String fileJspT = null;
         // Utente loggato
@@ -176,14 +174,18 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Elenco strutture collegate alla rilevazione
         ArrayList<DepartmentBean> structs = null;
         // Elenco strutture collegate alla rilevazione
+        ArrayList<ProcessBean> macros = null;
+        // Elenco strutture collegate alla rilevazione
         HashMap<String, Vector<DepartmentBean>> flatStructs = null;
+        // Parametri identificanti le strutture 
+        LinkedHashMap<String, String> paramStruct = null;
         // Variabile contenente l'indirizzo alla pagina di reindirizzamento
         String redirect = null;
         /* ******************************************************************** *
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
-        // Recupera o inizializza 'id progetto'
-        int idPrj = parser.getIntParameter("id", DEFAULT_ID);
+        // Recupera o inizializza 'codice rilevazione' (Survey)
+        String codeSur = parser.getStringParameter("r", DASH);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
         // Flag di scrittura
@@ -259,11 +261,12 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                         // Controlla se deve effettuare un inserimento o un aggiornamento
                         if (part.equalsIgnoreCase(PART_SELECT_STR)) {
                             /* ************************************************ *
-                             *                  SELECT Process Part                *
+                             *                  SELECT Process Part             *
                              * ************************************************ */
                             // Devono essere possibile identificare la struttura
                             loadParams(part, parser, params);
                             LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
+                            //String par = HomePageCommand.getParameters(req, MIME_TYPE_HTML);
                             //String par = HomePageCommand.getParameters(req, MIME_TYPE_TEXT);
                             StringBuffer paramsStruct = new StringBuffer();
                             for (Map.Entry<String, String> set : struct.entrySet()) {
@@ -287,10 +290,20 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                     /* ************************************************ *
                      *                  SELECT Risk Part                *
                      * ************************************************ */
-                    if (nomeFile.containsKey(part)) {   // Aggiungere condizioni più specifiche se ci sarà più di una "part"
+                    if (nomeFile.containsKey(part)) {
                         // Recupera le strutture della rilevazione corrente
                         structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
-                        flatStructs = decant(structs);
+                        if (part.equalsIgnoreCase(PART_SELECT_STR)) {
+                            /* ************************************************ *
+                             *              SELECT Structure Part               *
+                             * ************************************************ */
+                            flatStructs = decant(structs);
+                        } else if (part.equalsIgnoreCase(PART_PROCESS)) {
+                            /* ************************************************ *
+                             *               SELECT Process Part                *
+                             * ************************************************ */
+                            macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
+                        }
                         fileJspT = nomeFile.get(part);
                     } else {
                         //riskOfRuntimeProject = db.getRisks(idPrj, user);
@@ -329,25 +342,26 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
-        // Imposta nella request elenco strutture
+        // Imposta nella request elenco completo strutture
         if (structs != null) {
             req.setAttribute("strutture", structs);
         }
-        // Imposta nella request elenco strutture sotto forma di dictionary
+        // Imposta nella request elenco completo strutture sotto forma di dictionary
         if (flatStructs != null) {
             req.setAttribute("elencoStrutture", flatStructs);
+        }
+        // Imposta nella request elenco completo processi
+        if (macros != null) {
+            req.setAttribute("processi", macros);
+        }
+        // Imposta l'eventuale indirizzo a cui redirigere
+        if (redirect != null) {
+            req.setAttribute("redirect", redirect);
         }
         // Imposta nella request data di oggi 
         req.setAttribute("now", Utils.format(today));
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
-        /* ******************************************************************** *
-         * Settaggi in request di valori facoltativi: attenzione, il passaggio  *
-         * di questi attributi e' condizionato al fatto che siano significativi *
-         * ******************************************************************** */
-        if (redirect != null) {
-            req.setAttribute("redirect", redirect);
-        }
     }
     
     
