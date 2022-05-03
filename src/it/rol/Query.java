@@ -176,6 +176,27 @@ public interface Query extends Serializable {
      * <p>Estrae tutti i macroprocessi filtrati in base all'identificativo della rilevazione,
      * passato come parametro.</p>
      */
+    public static final String GET_MACRO_AT_BY_SURVEY =
+            "SELECT DISTINCT" +
+            "       MAT.id                AS \"id\"" +
+            "   ,   MAT.codice            AS \"codice\"" +
+            "   ,   MAT.nome              AS \"nome\"" +
+            //"   ,   MAT.descrizione       AS \"descrizione\"" +
+            "   ,   MAT.ordinale          AS \"ordinale\"" +
+            "   ,   MAT.id_rilevazione    AS \"idAppo\"" +
+            //"   ,   ROUND(100 * SUM(AM.quotaparte) OVER (PARTITION BY M.id) / (SUM(AM.quotaparte) OVER ())::numeric, 2) AS \"quotaParte\"" +
+            //"   ,   ROUND((SUM(AM.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY M.id) / 100.0), 2)         AS \"fte\"" +
+            "   FROM macroprocesso_at MAT" +
+            "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
+            //"       INNER JOIN allocazione_macroprocesso AM ON AM.id_macroprocesso = M.id" +
+            //"       INNER JOIN afferenza A ON R.id = A.id_rilevazione AND A.id_persona = AM.id_persona" +
+            "   WHERE R.codice ILIKE ?" +
+            "   ORDER BY MAT.codice";
+    
+    /**
+     * <p>Estrae tutti i macroprocessi filtrati in base all'identificativo della rilevazione,
+     * passato come parametro.</p>
+     */
     public static final String GET_MACRO_BY_SURVEY =
             "SELECT DISTINCT" +
             "       M.id                AS \"id\"" +
@@ -376,6 +397,46 @@ public interface Query extends Serializable {
             "       AND AP.id_persona = ?" +
             "   ORDER BY PR.codice";
 
+    /**
+     * <p>Estrae tutti i processi anticorruzione appartenenti a un macroprocesso
+     * anticorruzione, il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_PROCESSI_AT_BY_MACRO =
+            "SELECT DISTINCT" +
+            "       PRAT.id                AS \"id\"" +
+            "   ,   PRAT.codice            AS \"codice\"" +
+            "   ,   PRAT.nome              AS \"nome\"" +
+            "   ,   PRAT.ordinale          AS \"ordinale\"" +
+            "   ,   PRAT.smartworking      AS \"smartWorking\"" +
+            //"   ,   COALESCE(ROUND(100 * SUM(AP.quotaparte) OVER (PARTITION BY PR.id) / (SUM(AP.quotaparte) OVER ())::numeric, 2), 0) AS \"quotaParte\"" +
+            //"   ,   COALESCE(ROUND((SUM(AP.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY PR.id) / 100.0), 2), 0)         AS \"fte\"" +
+            "   FROM processo_at PRAT" +
+            "       INNER JOIN macroprocesso_at MAT ON PRAT.id_macroprocesso_at = MAT.id" +
+            //"       INNER JOIN allocazione_processo AP ON AP.id_processo = PR.id" +
+            //"       INNER JOIN afferenza A ON AP.id_persona = A.id_persona AND AP.id_rilevazione = A.id_rilevazione" +
+            "   WHERE PRAT.id_macroprocesso_at = ?" +
+            "   ORDER BY PRAT.codice";
+
+    /**
+     * <p>Estrae tutti i sottoprocessi anticorruzione appartenenti a un processo
+     * anticorruzione, il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_SOTTOPROCESSI_AT_BY_PROCESS =
+            "SELECT DISTINCT" +
+            "       SPRAT.id                AS \"id\"" +
+            "   ,   SPRAT.codice            AS \"codice\"" +
+            "   ,   SPRAT.nome              AS \"nome\"" +
+            "   ,   SPRAT.ordinale          AS \"ordinale\"" +
+            "   ,   SPRAT.smartworking      AS \"smartWorking\"" +
+            //"   ,   COALESCE(ROUND(100 * SUM(AP.quotaparte) OVER (PARTITION BY PR.id) / (SUM(AP.quotaparte) OVER ())::numeric, 2), 0) AS \"quotaParte\"" +
+            //"   ,   COALESCE(ROUND((SUM(AP.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY PR.id) / 100.0), 2), 0)         AS \"fte\"" +
+            "   FROM sottoprocesso_at SPRAT" +
+            "       INNER JOIN processo_at PRAT ON SPRAT.id_processo_at = PRAT.id" +
+            //"       INNER JOIN allocazione_processo AP ON AP.id_processo = PR.id" +
+            //"       INNER JOIN afferenza A ON AP.id_persona = A.id_persona AND AP.id_rilevazione = A.id_rilevazione" +
+            "   WHERE SPRAT.id_processo_at = ?" +
+            "   ORDER BY SPRAT.codice";
+    
     /**
      * <p>Estrae tutti i processi appartenenti a un macroprocesso, il cui identificativo viene
      * passato come parametro.</p>
