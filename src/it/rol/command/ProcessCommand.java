@@ -252,6 +252,42 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         req.setAttribute("fileJsp", fileJspT);
     }
 
+    
+    /**
+     * <p>Restituisce un ArrayList di tutti macroprocessi censiti 
+     * dall'anticorruzionetrovati in base a una rilevazione il cui 
+     * identificativo viene passato come argomento.</p>
+     *
+     * @param codeSurvey    il codice della rilevazione
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param db            WebStorage per l'accesso ai dati
+     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi recuperati
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static ArrayList<ProcessBean> retrieveMacroAtBySurvey(PersonBean user,
+                                                                 String codeSurvey,
+                                                                 DBWrapper db)
+                                                          throws CommandException {
+        ArrayList<ProcessBean> macro = null;
+        try {
+            // Estrae i macroprocessi anticorruttivi in una data rilevazione
+            macro = db.getMacroAtBySurvey(user, codeSurvey);
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei macro/processi in base alla rilevazione.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return macro;
+    }
+
 
     /**
      * <p>Restituisce un ArrayList di tutti processi/macroprocessi trovati in base a
@@ -267,10 +303,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                                                String codeSurvey,
                                                                DBWrapper db)
                                                         throws CommandException {
-        ArrayList<ProcessBean> people = null;
+        ArrayList<ProcessBean> macro = null;
         try {
-            // Estrae le persone allocate su un dato macroprocesso in una data rilevazione
-            people = db.getMacroBySurvey(user, codeSurvey);
+            // Estrae i macroprocessi in una data rilevazione
+            macro = db.getMacroBySurvey(user, codeSurvey);
         } catch (WebStorageException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei macro/processi in base alla rilevazione.\n";
             LOG.severe(msg);
@@ -284,7 +320,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg + e.getMessage(), e);
         }
-        return people;
+        return macro;
     }
 
 
