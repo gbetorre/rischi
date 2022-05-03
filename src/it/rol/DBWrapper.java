@@ -645,7 +645,112 @@ public class DBWrapper implements Query, Constants {
             }
         }
     }
+    
 
+    /**
+     * <p>Data una rilevazione, restituisce un ArrayList di macroprocessi 
+     * censiti dall'anticorruzione ad essa afferenti, contenenti ciascuno 
+     * i processi figli al proprio interno. Ogni figlio conterr&agrave;
+     * i relativi figli.</p>
+     * <p>Recupera solo i macroprocessi su cui un utente, il cui username viene
+     * passato come argomento, ha i diritti di accesso (in base al ruolo <em>per se</em>).</p>
+     *
+     * @param user oggetto rappresentante la persona loggata
+     * @param codeSurvey identificativo della rilevazione di cui si vogliono recuperare i macroprocessi
+     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - un Vector di ProcessBean, che rappresentano i macroprocessi su cui l'utente ha i diritti di lettura
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "null" })
+    public ArrayList<ProcessBean> getMacroAtBySurvey(PersonBean user,
+                                                     String codeSurvey)
+                                              throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs, rs1, rs2 = null;
+        ProcessBean macro = null;
+        ProcessBean processo = null;
+        ProcessBean sottoprocesso = null;
+        CodeBean rilevazione = null;
+        AbstractList<ProcessBean> macroprocessi = new ArrayList<ProcessBean>();
+        AbstractList<ProcessBean> processi = null;
+        AbstractList<ProcessBean> sottoprocessi = null;
+        try {
+            // TODO: Controllare se user è superuser
+            con = prol_manager.getConnection();
+            pst = con.prepareStatement(GET_MACRO_AT_BY_SURVEY);
+            pst.clearParameters();
+            pst.setString(1, codeSurvey);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                // Crea un macroprocesso vuoto
+                macro = new ProcessBean();
+                // Istanzia una struttura vettoriale per contenere i suoi processi
+                processi = new Vector<>();
+                // Valorizza il macroprocesso col contenuto della query
+                BeanUtil.populate(macro, rs);
+                // Recupera la rilevazione
+                rilevazione = getSurvey(macro.getIdAppo(), macro.getIdAppo());
+                // Imposta la rilevazione
+                macro.setRilevazione(rilevazione);
+                // Recupera i processi del macroprocesso
+                pst = null;
+                pst = con.prepareStatement(GET_PROCESSI_AT_BY_MACRO);
+                pst.clearParameters();
+                pst.setInt(1, macro.getId());
+                rs1 = pst.executeQuery();
+                while (rs1.next()) {
+                    processo = new ProcessBean();
+                    // Istanzia una struttura vettoriale per contenere i suoi sottoprocessi
+                    sottoprocessi = new Vector<>();
+                    // Valorizza il processo col contenuto della query
+                    BeanUtil.populate(processo, rs1);
+                    // Recupera i sottoprocessi del processo
+                    pst = null;
+                    pst = con.prepareStatement(GET_SOTTOPROCESSI_AT_BY_PROCESS);
+                    pst.clearParameters();
+                    pst.setInt(1, processo.getId());
+                    rs2 = pst.executeQuery();
+                    while (rs2.next()) {
+                        sottoprocesso = new ProcessBean();
+                        BeanUtil.populate(sottoprocesso, rs2);
+                        sottoprocessi.add(sottoprocesso);
+                    }
+                    // Imposta i sottoprocessi
+                    processo.setProcessi(sottoprocessi);
+                    // Aggiunge il processo valorizzato all'elenco
+                    processi.add(processo);
+                }
+                // Imposta i processi
+                macro.setProcessi(sottoprocessi);
+                // Aggiunge il macroprocesso valorizzato all'elenco
+                macroprocessi.add(macro);
+                rs1 = rs2 = null;
+            }
+            // Tries (just tries) to engage the Garbage Collector
+            pst = null;
+            // Get out
+            return (ArrayList<ProcessBean>) macroprocessi;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto ProcessBean.some non valorizzato; problema nel metodo di estrazione dei processi/macroprocessi.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ProcessBean non valorizzato; problema nella query dei processi/macroprocessi..\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
 
     /**
      * <p>Data una rilevazione, restituisce un ArrayList di macroprocessi
