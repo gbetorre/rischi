@@ -6,7 +6,7 @@
 <c:set var="dir" value="${structs.get(zero)}" />
 <c:set var="cen" value="${structs.get(zero+1)}" />
 <c:set var="dip" value="${structs.get(zero+2)}" />
-    <form id="select_ent_form" class="form-horizontal" action="" method="post">
+    <form id="select_str_form" class="form-horizontal" action="" method="post">
       <h4 class="btn-lightgray">Scelta struttura intervistata</h4>
       <div class="form-custom form-group" id="str_form">
         <div class="panel-body form-group">
@@ -16,7 +16,7 @@
               Scelta tipologia struttura&nbsp;
             </div>
             <div class="col-sm-9">
-              <select id="str-liv1" name="str-liv1">
+              <select id="str-liv1" name="sliv1">
                 <option value="0">-- scelta tipologia struttura -- </option>
                 <option value="${dir.extraInfo.codice}"><c:out value="${dir.nome}" /></option>
                 <option value="${cen.extraInfo.codice}"><c:out value="${cen.nome}" /></option>
@@ -31,7 +31,7 @@
               Scelta struttura II livello&nbsp;
             </div>
             <div class="col-sm-9">
-              <select id="str-liv2" name="str-liv2">
+              <select id="str-liv2" name="sliv2">
                 <option value="">-- struttura II livello -- </option>
               </select>
             </div>
@@ -43,7 +43,7 @@
               Scelta struttura III livello&nbsp;
             </div>
             <div class="col-sm-9">
-              <select id="str-liv3" name="str-liv3">
+              <select id="str-liv3" name="sliv3">
                 <option value="">-- struttura III livello -- </option>
               </select>
             </div>
@@ -55,7 +55,7 @@
               Scelta struttura IV livello&nbsp;
             </div>
             <div class="col-sm-9">
-              <select id="str-liv4" name="str-liv4">
+              <select id="str-liv4" name="sliv4">
                 <option value="">-- struttura IV livello -- </option>
               </select>
             </div>
@@ -64,7 +64,7 @@
           &nbsp;
           <button type="submit" class="btn btn-info" value="Save">
             <i class="far fa-save"></i>
-            Invio
+            Continua
           </button>
         </div>
         <br />
