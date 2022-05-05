@@ -1,34 +1,31 @@
 /*
- *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo,
- *   della gestione dei progetti on line (POL) 
- *   e della preparazione e del monitoraggio delle informazioni riguardanti 
- *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
- *   (questionari on line - QOL).
- *   
- *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
- *   web applications to publish, and manage, students evaluation,
- *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
+ *   dell'ateneo possono essere esposti e per la gestione di reportistica
+ *   e mappature per la gestione dei "rischi on line" (rol).
+ *
+ *   Risk Mapping Software (rms)
+ *   web applications to make survey about the amount and kind of risk
+ *   which each process is exposed, and to publish, and manage,
+ *   report and risk information.
+ *   Copyright (C) renewed 2022 Giovanroberto Torre
  *   all right reserved
  *
- *   This program is free software; you can redistribute it and/or modify 
- *   it under the terms of the GNU General Public License as published by 
- *   the Free Software Foundation; either version 2 of the License, or 
- *   (at your option) any later version. 
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful, 
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of 
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
- *   GNU General Public License for more details. 
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *   GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License 
- *   along with this program; if not, write to the Free Software 
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA<br>
- *   
- *   Giovanroberto Torre <giovanroberto.torre@univr.it>
- *   Sistemi Informatici per il Reporting di Ateneo
+ *
+ *   Giovanroberto Torre <gianroberto.torre@gmail.com>
  *   Universita' degli Studi di Verona
  *   Via Dell'Artigliere, 8
  *   37129 Verona (Italy)
@@ -100,6 +97,10 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileSelectProcess = "/jsp/riProcesso.jsp";
     /**
+     * Pagina a cui la command fa riferimento per permettere la selezione dei quesiti
+     */
+    private static final String nomeFileSelectQuest = "/jsp/riQuestionario.jsp";
+    /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<>();
@@ -143,7 +144,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         nomeFile.put(COMMAND_RISK, nomeFileElenco);
         nomeFile.put(PART_SELECT_STR, nomeFileSelectStruct);
         nomeFile.put(PART_PROCESS, nomeFileSelectProcess);
-        //nomeFile.put(Query.MODIFY_PART, nomeFileRisk);
+        nomeFile.put(PART_SELECT_QST, nomeFileSelectQuest);
     }  
   
     
@@ -173,12 +174,14 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         GregorianCalendar today = Utils.getCurrentDate();
         // Elenco strutture collegate alla rilevazione
         ArrayList<DepartmentBean> structs = null;
-        // Elenco strutture collegate alla rilevazione
+        // Elenco processi collegati alla rilevazione
         ArrayList<ProcessBean> macros = null;
         // Elenco strutture collegate alla rilevazione
         HashMap<String, Vector<DepartmentBean>> flatStructs = null;
         // Parametri identificanti le strutture 
-        LinkedHashMap<String, String> paramStruct = null;
+        LinkedHashMap<String, String> paramsNav = new LinkedHashMap<>();
+        // Tabella che conterrà i valori dei parametri passati dalle form
+        HashMap<String, LinkedHashMap<String, String>> params = null;
         // Variabile contenente l'indirizzo alla pagina di reindirizzamento
         String redirect = null;
         /* ******************************************************************** *
@@ -187,7 +190,16 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Recupera o inizializza 'codice rilevazione' (Survey)
         String codeSur = parser.getStringParameter("r", DASH);
         // Recupera o inizializza 'tipo pagina'   
-        String part = parser.getStringParameter("p", "-");
+        String part = parser.getStringParameter("p", DASH);
+        // Recupera o inizializza le strutture
+        String l1 = parser.getStringParameter("sliv1", DASH);
+        String l2 = parser.getStringParameter("sliv2", DASH);
+        String l3 = parser.getStringParameter("sliv3", DASH);
+        String l4 = parser.getStringParameter("sliv4", DASH);
+        // Recupera o inizializza i processi anticorruttivi
+        String p1 = parser.getStringParameter("pliv1", DASH);
+        String p2 = parser.getStringParameter("pliv2", DASH);
+        String p3 = parser.getStringParameter("pliv3", DASH);
         // Flag di scrittura
         boolean write = (boolean) req.getAttribute("w");
         /* ******************************************************************** *
@@ -199,7 +211,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
         /* ******************************************************************** *
-         *                         Recupera la Sessione                         *
+         *                         Controllo Garden Gate                        *
          * ******************************************************************** */
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
@@ -207,7 +219,9 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             if (ses == null) {
                 throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
             }
+            // Bisogna essere autenticati 
             user = (PersonBean) ses.getAttribute("usr");
+            // Cioè bisogna che l'utente corrente abbia una sessione valida
             if (user == null) {
                 throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
             }
@@ -235,54 +249,48 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         try {
             // Controllo sull'input
             if (!codeSur.equals(DASH)) {
-                // Recupera in ogni caso il progetto richiesto dalla navigazione utente
-                //runtimeProject = db.getProject(idPrj, user.getId());
-                // Recupera in ogni caso i rischi associati al progetto richiesto dalla navigazione utente
-                //riskOfRuntimeProject = db.getRisks(idPrj, user);
-                // Verifica se deve eseguire un'operazione di scrittura
+                // Creazione della tabella che conterrà i valori dei parametri passati dalle form
+                params = new HashMap<>();
+                // Carica in ogni caso i parametri di navigazione
+                loadParams(part, parser, params);
+                // Verifica se deve gestire una chiamata POST
                 if (write) {
-                    // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-                    //HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
-                    // Recupera i progetti su cui l'utente ha diritti di scrittura
-                    //Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
-                    // Se non ci sono progetti scrivibili e il flag "write" è true c'è qualcosa che non va...
-                    /*if (writablePrj == null) {
-                        String msg = FOR_NAME + "Il flag di scrittura e\' true pero\' non sono stati trovati progetti scrivibili: problema!.\n";
-                        LOG.severe(msg);
-                        throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-                    }*/
-                    // Trasforma un Vector di progetti scrivibili dall'utente loggato in un dictionary degli stessi
-                    //HashMap<Integer, ProjectBean> writableProjects = ProjectCommand.decant(writablePrj);
-                    // Controllo quale azione vuole fare l'utente
+                    // Controlla quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
-                        // Creazione della tabella che conterrà i valori dei parametri passati dalle form
-                        HashMap<String, LinkedHashMap<String, String>> params = new HashMap<>();
-                        //loadParams(part, parser, params);
-                        // Controlla se deve effettuare un inserimento o un aggiornamento
+                        // Stringa dinamica per contenere i parametri di scelta strutture
+                        StringBuffer paramsStruct = new StringBuffer();
+                        // Dizionario dei parametri delle strutture scelte dall'utente
+                        LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
+                        // Cicla sul dizionario dei parametri per ricostruire l'URL
+                        for (Map.Entry<String, String> set : struct.entrySet()) {
+                            // Printing all elements of a Map
+                            paramsStruct.append("&");
+                            paramsStruct.append("s" + set.getKey() + "=" + set.getValue());
+                        }
+                        // Controlla quale richiesta deve gestire
                         if (part.equalsIgnoreCase(PART_SELECT_STR)) {
                             /* ************************************************ *
-                             *                  SELECT Process Part             *
+                             *              CHOOSING Structure Part             *
                              * ************************************************ */
-                            // Devono essere possibile identificare la struttura
-                            loadParams(part, parser, params);
-                            LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
-                            //String par = HomePageCommand.getParameters(req, MIME_TYPE_HTML);
-                            //String par = HomePageCommand.getParameters(req, MIME_TYPE_TEXT);
-                            StringBuffer paramsStruct = new StringBuffer();
-                            for (Map.Entry<String, String> set : struct.entrySet()) {
-                                // Printing all elements of a Map
-                                paramsStruct.append("&");
-                                paramsStruct.append("s" + set.getKey() + "=" + set.getValue());
-                            }
-                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_PROCESS + paramsStruct.toString() + "&r=AT2022";
-                        }/* else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT)) {
+                            // Deve essere possibile identificare la struttura
+                            //loadParams(part, parser, params);
+                            // Prepara la redirect 
+                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_PROCESS + paramsStruct.toString() + "&r=" + codeSur;
+                        } else if (part.equalsIgnoreCase(PART_PROCESS)) {
                             /* ************************************************ *
-                             *                  INSERT Risk Part                *
-                             * ************************************************ *
-                            loadParams(part, parser, params);
-                            db.insertWbs(idPrj, user, writablePrj, params.get(Query.ADD_TO_PROJECT));
-                            redirect = "q=" + Query.PART_RISK + "&id=" + idPrj;
-                        }*/
+                             *               CHOOSING Process Part              *
+                             * ************************************************ */
+                            // Dizionario dei parametri dei processi scelti dall'utente
+                            LinkedHashMap<String, String> macro = params.get(PART_PROCESS);
+                            // Stringa dinamica per contenere i parametri di scelta processi
+                            StringBuffer paramsProc = new StringBuffer();
+                            for (Map.Entry<String, String> set : macro.entrySet()) {
+                                // Printing all elements of a Map
+                                paramsProc.append("&");
+                                paramsProc.append("p" + set.getKey() + "=" + set.getValue());
+                            }
+                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_SELECT_QST + paramsStruct.toString() + paramsProc.toString() + "&r=" + codeSur;
+                        }
                     } else {
                         // Deve eseguire una eliminazione
                     }
@@ -293,16 +301,17 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                     if (nomeFile.containsKey(part)) {
                         // Recupera le strutture della rilevazione corrente
                         structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
+                        macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
                         if (part.equalsIgnoreCase(PART_SELECT_STR)) {
                             /* ************************************************ *
                              *              SELECT Structure Part               *
                              * ************************************************ */
                             flatStructs = decant(structs);
-                        } else if (part.equalsIgnoreCase(PART_PROCESS)) {
+                        } else if (part.equalsIgnoreCase(PART_SELECT_QST)) {
                             /* ************************************************ *
-                             *               SELECT Process Part                *
+                             *              Creazione Questionario              *
                              * ************************************************ */
-                            macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
+                            
                         }
                         fileJspT = nomeFile.get(part);
                     } else {
@@ -357,6 +366,15 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
+        }/*
+        if (!l1.equals(DASH)) {
+            paramsNav.put("sliv1", l1);
+        }
+        if (!l1.equals(DASH)) {
+            paramsNav.put("sliv2", l2);
+        }*/
+        if (!params.isEmpty()) {
+            req.setAttribute("params", params);
         }
         // Imposta nella request data di oggi 
         req.setAttribute("now", Utils.format(today));
@@ -433,31 +451,23 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                    ParameterParser parser,
                                    HashMap<String, LinkedHashMap<String, String>> formParams)
                             throws CommandException {
+        LinkedHashMap<String, String> struct = new LinkedHashMap<>();
+        LinkedHashMap<String, String> proat = new LinkedHashMap<>();
         /* **************************************************** *
-         *           Ramo di SELECT di una Struttura            *
+         *     Caricamento parametri di Scelta Struttura        *
+         * **************************************************** */        
+        struct.put("liv1",  parser.getStringParameter("sliv1", VOID_STRING));
+        struct.put("liv2",  parser.getStringParameter("sliv2", VOID_STRING));
+        struct.put("liv3",  parser.getStringParameter("sliv3", VOID_STRING));
+        struct.put("liv4",  parser.getStringParameter("sliv4", VOID_STRING));
+        formParams.put(PART_SELECT_STR, struct);
+        /* **************************************************** *
+         *      Caricamento parametri di Scelta Processo        *
          * **************************************************** */
-        if (part.equalsIgnoreCase(PART_SELECT_STR)) {
-            // Recupero e caricamento parametri di struttura
-            LinkedHashMap<String, String> struct = new LinkedHashMap<>();
-            struct.put("liv1",  parser.getStringParameter("str-liv1", VOID_STRING));
-            struct.put("liv2",  parser.getStringParameter("str-liv2", VOID_STRING));
-            struct.put("liv3",  parser.getStringParameter("str-liv3", VOID_STRING));
-            struct.put("liv4",  parser.getStringParameter("str-liv4", VOID_STRING));
-            formParams.put(PART_SELECT_STR, struct);
-        } 
-        /* **************************************************** *
-         *              Ramo di INSERT di una Wbs               *
-         * **************************************************** *
-        else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT)) {
-            HashMap<String, String> wbs = new HashMap<String, String>();
-            wbs.put("wbs-idpadre",      parser.getStringParameter("wbs-idpadre", Utils.VOID_STRING));
-            wbs.put("wbs-name",         parser.getStringParameter("wbs-name", Utils.VOID_STRING));
-            wbs.put("wbs-descr",        parser.getStringParameter("wbs-descr", Utils.VOID_STRING));
-            wbs.put("wbs-workpackage",  parser.getStringParameter("wbs-workpackage", Utils.VOID_STRING));
-            wbs.put("wbs-note",         parser.getStringParameter("wbs-note", Utils.VOID_STRING));
-            wbs.put("wbs-result",       parser.getStringParameter("wbs-result", Utils.VOID_STRING));
-            formParams.put(Query.ADD_TO_PROJECT, wbs);
-        }*/
+        proat.put("liv1",    parser.getStringParameter("pliv1", VOID_STRING));
+        proat.put("liv2",    parser.getStringParameter("pliv2", VOID_STRING));
+        proat.put("liv3",    parser.getStringParameter("pliv3", VOID_STRING));
+        formParams.put(PART_PROCESS, proat);
     }
     
 }
