@@ -721,7 +721,7 @@ public class DBWrapper implements Query, Constants {
                     processi.add(processo);
                 }
                 // Imposta i processi
-                macro.setProcessi(sottoprocessi);
+                macro.setProcessi(processi);
                 // Aggiunge il macroprocesso valorizzato all'elenco
                 macroprocessi.add(macro);
                 rs1 = rs2 = null;
