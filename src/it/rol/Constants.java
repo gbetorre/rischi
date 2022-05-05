@@ -128,6 +128,14 @@ public interface Constants extends Serializable {
      */
     public static final String PART_SELECT_STR          = "str";
     /**
+     * <p>Costante per il parametro identificante la parte di presentazione quesiti.</p>
+     */
+    public static final String PART_SELECT_QST          = "sqs";
+    /**
+     * <p>Costante per il parametro identificante la parte di riepilogo quesiti.</p>
+     */
+    public static final String PART_RESUME_QST          = "rqs";
+    /**
      * <p>Costante per il parametro identificante la pagina dell'utente.</p>
      */
     public static final String PART_USR                 = "usr";
