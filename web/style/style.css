@@ -270,6 +270,14 @@ div.successPwd {
 	width: 100%;
 }
 
+div.info {
+  color: #660000;
+  padding: 10px;
+  border: 1px solid #2eb82e;
+  background-color: #99ccff;
+  width: 100%;
+}
+
 div.additional-fields {
   display:none;
 }
