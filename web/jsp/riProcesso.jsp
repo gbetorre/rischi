@@ -4,12 +4,13 @@
 <%@ include file="URL.jspf" %>
 <c:set var="structs" value="${requestScope.strutture}" scope="page" />
 <c:set var="macros" value="${requestScope.processi}" scope="page" />
-<c:set var="codLiv1" value="${param['sliv1']}" scope="page" />
-<c:set var="codLiv2" value="${param['sliv2']}" scope="page" />
-<c:set var="codLiv3" value="${param['sliv3']}" scope="page" />
-<c:set var="codLiv4" value="${param['sliv4']}" scope="page" />
+<c:set var="selStr" value="${requestScope.params.get('str')}" scope="page" />
+<c:set var="codLiv1" value="${selStr.get('liv1')}" scope="page" />
+<c:set var="codLiv2" value="${selStr.get('liv2')}" scope="page" />
+<c:set var="codLiv3" value="${selStr.get('liv3')}" scope="page" />
+<c:set var="codLiv4" value="${selStr.get('liv4')}" scope="page" />
     <h4 class="btn-lightgray">Riepilogo struttura selezionata</h4>
-    <div class="substatus">
+    <div class="info">
     <c:forEach var="strLiv1" items="${structs}">
       <c:if test="${strLiv1.extraInfo.codice eq codLiv1}">
         <c:out value="${strLiv1.nome}" />
@@ -31,21 +32,21 @@
       </c:if>
     </c:forEach>
     </div><br />
-    <form id="select_ent_form" class="form-horizontal" action="" method="post">
-      <input type="hidden" name="str-liv1" value="${codLiv1}" />
-      <input type="hidden" name="str-liv2" value="${codLiv2}" />
-      <input type="hidden" name="str-liv3" value="${codLiv3}" />
-      <input type="hidden" name="str-liv4" value="${codLiv4}" />
+    <form id="select_pat_form" class="form-horizontal" action="" method="post">
+      <input type="hidden" name="sliv1" value="${codLiv1}" />
+      <input type="hidden" name="sliv2" value="${codLiv2}" />
+      <input type="hidden" name="sliv3" value="${codLiv3}" />
+      <input type="hidden" name="sliv4" value="${codLiv4}" />
       <h4 class="btn-lightgray">Scelta processi</h4>
       <div class="form-custom form-group" id="str_form">
         <div class="panel-body form-group">
           <!--  Macroprocesso -->
           <div class="row alert">
             <div class="col-sm-3  alert-success">
-              Scelta Macroprocesso&nbsp;
+              Scelta macroprocesso&nbsp;
             </div>
             <div class="col-sm-9">
-              <select id="pat-liv1" name="pat-liv1">
+              <select id="pat-liv1" name="pliv1">
                 <option value="0">-- macroprocesso -- </option>
               <c:forEach var="macro" items="${macros}">
                 <option value="${macro.codice}">${macro.nome}</option>
@@ -60,7 +61,7 @@
               Scelta processo&nbsp;
             </div>
             <div class="col-sm-9">
-              <select id="pat-liv2" name="pat-liv2">
+              <select id="pat-liv2" name="pliv2">
                 <option value="">-- processo -- </option>
               </select>
             </div>
@@ -72,7 +73,7 @@
               Scelta sottoprocesso&nbsp;
             </div>
             <div class="col-sm-9">
-              <select id="pat-liv3" name="pat-liv3">
+              <select id="pat-liv3" name="pliv3">
                 <option value="">-- sottoprocesso -- </option>
               </select>
             </div>
@@ -97,7 +98,7 @@
     function blank() {
         return "<option value=''>-- Nessuno --</option>";
     }
-</script>
+    </script>
 <c:set var="singleQuote" value="'" scope="page" />
 <c:set var="singleQuoteEsc" value="''" scope="page" />
 <c:set var="doubleQuote" value='"' scope="page" />
@@ -112,11 +113,10 @@ $(document).ready(function() {
         $(child2).html(blank());
         $(child3).html(blank());
         switch (parent) {
-        <c:forEach var="l1" items="${structs}">
-        case "${l1.extraInfo.codice}":
-            $(child2).html("<c:forEach var="l2" items="${l1.figlie}"><c:set var="l2nome" value="${fn:replace(l2.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l2.extraInfo.codice}'>${l2.prefisso} ${fn:replace(l2nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach>");
-            $(child3).html("<c:forEach var="l2" items="${l1.figlie}" begin="0" end="0"><c:forEach var="l3" items="${l2.figlie}"><c:set var="l3nome" value="${fn:replace(l3.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l3.extraInfo.codice}'>${l3.prefisso} ${fn:replace(l3nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach>");
-            $(child4).html("<c:forEach var="l2" items="${l1.figlie}" begin="0" end="0"><c:forEach var="l3" items="${l2.figlie}" begin="0" end="0"><c:forEach var="l4" items="${l3.figlie}"><c:set var="l4nome" value="${fn:replace(l4.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l4.extraInfo.codice}'>${l4.prefisso} ${fn:replace(l4nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach></c:forEach>");
+        <c:forEach var="mp" items="${macros}">
+        case "${mp.codice}":
+            $(child2).html("<c:forEach var="pp" items="${mp.processi}"><c:set var="ppnome" value="${fn:replace(pp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${pp.codice}'>${fn:replace(ppnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach>");
+            $(child3).html("<c:forEach var="pp" items="${mp.processi}" begin="0" end="0"><c:forEach var="sp" items="${pp.processi}"><c:set var="spnome" value="${fn:replace(sp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${sp.codice}'>${fn:replace(spnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach>");
             break;
         </c:forEach>
         }
@@ -127,20 +127,12 @@ $(document).ready(function() {
         var child3 = "#pat-liv3";
         $(child3).html(blank());
         switch (parent) {
-        <c:forEach var="entry" items="${structsByCode}">
-        <c:choose>
-          <c:when test="${fn:endsWith(entry.key, '-2') and not empty entry.value}">
-          case "${entry.key}": 
-              $(child3).html("<c:forEach var="str" items="${entry.value}"><c:set var="l3nome" value="${fn:replace(str.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${str.extraInfo.codice}'>${str.prefisso} ${fn:replace(l3nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach>");
-              $(child4).html("<c:forEach var="str" items="${entry.value}" begin="0" end="0"><c:forEach var="l4" items="${str.figlie}"><c:set var="l4nome" value="${fn:replace(l4.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l4.extraInfo.codice}'>${l4.prefisso} ${fn:replace(l4nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach>");
-              break;
-          </c:when>
-          <c:when test="${fn:endsWith(entry.key, '-3') and not empty entry.value}">
-          case "${entry.key}": 
-              $(child4).html("<c:forEach var="l4" items="${entry.value}"><c:set var="l4nome" value="${fn:replace(l4.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l4.extraInfo.codice}'>${l4.prefisso} ${fn:replace(l4nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach>");
-              break;
-          </c:when>
-          </c:choose>
+        <c:forEach var="mp" items="${macros}">
+          <c:forEach var="pp" items="${mp.processi}" begin="0" end="0">
+        case "${pp.codice}":
+            $(child3).html("<c:forEach var="pp" items="${mp.processi}" begin="0" end="0"><c:forEach var="sp" items="${pp.processi}"><c:set var="spnome" value="${fn:replace(sp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${sp.codice}'>${fn:replace(spnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach>");
+            break;
+          </c:forEach>
         </c:forEach>
         }
     });
