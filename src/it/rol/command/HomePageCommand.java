@@ -547,10 +547,12 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         String codeSurvey, tokenSurvey = null;
         Vector<ItemBean> classiCommand = ConfigManager.getClassiCommand();
         LinkedHashMap<String, String> allowedParams = new LinkedHashMap<String, String>(prime);
-        String deniedPattern = "sliv";
+        String deniedPattern1 = "sliv";
+        String deniedPattern2 = "pliv";
         allowedParams.put(PART_SEARCH_PERSON, "Ricerca");
         allowedParams.put(PART_SELECT_STR, "Scelta Struttura");
         allowedParams.put(PART_PROCESS, "Scelta Processi");
+        allowedParams.put(PART_SELECT_QST, "Quesiti");
         try {
             String[] tokens = pageParams.split(AND);
             Map<String, String> tokensAsMap = new LinkedHashMap<String, String>(prime);
@@ -558,7 +560,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
                 String couple = tokens[i];
                 String paramName = couple.substring(NOTHING, couple.indexOf(EQ));
                 String paramValue = couple.substring(couple.indexOf(EQ));
-                if (!paramName.startsWith(deniedPattern)) {
+                if (!paramName.startsWith(deniedPattern1) && !paramName.startsWith(deniedPattern2)) {
                     tokensAsMap.put(paramName, paramValue);
                     couple = paramName = paramValue = null;
                 }
@@ -673,7 +675,10 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
      * <p>Pu&ograve; essere utilizzato per verificare rapidamente
      * quali parametri sono presenti in Request onde evitare duplicazioni
      * e/o ridondanze.</p>
-     *
+     * <p>Esempi di richiamo:
+     * String par = HomePageCommand.getParameters(req, MIME_TYPE_HTML);
+     * String par = HomePageCommand.getParameters(req, MIME_TYPE_TEXT);
+     * </p>
      * @param req HttpServletRequest contenente i parametri che si vogliono conoscere
      * @param mime argomento specificante il formato dell'output desiderato
      * @return un unico oggetto contenente tutti i valori e i nomi dei parametri settati in request nel momento in cui lo chiede il chiamante
