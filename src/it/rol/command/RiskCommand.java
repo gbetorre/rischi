@@ -46,17 +46,18 @@ import javax.servlet.http.HttpSession;
 
 import com.oreilly.servlet.ParameterParser;
 
+import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Main;
-import it.rol.Query;
 import it.rol.Utils;
+import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
+import it.rol.bean.QuestionBean;
 import it.rol.bean.RiskBean;
-import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
 
@@ -176,8 +177,12 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         ArrayList<DepartmentBean> structs = null;
         // Elenco processi collegati alla rilevazione
         ArrayList<ProcessBean> macros = null;
+        // Elenco quesiti collegati alla rilevazione
+        ArrayList<QuestionBean> questions = null;
         // Elenco strutture collegate alla rilevazione
         HashMap<String, Vector<DepartmentBean>> flatStructs = null;
+        // Elenco quesiti collegati alla rilevazione
+        HashMap<ItemBean, ArrayList<QuestionBean>> flatQuestions = null;
         // Parametri identificanti le strutture 
         LinkedHashMap<String, String> paramsNav = new LinkedHashMap<>();
         // Tabella che conterrà i valori dei parametri passati dalle form
@@ -249,6 +254,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         try {
             // Controllo sull'input
             if (!codeSur.equals(DASH)) {
+                // Recupera la rilevazione sotto forma di oggetto
+                CodeBean survey = ConfigManager.getSurvey(codeSur);
                 // Creazione della tabella che conterrà i valori dei parametri passati dalle form
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
@@ -306,12 +313,14 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *              SELECT Structure Part               *
                              * ************************************************ */
-                            flatStructs = decant(structs);
+                            flatStructs = (HashMap<String, Vector<DepartmentBean>>) decant(structs, part);
                         } else if (part.equalsIgnoreCase(PART_SELECT_QST)) {
                             /* ************************************************ *
                              *              Creazione Questionario              *
                              * ************************************************ */
-                            
+                            questions = db.getQuestions(user, survey);
+                            ArrayList<ItemBean> ambits = db.getAmbits(user);
+                            flatQuestions = decantQuestions(questions, ambits);
                         }
                         fileJspT = nomeFile.get(part);
                     } else {
@@ -363,16 +372,14 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         if (macros != null) {
             req.setAttribute("processi", macros);
         }
+        // Imposta nella request elenco completo quesiti raggruppati per ambito
+        if (flatQuestions != null) {
+            req.setAttribute("elencoQuesiti", flatQuestions);
+        }
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
-        }/*
-        if (!l1.equals(DASH)) {
-            paramsNav.put("sliv1", l1);
         }
-        if (!l1.equals(DASH)) {
-            paramsNav.put("sliv2", l2);
-        }*/
         if (!params.isEmpty()) {
             req.setAttribute("params", params);
         }
@@ -380,6 +387,31 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         req.setAttribute("now", Utils.format(today));
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
+    }
+    
+    
+    /**
+     * <p>Travasa una struttura vettoriale in una corrispondente struttura 
+     * di tipo Dictionary, HashMap, in cui le chiavi sono rappresentate 
+     * da oggetti String e i valori sono rappresentati dalle elenchi di figlie 
+     * associate alla chiave.</p>
+     *
+     * @param 
+     * @return <code>HashMap&lt;String&comma; Vector&lt;DepartmentBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
+     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
+     */
+    private static HashMap<?,?> decant(ArrayList<?> objects, 
+                                                     String part)
+                                              throws CommandException {
+        if (part.equals(PART_SELECT_STR)) {
+            return decantStructs((ArrayList<DepartmentBean>) objects);
+        /*} else if(part.equals(PART_SELECT_QST)) {
+            return decantQuestions((ArrayList<QuestionBean>) objects);*/
+        } else {
+            String msg = FOR_NAME + "Valore di \'part\' non gestito.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg);
+        }
     }
     
     
@@ -398,8 +430,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      * @return <code>HashMap&lt;String&comma; Vector&lt;DepartmentBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
-    private static HashMap<String, Vector<DepartmentBean>> decant(ArrayList<DepartmentBean> structs)
-                                                           throws CommandException {
+    private static HashMap<String, Vector<DepartmentBean>> decantStructs(ArrayList<DepartmentBean> structs)
+                                                                  throws CommandException {
         HashMap<String, Vector<DepartmentBean>> flatStructs = new HashMap<>();
         try {
             for (DepartmentBean l1 : structs) {
@@ -435,6 +467,49 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             throw new CommandException(msg, e);
         }
         return flatStructs;
+    }
+    
+    
+    /**
+     * <p></p>
+     *
+     * @param structs Vector di DepartmentBean da travasare in HashMap
+     * @return <code>HashMap&lt;String&comma; Vector&lt;DepartmentBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
+     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
+     */
+    private static HashMap<ItemBean, ArrayList<QuestionBean>> decantQuestions(ArrayList<QuestionBean> questions, 
+                                                                            ArrayList<ItemBean> ambits)
+                                                                     throws CommandException {
+        HashMap<ItemBean, ArrayList<QuestionBean>> questionsByAmbit = new HashMap<>();
+        try {
+            for (ItemBean ambit : ambits) {
+                int key = ambit.getId();
+                ArrayList<QuestionBean> qs = new ArrayList<>();
+                for (QuestionBean q : questions) {
+                    if (q.getCod1() == key) {
+                        qs.add(q);
+                    }
+                }
+                questionsByAmbit.put(ambit, qs);
+            }
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento fuori tabella.\n" + aiobe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, aiobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di conversione di tipo.\n" + cce.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n" + npe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel travaso di un Vector in un Dictionary.\n" + e.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, e);
+        }
+        return questionsByAmbit;
     }
     
     
