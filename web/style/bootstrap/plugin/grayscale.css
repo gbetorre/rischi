@@ -105,8 +105,8 @@
   height: auto;
   min-height: 35rem;
   padding: 15rem 0;
-  background: -webkit-gradient(linear, left top, left bottom, from(rgba(2, 62, 138, 0.1)), color-stop(75%, rgba(2, 62, 138, 0.5)), to(#023e8a));
-  background-image: radial-gradient(rgba(2, 62, 138, 0.1) 0%, rgba(255, 153, 0, 0.5) 75%, #ff9900 100%);
+  background: -webkit-gradient(linear, left top, left bottom, from(rgba(22, 22, 22, 0.1)), color-stop(75%, rgba(22, 22, 22, 0.5)), to(#161616));
+  background-image: radial-gradient(rgba(22, 22, 22, 0.1) 0%, rgba(22, 22, 22, 0.5) 75%, #161616 100%);
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: scroll;
@@ -119,7 +119,7 @@
   	font-size: 3rem;
   	line-height: 3.5rem;
   	letter-spacing: 0.5rem;
-  	background:  #333333;
+  	background: white;
   	/*background: -webkit-linear-gradient(rgba(255, 255, 255, 1), rgba(0, 0, 0, 0.3));*/
   	-webkit-text-fill-color: transparent;
   	-webkit-background-clip: text;
