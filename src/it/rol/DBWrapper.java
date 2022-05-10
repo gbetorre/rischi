@@ -53,6 +53,7 @@ import it.rol.bean.DepartmentBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
+import it.rol.bean.QuestionBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.WebStorageException;
 
@@ -1475,7 +1476,7 @@ public class DBWrapper implements Query, Constants {
         PreparedStatement pst = null;
         ResultSet rs, rs1, rs2, rs3 = null;
         DepartmentBean s1, s2, s3, s4 = null;
-        AbstractList<DepartmentBean> structs = new ArrayList<DepartmentBean>();
+        AbstractList<DepartmentBean> structs = new ArrayList<>();
         Vector<DepartmentBean> vS2 = null;
         Vector<DepartmentBean> vS3 = null;
         Vector<DepartmentBean> vS4 = null;
@@ -1499,13 +1500,13 @@ public class DBWrapper implements Query, Constants {
                 // Valorizza la struttura di I livello col contenuto della query
                 BeanUtil.populate(s1, rs);
                 // Vi memorizza l'id globale
-                infoS1.setCodice(String.valueOf(idThru + Data.DOT + s1.getId() + DASH + s1.getLivello()));
+                infoS1.setCodice(String.valueOf(idThru + DOT + s1.getId() + DASH + s1.getLivello()));
                 // Ne imposta il livello
                 s1.setLivello((byte) 1);
                 // Prepara il recupero dei figli di livello 2
                 pst = null;
                 // Crea una struttura per i figli
-                vS2 = new Vector<DepartmentBean>();
+                vS2 = new Vector<>();
                 // Prepara la query
                 query = new StringBuffer(getQueryStructures(survey.getId(), NOTHING, NOTHING, NOTHING, s1.getId()));
                 // Recupera le strutture figlie
@@ -1522,7 +1523,7 @@ public class DBWrapper implements Query, Constants {
                     // Valorizza la struttura di II livello tramite la query
                     BeanUtil.populate(s2, rs1);
                     // Vi memorizza l'id globale
-                    infoS2.setCodice(String.valueOf(idThru + Data.DOT + s2.getId() + DASH + s2.getLivello()));
+                    infoS2.setCodice(String.valueOf(idThru + DOT + s2.getId() + DASH + s2.getLivello()));
                     // Ne imposta il livello
                     s2.setLivello((byte) 2);
                     // Ne imposta il padre
@@ -1551,7 +1552,7 @@ public class DBWrapper implements Query, Constants {
                         s3.setPadre(s2);
                         // Ne recupera i figli di livello 4 (pronipoti)
                         pst = null;
-                        vS4 = new Vector<DepartmentBean>();
+                        vS4 = new Vector<>();
                         query = new StringBuffer(getQueryStructures(survey.getId(), NOTHING, s3.getId(), NOTHING, NOTHING));
                         pst = con.prepareStatement(String.valueOf(query));
                         pst.clearParameters();
@@ -2122,6 +2123,143 @@ public class DBWrapper implements Query, Constants {
             } catch (SQLException sqle) {
                 throw new WebStorageException(FOR_NAME + sqle.getMessage());
             }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un ArrayList contenente tutti gli ambiti di analisi trovati.</p>
+     *
+     * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param survey   oggetto contenente l'identificativo della rilevazione
+     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - un Vector di QuestionBean, che rappresentano le domande trovate
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public ArrayList<ItemBean> getAmbits(PersonBean user)
+                                         throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            AbstractList<ItemBean> ambits = new ArrayList<>();
+            try {
+                // TODO: Controllare se user è superuser
+                pst = null;
+                pst = con.prepareStatement(GET_AMBIT);
+                pst.clearParameters();
+                pst.setInt(1, GET_ALL_BY_CLAUSE);
+                pst.setInt(2, GET_ALL_BY_CLAUSE);
+                rs = pst.executeQuery();
+                // Punta all'àmbito
+                while (rs.next()) {
+                    // Prepara l'àmbito
+                    ItemBean ambit = new ItemBean();
+                    // Valorizza l'àmbito
+                    BeanUtil.populate(ambit, rs);
+                    // Aggiunge l'àmbito al quesito
+                    ambits.add(ambit);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<ItemBean>) ambits;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "QuestionBean non valorizzato; problema nella query dei quesiti.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Data una rilevazione restituisce
+     * un ArrayList di domande da sottoporre per rilevare i rischi.</p>
+     *
+     * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param survey   oggetto contenente l'identificativo della rilevazione
+     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - un Vector di QuestionBean, che rappresentano le domande trovate
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public ArrayList<QuestionBean> getQuestions(PersonBean user,
+                                                CodeBean survey)
+                                         throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs, rs1, rs2, rs3 = null;
+            QuestionBean question = null;
+            AbstractList<QuestionBean> questions = new ArrayList<>();
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_QUESTIONS);
+                pst.clearParameters();
+                pst.setInt(1, survey.getId());
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Crea una domanda vuota
+                    question = new QuestionBean();
+                    // La valorizza col contenuto della query
+                    BeanUtil.populate(question, rs);
+                    // Recupera l'àmbito
+                    pst = null;
+                    pst = con.prepareStatement(GET_AMBIT);
+                    pst.clearParameters();
+                    pst.setInt(1, question.getCod1());
+                    pst.setInt(2, question.getCod1());
+                    rs1 = pst.executeQuery();
+                    // Punta all'àmbito
+                    if (rs1.next()) {
+                        // Prepara l'àmbito
+                        CodeBean ambit = new CodeBean();
+                        // Valorizza l'àmbito
+                        BeanUtil.populate(ambit, rs1);
+                        // Aggiunge l'àmbito al quesito
+                        question.setAmbito(ambit);
+                    }
+                    questions.add(question);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<QuestionBean>) questions;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean; verificare identificativo della rilevazione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "QuestionBean non valorizzato; problema nella query dei quesiti.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
         }
     }
 
