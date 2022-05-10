@@ -4,6 +4,7 @@
 <%@ include file="URL.jspf" %>
 <c:set var="structs" value="${requestScope.strutture}" scope="page" />
 <c:set var="macros" value="${requestScope.processi}" scope="page" />
+<c:set var="quests" value="${requestScope.elencoQuesiti}" scope="page" />
 <c:set var="selStr" value="${requestScope.params.get('str')}" scope="page" />
 <c:set var="selPro" value="${requestScope.params.get('pro')}" scope="page" />
 <c:set var="codLiv1" value="${selStr.get('liv1')}" scope="page" />
@@ -52,61 +53,40 @@
     </c:forEach>
     </div><br />
     <form id="select_ent_form" class="form-horizontal" action="" method="post">
-      <input type="hidden" name="str-liv1" value="${codLiv1}" />
+      <input type="text" name="str-liv1" value="${codLiv1}" />
       <input type="hidden" name="str-liv2" value="${codLiv2}" />
       <input type="hidden" name="str-liv3" value="${codLiv3}" />
       <input type="hidden" name="str-liv4" value="${codLiv4}" />
-      <h4 class="btn-lightgray">Scelta processi</h4>
+      <h4 class="btn-lightgray">Compilazione quesiti</h4>
       <div class="form-custom form-group" id="str_form">
         <div class="panel-body form-group">
-          <!--  Macroprocesso -->
-          <div class="row alert">
-            <div class="col-sm-3  alert-success">
-              Scelta macroprocesso&nbsp;
+      <c:forEach var="entry" items="${quests}" varStatus="status">
+          <!--  Ambito di Analisi -->
+          <div class="row substatus">
+            <strong><c:out value="${status.count}. ${entry.key.nome}" /></strong>
+        <c:forEach var="quesito" items="${quests.get(entry.key)}">
+            <div class="panel panel-default subfields"><div class="panel-heading">
+                <cite><c:out value="${quesito.formulazione}" /></cite>
+              </div>
+              <div class="panel-body">
+                <input type="radio" id="Q.${quesito.id}" name="Q.${quesito.id}" value="SI"> SI
+                <input type="radio" id="Q.${quesito.id}" name="Q.${quesito.id}" value="NO"> NO
+              </div>
             </div>
-            <div class="col-sm-9">
-              <select id="pat-liv1" name="pat-liv1">
-                <option value="0">-- macroprocesso -- </option>
-              <c:forEach var="macro" items="${macros}">
-                <option value="${macro.codice}">${macro.nome}</option>
-              </c:forEach>
-              </select>
-            </div>
-            &nbsp;
-          </div>
-          <!--  Processo -->
-          <div class="row alert">
-            <div class="col-sm-3  alert-success">
-              Scelta processo&nbsp;
-            </div>
-            <div class="col-sm-9">
-              <select id="pat-liv2" name="pat-liv2">
-                <option value="">-- processo -- </option>
-              </select>
-            </div>
-            &nbsp;
-          </div>
-          <!--  Sottoprocesso -->
-          <div class="row alert">
-            <div class="col-sm-3  alert-success">
-              Scelta sottoprocesso&nbsp;
-            </div>
-            <div class="col-sm-9">
-              <select id="pat-liv3" name="pat-liv3">
-                <option value="">-- sottoprocesso -- </option>
-              </select>
-            </div>
-            &nbsp;
+        </c:forEach>
           </div>
           <br />
+      </c:forEach>
+          <br />
           &nbsp;
-          <a id="btnBack" class="btn btnNav" href="${str}"><i class="fa-solid fa-angles-left"></i> Inizio</a>
+          <center>
           <button type="submit" class="btn btn-success" value="Save">
             <i class="far fa-save"></i>
-            Invio
+            Salva
           </button>
+          </center>
         </div>
-        <br />
+        <hr class="separatore" />
       </div>
     </form>
     <script>
@@ -122,39 +102,3 @@
 <c:set var="singleQuoteEsc" value="''" scope="page" />
 <c:set var="doubleQuote" value='"' scope="page" />
 <c:set var="doubleQuoteEsc" value='\\"' scope="page" />
-<script>
-$(document).ready(function() {
-
-    $("#pat-liv1").change(function() {
-        var parent = $(this).val();
-        var child2 = "#pat-liv2";
-        var child3 = "#pat-liv3";
-        $(child2).html(blank());
-        $(child3).html(blank());
-        switch (parent) {
-        <c:forEach var="mp" items="${macros}">
-        case "${mp.codice}":
-            $(child2).html("<c:forEach var="pp" items="${mp.processi}"><c:set var="ppnome" value="${fn:replace(pp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${pp.codice}'>${fn:replace(ppnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach>");
-            $(child3).html("<c:forEach var="pp" items="${mp.processi}" begin="0" end="0"><c:forEach var="sp" items="${pp.processi}"><c:set var="spnome" value="${fn:replace(sp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${sp.codice}'>${fn:replace(spnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach>");
-            break;
-        </c:forEach>
-        }
-    });
-    
-    $("#pat-liv2").change(function() {
-        var parent = $(this).val();
-        var child3 = "#pat-liv3";
-        $(child3).html(blank());
-        switch (parent) {
-        <c:forEach var="mp" items="${macros}">
-          <c:forEach var="pp" items="${mp.processi}" begin="0" end="0">
-        case "${pp.codice}":
-            $(child3).html("<c:forEach var="pp" items="${mp.processi}" begin="0" end="0"><c:forEach var="sp" items="${pp.processi}"><c:set var="spnome" value="${fn:replace(sp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${sp.codice}'>${fn:replace(spnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach>");
-            break;
-          </c:forEach>
-        </c:forEach>
-        }
-    });
-    
-});
-</script>
