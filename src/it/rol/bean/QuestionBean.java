@@ -33,7 +33,6 @@
 
 package it.rol.bean;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import it.rol.exception.AttributoNonValorizzatoException;
@@ -44,15 +43,8 @@ import it.rol.exception.AttributoNonValorizzatoException;
  * 
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
-public class QuestionBean extends CodeBean implements Serializable {
+public class QuestionBean extends ItemBean {
     
-    /**
-     * La serializzazione necessita di dichiarare una costante di tipo long
-     * identificativa della versione seriale. 
-     * (Se questo dato non fosse inserito, verrebbe calcolato in maniera automatica
-     * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione). 
-     */
-    private static final long serialVersionUID = 1L;
     /**
      *  Nome di questa classe. 
      *  Viene utilizzato per contestualizzare i messaggi di errore.
@@ -62,10 +54,6 @@ public class QuestionBean extends CodeBean implements Serializable {
     /* **************************************************** *
      *                  Variabili d'istanza                 *
      * **************************************************** */
-    /**
-     * Codice del quesito
-     */
-    private String codice;
     /**
      * Formulazione del quesito
      */
@@ -83,9 +71,13 @@ public class QuestionBean extends CodeBean implements Serializable {
      */
     private CodeBean tipoFormulazione;
     /**
+     * Quesito padre
+     */
+    private QuestionBean parentQuestion;
+    /**
      * Quesiti figli
      */
-    private ArrayList<QuestionBean> quesiti;
+    private ArrayList<QuestionBean> childQuestions;
     
     
     /* **************************************************** *
@@ -96,36 +88,13 @@ public class QuestionBean extends CodeBean implements Serializable {
      */
     public QuestionBean() {
         super();
-        this.codice = this.formulazione = null;
+        this.formulazione = null;
         this.ambito = this.tipo = this.tipoFormulazione = null;
-        this.quesiti = null;
+        this.parentQuestion = null;
+        this.childQuestions = null;
     }
     
-
-    /* **************************************************** *
-     *          Metodi getter e setter per codice           *
-     * **************************************************** */
-    /**
-     * Restituisce il codice di un quesito.
-     * @return <code>codice</code> - codice del quesito 
-     * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'attributo obbligatorio non &egrave; stato valorizzato
-     */
-    public String getCodice() throws AttributoNonValorizzatoException {
-        if (this.codice == null) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo codice non valorizzato!");
-        }
-        return this.codice;
-    }
-    
-    /**
-     * Imposta  il codice di un quesito.
-     * @param codice il codice del quesito da impostare
-     */
-    public void setCodice(String codice) {
-        this.codice = codice;
-    }
-    
-    
+ 
     /* **************************************************** *
      *  Metodi getter e setter per formulazione del quesito *
      * **************************************************** */
@@ -234,6 +203,46 @@ public class QuestionBean extends CodeBean implements Serializable {
      */
     public void setTipoFormulazione(CodeBean tipoFormulazione) {
         this.tipoFormulazione = tipoFormulazione;
+    }
+
+    
+    /* **************************************************** *
+     *       Metodi getter e setter per quesito padre       *
+     * **************************************************** */
+    /**
+     * Restituisce il quesito padre del quesito corrente.
+     * @return <code>parent</code> - l'eventuale padre del quesito
+     */
+    public QuestionBean getParentQuestion()  {
+        return this.parentQuestion;
+    }
+    
+    /**
+     * Imposta il quesito padre del quesito corrente.
+     * @param parent il quesito padre del quesito corrente
+     */
+    public void setParentQuestion(QuestionBean parent) {
+        this.parentQuestion = parent;
+    }
+    
+    
+    /* **************************************************** *
+     *      Metodi getter e setter per quesiti "di cui"     *
+     * **************************************************** */
+    /**
+     * Restituisce i quesiti figli del quesito corrente.
+     * @return <code>parent</code> - gli eventuali quesiti "di cui" del quesito
+     */
+    public ArrayList<QuestionBean> getChildQuestions() {
+        return this.childQuestions;
+    }
+
+    /**
+     * Imposta i quesiti "di cui" del quesito corrente.
+     * @param childs i quesiti "di cui" del quesito corrente
+     */
+    public void setChildQuestions(ArrayList<QuestionBean> childs) {
+        this.childQuestions = childs;
     }    
     
     
