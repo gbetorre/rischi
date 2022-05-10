@@ -65,7 +65,7 @@ public interface Query extends Serializable {
      */
     public static final boolean GET_ALL = true;
     /* ********************************************************************** *
-     *                         1. Query di selezione                          *
+     *                          1. Query comuni                               *
      * ********************************************************************** */
     /**
      * <p>Estrae le classi Command previste per la/le applicazione/i.</p>
@@ -171,28 +171,9 @@ public interface Query extends Serializable {
             "   WHERE (R.id = ? OR -1 = ?)" +
             "       AND R.chiusa = true" +
             "   ORDER BY data_rilevazione DESC";
-
-    /**
-     * <p>Estrae tutti i macroprocessi filtrati in base all'identificativo della rilevazione,
-     * passato come parametro.</p>
-     */
-    public static final String GET_MACRO_AT_BY_SURVEY =
-            "SELECT DISTINCT" +
-            "       MAT.id                AS \"id\"" +
-            "   ,   MAT.codice            AS \"codice\"" +
-            "   ,   MAT.nome              AS \"nome\"" +
-            //"   ,   MAT.descrizione       AS \"descrizione\"" +
-            "   ,   MAT.ordinale          AS \"ordinale\"" +
-            "   ,   MAT.id_rilevazione    AS \"idAppo\"" +
-            //"   ,   ROUND(100 * SUM(AM.quotaparte) OVER (PARTITION BY M.id) / (SUM(AM.quotaparte) OVER ())::numeric, 2) AS \"quotaParte\"" +
-            //"   ,   ROUND((SUM(AM.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY M.id) / 100.0), 2)         AS \"fte\"" +
-            "   FROM macroprocesso_at MAT" +
-            "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
-            //"       INNER JOIN allocazione_macroprocesso AM ON AM.id_macroprocesso = M.id" +
-            //"       INNER JOIN afferenza A ON R.id = A.id_rilevazione AND A.id_persona = AM.id_persona" +
-            "   WHERE R.codice ILIKE ?" +
-            "   ORDER BY MAT.codice";
-    
+    /* ********************************************************************** *
+     *           2. Query di selezione PMS (Process Mapping Software)         *
+     * ********************************************************************** */    
     /**
      * <p>Estrae tutti i macroprocessi filtrati in base all'identificativo della rilevazione,
      * passato come parametro.</p>
@@ -396,46 +377,6 @@ public interface Query extends Serializable {
             "       AND PR.id_macroprocesso = ?" +
             "       AND AP.id_persona = ?" +
             "   ORDER BY PR.codice";
-
-    /**
-     * <p>Estrae tutti i processi anticorruzione appartenenti a un macroprocesso
-     * anticorruzione, il cui identificativo viene passato come parametro.</p>
-     */
-    public static final String GET_PROCESSI_AT_BY_MACRO =
-            "SELECT DISTINCT" +
-            "       PRAT.id                AS \"id\"" +
-            "   ,   PRAT.codice            AS \"codice\"" +
-            "   ,   PRAT.nome              AS \"nome\"" +
-            "   ,   PRAT.ordinale          AS \"ordinale\"" +
-            "   ,   PRAT.smartworking      AS \"smartWorking\"" +
-            //"   ,   COALESCE(ROUND(100 * SUM(AP.quotaparte) OVER (PARTITION BY PR.id) / (SUM(AP.quotaparte) OVER ())::numeric, 2), 0) AS \"quotaParte\"" +
-            //"   ,   COALESCE(ROUND((SUM(AP.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY PR.id) / 100.0), 2), 0)         AS \"fte\"" +
-            "   FROM processo_at PRAT" +
-            "       INNER JOIN macroprocesso_at MAT ON PRAT.id_macroprocesso_at = MAT.id" +
-            //"       INNER JOIN allocazione_processo AP ON AP.id_processo = PR.id" +
-            //"       INNER JOIN afferenza A ON AP.id_persona = A.id_persona AND AP.id_rilevazione = A.id_rilevazione" +
-            "   WHERE PRAT.id_macroprocesso_at = ?" +
-            "   ORDER BY PRAT.codice";
-
-    /**
-     * <p>Estrae tutti i sottoprocessi anticorruzione appartenenti a un processo
-     * anticorruzione, il cui identificativo viene passato come parametro.</p>
-     */
-    public static final String GET_SOTTOPROCESSI_AT_BY_PROCESS =
-            "SELECT DISTINCT" +
-            "       SPRAT.id                AS \"id\"" +
-            "   ,   SPRAT.codice            AS \"codice\"" +
-            "   ,   SPRAT.nome              AS \"nome\"" +
-            "   ,   SPRAT.ordinale          AS \"ordinale\"" +
-            "   ,   SPRAT.smartworking      AS \"smartWorking\"" +
-            //"   ,   COALESCE(ROUND(100 * SUM(AP.quotaparte) OVER (PARTITION BY PR.id) / (SUM(AP.quotaparte) OVER ())::numeric, 2), 0) AS \"quotaParte\"" +
-            //"   ,   COALESCE(ROUND((SUM(AP.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY PR.id) / 100.0), 2), 0)         AS \"fte\"" +
-            "   FROM sottoprocesso_at SPRAT" +
-            "       INNER JOIN processo_at PRAT ON SPRAT.id_processo_at = PRAT.id" +
-            //"       INNER JOIN allocazione_processo AP ON AP.id_processo = PR.id" +
-            //"       INNER JOIN afferenza A ON AP.id_persona = A.id_persona AND AP.id_rilevazione = A.id_rilevazione" +
-            "   WHERE SPRAT.id_processo_at = ?" +
-            "   ORDER BY SPRAT.codice";
     
     /**
      * <p>Estrae tutti i processi appartenenti a un macroprocesso, il cui identificativo viene
@@ -839,9 +780,101 @@ public interface Query extends Serializable {
      * @return <code>String</code> - la query che seleziona l'insieme desiderato
      */
     public String getQueryPeople(HashMap<String, String> fields, int idSurvey);
-
     /* ********************************************************************** *
-     *                        2. Query di inserimento                         *
+     *              3. Query di Selezione di ROL (Rischi On Line)             *
+     * ********************************************************************** */
+    /**
+     * <p>Estrae tutti i macroprocessi censiti dall'anticorruzione filtrati 
+     * in base all'identificativo della rilevazione, passato come parametro.</p>
+     */
+    public static final String GET_MACRO_AT_BY_SURVEY =
+            "SELECT DISTINCT" +
+            "       MAT.id                AS \"id\"" +
+            "   ,   MAT.codice            AS \"codice\"" +
+            "   ,   MAT.nome              AS \"nome\"" +
+            "   ,   MAT.ordinale          AS \"ordinale\"" +
+            "   ,   MAT.id_rilevazione    AS \"idAppo\"" +
+            "   FROM macroprocesso_at MAT" +
+            "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
+            //"       INNER JOIN allocazione_macroprocesso AM ON AM.id_macroprocesso = M.id" +
+            //"       INNER JOIN afferenza A ON R.id = A.id_rilevazione AND A.id_persona = AM.id_persona" +
+            "   WHERE R.codice ILIKE ?" +
+            "   ORDER BY MAT.codice";
+    
+    /**
+     * <p>Estrae tutti i processi anticorruzione appartenenti a un macroprocesso
+     * anticorruzione, il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_PROCESSI_AT_BY_MACRO =
+            "SELECT DISTINCT" +
+            "       PRAT.id                AS \"id\"" +
+            "   ,   PRAT.codice            AS \"codice\"" +
+            "   ,   PRAT.nome              AS \"nome\"" +
+            "   ,   PRAT.ordinale          AS \"ordinale\"" +
+            "   ,   PRAT.smartworking      AS \"smartWorking\"" +
+            "   FROM processo_at PRAT" +
+            "       INNER JOIN macroprocesso_at MAT ON PRAT.id_macroprocesso_at = MAT.id" +
+            //"       INNER JOIN allocazione_processo AP ON AP.id_processo = PR.id" +
+            //"       INNER JOIN afferenza A ON AP.id_persona = A.id_persona AND AP.id_rilevazione = A.id_rilevazione" +
+            "   WHERE PRAT.id_macroprocesso_at = ?" +
+            "   ORDER BY PRAT.codice";
+
+    /**
+     * <p>Estrae tutti i sottoprocessi anticorruzione appartenenti a un processo
+     * anticorruzione, il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_SOTTOPROCESSI_AT_BY_PROCESS =
+            "SELECT DISTINCT" +
+            "       SPRAT.id                AS \"id\"" +
+            "   ,   SPRAT.codice            AS \"codice\"" +
+            "   ,   SPRAT.nome              AS \"nome\"" +
+            "   ,   SPRAT.ordinale          AS \"ordinale\"" +
+            "   ,   SPRAT.smartworking      AS \"smartWorking\"" +
+            "   FROM sottoprocesso_at SPRAT" +
+            "       INNER JOIN processo_at PRAT ON SPRAT.id_processo_at = PRAT.id" +
+            //"       INNER JOIN allocazione_processo AP ON AP.id_processo = PR.id" +
+            //"       INNER JOIN afferenza A ON AP.id_persona = A.id_persona AND AP.id_rilevazione = A.id_rilevazione" +
+            "   WHERE SPRAT.id_processo_at = ?" +
+            "   ORDER BY SPRAT.codice";
+    
+    /**
+     * <p>Estrae tutti i quesiti filtrati in base all'identificativo 
+     * della rilevazione, passato come parametro.</p>
+     */
+    public static final String GET_QUESTIONS =
+            "SELECT DISTINCT " +
+            "       Q.id                    AS \"id\"" +
+            "   ,   Q.codice                AS \"codice\"" +
+            "   ,   Q.nome                  AS \"nome\"" +
+            "   ,   Q.formulazione          AS \"formulazione\"" +
+            "   ,   Q.ordinale              AS \"ordinale\"" +
+            "   ,   Q.id_ambito_analisi     AS \"cod1\"" +
+            "   ,   Q.id_tipo_quesito       AS \"cod2\"" +
+            "   ,   Q.id_tipo_formulazione  AS \"cod3\"" +
+            "   ,   Q.id_quesito            AS \"cod4\"" +
+            "   FROM quesito Q" +
+            "       INNER JOIN ambito_analisi AA ON Q.id_ambito_analisi = AA.id" +
+            "       INNER JOIN tipo_quesito TQ ON Q.id_tipo_quesito = TQ.id" +
+            "       INNER JOIN tipo_formulazione TF ON Q.id_tipo_formulazione = TF.id" +
+            "   WHERE id_rilevazione = ?" + 
+            "   ORDER BY Q.id_ambito_analisi";
+    
+    /**
+     * <p>Estrae l'ambito di analisi in base all'identificativo 
+     * del quesito.</p>
+     */
+    public static final String GET_AMBIT =
+            "SELECT DISTINCT" +
+            "       AA.id                   AS \"id\"" +
+            "   ,   AA.nome                 AS \"nome\"" +
+            "   ,   AA.valore               AS \"valore\"" +
+            "   ,   AA.ordinale             AS \"ordinale\"" +
+            "   FROM ambito_analisi AA" +
+            "       INNER JOIN QUESITO Q ON AA.id = Q.id_ambito_analisi" +
+            "   WHERE (AA.id = ? OR -1 = ?)" +
+            "   ORDER BY AA.id";
+    /* ********************************************************************** *
+     *                        4. Query di inserimento                         *
      * ********************************************************************** */
     /**
      * <p>Query per inserimento di ultimo accesso al sistema.</p>
@@ -858,7 +891,7 @@ public interface Query extends Serializable {
             "   ,       ?)" ;          // oraultimoaccesso
 
     /* ********************************************************************** *
-     *                       3. Query di aggiornamento                        *
+     *                       5. Query di aggiornamento                        *
      * ********************************************************************** */
     /**
      * <p>Query per aggiornamento di ultimo accesso al sistema.</p>
