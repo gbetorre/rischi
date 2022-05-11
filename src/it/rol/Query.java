@@ -857,22 +857,79 @@ public interface Query extends Serializable {
             "       INNER JOIN tipo_quesito TQ ON Q.id_tipo_quesito = TQ.id" +
             "       INNER JOIN tipo_formulazione TF ON Q.id_tipo_formulazione = TF.id" +
             "   WHERE id_rilevazione = ?" + 
+            "       AND (Q.id = ? OR -1 = ?)" +
+            "   ORDER BY Q.id_ambito_analisi";
+    
+    /**
+     * <p>Estrae un singolo quesito filtrati in base all'identificativo 
+     * della rilevazione, passato come parametro.</p>
+     */
+    public static final String GET_QUESTION =
+            "SELECT DISTINCT " +
+            "       Q.id                    AS \"id\"" +
+            "   ,   Q.codice                AS \"codice\"" +
+            "   ,   Q.nome                  AS \"nome\"" +
+            "   ,   Q.formulazione          AS \"formulazione\"" +
+            "   ,   Q.ordinale              AS \"ordinale\"" +
+            "   ,   Q.id_ambito_analisi     AS \"cod1\"" +
+            "   ,   Q.id_tipo_quesito       AS \"cod2\"" +
+            "   ,   Q.id_tipo_formulazione  AS \"cod3\"" +
+            "   ,   Q.id_quesito            AS \"cod4\"" +
+            "   FROM quesito Q" +
+            "       INNER JOIN ambito_analisi AA ON Q.id_ambito_analisi = AA.id" +
+            "       INNER JOIN tipo_quesito TQ ON Q.id_tipo_quesito = TQ.id" +
+            "       INNER JOIN tipo_formulazione TF ON Q.id_tipo_formulazione = TF.id" +
+            "   WHERE id_rilevazione = ?" + 
             "   ORDER BY Q.id_ambito_analisi";
     
     /**
      * <p>Estrae l'ambito di analisi in base all'identificativo 
-     * del quesito.</p>
+     * del quesito, oppure tutti gli ambiti di analisi se viene passato 
+     * il valore fittizio -1.</p>
      */
     public static final String GET_AMBIT =
             "SELECT DISTINCT" +
             "       AA.id                   AS \"id\"" +
             "   ,   AA.nome                 AS \"nome\"" +
-            "   ,   AA.valore               AS \"valore\"" +
+            "   ,   AA.valore               AS \"informativa\"" +
             "   ,   AA.ordinale             AS \"ordinale\"" +
             "   FROM ambito_analisi AA" +
             "       INNER JOIN QUESITO Q ON AA.id = Q.id_ambito_analisi" +
             "   WHERE (AA.id = ? OR -1 = ?)" +
             "   ORDER BY AA.id";
+    
+    /**
+     * <p>Estrae il tipo di quesito in base all'identificativo 
+     * del quesito, oppure tutti i tipi di quesito se viene passato 
+     * il valore fittizio -1.</p>
+     */
+    public static final String GET_QUESTION_TYPE =
+            "SELECT DISTINCT" +
+            "       TQ.id                   AS \"id\"" +
+            "   ,   TQ.nome                 AS \"nome\"" +
+            "   ,   TQ.valore               AS \"informativa\"" +
+            "   ,   TQ.ordinale             AS \"ordinale\"" +
+            "   FROM tipo_quesito TQ" +
+            "       INNER JOIN QUESITO Q ON TQ.id = Q.id_tipo_quesito" +
+            "   WHERE (TQ.id = ? OR -1 = ?)" +
+            "   ORDER BY TQ.id";
+    
+    /**
+     * <p>Estrae il tipo di formulazione in base all'identificativo 
+     * del quesito, oppure tutti i tipi di formulazione se viene passato 
+     * il valore fittizio -1.</p>
+     */
+    public static final String GET_QUESTION_WORDING =
+            "SELECT DISTINCT" +
+            "       TF.id                   AS \"id\"" +
+            "   ,   TF.nome                 AS \"nome\"" +
+            "   ,   TF.valore               AS \"informativa\"" +
+            "   ,   TF.criterio             AS \"extraInfo\"" +
+            "   ,   TF.ordinale             AS \"ordinale\"" +
+            "   FROM tipo_formulazione TF" +
+            "       INNER JOIN QUESITO Q ON TF.id = Q.id_tipo_quesito" +
+            "   WHERE (TF.id = ? OR -1 = ?)" +
+            "   ORDER BY TF.id";
     /* ********************************************************************** *
      *                        4. Query di inserimento                         *
      * ********************************************************************** */
