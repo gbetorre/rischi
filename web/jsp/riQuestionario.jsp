@@ -53,7 +53,7 @@
     </c:forEach>
     </div><br />
     <form id="select_ent_form" class="form-horizontal" action="" method="post">
-      <input type="text" name="str-liv1" value="${codLiv1}" />
+      <input type="hidden" name="str-liv1" value="${codLiv1}" />
       <input type="hidden" name="str-liv2" value="${codLiv2}" />
       <input type="hidden" name="str-liv3" value="${codLiv3}" />
       <input type="hidden" name="str-liv4" value="${codLiv4}" />
@@ -65,40 +65,63 @@
           <div class="row substatus">
             <strong><c:out value="${status.count}. ${entry.key.nome}" /></strong>
         <c:forEach var="quesito" items="${quests.get(entry.key)}">
-            <div class="panel panel-default subfields"><div class="panel-heading">
-                <cite><c:out value="${quesito.formulazione}" /></cite>
+            <div class="panel panel-default subfields">
+              <div class="row panel-heading">
+                <div class="col-sm-10">
+                  <cite><c:out value="${quesito.formulazione}" /></cite>
+                </div>
+                <div class="col-sm-2">
+              <c:choose>
+                <c:when test="${quesito.tipo.nome eq 'On/Off'}">
+                  <input type="radio" id="Q.${quesito.id}-Y" name="Q.${quesito.id}" value="SI">
+                  <label for="Q.${quesito.id}-Y"> SI &nbsp;</label>
+                  <input type="radio" id="Q.${quesito.id}-N" name="Q.${quesito.id}" value="NO">
+                  <label for="Q.${quesito.id}-N"> NO &nbsp;</label>
+                </c:when>
+                <c:when test="${quesito.tipo.nome eq 'Quantitativo'}">
+                  <input type="text" class="form-custom" id="Q${quesito.id}-V" name="Q.Valore" size="4" placeholder="#">
+                </c:when>
+              </c:choose>
+                </div>
               </div>
-              <div class="panel-body">
-                <input type="radio" id="Q.${quesito.id}" name="Q.${quesito.id}" value="SI"> SI
-                <input type="radio" id="Q.${quesito.id}" name="Q.${quesito.id}" value="NO"> NO
+              <div class="panel-body" style="margin-top:-20px;">
+                <textarea class="form-control" name="-descr" aria-label="With textarea" maxlength="8104" placeholder="Inserisci una descrizione"></textarea>  
               </div>
             </div>
         </c:forEach>
           </div>
-          <br />
+          <hr class="riga" />
       </c:forEach>
           <br />
           &nbsp;
-          <center>
-          <button type="submit" class="btn btn-success" value="Save">
-            <i class="far fa-save"></i>
-            Salva
-          </button>
-          </center>
+          <div class="centerlayout">
+            <button type="submit" class="btn btn-success" value="Save">
+              <i class="far fa-save"></i> Salva
+            </button>
+          </div>
         </div>
         <hr class="separatore" />
       </div>
     </form>
     <script>
-    function defaultVal() {
-        return "<option value=''>-- scegli un processo --</option>";
-    }
-    
-    function blank() {
-        return "<option value=''>-- Nessuno --</option>";
-    }
+    $(document).ready(function() {
+    <c:forEach var="entry" items="${quests}" varStatus="status">
+      <c:forEach var="quesito" items="${quests.get(entry.key)}">
+        <c:if test="${quesito.tipo.nome eq 'Quantitativo'}">
+        $("#Q${quesito.id}-V").change(function() {
+            $("#Q${quesito.id}-V").removeClass("form-custom");
+            $("#Q${quesito.id}-V").removeClass("bgcolorred");
+            var textValue = this.value; 
+            if (isNaN(textValue)) {
+                alert("Attenzione: la risposta a questa domanda deve essere un valore numerico! Correggere, prego.");
+                $("#Q${quesito.id}-V").addClass("bgcolorred");
+            }
+            else {
+                $("#Q${quesito.id}-V").addClass("bgcolor1");
+            }
+        });
+        </c:if>
+      </c:forEach>
+    </c:forEach>
+    });
     </script>
-<c:set var="singleQuote" value="'" scope="page" />
-<c:set var="singleQuoteEsc" value="''" scope="page" />
-<c:set var="doubleQuote" value='"' scope="page" />
-<c:set var="doubleQuoteEsc" value='\\"' scope="page" />
