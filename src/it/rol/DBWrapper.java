@@ -2131,13 +2131,12 @@ public class DBWrapper implements Query, Constants {
      * <p>Restituisce un ArrayList contenente tutti gli ambiti di analisi trovati.</p>
      *
      * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param survey   oggetto contenente l'identificativo della rilevazione
-     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - un Vector di QuestionBean, che rappresentano le domande trovate
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - un vettore ordinato di ItemBean, che rappresentano gli ambiti di analisi trovati
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
     public ArrayList<ItemBean> getAmbits(PersonBean user)
-                                         throws WebStorageException {
+                                  throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
@@ -2192,10 +2191,10 @@ public class DBWrapper implements Query, Constants {
      *
      * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param survey   oggetto contenente l'identificativo della rilevazione
-     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - un Vector di QuestionBean, che rappresentano le domande trovate
+     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - un Vector di QuestionBean, che rappresentano le domande atte a rilevare i rischi corruttivi
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "static-method" })
     public ArrayList<QuestionBean> getQuestions(PersonBean user,
                                                 CodeBean survey)
                                          throws WebStorageException {
@@ -2204,18 +2203,21 @@ public class DBWrapper implements Query, Constants {
             ResultSet rs, rs1, rs2, rs3 = null;
             QuestionBean question = null;
             AbstractList<QuestionBean> questions = new ArrayList<>();
+            int nextParam = NOTHING;
             try {
                 // TODO: Controllare se user è superuser
                 pst = con.prepareStatement(GET_QUESTIONS);
                 pst.clearParameters();
-                pst.setInt(1, survey.getId());
+                pst.setInt(++nextParam, survey.getId());
+                pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
                 rs = pst.executeQuery();
                 while (rs.next()) {
                     // Crea una domanda vuota
                     question = new QuestionBean();
                     // La valorizza col contenuto della query
                     BeanUtil.populate(question, rs);
-                    // Recupera l'àmbito
+                    /* == Recupera l'àmbito == */
                     pst = null;
                     pst = con.prepareStatement(GET_AMBIT);
                     pst.clearParameters();
@@ -2231,6 +2233,55 @@ public class DBWrapper implements Query, Constants {
                         // Aggiunge l'àmbito al quesito
                         question.setAmbito(ambit);
                     }
+                    /* == Recupera il tipo di quesito == */
+                    pst = null;
+                    pst = con.prepareStatement(GET_QUESTION_TYPE);
+                    pst.clearParameters();
+                    pst.setInt(1, question.getCod2());
+                    pst.setInt(2, question.getCod2());
+                    rs2 = pst.executeQuery();
+                    // Punta al tipo di quesito
+                    if (rs2.next()) {
+                        // Prepara il tipo di quesito
+                        CodeBean type = new CodeBean();
+                        // Valorizza il tipo di quesito
+                        BeanUtil.populate(type, rs2);
+                        // Aggiunge il tipo al quesito
+                        question.setTipo(type);
+                    }
+                    /* == Recupera il tipo di formulazione == */
+                    pst = null;
+                    pst = con.prepareStatement(GET_QUESTION_WORDING);
+                    pst.clearParameters();
+                    pst.setInt(1, question.getCod3());
+                    pst.setInt(2, question.getCod3());
+                    rs3 = pst.executeQuery();
+                    // Punta al tipo di formulazione
+                    if (rs3.next()) {
+                        // Prepara il tipo di formulazione
+                        ItemBean wording = new ItemBean();
+                        // Valorizza il tipo di formulazione
+                        BeanUtil.populate(wording, rs3);
+                        // Aggiunge il tipo di formulazione al quesito
+                        question.setTipoFormulazione(wording);
+                    }
+                    /* == Recupera il quesito padre == *
+                    pst = null;
+                    pst = con.prepareStatement(GET_QUESTION_WORDING);
+                    pst.clearParameters();
+                    pst.setInt(1, question.getCod3());
+                    pst.setInt(2, question.getCod3());
+                    rs3 = pst.executeQuery();
+                    // Punta al tipo di formulazione
+                    if (rs3.next()) {
+                        // Prepara il tipo di formulazione
+                        ItemBean wording = new ItemBean();
+                        // Valorizza il tipo di formulazione
+                        BeanUtil.populate(wording, rs3);
+                        // Aggiunge il tipo di formulazione al quesito
+                        question.setTipoFormulazione(wording);
+                    }*/
+                    // Aggiunge il quesito valorizzato all'elenco dei quesiti
                     questions.add(question);
                 }
                 // Just tries to engage the Garbage Collector
