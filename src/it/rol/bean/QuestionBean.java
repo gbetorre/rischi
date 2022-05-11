@@ -33,6 +33,7 @@
 
 package it.rol.bean;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import it.rol.exception.AttributoNonValorizzatoException;
@@ -43,8 +44,12 @@ import it.rol.exception.AttributoNonValorizzatoException;
  * 
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
-public class QuestionBean extends ItemBean {
+public class QuestionBean extends ItemBean implements Serializable {
     
+    /**
+     * Generated Serial Version ID (let's compliant with Hybernate, man!)
+     */
+    private static final long serialVersionUID = 6507852092768226919L;
     /**
      *  Nome di questa classe. 
      *  Viene utilizzato per contestualizzare i messaggi di errore.
@@ -69,7 +74,7 @@ public class QuestionBean extends ItemBean {
     /**
      * Tipo formulazione
      */
-    private CodeBean tipoFormulazione;
+    private ItemBean tipoFormulazione;
     /**
      * Quesito padre
      */
@@ -89,7 +94,8 @@ public class QuestionBean extends ItemBean {
     public QuestionBean() {
         super();
         this.formulazione = null;
-        this.ambito = this.tipo = this.tipoFormulazione = null;
+        this.ambito = this.tipo = null; 
+        this.tipoFormulazione = null;
         this.parentQuestion = null;
         this.childQuestions = null;
     }
@@ -187,10 +193,10 @@ public class QuestionBean extends ItemBean {
      * alti (cio&egrave; distanti da zero) siano indicativi di alto rischio,
      * &egrave; un quesito con formulazione "Quantitativa Positiva"; viceversa
      * ha formulazione "Quantitativa Negativa".</p>
-     * @return <code>ambito</code> - l'ambito del quesito
+     * @return <code>tipoFormulazione</code> - il tipo di formulazione del quesito
      * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'attributo obbligatorio non &egrave; stato valorizzato
      */
-    public CodeBean getTipoFormulazione() throws AttributoNonValorizzatoException {
+    public ItemBean getTipoFormulazione() throws AttributoNonValorizzatoException {
         if (this.tipoFormulazione == null) {
             throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo tipoFormulazione non valorizzato!");
         }
@@ -201,7 +207,7 @@ public class QuestionBean extends ItemBean {
      * Imposta il tipo di formulazione di un quesito.
      * @param tipoFormulazione il tipoFormulazione da impostare per il quesito
      */
-    public void setTipoFormulazione(CodeBean tipoFormulazione) {
+    public void setTipoFormulazione(ItemBean tipoFormulazione) {
         this.tipoFormulazione = tipoFormulazione;
     }
 
