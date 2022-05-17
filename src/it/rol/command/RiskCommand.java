@@ -50,6 +50,7 @@ import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Main;
+import it.rol.Query;
 import it.rol.Utils;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
@@ -187,7 +188,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         LinkedHashMap<String, String> paramsNav = new LinkedHashMap<>();
         // Tabella che conterrà i valori dei parametri passati dalle form
         HashMap<String, LinkedHashMap<String, String>> params = null;
-        // Variabile contenente l'indirizzo alla pagina di reindirizzamento
+        // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
         String redirect = null;
         /* ******************************************************************** *
          *                    Recupera parametri e attributi                    *
@@ -255,7 +256,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             // Controllo sull'input
             if (!codeSur.equals(DASH)) {
                 // Recupera la rilevazione sotto forma di oggetto
-                CodeBean survey = ConfigManager.getSurvey(codeSur);
+                //CodeBean survey = ConfigManager.getSurvey(codeSur);
                 // Creazione della tabella che conterrà i valori dei parametri passati dalle form
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
@@ -271,8 +272,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                         // Cicla sul dizionario dei parametri per ricostruire l'URL
                         for (Map.Entry<String, String> set : struct.entrySet()) {
                             // Printing all elements of a Map
-                            paramsStruct.append("&");
-                            paramsStruct.append("s" + set.getKey() + "=" + set.getValue());
+                            paramsStruct.append(AMPERSAND);
+                            paramsStruct.append("s" + set.getKey() + EQ + set.getValue());
                         }
                         // Controlla quale richiesta deve gestire
                         if (part.equalsIgnoreCase(PART_SELECT_STR)) {
@@ -293,10 +294,26 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                             StringBuffer paramsProc = new StringBuffer();
                             for (Map.Entry<String, String> set : macro.entrySet()) {
                                 // Printing all elements of a Map
+                                paramsProc.append(AMPERSAND);
+                                paramsProc.append("p" + set.getKey() + EQ + set.getValue());
+                            }
+                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_SELECT_QST + paramsStruct.toString() + paramsProc.toString() + "&r=" + codeSur;
+                        } else if (part.equalsIgnoreCase(PART_SELECT_QST)) {
+                            /* ************************************************ *
+                             *                INSERT Answers Part               *
+                             * ************************************************ */
+                            // Dizionario dei parametri dei processi scelti dall'utente
+                            LinkedHashMap<String, String> quest = params.get(PART_SELECT_QST);
+                            /* Stringa dinamica per contenere i parametri di scelta processi
+                            StringBuffer paramsProc = new StringBuffer();
+                            for (Map.Entry<String, String> set : macro.entrySet()) {
+                                // Printing all elements of a Map
                                 paramsProc.append("&");
                                 paramsProc.append("p" + set.getKey() + "=" + set.getValue());
                             }
-                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_SELECT_QST + paramsStruct.toString() + paramsProc.toString() + "&r=" + codeSur;
+                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_CONFIRM_QST + paramsStruct.toString() + paramsProc.toString() + "&r=" + codeSur;*/
+                            //db.insertQuest(user, quest);
+                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_CONFIRM_QST + "&r=" + codeSur;
                         }
                     } else {
                         // Deve eseguire una eliminazione
@@ -318,7 +335,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *              Creazione Questionario              *
                              * ************************************************ */
-                            questions = db.getQuestions(user, survey);
+                            questions = retrieveQuestions(user, codeSur, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
                             ArrayList<ItemBean> ambits = db.getAmbits(user);
                             flatQuestions = decantQuestions(questions, ambits);
                         }
@@ -387,6 +404,64 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         req.setAttribute("now", Utils.format(today));
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
+    }
+    
+    
+    /**
+     * <p>Estrae l'elenco dei quesiti e, per ogni quesito figlio trovato,
+     * lo valorizza con gli attributi aggiuntivi (tipo, formulazione, etc.)</p>
+     *TODO COMMENTO
+     * @param type          valore identificante se si vuol fare la query sulle strutture collegate a processi o a macroprocessi
+     * @param id            identificativo del processo o macroprocesso
+     * @param getAll        flag specificante, se vale -1, che si vogliono recuperare tutte le strutture collegate a tutti i macro/processi
+     * @param codeSurvey    codice testuale della rilevazione
+     * @param user          utente loggato
+     * @param db            databound gia' istanziato
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - ArrayList di strutture collegate alla rilevazione e al macro/processo specifico, oppure a tutti i macro/processi
+     * @throws CommandException se si verifica un problema nella query o nell'estrazione, nel recupero di valori o in qualche altro tipo di puntamento
+     */
+    public static ArrayList<QuestionBean> retrieveQuestions(PersonBean user,
+                                                            String codeSurvey,
+                                                            int idQ,
+                                                            int getAll,
+                                                            DBWrapper db)
+                                                     throws CommandException {
+        // Recupera l'oggetto rilevazione a partire dal suo codice
+        CodeBean survey = ConfigManager.getSurvey(codeSurvey);
+        // Dichiara la lista di quesiti finiti
+        ArrayList<QuestionBean> richQuestions = new ArrayList<>();
+        try {
+            // Chiama il metodo del databound che estrae i quesiti valorizzati
+            ArrayList<QuestionBean> questions = db.getQuestions(user, survey, idQ, getAll);
+            // Cicla sui quesiti trovati
+            for (QuestionBean current : questions) {
+                // Per ogni quesito verifica se ha figli
+                ArrayList<QuestionBean> childQuestions = current.getChildQuestions();
+                // Se li ha:
+                if (childQuestions != null) {
+                    // Per ogni figlio (i figli hanno solo gli id)
+                    for (int i = NOTHING; i < childQuestions.size(); i++) {
+                        // Recupera il figlio
+                        QuestionBean child = childQuestions.get(i);
+                        // Lo arricchisce con il tipo e gli altri attributi
+                        QuestionBean richChild = db.getQuestions(user, survey, child.getId(), child.getId()).get(NOTHING);
+                        // Sostituisce il tipo "arricchito" al tipo "povero"
+                        childQuestions.set(i, richChild);
+                    }
+                    current.setChildQuestions(childQuestions);
+                }
+                richQuestions.add(current);
+            }
+            return richQuestions;
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
     }
     
     
@@ -473,7 +548,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
     /**
      * <p></p>
      *
-     * @param structs Vector di DepartmentBean da travasare in HashMap
+     * @param questions Vector di DepartmentBean da travasare in HashMap
      * @return <code>HashMap&lt;String&comma; Vector&lt;DepartmentBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
@@ -528,6 +603,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                             throws CommandException {
         LinkedHashMap<String, String> struct = new LinkedHashMap<>();
         LinkedHashMap<String, String> proat = new LinkedHashMap<>();
+        LinkedHashMap<String, String> answs = new LinkedHashMap<>();
         /* **************************************************** *
          *     Caricamento parametri di Scelta Struttura        *
          * **************************************************** */        
@@ -543,6 +619,17 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         proat.put("liv2",    parser.getStringParameter("pliv2", VOID_STRING));
         proat.put("liv3",    parser.getStringParameter("pliv3", VOID_STRING));
         formParams.put(PART_PROCESS, proat);
+        /* **************************************************** *
+         *    Caricamento parametri di Compilazione Quesiti     *
+         * **************************************************** */
+        if (part.equals(PART_SELECT_QST)) {
+            int limit = 33;
+            for (int i = 1; i <= limit; i++) {
+                answs.put("risp" + String.valueOf(i),  parser.getStringParameter("Q" + String.valueOf(i), VOID_STRING));
+                answs.put("note" + String.valueOf(i),  parser.getStringParameter("Q" + String.valueOf(i) + "-note", VOID_STRING));
+            }
+            formParams.put(PART_SELECT_QST, answs);
+        }
     }
     
 }
