@@ -298,6 +298,11 @@ div.centre {
 	margin-bottom: -11px;
 }
 
+.contractedTree {
+  margin-top: -30px;
+  margin-bottom: 11px;
+}
+
 p.profileInfo {
 	color: #003e80;
 	font-weight: bold;
