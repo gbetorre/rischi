@@ -838,8 +838,11 @@ public interface Query extends Serializable {
             "   ORDER BY SPRAT.codice";
     
     /**
-     * <p>Estrae tutti i quesiti filtrati in base all'identificativo 
-     * della rilevazione, passato come parametro.</p>
+     * <p>Se sul terzo parametro viene passato il valore convenzionale -1 
+     * estrae tutti i quesiti filtrati in base all'identificativo 
+     * della rilevazione, passato come parametro; 
+     * oppure se sul secondo e sul terzo parametro viene passato l'id di un
+     * quesito, estrae tale quesito specifico.</p>
      */
     public static final String GET_QUESTIONS =
             "SELECT DISTINCT " +
@@ -861,10 +864,10 @@ public interface Query extends Serializable {
             "   ORDER BY Q.id_ambito_analisi";
     
     /**
-     * <p>Estrae un singolo quesito filtrati in base all'identificativo 
-     * della rilevazione, passato come parametro.</p>
+     * <p>Estrae i quesiti figli di un dato quesito padre in una data rilevazione
+     * i cui identificativi vengono passati come parametro.</p>
      */
-    public static final String GET_QUESTION =
+    public static final String GET_QUESTIONS_BY_QUESTION =
             "SELECT DISTINCT " +
             "       Q.id                    AS \"id\"" +
             "   ,   Q.codice                AS \"codice\"" +
@@ -880,7 +883,8 @@ public interface Query extends Serializable {
             "       INNER JOIN tipo_quesito TQ ON Q.id_tipo_quesito = TQ.id" +
             "       INNER JOIN tipo_formulazione TF ON Q.id_tipo_formulazione = TF.id" +
             "   WHERE id_rilevazione = ?" + 
-            "   ORDER BY Q.id_ambito_analisi";
+            "       AND Q.id_quesito = ?" +
+            "   ORDER BY Q.id";
     
     /**
      * <p>Estrae l'ambito di analisi in base all'identificativo 
