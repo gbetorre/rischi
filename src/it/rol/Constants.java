@@ -132,6 +132,10 @@ public interface Constants extends Serializable {
      */
     public static final String PART_SELECT_QST          = "sqs";
     /**
+     * <p>Costante per il parametro identificante la parte di conferma quesiti.</p>
+     */
+    public static final String PART_CONFIRM_QST         = "cqs";
+    /**
      * <p>Costante per il parametro identificante la parte di riepilogo quesiti.</p>
      */
     public static final String PART_RESUME_QST          = "rqs";
@@ -241,7 +245,7 @@ public interface Constants extends Serializable {
     /**
      * Costante per il separatore dei token querystring "&"
      */
-    public static final String AND = "&";
+    public static final String AMPERSAND = "&";
     /* ************************************************************************ *
      * Formati di files, tipi MIME, etc.
      * ************************************************************************ */
