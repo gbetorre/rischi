@@ -63,8 +63,9 @@
       <c:forEach var="entry" items="${quests}" varStatus="status">
           <!--  Ambito di Analisi -->
           <div class="row substatus">
-            <strong><c:out value="${status.count}. ${entry.key.nome}" /></strong>
+            <h5 class="heading"><c:out value="${status.count}. ${entry.key.nome}" /></h5>
         <c:forEach var="quesito" items="${quests.get(entry.key)}">
+          <c:if test="${empty quesito.parentQuestion}">
             <div class="panel panel-default subfields">
               <div class="row panel-heading">
                 <div class="col-sm-10">
@@ -73,21 +74,49 @@
                 <div class="col-sm-2">
               <c:choose>
                 <c:when test="${quesito.tipo.nome eq 'On/Off'}">
-                  <input type="radio" id="Q.${quesito.id}-Y" name="Q.${quesito.id}" value="SI">
+                  <input type="radio" id="Q.${quesito.id}-Y" name="Q${quesito.id}" value="SI">
                   <label for="Q.${quesito.id}-Y"> SI &nbsp;</label>
-                  <input type="radio" id="Q.${quesito.id}-N" name="Q.${quesito.id}" value="NO">
+                  <input type="radio" id="Q.${quesito.id}-N" name="Q${quesito.id}" value="NO">
                   <label for="Q.${quesito.id}-N"> NO &nbsp;</label>
                 </c:when>
                 <c:when test="${quesito.tipo.nome eq 'Quantitativo'}">
-                  <input type="text" class="form-custom" id="Q${quesito.id}-V" name="Q.Valore" size="4" placeholder="#">
+                  <input type="text" class="form-custom" id="Q${quesito.id}-V" name="Q${quesito.id}" size="4" placeholder="#">
                 </c:when>
               </c:choose>
                 </div>
               </div>
-              <div class="panel-body" style="margin-top:-20px;">
-                <textarea class="form-control" name="-descr" aria-label="With textarea" maxlength="8104" placeholder="Inserisci una descrizione"></textarea>  
+              <div class="panel-body contractedTree">
+                <textarea class="form-control" name="Q${quesito.id}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione"></textarea>  
               </div>
+            <c:forEach var="quesitoFiglio" items="${quesito.childQuestions}">
+              <div class="row panel-heading">
+                <div class="col-sm-10">
+                  <cite><c:out value="${quesitoFiglio.formulazione}" /></cite>
+                </div>
+                <div class="col-sm-2">
+              <c:choose>
+                <c:when test="${quesitoFiglio.tipo.nome eq 'On/Off'}">
+                  <input type="radio" id="Q.${quesitoFiglio.id}-Y" name="Q${quesitoFiglio.id}" value="SI" disabled>
+                  <label for="Q.${quesitoFiglio.id}-Y"> SI &nbsp;</label>
+                  <input type="radio" id="Q.${quesitoFiglio.id}-N" name="Q${quesitoFiglio.id}" value="NO" disabled>
+                  <label for="Q.${quesitoFiglio.id}-N"> NO &nbsp;</label>
+                </c:when>
+                <c:when test="${quesitoFiglio.tipo.nome eq 'Quantitativo'}">
+                  <input type="text" class="form-custom" id="Q${quesitoFiglio.id}-V" name="Q${quesitoFiglio.id}" size="4" placeholder="#" disabled>
+                </c:when>
+              </c:choose>
+                </div>
+              </div>
+              <div class="panel-body contractedTree">
+                <textarea class="form-control" name="Q${quesitoFiglio.id}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione" readonly></textarea>  
+              </div>
+              
+            </c:forEach>
+
+
+              
             </div>
+          </c:if>
         </c:forEach>
           </div>
           <hr class="riga" />
