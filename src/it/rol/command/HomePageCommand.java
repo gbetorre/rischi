@@ -554,7 +554,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         allowedParams.put(PART_PROCESS, "Scelta Processi");
         allowedParams.put(PART_SELECT_QST, "Quesiti");
         try {
-            String[] tokens = pageParams.split(AND);
+            String[] tokens = pageParams.split(AMPERSAND);
             Map<String, String> tokensAsMap = new LinkedHashMap<String, String>(prime);
             for (int i = 0; i < tokens.length; i++) {
                 String couple = tokens[i];
@@ -573,7 +573,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
             } else {
                 tokenSurvey = PARAM_SURVEY + tokensAsMap.get(PARAM_SURVEY);
             }
-            final String homeLnk = appName + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_HOME + AND + tokenSurvey;
+            final String homeLnk = appName + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_HOME + AMPERSAND + tokenSurvey;
             ItemBean root = new ItemBean(appName, homeLbl, homeLnk, MAIN_MENU);
             nav.add(root);
 
@@ -591,7 +591,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
                 } else if (allowedParams.containsKey(value.substring(SUB_MENU))) {
                     labelWeb = allowedParams.get(value.substring(SUB_MENU));
                 }
-                String url = appName + ROOT_QM + key + value + AND + tokenSurvey;
+                String url = appName + ROOT_QM + key + value + AMPERSAND + tokenSurvey;
                 if (!url.equals(homeLnk)) {
                     ItemBean item = new ItemBean(key, labelWeb, url, SUB_MENU);
                     if (!key.equals(PARAM_SURVEY)) {
