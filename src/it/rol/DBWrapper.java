@@ -2188,19 +2188,20 @@ public class DBWrapper implements Query, Constants {
     /**
      * <p>Data una rilevazione restituisce
      * un ArrayList di domande da sottoporre per rilevare i rischi.</p>
-     *
+     *TODO COMMENTO
      * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param survey   oggetto contenente l'identificativo della rilevazione
      * @return <code>ArrayList&lt;QuestionBean&gt;</code> - un Vector di QuestionBean, che rappresentano le domande atte a rilevare i rischi corruttivi
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings({ "static-method" })
     public ArrayList<QuestionBean> getQuestions(PersonBean user,
-                                                CodeBean survey)
+                                                CodeBean survey,
+                                                int idQuestion,
+                                                int getAll)
                                          throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
-            ResultSet rs, rs1, rs2, rs3 = null;
+            ResultSet rs, rs1, rs2, rs3, rs4 = null;
             QuestionBean question = null;
             AbstractList<QuestionBean> questions = new ArrayList<>();
             int nextParam = NOTHING;
@@ -2209,10 +2210,12 @@ public class DBWrapper implements Query, Constants {
                 pst = con.prepareStatement(GET_QUESTIONS);
                 pst.clearParameters();
                 pst.setInt(++nextParam, survey.getId());
-                pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
-                pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                pst.setInt(++nextParam, idQuestion);
+                pst.setInt(++nextParam, getAll);
                 rs = pst.executeQuery();
                 while (rs.next()) {
+                    // Azzera il conto dei parametri
+                    nextParam = NOTHING;
                     // Crea una domanda vuota
                     question = new QuestionBean();
                     // La valorizza col contenuto della query
@@ -2221,8 +2224,8 @@ public class DBWrapper implements Query, Constants {
                     pst = null;
                     pst = con.prepareStatement(GET_AMBIT);
                     pst.clearParameters();
-                    pst.setInt(1, question.getCod1());
-                    pst.setInt(2, question.getCod1());
+                    pst.setInt(++nextParam, question.getCod1());
+                    pst.setInt(++nextParam, question.getCod1());
                     rs1 = pst.executeQuery();
                     // Punta all'àmbito
                     if (rs1.next()) {
@@ -2234,11 +2237,12 @@ public class DBWrapper implements Query, Constants {
                         question.setAmbito(ambit);
                     }
                     /* == Recupera il tipo di quesito == */
+                    nextParam = NOTHING;
                     pst = null;
                     pst = con.prepareStatement(GET_QUESTION_TYPE);
                     pst.clearParameters();
-                    pst.setInt(1, question.getCod2());
-                    pst.setInt(2, question.getCod2());
+                    pst.setInt(++nextParam, question.getCod2());
+                    pst.setInt(++nextParam, question.getCod2());
                     rs2 = pst.executeQuery();
                     // Punta al tipo di quesito
                     if (rs2.next()) {
@@ -2250,11 +2254,12 @@ public class DBWrapper implements Query, Constants {
                         question.setTipo(type);
                     }
                     /* == Recupera il tipo di formulazione == */
+                    nextParam = NOTHING;
                     pst = null;
                     pst = con.prepareStatement(GET_QUESTION_WORDING);
                     pst.clearParameters();
-                    pst.setInt(1, question.getCod3());
-                    pst.setInt(2, question.getCod3());
+                    pst.setInt(++nextParam, question.getCod3());
+                    pst.setInt(++nextParam, question.getCod3());
                     rs3 = pst.executeQuery();
                     // Punta al tipo di formulazione
                     if (rs3.next()) {
@@ -2265,24 +2270,42 @@ public class DBWrapper implements Query, Constants {
                         // Aggiunge il tipo di formulazione al quesito
                         question.setTipoFormulazione(wording);
                     }
-                    /* == Recupera il quesito padre == *
+                    /* == Recupera i quesiti figli == */
+                    nextParam = NOTHING;
                     pst = null;
-                    pst = con.prepareStatement(GET_QUESTION_WORDING);
+                    pst = con.prepareStatement(GET_QUESTIONS_BY_QUESTION);
                     pst.clearParameters();
-                    pst.setInt(1, question.getCod3());
-                    pst.setInt(2, question.getCod3());
-                    rs3 = pst.executeQuery();
-                    // Punta al tipo di formulazione
-                    if (rs3.next()) {
-                        // Prepara il tipo di formulazione
-                        ItemBean wording = new ItemBean();
-                        // Valorizza il tipo di formulazione
-                        BeanUtil.populate(wording, rs3);
-                        // Aggiunge il tipo di formulazione al quesito
-                        question.setTipoFormulazione(wording);
-                    }*/
-                    // Aggiunge il quesito valorizzato all'elenco dei quesiti
-                    questions.add(question);
+                    pst.setInt(++nextParam, survey.getId());
+                    pst.setInt(++nextParam, question.getId());
+                    rs4 = pst.executeQuery();
+                    ArrayList<QuestionBean> children = null;
+                    // Punta ai quesiti figli
+                    while (rs4.next()) {
+                        // Prepara la lista di figli
+                        children = new ArrayList<>();
+                        // Prepara il quesito figlio
+                        QuestionBean child = new QuestionBean();
+                        // Valorizza il quesito figlio
+                        BeanUtil.populate(child, rs4);
+                        // Aggiunge il figlio ai figli
+                        children.add(child);
+                    }
+                    question.setChildQuestions(children);
+                    /* == Recupera il quesito padre == */
+                    ArrayList<QuestionBean> fatherAsList = getQuestions(user, survey, question.getCod4(), question.getCod4());
+                    if (fatherAsList != null && !fatherAsList.isEmpty()) {
+                        // Recupera ricorsivamente il padre
+                        QuestionBean father = fatherAsList.get(NOTHING);
+                        // Aggiunge il padre al quesito
+                        question.setParentQuestion(father);
+                        // Aggiunge il quesito valorizzato all'elenco dei quesiti
+                        questions.add(question);
+                    } else {
+                        // Deve aggiungere il quesito perché alla prossima esce
+                        questions.add(question);
+                        // Condizione di uscita
+                        continue;
+                    }
                 }
                 // Just tries to engage the Garbage Collector
                 pst = null;
