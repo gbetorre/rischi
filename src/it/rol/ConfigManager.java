@@ -138,6 +138,10 @@ public class ConfigManager extends HttpServlet {
      */
     private static ConcurrentHashMap<String, CodeBean> surveys;
     /**
+     * Tabella hash (dictionary) contenente il numero di quesiti trovati per ciascuna rilevazione
+     */
+    private static ConcurrentHashMap<String, Integer> questionAmount;
+    /**
      * <p>Nome del parametro di inizializzazione, valorizzato nel
      * descrittore di deploy, che identifica il nome della web application.</p>
      * <p>Nelle ultime applicazioni che ho sviluppato valeva 'almalaurea', 'pm', 'pol' etc.;
@@ -335,11 +339,19 @@ public class ConfigManager extends HttpServlet {
         }
         try {
             // La istanzia quando gli serve...
-            surveys = new ConcurrentHashMap<String, CodeBean>();
+            surveys = new ConcurrentHashMap<>();
+            // Ne approfitta per costruire anche il dizionario del numero di quesiti per ogni rilevazione
+            questionAmount = new ConcurrentHashMap<>();
             // for each
             for (CodeBean rilevazione : surveyList) {
+                // Chiave del dizionario delle rilevazioni
                 String key = rilevazione.getNome();
-                surveys.put(key.toUpperCase(), rilevazione);
+                // Calcola il numero di quesiti trovati per la rilevazione corrente
+                Integer amount = db.getQuestionsAmountBySurvey(rilevazione.getId());
+                // Valorizza il dizionario delle rilevazioni
+                surveys.put(key.toUpperCase(), rilevazione);                
+                // Valorizza il dizionario del numero di quesiti
+                questionAmount.put(key, amount); 
             }
         }
         catch (NullPointerException npe) {
@@ -557,5 +569,17 @@ public class ConfigManager extends HttpServlet {
         return surveyList;
     }
 
+    
+    /**
+     * <p>Restituisce una struttura di tipo Tabella hash (dictionary),
+     * contenente il numero di quesiti trovato per ogni rilevazione.
+     * La chiave di ogni entry &egrave; il codice della rilevazione stesso.</p>
+     * <p>Metodo getter sulla variabile privata di classe.</p>
+     *
+     * @return <code>ConcurrentHashMap&lt;String, Integer&gt;</code> - il numero di quesiti trovati per ciascuna rilevazione, incapsulato in oggetto Wrapper di tipo primitivo
+     */
+    public static ConcurrentHashMap<String, Integer> getQuestionAmount() {
+        return questionAmount;
+    }
 
 }
