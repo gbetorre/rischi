@@ -49,7 +49,7 @@
               <select id="pat-liv1" name="pliv1">
                 <option value="0">-- macroprocesso -- </option>
               <c:forEach var="macro" items="${macros}">
-                <option value="${macro.codice}">${macro.nome}</option>
+                <option value="${macro.id}.${macro.codice}">${macro.nome}</option>
               </c:forEach>
               </select>
             </div>
@@ -114,9 +114,9 @@ $(document).ready(function() {
         $(child3).html(blank());
         switch (parent) {
         <c:forEach var="mp" items="${macros}">
-        case "${mp.codice}":
-            $(child2).html("<c:forEach var="pp" items="${mp.processi}"><c:set var="ppnome" value="${fn:replace(pp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${pp.codice}'>${fn:replace(ppnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach>");
-            $(child3).html("<c:forEach var="pp" items="${mp.processi}" begin="0" end="0"><c:forEach var="sp" items="${pp.processi}"><c:set var="spnome" value="${fn:replace(sp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${sp.codice}'>${fn:replace(spnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach>");
+        case "${mp.id}.${mp.codice}":
+            $(child2).html("<c:forEach var="pp" items="${mp.processi}"><c:set var="ppnome" value="${fn:replace(pp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${pp.id}.${pp.codice}'>${fn:replace(ppnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach>");
+            $(child3).html("<c:forEach var="pp" items="${mp.processi}" begin="0" end="0"><c:forEach var="sp" items="${pp.processi}"><c:set var="spnome" value="${fn:replace(sp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${sp.id}.${sp.codice}'>${fn:replace(spnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach>");
             break;
         </c:forEach>
         }
@@ -129,8 +129,8 @@ $(document).ready(function() {
         switch (parent) {
         <c:forEach var="mp" items="${macros}">
           <c:forEach var="pp" items="${mp.processi}" begin="0" end="0">
-        case "${pp.codice}":
-            $(child3).html("<c:forEach var="pp" items="${mp.processi}" begin="0" end="0"><c:forEach var="sp" items="${pp.processi}"><c:set var="spnome" value="${fn:replace(sp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${sp.codice}'>${fn:replace(spnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach>");
+        case "${pp.id}.${pp.codice}":
+            $(child3).html("<c:forEach var="pp" items="${mp.processi}" begin="0" end="0"><c:forEach var="sp" items="${pp.processi}"><c:set var="spnome" value="${fn:replace(sp.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${sp.id}.${sp.codice}'>${fn:replace(spnome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach>");
             break;
           </c:forEach>
         </c:forEach>
