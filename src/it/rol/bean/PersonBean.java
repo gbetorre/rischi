@@ -81,8 +81,8 @@ public class PersonBean implements Serializable {
     private int eta;
     /** Ritratto della persona */
     private Vector<FileDocBean> foto;
-    /** Curriculum personale */
-    private Vector<FileDocBean> currFileDoc;
+    /** Utente loggato */
+    private int usrId;
     /** Url della pagina personale in caso di necessit&agrave; di mostrare la propria persona in ulteriore contesto */
     private String urlPersonalPage;
     /** link alla pagina della persona (dipende dal contesto) */
@@ -129,7 +129,7 @@ public class PersonBean implements Serializable {
         url = null;
         note = null;
         foto = null;
-        currFileDoc = null;
+        usrId = CodeBean.BEAN_DEFAULT_ID;
         ruoli = null;
         ruoloGiuridico = null;
         codRuoloGiuridico = null;
@@ -490,17 +490,17 @@ public class PersonBean implements Serializable {
     }
 
 	/**
-	 * @return the currFileDoc
+	 * @return the user id
 	 */
-	public Vector<FileDocBean> getCurrFileDoc() {
-		return currFileDoc;
+	public int getUsrId() {
+		return usrId;
 	}
 
 	/**
-	 * @param currFileDoc the currFileDoc to set
+	 * @param usrId the user id to set
 	 */
-	public void setCurrFileDoc(Vector<FileDocBean> currFileDoc) {
-		this.currFileDoc = currFileDoc;
+	public void setUsrId(int usrId) {
+		this.usrId = usrId;
 	}
 
 	/**
