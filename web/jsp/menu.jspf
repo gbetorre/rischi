@@ -74,7 +74,7 @@
         <ul class="menu-nav">
           <!-- Home -->
           <li id="backHome">
-            <a class="nav-main-link" href="${project}"><i class="fas fa-home"></i></a>
+            <a class="nav-main-link" href="${initParam.appName}/?q=home&r=${param['r']}"><i class="fas fa-home"></i></a>
           </li>
           <!-- Menu Orizzontale -->
         <c:set var="vO" value="${requestScope.menu}" scope="page" />
