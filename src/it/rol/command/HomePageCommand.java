@@ -356,7 +356,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
 
 
     /* ************************************************************************ *
-     *              Metodi di generazione di liste di voci di MENU              *
+     * Metodi di generazione di liste di voci (per MENU,submenu,breadcrumbs...) *
      * ************************************************************************ */
 
     /**
@@ -426,7 +426,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
                                                             String surCode)
                                                      throws CommandException {
         int nextId = MAIN_MENU;
-        LinkedList<ItemBean> mO = new LinkedList<ItemBean>();
+        LinkedList<ItemBean> mO = new LinkedList<>();
         // MACROPROCESSI
         ItemBean vO = new ItemBean();
         vO.setId(++nextId);
@@ -546,13 +546,14 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         final String homeLbl = "Home";
         String codeSurvey, tokenSurvey = null;
         Vector<ItemBean> classiCommand = ConfigManager.getClassiCommand();
-        LinkedHashMap<String, String> allowedParams = new LinkedHashMap<String, String>(prime);
+        LinkedHashMap<String, String> allowedParams = new LinkedHashMap<>(prime);
         String deniedPattern1 = "sliv";
         String deniedPattern2 = "pliv";
         allowedParams.put(PART_SEARCH_PERSON, "Ricerca");
         allowedParams.put(PART_SELECT_STR, "Scelta Struttura");
         allowedParams.put(PART_PROCESS, "Scelta Processi");
         allowedParams.put(PART_SELECT_QST, "Quesiti");
+        allowedParams.put(PART_CONFIRM_QST, "Riepilogo");
         try {
             String[] tokens = pageParams.split(AMPERSAND);
             Map<String, String> tokensAsMap = new LinkedHashMap<String, String>(prime);
