@@ -102,7 +102,7 @@ public interface Query extends Serializable {
      */
     public static final String GET_USR =
             "SELECT " +
-            "       U.id                " +
+            "       U.id                AS \"usrId\"" +
             "   ,   P.id                AS \"id\"" +
             "   ,   P.nome              AS \"nome\"" +
             "   ,   P.cognome           AS \"cognome\"" +
@@ -171,6 +171,7 @@ public interface Query extends Serializable {
             "   WHERE (R.id = ? OR -1 = ?)" +
             "       AND R.chiusa = true" +
             "   ORDER BY data_rilevazione DESC";
+    
     /* ********************************************************************** *
      *           2. Query di selezione PMS (Process Mapping Software)         *
      * ********************************************************************** */    
@@ -780,6 +781,7 @@ public interface Query extends Serializable {
      * @return <code>String</code> - la query che seleziona l'insieme desiderato
      */
     public String getQueryPeople(HashMap<String, String> fields, int idSurvey);
+    
     /* ********************************************************************** *
      *              3. Query di Selezione di ROL (Rischi On Line)             *
      * ********************************************************************** */
@@ -796,7 +798,7 @@ public interface Query extends Serializable {
             "   ,   MAT.id_rilevazione    AS \"idAppo\"" +
             "   FROM macroprocesso_at MAT" +
             "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
-            //"       INNER JOIN allocazione_macroprocesso AM ON AM.id_macroprocesso = M.id" +
+            //"       INNER JOIN allocazione_macroprocesso_at AM ON AM.id_macroprocesso = M.id" +
             //"       INNER JOIN afferenza A ON R.id = A.id_rilevazione AND A.id_persona = AM.id_persona" +
             "   WHERE R.codice ILIKE ?" +
             "   ORDER BY MAT.codice";
@@ -814,7 +816,7 @@ public interface Query extends Serializable {
             "   ,   PRAT.smartworking      AS \"smartWorking\"" +
             "   FROM processo_at PRAT" +
             "       INNER JOIN macroprocesso_at MAT ON PRAT.id_macroprocesso_at = MAT.id" +
-            //"       INNER JOIN allocazione_processo AP ON AP.id_processo = PR.id" +
+            //"       INNER JOIN allocazione_processo_at AP ON AP.id_processo = PR.id" +
             //"       INNER JOIN afferenza A ON AP.id_persona = A.id_persona AND AP.id_rilevazione = A.id_rilevazione" +
             "   WHERE PRAT.id_macroprocesso_at = ?" +
             "   ORDER BY PRAT.codice";
@@ -832,7 +834,7 @@ public interface Query extends Serializable {
             "   ,   SPRAT.smartworking      AS \"smartWorking\"" +
             "   FROM sottoprocesso_at SPRAT" +
             "       INNER JOIN processo_at PRAT ON SPRAT.id_processo_at = PRAT.id" +
-            //"       INNER JOIN allocazione_processo AP ON AP.id_processo = PR.id" +
+            //"       INNER JOIN allocazione_processo_at AP ON AP.id_processo = PR.id" +
             //"       INNER JOIN afferenza A ON AP.id_persona = A.id_persona AND AP.id_rilevazione = A.id_rilevazione" +
             "   WHERE SPRAT.id_processo_at = ?" +
             "   ORDER BY SPRAT.codice";
@@ -898,7 +900,7 @@ public interface Query extends Serializable {
             "   ,   AA.valore               AS \"informativa\"" +
             "   ,   AA.ordinale             AS \"ordinale\"" +
             "   FROM ambito_analisi AA" +
-            "       INNER JOIN QUESITO Q ON AA.id = Q.id_ambito_analisi" +
+            "       INNER JOIN quesito Q ON AA.id = Q.id_ambito_analisi" +
             "   WHERE (AA.id = ? OR -1 = ?)" +
             "   ORDER BY AA.id";
     
@@ -914,7 +916,7 @@ public interface Query extends Serializable {
             "   ,   TQ.valore               AS \"informativa\"" +
             "   ,   TQ.ordinale             AS \"ordinale\"" +
             "   FROM tipo_quesito TQ" +
-            "       INNER JOIN QUESITO Q ON TQ.id = Q.id_tipo_quesito" +
+            "       INNER JOIN quesito Q ON TQ.id = Q.id_tipo_quesito" +
             "   WHERE (TQ.id = ? OR -1 = ?)" +
             "   ORDER BY TQ.id";
     
@@ -931,9 +933,31 @@ public interface Query extends Serializable {
             "   ,   TF.criterio             AS \"extraInfo\"" +
             "   ,   TF.ordinale             AS \"ordinale\"" +
             "   FROM tipo_formulazione TF" +
-            "       INNER JOIN QUESITO Q ON TF.id = Q.id_tipo_quesito" +
+            "       INNER JOIN quesito Q ON TF.id = Q.id_tipo_quesito" +
             "   WHERE (TF.id = ? OR -1 = ?)" +
             "   ORDER BY TF.id";
+    
+    /**
+     * <p>Calcola il numero di quesiti dato l'identificativo della rilevazione 
+     * cui sono collegati, passato come parametro.</p>
+     */
+    public static final String GET_QUESTION_AMOUNT_BY_SURVEY =
+            "SELECT" +
+            "       count(*)                AS \"informativa\"" +
+            "   FROM quesito Q" +
+            "   WHERE Q.id_rilevazione = ?";
+
+    /**
+     * <p>Costruisce dinamicamente la query che seleziona un insieme di persone in base
+     * ad una serie di parametri di ricerca immessi dall'utente tramite funzionalit&agrave;
+     * di navigazione.</p>
+     *  TODO COMMENTO
+     * @param fields    mappa contenente i parametri utente, indicizzati per nome
+     * @param idSurvey  identificativo della rilevazione
+     * @return <code>String</code> - la query che seleziona l'insieme desiderato
+     */
+    public String getQueryAnswers(HashMap<String, String> fields, int idSurvey);
+    
     /* ********************************************************************** *
      *                        4. Query di inserimento                         *
      * ********************************************************************** */
@@ -951,6 +975,47 @@ public interface Query extends Serializable {
             "   ,       ? " +          // dataultimoaccesso
             "   ,       ?)" ;          // oraultimoaccesso
 
+    /**
+     * <p>Query per inserimento di una risposta ad uno specifico quesito
+     * rivolto ad una specifica struttura e ad uno specifico processo
+     * censito ai fini della mappatura dei rischi corruttivi.</p>
+     */
+    public static final String INSERT_ANSWER =
+            "INSERT INTO risposta" +
+            "   (   valore" +
+            "   ,   note" +
+            "   ,   ordinale" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_quesito" +
+            "   ,   id_rilevazione" +
+            "   ,   id_struttura_liv1" +
+            "   ,   id_struttura_liv2" +
+            "   ,   id_struttura_liv3" +
+            "   ,   id_struttura_liv4" +
+            "   ,   id_macroprocesso_at" +
+            "   ,   id_processo_at" +
+            "   ,   id_sottoprocesso_at" +
+            "   )" +
+            "   VALUES (? " +       // valore
+            "   ,       ? " +       // note
+            "   ,       ? " +       // ordinale
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id_quesito
+            "   ,       ? " +       // id_rilevazione
+            "   ,       ? " +       // id_struttura_liv1
+            "   ,       ? " +       // id_struttura_liv2
+            "   ,       ? " +       // id_struttura_liv3
+            "   ,       ? " +       // id_struttura_liv4
+            "   ,       ? " +       // id_macroprocesso_at
+            "   ,       ? " +       // id_processo_at
+            "   ,       ? " +       // id_sottoprocesso_at
+            "          )" ;
+    
+    
     /* ********************************************************************** *
      *                       5. Query di aggiornamento                        *
      * ********************************************************************** */
