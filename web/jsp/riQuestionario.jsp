@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
+<c:set var="itCounts" value="${zero}" scope="page" />
 <c:set var="structs" value="${requestScope.strutture}" scope="page" />
 <c:set var="macros" value="${requestScope.processi}" scope="page" />
 <c:set var="quests" value="${requestScope.elencoQuesiti}" scope="page" />
@@ -36,15 +37,18 @@
     </div><hr class="separatore" />
     <h4 class="btn-lightgray">Riepilogo processo selezionato</h4>
     <div class="successPwd">
-    <c:forEach var="proLiv1" items="${macros}">
-      <c:if test="${proLiv1.codice eq selPro.get('liv1')}">
-        <c:out value="${proLiv1.nome}" />
-        <c:forEach var="proLiv2" items="${proLiv1.processi}">
-          <c:if test="${proLiv2.codice eq selPro.get('liv2')}"><br />
-            <big style="font-size:x-large">˪</big>&nbsp;&nbsp;<c:out value="${proLiv2.codice}" /> <c:out value="${proLiv2.nome}" />
-            <c:forEach var="proLiv3" items="${proLiv2.processi}">
-              <c:if test="${proLiv3.codice eq selPro.get('liv3')}"><br />
-                &nbsp;&nbsp;&nbsp;&nbsp;<big style="font-size:x-large">˪</big>&nbsp;&nbsp;<c:out value="${proLiv3.codice}" /> <c:out value="${proLiv3.nome}" />
+    <c:forEach var="mac" items="${macros}">
+      <c:set var="idPro1" value="${mac.id}.${mac.codice}" scope="page" />
+      <c:if test="${idPro1 eq selPro.get('liv1')}">
+        <c:out value="${mac.nome}" />
+        <c:forEach var="proc" items="${mac.processi}">
+          <c:set var="idPro2" value="${proc.id}.${proc.codice}" scope="page" />
+          <c:if test="${idPro2 eq selPro.get('liv2')}"><br />
+            <big style="font-size:x-large">˪</big>&nbsp;&nbsp;<c:out value="${proc.codice}" /> <c:out value="${proc.nome}" />
+            <c:forEach var="sub" items="${proc.processi}">
+              <c:set var="idPro3" value="${sub.id}.${sub.codice}" scope="page" />
+              <c:if test="${idPro3 eq selPro.get('liv3')}"><br />
+                &nbsp;&nbsp;&nbsp;&nbsp;<big style="font-size:x-large">˪</big>&nbsp;&nbsp;<c:out value="${sub.codice}" /> <c:out value="${sub.nome}" />
               </c:if>
             </c:forEach>
           </c:if>
@@ -53,10 +57,14 @@
     </c:forEach>
     </div><br />
     <form id="select_ent_form" class="form-horizontal" action="" method="post">
-      <input type="hidden" name="str-liv1" value="${codLiv1}" />
-      <input type="hidden" name="str-liv2" value="${codLiv2}" />
-      <input type="hidden" name="str-liv3" value="${codLiv3}" />
-      <input type="hidden" name="str-liv4" value="${codLiv4}" />
+      <input type="text" name="r" value="${param['r']}" />
+      <input type="text" name="sliv1" value="${codLiv1}" />
+      <input type="text" name="sliv2" value="${codLiv2}" />
+      <input type="text" name="sliv3" value="${codLiv3}" />
+      <input type="text" name="sliv4" value="${codLiv4}" />
+      <input type="text" name="pliv1" value="${idPro1}" />
+      <input type="text" name="pliv2" value="${idPro2}" />
+      <input type="text" name="pliv3" value="${idPro3}" />
       <h4 class="btn-lightgray">Compilazione quesiti</h4>
       <div class="form-custom form-group" id="str_form">
         <div class="panel-body form-group">
@@ -72,48 +80,49 @@
                   <cite><c:out value="${quesito.formulazione}" /></cite>
                 </div>
                 <div class="col-sm-2">
+                <input type="text" name="Q${itCounts}-id" value="${quesito.id}">
               <c:choose>
                 <c:when test="${quesito.tipo.nome eq 'On/Off'}">
-                  <input type="radio" id="Q.${quesito.id}-Y" name="Q${quesito.id}" value="SI">
+                  <input type="radio" id="Q.${quesito.id}-Y" name="Q${itCounts}" value="SI">
                   <label for="Q.${quesito.id}-Y"> SI &nbsp;</label>
-                  <input type="radio" id="Q.${quesito.id}-N" name="Q${quesito.id}" value="NO">
+                  <input type="radio" id="Q.${quesito.id}-N" name="Q${itCounts}" value="NO">
                   <label for="Q.${quesito.id}-N"> NO &nbsp;</label>
                 </c:when>
                 <c:when test="${quesito.tipo.nome eq 'Quantitativo'}">
-                  <input type="text" class="form-custom" id="Q${quesito.id}-V" name="Q${quesito.id}" size="4" placeholder="#">
+                  <input type="text" class="form-custom" id="Q${quesito.id}-V" name="Q${itCounts}" size="4" placeholder="#">
                 </c:when>
               </c:choose>
                 </div>
               </div>
               <div class="panel-body contractedTree">
-                <textarea class="form-control" name="Q${quesito.id}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione"></textarea>  
+                <textarea class="form-control" name="Q${itCounts}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione"></textarea>  
               </div>
+              <c:set var="itCounts" value="${itCounts + 1}" scope="page" />
             <c:forEach var="quesitoFiglio" items="${quesito.childQuestions}">
               <div class="row panel-heading">
                 <div class="col-sm-10">
                   <cite><c:out value="${quesitoFiglio.formulazione}" /></cite>
                 </div>
                 <div class="col-sm-2">
+                <input type="text" name="Q${itCounts}-id" value="${quesitoFiglio.id}">
               <c:choose>
                 <c:when test="${quesitoFiglio.tipo.nome eq 'On/Off'}">
-                  <input type="radio" id="Q.${quesitoFiglio.id}-Y" name="Q${quesitoFiglio.id}" value="SI" disabled>
+                  <input type="radio" id="Q.${quesitoFiglio.id}-Y" name="Q${itCounts}" value="SI" disabled>
                   <label for="Q.${quesitoFiglio.id}-Y"> SI &nbsp;</label>
-                  <input type="radio" id="Q.${quesitoFiglio.id}-N" name="Q${quesitoFiglio.id}" value="NO" disabled>
+                  <input type="radio" id="Q.${quesitoFiglio.id}-N" name="Q${itCounts}" value="NO" disabled>
                   <label for="Q.${quesitoFiglio.id}-N"> NO &nbsp;</label>
                 </c:when>
                 <c:when test="${quesitoFiglio.tipo.nome eq 'Quantitativo'}">
-                  <input type="text" class="form-custom" id="Q${quesitoFiglio.id}-V" name="Q${quesitoFiglio.id}" size="4" placeholder="#" disabled>
+                  <input type="text" class="form-custom" id="Q${quesitoFiglio.id}-V" name="Q${itCounts}" size="4" placeholder="#" disabled>
                 </c:when>
               </c:choose>
                 </div>
               </div>
               <div class="panel-body contractedTree">
-                <textarea class="form-control" name="Q${quesitoFiglio.id}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione" readonly></textarea>  
+                <textarea class="form-control" name="Q${itCounts}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione" readonly></textarea>  
               </div>
-              
+              <c:set var="itCounts" value="${itCounts + 1}" scope="page" />
             </c:forEach>
-
-
               
             </div>
           </c:if>
