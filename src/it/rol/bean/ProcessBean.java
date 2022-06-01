@@ -31,7 +31,6 @@
 
 package it.rol.bean;
 
-import java.io.Serializable;
 import java.sql.Time;
 import java.util.AbstractList;
 import java.util.Date;
@@ -53,7 +52,7 @@ import it.rol.exception.AttributoNonValorizzatoException;
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
-public class ProcessBean extends CodeBean implements Serializable {
+public class ProcessBean extends CodeBean {
 
     /**
      * La serializzazione necessita di dichiarare una costante di tipo long
@@ -120,6 +119,8 @@ public class ProcessBean extends CodeBean implements Serializable {
     private AbstractList<ProcessBean> processi;
     /** Persone allocate sul processo/macroprocesso */
     private AbstractList<PersonBean> persone;
+    /** Livello gerarchico del processo in una gerarchia di tipi di processi */
+    private int livello;
     /* ------------------------------------------------------------------------ *
      *                   Dati descrittivi dell'ultima modifica                  *
      * ------------------------------------------------------------------------ */
@@ -609,6 +610,30 @@ public class ProcessBean extends CodeBean implements Serializable {
     public void setPersone(AbstractList<PersonBean> persone) {
         this.persone = persone;
     }
+    
+    /* **************************************************** *
+     *          Metodi getter e setter per livello          *
+     * **************************************************** */
+    /**
+     * Restituisce il livello di un processo:<ul>
+     * <li>1 = macroprocesso</li>
+     * <li>2 = processo</li>
+     * <li>3 = sottoprocesso (o subprocesso)</li></ul>
+     * 
+     * @return <code>livello</code> - il livello del processo in una gerarchia di tipi di processo
+     */
+    public int getLivello() {
+        return livello;
+    }
+    
+    /**
+     * Imposta il livello di una struttura.
+     * @param livello - il livello di processo da impostare
+     */
+    public void setLivello(int livello) {
+        this.livello = livello;
+    }
+
 
 
     /* *********************************************************** *
