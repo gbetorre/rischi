@@ -83,6 +83,10 @@ public class QuestionBean extends ItemBean implements Serializable {
      * Quesiti figli
      */
     private ArrayList<QuestionBean> childQuestions;
+    /**
+     * Risposta
+     */
+    private QuestionBean answer;
     
     
     /* **************************************************** *
@@ -96,7 +100,7 @@ public class QuestionBean extends ItemBean implements Serializable {
         this.formulazione = null;
         this.ambito = this.tipo = null; 
         this.tipoFormulazione = null;
-        this.parentQuestion = null;
+        this.parentQuestion = this.answer = null;
         this.childQuestions = null;
     }
     
@@ -249,7 +253,26 @@ public class QuestionBean extends ItemBean implements Serializable {
      */
     public void setChildQuestions(ArrayList<QuestionBean> childs) {
         this.childQuestions = childs;
-    }    
+    }
+
     
+    /* **************************************************** *
+     *        Metodi getter e setter per la risposta        *
+     * **************************************************** */
+    /**
+     * Restituisce la risposta al quesito corrente.
+     * @return <code>answer</code> - l'eventuale risposta data al quesito
+     */
+    public QuestionBean getAnswer()  {
+        return this.answer;
+    }
+    
+    /**
+     * Imposta la risposta al quesito corrente.
+     * @param answer la risposta al quesito corrente
+     */
+    public void setAnswer(QuestionBean answer) {
+        this.answer = answer;
+    }
     
 }
