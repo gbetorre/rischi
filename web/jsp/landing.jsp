@@ -33,8 +33,17 @@
     </div>
     <hr class="separatore" /><br />
     <div class="row">
-      <h3 class="mt-1 m-0 font-weight-bold">Analisi aggregate</h3>
+      <h3 class="mt-1 m-0 font-weight-bold">Strumenti di Analisi</h3>
       <hr class="riga" />
+      <div class="col-xl-3 col-md-6 mx-auto">
+        <div class="card bgcolor2 mb-4">
+          <div class="card-body landing-card-body d-flex align-items-center">
+            <i class="fa-solid fa-headphones fa-5x"></i>&nbsp;&nbsp;
+            <span class="h3 landing-card-title">Archivio Interviste</span>
+          </div>
+          <a class="small text-white stretched-link" href="${sqs}"></a>
+        </div>
+      </div>
       <div class="col-xl-3 col-md-6 mx-auto">
         <div class="card bg-danger text-white mb-4">
           <div class="card-body landing-card-body d-flex align-items-center">
