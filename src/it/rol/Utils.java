@@ -32,6 +32,7 @@
 package it.rol;
 
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -149,6 +150,20 @@ public class Utils implements Constants {
             return s1;
         }
         return s;
+    }
+    
+    
+    /**
+     * <p>Data in input una stringa qualsiasi, restituisce la stringa 
+     * avente lo stesso contenuto dell'originale ma con la prima lettera
+     * maiuscola.</p>
+     *
+     * @param s la String da capitalizzare
+     * @return <code>String</code> la String da capitalizzare
+     */
+    public static String capitalize(String s) {
+        String s1 = s.substring(0, 1).toUpperCase();
+        return new String(s1 + s.substring(1));
     }
 
     /* ************************************************************************ *
@@ -590,6 +605,63 @@ public class Utils implements Constants {
             throw new CommandException(msg, npe);
         }
         return returnDate;
+    }
+
+    
+    /**
+     * <p>Formatta una data che riceve sotto forma di oggetto <code>String</code>
+     * basandosi su un formato default come formato di partenza
+     * e su un formato di default per un oggetto di tipo 
+     * <code>java.util.Date</code>
+     * restituito come tipo di ritorno.</p>
+     *
+     * @param date una datat sotto forma di String che deve essere convertita
+     * @return <code>java.util.Date</code> - un oggetto Date costruito a partire dalla String ricevuta e formattato secondo un formato predefinito
+     * @throws CommandException se si verifica un problema nella conversione di tipo o in qualche tipo di puntamento
+     *
+     */
+    public static Date format(String date)
+                       throws CommandException {
+        Date returnDate = null;
+        try {
+            returnDate = format(date, DATA_SQL_PATTERN, DATA_SQL_PATTERN);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + npe.getLocalizedMessage();
+            log.warning(msg + "Attenzione: si e\' verificato un problema nel puntamento a qualche parametro.\n");
+            throw new CommandException(msg, npe);
+        }
+        return returnDate;
+    }
+
+    
+    /**
+     * <p>Formatta un orario che riceve sotto forma di oggetto <code>String</code>
+     * basandosi su un parametro che ne indica il formato.</p>
+     *TODO COMMENTO
+     * @param date una String che deve essere convertita
+     * @param initDateFormat il formato con cui la String e' formattata
+     * @param endDateFormat il formato che l'oggetto Date restituito dovra' avere
+     * @return <code>java.util.Date</code> - un oggetto Date costruito a partire dalla String ricevuta e formattato secondo il formato indicato
+     * @throws CommandException se si verifica un problema nella conversione di tipo o in qualche tipo di puntamento
+     */
+    public static Time format(String time,
+                              String timeFormat)
+                       throws CommandException {
+        Time returnTime = null;
+        try {
+            DateFormat format = new SimpleDateFormat(timeFormat);
+            Date initDate = format.parse(time);
+            returnTime = new Time(initDate.getTime());
+        } catch (ParseException pe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + pe.getLocalizedMessage();
+            log.warning(msg + "Attenzione: si e\' verificato un problema nel metodo di formattazione della data.\n");
+            throw new CommandException(msg, pe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + npe.getLocalizedMessage();
+            log.warning(msg + "Attenzione: si e\' verificato un problema nel puntamento a qualche parametro.\n");
+            throw new CommandException(msg, npe);
+        }
+        return returnTime;
     }
 
 
