@@ -735,34 +735,140 @@ hr.riga       {
   padding-left: 180px;
 }
 
+/*---------------------- STATI ------------------------*/
+.bgAct {
+  background-color: #ffd9b3 !important;
+}
+.bgAct1 {
+  background-color: #b3e6ff !important;
+}
+
+.bgAct2 {
+  background-color: #ffffb3 !important;
+}
+
+.bgAct3 {
+  background-color: #c3e6cb !important;
+}
+
+.bgAct4 {
+  background-color: #d9d9d9 !important;
+}
+
+.bgAct5 {
+  background-color: #ffff33 !important;
+}
+
+.bgAct6 {
+  background-color: #ffb380 !important;
+}
+
+.bgAct7 {
+  background-color: #ff6600 !important;
+}
+
+.bgAct8 {
+  background-color: #bfff00 !important;
+}
+
+.bgAct9 {
+  background-color: #6fdc95 !important;
+}
+
+.bgAct10 {
+  background-color: #f5c6cb !important;
+}
+
+.bgSts21, .bgSts22 {
+  background-color: #ccff99;
+}
+
+.bgAct21 {
+  background-color: #4d9900;
+  border: 1px solid #336600;
+}
+
+.bgAct22 {
+  background-color: #73e600;
+  border: 1px solid #4d9900;
+}
+
+.bgSts23, .bgSts24 {
+  background-color: #ffff80;
+}
+
+.bgAct23 {
+  background-color: #ff9933;
+  border: 1px solid #e67300;
+}
+
+.bgAct24 {
+  background-color: #ffd633;
+  border: 1px solid #cca300;
+}
+
+.bgSts25, .bgSts26 {
+  background-color: #cceeff;
+}
+
+.bgAct25 {
+  background-color: #99ccff;
+  border: 1px solid #3399ff;
+}
+
+.bgAct26 {
+  background-color: #80aaff;
+  border: 1px solid #004de6;
+}
+
+.bgAddAct {
+  background-color: #d9edf7;
+}
+
+.bgFade {
+  background-image: linear-gradient(to right, transparent, white) !important;
+}
+
+.bgWbs {
+  background-color: #ffccff;
+}
+
+.bgInd {
+  background-color: #99ff33;
+}
+
+.bgMis {
+  background-color: #0066FF;
+}
+
 .lightTable{
-	border-color: #d9d9d9;
-	border-style: solid;
-	border-width: 2px;
-	background-color: #f2f2f2;
-	padding: 10px 15px;
+  border-color: #d9d9d9;
+  border-style: solid;
+  border-width: 2px;
+  background-color: #f2f2f2;
+  padding: 10px 15px;
 }
 
 .lightTableHead{
-	border-top-style: solid;
-	border-top-width: 1px;
-	border-bottom-style: solid;
-	border-bottom-width: 1px;
-	border-color: #d9d9d9;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-color: #d9d9d9;
 }
 
 .verticalCenter{
-	vertical-align: middle;
+  vertical-align: middle;
 }
 
 .rowBottomLine{
-	border-bottom-style: dotted;
-	border-bottom-width: 1px;
-	border-color: #d9d9d9;
+  border-bottom-style: dotted;
+  border-bottom-width: 1px;
+  border-color: #d9d9d9;
 }
 
 .bg-note{
-	background-color: #ffc;
+  background-color: #ffc;
 }
 
 /*---------------------- POP-UP ------------------------*/
