@@ -158,7 +158,7 @@ public class DepartmentBean extends CodeBean implements Serializable {
      * **************************************************** */
     /**
      * Restituisce il livello di una struttura.
-     * @return <code>id</code> - il livello della struttura
+     * @return <code>livello</code> - il livello della struttura
      */
     public int getLivello() {
         return livello;
