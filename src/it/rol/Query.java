@@ -33,6 +33,9 @@ package it.rol;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+
+import it.rol.bean.CodeBean;
 
 
 /**
@@ -948,15 +951,95 @@ public interface Query extends Serializable {
             "   WHERE Q.id_rilevazione = ?";
 
     /**
-     * <p>Costruisce dinamicamente la query che seleziona un insieme di persone in base
-     * ad una serie di parametri di ricerca immessi dall'utente tramite funzionalit&agrave;
-     * di navigazione.</p>
-     *  TODO COMMENTO
-     * @param fields    mappa contenente i parametri utente, indicizzati per nome
+     * <p>Estrae le interviste effettuate intervistando le strutture
+     * di livello 4. Per ogni struttura di 4° livello trovata, estrae
+     * le strutture di livello superiore che la aggregano, nonch&eacute; 
+     * i processi anticorruttivi sondati nel contesto dell'intervista
+     * (sar&agrave; presente almeno uno: tra macroprocesso, processo o
+     * sottoprocesso anticorruttivo e, al pi&uacute;, tutti e tre i livelli).</p>
+     * <p>Ogni riga, quindi, corrisponde ad una distinta intervista.</p>
+     */
+    public static final String GET_INTERVIEWED_STRUCT_L4 = 
+            "SELECT DISTINCT" +
+            "   ,   R.id_struttura_liv4     AS \"cod4\"" +
+            "   ,   R.id_struttura_liv3     AS \"cod3\"" +
+            "   ,   R.id_struttura_liv2     AS \"cod2\"" +
+            "   ,   R.id_struttura_liv1     AS \"cod1\"" +
+            "   ,   R.id_macroprocesso_at   AS \"value1\"" +
+            "   ,   R.id_processo_at        AS \"value2\"" +
+            "   ,   R.id_sottoprocesso_at   AS \"value3\"" +       
+            "   ,   R.data_ultima_modifica, AS \"codice\"" + 
+            "   ,   R.ora_ultima_modifica,  AS \"extraInfo\"" + 
+            "   FROM risposta R" +
+            "   WHERE R.id_struttura_liv4 IS NOT NULL" +
+            "   ORDER BY R.data_ultima_modifica, R.ora_ultima_modifica DESC";    
+
+    /**
+     * <p>Estrae le interviste effettuate nel contesto di una data rilevazione
+     * se viene passato l'identificativo della rilevazione sul primo e secondo
+     * parametro, oppure tutte le interviste se viene passato un valore 
+     * convezionale (-1) sul secondo parametro. 
+     * Per ogni riga sar&agrave; presente almeno
+     * un riferimento ai processi anticorruttivi sondati 
+     * nel contesto dell'intervista (sar&agrave; presente almeno uno: 
+     * tra macroprocesso, processo o sottoprocesso anticorruttivo e, 
+     * al pi&uacute;, tutti e tre i livelli).</p>
+     * <p>Ogni riga, quindi, corrisponder&agrave; ad una distinta intervista.</p>
+     */
+    public static final String GET_INTERVIEWS = 
+            "SELECT DISTINCT" +
+            "       R.id_struttura_liv1     AS \"cod1\"" +
+            "   ,   R.id_struttura_liv2     AS \"cod2\"" +
+            "   ,   R.id_struttura_liv3     AS \"cod3\"" +
+            "   ,   R.id_struttura_liv4     AS \"cod4\"" +
+            "   ,   R.id_macroprocesso_at   AS \"value1\"" +
+            "   ,   R.id_processo_at        AS \"value2\"" +
+            "   ,   R.id_sottoprocesso_at   AS \"value3\"" +       
+            "   ,   R.data_ultima_modifica  AS \"codice\"" + 
+            "   ,   R.ora_ultima_modifica   AS \"extraInfo\"" + 
+            "   FROM risposta R" +
+            "   WHERE (R.id_rilevazione = ? OR -1 = ?)" +
+            "   ORDER BY R.data_ultima_modifica DESC, R.ora_ultima_modifica DESC";    
+
+    /**
+     * <p>Costruisce dinamicamente la query che seleziona un insieme di risposte
+     * ad una serie di quesiti associati a una data rilevazione.</p>
+     * <p>Siccome potrebbero esservi pi&uacute; insiemi di risposte a 
+     * parit&agrave; di parametri (se la stessa struttura e lo stesso processo
+     * sono stati scelti pi&uacute; volte come "paletti" per l'intervista),
+     * il metodo prende in input anche un numero che limita il totale dei record
+     * da recuperare.</p>
+     * 
+     * @param params    mappa contenente tutti i parametri di navigazione trovati
      * @param idSurvey  identificativo della rilevazione
+     * @param limit     numero di record da recuperare 
+     * @param idQuest   identificativo di un quesito, se si vuol recuperare solo le risposte date a quel quesito
+     * @param getAll    flag booleano; se true bisogna recuperare le risposte indipendentemente dall'id del quesito
      * @return <code>String</code> - la query che seleziona l'insieme desiderato
      */
-    public String getQueryAnswers(HashMap<String, String> fields, int idSurvey);
+    public String getQueryAnswers(HashMap<String, LinkedHashMap<String, String>> params, int idSurvey, int limit, int idQuest, boolean getAll);
+    
+    /**
+     * TODO COMMENTO
+     * @param idR
+     * @param idl4
+     * @param idl3
+     * @param idl2
+     * @param idl1
+     * @return
+     */
+    public String getQueryStructureBySurvey(int idR, int idl4, int idl3, int idl2, int idl1);
+    
+    /**
+     * TODO COMMENTO
+     * @param idR
+     * @param idS   identificativo sottoprocesso anticorruzione
+     * @param idP   identificativo processo anticorruzione
+     * @param idM   identificativo macroprocesso anticorruzione
+     * @param idl1
+     * @return
+     */
+    public String getQueryProcessBySurvey(int idR, int idS, int idP, int idM);
     
     /* ********************************************************************** *
      *                        4. Query di inserimento                         *
