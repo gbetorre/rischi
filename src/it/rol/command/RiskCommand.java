@@ -33,7 +33,9 @@
 
 package it.rol.command;
 
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -55,6 +57,7 @@ import it.rol.Query;
 import it.rol.Utils;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
+import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
@@ -76,7 +79,10 @@ import it.rol.exception.WebStorageException;
 public class RiskCommand extends ItemBean implements Command, Constants {
     
     /**
-     * 
+     * La serializzazione necessita di dichiarare una costante di tipo long
+     * identificativa della versione seriale. 
+     * (Se questo dato non fosse inserito, verrebbe calcolato in maniera automatica
+     * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione). 
      */
     private static final long serialVersionUID = 6619103818860851921L;
     /**
@@ -107,11 +113,15 @@ public class RiskCommand extends ItemBean implements Command, Constants {
     /**
      * Pagina a cui la command fa riferimento per riepilogare le risposte ai quesiti
      */
-    private static final String nomeFileConfirmQuest = "/jsp/riEpilogo.jsp";
+    private static final String nomeFileConfirmQuest = "/jsp/riAggiornamento.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per mostrare la lista delle interviste
+     */
+    private static final String nomeFileElencoQuest = "/jsp/riInterviste.jsp";
     /**
      * Pagina a cui la command fa riferimento per permettere l'aggiornamento delle risposte ai dei quesiti
      */
-    private static final String nomeFileResumeQuest = "/jsp/riAggiornamento.jsp";
+    private static final String nomeFileResumeQuest = "/jsp/riEpilogo.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
@@ -155,7 +165,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_PROCESS, nomeFileSelectProcess);
         nomeFile.put(PART_SELECT_QST, nomeFileCompileQuest);
         nomeFile.put(PART_CONFIRM_QST, nomeFileConfirmQuest);
-        //nomeFile.put(PART_RESUME_QST, nomeFileResumeQuest);
+        nomeFile.put(PART_RESUME_QST, nomeFileResumeQuest);
+        nomeFile.put(PART_SELECT_QSS, nomeFileElencoQuest);
     }  
   
     
@@ -190,13 +201,13 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Elenco quesiti collegati alla rilevazione
         ArrayList<QuestionBean> questions = null;
         // Elenco risposte ai quesiti collegati alla rilevazione
-        ArrayList<ItemBean> answers = null;
+        ArrayList<QuestionBean> answers = null;
+        // Elenco interviste collegate alla rilevazione
+        ArrayList<InterviewBean> interviews = null;
         // Elenco strutture collegate alla rilevazione indicizzate per codice
         HashMap<String, Vector<DepartmentBean>> flatStructs = null;
         // Elenco quesiti collegati alla rilevazione raggruppati per ambito
         HashMap<ItemBean, ArrayList<QuestionBean>> flatQuestions = null;
-        // Parametri identificanti le strutture 
-        LinkedHashMap<String, String> paramsNav = new LinkedHashMap<>();
         // Tabella che conterrà i valori dei parametri passati dalle form
         HashMap<String, LinkedHashMap<String, String>> params = null;
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
@@ -209,7 +220,11 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", DASH);
         // Flag di scrittura
-        boolean write = (boolean) req.getAttribute("w");
+        Boolean writeAsObject = (Boolean) req.getAttribute("w");
+        boolean write = writeAsObject.booleanValue();
+        // Dichiara data ed ora di una intervista cercata
+        Date questDate = null;
+        Time questTime = null;
         /* ******************************************************************** *
          *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
          * ******************************************************************** */
@@ -261,7 +276,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
                 loadParams(part, parser, params);
-                // Verifica se deve gestire una chiamata POST
+                // @PostMapping
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
@@ -301,16 +316,18 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                              *                INSERT Answers Part               *
                              * ************************************************ */
                             // Recupera il numero di quesiti associati alla rilevazione
-                            int items = Integer.valueOf(questionAmounts.get(codeSur));
+                            Integer itemsAsInteger = questionAmounts.get(codeSur);
+                            // Unboxing
+                            int items = itemsAsInteger.intValue();
                             // Inserisce nel DB le risposte a tutti gli item quesiti
-                            db.insertQuest(user, params, items);
+                            db.insertAnswers(user, params, items);
                             // Prepara il passaggio dei parametri identificativi dei processi
                             LinkedHashMap<String, String> macro = params.get(PART_PROCESS);
                             // Stringa dinamica per contenere i parametri di scelta processi
                             StringBuffer paramsProc = new StringBuffer();
                             for (Map.Entry<String, String> set : macro.entrySet()) {
                                 // Printing all elements of a Map
-                                paramsProc.append("&");
+                                paramsProc.append(AMPERSAND);
                                 paramsProc.append("p" + set.getKey() + "=" + set.getValue());
                             }
                             redirect = "q=" + COMMAND_RISK + "&p=" + PART_CONFIRM_QST + paramsStruct.toString() + paramsProc.toString() + "&r=" + codeSur;
@@ -318,9 +335,10 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                     } else {
                         // Deve eseguire una eliminazione
                     }
+                // @GetMapping
                 } else {
                     /* ************************************************ *
-                     *                  SELECT Risk Part                *
+                     *                  Manage Risk Part                *
                      * ************************************************ */
                     if (nomeFile.containsKey(part)) {
                         // Recupera le strutture della rilevazione corrente
@@ -333,18 +351,41 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                             flatStructs = (HashMap<String, Vector<DepartmentBean>>) decant(structs, part);
                         } else if (part.equalsIgnoreCase(PART_SELECT_QST)) {
                             /* ************************************************ *
-                             *              Creazione Questionario              *
+                             *              SELECT Questions Part               *
                              * ************************************************ */
                             questions = retrieveQuestions(user, codeSur, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
                             ArrayList<ItemBean> ambits = db.getAmbits(user);
                             flatQuestions = decantQuestions(questions, ambits);
                         } else if (part.equalsIgnoreCase(PART_CONFIRM_QST)) {
                             /* ************************************************ *
-                             *                Riepilogo Risposte                *
+                             *                   Confirm Part                   *
                              * ************************************************ */
                             // TODO IMPLEMENTARE
                             //answers = retrieveAnswers(user, codeSur, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
-                            //answers = db.getAnswers(user, fields, survey);
+                            answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
+                            //ArrayList<ItemBean> ambits = db.getAmbits(user);
+                            //flatQuestions = decantQuestions(questions, ambits);
+                        } else if (part.equalsIgnoreCase(PART_RESUME_QST)) {
+                            /* ************************************************ *
+                             *  SELECT Set of Answers belonging to an Inverview *
+                             * ************************************************ */
+                            //answers = retrieveAnswers(user, codeSur, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
+                            answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
+                            // Prepara data intervista di cui si vogliono visualizzare le risposte
+                            if (params.get(PARAM_SURVEY).get("d") != null && !params.get(PARAM_SURVEY).get("d").equals(VOID_STRING)) {
+                                questDate = Utils.format(params.get(PARAM_SURVEY).get("d"));
+                            }
+                            // Prepara ora intervista di cui si vogliono visualizzare le risposte
+                            if (params.get(PARAM_SURVEY).get("t") != null && !params.get(PARAM_SURVEY).get("t").equals(VOID_STRING)) {
+                                String questTimeAsString = params.get(PARAM_SURVEY).get("t").replaceAll("_", ":");
+                                questTime = Utils.format(questTimeAsString, TIME_SQL_PATTERN);
+                            }
+                        } else if (part.equalsIgnoreCase(PART_SELECT_QSS)) {
+                            /* ************************************************ *
+                             *          SELECT List of Interview Part           *
+                             * ************************************************ */
+                            interviews = db.getInterviewsBySurvey(user, params, ConfigManager.getSurvey(codeSur));
+                            //answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
                             //ArrayList<ItemBean> ambits = db.getAmbits(user);
                             //flatQuestions = decantQuestions(questions, ambits);
                         }
@@ -355,17 +396,17 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                     }
                 }
             } else {
-                // Se siamo qui vuol dire che l'id del progetto non è > zero, il che è un guaio
+                // Se siamo qui vuol dire che l'identificativo della rilevazione non è significativo, il che vuol dire che qualcuno ha pasticciato con l'URL
                 HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
                 ses.invalidate();
-                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un codice rilevazione non valido!.\n";
                 LOG.severe(msg);
                 throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
             }
-        /*}  catch (WebStorageException wse) {
+        }  catch (WebStorageException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
             LOG.severe(msg);
-            throw new CommandException(msg + wse.getMessage(), wse);*/
+            throw new CommandException(msg + wse.getMessage(), wse);
         } catch (IllegalStateException ise) {
             String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
             LOG.severe(msg);
@@ -402,15 +443,30 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         if (flatQuestions != null) {
             req.setAttribute("elencoQuesiti", flatQuestions);
         }
+        // Imposta l'eventuale lista di inteviste trovate
+        if (interviews != null) {
+            req.setAttribute("elencoInterviste", interviews);
+        }
+        // Imposta nella request elenco completo domande e risposte di un'intervista
+        if (answers != null) {
+            req.setAttribute("elencoRisposte", answers);
+        }
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
         }
+        // Imposta struttura contenente tutti i parametri di navigazione già estratti
         if (!params.isEmpty()) {
             req.setAttribute("params", params);
         }
-        // Imposta nella request data di oggi 
-        req.setAttribute("now", Utils.format(today));
+        // Imposta nella request data di un'intervista cercata
+        if (questDate != null) {
+            req.setAttribute("dataRisposte", questDate);
+        }
+        // Imposta nella request ora di un'intervista cercata
+        if (questTime != null) {
+            req.setAttribute("oraRisposte", questTime);
+        }
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
@@ -500,7 +556,12 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         String codeSur = parser.getStringParameter("r", DASH);
         // Recupera l'oggetto rilevazione a partire dal suo codice
         CodeBean surveyAsBean = ConfigManager.getSurvey(codeSur);
+        // Inserisce l'ìd della rilevazione come valore del parametro
         survey.put(PARAM_SURVEY, String.valueOf(surveyAsBean.getId()));
+        // Aggiunge data e ora, se le trova
+        survey.put("d", parser.getStringParameter("d", VOID_STRING));
+        survey.put("t", parser.getStringParameter("t", VOID_STRING));
+        // Aggiunge il tutto al dizionario dei parametri
         formParams.put(PARAM_SURVEY, survey);
         /* **************************************************** *
          *     Caricamento parametri di Scelta Struttura        *
@@ -524,7 +585,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             // Carica la tabella che ad ogni rilevazione associa il numero di quesiti corrispondenti
             questionAmounts = ConfigManager.getQuestionAmount();
             // Recupera il numero di quesiti associati alla rilevazione
-            int limit = Integer.valueOf(questionAmounts.get(codeSur));
+            int limit = questionAmounts.get(codeSur).intValue();
             for (int i = NOTHING; i < limit; i++) {
                 answs.put("quid" + String.valueOf(i),  parser.getStringParameter("Q" + String.valueOf(i) + "-id", VOID_STRING));
                 answs.put("risp" + String.valueOf(i),  parser.getStringParameter("Q" + String.valueOf(i), VOID_STRING));
