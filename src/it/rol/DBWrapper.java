@@ -36,12 +36,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.sql.Types;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.naming.Context;
@@ -54,6 +56,7 @@ import it.rol.Utils;
 import it.rol.bean.BeanUtil;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
+import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
@@ -650,177 +653,6 @@ public class DBWrapper implements Query, Constants {
             String msg = FOR_NAME + "Problema in una conversione di tipi nella query delle rilevazioni.\n";
             LOG.severe(msg);
             throw new WebStorageException(msg + cce.getMessage(), cce);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-    
-    
-    /**
-     * <p>Restituisce un Integer corrispondente al wrapper del numero di
-     * quesiti trovati dato un identificativo di rilevazione, passato come
-     * parametro.</p>
-     *TODO COMMENTO
-     * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @return <code>ArrayList&lt;ItemBean&gt;</code> - un vettore ordinato di ItemBean, che rappresentano gli ambiti di analisi trovati
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public Integer getQuestionsAmountBySurvey(int idSurvey)
-                                       throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
-            PreparedStatement pst = null;
-            ResultSet rs = null;
-            Integer tot = null;
-            try {
-                // TODO: Controllare se user è superuser
-                pst = null;
-                pst = con.prepareStatement(GET_QUESTION_AMOUNT_BY_SURVEY);
-                pst.clearParameters();
-                pst.setInt(1, idSurvey);
-                rs = pst.executeQuery();
-                if (rs.next()) {
-                    // Prepara bean di appoggio per il valore di count(*)
-                    CodeBean amount = new CodeBean();
-                    // Valorizza il bean di appoggio
-                    BeanUtil.populate(amount, rs);
-                    // Incapsula il valore in un Wrapper di tipo primitivo
-                    tot = new Integer(amount.getInformativa());
-                }
-                // Just tries to engage the Garbage Collector
-                pst = null;
-                // Get out
-                return tot;
-            } catch (AttributoNonValorizzatoException anve) {
-                String msg = FOR_NAME + "Oggetto CodeBean.informativa non valorizzato; problema nel metodo di estrazione del numero di quesiti data una rilevazione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + anve.getMessage(), anve);
-            } catch (NumberFormatException nfe) {
-                String msg = FOR_NAME + "Si e\' verificato un problema in una conversione in numero; verificare che il valore dell\'informativa sia convertibile in numero.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + nfe.getMessage(), nfe);
-            } catch (SQLException sqle) {
-                String msg = FOR_NAME + "QuestionBean non valorizzato; problema nella query dei quesiti.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + sqle.getMessage(), sqle);
-            } finally {
-                try {
-                    con.close();
-                } catch (NullPointerException npe) {
-                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                    LOG.severe(msg);
-                    throw new WebStorageException(msg + npe.getMessage());
-                } catch (SQLException sqle) {
-                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
-                }
-            }
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        }
-    }
-    
-
-    /**
-     * <p>Data una rilevazione, restituisce un ArrayList di macroprocessi 
-     * censiti dall'anticorruzione ad essa afferenti, contenenti ciascuno 
-     * i processi figli al proprio interno. Ogni figlio conterr&agrave;
-     * i relativi figli.</p>
-     * <p>Recupera solo i macroprocessi su cui un utente, il cui username viene
-     * passato come argomento, ha i diritti di accesso (in base al ruolo <em>per se</em>).</p>
-     *
-     * @param user oggetto rappresentante la persona loggata
-     * @param codeSurvey identificativo della rilevazione di cui si vogliono recuperare i macroprocessi
-     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - un Vector di ProcessBean, che rappresentano i macroprocessi su cui l'utente ha i diritti di lettura
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    @SuppressWarnings({ "null" })
-    public ArrayList<ProcessBean> getMacroAtBySurvey(PersonBean user,
-                                                     String codeSurvey)
-                                              throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs, rs1, rs2 = null;
-        ProcessBean macro = null;
-        ProcessBean processo = null;
-        ProcessBean sottoprocesso = null;
-        CodeBean rilevazione = null;
-        AbstractList<ProcessBean> macroprocessi = new ArrayList<ProcessBean>();
-        AbstractList<ProcessBean> processi = null;
-        AbstractList<ProcessBean> sottoprocessi = null;
-        try {
-            // TODO: Controllare se user è superuser
-            con = prol_manager.getConnection();
-            pst = con.prepareStatement(GET_MACRO_AT_BY_SURVEY);
-            pst.clearParameters();
-            pst.setString(1, codeSurvey);
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                // Crea un macroprocesso vuoto
-                macro = new ProcessBean();
-                // Istanzia una struttura vettoriale per contenere i suoi processi
-                processi = new Vector<>();
-                // Valorizza il macroprocesso col contenuto della query
-                BeanUtil.populate(macro, rs);
-                // Recupera la rilevazione
-                rilevazione = getSurvey(macro.getIdAppo(), macro.getIdAppo());
-                // Imposta la rilevazione
-                macro.setRilevazione(rilevazione);
-                // Recupera i processi del macroprocesso
-                pst = null;
-                pst = con.prepareStatement(GET_PROCESSI_AT_BY_MACRO);
-                pst.clearParameters();
-                pst.setInt(1, macro.getId());
-                rs1 = pst.executeQuery();
-                while (rs1.next()) {
-                    processo = new ProcessBean();
-                    // Istanzia una struttura vettoriale per contenere i suoi sottoprocessi
-                    sottoprocessi = new Vector<>();
-                    // Valorizza il processo col contenuto della query
-                    BeanUtil.populate(processo, rs1);
-                    // Recupera i sottoprocessi del processo
-                    pst = null;
-                    pst = con.prepareStatement(GET_SOTTOPROCESSI_AT_BY_PROCESS);
-                    pst.clearParameters();
-                    pst.setInt(1, processo.getId());
-                    rs2 = pst.executeQuery();
-                    while (rs2.next()) {
-                        sottoprocesso = new ProcessBean();
-                        BeanUtil.populate(sottoprocesso, rs2);
-                        sottoprocessi.add(sottoprocesso);
-                    }
-                    // Imposta i sottoprocessi
-                    processo.setProcessi(sottoprocessi);
-                    // Aggiunge il processo valorizzato all'elenco
-                    processi.add(processo);
-                }
-                // Imposta i processi
-                macro.setProcessi(processi);
-                // Aggiunge il macroprocesso valorizzato all'elenco
-                macroprocessi.add(macro);
-                rs1 = rs2 = null;
-            }
-            // Tries (just tries) to engage the Garbage Collector
-            pst = null;
-            // Get out
-            return (ArrayList<ProcessBean>) macroprocessi;
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Oggetto ProcessBean.some non valorizzato; problema nel metodo di estrazione dei processi/macroprocessi.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + anve.getMessage(), anve);
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto ProcessBean non valorizzato; problema nella query dei processi/macroprocessi..\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
             try {
                 con.close();
@@ -1612,7 +1444,7 @@ public class DBWrapper implements Query, Constants {
                     s2.setPadre(s1);
                     // Ne recupera i figli di livello 3 (nipoti)
                     pst = null;
-                    vS3 = new Vector<DepartmentBean>();
+                    vS3 = new Vector<>();
                     query = new StringBuffer(getQueryStructures(survey.getId(), NOTHING, NOTHING, s2.getId(), NOTHING));
                     pst = con.prepareStatement(String.valueOf(query));
                     pst.clearParameters();
@@ -2209,6 +2041,180 @@ public class DBWrapper implements Query, Constants {
         }
     }
     
+    /* ********************************************************** *
+     *                 Metodi strettamente di ROL                 *
+     * ********************************************************** */
+    
+    /**
+     * <p>Restituisce un Integer corrispondente al wrapper del numero di
+     * quesiti trovati dato un identificativo di rilevazione, passato come
+     * parametro.</p>
+     *TODO COMMENTO
+     * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - un vettore ordinato di ItemBean, che rappresentano gli ambiti di analisi trovati
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Integer getQuestionsAmountBySurvey(int idSurvey)
+                                       throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            Integer tot = null;
+            try {
+                // TODO: Controllare se user è superuser
+                pst = null;
+                pst = con.prepareStatement(GET_QUESTION_AMOUNT_BY_SURVEY);
+                pst.clearParameters();
+                pst.setInt(1, idSurvey);
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    // Prepara bean di appoggio per il valore di count(*)
+                    CodeBean amount = new CodeBean();
+                    // Valorizza il bean di appoggio
+                    BeanUtil.populate(amount, rs);
+                    // Incapsula il valore in un Wrapper di tipo primitivo
+                    tot = new Integer(amount.getInformativa());
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return tot;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Oggetto CodeBean.informativa non valorizzato; problema nel metodo di estrazione del numero di quesiti data una rilevazione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in una conversione in numero; verificare che il valore dell\'informativa sia convertibile in numero.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + nfe.getMessage(), nfe);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "QuestionBean non valorizzato; problema nella query dei quesiti.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+
+    /**
+     * <p>Data una rilevazione, restituisce un ArrayList di macroprocessi 
+     * censiti dall'anticorruzione ad essa afferenti, contenenti ciascuno 
+     * i processi figli al proprio interno. Ogni figlio conterr&agrave;
+     * i relativi figli.</p>
+     * <p>Recupera solo i macroprocessi su cui un utente, il cui username viene
+     * passato come argomento, ha i diritti di accesso (in base al ruolo <em>per se</em>).</p>
+     *
+     * @param user oggetto rappresentante la persona loggata
+     * @param codeSurvey identificativo della rilevazione di cui si vogliono recuperare i macroprocessi
+     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - un Vector di ProcessBean, che rappresentano i macroprocessi su cui l'utente ha i diritti di lettura
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "null" })
+    public ArrayList<ProcessBean> getMacroAtBySurvey(PersonBean user,
+                                                     String codeSurvey)
+                                              throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs, rs1, rs2 = null;
+        ProcessBean macro = null;
+        ProcessBean processo = null;
+        ProcessBean sottoprocesso = null;
+        CodeBean rilevazione = null;
+        AbstractList<ProcessBean> macroprocessi = new ArrayList<ProcessBean>();
+        AbstractList<ProcessBean> processi = null;
+        AbstractList<ProcessBean> sottoprocessi = null;
+        try {
+            // TODO: Controllare se user è superuser
+            con = prol_manager.getConnection();
+            pst = con.prepareStatement(GET_MACRO_AT_BY_SURVEY);
+            pst.clearParameters();
+            pst.setString(1, codeSurvey);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                // Crea un macroprocesso vuoto
+                macro = new ProcessBean();
+                // Istanzia una struttura vettoriale per contenere i suoi processi
+                processi = new Vector<>();
+                // Valorizza il macroprocesso col contenuto della query
+                BeanUtil.populate(macro, rs);
+                // Recupera la rilevazione
+                rilevazione = getSurvey(macro.getIdAppo(), macro.getIdAppo());
+                // Imposta la rilevazione
+                macro.setRilevazione(rilevazione);
+                // Recupera i processi del macroprocesso
+                pst = null;
+                pst = con.prepareStatement(GET_PROCESSI_AT_BY_MACRO);
+                pst.clearParameters();
+                pst.setInt(1, macro.getId());
+                rs1 = pst.executeQuery();
+                while (rs1.next()) {
+                    processo = new ProcessBean();
+                    // Istanzia una struttura vettoriale per contenere i suoi sottoprocessi
+                    sottoprocessi = new Vector<>();
+                    // Valorizza il processo col contenuto della query
+                    BeanUtil.populate(processo, rs1);
+                    // Recupera i sottoprocessi del processo
+                    pst = null;
+                    pst = con.prepareStatement(GET_SOTTOPROCESSI_AT_BY_PROCESS);
+                    pst.clearParameters();
+                    pst.setInt(1, processo.getId());
+                    rs2 = pst.executeQuery();
+                    while (rs2.next()) {
+                        sottoprocesso = new ProcessBean();
+                        BeanUtil.populate(sottoprocesso, rs2);
+                        sottoprocessi.add(sottoprocesso);
+                    }
+                    // Imposta i sottoprocessi
+                    processo.setProcessi(sottoprocessi);
+                    // Aggiunge il processo valorizzato all'elenco
+                    processi.add(processo);
+                }
+                // Imposta i processi
+                macro.setProcessi(processi);
+                // Aggiunge il macroprocesso valorizzato all'elenco
+                macroprocessi.add(macro);
+                rs1 = rs2 = null;
+            }
+            // Tries (just tries) to engage the Garbage Collector
+            pst = null;
+            // Get out
+            return (ArrayList<ProcessBean>) macroprocessi;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto ProcessBean.some non valorizzato; problema nel metodo di estrazione dei processi/macroprocessi.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ProcessBean non valorizzato; problema nella query dei processi/macroprocessi..\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
     
     /**
      * <p>Restituisce un ArrayList contenente tutti gli ambiti di analisi trovati.</p>
@@ -2271,9 +2277,38 @@ public class DBWrapper implements Query, Constants {
     /**
      * <p>Data una rilevazione restituisce
      * un ArrayList di domande da sottoporre per rilevare i rischi.</p>
-     *TODO COMMENTO
-     * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param survey   oggetto contenente l'identificativo della rilevazione
+     * <p><strong>Il metodo &egrave; ricorsivo</strong> e funziona 
+     * richiamando se stesso per arricchire in una passata successiva 
+     * la lista di quesiti trovati.</p>
+     * <p>La prima volta che viene eseguito, riceve come identificativi interi 
+     * il valore convenzionale -1 e quindi recupera un elenco; 
+     * per ogni quesito trovato, recupera gli identificativi di risorse 
+     * collegate al quesito, inserendoli in attributi temporanei; 
+     * quindi utilizza immediatamente tali valori per ottenere oggetti 
+     * completi, che inserisce come attributi a loro volta del bean 
+     * che inizialmente conteneva i valori temporanei.<br />
+     * Quando richiama se stesso, non passa pi&uacute; il valore -1 ma 
+     * il vero id del quesito corrente, di cui si vuol recuperare 
+     * il quesito padre, se esiste, aggiungendolo al quesito corrente 
+     * e aggiungendo finalmente questo all'elenco.<br /> 
+     * Quindi termina l'esecuzione.</p>
+     * <p>Il metodo quindi pu&ograve; essere utilizzato
+     * <ul>
+     * <li>sia per ottenere una lista di quesiti,</li> 
+     * <li>sia per ottenere uno specifico quesito (sia pure
+     * sotto forma di lista, perch&eacute; ovviamente il tipo restituito 
+     * pu&ograve; essere solo uno).</li></ul> 
+     * <p><dl><dt>Se si vuol ottenere una lista</dt>
+     * <dd>bisogna passare un valore qualunque
+     * sul primo parametro e -1 sul secondo parametro.</dd>
+     * <dt>Se si vuol ottenere un quesito</dt>
+     * <dd>bisogna passare l'identificativo
+     * del quesito sia sul primo sia sul secondo parametro.</dd></dl></p>
+     *
+     * @param user          oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param survey        oggetto contenente i dati della rilevazione
+     * @param idQuestion    identificativo di uno specifico quesito
+     * @param getAll        valore convenzionale; se vale -1 comporta il recupero di tutti i quesiti, indipendentemente dall'id passato come parametro
      * @return <code>ArrayList&lt;QuestionBean&gt;</code> - un Vector di QuestionBean, che rappresentano le domande atte a rilevare i rischi corruttivi
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
@@ -2426,114 +2461,519 @@ public class DBWrapper implements Query, Constants {
      */
     @SuppressWarnings("javadoc")
     @Override
-    public String getQueryAnswers(HashMap<String, String> fields,
-                                 int idSurvey) {
-        StringBuffer clause = new StringBuffer("AF.id_rilevazione = " + idSurvey);
-        String name = fields.get("pe-name");
-        String surname = fields.get("pe-surn");
-        if (!name.equals(String.valueOf(GET_ALL))) {
-            clause.append(BLANK_SPACE).append("AND (P.nome ~* ALL(('{' || '" + name + "' || '}')::text[]))");
+    public String getQueryAnswers(HashMap<String, LinkedHashMap<String, String>> params,
+                                  int idSurvey,
+                                  int numOfQuest,
+                                  int idQuest,
+                                  boolean getAll) {
+        // Dizionario dei parametri delle strutture scelte dall'utente
+        LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
+        // Dizionario dei parametri dei processi scelti dall'utente
+        LinkedHashMap<String, String> proc = params.get(PART_PROCESS);
+        // Dizionario dei parametri temporali
+        LinkedHashMap<String, String> surv = params.get(PARAM_SURVEY);
+        // Preparazione dei parametri
+        String idStrLiv1 = struct.get("liv1").substring(struct.get("liv1").indexOf('.') + 1, struct.get("liv1").indexOf('-'));
+        String idStrLiv2 = struct.get("liv2").substring(struct.get("liv2").indexOf('.') + 1, struct.get("liv2").indexOf('-'));
+        String idStrLiv3 = (!struct.get("liv3").equals(VOID_STRING) ? (struct.get("liv3").substring(struct.get("liv3").indexOf('.') + 1, struct.get("liv3").indexOf('-'))) : VOID_STRING);
+        String idStrLiv4 = (!struct.get("liv4").equals(VOID_STRING) ? (struct.get("liv4").substring(struct.get("liv4").indexOf('.') + 1, struct.get("liv4").indexOf('-'))) : VOID_STRING);
+        String idProLiv1 = proc.get("liv1").substring(NOTHING, proc.get("liv1").indexOf('.'));
+        String idProLiv2 = (!proc.get("liv2").equals(VOID_STRING) ? (proc.get("liv2").substring(NOTHING,proc.get("liv2").indexOf('.'))) : VOID_STRING);
+        String idProLiv3 = (!proc.get("liv3").equals(VOID_STRING) ? (proc.get("liv3").substring(NOTHING,proc.get("liv3").indexOf('.'))) : VOID_STRING);
+        String date = (!surv.get("d").equals(VOID_STRING) ? surv.get("d") : VOID_STRING);
+        String time = (!surv.get("t").equals(VOID_STRING) ? surv.get("t").replaceAll("_", ":") : VOID_STRING);
+        // Clausole
+        StringBuffer clause = new StringBuffer("R.id_rilevazione = " + idSurvey);
+        // Filtro per id quesito
+        String clauseOnQuestion = (getAll ? BLANK_SPACE + "OR -1 = " + GET_ALL_BY_CLAUSE + ")" : ")");
+        clause.append(BLANK_SPACE).append("AND (R.id_quesito = " + idQuest);
+        clause.append(clauseOnQuestion);
+        // Filtro per id struttura_*
+        if (!idStrLiv1.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv1 = " + idStrLiv1);
         }
-        if (!surname.equals(String.valueOf(GET_ALL))) {
-            clause.append(BLANK_SPACE).append("AND (P.cognome ~* ALL(('{' || '" + surname + "' || '}')::text[]))");
+        if (!idStrLiv2.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv2 = " + idStrLiv2);
         }
-        clause.append(BLANK_SPACE).append("AND (AF.codice_area_funz = '");
-        clause.append(fields.get("pe-funz"));
-        clause.append("' OR 'true' = '");
-        clause.append(fields.get("pe-funz"));
-        clause.append("')");
-        clause.append(BLANK_SPACE).append("AND (AF.codice_ruolo_giuridico = '");
-        clause.append(fields.get("pe-giur"));
-        clause.append("' OR 'true' = '");
-        clause.append(fields.get("pe-giur"));
-        clause.append("')");
-        // Responsabilità in alternativa
-        if (fields.get("pe-resp").equals(TIPI_RESPONSABILITA[0])) {
-            clause.append(BLANK_SPACE).append("AND (AF.respons_organizzativa IS NOT NULL)");
-        } else if (fields.get("pe-resp").equals(TIPI_RESPONSABILITA[1])) {
-            clause.append(BLANK_SPACE).append("AND (AF.funzione_specialistica IS NOT NULL)");
-        } else if (fields.get("pe-resp").equals(TIPI_RESPONSABILITA[2])) {
-            clause.append(BLANK_SPACE).append("AND (AF.tecnico_lab IS NOT NULL)");
+        if (!idStrLiv3.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv3 = " + idStrLiv3);
         }
+        if (!idStrLiv4.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv4 = " + idStrLiv4);
+        }
+        // Filtro per id processo
+        if (!idProLiv1.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_macroprocesso_at = " + idProLiv1);
+        }
+        if (!idProLiv2.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_processo_at = " + idProLiv2);
+        }
+        if (!idProLiv3.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_sottoprocesso_at = " + idProLiv3);
+        }
+        // Filtro per data e ora
+        if (!date.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.data_ultima_modifica = '" + date + "'");
+        }
+        if (!time.equals(VOID_STRING)) {
+            //String timeFormat = time.replaceAll("_", ":")
+            clause.append(BLANK_SPACE).append("AND R.ora_ultima_modifica = '" + time + "'");
+        }
+        // Query
         final String GET_ANSWERS =
                 "SELECT DISTINCT" +
                 "       R.id                        AS \"id\"" +
                 "   ,   R.valore                    AS \"nome\"" +
                 "   ,   R.note                      AS \"informativa\"" +
                 "   ,   R.ordinale                  AS \"ordinale\"" +
-                "   ,   R.id_quesito                AS \"codice\"" +
-                "   ,   R.id_rilevazione            AS \"cod4\"" +                
                 "   ,   R.id_struttura_liv1         AS \"value1\"" +
-                "   ,   R.id_struttura_liv2         AS \"value1\"" +
-                "   ,   R.id_struttura_liv3         AS \"value1\"" +
-                "   ,   R.id_struttura_liv4         AS \"value1\"" +
+                "   ,   R.id_struttura_liv2         AS \"value2\"" +
+                "   ,   R.id_struttura_liv3         AS \"value3\"" +
+                "   ,   R.id_struttura_liv4         AS \"value4\"" +
                 "   ,   R.id_macroprocesso_at       AS \"cod1\""   +
                 "   ,   R.id_processo_at            AS \"cod2\""   +
                 "   ,   R.id_sottoprocesso_at       AS \"cod3\""   +
+                "   ,   R.id_rilevazione            AS \"cod4\"" + 
+                "   ,   R.id_quesito                AS \"livello\"" +
+                "   ,   R.data_ultima_modifica      AS \"extraInfo\"" +
+                "   ,   R.ora_ultima_modifica       AS \"labelWeb\"" +
                 "   FROM risposta R" +
-                "       INNER JOIN persona P ON AF.id_persona = P.id" +
                 "   WHERE " + clause +
-                "   ORDER BY P.cognome";
+                "   ORDER BY R.data_ultima_modifica DESC, R.ora_ultima_modifica DESC"; 
+              //"   LIMIT " + numOfQuest;
         return GET_ANSWERS;
     }
     
     
     /**
-     * <p>Estrae un elenco di persone in base a parametri di ricerca decisi dall'utente.</p>
-     *TODO COMMENTO
+     * <p>Estrae un elenco di risposte ad una serie di quesiti 
+     * associati a una data rilevazione.</p>
+     *
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param fields    mappa contenente i parametri di ricerca
+     * @param params    mappa contenente i parametri di navigazione
      * @param survey    oggetto contenente i dati della rilevazione
-     * @return <code>ArrayList&lt;PersonBean&gt;</code> - la lista di persone cercate
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - la lista di risposte trovate
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings({ "null" })
-    public ArrayList<ItemBean> getAnswers(PersonBean user,
-                                           HashMap<String, String> fields,
-                                           CodeBean survey)
-                                    throws WebStorageException { //TODO IMPLEMENTARE 
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        ItemBean item = null;
-        AbstractList<ItemBean> answers = new ArrayList<>();
-        // TODO: Controllare se user è superuser
-        try {
-            con = prol_manager.getConnection();
-            String query = getQueryPeople(fields, survey.getId());
-            pst = con.prepareStatement(query);
-            pst.clearParameters();
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                // Crea una struttura vuota
-                item = new ItemBean();
-                // La valorizza col contenuto della query
-                BeanUtil.populate(item, rs);
-                // la aggiunge alla lista di persone trovate
-                answers.add(item);
+    public ArrayList<QuestionBean> getAnswers(PersonBean user,
+                                          HashMap<String, LinkedHashMap<String, String>> params,
+                                          CodeBean survey)
+                                   throws WebStorageException { 
+        // Resource 'con' should be managed by try-with-resource
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            QuestionBean question = null;
+            QuestionBean answer = null;
+            AbstractList<ItemBean> rawAnswers = new ArrayList<>();
+            AbstractList<QuestionBean> answers = new ArrayList<>();
+            // Carica la tabella che ad ogni rilevazione associa il numero di quesiti corrispondenti
+            ConcurrentHashMap<String, Integer> questionAmounts = ConfigManager.getQuestionAmount();
+            // TODO: Controllare se user è superuser
+            try {
+                // Recupera il numero di quesiti associati alla rilevazione
+                int limit = questionAmounts.get(survey.getNome()).intValue();
+                String query = getQueryAnswers(params, survey.getId(), limit, GET_ALL_BY_CLAUSE, GET_ALL);
+                pst = con.prepareStatement(query);
+                pst.clearParameters();
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Crea un oggetto per la risposta
+                    answer = new QuestionBean();
+                    // Lo valorizza col contenuto della query
+                    BeanUtil.populate(answer, rs);
+                    // Recupera il quesito della risposta sotto forma di lista
+                    ArrayList<QuestionBean> questionAsList = getQuestions(user, survey, answer.getLivello(), answer.getLivello());
+                    // Assunzione: la relazione tra quesito e risposta è 1 : 1
+                    question = questionAsList.get(NOTHING);
+                    
+                    /*
+                    answer.setId(item.getId());
+                    answer.setNome(item.getNome());
+                    answer.setInformativa(item.getInformativa());
+                    answer.setOrdinale(item);
+                    */
+                    // Aggiunge al quesito la risposta corrente
+                    question.setAnswer(answer);
+                    
+                    // Lo aggiunge alla lista di persone trovate
+                    answers.add(question);
+                }
+                // Closes the statement
+                pst.close();
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<QuestionBean>) answers;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio non recuperabile; problema nel metodo di estrazione delle risposte.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
             }
-            // Tries (just tries) to engage the Garbage Collector
-            pst = null;
-            // Let's go away
-            return (ArrayList<ItemBean>) answers;
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Identificativo della rilevazione non recuperabile; problema nel metodo di estrazione delle persone.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query della struttura in base all'id.\n";
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
             LOG.severe(msg);
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+        }
+    }
+    
+    
+    /* (non-Javadoc)
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String getQueryStructureBySurvey(int idR, int idl4, int idl3, int idl2, int idl1) {
+        String tableFrom = null;
+        String idD = null;
+        byte level = (byte) DEFAULT_ID;
+        // Verifica se l'id di livello 4 è non impostato
+        if (idl4 == BEAN_DEFAULT_ID) { // it means Liv 4 is null
+            // Verifica se l'id di livello 3 non è impostato
+            if (idl3 == BEAN_DEFAULT_ID) { // it means Liv 3 is null
+                // Verifica se l'id di livello 3 non è impostato
+                if (idl2 == BEAN_DEFAULT_ID) { // it means Liv 2 is null
+                    // Verifica se c'è un errore (almeno una struttura di Liv 1 dev'esserci)
+                    if (idl1 == BEAN_DEFAULT_ID) { // it means Liv 1 is null! Something's wrong
+                        return DASH; // "ERR!";
+                    }
+                    // Clausole per recuperare la struttura di Liv 1
+                    level = (byte) 1;
+                    tableFrom = "struttura_liv1";
+                    idD = String.valueOf(idl1);
+                // Clausole per recuperare la struttura di Liv 2
+                } else {       
+                    level = (byte) 2;
+                    tableFrom = "struttura_liv2";
+                    idD = String.valueOf(idl2);
+                }
+            // Clausole per recuperare la struttura di Liv 3
+            } else {
+                level = (byte) 3;
+                tableFrom = "struttura_liv3";
+                idD = String.valueOf(idl3);
             }
+        // Clausole per recuperare la struttura di Liv 4
+        } else {
+            level = (byte) 4;
+            tableFrom = "struttura_liv4";
+            idD = String.valueOf(idl4);
+        }
+        final String GET_STRUCTURE_BY_INTERVIEW =
+                "SELECT " +
+                "       D.id                AS \"id\"" +
+                "   ,   D.nome              AS \"nome\"" +
+                "   ,   concat('0.',D.id::VARCHAR,'-'," + level + ")" +
+                "                           AS \"informativa\"" +
+                "   ,   D.ordinale          AS \"ordinale\"" +
+                "   ,   D.prefisso          AS \"prefisso\"" +
+                "   ,   D.acronimo          AS \"acronimo\"" +
+                "   ,   D.indirizzo_sede    AS \"indirizzo\"" +
+                "   ," + level + "::SMALLINT AS \"livello\"" +
+                "   FROM " + tableFrom + " D" +
+                "   WHERE D.id_rilevazione = " + idR +
+                "       AND D.id = " + idD +
+                "   ORDER BY D.nome";
+        return GET_STRUCTURE_BY_INTERVIEW;
+    }
+    
+    
+    /* (non-Javadoc)
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String getQueryProcessBySurvey(int idR, int idS, int idP, int idM) {
+        String tableFrom = null;
+        String idD = null;
+        byte level = (byte) DEFAULT_ID;
+        // Verifica se l'id di sottoprocesso non è impostato
+        if (idS == BEAN_DEFAULT_ID) { // it means sub is null
+            // Verifica se l'id di processo non è impostato
+            if (idP == BEAN_DEFAULT_ID) { // it means proc is null
+                // Verifica se c'è un errore (almeno un macroprocesso dev'esserci)
+                if (idM == BEAN_DEFAULT_ID) { // it means Liv 1 is null! Something's wrong
+                    return DASH; // "ERR!";
+                }
+                // Clausole per recuperare il macroprocesso anticorruttivo
+                level = (byte) 1;
+                tableFrom = "macroprocesso_at";
+                idD = String.valueOf(idM);
+            // Clausole per recuperare il processo anticorruttivo
+            } else {       
+                level = (byte) 2;
+                tableFrom = "processo_at";
+                idD = String.valueOf(idP);
+            }
+        // Clausole per recuperare il sottoprocesso anticorruttivo
+        } else {
+            level = (byte) 3;
+            tableFrom = "sottoprocesso_at";
+            idD = String.valueOf(idS);
+        }
+        final String GET_PROCESS_BY_INTERVIEW =
+                "SELECT " +
+                "       PAT.id                  AS \"id\"" +
+                "   ,   PAT.nome                AS \"nome\"" +
+                "   ,   PAT.codice              AS \"codice\"" +
+                "   ,   concat(PAT.id::VARCHAR,'.',PAT.codice)" +
+                "                               AS \"informativa\"" +
+                "   ,   PAT.ordinale            AS \"ordinale\"" +
+                "   ,   PAT.smartworking        AS \"smartWorking\"" +
+              //"   ,   PAT.id_area_rischio     AS \"idAppo\"" +
+                "   ,   PAT.attivita            AS \"descrizione\"" +
+                "   ," + level + "::SMALLINT    AS \"livello\"" +
+                "   FROM " + tableFrom + " PAT" +
+                "   WHERE PAT.id_rilevazione = " + idR +
+                "       AND PAT.id = " + idD +
+                "   ORDER BY PAT.nome";
+        return GET_PROCESS_BY_INTERVIEW;
+    }
+    
+    
+    /**
+     * <p>Estrae un elenco di interviste definita ciascuna come un insieme 
+     * di riposte a quesiti associati a una data rilevazione.<br />
+     * L'insieme di risposte viene identificato a partire da una chiave di fatto,
+     * costituita dai seguenti campi:<ul>
+     * <li>id struttura liv1, liv2, liv3, liv4</li>
+     * <li>id macroprocesso, processo, sottoprocesso</li>
+     * <li>id rilevazione</li>
+     * <li>stessa data e ora per tutte le risposte</li></ul></p>
+     * <p>Per ogni intervista, utilizza un ItemBean per memorizzare gli id
+     * degli oggetti correlati all'intervista; quindi utilizza tali id dell'item
+     * per estrarre, a partire dall'id in questione, il relativo oggetto completo,
+     * che memorizza nell'apposito bean per l'intervista (InterviewBean).<br />
+     * Infine, restituisce la lista di InterviewBean.</p> 
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param params    mappa contenente i parametri di navigazione
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ArrayList&lt;InterviewBean&gt;</code> - la lista di interviste trovate
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public ArrayList<InterviewBean> getInterviewsBySurvey(PersonBean user,
+                                                          HashMap<String, LinkedHashMap<String, String>> params,
+                                                          CodeBean survey)
+                                                   throws WebStorageException {
+        PreparedStatement pst = null;
+        ResultSet rs, rs1, rs2, rs3, rs4, rs5, rs6, rs7 = null;
+        ItemBean item = null;
+        InterviewBean interview = null;
+        AbstractList<InterviewBean> interviews = new ArrayList<>();
+        Vector<DepartmentBean> vS2child = null;
+        Vector<DepartmentBean> vS3child = null;
+        Vector<DepartmentBean> vS4child = null;
+        AbstractList<ProcessBean> vMchild = null;
+        AbstractList<ProcessBean> vPchild = null;
+        // Resource 'con' implements AutoCloseable interface, so we can use try-with-resource...
+        try (Connection con = prol_manager.getConnection()) {
+            // Carica la tabella che ad ogni rilevazione associa il numero di quesiti corrispondenti
+            //ConcurrentHashMap<String, Integer> questionAmounts = ConfigManager.getQuestionAmount();
+            // TODO: Controllare se user è superuser
+            try {
+                // Recupera il numero di quesiti associati alla rilevazione
+                //int limit = questionAmounts.get(survey.getNome()).intValue();
+                //String query = getQueryAnswers(params, survey.getId(), limit, GET_ALL_BY_CLAUSE, GET_ALL);
+                pst = con.prepareStatement(GET_INTERVIEWS);
+                pst.clearParameters();
+                pst.setInt(1, survey.getId());
+                pst.setInt(2, survey.getId());
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Crea una intervista raffinata vuota
+                    interview = new InterviewBean();
+                    // Crea una intervista grezza vuota
+                    item = new ItemBean();
+                    // La valorizza col contenuto della query
+                    BeanUtil.populate(item, rs);
+                    /* === Ricerca della struttura intervistata === */
+                    String queryL1 = getQueryStructureBySurvey(survey.getId(), BEAN_DEFAULT_ID, BEAN_DEFAULT_ID, BEAN_DEFAULT_ID, item.getCod1());
+                    // Controlla la significatività della query
+                    if (!queryL1.equals(DASH)) {
+                        // Cerca gli estremi della struttura di I livello
+                        pst = null;
+                        pst = con.prepareStatement(queryL1);
+                        pst.clearParameters();
+                        rs1 = pst.executeQuery();
+                        // Punta alla struttura L1
+                        if (rs1.next()) {
+                            // Prepara la struttura L1
+                            DepartmentBean s1 = new DepartmentBean();
+                            // Valorizza la struttura L1
+                            BeanUtil.populate(s1, rs1);
+                            // Ne cerca i figli
+                            vS2child = new Vector<>();
+                            pst = null;
+                            pst = con.prepareStatement(getQueryStructureBySurvey(survey.getId(), BEAN_DEFAULT_ID, BEAN_DEFAULT_ID, item.getCod2(), item.getCod1()));
+                            pst.clearParameters();
+                            rs2 = pst.executeQuery();
+                            // Punta alla struttura L2
+                            if (rs2.next()) {
+                                // Prepara la struttura L2
+                                DepartmentBean s2 = new DepartmentBean();
+                                // Valorizza la struttura L2
+                                BeanUtil.populate(s2, rs2);
+                                // Ne cerca i figli
+                                vS3child = new Vector<>();
+                                pst = null;
+                                pst = con.prepareStatement(getQueryStructureBySurvey(survey.getId(), BEAN_DEFAULT_ID, item.getCod3(), item.getCod2(), item.getCod1()));
+                                pst.clearParameters();
+                                rs3 = pst.executeQuery();
+                                // Punta alla struttura L3
+                                if (rs3.next()) {
+                                    // Prepara la struttura L3
+                                    DepartmentBean s3 = new DepartmentBean();
+                                    // Valorizza la struttura L3
+                                    BeanUtil.populate(s3, rs3);
+                                    // Ne cerca i figli 
+                                    vS4child = new Vector<>();
+                                    pst = null;
+                                    pst = con.prepareStatement(getQueryStructureBySurvey(survey.getId(), item.getCod4(), item.getCod3(), item.getCod2(), item.getCod1()));
+                                    pst.clearParameters();
+                                    rs4 = pst.executeQuery();
+                                    // Punta alla struttura L4
+                                    if (rs4.next()) {
+                                        // Prepara la struttura L4
+                                        DepartmentBean s4 = new DepartmentBean();
+                                        // Valorizza la struttura L4
+                                        BeanUtil.populate(s4, rs4);
+                                        // Valorizza il padre di L4
+                                        s4.setPadre(s3);
+                                        // Aggiunge L4 alla lista di figlie di L3
+                                        vS4child.add(s4);
+                                        // Aggiunge le figlie (sempre una sola) a L3
+                                        s3.setFiglie(vS4child);
+                                    }
+                                    // Valorizza il padre di L3
+                                    s3.setPadre(s2);
+                                    // Aggiunge L3 alla lista di figlie di L2
+                                    vS3child.add(s3);
+                                    // Aggiunge le figlie (sempre una sola) a L2
+                                    s2.setFiglie(vS3child);
+                                }
+                                // Valorizza il padre di L2
+                                s2.setPadre(s1);
+                                // Aggiunge L2 alla lista di figlie di L1
+                                vS2child.add(s2);
+                                // Aggiunge le figlie (sempre una sola) a L1
+                                s1.setFiglie(vS2child);
+                            }
+                            interview.setStruttura(s1);
+                        }
+                        // Che sia presente una struttura L1 è un'assunzione forte, ma non eccessiva
+                    }
+                    /* === Ricerca del processo sondato === */
+                    // Casting from float to int
+                    int idM = (int) item.getValue1();
+                    int idP = (int) item.getValue2();
+                    int idS = (int) item.getValue3();
+                    // MAT means "Macroprocesso Anticorruzione Trasparenza"
+                    String queryMAT = getQueryProcessBySurvey(survey.getId(), BEAN_DEFAULT_ID, BEAN_DEFAULT_ID, idM);
+                    // Controlla la significatività della query
+                    if (!queryMAT.equals(DASH)) {
+                        // Cerca gli estremi della struttura di I livello
+                        pst = null;
+                        pst = con.prepareStatement(queryMAT);
+                        pst.clearParameters();
+                        rs5 = pst.executeQuery();
+                        // Punta al macroprocesso censito a fini anticorruttivi
+                        if (rs5.next()) {
+                            // Prepara il macroprocesso
+                            ProcessBean m = new ProcessBean();
+                            // Valorizza il macroprocesso
+                            BeanUtil.populate(m, rs5);
+                            // Ne cerca i figli
+                            vMchild = new Vector<>();
+                            pst = null;
+                            pst = con.prepareStatement(getQueryProcessBySurvey(survey.getId(), BEAN_DEFAULT_ID, idP, idM));
+                            pst.clearParameters();
+                            rs6 = pst.executeQuery();
+                            // Punta al processo
+                            if (rs6.next()) {
+                                // Prepara il processo
+                                ProcessBean p = new ProcessBean();
+                                // Valorizza il processo
+                                BeanUtil.populate(p, rs6);
+                                // Ne cerca i figli
+                                vPchild = new Vector<>();
+                                pst = null;
+                                pst = con.prepareStatement(getQueryProcessBySurvey(survey.getId(), idS, idP, idM));
+                                pst.clearParameters();
+                                rs7 = pst.executeQuery();
+                                // Punta alla struttura L3
+                                if (rs7.next()) {
+                                    // Prepara il sottoprocesso
+                                    ProcessBean s = new ProcessBean();
+                                    // Valorizza il sottoprocesso
+                                    BeanUtil.populate(s, rs7);
+                                    // Aggiunge il sottoprocesso alla lista di figlie del processo
+                                    vPchild.add(s);
+                                    // Aggiunge le figlie (sempre una sola) al processo
+                                    p.setProcessi(vPchild);
+                                }
+                                // Aggiunge il processo alla lista di figlie del macroprocesso
+                                vMchild.add(p);
+                                // Aggiunge le figlie (sempre una sola) al macroprocesso
+                                m.setProcessi(vMchild);
+                            }
+                            interview.setProcesso(m);
+                        }
+                        // Che sia presente un macroprocesso è un'assunzione forte, ma non eccessiva
+                    }
+                    // Propaga data di ultima modifica
+                    interview.setDataUltimaModifica(Utils.format(item.getCodice(), DATA_SQL_PATTERN, DATA_SQL_PATTERN));
+                    // Propaga ora di ultima modifica
+                    Time t = Utils.format(item.getExtraInfo(), TIME_SQL_PATTERN);
+                    interview.setOraUltimaModifica(t);
+                    // La aggiunge alla lista di interviste trovate
+                    interviews.add(interview);
+                }
+                // Closes the statement
+                pst.close();
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<InterviewBean>) interviews;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio non recuperabile; problema nel metodo di estrazione delle risposte.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (CommandException ce) {
+                String msg = FOR_NAME + "Probabile problema nel metodo di utilita\' di conversione delle date.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + ce.getMessage(), ce);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally { // ...still...
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
         }
     }
     
@@ -2543,18 +2983,17 @@ public class DBWrapper implements Query, Constants {
     
     /**
      * <p>Metodo per fare l'inserimento di un nuovo questionario.</p>
-     * TODO COMMENTO
-     * @param idProj    identificativo del progetto, al contesto del quale l'indicatore fa riferimento
+     *
      * @param user      utente loggato
-     * @param projectsWritableByUser    Vector contenente tutti i progetti scrivibili dall'utente; l'indicatore deve essere agganciata ad uno di questi
-     * @param params    tabella contenente tutti i valori che l'utente inserisce per il nuovo indicatore;
+     * @param params    mappa contenente i parametri di navigazione
+     * @param items     numero di quesiti a cui rispondere e quindi numero di risposte da inserire
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
-    @SuppressWarnings({ "null" })
-    public void insertQuest(PersonBean user, 
-                            HashMap<String, LinkedHashMap<String, String>> params,
-                            int items) 
-                     throws WebStorageException {
+    @SuppressWarnings({ "null", "static-method" })
+    public void insertAnswers(PersonBean user, 
+                              HashMap<String, LinkedHashMap<String, String>> params,
+                              int items) 
+                       throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         // Dizionario dei parametri contenente il solo codice della rilevazione
@@ -2685,8 +3124,10 @@ public class DBWrapper implements Query, Constants {
             }
             // End: <==
             con.commit();
+            pst.close();
+            pst = null;
         } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto Bean non valorizzato; problema nel codice SQL.\n";
+            String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
