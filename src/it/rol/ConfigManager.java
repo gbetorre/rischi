@@ -290,7 +290,7 @@ public class ConfigManager extends HttpServlet {
          * servlet. Tali classi dovrebbero essere dichiarate in un file
          * di configurazione (p.es. web.xml) o nel database.
          */
-        classiCommand = new Vector<ItemBean>();
+        classiCommand = new Vector<>();
         try {
             classiCommand = db.lookupCommand();
         }
@@ -299,7 +299,7 @@ public class ConfigManager extends HttpServlet {
         }
         ItemBean voceMenu = null;
         Command classCommand = null;
-        commands = new ConcurrentHashMap<String, Command>();
+        commands = new ConcurrentHashMap<>();
         for (int i = 0; i < classiCommand.size(); i++) {
             voceMenu = classiCommand.get(i);
             try {
