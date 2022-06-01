@@ -36,6 +36,8 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import it.rol.bean.CodeBean;
+
 
 /**
  * <p>Questa &egrave; l'interfaccia contenente le costanti utilizzabili da tutti i 
@@ -60,7 +62,7 @@ public interface Constants extends Serializable {
     public static final byte NOTHING = 0;
     /**
      * <p>Costante da utilizzare quando serve un valore per inizializzazione
-     * o da utilizzare come argomento.</p>
+     * in un Controller o da utilizzare come argomento.</p>
      * Incapsula un valore convenzionale per i test che controllano,
      * nelle Command, se &egrave; presente un valore significativo;
      * se in Request non &grave; presente tale valore, lo imposta a
@@ -73,6 +75,14 @@ public interface Constants extends Serializable {
      * </code>{@link com.oreilly.servlet.ParameterParser ParameterParser}</code>.</p>
      */
     public static final int DEFAULT_ID = -1;
+    /**
+     * <p>Costante da utilizzare quando serve un valore per inizializzazione
+     * in un Bean del Model o da utilizzare come argomento.</p>
+     * <p>Incapsula un valore convenzionale definito nel bean padre CodeBean
+     * per comodit&agrave; di accesso dal di fuori del package bean e delle
+     * sottoclassi di CodeBean.</p>
+     */
+    public static final int BEAN_DEFAULT_ID = CodeBean.BEAN_DEFAULT_ID;
     /* ************************************************************************ *
      *              Costanti parlanti per valori boolean di flags               *
      * ************************************************************************ */
@@ -130,7 +140,7 @@ public interface Constants extends Serializable {
     /**
      * <p>Costante per il parametro identificante la parte di presentazione quesiti.</p>
      */
-    public static final String PART_SELECT_QST          = "sqs";
+    public static final String PART_SELECT_QST          = "sqt";
     /**
      * <p>Costante per il parametro identificante la parte di conferma quesiti.</p>
      */
@@ -139,6 +149,10 @@ public interface Constants extends Serializable {
      * <p>Costante per il parametro identificante la parte di riepilogo quesiti.</p>
      */
     public static final String PART_RESUME_QST          = "rqs";
+    /**
+     * <p>Costante per il parametro identificante la parte di elenco interviste.</p>
+     */
+    public static final String PART_SELECT_QSS          = "sqs";
     /**
      * <p>Costante per il parametro identificante la pagina dell'utente.</p>
      */
@@ -277,6 +291,14 @@ public interface Constants extends Serializable {
      * <p>Contiene la formattazione che deve avere una data all'interno dell'applicazione.</p>
      */
     public static final SimpleDateFormat DATA_FORMAT = new SimpleDateFormat(DATA_SQL_PATTERN);
+    /**
+     * <p>Pattern per un oggetto Time espresso su ore:minuti:secondi.</p> 
+     */
+    public static final String TIME_SQL_PATTERN = "hh:mm:ss";
+    /**
+     * <p>Pattern per un oggetto Time espresso su 12 ore.</p>
+     */
+    public static final String TWELWE_HOUR_FORMAT = "HH:mm";
     /**
      * <p>Numero di anni da spostare per l'estrazione degli elementi
      * nella visualizzazione di default.
