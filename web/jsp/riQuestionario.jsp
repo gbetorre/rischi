@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
 <c:set var="itCounts" value="${zero}" scope="page" />
 <c:set var="structs" value="${requestScope.strutture}" scope="page" />
@@ -57,14 +56,14 @@
     </c:forEach>
     </div><br />
     <form id="select_ent_form" class="form-horizontal" action="" method="post">
-      <input type="text" name="r" value="${param['r']}" />
-      <input type="text" name="sliv1" value="${codLiv1}" />
-      <input type="text" name="sliv2" value="${codLiv2}" />
-      <input type="text" name="sliv3" value="${codLiv3}" />
-      <input type="text" name="sliv4" value="${codLiv4}" />
-      <input type="text" name="pliv1" value="${idPro1}" />
-      <input type="text" name="pliv2" value="${idPro2}" />
-      <input type="text" name="pliv3" value="${idPro3}" />
+      <input type="hidden" name="r" value="${param['r']}" />
+      <input type="hidden" name="sliv1" value="${codLiv1}" />
+      <input type="hidden" name="sliv2" value="${codLiv2}" />
+      <input type="hidden" name="sliv3" value="${codLiv3}" />
+      <input type="hidden" name="sliv4" value="${codLiv4}" />
+      <input type="hidden" name="pliv1" value="${idPro1}" />
+      <input type="hidden" name="pliv2" value="${idPro2}" />
+      <input type="hidden" name="pliv3" value="${idPro3}" />
       <h4 class="btn-lightgray">Compilazione quesiti</h4>
       <div class="form-custom form-group" id="str_form">
         <div class="panel-body form-group">
@@ -80,13 +79,13 @@
                   <cite><c:out value="${quesito.formulazione}" /></cite>
                 </div>
                 <div class="col-sm-2">
-                <input type="text" name="Q${itCounts}-id" value="${quesito.id}">
+                <input type="hidden" name="Q${itCounts}-id" value="${quesito.id}">
               <c:choose>
                 <c:when test="${quesito.tipo.nome eq 'On/Off'}">
-                  <input type="radio" id="Q.${quesito.id}-Y" name="Q${itCounts}" value="SI">
-                  <label for="Q.${quesito.id}-Y"> SI &nbsp;</label>
-                  <input type="radio" id="Q.${quesito.id}-N" name="Q${itCounts}" value="NO">
-                  <label for="Q.${quesito.id}-N"> NO &nbsp;</label>
+                  <input type="radio" id="Q${quesito.id}-Y" name="Q${itCounts}" value="SI">
+                  <label for="Q${quesito.id}-Y"> SI &nbsp;</label>
+                  <input type="radio" id="Q${quesito.id}-N" name="Q${itCounts}" value="NO">
+                  <label for="Q${quesito.id}-N"> NO &nbsp;</label>
                 </c:when>
                 <c:when test="${quesito.tipo.nome eq 'Quantitativo'}">
                   <input type="text" class="form-custom" id="Q${quesito.id}-V" name="Q${itCounts}" size="4" placeholder="#">
@@ -103,14 +102,14 @@
                 <div class="col-sm-10">
                   <cite><c:out value="${quesitoFiglio.formulazione}" /></cite>
                 </div>
-                <div class="col-sm-2">
-                <input type="text" name="Q${itCounts}-id" value="${quesitoFiglio.id}">
+                <div class="col-sm-2" id="T${quesitoFiglio.parentQuestion.id}">
+                <input type="hidden" name="Q${itCounts}-id" value="${quesitoFiglio.id}">
               <c:choose>
                 <c:when test="${quesitoFiglio.tipo.nome eq 'On/Off'}">
-                  <input type="radio" id="Q.${quesitoFiglio.id}-Y" name="Q${itCounts}" value="SI" disabled>
-                  <label for="Q.${quesitoFiglio.id}-Y"> SI &nbsp;</label>
-                  <input type="radio" id="Q.${quesitoFiglio.id}-N" name="Q${itCounts}" value="NO" disabled>
-                  <label for="Q.${quesitoFiglio.id}-N"> NO &nbsp;</label>
+                  <input type="radio" id="Q${quesitoFiglio.id}-Y" name="Q${itCounts}" value="SI" disabled>
+                  <label for="Q${quesitoFiglio.id}-Y"> SI &nbsp;</label>
+                  <input type="radio" id="Q${quesitoFiglio.id}-N" name="Q${itCounts}" value="NO" disabled>
+                  <label for="Q${quesitoFiglio.id}-N"> NO &nbsp;</label>
                 </c:when>
                 <c:when test="${quesitoFiglio.tipo.nome eq 'Quantitativo'}">
                   <input type="text" class="form-custom" id="Q${quesitoFiglio.id}-V" name="Q${itCounts}" size="4" placeholder="#" disabled>
@@ -119,11 +118,10 @@
                 </div>
               </div>
               <div class="panel-body contractedTree">
-                <textarea class="form-control" name="Q${itCounts}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione" readonly></textarea>  
+                <textarea class="form-control" id="A${quesitoFiglio.parentQuestion.id}" name="Q${itCounts}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione" readonly></textarea>  
               </div>
               <c:set var="itCounts" value="${itCounts + 1}" scope="page" />
             </c:forEach>
-              
             </div>
           </c:if>
         </c:forEach>
@@ -145,7 +143,20 @@
     $(document).ready(function() {
     <c:forEach var="entry" items="${quests}" varStatus="status">
       <c:forEach var="quesito" items="${quests.get(entry.key)}">
-        <c:if test="${quesito.tipo.nome eq 'Quantitativo'}">
+      <c:choose>
+      <c:when test="${quesito.tipo.nome eq 'On/Off'}">
+        <c:if test="${not empty quesito.childQuestions}"> 
+        $("#Q${quesito.id}-Y").click(function() {
+          if ($("#Q${quesito.id}-Y").is(':checked')) {
+            $("#T${quesito.id} :input[type=text]").prop( "disabled", false );
+            $("#T${quesito.id} :input[type=text]").removeClass("form-custom");
+            $("#T${quesito.id} :input[type=text]").addClass("btnNav");
+            $("#A${quesito.id}").prop("readonly", false);
+          }
+        });
+        </c:if>
+      </c:when>
+      <c:when test="${quesito.tipo.nome eq 'Quantitativo'}">
         $("#Q${quesito.id}-V").change(function() {
             $("#Q${quesito.id}-V").removeClass("form-custom");
             $("#Q${quesito.id}-V").removeClass("bgcolorred");
@@ -158,7 +169,8 @@
                 $("#Q${quesito.id}-V").addClass("bgcolor1");
             }
         });
-        </c:if>
+      </c:when>
+      </c:choose>
       </c:forEach>
     </c:forEach>
     });
