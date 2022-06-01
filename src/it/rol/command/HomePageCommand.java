@@ -51,6 +51,7 @@ import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Main;
 import it.rol.Query;
+import it.rol.Utils;
 import it.rol.bean.CodeBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
@@ -541,27 +542,51 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
                                                        String pageParams,
                                                        String extraInfo)
                                                 throws CommandException {
-        AbstractList<ItemBean> nav = new LinkedList<>();
         int prime = 13;                 // per ottimizzare
-        final String homeLbl = "Home";
-        String codeSurvey, tokenSurvey = null;
+        // Ottiene l'elenco delle Command
         Vector<ItemBean> classiCommand = ConfigManager.getClassiCommand();
+        // Genera l'etichetta per nodo radice
+        final String homeLbl = Utils.capitalize(COMMAND_HOME);
+        // Dichiara la struttura per la lista di voci da usare per generare le breadcrumbs
+        AbstractList<ItemBean> nav = new LinkedList<>();
+        // Variabili di appoggio
+        String codeSurvey, tokenSurvey = null;
+        // Dictonary contenente i soli valori del token 'p' permessi
         LinkedHashMap<String, String> allowedParams = new LinkedHashMap<>(prime);
+        // Lista dei token che non devono generare breadcrumbs ("token vietati")
+        LinkedList<String> deniedTokens = new LinkedList<>();
+        // Aggiunge un tot di token vietati, caricati dinamicamente
         String deniedPattern1 = "sliv";
         String deniedPattern2 = "pliv";
-        allowedParams.put(PART_SEARCH_PERSON, "Ricerca");
-        allowedParams.put(PART_SELECT_STR, "Scelta Struttura");
-        allowedParams.put(PART_PROCESS, "Scelta Processi");
-        allowedParams.put(PART_SELECT_QST, "Quesiti");
-        allowedParams.put(PART_CONFIRM_QST, "Riepilogo");
+        for (int i = 1; i <= 4; i++) {
+            String patternToDeny1 = new String(deniedPattern1 + i);
+            String patternToDeny2 = new String(deniedPattern2 + i);
+            deniedTokens.add(patternToDeny1);
+            deniedTokens.add(patternToDeny2);
+        }
+        // Aggiunge le esclusioni per data e ora
+        deniedTokens.add("d");
+        deniedTokens.add("t");
+        // Aggiunte i valori del token 'p' che devono generare breadcrumb associandoli a un'etichetta da mostrare in breadcrumb
+        allowedParams.put(PART_SEARCH_PERSON,   "Ricerca");
+        allowedParams.put(PART_SELECT_STR,      "Scelta Struttura");
+        allowedParams.put(PART_PROCESS,         "Scelta Processi");
+        allowedParams.put(PART_SELECT_QST,      "Quesiti");
+        allowedParams.put(PART_CONFIRM_QST,     "Riepilogo");
+        allowedParams.put(PART_SELECT_QSS,      "Interviste");
+        allowedParams.put(PART_RESUME_QST,      "Risposte");
         try {
+            // Tokenizza la querystring in base all'ampersand
             String[] tokens = pageParams.split(AMPERSAND);
-            Map<String, String> tokensAsMap = new LinkedHashMap<String, String>(prime);
+            // Prepara la lista dei parametri da esporre nelle breadcrumbs
+            Map<String, String> tokensAsMap = new LinkedHashMap<>(prime);
+            // Esamina ogni token
             for (int i = 0; i < tokens.length; i++) {
                 String couple = tokens[i];
                 String paramName = couple.substring(NOTHING, couple.indexOf(EQ));
                 String paramValue = couple.substring(couple.indexOf(EQ));
-                if (!paramName.startsWith(deniedPattern1) && !paramName.startsWith(deniedPattern2)) {
+                // Test: il token trovato non rientra in quelli da escludere? 
+                if (!deniedTokens.contains(paramName)) {
                     tokensAsMap.put(paramName, paramValue);
                     couple = paramName = paramValue = null;
                 }
