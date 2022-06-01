@@ -72,7 +72,7 @@ public class CodeBean implements Serializable {
     /**
      * 
      */
-    protected static final int BEAN_DEFAULT_ID = -2;
+    public static final int BEAN_DEFAULT_ID = -2;
     
     /* **************************************************** *
      *                  Variabili d'istanza                 *
