@@ -66,11 +66,94 @@
       <input type="hidden" name="pliv3" value="${idPro3}" />
       <h4 class="btn-lightgray">Compilazione quesiti</h4>
       <div class="form-custom form-group" id="str_form">
-        <div class="panel-body form-group">
+        <div class="panel-body form-group">      
+          <div class="accordion" id="accordionExample">     
+    <c:forEach var="entry" items="${quests}" varStatus="status">
+            <div class="card">
+              <div class="card-header" id="heading${status.count}">
+                <h2 class="mb-0">
+                  <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse${status.count}" aria-expanded="false" aria-controls="collapse${status.count}">
+                    <c:out value="${status.count}. ${entry.key.nome}" />
+                  </button>
+                </h2>
+              </div>
+              <div id="collapse${status.count}" class="collapse" aria-labelledby="heading${status.count}" data-parent="#accordionExample">
+                <div class="card-body">
+        <c:forEach var="quesito" items="${quests.get(entry.key)}">
+          <c:if test="${empty quesito.parentQuestion}">
+                  <div class="panel panel-default bgAct${entry.key.id}">
+                    <div class="row panel-heading">
+                      <div class="col-sm-10">
+                        <cite><c:out value="${quesito.formulazione}" /></cite>
+                      </div>
+                      <div class="col-sm-2">
+                        <input type="hidden" name="Q${itCounts}-id" value="${quesito.id}">
+                    <c:choose>
+                      <c:when test="${quesito.tipo.nome eq 'On/Off'}">
+                        <input type="radio" id="Q${quesito.id}-Y" name="Q${itCounts}" value="SI">
+                        <label for="Q${quesito.id}-Y"> SI &nbsp;</label>
+                        <input type="radio" id="Q${quesito.id}-N" name="Q${itCounts}" value="NO">
+                        <label for="Q${quesito.id}-N"> NO &nbsp;</label>
+                      </c:when>
+                      <c:when test="${quesito.tipo.nome eq 'Quantitativo'}">
+                        <input type="text" class="form-custom" id="Q${quesito.id}-V" name="Q${itCounts}" size="4" placeholder="#">
+                      </c:when>
+                    </c:choose>
+                      </div>
+                    </div>
+                    <div class="panel-body contractedTree">
+                      <textarea class="form-control" name="Q${itCounts}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione"></textarea>  
+                    </div>
+                    <c:set var="itCounts" value="${itCounts + 1}" scope="page" />
+                  <c:forEach var="quesitoFiglio" items="${quesito.childQuestions}">
+                    <div class="row panel-heading">
+                      <div class="col-sm-10">
+                        <cite><c:out value="${quesitoFiglio.formulazione}" /></cite>
+                      </div>
+                      <div class="col-sm-2" id="T${quesitoFiglio.parentQuestion.id}">
+                      <input type="hidden" name="Q${itCounts}-id" value="${quesitoFiglio.id}">
+                    <c:choose>
+                      <c:when test="${quesitoFiglio.tipo.nome eq 'On/Off'}">
+                        <input type="radio" id="Q${quesitoFiglio.id}-Y" name="Q${itCounts}" value="SI" disabled>
+                        <label for="Q${quesitoFiglio.id}-Y"> SI &nbsp;</label>
+                        <input type="radio" id="Q${quesitoFiglio.id}-N" name="Q${itCounts}" value="NO" disabled>
+                        <label for="Q${quesitoFiglio.id}-N"> NO &nbsp;</label>
+                      </c:when>
+                      <c:when test="${quesitoFiglio.tipo.nome eq 'Quantitativo'}">
+                        <input type="text" class="form-custom" id="Q${quesitoFiglio.id}-V" name="Q${itCounts}" size="4" placeholder="#" disabled>
+                      </c:when>
+                    </c:choose>
+                      </div>
+                    </div>
+                    <div class="panel-body contractedTree">
+                      <textarea class="form-control" id="A${quesitoFiglio.parentQuestion.id}" name="Q${itCounts}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione" readonly></textarea>  
+                    </div>
+                    <c:set var="itCounts" value="${itCounts + 1}" scope="page" />
+                  </c:forEach>
+                  </div>
+          </c:if>
+        </c:forEach>
+                </div>
+              </div>
+            </div>
+    </c:forEach>      
+          </div>     
+      
+      <%--
+          <div class="accordion" id="accordionExample">
       <c:forEach var="entry" items="${quests}" varStatus="status">
+      <c:if test="${status.count gt 1}"><c:set var="show" value="" scope="page" /></c:if>
           <!--  Ambito di Analisi -->
-          <div class="row substatus">
-            <h5 class="heading"><c:out value="${status.count}. ${entry.key.nome}" /></h5>
+            <div class="card">
+              <div class="card-header" id="heading${status.count}">
+                <h2 class="mb-0">
+                  <button class="btn btn-link btn-block text-left" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${status.count}" aria-expanded="true" aria-controls="collapse${status.count}">
+                    <c:out value="${status.count}. ${entry.key.nome}" />
+                  </button>
+                </h2>
+              </div>
+              <div id="collapse${status.count}" class="collapse" aria-labelledby="heading${status.count}" data-bs-parent="#accordionExample">
+                <div class="card-body">
         <c:forEach var="quesito" items="${quests.get(entry.key)}">
           <c:if test="${empty quesito.parentQuestion}">
             <div class="panel panel-default subfields">
@@ -126,8 +209,11 @@
           </c:if>
         </c:forEach>
           </div>
-          <hr class="riga" />
+        </div>
+        </div>
+        <hr class="riga" />
       </c:forEach>
+        </div>--%>
           <br />
           &nbsp;
           <div class="centerlayout">
