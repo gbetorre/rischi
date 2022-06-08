@@ -216,7 +216,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
         // Recupera o inizializza 'codice rilevazione' (Survey)
-        String codeSur = parser.getStringParameter("r", DASH);
+        String codeSur = parser.getStringParameter(PARAM_SURVEY, DASH);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", DASH);
         // Flag di scrittura
@@ -330,7 +330,51 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                 paramsProc.append(AMPERSAND);
                                 paramsProc.append("p" + set.getKey() + "=" + set.getValue());
                             }
-                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_CONFIRM_QST + paramsStruct.toString() + paramsProc.toString() + "&r=" + codeSur;
+                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_SELECT_QSS + "&r=" + codeSur;
+                        } else if (part.equalsIgnoreCase(PART_RESUME_QST)) {
+                            /* ************************************************ *
+                             *                UPDATE Answers Part               *
+                             * ************************************************ */
+                            /* Riduce il rischio di attacchi di tipo Cross-site request forgery (CSRF)
+                             * perche' tutte le funzioni che modificano lo stato degli oggetti sono invocate tramite POST (infatti
+                             * qui siamo nel ramo @PostMapping). In altre parole, avrei potuto passare l'id del quesito da
+                             * aggiornare come parametro dell'action, e inviare la form stessa tramite metodo GET (in tal caso qui non
+                             * ci saremmo arrivati e saremmo andati nel ramo @GetMapping). Siccome pero' questa form induce
+                             * un aggiornamento dei dati, cio' avrebbe esposto al rischio di attacchi CSRF. Invece, la form viene
+                             * gestita tramite POST e l'id del quesito da aggiornare viene passato tramite un campo hidden.
+                             * Cio' non impedisce attacchi di tipo "fake form" (non so bene come si chiamino) pero' in tal caso
+                             * il browser che invia la fake form con il valore del campo hidden modificato deve essere loggato,
+                             * cioe' e' l'hacker stesso che deve essere loggato, il che non e' banale ed e' ben diverso da inviare
+                             * una gif (con i parametri) a un utente che ha gia' il browser loggato nell'applicazione e ci clicca sopra. */
+                            // Aggiorna il quesito
+                            db.updateAnswer(user, params);
+                            // Prepara il passaggio dei parametri identificativi dei processi
+                            LinkedHashMap<String, String> macro = params.get(PART_PROCESS);
+                            // Stringa dinamica per contenere i parametri di scelta processi
+                            StringBuffer paramsProc = new StringBuffer();
+                            for (Map.Entry<String, String> set : macro.entrySet()) {
+                                // Printing all elements of a Map
+                                paramsProc.append(AMPERSAND);
+                                paramsProc.append("p" + set.getKey() + "=" + set.getValue());
+                            }
+                            // Prepara il passaggio dei parametri identificativi del timestamp della rilevazione
+                            LinkedHashMap<String, String> dateTime = params.get(PARAM_SURVEY);
+                            // Stringa dinamica per contenere i parametri di scelta processi
+                            StringBuffer dateTimeProc = new StringBuffer();
+                            for (Map.Entry<String, String> set : dateTime.entrySet()) {
+                                // Printing all elements of a Map but 'r'
+                                if (!set.getKey().equals(PARAM_SURVEY)) {
+                                    dateTimeProc.append(AMPERSAND);
+                                    dateTimeProc.append(set.getKey() + EQ + set.getValue());
+                                }
+                            }
+                            // Costruisce l'indirizzo a cui redirezionare
+                            redirect =  "q" + EQ + COMMAND_RISK + AMPERSAND +
+                                        "p" + EQ + PART_RESUME_QST + 
+                                        paramsStruct.toString() + 
+                                        paramsProc.toString() +
+                                        dateTimeProc.toString() + AMPERSAND +
+                                        PARAM_SURVEY + EQ + codeSur;
                         }
                     } else {
                         // Deve eseguire una eliminazione
@@ -549,6 +593,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         LinkedHashMap<String, String> proat = new LinkedHashMap<>();
         LinkedHashMap<String, String> answs = new LinkedHashMap<>();
         LinkedHashMap<String, String> survey = new LinkedHashMap<>();
+        LinkedHashMap<String, String> quest = new LinkedHashMap<>();
         /* **************************************************** *
          *     Caricamento parametro di Codice Rilevazione      *
          * **************************************************** */      
@@ -592,6 +637,13 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                 answs.put("note" + String.valueOf(i),  parser.getStringParameter("Q" + String.valueOf(i) + "-note", VOID_STRING));
             }
             formParams.put(PART_SELECT_QST, answs);
+        }
+        if (part.equals(PART_RESUME_QST)) {
+            // Recupera gli estremi del quesito di cui aggiornare la risposta
+            quest.put("quid",    parser.getStringParameter("q-id", VOID_STRING));
+            quest.put("risp",    parser.getStringParameter("q-risp", VOID_STRING));
+            quest.put("note",    parser.getStringParameter("q-note", VOID_STRING));
+            formParams.put(PART_RESUME_QST, quest);
         }
     }
     
