@@ -14,7 +14,7 @@
     <meta name="language" content="Italian" />
     <meta name="description" content="${requestScope.advice}" />
     <meta name="viewport" content="width=device-width, user-scalable=no,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
-    <meta name="creator" content="Universita' degli studi di Verona" />
+    <meta name="creator" content="Giovanroberto Torre" />
     <meta name="author" content="Giovanroberto Torre, giovanroberto.torre@univr.it" />
     <link rev="made" href="giovanroberto.torre@univr.it" />
     <meta http-equiv='cache-control' content='no-cache'>
@@ -34,7 +34,8 @@
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery-modal.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/plugin/grayscale.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />cookie/cookieconsent.min.js"></script>
-    <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery-datatables.js"></script>
+    <!-- <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery-datatables.js"></script> -->
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery-datatables-bootstrap4.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />gpro.js"></script>
     <!-- Begin Cookie Consent plugin by Silktide - http://silktide.com/cookieconsent -->
@@ -72,7 +73,8 @@
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />style.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />menu.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />cookie/cookieconsent.min.css" type="text/css" />
-    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-datatables.css" type="text/css" />
+    <%-- <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-datatables.css" type="text/css" /> --%>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-bootstrap-datatables.css" type="text/css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" integrity="sha384-/frq1SRXYH/bSyou/HUp/hib7RVN1TawQYja658FEOodR/FQBKVqT9Ol+Oz3Olq5" crossorigin="anonymous">
   </head>
