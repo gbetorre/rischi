@@ -4,17 +4,17 @@
 <%@ include file="URL.jspf" %>
 <c:set var="quests" value="${requestScope.elencoInterviste}" scope="page" />
     <h4 class="btn-lightgray">Interviste effettuate</h4>
-    <table class="table table-bordered table-hover table-sm">
+    <table class="table table-bordered table-hover table-sm" id="listInt">
       <thead class="thead-light">
         <tr>
           <th class="bg-primary text-white" scope="col" width="*"><div class="text-center">Data Intervista</div></th>
-          <th class="" scope="col" width="13%">Struttura Liv 1</th>
-          <th class="" scope="col" width="13%">Struttura Liv 2</th>
-          <th class="" scope="col" width="13%">Struttura Liv 3</th>
-          <th class="" scope="col" width="13%">Struttura Liv 4</th>
-          <th class="bg-warning" scope="col" width="13%">Macroprocesso</th>
-          <th class="bgcolorgreen" scope="col" width="13%">Processo</th>
-          <th class="reportWp" scope="col" width="13%">Sottoprocesso</th>
+          <th class="" scope="col" width="12%">Struttura Liv 1</th>
+          <th class="" scope="col" width="12%">Struttura Liv 2</th>
+          <th class="" scope="col" width="12%">Struttura Liv 3</th>
+          <th class="" scope="col" width="12%">Struttura Liv 4</th>
+          <th class="bg-warning" scope="col" width="12%">Macroprocesso</th>
+          <th class="bgcolorgreen" scope="col" width="12%">Processo</th>
+          <th class="reportWp" scope="col" width="12%">Sottoprocesso</th>
         </tr>
       </thead>
       <tbody>
@@ -40,18 +40,35 @@
           <td class="bgcolor1" width="*">
             <%--a href="${initParam.appName}/?q=ri&p=rqs&sliv1=${iview.struttura.informativa}&sliv2=${iview.struttura.figlie.get(zero).informativa}&sliv3=${iview.struttura.figlie.get(zero).figlie.get(zero).informativa}&sliv4=${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).informativa}&r=${param['r']}"--%>
             <a href="${rqsInstance}">
-              <fmt:formatDate value="${iview.dataUltimaModifica}" pattern="dd/MM/yyyy" /> <fmt:formatDate value="${iview.oraUltimaModifica}" pattern="HH:mm" />
+              <c:out value="${loop.count}" /><sup>a</sup> &ndash; 
+              <fmt:formatDate value="${iview.dataUltimaModifica}" pattern="dd/MM/yyyy" /> 
+              <fmt:formatDate value="${iview.oraUltimaModifica}" pattern="HH:mm" />
             </a>
           </td>
-          <td class="bg-primary text-white" width="13%"><strong><c:out value="${iview.struttura.nome}" /></strong></td>
-          <td class="bg-primary text-white" width="13%"><strong><c:out value="${iview.struttura.figlie.get(zero).nome}" /></strong></td>
-          <td class="bg-primary text-white" width="13%"><div class="text-center"><strong><c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).nome}" /></strong></div></td>
-          <td class="bg-primary text-white" width="13%"><div class="text-center"><strong><c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).nome}" /></strong></div></td>
-          <td class="bgcolor1" width="13%"><strong><c:out value="${iview.processo.nome}" /></strong></td>
-          <td class="bgcolor1" width="13%"><c:out value="${iview.processo.processi.get(zero).nome}" /></td>
-          <td class="bgcolor1" width="13%"><c:out value="${iview.processo.processi.get(zero).processi.get(zero).nome}" /></td>
+          <td class="bg-primary text-white" width="12%"><strong><c:out value="${iview.struttura.nome}" /></strong></td>
+          <td class="bg-primary text-white" width="12%"><strong><c:out value="${iview.struttura.figlie.get(zero).nome}" /></strong></td>
+          <td class="bg-primary text-white" width="12%"><div class="text-center"><strong><c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).nome}" /></strong></div></td>
+          <td class="bg-primary text-white" width="12%"><div class="text-center"><strong><c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).nome}" /></strong></div></td>
+          <td class="bgcolor1" width="12%"><strong><c:out value="${iview.processo.nome}" /></strong></td>
+          <td class="bgcolor1" width="12%"><c:out value="${iview.processo.processi.get(zero).nome}" /></td>
+          <td class="bgcolor1" width="12%"><c:out value="${iview.processo.processi.get(zero).processi.get(zero).nome}" /></td>
         </tr>
     </c:forEach>
       </tbody>
     </table>
     <h4 class="heading avvisiTot">Interviste trovate: <button type="button" class="btn btn-success"><span class="badge badge-pill badge-light">${quests.size()}</span></button></h4>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('#listInt').DataTable({
+          "ordering": true,  
+          "paging": false,
+          "bInfo": false,
+          "oLanguage": {
+              "sSearch": "Filtra:"
+              },
+          "searchPanes": {
+              "viewTotal": false
+              }
+        });
+      });
+    </script>
