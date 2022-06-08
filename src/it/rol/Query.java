@@ -1112,5 +1112,19 @@ public interface Query extends Serializable {
             "   ,   ora_ultimo_accesso = ?" +
             "   WHERE id = ? ";
 
+    /**
+     * <p>Query per aggiornamento dei valori di una data risposta.</p>
+     */
+    public static final String UPDATE_ANSWER =
+            "UPDATE risposta" +
+            "   SET valore                  = ?" +
+            "   ,   note                    = ?" +
+//            "   ,   data_ultima_modifica    = ?" +
+//            "   ,   ora_ultima_modifica     = ?" +
+//            "   ,   id_usr_ultima_modifica  = ?" +
+            "   WHERE id_quesito            = ?" +
+            "       AND id_rilevazione      = ?" +
+            "       AND data_ultima_modifica = ?" +
+            "       AND ora_ultima_modifica = ?";
 
 }
