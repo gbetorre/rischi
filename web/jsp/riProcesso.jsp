@@ -82,7 +82,7 @@
           <br />
           &nbsp;
           <a id="btnBack" class="btn btnNav" href="${str}"><i class="fas fa-chevron-left"></i> Indietro</a>
-          <button type="submit" class="btn btn-success" value="Save">
+          <button type="submit" id="pat-sub" class="btn btn-success" value="Save">
             <i class="far fa-save"></i>
             Invio
           </button>
@@ -91,10 +91,6 @@
       </div>
     </form>
     <script>
-    function defaultVal() {
-        return "<option value=''>-- scegli un processo --</option>";
-    }
-    
     function blank() {
         return "<option value=''>-- Nessuno --</option>";
     }
@@ -105,7 +101,13 @@
 <c:set var="doubleQuoteEsc" value='\\"' scope="page" />
 <script>
 $(document).ready(function() {
-
+    $("#pat-sub").click(function() {
+        if ($("#pat-liv1").val() == 0) {
+            alert("Occorre selezionare almeno un macroprocesso");
+            return false;
+        }
+    });
+    
     $("#pat-liv1").change(function() {
         var parent = $(this).val();
         var child2 = "#pat-liv2";
