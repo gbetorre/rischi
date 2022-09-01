@@ -1,11 +1,13 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
+ *   dell'ateneo possono essere esposti e per la gestione di reportistica
+ *   e mappature per la gestione dei "rischi on line" (rol).
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
+ *   Risk Mapping Software (rms)
+ *   web applications to make survey about the amount and kind of risk
+ *   which each process is exposed, and to publish, and manage,
+ *   report and risk information.
  *   Copyright (C) renewed 2022 Giovanroberto Torre
  *   all right reserved
  *
@@ -125,6 +127,7 @@ public class Utils implements Constants {
         try {
             Integer.parseInt(s);
         } catch (NumberFormatException nfe) {
+            log.warning(": si e\' verificato un problema nel puntamento a qualche parametro.\n");
             return false;
         } catch (NullPointerException npe) {
             return false;
@@ -615,7 +618,7 @@ public class Utils implements Constants {
      * <code>java.util.Date</code>
      * restituito come tipo di ritorno.</p>
      *
-     * @param date una datat sotto forma di String che deve essere convertita
+     * @param date una data sotto forma di String che deve essere convertita
      * @return <code>java.util.Date</code> - un oggetto Date costruito a partire dalla String ricevuta e formattato secondo un formato predefinito
      * @throws CommandException se si verifica un problema nella conversione di tipo o in qualche tipo di puntamento
      *
