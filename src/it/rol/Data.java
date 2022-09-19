@@ -1,11 +1,13 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
+ *   dell'ateneo possono essere esposti e per la gestione di reportistica
+ *   e mappature per la gestione dei "rischi on line" (rol).
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
+ *   Risk Mapping Software (rms)
+ *   web applications to make survey about the amount and kind of risk
+ *   which each process is exposed, and to publish, and manage,
+ *   report and risk information.
  *   Copyright (C) renewed 2022 Giovanroberto Torre
  *   all right reserved
  *
@@ -36,6 +38,8 @@ import java.io.PrintWriter;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
@@ -50,17 +54,20 @@ import javax.servlet.http.HttpSession;
 import com.oreilly.servlet.ParameterParser;
 
 import it.rol.bean.DepartmentBean;
+import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
+import it.rol.bean.QuestionBean;
 import it.rol.command.DepartmentCommand;
 import it.rol.command.PersonCommand;
 import it.rol.command.ProcessCommand;
+import it.rol.command.RiskCommand;
 import it.rol.exception.CommandException;
 
 
 /**
- * <p><code>Data</code> &egrave; la servlet della web-application prol
+ * <p><code>Data</code> &egrave; la servlet della web-application rol
  * che pu&ograve; essere utilizzata in due distinti contesti:<ol>
  * <li>su una richiesta sincrona: per produrre output con contentType differenti da
  * 'text/html'</li>
@@ -149,11 +156,11 @@ public class Data extends HttpServlet implements Constants {
     /**
      * Pagina a cui la command reindirizza per mostrare le strutture nel contesto dei processi
      */
-    private static final String nomeFileStruttureProcessiAjax = "/jsp/prElencoAjax.jsp";
+    //private static final String nomeFileStruttureProcessiAjax = "/jsp/prElencoAjax.jsp";
     /**
      * Pagina a cui la command reindirizza per mostrare i processi nel contesto di una struttura
      */
-    private static final String nomeFileProcessiStruttureAjax = "/jsp/stElencoAjax.jsp";
+    //private static final String nomeFileProcessiStruttureAjax = "/jsp/stElencoAjax.jsp";
 
 
     /**
@@ -193,21 +200,21 @@ public class Data extends HttpServlet implements Constants {
         // Message
         log.info("===> Log su servlet Data. <===");
         // Decodifica la richiesta
-        if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {   //  var url = "data?q=pr"
+        if (qToken.equalsIgnoreCase(COMMAND_RISK)) {   //  var url = "data?q=ri"
             // A una chiamata possono corrispondere più liste
             try {
                 // Verifica se deve servire un output csv
                 if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
                     // Recupero macroprocessi in base alla rilevazione
-                    lista = retrieve(req, COMMAND_PROCESS);
+                    lista = retrieve(req, COMMAND_RISK);
                     // Passaggio in request per uso delle lista
-                    req.setAttribute("listaProcessi", lista);
+                    req.setAttribute("listaInterviste", lista);
                     // Genera il file CSV
-                    makeCSV(req, res, COMMAND_PROCESS);
+                    makeCSV(req, res, COMMAND_RISK);
                     // Ha finito
                     return;
                 }
-                // Strutture estratte in base al macroprocesso
+                /* Strutture estratte in base al macroprocesso
                 lista = retrieve(req, COMMAND_STRUCTURES);
                 req.setAttribute("listaStrutture", lista);
                 // Persone estratte in base al macroprocesso
@@ -218,10 +225,10 @@ public class Data extends HttpServlet implements Constants {
                     fileJsp = "/jsp/prElencoAjaxDC.jsp";
                 } else {
                     fileJsp = nomeFileStruttureProcessiAjax;
-                }
+                }*/
             } catch (CommandException ce) {
                 throw new ServletException(FOR_NAME + "Problema nel recupero dei dati richiesti.\n" + ce.getMessage(), ce);
-            }
+            } /*
         } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) { //  var url = "data?q=st"
             try {
                 // Verifica se deve servire un output csv
@@ -245,7 +252,7 @@ public class Data extends HttpServlet implements Constants {
                 fileJsp = nomeFileProcessiStruttureAjax;
             } catch (CommandException ce) {
                 throw new ServletException(FOR_NAME + "Problema nel recupero dei dati richiesti.\n" + ce.getMessage(), ce);
-            }
+            }*/
         } else {
             String msg = FOR_NAME + "Valore del parametro \'q\' (" + qToken + ") non consentito. Impossibile visualizzare i risultati.\n";
             log.severe(msg);
@@ -272,12 +279,11 @@ public class Data extends HttpServlet implements Constants {
     private static ArrayList<?> retrieve(HttpServletRequest req,
                                          String qToken)
                                   throws CommandException {
+        
         ArrayList<?> list = null;
+        ArrayList<InterviewBean> interviewsWithAnswer = new ArrayList<>();
         ParameterParser parser = new ParameterParser(req);
-        int idMacro = parser.getIntParameter("idM", NOTHING);
-        int idProc = parser.getIntParameter("idR", NOTHING);
-        int idStruct = parser.getIntParameter("idS", NOTHING);
-        byte level = parser.getByteParameter("lev", NOTHING);
+        String part = parser.getStringParameter("p", VOID_STRING);
         String codeSurvey = parser.getStringParameter("r", VOID_STRING);
         // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
         HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
@@ -288,28 +294,19 @@ public class Data extends HttpServlet implements Constants {
         // Gestisce la richiesta
         try {
             DBWrapper db = new DBWrapper();
-            if (qToken.equalsIgnoreCase(COMMAND_PERSON)) {
-                if (idMacro > NOTHING) {
-                    list = PersonCommand.retrievePeopleByMacro(idMacro, codeSurvey, null, db);
+            if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
+                if (part.equalsIgnoreCase(PART_SELECT_QSS)) {
+                    ArrayList<InterviewBean> interviews = db.getInterviewsBySurvey(user, new HashMap<String, LinkedHashMap<String, String>>(), ConfigManager.getSurvey(codeSurvey));
+                    for (InterviewBean interview : interviews) {
+                        HashMap<String, LinkedHashMap<String, String>> interviewParams = RiskCommand.loadInterviewParams(codeSurvey, interview);
+                        ArrayList<QuestionBean> answers = db.getAnswers(user, interviewParams, ConfigManager.getSurvey(codeSurvey));
+                        interview.setRisposte(answers);
+                        interviewsWithAnswer.add(interview);
+                    }
+                    list = interviewsWithAnswer;
                 } else {
-                    list = PersonCommand.retrievePeopleByProcess(idProc, codeSurvey, null, db);
+                    //
                 }
-            } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
-                if (idMacro > NOTHING) {
-                    list = DepartmentCommand.retrieveStructuresByMacro(idMacro, codeSurvey, null, db);
-                    // Prepara il json
-                    ItemBean options = new ItemBean();
-                    options.setCodice("#66CC99");
-                    DepartmentCommand.printJson(req, (ArrayList<DepartmentBean>) list, "prElencoAjax", options);
-                } else if (idStruct > NOTHING) {
-                    list = ProcessCommand.retrieveMacroByStruct(user, idStruct, level, codeSurvey, db);
-                } else if (idProc > NOTHING) {
-                    list = DepartmentCommand.retrieveStructuresByProcess(idProc, codeSurvey, null, db);
-                } else {
-                    list = DepartmentCommand.retrieveStructsByMacroOrProcess(PART_MACROPROCESS, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, codeSurvey, user, db);
-                }
-            } else if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
-                list = ProcessCommand.retrieveMacroBySurvey(user, codeSurvey, db);
             }
         } catch (CommandException ce) {
             String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + ce.getLocalizedMessage();
@@ -437,31 +434,31 @@ public class Data extends HttpServlet implements Constants {
         /* **************************************************************** *
          *          Contenuto files CSV per strutture in processi           *
          * **************************************************************** */
-        if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_PROCESS)) {
+        if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_RISK)) {
             try {
-                ArrayList<ProcessBean> l1 = (ArrayList<ProcessBean>) req.getAttribute("listaProcessi");
+                ArrayList<InterviewBean> list = (ArrayList<InterviewBean>) req.getAttribute("listaInterviste");
                 // Scrittura file CSV
                 out.println("N." + SEPARATOR +
-                            "Codice" + SEPARATOR +
-                            "Nome" + SEPARATOR +
-                            "Descrizione" + SEPARATOR +
-                            "Personale FTE" + SEPARATOR +
-                            "Quotaparte"
+                            "Data" + SEPARATOR +
+                            "Ora" + SEPARATOR +
+                            "Processo" + SEPARATOR +
+                            "Struttura" + SEPARATOR +
+                            "Ufficio"
                             );
-                if (l1.size() > NOTHING) {
+                if (list.size() > NOTHING) {
                     int itCounts = NOTHING, record = NOTHING;
                     do {
-                        ProcessBean mp = l1.get(itCounts);
+                        InterviewBean iw = list.get(itCounts);
                         out.println(
                                     ++record + SEPARATOR +
-                                    mp.getCodice() + " " + SEPARATOR +
-                                    mp.getNome().replace(';', ',') + SEPARATOR +
-                                    mp.getDescrizione().replace(';', ',') + SEPARATOR +
-                                    mp.getFte() + SEPARATOR +
-                                    mp.getQuotaParte() + "%"
+                                    iw.getDataUltimaModifica() + BLANK_SPACE + SEPARATOR +
+                                    iw.getOraUltimaModifica() + SEPARATOR +
+                                    iw.getProcesso().getNome() + SEPARATOR +
+                                    iw.getStruttura().getNome() + SEPARATOR +
+                                    iw.getStruttura().getFiglie().get(0).getNome()
                                    );
                         itCounts++;
-                    } while (itCounts < l1.size());
+                    } while (itCounts < list.size());
                     success = itCounts;
                 }
             } catch (RuntimeException re) {
@@ -474,7 +471,7 @@ public class Data extends HttpServlet implements Constants {
         }
         /* **************************************************************** *
          *        Contenuto files CSV per strutture in organigramma         *
-         * **************************************************************** */
+         * **************************************************************** *
         else if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_STRUCTURES)) {
             try {
                 ArrayList<ItemBean> l = (ArrayList<ItemBean>) req.getAttribute("listaOrganigramma");
@@ -530,7 +527,7 @@ public class Data extends HttpServlet implements Constants {
                 log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
                 out.println(e.getMessage());
             }
-        }
+        }*/
         else {
             String msg = FOR_NAME + "La Servlet Data non accetta la stringa passata come valore di 'ent': " + req.getParameter(ConfigManager.getEntToken());
             log.severe(msg + "Tentativo di indirizzare alla Servlet Data una richiesta non gestita. Hacking test?\n");
