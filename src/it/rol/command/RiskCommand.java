@@ -200,7 +200,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         ArrayList<ProcessBean> macros = null;
         // Elenco quesiti collegati alla rilevazione
         ArrayList<QuestionBean> questions = null;
-        // Elenco risposte ai quesiti collegati alla rilevazione
+        // Elenco risposte ai quesiti collegati all'intervista
         ArrayList<QuestionBean> answers = null;
         // Elenco interviste collegate alla rilevazione
         ArrayList<InterviewBean> interviews = null;
@@ -575,8 +575,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
     
     
     /**
-     * <p>Valorizza per riferimento una mappa contenente i valori relativi  
-     * ad una attivit&agrave; eventualmente da aggiornare.</p> 
+     * <p>Valorizza per riferimento una mappa contenente i valori riscontrati  
+     * sulla richiesta.</p> 
      * 
      * @param part la sezione del sito che si vuole aggiornare
      * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
@@ -584,7 +584,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
      * @throws AttributoNonValorizzatoException se si fa riferimento a un attributo obbligatorio di bean che non viene trovato
      */
-    private static void loadParams(String part, 
+    public static void loadParams(String part, 
                                    ParameterParser parser,
                                    HashMap<String, LinkedHashMap<String, String>> formParams)
                             throws CommandException, 
@@ -645,6 +645,71 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             quest.put("note",    parser.getStringParameter("q-note", VOID_STRING));
             formParams.put(PART_RESUME_QST, quest);
         }
+    }
+    
+    
+    /**
+     * <p>Valorizza per riferimento una mappa contenente gli estremi
+     * di una singola intervista.</p> 
+     * 
+     * @param part la sezione del sito che si vuole aggiornare
+     * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
+     * @param formParams mappa da valorizzare per riferimento (ByRef)
+     * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
+     * @throws AttributoNonValorizzatoException se si fa riferimento a un attributo obbligatorio di bean che non viene trovato
+     */
+    public static HashMap<String, LinkedHashMap<String, String>> loadInterviewParams(String codeSur,
+                                            InterviewBean interview)
+                            throws CommandException, 
+                                   AttributoNonValorizzatoException {
+        LinkedHashMap<String, String> struct = new LinkedHashMap<>();
+        LinkedHashMap<String, String> proat = new LinkedHashMap<>();
+        String liv2, liv3, liv4;
+        String pro2, pro3;
+        LinkedHashMap<String, String> survey = new LinkedHashMap<>();
+        HashMap<String, LinkedHashMap<String, String>> formParams = new HashMap<String, LinkedHashMap<String, String>>();
+        /* **************************************************** *
+         *     Caricamento parametro di Codice Rilevazione      *
+         * **************************************************** */      
+        // Recupera l'oggetto rilevazione a partire dal suo codice
+        CodeBean surveyAsBean = ConfigManager.getSurvey(codeSur);
+        // Inserisce l'ìd della rilevazione come valore del parametro
+        survey.put(PARAM_SURVEY, String.valueOf(surveyAsBean.getId()));
+        // Aggiunge data e ora
+        survey.put("d", interview.getDataUltimaModifica().toString());
+        survey.put("t", interview.getOraUltimaModifica().toString());
+        // Aggiunge il tutto al dizionario dei parametri
+        formParams.put(PARAM_SURVEY, survey);
+        /* **************************************************** *
+         *     Caricamento parametri di Struttura Scelta        *
+         * **************************************************** */        
+        struct.put("liv1",  interview.getStruttura().getInformativa());
+        liv2 = (interview.getStruttura().getFiglie() != null) ? interview.getStruttura().getFiglie().get(0).getInformativa() : VOID_STRING; 
+        struct.put("liv2", liv2);
+        struct.put("liv3", VOID_STRING);
+        struct.put("liv4", VOID_STRING);
+        if (liv2 != VOID_STRING) {
+            liv3 = (interview.getStruttura().getFiglie().get(0).getFiglie() != null) ? interview.getStruttura().getFiglie().get(0).getFiglie().get(0).getInformativa() : VOID_STRING;
+            struct.replace("liv3",  liv3);
+            if (liv3 != VOID_STRING) {
+                liv4 = (interview.getStruttura().getFiglie().get(0).getFiglie().get(0).getFiglie() != null) ? interview.getStruttura().getFiglie().get(0).getFiglie().get(0).getFiglie().get(0).getInformativa() : VOID_STRING;
+                struct.replace("liv4",  liv4);
+            }
+        }
+        formParams.put(PART_SELECT_STR, struct);
+        /* **************************************************** *
+         *       Caricamento parametri di Processo Scelto       *
+         * **************************************************** */
+        proat.put("liv1",    interview.getProcesso().getInformativa());
+        pro2 = (interview.getProcesso().getProcessi() != null) ? interview.getProcesso().getProcessi().get(0).getInformativa() : VOID_STRING;
+        proat.put("liv2", pro2);
+        proat.put("liv3", VOID_STRING);
+        if (pro2 != VOID_STRING) {
+            pro3 = (interview.getProcesso().getProcessi().get(0).getProcessi() != null) ? interview.getProcesso().getProcessi().get(0).getProcessi().get(0).getInformativa() : VOID_STRING;
+            proat.put("liv3", pro3);
+        }
+        formParams.put(PART_PROCESS, proat);
+        return formParams;
     }
     
     
