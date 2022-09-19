@@ -34,6 +34,7 @@
 package it.rol.bean;
 
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Vector;
 
@@ -85,10 +86,9 @@ public class InterviewBean extends CodeBean {
      *                         Allegati                         *
      * ******************************************************** */
     /**
-     * Vector di fileset, ciascuno rappresentante 
-     * un riferimento logico ad un allegato fisico
+     * Vector di risposte fornite nel contesto dell'intervista
      */
-    private Vector<FileDocBean> allegati;
+    private ArrayList<QuestionBean> risposte;
     
 	
     /**
@@ -104,7 +104,7 @@ public class InterviewBean extends CodeBean {
         dataUltimaModifica = new Date(0);
         oraUltimaModifica = null;
         autoreUltimaModifica = null;
-        allegati = null;
+        risposte = null;
 	}
 
 
@@ -285,26 +285,25 @@ public class InterviewBean extends CodeBean {
     
     
     /* ************************************************************** *
-     *              Metodi getter e setter per allegati               *
+     *              Metodi getter e setter per risposte               *
      * ************************************************************** */
     /**
-     * Restituisce l'elenco dei riferimenti logici agli allegati fisici
-     * in precedenza caricati per la misurazione corrente 
+     * Restituisce l'elenco delle risposte fornite nel contesto dell'intervista 
      * 
-     * @return <code>Vector&lt;FileDocBean&gt;</code> - elenco di riferimenti logici ad allegati fisici
+     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - elenco di risposte
      */
-    public Vector<FileDocBean> getAllegati() {
-        return allegati;
+    public ArrayList<QuestionBean> getRisposte() {
+        return risposte;
     }
 
     /**
-     * Imposta l'elenco dei riferimenti logici agli allegati fisici
-     * caricati per la misurazione corrente
+     * Imposta l'elenco delle risposte fornite nel contesto dell'intervista
+     * corrente
      * 
-     * @param allegati Vector di FileDocBean da impostare
+     * @param risposte ArrayList di QuestionBean da impostare
      */
-    public void setAllegati(Vector<FileDocBean> allegati) {
-        this.allegati = allegati;
+    public void setRisposte(ArrayList<QuestionBean> risposte) {
+        this.risposte = risposte;
     }
 
 }
