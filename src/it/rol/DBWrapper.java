@@ -1,11 +1,13 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
+ *   dell'ateneo possono essere esposti e per la gestione di reportistica
+ *   e mappature per la gestione dei "rischi on line" (rol).
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
+ *   Risk Mapping Software (rms)
+ *   web applications to make survey about the amount and kind of risk
+ *   which each process is exposed, and to publish, and manage,
+ *   report and risk information.
  *   Copyright (C) renewed 2022 Giovanroberto Torre
  *   all right reserved
  *
@@ -2050,9 +2052,9 @@ public class DBWrapper implements Query, Constants {
      * <p>Restituisce un Integer corrispondente al wrapper del numero di
      * quesiti trovati dato un identificativo di rilevazione, passato come
      * parametro.</p>
-     *TODO COMMENTO
-     * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @return <code>ArrayList&lt;ItemBean&gt;</code> - un vettore ordinato di ItemBean, che rappresentano gli ambiti di analisi trovati
+     *
+     * @param idSurvey identificativo della rilevazione corrente 
+     * @return <code>Integer</code> - il numero di quesiti collegati ad ambiti generici trovati dato l'identificativo della rilevazione
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
@@ -2538,9 +2540,12 @@ public class DBWrapper implements Query, Constants {
                 "   ,   R.id_quesito                AS \"livello\"" +
                 "   ,   R.data_ultima_modifica      AS \"extraInfo\"" +
                 "   ,   R.ora_ultima_modifica       AS \"labelWeb\"" +
+                "   ,   AM.id" +
                 "   FROM risposta R" +
+                "       INNER JOIN quesito Q ON R.id_quesito = Q.id" +
+                "       INNER JOIN ambito_analisi AM ON Q.id_ambito_analisi = AM.id" +
                 "   WHERE " + clause +
-                "   ORDER BY R.data_ultima_modifica DESC, R.ora_ultima_modifica DESC"; 
+                "   ORDER BY R.data_ultima_modifica DESC, R.ora_ultima_modifica DESC, AM.id"; 
               //"   LIMIT " + numOfQuest;
         return GET_ANSWERS;
     }
@@ -2597,7 +2602,7 @@ public class DBWrapper implements Query, Constants {
                     // Aggiunge al quesito la risposta corrente
                     question.setAnswer(answer);
                     
-                    // Lo aggiunge alla lista di persone trovate
+                    // Lo aggiunge alla lista di risposte trovate
                     answers.add(question);
                 }
                 // Closes the statement
