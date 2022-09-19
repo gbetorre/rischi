@@ -21,6 +21,12 @@
   <c:param name="p" value="sqs" />
   <c:param name="r" value="${ril}" />
 </c:url>
+<c:url var="sqsCSV" context="${initParam.appName}" value="/data" scope="page">
+  <c:param name="q" value="ri" />
+  <c:param name="p" value="sqs" />
+  <c:param name="r" value="${ril}" />
+  <c:param name="out" value="csv" />
+</c:url>
 <c:url var="rqs" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="ri" />
   <c:param name="p" value="rqs" />
@@ -36,16 +42,20 @@
   <c:param name="p" value="mac" />
   <c:param name="r" value="${ril}" />
 </c:url>
-<%-- 
-<c:url var="mul" context="${initParam.appName}" value="/" scope="page">
+<c:url var="macCSV" context="${initParam.appName}" value="/data" scope="page">
   <c:param name="q" value="pr" />
-  <c:param name="p" value="mul" />
+  <c:param name="p" value="mac" />
   <c:param name="r" value="${ril}" />
+  <c:param name="out" value="csv" />
 </c:url>
---%>
 <c:url var="st" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="st" />
   <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="stCSV" context="${initParam.appName}" value="/data" scope="page">
+  <c:param name="q" value="st" />
+  <c:param name="r" value="${ril}" />
+  <c:param name="out" value="csv" />
 </c:url>
 <c:url var="pe" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pe" />
@@ -60,18 +70,6 @@
   <c:param name="q" value="ho" />
   <c:param name="p" value="usr" />
 </c:url>
-<c:url var="macCSV" context="${initParam.appName}" value="/data" scope="page">
-  <c:param name="q" value="pr" />
-  <c:param name="p" value="mac" />
-  <c:param name="r" value="${ril}" />
-  <c:param name="out" value="csv" />
-</c:url>
-<c:url var="stCSV" context="${initParam.appName}" value="/data" scope="page">
-  <c:param name="q" value="st" />
-  <c:param name="r" value="${ril}" />
-  <c:param name="out" value="csv" />
-</c:url>
-
 <c:url var="credits" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pr" />
   <c:param name="p" value="credits" />
