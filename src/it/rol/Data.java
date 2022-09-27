@@ -33,6 +33,7 @@
 
 package it.rol;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.AbstractList;
@@ -63,6 +64,7 @@ import it.rol.command.DepartmentCommand;
 import it.rol.command.PersonCommand;
 import it.rol.command.ProcessCommand;
 import it.rol.command.RiskCommand;
+import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 
 
@@ -130,7 +132,7 @@ public class Data extends HttpServlet implements Constants {
      * (Se questo dato non fosse inserito, verrebbe calcolato in maniera automatica
      * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione).
      */
-    private static final long serialVersionUID = -4370277411588954522L;
+    private static final long serialVersionUID = -7053908837630394953L;
     /**
      * Nome di questa classe
      * (viene utilizzato per contestualizzare i messaggi di errore)
@@ -160,7 +162,7 @@ public class Data extends HttpServlet implements Constants {
     /**
      * Pagina a cui la command reindirizza per mostrare i processi nel contesto di una struttura
      */
-    //private static final String nomeFileProcessiStruttureAjax = "/jsp/stElencoAjax.jsp";
+    private static final String nomeFileProcessiStruttureAjax = "/jsp/stElencoAjax.jsp";
 
 
     /**
@@ -200,9 +202,9 @@ public class Data extends HttpServlet implements Constants {
         // Message
         log.info("===> Log su servlet Data. <===");
         // Decodifica la richiesta
-        if (qToken.equalsIgnoreCase(COMMAND_RISK)) {   //  var url = "data?q=ri"
-            // A una chiamata possono corrispondere più liste
-            try {
+        try {
+            // "data?q=ri"
+            if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
                 // Verifica se deve servire un output csv
                 if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
                     // Recupero macroprocessi in base alla rilevazione
@@ -214,23 +216,8 @@ public class Data extends HttpServlet implements Constants {
                     // Ha finito
                     return;
                 }
-                /* Strutture estratte in base al macroprocesso
-                lista = retrieve(req, COMMAND_STRUCTURES);
-                req.setAttribute("listaStrutture", lista);
-                // Persone estratte in base al macroprocesso
-                lista = retrieve(req, COMMAND_PERSON);
-                req.setAttribute("listaPersone", lista);
-                // Output in formato di default
-                if ((req.getParameter("p") !=  null) && req.getParameter("p").equals(PART_MACROPROCESS)) {
-                    fileJsp = "/jsp/prElencoAjaxDC.jsp";
-                } else {
-                    fileJsp = nomeFileStruttureProcessiAjax;
-                }*/
-            } catch (CommandException ce) {
-                throw new ServletException(FOR_NAME + "Problema nel recupero dei dati richiesti.\n" + ce.getMessage(), ce);
-            } /*
-        } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) { //  var url = "data?q=st"
-            try {
+            // "data?q=st"
+            } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
                 // Verifica se deve servire un output csv
                 if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
                     // Strutture estratte in base alla rilevazione
@@ -250,13 +237,14 @@ public class Data extends HttpServlet implements Constants {
                 //req.setAttribute("listaPersone", lista);
                 // Output in formato di default
                 fileJsp = nomeFileProcessiStruttureAjax;
-            } catch (CommandException ce) {
-                throw new ServletException(FOR_NAME + "Problema nel recupero dei dati richiesti.\n" + ce.getMessage(), ce);
-            }*/
-        } else {
-            String msg = FOR_NAME + "Valore del parametro \'q\' (" + qToken + ") non consentito. Impossibile visualizzare i risultati.\n";
-            log.severe(msg);
-            throw new ServletException(msg);
+
+            } else {
+                String msg = FOR_NAME + "Valore del parametro \'q\' (" + qToken + ") non consentito. Impossibile visualizzare i risultati.\n";
+                log.severe(msg);
+                throw new ServletException(msg);
+            }
+        } catch (CommandException ce) {
+            throw new ServletException(FOR_NAME + "Problema nel recupero dei dati richiesti.\n" + ce.getMessage(), ce);
         }
         /*
          * Forworda la richiesta, esito finale di tutto
@@ -267,7 +255,8 @@ public class Data extends HttpServlet implements Constants {
 
 
     /**
-     * <p>Restituisce un elenco generico di elementi (persone, macroprocessi, strutture...)
+     * <p>Restituisce un elenco generico di elementi 
+     * (persone, macroprocessi, strutture...)
      * relativi a una richiesta specifica.</p>
      *
      * @param req HttpServletRequest contenente i parametri per contestualizzare l'estrazione
@@ -275,15 +264,16 @@ public class Data extends HttpServlet implements Constants {
      * @return <code>ArrayList&lt;?&gt; - lista contenente gli elementi trovati
      * @throws CommandException se si verifica un problema nella WebStorage (DBWrapper), nella Command interpellata, o in qualche puntamento
      */
-    @SuppressWarnings("unchecked")
     private static ArrayList<?> retrieve(HttpServletRequest req,
                                          String qToken)
                                   throws CommandException {
-        
+        // Dichiara generico elenco di elementi da restituire
         ArrayList<?> list = null;
-        ArrayList<InterviewBean> interviewsWithAnswer = new ArrayList<>();
+        // Ottiene i parametri della richiesta
         ParameterParser parser = new ParameterParser(req);
+        // Recupera o inizializza parametro per identificare la pagina
         String part = parser.getStringParameter("p", VOID_STRING);
+        // Recupera o inizializza parametro per identificare la rilevazione
         String codeSurvey = parser.getStringParameter("r", VOID_STRING);
         // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
         HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
@@ -293,14 +283,25 @@ public class Data extends HttpServlet implements Constants {
         }
         // Gestisce la richiesta
         try {
+            // Istanzia nuovo Databound
             DBWrapper db = new DBWrapper();
+            // "data?q=ri"
             if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
+                // "&p=sqs"
                 if (part.equalsIgnoreCase(PART_SELECT_QSS)) {
+                    // Recupera dal Databound elenco di interviste in base a rilevazione
                     ArrayList<InterviewBean> interviews = db.getInterviewsBySurvey(user, new HashMap<String, LinkedHashMap<String, String>>(), ConfigManager.getSurvey(codeSurvey));
+                    // Dichiara elenco di interviste corredate di risposte
+                    ArrayList<InterviewBean> interviewsWithAnswer = new ArrayList<>();
+                    // Per ogni intervista
                     for (InterviewBean interview : interviews) {
+                        // Recupera tutti i parametri identificanti l'intervista
                         HashMap<String, LinkedHashMap<String, String>> interviewParams = RiskCommand.loadInterviewParams(codeSurvey, interview);
+                        // Recupera tutte le risposte identificate in base ai parametri dell'intervista
                         ArrayList<QuestionBean> answers = db.getAnswers(user, interviewParams, ConfigManager.getSurvey(codeSurvey));
+                        // Imposta le risposte dell'intervista corrente 
                         interview.setRisposte(answers);
+                        // Aggiunge l'intervista completa di risposte alla lista di interviste corredate di risposte
                         interviewsWithAnswer.add(interview);
                     }
                     list = interviewsWithAnswer;
@@ -422,7 +423,7 @@ public class Data extends HttpServlet implements Constants {
      */
     @SuppressWarnings("unchecked")
     private static int fprintf(HttpServletRequest req, HttpServletResponse res)
-                 throws ServletException, IOException {
+                        throws ServletException, IOException {
         /*
          *  Genera l'oggetto per lo standard output
          */
@@ -432,7 +433,7 @@ public class Data extends HttpServlet implements Constants {
          */
         int success = DEFAULT_ID;
         /* **************************************************************** *
-         *          Contenuto files CSV per strutture in processi           *
+         *         Contenuto files CSV per interviste con risposte          *
          * **************************************************************** */
         if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_RISK)) {
             try {
@@ -450,7 +451,7 @@ public class Data extends HttpServlet implements Constants {
                     do {
                         InterviewBean iw = list.get(itCounts);
                         out.println(
-                                    ++record + SEPARATOR +
+                                    iw.getRisposte().size() + SEPARATOR +
                                     iw.getDataUltimaModifica() + BLANK_SPACE + SEPARATOR +
                                     iw.getOraUltimaModifica() + SEPARATOR +
                                     iw.getProcesso().getNome() + SEPARATOR +
@@ -536,5 +537,86 @@ public class Data extends HttpServlet implements Constants {
         return success;
     }
 
+    
+    /**
+     * <p>Genera il nodo JSON</p>
+     *
+     * @param tipo          valore che serve a differenziare tra tipi diversi di nodi per poter applicare formattazioni o attributi diversi
+     * @param codice        codice del nodo corrente
+     * @param codicePadre   codice del nodo padre del nodo corrente
+     * @param nome          etichetta del nodo
+     * @param descr         descrizione del nodo
+     * @param bgColor       parametro opzionale specificante il colore dei box/nodi in formato esadecimale
+     * @param icona         parametro opzionale specificante il nome del file da mostrare come stereotipo
+     * @param livello       livello gerarchico del nodo
+     * @return <code>String</code> - il nodo in formato String
+     */
+    public static String getStructureJsonNode(String tipo,
+                                              String codice,
+                                              String codicePadre,
+                                              String nome,
+                                              String descr,
+                                              String bgColor,
+                                              String icona,
+                                              int livello) {
+        /* ------------------------ *
+         *   Controlli sull'input   *
+         * ------------------------ */
+        String codiceGest = (codicePadre == null ? "null" : "\"" + codicePadre + "\"");
+        String nodeImage = (icona == null ? "logo2.gif" : icona + livello + ".png");
+        String height =  (descr.length() > 100) ? String.valueOf(descr.length()) : String.valueOf(146);
+        Color backgroundColor = null;
+        if (bgColor != null && !bgColor.equals(VOID_STRING)) {
+            backgroundColor = Color.decode(bgColor);
+        } else {
+            backgroundColor = new Color(51,182,208);
+        }
+        /* ------------------------ */
+        // Generazione nodo
+        return "{\"nodeId\":\"" + codice + "\"," +
+                "  \"parentNodeId\":" + codiceGest + "," +
+                "  \"width\":342," +
+                "  \"height\":" + height +"," +
+                "  \"borderWidth\":1," +
+                "  \"borderRadius\":5," +
+                "  \"borderColor\":{\"red\":15,\"green\":140,\"blue\":121,\"alpha\":1}," +
+                "  \"backgroundColor\":{\"red\":" + backgroundColor.getRed() + ",\"green\":" + backgroundColor.getGreen() + ",\"blue\":" + backgroundColor.getBlue() + ",\"alpha\":1}," +
+                "  \"nodeImage\":{\"url\":\"web/img/" + nodeImage + "\",\"width\":50,\"height\":50,\"centerTopDistance\":0,\"centerLeftDistance\":0,\"cornerShape\":\"CIRCLE\",\"shadow\":false,\"borderWidth\":0,\"borderColor\":{\"red\":19,\"green\":123,\"blue\":128,\"alpha\":1}}," +
+                "  \"nodeIcon\":{\"icon\":\"\",\"size\":30}," +
+                "  \"template\":\"<div>\\n <div style=\\\"margin-left:15px;\\n margin-right:15px;\\n text-align: center;\\n margin-top:10px;\\n font-size:20px;\\n font-weight:bold;\\n \\\">" + nome + "</div>\\n <div style=\\\"margin-left:80px;\\n margin-right:15px;\\n margin-top:3px;\\n font-size:16px;\\n \\\">" + descr + "</div>\\n\\n </div>\"," +
+                "  \"connectorLineColor\":{\"red\":220,\"green\":189,\"blue\":207,\"alpha\":1}," +
+                "  \"connectorLineWidth\":5," +
+              //"  \"dashArray\":\"\"," +
+                "  \"expanded\":false }";
+    }
+    
+    
+    /**
+     * <p>Genera la descrizione del nodo JSON</p>
+     *
+     * @param list          struttura vettoriale contenente informazioni
+     * @param livello       livello gerarchico del nodo
+     * @return <code>String</code> - il nodo in formato String
+     * @throws AttributoNonValorizzatoException eccezione che viene propagata se si tenta di accedere a un dato obbligatorio non valorizzato del bean
+     */
+    public static String makeDescrJsonNode(ArrayList<?> list,
+                                           int livello) 
+                                    throws AttributoNonValorizzatoException {
+        StringBuffer descr = new StringBuffer();
+        descr.append("<ul>");
+        for (int i = 0; i < list.size(); i++) {
+            PersonBean p = (PersonBean) list.get(i);
+            descr.append("<li>");
+            descr.append(p.getNome());
+            descr.append(BLANK_SPACE);
+            descr.append(p.getCognome());
+            descr.append(BLANK_SPACE + DASH + BLANK_SPACE);
+            descr.append(p.getNote());
+            descr.append("</li>");
+        }
+        descr.append("</ul>");
+        // Generazione descr
+        return descr.toString();
+    }
 
 }
