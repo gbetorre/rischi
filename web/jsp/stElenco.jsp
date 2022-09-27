@@ -3,8 +3,10 @@
     <h3 class="mt-1 m-0 font-weight-bold">Organigramma e Strutture</h3>
     <hr class="riga"/>
     <div class="chart-container col-12" style="padding-top:10px;"> </div>
-    <script src='https://d3js.org/d3.v5.min.js'></script>
-    <script src='https://unpkg.com/d3-org-chart@1.0.5/index.js'></script>
+    <!-- <script src='https://d3js.org/d3.v5.min.js'></script> -->
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />orgchart/1.0.5/d3.v5.min.js"></script>
+    <!-- <script src='https://unpkg.com/d3-org-chart@1.0.5/index.js'></script> -->
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />orgchart/1.0.5/index.js"></script>
     <a href="${stCSV}">
       <i class="fas fa-download"></i> <span class="lead">Scarica tutti i dati</span>
     </a>
