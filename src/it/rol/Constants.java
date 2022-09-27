@@ -261,7 +261,7 @@ public interface Constants extends Serializable {
      */
     public static final String AMPERSAND = "&";
     /* ************************************************************************ *
-     * Formati di files, tipi MIME, etc.
+     * Formati di files, naming di files, tipi MIME etc.
      * ************************************************************************ */
     /**
      * Costante per il tipo MIME html
@@ -279,7 +279,18 @@ public interface Constants extends Serializable {
      * Costante per il formato di file "JavaScript Object Notation"
      */
     public static final String JSON = "json";
-    
+    /**
+     * Costante per il formato di file "Java Server Pages"
+     */
+    public static final String JSP_EXT = "jsp";
+    /**
+     * Costante per i nomi di immagini relative a strutture
+     */
+    public static final String STR_PFX = "dept_l";
+    /**
+     * Costante per i nomi di immagini relative a processi
+     */
+    public static final String PRO_PFX = "procat_l";
     /* ************************************************************************ *
      * Costanti di tempo (p.es. formati di data, date significative, etc.) *
      * ************************************************************************ */
