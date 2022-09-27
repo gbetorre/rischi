@@ -33,11 +33,9 @@
 
 package it.rol.command;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
@@ -51,6 +49,7 @@ import com.oreilly.servlet.ParameterParser;
 import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
+import it.rol.Data;
 import it.rol.Utils;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
@@ -64,7 +63,7 @@ import it.rol.exception.WebStorageException;
 
 /**
  * <p><code>DepartmentCommand.java</code><br>
- * Implementa la logica per la gestione delle strutture collegate ai processi on line (PROL).</p>
+ * Implementa la logica per la gestione delle strutture organizzative.</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
@@ -87,13 +86,17 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
      */
     protected static Logger LOG = Logger.getLogger(ConfigManager.class.getName());
     /**
-     * Pagina a cui la command reindirizza per mostrare i processi che l'utente ha i diritti di visualizzare
+     * Pagina di default della Command
      */
     private static final String nomeFileElenco = "/jsp/stElenco.jsp";
     /**
+     * Nome del file json della Command (dipende dalla pagina di default)
+     */
+    private String nomeFileJson = nomeFileElenco.substring(nomeFileElenco.lastIndexOf('/'), nomeFileElenco.indexOf(DOT));
+    /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */
-    private static final HashMap<String, String> nomeFile = new HashMap<String, String>();
+    private static final HashMap<String, String> nomeFile = new HashMap<>();
     /**
      *  Processo di dato id
      */
@@ -104,7 +107,7 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
      * Crea una nuova istanza di questa Command
      */
     public DepartmentCommand() {
-        ;   // It Doesn't Anything
+        ;   // It doesn't anything
     }
 
 
@@ -154,14 +157,16 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
         PersonBean user = null;
         // Recupera o inizializza 'codice rilevazione' (Survey)
         String codeSur = parser.getStringParameter("r", DASH);
-        // Recupera o inizializza 'id processo'
-        int idSt = parser.getIntParameter("id", -1);
+        // Recupera o inizializza 'id struttura'
+        //int idSt = parser.getIntParameter("id", -1);
         // Recupera o inizializza 'tipo parte'
-        String part = parser.getStringParameter("p", DASH);
+        //String part = parser.getStringParameter("p", DASH);
         // Dichiara la pagina a cui reindirizzare
         String fileJspT = null;
         // Dichiara elenco di processi
-        AbstractList<ProcessBean> m = new ArrayList<ProcessBean>();
+        //AbstractList<ProcessBean> m = new ArrayList<>();
+        // Prepara un oggetto contenente i parametri opzionali per i nodi
+        ItemBean options = new ItemBean(VOID_STRING,  VOID_STRING,  VOID_STRING, VOID_STRING, STR_PFX, NOTHING);
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -203,33 +208,34 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
         try {
             // Il parametro di navigazione 'rilevazione' è obbligatorio
             if (!codeSur.equals(DASH)) {
-                // Il parametro di navigazione 'p' permette di addentrarsi nelle funzioni
+                /* Il parametro di navigazione 'p' permette di addentrarsi nelle funzioni
                 if (nomeFile.containsKey(part)) {
                     // Viene richiesta la visualizzazione di una struttura specifica
                     if (idSt > NOTHING) {
                         // TODO
+                        // Qui va l'eventuale codice per la preparazione info pagina di dettaglio struttura
+                        // (nel caso, ricordarsi di recuperare i parametri 'p' ed 'st', commentati più sopra)
                     } else {
-                        // TODO
                         m = db.getMacroBySurvey(user, codeSur);
                     }
                     fileJspT = nomeFile.get(part);
-                } else {    // Viene richiesta la visualizzazione dell'organigramma
-                    // Recupera le strutture associate
-                    ArrayList<DepartmentBean> structs = retrieveStructures(codeSur, user, db);
-                    // Stampa il json
-                    printJson(req, structs, "prElencoAjax", new ItemBean());
-                    // Imposta la jsp
-                    fileJspT = nomeFileElenco;
-                }
-            } else {    // manca il codice rilevazione
+                } else {     */
+                // Viene richiesta la visualizzazione dell'organigramma
+                ArrayList<DepartmentBean> structs = retrieveStructures(codeSur, user, db);
+                // Genera il file json contenente le informazioni strutturate
+                printJson(req, structs, nomeFileJson, options);
+                // Imposta la jsp
+                fileJspT = nomeFileElenco;
+              /*}*/
+            } else {    // Manca il codice rilevazione!
                 String msg = FOR_NAME + "Impossibile recuperare il codice della rilevazione.\n";
-                LOG.severe(msg + "Qualcuno ha probabilmente alterato il codice rilevazione nell\'URI della pagina.\n");
+                LOG.severe(msg + "E\' possibile che qualcuno abbia alterato il codice rilevazione nell\'URL della pagina.\n");
                 throw new CommandException(msg);
             }
-        } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+        } catch (CommandException ce) {
+            String msg = FOR_NAME + "Probabile problema nel recupero di valori dal db.\n";
             LOG.severe(msg);
-            throw new CommandException(msg + wse.getMessage(), wse);
+            throw new CommandException(msg + ce.getMessage(), ce);
         } catch (NullPointerException npe) {
             String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
             LOG.severe(msg);
@@ -242,8 +248,6 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
-        // Imposta nella request elenco macroprocessi
-        req.setAttribute("macroprocessi", m);
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
@@ -251,7 +255,7 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
 
     /**
      * <p>Estrae l'albero completo (vista gerarchica) delle strutture
-     * collegate a una rilevazione, il cui identificativo testuale
+     * collegate a una data rilevazione, il cui identificativo testuale
      * viene passato come parametro.</p>
      *
      * @param codeSurvey    codice testuale della rilevazione
@@ -267,7 +271,7 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
         // Recupera l'oggetto rilevazione a partire dal codice
         CodeBean survey = ConfigManager.getSurvey(codeSurvey);
         try {
-            // Chiama il metodo del databound che estrae l'albero completo delle strutture nella rilevazione
+            // Chiama il metodo del databound che estrae l'albero delle strutture nella rilevazione
             ArrayList<DepartmentBean> structs = db.getStructures(user, survey);
             return structs;
         } catch (WebStorageException wse) {
@@ -284,8 +288,9 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
 
     /**
      * <p>Estrae l'elenco (vista piatta, non gerarchica) delle strutture
-     * collegate a una rilevazione, il cui identificativo testuale
-     * viene passato come parametro.</p>
+     * collegate a una intera rilevazione, il cui identificativo testuale
+     * viene passato come parametro, o solo delle strutture collegate 
+     * ad uno specifico processo o macroprocesso.</p>
      *
      * @param type          valore identificante se si vuol fare la query sulle strutture collegate a processi o a macroprocessi
      * @param id            identificativo del processo o macroprocesso
@@ -296,13 +301,13 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
      * @return <code>ArrayList&lt;ItemBean&gt;</code> - ArrayList di strutture collegate alla rilevazione e al macro/processo specifico, oppure a tutti i macro/processi
      * @throws CommandException se si verifica un problema nella query o nell'estrazione, nel recupero di valori o in qualche altro tipo di puntamento
      */
-    public static ArrayList<ItemBean> retrieveStructsByMacroOrProcess(String type,
-                                                                      int id,
-                                                                      int getAll,
-                                                                      String codeSurvey,
-                                                                      PersonBean user,
-                                                                      DBWrapper db)
-                                                               throws CommandException {
+    private static ArrayList<ItemBean> retrieveStructsByMacroOrProcess(String type,
+                                                                       int id,
+                                                                       int getAll,
+                                                                       String codeSurvey,
+                                                                       PersonBean user,
+                                                                       DBWrapper db)
+                                                                throws CommandException {
         // Recupera l'oggetto rilevazione a partire dal codice
         CodeBean survey = ConfigManager.getSurvey(codeSurvey);
         try {
@@ -352,10 +357,10 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
             for (ItemBean i: items) {
                 // Incrementa l'id globale
                 ++idThru;
-                Integer id_uo_l1 = i.getCod1();
-                Integer id_uo_l2 = i.getCod2();
-                Integer id_uo_l3 = i.getCod3();
-                Integer id_uo_l4 = i.getCod4();
+                Integer id_uo_l1 = new Integer(i.getCod1());
+                Integer id_uo_l2 = new Integer(i.getCod2());
+                Integer id_uo_l3 = new Integer(i.getCod3());
+                Integer id_uo_l4 = new Integer(i.getCod4());
                 DepartmentBean uo_l1;
                 DepartmentBean uo_l2;
                 DepartmentBean uo_l3;
@@ -471,11 +476,11 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
      * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - lista di strutture recuperate
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
      */
-    public static ArrayList<DepartmentBean> retrieveStructuresByMacro(int idMacro,
-                                                                      String codeSurvey,
-                                                                      PersonBean user,
-                                                                      DBWrapper db)
-                                                               throws CommandException {
+    private static ArrayList<DepartmentBean> retrieveStructuresByMacro(int idMacro,
+                                                                       String codeSurvey,
+                                                                       PersonBean user,
+                                                                       DBWrapper db)
+                                                                throws CommandException {
         return retrieveStructuresByMacroOrProcess(PART_MACROPROCESS, idMacro, codeSurvey, user, db);
     }
 
@@ -491,107 +496,24 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
      * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - lista di strutture recuperate
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
      */
-    public static ArrayList<DepartmentBean> retrieveStructuresByProcess(int idProcess,
-                                                                        String codeSurvey,
-                                                                        PersonBean user,
-                                                                        DBWrapper db)
-                                                                 throws CommandException {
+    private static ArrayList<DepartmentBean> retrieveStructuresByProcess(int idProcess,
+                                                                         String codeSurvey,
+                                                                         PersonBean user,
+                                                                         DBWrapper db)
+                                                                  throws CommandException {
         return retrieveStructuresByMacroOrProcess(PART_PROCESS, idProcess, codeSurvey, user, db);
     }
 
 
     /**
-     * <p>Genera il nodo JSON</p>
-     *
-     * @param tipo          valore che serve a differenziare tra tipi diversi di nodi per poter applicare formattazioni o attributi diversi
-     * @param codice        codice del nodo corrente
-     * @param codicePadre   codice del nodo padre del nodo corrente
-     * @param nome          etichetta del nodo
-     * @param descr         descrizione del nodo
-     * @param bgColor       parametro opzionale specificante il colore dei box/nodi in formato esadecimale
-     * @param livello       livello gerarchico del nodo
-     * @return <code>String</code> - il nodo in formato String
-     */
-    private static String getStructureJsonNode(String tipo,
-                                               String codice,
-                                               String codicePadre,
-                                               String nome,
-                                               String descr,
-                                               String bgColor,
-                                               int livello) {
-        /* ======================== *
-         *   Controlli sull'input   *
-         * ======================== */
-        String codiceGest = (codicePadre == null ? "null" : "\"" + codicePadre + "\"");
-        String nodeImage = null;
-        if (tipo.equals(COMMAND_PERSON)) {
-            nodeImage = "per.png";
-        } else if (tipo.equals(COMMAND_STRUCTURES)) {
-            nodeImage = "dept_l" + livello + ".png";
-        }
-        String height =  (descr.length() > 100) ? String.valueOf(descr.length()) : String.valueOf(146);
-        Color backgroundColor = null;
-        if (bgColor != null && !bgColor.equals(VOID_STRING)) {
-            backgroundColor = Color.decode(bgColor);
-        } else {
-            backgroundColor = new Color(51,182,208);
-        }
-        /* ======================== */
-        // Generazione nodo
-        return "{\"nodeId\":\"" + codice + "\"," +
-                "  \"parentNodeId\":" + codiceGest + "," +
-                "  \"width\":342," +
-                "  \"height\":" + height +"," +
-                "  \"borderWidth\":1," +
-                "  \"borderRadius\":5," +
-                "  \"borderColor\":{\"red\":15,\"green\":140,\"blue\":121,\"alpha\":1}," +
-                "  \"backgroundColor\":{\"red\":" + backgroundColor.getRed() + ",\"green\":" + backgroundColor.getGreen() + ",\"blue\":" + backgroundColor.getBlue() + ",\"alpha\":1}," +
-                "  \"nodeImage\":{\"url\":\"web/img/" + nodeImage + "\",\"width\":50,\"height\":50,\"centerTopDistance\":0,\"centerLeftDistance\":0,\"cornerShape\":\"CIRCLE\",\"shadow\":false,\"borderWidth\":0,\"borderColor\":{\"red\":19,\"green\":123,\"blue\":128,\"alpha\":1}}," +
-                "  \"nodeIcon\":{\"icon\":\"\",\"size\":30}," +
-                "  \"template\":\"<div>\\n <div style=\\\"margin-left:15px;\\n margin-right:15px;\\n text-align: center;\\n margin-top:10px;\\n font-size:20px;\\n font-weight:bold;\\n \\\">" + nome + "</div>\\n <div style=\\\"margin-left:80px;\\n margin-right:15px;\\n margin-top:3px;\\n font-size:16px;\\n \\\">" + descr + "</div>\\n\\n </div>\"," +
-                "  \"connectorLineColor\":{\"red\":220,\"green\":189,\"blue\":207,\"alpha\":1}," +
-                "  \"connectorLineWidth\":5," +
-              //"  \"dashArray\":\"\"," +
-                "  \"expanded\":false }";
-    }
-
-    
-    /**
-     * <p>Genera la descrizione del nodo JSON</p>
-     *
-     * @param list          struttura vettoriale contenente informazioni
-     * @param livello       livello gerarchico del nodo
-     * @return <code>String</code> - il nodo in formato String
-     * @throws AttributoNonValorizzatoException 
-     */
-    private static String makeDescrJsonNode(ArrayList<?> list,
-                                            int livello) 
-                                     throws AttributoNonValorizzatoException {
-        StringBuffer descr = new StringBuffer();
-        descr.append("<ul>");
-        for (int i = 0; i < list.size(); i++) {
-            PersonBean p = (PersonBean) list.get(i);
-            descr.append("<li>");
-            descr.append(p.getNome());
-            descr.append(BLANK_SPACE);
-            descr.append(p.getCognome());
-            descr.append(BLANK_SPACE + Utils.DASH + BLANK_SPACE);
-            descr.append(p.getNote());
-            descr.append("</li>");
-        }
-        descr.append("</ul>");
-        /* ======================== */
-        // Generazione descr
-        return descr.toString();
-    }
-    
-
-    /**
      * <p>Gestisce la creazione di un file JSON formattato per la libreria
-     * orgchart.js.</p>
+     * orgchart.js (versione 1.0.5) contenente le informazioni relative alla
+     * gerarchia delle strutture (organigramma).</p>
      *
      * @param req HttpServletRequest    per recuperare la path assoluta della web application
      * @param structs                   lista gerarchica delle strutture dell'organigramma
+     * @param filename                  nome del file json da generare, parametrizzato
+     * @param options                   opzioni di formattazione aggiuntive
      * @throws CommandException         se si verifica un puntamento a null o in genere nei casi in cui nella gestione del flusso informativo di questo metodo si verifica un problema
      */
     public static void printJson(HttpServletRequest req,
@@ -637,21 +559,45 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
             // Json begins
             StringBuilder json = new StringBuilder("[");
             // First Node: the principal
-            json.append(getStructureJsonNode(COMMAND_STRUCTURES, "1000", null, "ATENEO", VOID_STRING, null, NOTHING)).append(",\n");
+            json.append(Data.getStructureJsonNode(COMMAND_STRUCTURES, "1000", null, "ATENEO", VOID_STRING, null, STR_PFX, NOTHING)).append(",\n");
             int count = NOTHING;
             do {
                 DepartmentBean s1 = structs.get(count);
                 // I LIVELLO
-                json.append(getStructureJsonNode(COMMAND_STRUCTURES, s1.getExtraInfo().getCodice(), "1000", Utils.checkQuote(s1.getNome()), VOID_STRING, options.getCodice(), s1.getLivello())).append(",\n");
+                json.append(Data.getStructureJsonNode(COMMAND_STRUCTURES, 
+                                                      s1.getExtraInfo().getCodice(), 
+                                                      "1000", 
+                                                      Utils.checkQuote(s1.getNome()), 
+                                                      VOID_STRING, 
+                                                      options.getNome(), options.getIcona(), 
+                                                      s1.getLivello())).append(",\n");
                 // II LIVELLO
                 for (DepartmentBean s2 : s1.getFiglie()) {
-                    json.append(getStructureJsonNode(COMMAND_STRUCTURES, s2.getExtraInfo().getCodice(), s1.getExtraInfo().getCodice(), Utils.checkQuote(s2.getPrefisso() + BLANK_SPACE + s2.getNome()), (s2.getPersone() != null ? makeDescrJsonNode(s2.getPersone(), s2.getLivello()) : VOID_STRING), options.getCodice(), s2.getLivello())).append(",\n");
+                    json.append(Data.getStructureJsonNode(COMMAND_STRUCTURES, 
+                                                          s2.getExtraInfo().getCodice(), 
+                                                          s1.getExtraInfo().getCodice(), 
+                                                          Utils.checkQuote(s2.getPrefisso() + BLANK_SPACE + s2.getNome()), 
+                                                          (s2.getPersone() != null ? Data.makeDescrJsonNode(s2.getPersone(), s2.getLivello()) : VOID_STRING), 
+                                                          options.getNome(), options.getIcona(), 
+                                                          s2.getLivello())).append(",\n");
                     // III LIVELLO
                     for (DepartmentBean s3 : s2.getFiglie()) {
-                        json.append(getStructureJsonNode(COMMAND_STRUCTURES, s3.getExtraInfo().getCodice(), s2.getExtraInfo().getCodice(), Utils.checkQuote(s3.getPrefisso() + BLANK_SPACE + s3.getNome()), (s3.getPersone() != null ? makeDescrJsonNode(s3.getPersone(), s3.getLivello()) : VOID_STRING), options.getCodice(), s3.getLivello())).append(",\n");
+                        json.append(Data.getStructureJsonNode(COMMAND_STRUCTURES, 
+                                                              s3.getExtraInfo().getCodice(), 
+                                                              s2.getExtraInfo().getCodice(), 
+                                                              Utils.checkQuote(s3.getPrefisso() + BLANK_SPACE + s3.getNome()), 
+                                                              (s3.getPersone() != null ? Data.makeDescrJsonNode(s3.getPersone(), s3.getLivello()) : VOID_STRING), 
+                                                              options.getNome(), options.getIcona(), 
+                                                              s3.getLivello())).append(",\n");
                         // IV LIVELLO
                         for (DepartmentBean s4 : s3.getFiglie()) {
-                            json.append(getStructureJsonNode(COMMAND_STRUCTURES, s4.getExtraInfo().getCodice(), s3.getExtraInfo().getCodice(), Utils.checkQuote(s4.getPrefisso() + BLANK_SPACE + s4.getNome()), (s4.getPersone() != null ? makeDescrJsonNode(s4.getPersone(), s4.getLivello()) : VOID_STRING), options.getCodice(), s4.getLivello())).append(",\n");
+                            json.append(Data.getStructureJsonNode(COMMAND_STRUCTURES, 
+                                                                  s4.getExtraInfo().getCodice(), 
+                                                                  s3.getExtraInfo().getCodice(), 
+                                                                  Utils.checkQuote(s4.getPrefisso() + BLANK_SPACE + s4.getNome()), 
+                                                                  (s4.getPersone() != null ? Data.makeDescrJsonNode(s4.getPersone(), s4.getLivello()) : VOID_STRING), 
+                                                                  options.getNome(), options.getIcona(), 
+                                                                  s4.getLivello())).append(",\n");
                         }
                     }
                 }
