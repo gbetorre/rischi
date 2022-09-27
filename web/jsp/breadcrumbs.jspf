@@ -1,7 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <style>
 .breadcrumb-item + .breadcrumb-item::before {
-        /*content: ">";*/
         content: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwYXRoIGQ9Ik0yLjUgMEwxIDEuNSAzLjUgNCAxIDYuNSAyLjUgOGw0LTQtNC00eiIgZmlsbD0iY3VycmVudENvbG9yIi8+PC9zdmc+);
     }
 </style>
@@ -9,7 +8,7 @@
     <c:set var="bC" value="${requestScope.breadCrumbs}" scope="page" />
     <c:catch var="exception">
     <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
+      <ol class="breadcrumb btn-spacer">
       <c:forEach var="item" items="${bC}" varStatus="status">
       <c:choose>
         <c:when test="${status.count lt bC.size()}">
