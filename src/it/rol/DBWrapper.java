@@ -1360,7 +1360,8 @@ public class DBWrapper implements Query, Constants {
                 "   FROM " + tableFrom + " D" +
                 "   WHERE D.id_rilevazione = " + idR +
                 "       AND " + tableWhere +
-                "   ORDER BY D.nome";
+                "       AND id_stato = 1" + // Prende solo le strutture attive
+                "   ORDER BY D.ordinale, D.nome";
         return GET_STRUCTURE_BY_STRUCTURE;
     }
 
@@ -2138,9 +2139,10 @@ public class DBWrapper implements Query, Constants {
         ProcessBean processo = null;
         ProcessBean sottoprocesso = null;
         CodeBean rilevazione = null;
-        AbstractList<ProcessBean> macroprocessi = new ArrayList<ProcessBean>();
+        AbstractList<ProcessBean> macroprocessi = new ArrayList<>();
         AbstractList<ProcessBean> processi = null;
         AbstractList<ProcessBean> sottoprocessi = null;
+        int idThru = NOTHING;   // id globale
         try {
             // TODO: Controllare se user è superuser
             con = prol_manager.getConnection();
@@ -2149,21 +2151,28 @@ public class DBWrapper implements Query, Constants {
             pst.setString(1, codeSurvey);
             rs = pst.executeQuery();
             while (rs.next()) {
+                // Incrementa l'id globale
+                ++idThru;
                 // Crea un macroprocesso vuoto
                 macro = new ProcessBean();
                 // Istanzia una struttura vettoriale per contenere i suoi processi
                 processi = new Vector<>();
                 // Valorizza il macroprocesso col contenuto della query
                 BeanUtil.populate(macro, rs);
+                // Ne imposta il livello
+                macro.setLivello(1);
                 // Recupera la rilevazione
                 rilevazione = getSurvey(macro.getIdAppo(), macro.getIdAppo());
                 // Imposta la rilevazione
                 macro.setRilevazione(rilevazione);
+                // Genera il codice globale
+                macro.setTag(String.valueOf(idThru + DOT + macro.getId() + DASH + macro.getLivello()));
                 // Recupera i processi del macroprocesso
                 pst = null;
                 pst = con.prepareStatement(GET_PROCESSI_AT_BY_MACRO);
                 pst.clearParameters();
                 pst.setInt(1, macro.getId());
+                pst.setString(2, codeSurvey);
                 rs1 = pst.executeQuery();
                 while (rs1.next()) {
                     processo = new ProcessBean();
@@ -2171,15 +2180,27 @@ public class DBWrapper implements Query, Constants {
                     sottoprocessi = new Vector<>();
                     // Valorizza il processo col contenuto della query
                     BeanUtil.populate(processo, rs1);
+                    // Ne imposta il livello
+                    processo.setLivello(2);
+                    // Genera il codice globale
+                    processo.setTag(String.valueOf(idThru + DOT + processo.getId() + DASH + processo.getLivello()));
                     // Recupera i sottoprocessi del processo
                     pst = null;
                     pst = con.prepareStatement(GET_SOTTOPROCESSI_AT_BY_PROCESS);
                     pst.clearParameters();
                     pst.setInt(1, processo.getId());
+                    pst.setString(2, codeSurvey);
                     rs2 = pst.executeQuery();
                     while (rs2.next()) {
+                        // Crea un sottoprocesso vuoto
                         sottoprocesso = new ProcessBean();
+                        // Lo valorizza col contenuto della query
                         BeanUtil.populate(sottoprocesso, rs2);
+                        // Ne imposta il livello
+                        sottoprocesso.setLivello(3);
+                        // Genera il codice globale
+                        sottoprocesso.setTag(String.valueOf(idThru + DOT + sottoprocesso.getId() + DASH + sottoprocesso.getLivello()));
+                        // Lo aggiunge alla lista dei sottoprocessi trovati
                         sottoprocessi.add(sottoprocesso);
                     }
                     // Imposta i sottoprocessi
