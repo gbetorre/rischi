@@ -808,7 +808,9 @@ public interface Query extends Serializable {
     
     /**
      * <p>Estrae tutti i processi anticorruzione appartenenti a un macroprocesso
-     * anticorruzione, il cui identificativo viene passato come parametro.</p>
+     * anticorruzione, il cui identificativo viene passato come parametro
+     * e che sono collegati al codice identificativo della rilevazione corrente,
+     * che viene passato come parametro.</p>
      */
     public static final String GET_PROCESSI_AT_BY_MACRO =
             "SELECT DISTINCT" +
@@ -819,9 +821,9 @@ public interface Query extends Serializable {
             "   ,   PRAT.smartworking      AS \"smartWorking\"" +
             "   FROM processo_at PRAT" +
             "       INNER JOIN macroprocesso_at MAT ON PRAT.id_macroprocesso_at = MAT.id" +
-            //"       INNER JOIN allocazione_processo_at AP ON AP.id_processo = PR.id" +
-            //"       INNER JOIN afferenza A ON AP.id_persona = A.id_persona AND AP.id_rilevazione = A.id_rilevazione" +
+            "       INNER JOIN rilevazione R ON PRAT.id_rilevazione = R.id" +
             "   WHERE PRAT.id_macroprocesso_at = ?" +
+            "       AND R.codice ILIKE ?" +
             "   ORDER BY PRAT.codice";
 
     /**
@@ -837,9 +839,9 @@ public interface Query extends Serializable {
             "   ,   SPRAT.smartworking      AS \"smartWorking\"" +
             "   FROM sottoprocesso_at SPRAT" +
             "       INNER JOIN processo_at PRAT ON SPRAT.id_processo_at = PRAT.id" +
-            //"       INNER JOIN allocazione_processo_at AP ON AP.id_processo = PR.id" +
-            //"       INNER JOIN afferenza A ON AP.id_persona = A.id_persona AND AP.id_rilevazione = A.id_rilevazione" +
+            "       INNER JOIN rilevazione R ON PRAT.id_rilevazione = R.id" +
             "   WHERE SPRAT.id_processo_at = ?" +
+            "       AND R.codice ILIKE ?" +
             "   ORDER BY SPRAT.codice";
     
     /**
