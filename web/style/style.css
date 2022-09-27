@@ -3,7 +3,7 @@ Style.css - Global Stylesheet for /processi application
 =====================================================*/
 html, body {
     font-family: Verdana,sans-serif;
-    font-size: 15px;
+    font-size: small;
     line-height: 1.5;
 }
 
@@ -29,7 +29,6 @@ h4.heading {
 
 body {
   background-color: white;
-  font-size: medium;
   width: 100%;
   overflow-x: hidden;
 }
@@ -592,7 +591,9 @@ textarea {
 
 /*---------------------- Additional styles ------------------------*/
 .mandatory {
-	font-weight: bold;
+  background-color: #dcdcdc;
+  border-bottom-style: groove;
+  border-color: #929aa0;
 }
 
 .mandatory:after {
@@ -735,7 +736,7 @@ hr.riga       {
   padding-left: 180px;
 }
 
-/*---------------------- STATI ------------------------*/
+/*---------------------- AMBITI DI ANALISI ------------------------*/
 .bgAct {
   background-color: #ffd9b3 !important;
 }
@@ -779,46 +780,46 @@ hr.riga       {
   background-color: #f5c6cb !important;
 }
 
-.bgSts21, .bgSts22 {
-  background-color: #ccff99;
-}
-
-.bgAct21 {
-  background-color: #4d9900;
-  border: 1px solid #336600;
-}
-
-.bgAct22 {
-  background-color: #73e600;
-  border: 1px solid #4d9900;
-}
-
-.bgSts23, .bgSts24 {
-  background-color: #ffff80;
-}
-
-.bgAct23 {
+.bgAct11 {
   background-color: #ff9933;
   border: 1px solid #e67300;
 }
 
-.bgAct24 {
-  background-color: #ffd633;
-  border: 1px solid #cca300;
-}
-
-.bgSts25, .bgSts26 {
-  background-color: #cceeff;
-}
-
-.bgAct25 {
+.bgAct12 {
   background-color: #99ccff;
   border: 1px solid #3399ff;
 }
 
-.bgAct26 {
+.bgAct13 {
+  background-color: #ffd633;
+  border: 1px solid #cca300;
+}
+
+.bgAct14 {
+  background-color: #4d9900;
+  border: 1px solid #336600;
+}
+
+.bgAct15 {
+  background-color: #73e600;
+  border: 1px solid #4d9900;
+}
+
+.bgAct16 {
+  background-color: #ffff80;
+}
+
+.bgAct17 {
+  background-color: #cceeff;
+}
+
+.bgAct18 {
   background-color: #80aaff;
   border: 1px solid #004de6;
+}
+
+.bgAct19 {
+  background-color: #ccff99;
 }
 
 .bgAddAct {
