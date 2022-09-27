@@ -42,10 +42,10 @@
         <div class="panel-body form-group">
           <!--  Macroprocesso -->
           <div class="row alert">
-            <div class="col-sm-3  alert-success">
+            <div class="col-sm-3 mandatory">
               Scelta macroprocesso&nbsp;
             </div>
-            <div class="col-sm-9">
+            <div class="col-sm-9 mandatory">
               <select id="pat-liv1" name="pliv1">
                 <option value="0">-- macroprocesso -- </option>
               <c:forEach var="macro" items="${macros}">
