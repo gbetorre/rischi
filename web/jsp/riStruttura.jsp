@@ -12,10 +12,10 @@
         <div class="panel-body form-group">
           <!--  1° Livello -->
           <div class="row alert">
-            <div class="col-sm-3  alert-info">
+            <div class="col-sm-3 mandatory">
               Scelta tipologia struttura&nbsp;
             </div>
-            <div class="col-sm-9">
+            <div class="col-sm-9 mandatory">
               <select id="str-liv1" name="sliv1">
                 <option value="0">-- scelta tipologia struttura -- </option>
                 <option value="${dir.extraInfo.codice}"><c:out value="${dir.nome}" /></option>
@@ -27,10 +27,10 @@
           </div>
           <!--  2° Livello -->
           <div class="row alert">
-            <div class="col-sm-3  alert-info">
+            <div class="col-sm-3 mandatory">
               Scelta struttura II livello&nbsp;
             </div>
-            <div class="col-sm-9">
+            <div class="col-sm-9 mandatory">
               <select id="str-liv2" name="sliv2">
                 <option value="">-- struttura II livello -- </option>
               </select>
