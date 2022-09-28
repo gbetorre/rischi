@@ -1,11 +1,13 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
+ *   dell'ateneo possono essere esposti e per la gestione di reportistica
+ *   e mappature per la gestione dei "rischi on line" (rol).
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
+ *   Risk Mapping Software (rms)
+ *   web applications to make survey about the amount and kind of risk
+ *   which each process is exposed, and to publish, and manage,
+ *   report and risk information.
  *   Copyright (C) renewed 2022 Giovanroberto Torre
  *   all right reserved
  *
@@ -34,8 +36,6 @@ package it.rol;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-
-import it.rol.bean.CodeBean;
 
 
 /**
