@@ -1,11 +1,13 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
+ *   dell'ateneo possono essere esposti e per la gestione di reportistica
+ *   e mappature per la gestione dei "rischi on line" (rol).
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
+ *   Risk Mapping Software (rms)
+ *   web applications to make survey about the amount and kind of risk
+ *   which each process is exposed, and to publish, and manage,
+ *   report and risk information.
  *   Copyright (C) renewed 2022 Giovanroberto Torre
  *   all right reserved
  *
@@ -50,6 +52,9 @@ import it.rol.bean.CodeBean;
 public interface Constants extends Serializable {
     /* ************************************************************************ *
      *        Costanti parlanti per valori interi di inizializzazione           *
+     *  - Se un valore vale -1 significa che è stato inizializzato da Command   *
+     *  - Se un valore vale -2 significa che è stato inizializzato nel Bean     *
+     *  - Se un valore vale  0 è la cardinalità di una struttura vuota          *    
      * ************************************************************************ */
     /**
      * <p>Costante parlante per i test che controllano
@@ -130,9 +135,9 @@ public interface Constants extends Serializable {
      */
     public static final String PART_MULTIFACT           = "mul";
     /**
-     * <p>Costante per il parametro identificante la parte di ricerca sulle persone.</p>
+     * <p>Costante per il parametro identificante la form di ricerca.</p>
      */
-    public static final String PART_SEARCH_PERSON       = "pes";
+    public static final String PART_SEARCH              = "ris";
     /**
      * <p>Costante per il parametro identificante la parte di selezione strutture.</p>
      */
@@ -179,18 +184,53 @@ public interface Constants extends Serializable {
     /**
      * <p>Lista contenente i possibili valori dell'attributo stato della classe RiskBean.</p>
      */
-    public static final LinkedList<String> STATI_STRUTTURA_AS_LIST = new LinkedList<String>(Arrays.asList(STATI_STRUTTURA));
+    public static final LinkedList<String> STATI_STRUTTURA_AS_LIST = new LinkedList<>(Arrays.asList(STATI_STRUTTURA));
     /**
      * <p>Lista contenente i possibili valori convenzionali corrispondenti a tipi diversi di responsabilit&agrave;.</p>
      */
-    public static final LinkedList<String> TIPI_RESPONSABILITA_AS_LIST = new LinkedList<String>(Arrays.asList(TIPI_RESPONSABILITA));
+    public static final LinkedList<String> TIPI_RESPONSABILITA_AS_LIST = new LinkedList<>(Arrays.asList(TIPI_RESPONSABILITA));
     /**
      * <p>Lista contenente i possibili valori degli attributi probabilita, impatto, livello della classe RiskBean.</p>
      */
-    public static final LinkedList<String> LIVELLI_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(LIVELLI_RISCHIO));
+    public static final LinkedList<String> LIVELLI_RISCHIO_AS_LIST = new LinkedList<>(Arrays.asList(LIVELLI_RISCHIO));
     /* ************************************************************************ *
      *   Costanti tipografiche per la generazione di output (p.es. csv) e URL   *
      * ************************************************************************ */
+    /**
+     * <p>Costante da utilizzare quando serve uno spazio (l'equivalente,
+     * in java, dell'html &quot;&nbsp;&quot;), generalmente usato
+     * per separare pi&uacute; sottostostringhe in una stringa
+     * da restituire come valore oppure messaggio.</p>
+     */
+    public static final char BLANK_SPACE = ' ';
+    /**
+     * Costante per l'uso del separatore trattino
+     */
+    public static final char HYPHEN = '-';
+    /**
+     * Costante per l'uso del separatore underscore
+     */
+    public static final char UNDERSCORE = '_';
+    /**
+     * Costante per l'uso del carattere punto e virgola 
+     */
+    public static final char SEMICOLON = ';';
+    /**
+     * Costante per l'uso del carattere due punti
+     */
+    public static final char COLON = ':';
+    /**
+     * Costante per l'uso del separatore '=' (p.es., tra parametro e valore) 
+     */
+    public static final char EQ = '=';
+    /**
+     * Costante per l'uso del separatore 'slash' (p.es. nei percorsi)
+     */
+    public static final char SLASH = '/';
+    /**
+     * Costante per l'uso del separatore '?' (question mark)
+     */
+    public static final char QM = '?';
     /**
      * <p>Costante da utilizzare quando serve un valore per inizializzazione,
      * o da utilizzare come argomento, per effettuare test, etc.</p>
@@ -206,28 +246,17 @@ public interface Constants extends Serializable {
      */
     public static final String VOID_STRING = "";
     /**
-     * <p>Costante da utilizzare quando serve uno spazio (l'equivalente,
-     * in java, dell'html &quot;&nbsp;&quot;), generalmente usato
-     * per separare pi&uacute; sottostostringhe in una stringa
-     * da restituire come valore oppure messaggio.</p>
-     */
-    public static final char BLANK_SPACE = ' ';
-    /**
      * <p>Costante da utilizzare quando serve un valore per inizializzazione
      * di default di un parametro mancante sulla querystring.</p>
      * <p>Incapsula il classico trattino (-) che viene utilizzato come default
      * per i valori mancanti di parametri richiesti tipicamente dalle
      * Command.</p>
      */
-    public static final String DASH = "-";
+    public static final String DASH = String.valueOf(HYPHEN);
     /**
-     * Costante per l'uso del separatore trattino
+     * Costante per l'uso del separatore semicolon 
      */
-    public static final char HYPHEN = '-';
-    /**
-     * Costante per l'uso del separatore underscore
-     */
-    public static final char UNDERSCORE = '_';
+    public static final String SEPARATOR = String.valueOf(SEMICOLON);
     /**
      * Costante per l'uso del separatore punto
      */
@@ -236,22 +265,6 @@ public interface Constants extends Serializable {
      * Costante per l'uso del separatore virgola
      */
     public static final String COMMA = ",";
-    /**
-     * Costante per l'uso del separatore semicolon 
-     */
-    public static final String SEPARATOR = ";";
-    /**
-     * Costante per l'uso del separatore '=' (p.es., tra parametro e valore) 
-     */
-    public static final char EQ = '=';
-    /**
-     * Costante per l'uso del separatore 'slash' (p.es. nei percorsi)
-     */
-    public static final char SLASH = '/';
-    /**
-     * Costante per l'uso del separatore '?' (question mark)
-     */
-    public static final char QM = '?';
     /**
      * Costante per il separatore che precede immediatamente la querystring (root question mark)
      */
@@ -291,6 +304,22 @@ public interface Constants extends Serializable {
      * Costante per i nomi di immagini relative a processi
      */
     public static final String PRO_PFX = "procat_l";
+    /**
+     * Costante per i nomi di estrazioni dati interviste
+     */
+    public static final String INTERVIEWS = "interviste";
+    /**
+     * Costante per i nomi di estrazioni dati intervista
+     */
+    public static final String INTERVIEW = "intervista";
+    /**
+     * Costante per i nomi di estrazioni dati strutture
+     */
+    public static final String STRUCTURES = "organigramma";
+    /**
+     * Costante per i nomi di estrazioni dati processi anticorruzione
+     */
+    public static final String PROCESS = "processi";
     /* ************************************************************************ *
      * Costanti di tempo (p.es. formati di data, date significative, etc.) *
      * ************************************************************************ */
@@ -298,6 +327,11 @@ public interface Constants extends Serializable {
      * <p>Pattern che deve avere una data (oggetto java.util.Date o GregorianCalendar) per essere conforme al fornato SQL.</p>
      */
     public static final String DATA_SQL_PATTERN = "yyyy-MM-dd";
+    /**
+     * <p>Pattern che specifica il formato di una String che rappresenta una data
+     * esprimendola relativamente per esteso; esempio: "Tue Jul 07 00:00:00 CEST 2020".</p>
+     */
+    public static final String DATA_GENERAL_PATTERN ="EEE MMM dd HH:mm:ss zzz yyyy";
     /**
      * <p>Contiene la formattazione che deve avere una data all'interno dell'applicazione.</p>
      */
