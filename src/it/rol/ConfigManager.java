@@ -144,10 +144,17 @@ public class ConfigManager extends HttpServlet {
      */
     private static ConcurrentHashMap<String, Integer> questionAmount;
     /**
+     * Tabella hash (dictionary) contenente etichette predefinite 
+     * in funzione del valore del parametro 'p'; queste possono essere utilizzate
+     * poi nella costruzione dei nomi dei files generati dall'applicazione
+     */
+    private static ConcurrentHashMap<String, String> labels;
+    /**
      * <p>Nome del parametro di inizializzazione, valorizzato nel
      * descrittore di deploy, che identifica il nome della web application.</p>
-     * <p>Nelle ultime applicazioni che ho sviluppato valeva 'almalaurea', 'pm', 'pol' etc.;
-     * comunque si chiami, di esso &egrave; da ricercare il valore
+     * <p>Nelle ultime applicazioni che ho sviluppato valeva<ul> 
+     * <li>'almalaurea',</li> <li>'pm',</li> <li>'pol',</li> <li>'processi'</li> 
+     * etc.;</ul> comunque si chiami, di esso &egrave; da ricercare il valore
      * <em>prima</em> della QueryString.</p>
      */
     private static String appName;
@@ -362,6 +369,19 @@ public class ConfigManager extends HttpServlet {
         catch (Exception e) {
             throw new ServletException(FOR_NAME + "Problemi nel caricare la struttura contenente le rilevazioni.\n" + e.getMessage(), e);
         }
+        /*
+         * Carica una struttura dati, che esporra' staticamente, contenente tutte 
+         * le etichette utilizzabili nella costruzione dei nomi dei files 
+         * generati dall'applicazione in funzione del valore del parametro p.
+         */
+        labels = null;
+        // La istanzia
+        labels = new ConcurrentHashMap<>();
+        // La carica
+        labels.put(Constants.PART_SELECT_QSS, Constants.INTERVIEWS);
+        labels.put(Constants.PART_RESUME_QST, Constants.INTERVIEW);
+        labels.put(Constants.COMMAND_STRUCTURES, Constants.STRUCTURES);
+        labels.put(Constants.COMMAND_PROCESS, Constants.PROCESS);
     }
 
 
@@ -584,4 +604,18 @@ public class ConfigManager extends HttpServlet {
         return questionAmount;
     }
 
+    
+    /**
+     * <p>Restituisce una struttura di tipo Tabella hash (dictionary),
+     * contenente alcune etichette che possono essere utili come prefissi
+     * di file di estrazione e usi simili.
+     * La chiave di ogni entry &egrave; valore del parametro p.</p>
+     * <p>Metodo getter sulla variabile privata di classe.</p>
+     *
+     * @return <code>ConcurrentHashMap&lt;String, String&gt;</code> - etichette associate al valore di p
+     */
+    public static ConcurrentHashMap<String, String> getLabels() {
+        return labels;
+    }
+    
 }
