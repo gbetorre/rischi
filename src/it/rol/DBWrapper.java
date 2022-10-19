@@ -54,8 +54,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import it.rol.Query;
-import it.rol.Utils;
 import it.rol.bean.BeanUtil;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
@@ -64,8 +62,8 @@ import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
-import it.rol.exception.CommandException;
 import it.rol.exception.AttributoNonValorizzatoException;
+import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
 
 
@@ -82,8 +80,8 @@ public class DBWrapper implements Query, Constants {
     /**
      * <p>La serializzazione necessita di dichiarare una costante di tipo long
      * identificativa della versione seriale.<br />
-     * (Se questo dato non fosse inserito, verrebbe calcolato in maniera a
-     * utomatica dalla JVM, e questo potrebbe portare a errori
+     * (Se questo dato non fosse inserito, verrebbe calcolato in maniera
+     * automatica dalla JVM, e questo potrebbe portare a errori
      * riguardo alla serializzazione).</p>
      * <p><small>I moderni IDE, come Eclipse, permettono di assegnare
      * questa costante in due modi diversi:
@@ -147,7 +145,7 @@ public class DBWrapper implements Query, Constants {
     }
 
     /* ********************************************************** *
-     *                     Metodi di SELEZIONE                    *
+     *               Metodi generali dell'applicazione            *
      * ********************************************************** */
 
     /**
@@ -163,7 +161,7 @@ public class DBWrapper implements Query, Constants {
         PreparedStatement pst = null;
         ResultSet rs = null;
         ItemBean cmd = null;
-        Vector<ItemBean> commands = new Vector<ItemBean>();
+        Vector<ItemBean> commands = new Vector<>();
         try {
             con = prol_manager.getConnection();
             pst = con.prepareStatement(LOOKUP_COMMAND);
@@ -286,7 +284,8 @@ public class DBWrapper implements Query, Constants {
 
 
     /**
-     * <p>Restituisce il primo valore trovato data una query in input</p>
+     * <p>Restituisce il primo valore trovato data una query 
+     * passata come parametro</p>
      *
      * @param query da eseguire
      * @return <code>String</code> - stringa restituita
@@ -377,7 +376,7 @@ public class DBWrapper implements Query, Constants {
      * @param username  username della persona che ha eseguito il login
      * @param password  password della persona che ha eseguito il login
      * @return <code>PersonBean</code> - PersonBean rappresentante l'utente loggato
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     * @throws it.rol.exception.WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id della persona non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
      */
     @SuppressWarnings({ "null", "static-method" })
@@ -386,10 +385,10 @@ public class DBWrapper implements Query, Constants {
                        throws WebStorageException, AttributoNonValorizzatoException {
         Connection con = null;
         PreparedStatement pst = null;
-        ResultSet rs, rs1, rs2 = null;
+        ResultSet rs, rs1 = null;
         PersonBean usr = null;
         int nextInt = 0;
-        Vector<CodeBean> vRuoli = new Vector<CodeBean>();
+        Vector<CodeBean> vRuoli = new Vector<>();
         try {
             con = prol_manager.getConnection();
             pst = con.prepareStatement(GET_USR);
@@ -402,17 +401,6 @@ public class DBWrapper implements Query, Constants {
                 usr = new PersonBean();
                 BeanUtil.populate(usr, rs);
                 // Se ha trovato l'utente, ne cerca il ruolo
-                pst = null;
-                pst = con.prepareStatement(GET_RUOLOUTENTE);
-                pst.clearParameters();
-                pst.setString(1, username);
-                rs1 = pst.executeQuery();
-                while(rs1.next()) {
-                    CodeBean ruolo = new CodeBean();
-                    BeanUtil.populate(ruolo, rs1);
-                    vRuoli.add(ruolo);
-                }
-                // Se ha trovato l'utente, ne cerca l'id utente
                 pst = null;
                 pst = con.prepareStatement(GET_RUOLOUTENTE);
                 pst.clearParameters();
@@ -545,8 +533,12 @@ public class DBWrapper implements Query, Constants {
         }
     }
 
-
+    /* ********************************************************** *
+     *                     Metodi di SELEZIONE                    *
+     * ********************************************************** */
+    
     /**
+     * <p>Seleziona i dati della rilevazione.</p>
      * <p>A seconda del valore dei parameri ricevuti, assume i seguenti comportamenti:
      * <dl><dt>se viene passato l'id rilevazione sul primo e secondo parametro</dt>
      * <dd>restituisce i dati della specifica rilevazione, avente tale valore
@@ -583,7 +575,7 @@ public class DBWrapper implements Query, Constants {
             }
             // Tries (just tries) to engage the Garbage Collector
             pst = null;
-            // Let's go away
+            // Get out
             return survey;
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto CodeBean non valorizzato; problema nella query dell\'ultima rilevazione.\n";
@@ -608,6 +600,7 @@ public class DBWrapper implements Query, Constants {
 
 
     /**
+     * <p>Seleziona i dati di una o pi&uacute; rilevazioni.</p>
      * <p>A seconda del valore dei parameri ricevuti, assume i seguenti comportamenti:
      * <dl><dt>se viene passato l'id rilevazione sul primo e secondo parametro</dt>
      * <dd>restituisce una struttura vettoriale contenente un oggetto valorizzato con
@@ -631,7 +624,7 @@ public class DBWrapper implements Query, Constants {
         PreparedStatement pst = null;
         ResultSet rs = null;
         CodeBean survey = null;
-        ArrayList<CodeBean> surveys = new ArrayList<CodeBean>();
+        ArrayList<CodeBean> surveys = new ArrayList<>();
         try {
             con = prol_manager.getConnection();
             pst = con.prepareStatement(GET_SURVEY);
@@ -672,7 +665,8 @@ public class DBWrapper implements Query, Constants {
 
     /**
      * <p>Data una rilevazione, restituisce un ArrayList di macroprocessi
-     * ad essa afferenti, contenenti ciascuno i processi figli al proprio interno.</p>
+     * ad essa afferenti, contenenti ciascuno i processi figli al proprio interno
+     * (albero, o struttura gerarchica).</p>
      * <p>Recupera solo i macroprocessi su cui un utente, il cui username viene
      * passato come argomento, ha i diritti di accesso (in base al ruolo <em>per se</em>).</p>
      *
@@ -691,7 +685,7 @@ public class DBWrapper implements Query, Constants {
         ProcessBean macro = null;
         ProcessBean processo = null;
         CodeBean rilevazione = null;
-        AbstractList<ProcessBean> macroprocessi = new ArrayList<ProcessBean>();
+        AbstractList<ProcessBean> macroprocessi = new ArrayList<>();
         AbstractList<ProcessBean> sottoprocessi = null;
         try {
             // TODO: Controllare se user è superuser
@@ -704,7 +698,7 @@ public class DBWrapper implements Query, Constants {
                 // Crea un macroprocesso vuoto
                 macro = new ProcessBean();
                 // Istanzia una struttura vettoriale per contenere i suoi sottoprocessi
-                sottoprocessi = new Vector<ProcessBean>();
+                sottoprocessi = new Vector<>();
                 // Valorizza il macroprocesso col contenuto della query
                 BeanUtil.populate(macro, rs);
                 // Recupera la rilevazione
@@ -816,7 +810,7 @@ public class DBWrapper implements Query, Constants {
         ProcessBean macro = null;
         ProcessBean processo = null;
         String codeSurvey = null;
-        AbstractList<ProcessBean> macroprocessi = new ArrayList<ProcessBean>();
+        AbstractList<ProcessBean> macroprocessi = new ArrayList<>();
         AbstractList<ProcessBean> sottoprocessi = null;
         DepartmentBean struttura = null;
         int[] sl = null;
@@ -883,7 +877,7 @@ public class DBWrapper implements Query, Constants {
                 // Crea un macroprocesso vuoto
                 macro = new ProcessBean();
                 // Istanzia una struttura vettoriale per contenere i suoi sottoprocessi
-                sottoprocessi = new Vector<ProcessBean>();
+                sottoprocessi = new Vector<>();
                 // Valorizza il macroprocesso col contenuto della query
                 BeanUtil.populate(macro, rs);
                 // Imposta la rilevazione nel macroprocesso
@@ -938,8 +932,8 @@ public class DBWrapper implements Query, Constants {
 
     /**
      * <p>Data una rilevazione e l'identificativo di una persona, passati come argomenti,
-     * restituisce un ArrayList di macroprocessi ad essa afferenti, contenenti ciascuno
-     * i processi figli al proprio interno.</p>
+     * restituisce un ArrayList di macroprocessi ad essa afferenti, 
+     * contenenti ciascuno i processi figli al proprio interno.</p>
      * <p>Recupera solo i macroprocessi su cui un utente, il cui username viene
      * passato come argomento, ha i diritti di accesso (in base al ruolo <em>per se</em>).</p>
      *
@@ -961,7 +955,7 @@ public class DBWrapper implements Query, Constants {
         ProcessBean macro = null;
         ProcessBean processo = null;
         CodeBean rilevazione = null;
-        AbstractList<ProcessBean> macroprocessi = new ArrayList<ProcessBean>();
+        AbstractList<ProcessBean> macroprocessi = new ArrayList<>();
         AbstractList<ProcessBean> sottoprocessi = null;
         try {
             // TODO: Controllare se user è superuser
@@ -977,7 +971,7 @@ public class DBWrapper implements Query, Constants {
                 // Crea un macroprocesso vuoto
                 macro = new ProcessBean();
                 // Istanzia una struttura vettoriale per contenere i suoi sottoprocessi
-                sottoprocessi = new Vector<ProcessBean>();
+                sottoprocessi = new Vector<>();
                 // Valorizza il macroprocesso col contenuto della query
                 BeanUtil.populate(macro, rs);
                 // Recupera la rilevazione
@@ -1051,7 +1045,7 @@ public class DBWrapper implements Query, Constants {
         ResultSet rs = null;
         int nextParam = NOTHING;
         PersonBean person = null;
-        AbstractList<PersonBean> people = new ArrayList<PersonBean>();
+        AbstractList<PersonBean> people = new ArrayList<>();
         try {
             // TODO: Controllare se user è superuser
             con = prol_manager.getConnection();
@@ -1092,6 +1086,7 @@ public class DBWrapper implements Query, Constants {
         }
     }
 
+    
     /**
      * <p>Data una rilevazione e l'identificativo di un macroprocesso, restituisce
      * un ArrayList di persone ad essi afferenti.</p>
@@ -1125,15 +1120,10 @@ public class DBWrapper implements Query, Constants {
     }
 
 
-    /**
-     * <p>Costruisce dinamicamente la query di estrazione delle persone afferenti
-     * a una struttura allocata su un macroprocesso</p>
-     *
-     * @param idM identificativo del macroprocesso
-     * @param idR identificativo della rilevazione
-     * @param idl identificativi delle strutture di livello 4, 3, 2 e 1 (-1 se null)
-     * @return la query che estrae le persone afferenti alla struttura data, costruita dinamicamente
+    /* (non-Javadoc)
+     * @see it.rol.Query#getQueryPeopleByStructureAndMacro(int, int, int[])
      */
+    @SuppressWarnings("javadoc")
     @Override
     public String getQueryPeopleByStructureAndMacro(int idM,
                                                     int idR,
@@ -1161,15 +1151,10 @@ public class DBWrapper implements Query, Constants {
     }
 
 
-    /**
-     * <p>Costruisce dinamicamente la query di estrazione delle persone afferenti
-     * a una struttura allocata su un macroprocesso</p>
-     *
-     * @param idP identificativo del processo
-     * @param idR identificativo della rilevazione
-     * @param idl identificativi delle strutture di livello 4, 3, 2 e 1 (-1 se null)
-     * @return la query che estrae le persone afferenti alla struttura data, costruita dinamicamente
+    /* (non-Javadoc)
+     * @see it.rol.Query#getQueryPeopleByStructureAndProcess(int, int, int[])
      */
+    @SuppressWarnings("javadoc")
     @Override
     public String getQueryPeopleByStructureAndProcess(int idP,
                                                       int idR,
@@ -1220,7 +1205,7 @@ public class DBWrapper implements Query, Constants {
         Statement st = null;
         ResultSet rs = null;
         PersonBean person = null;
-        AbstractList<PersonBean> people = new ArrayList<PersonBean>();
+        AbstractList<PersonBean> people = new ArrayList<>();
         try {
             // TODO: Controllare se user è superuser
             // Chiama il metodo che costruisce la query
@@ -1261,6 +1246,7 @@ public class DBWrapper implements Query, Constants {
         }
     }
 
+    
     /**
      * <p>Data una rilevazione e l'identificativo di un macroprocesso, restituisce
      * un ArrayList di persone ad essi afferenti.</p>
@@ -1389,7 +1375,7 @@ public class DBWrapper implements Query, Constants {
     @SuppressWarnings({ "null" })
     public ArrayList<DepartmentBean> getStructures(PersonBean user,
                                                    CodeBean survey)
-                                               throws WebStorageException {
+                                            throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         ResultSet rs, rs1, rs2, rs3 = null;
@@ -1583,7 +1569,7 @@ public class DBWrapper implements Query, Constants {
         ResultSet rs = null;
         int nextParam = NOTHING;
         ItemBean item = null;
-        AbstractList<ItemBean> items = new ArrayList<ItemBean>();
+        AbstractList<ItemBean> items = new ArrayList<>();
         try {
             // TODO: Controllare se user è superuser
             con = prol_manager.getConnection();
@@ -1704,8 +1690,8 @@ public class DBWrapper implements Query, Constants {
 
 
     /**
-     * <p>Dato un id e un livello, restituisce una struttura selezionata in base a quell'id
-     * nella tabella identificata in base al livello.</p>
+     * <p>Dato un id e un livello, restituisce una struttura selezionata 
+     * in base a quell'id nella tabella identificata in base al livello.</p>
      *
      * @param user          oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param id            identificativo della struttura che si vuol recuperare
@@ -1774,7 +1760,7 @@ public class DBWrapper implements Query, Constants {
         PreparedStatement pst = null;
         ResultSet rs = null;
         ItemBean a = null;
-        ArrayList<ItemBean> aree = new ArrayList<ItemBean>();
+        ArrayList<ItemBean> aree = new ArrayList<>();
         // TODO: Controllare se user è superuser
         try {
             con = prol_manager.getConnection();
@@ -1825,7 +1811,7 @@ public class DBWrapper implements Query, Constants {
         PreparedStatement pst = null;
         ResultSet rs = null;
         ItemBean rg = null;
-        ArrayList<ItemBean> qualifiche = new ArrayList<ItemBean>();
+        ArrayList<ItemBean> qualifiche = new ArrayList<>();
         // TODO: Controllare se user è superuser
         try {
             con = prol_manager.getConnection();
@@ -1933,7 +1919,7 @@ public class DBWrapper implements Query, Constants {
         PreparedStatement pst = null;
         ResultSet rs = null;
         PersonBean person = null;
-        AbstractList<PersonBean> people = new ArrayList<PersonBean>();
+        AbstractList<PersonBean> people = new ArrayList<>();
         // TODO: Controllare se user è superuser
         try {
             con = prol_manager.getConnection();
@@ -2045,9 +2031,6 @@ public class DBWrapper implements Query, Constants {
         }
     }
     
-    /* ********************************************************** *
-     *                 Metodi strettamente di ROL                 *
-     * ********************************************************** */
     
     /**
      * <p>Restituisce un Integer corrispondente al wrapper del numero di
@@ -2058,7 +2041,7 @@ public class DBWrapper implements Query, Constants {
      * @return <code>Integer</code> - il numero di quesiti collegati ad ambiti generici trovati dato l'identificativo della rilevazione
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "static-method" })
     public Integer getQuestionsAmountBySurvey(int idSurvey)
                                        throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
@@ -2067,7 +2050,6 @@ public class DBWrapper implements Query, Constants {
             Integer tot = null;
             try {
                 // TODO: Controllare se user è superuser
-                pst = null;
                 pst = con.prepareStatement(GET_QUESTION_AMOUNT_BY_SURVEY);
                 pst.clearParameters();
                 pst.setInt(1, idSurvey);
@@ -2114,14 +2096,109 @@ public class DBWrapper implements Query, Constants {
         }
     }
     
+    
+    /**
+     * <p>Restituisce un Integer corrispondente al wrapper del numero di
+     * quesiti trovati dati gli estremi di un'intervista, passati come
+     * parametri.</p>
+     * <p>Nota: l'intervista non &egrave; stata pensata come un'entit&agrave;
+     * fisica ma come un set di risposte, accomunate tutte dalla stessa
+     * data ed ora. Per gli scopi dell'applicazione rol questa soluzione
+     * in una prima fase si sviluppo va bene perch&eacute; l'inserimento 
+     * delle risposte non &egrave distribuito ma centralizzato. 
+     * In tale fase non esiste quindi un identificativo dell'intervista 
+     * da passare, ma solo una data ed un'ora, cui ogni risposta
+     * accomunata dalla stessa intervista deve fare capo. Successivamente
+     * ha senso concepire l'intervista come un'entit&agrave; dotata di un
+     * suo identificativo, e considerare le risposte accoumunate non in base 
+     * a una marca temporale ma piuttosto in base alla chiave esterna 
+     * di tale identificativo. Ci&ograve; per prevenire l'evenienza di
+     * un improbabile, ma non impossibile, salvataggio di due distinti 
+     * set di risposte nella stessa data ed ora.</p>
+     * 
+     * @param params    mappa contenente i parametri di navigazione
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>Integer</code> - il numero di quesiti collegati ad una stessa marca temporale richiesta
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public Integer getQuestionsAmountWithAnswerByInterview(HashMap<String, LinkedHashMap<String, String>> params,
+                                                           CodeBean survey)
+                                       throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            Integer tot = null;
+            // Dizionario dei parametri temporali
+            LinkedHashMap<String, String> surv = params.get(PARAM_SURVEY);
+            try {
+                // TODO: Controllare se user è superuser
+                // Recupera dai parametri la data della marca temporale delle risposte
+                String dateAsString = (!surv.get("d").equals(VOID_STRING) ? surv.get("d") : VOID_STRING);
+                // Recupera dai parametri l'ora della marca temporale delle risposte
+                String time = (!surv.get("t").equals(VOID_STRING) ? surv.get("t").replaceAll("_", ":") : VOID_STRING);
+                // Converte la data recuperata come String in una java.util.Date
+                java.util.Date dateAsDate = Utils.format(dateAsString, DATA_GENERAL_PATTERN, DATA_SQL_PATTERN);
+                // Imposta la query
+                pst = con.prepareStatement(GET_QUESTION_AMOUNT_WITH_ANSWER_BY_INTERVIEW);
+                pst.clearParameters();
+                // Converte la data trasformata in java.util.Date in una java.sql.Date
+                pst.setDate(1, Utils.convert(dateAsDate));
+                // Converte l'ora recuperata come String in un oggetto di tipo java.sql.Time
+                pst.setTime(2, Utils.format(time, TIME_SQL_PATTERN));
+                pst.setInt(3, survey.getId());
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    // Prepara bean di appoggio per il valore di count(*)
+                    CodeBean amount = new CodeBean();
+                    // Valorizza il bean di appoggio
+                    BeanUtil.populate(amount, rs);
+                    // Incapsula il valore in un Wrapper di tipo primitivo
+                    tot = new Integer(amount.getInformativa());
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return tot;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Oggetto CodeBean.informativa non valorizzato; problema nel metodo di estrazione del numero di quesiti data una rilevazione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (CommandException ce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in una conversione di tipi.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + ce.getMessage(), ce);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "QuestionBean non valorizzato; problema nella query dei quesiti.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
 
     /**
      * <p>Data una rilevazione, restituisce un ArrayList di macroprocessi 
      * censiti dall'anticorruzione ad essa afferenti, contenenti ciascuno 
      * i processi figli al proprio interno. Ogni figlio conterr&agrave;
      * i relativi figli.</p>
-     * <p>Recupera solo i macroprocessi su cui un utente, il cui username viene
-     * passato come argomento, ha i diritti di accesso (in base al ruolo <em>per se</em>).</p>
+     * <p>Deve recuperare solo i macroprocessi su cui un utente, 
+     * il cui username viene passato come argomento, ha i diritti di accesso 
+     * (in base al ruolo <em>per se</em>).</p>
      *
      * @param user oggetto rappresentante la persona loggata
      * @param codeSurvey identificativo della rilevazione di cui si vogliono recuperare i macroprocessi
@@ -2212,6 +2289,7 @@ public class DBWrapper implements Query, Constants {
                 macro.setProcessi(processi);
                 // Aggiunge il macroprocesso valorizzato all'elenco
                 macroprocessi.add(macro);
+                // It tries to dereference some object
                 rs1 = rs2 = null;
             }
             // Tries (just tries) to engage the Garbage Collector
@@ -2433,7 +2511,7 @@ public class DBWrapper implements Query, Constants {
                         children.add(child);
                     }
                     question.setChildQuestions(children);
-                    /* == Recupera il quesito padre == */
+                    /* == Recupera il quesito padre (richiamando se stesso) == */
                     ArrayList<QuestionBean> fatherAsList = getQuestions(user, survey, question.getCod4(), question.getCod4());
                     if (fatherAsList != null && !fatherAsList.isEmpty()) {
                         // Recupera ricorsivamente il padre
@@ -2579,20 +2657,19 @@ public class DBWrapper implements Query, Constants {
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param params    mappa contenente i parametri di navigazione
      * @param survey    oggetto contenente i dati della rilevazione
-     * @return <code>ArrayList&lt;ItemBean&gt;</code> - la lista di risposte trovate
+     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - la lista di risposte trovate
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     public ArrayList<QuestionBean> getAnswers(PersonBean user,
-                                          HashMap<String, LinkedHashMap<String, String>> params,
-                                          CodeBean survey)
-                                   throws WebStorageException { 
+                                              HashMap<String, LinkedHashMap<String, String>> params,
+                                              CodeBean survey)
+                                       throws WebStorageException { 
         // Resource 'con' should be managed by try-with-resource
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             QuestionBean question = null;
             QuestionBean answer = null;
-            AbstractList<ItemBean> rawAnswers = new ArrayList<>();
             AbstractList<QuestionBean> answers = new ArrayList<>();
             // Carica la tabella che ad ogni rilevazione associa il numero di quesiti corrispondenti
             ConcurrentHashMap<String, Integer> questionAmounts = ConfigManager.getQuestionAmount();
@@ -2600,29 +2677,24 @@ public class DBWrapper implements Query, Constants {
             try {
                 // Recupera il numero di quesiti associati alla rilevazione
                 int limit = questionAmounts.get(survey.getNome()).intValue();
+                // Costruisce la query di selezione delle risposte
                 String query = getQueryAnswers(params, survey.getId(), limit, GET_ALL_BY_CLAUSE, GET_ALL);
+                // Prepara l'estrazione
                 pst = con.prepareStatement(query);
                 pst.clearParameters();
                 rs = pst.executeQuery();
+                // Per ogni record
                 while (rs.next()) {
                     // Crea un oggetto per la risposta
                     answer = new QuestionBean();
                     // Lo valorizza col contenuto della query
                     BeanUtil.populate(answer, rs);
-                    // Recupera il quesito della risposta sotto forma di lista
+                    // Recupera il quesito della risposta sotto forma di lista tramite il metodo ricorsivo
                     ArrayList<QuestionBean> questionAsList = getQuestions(user, survey, answer.getLivello(), answer.getLivello());
                     // Assunzione: la relazione tra quesito e risposta è 1 : 1
                     question = questionAsList.get(NOTHING);
-                    
-                    /*
-                    answer.setId(item.getId());
-                    answer.setNome(item.getNome());
-                    answer.setInformativa(item.getInformativa());
-                    answer.setOrdinale(item);
-                    */
                     // Aggiunge al quesito la risposta corrente
                     question.setAnswer(answer);
-                    
                     // Lo aggiunge alla lista di risposte trovate
                     answers.add(question);
                 }
@@ -2660,6 +2732,7 @@ public class DBWrapper implements Query, Constants {
     
     
     /* (non-Javadoc)
+     * @see it.rol.Query#getQueryStructureBySurvey(int, int, int, int, int)
      */
     @SuppressWarnings("javadoc")
     @Override
@@ -2719,6 +2792,7 @@ public class DBWrapper implements Query, Constants {
     
     
     /* (non-Javadoc)
+     * @see it.rol.Query#getQueryProcessBySurvey(int, int, int, int)
      */
     @SuppressWarnings("javadoc")
     @Override
@@ -2807,13 +2881,9 @@ public class DBWrapper implements Query, Constants {
         AbstractList<ProcessBean> vPchild = null;
         // Resource 'con' implements AutoCloseable interface, so we can use try-with-resource...
         try (Connection con = prol_manager.getConnection()) {
-            // Carica la tabella che ad ogni rilevazione associa il numero di quesiti corrispondenti
-            //ConcurrentHashMap<String, Integer> questionAmounts = ConfigManager.getQuestionAmount();
             // TODO: Controllare se user è superuser
             try {
-                // Recupera il numero di quesiti associati alla rilevazione
-                //int limit = questionAmounts.get(survey.getNome()).intValue();
-                //String query = getQueryAnswers(params, survey.getId(), limit, GET_ALL_BY_CLAUSE, GET_ALL);
+                // Prepara l'estrazione delle interviste, da arricchire in dettagli
                 pst = con.prepareStatement(GET_INTERVIEWS);
                 pst.clearParameters();
                 pst.setInt(1, survey.getId());
@@ -2824,7 +2894,7 @@ public class DBWrapper implements Query, Constants {
                     interview = new InterviewBean();
                     // Crea una intervista grezza vuota
                     item = new ItemBean();
-                    // La valorizza col contenuto della query
+                    // Valorizza quest'ultima col contenuto della query
                     BeanUtil.populate(item, rs);
                     /* === Ricerca della struttura intervistata === */
                     String queryL1 = getQueryStructureBySurvey(survey.getId(), BEAN_DEFAULT_ID, BEAN_DEFAULT_ID, BEAN_DEFAULT_ID, item.getCod1());
@@ -2902,7 +2972,7 @@ public class DBWrapper implements Query, Constants {
                         }
                         // Che sia presente una struttura L1 è un'assunzione forte, ma non eccessiva
                     }
-                    /* === Ricerca del processo sondato === */
+                    /* === Ricerca del processo anticorruttivo sondato === */
                     // Casting from float to int
                     int idM = (int) item.getValue1();
                     int idP = (int) item.getValue2();
@@ -2911,7 +2981,7 @@ public class DBWrapper implements Query, Constants {
                     String queryMAT = getQueryProcessBySurvey(survey.getId(), BEAN_DEFAULT_ID, BEAN_DEFAULT_ID, idM);
                     // Controlla la significatività della query
                     if (!queryMAT.equals(DASH)) {
-                        // Cerca gli estremi della struttura di I livello
+                        // Cerca gli estremi del macroprocesso
                         pst = null;
                         pst = con.prepareStatement(queryMAT);
                         pst.clearParameters();
@@ -2928,7 +2998,7 @@ public class DBWrapper implements Query, Constants {
                             pst = con.prepareStatement(getQueryProcessBySurvey(survey.getId(), BEAN_DEFAULT_ID, idP, idM));
                             pst.clearParameters();
                             rs6 = pst.executeQuery();
-                            // Punta al processo
+                            // Punta al processo censito a fini anticorruttivi
                             if (rs6.next()) {
                                 // Prepara il processo
                                 ProcessBean p = new ProcessBean();
@@ -2940,7 +3010,7 @@ public class DBWrapper implements Query, Constants {
                                 pst = con.prepareStatement(getQueryProcessBySurvey(survey.getId(), idS, idP, idM));
                                 pst.clearParameters();
                                 rs7 = pst.executeQuery();
-                                // Punta alla struttura L3
+                                // Punta al sottoprocesso censito a fini anticorruttivi
                                 if (rs7.next()) {
                                     // Prepara il sottoprocesso
                                     ProcessBean s = new ProcessBean();
@@ -2965,7 +3035,9 @@ public class DBWrapper implements Query, Constants {
                     // Propaga ora di ultima modifica
                     Time t = Utils.format(item.getExtraInfo(), TIME_SQL_PATTERN);
                     interview.setOraUltimaModifica(t);
-                    // La aggiunge alla lista di interviste trovate
+                    // Propaga il codice rilevazione nel contesto della quale è stata fatta l'intervista
+                    interview.setDescrizione(item.getLabelWeb());
+                    // Aggiunge l'intervista valorizzata alla lista di interviste trovate
                     interviews.add(interview);
                 }
                 // Closes the statement
@@ -3175,25 +3247,34 @@ public class DBWrapper implements Query, Constants {
      * ********************************************************** */
     
     /**
-     * <p>Metodo per fare l'inserimento di un nuovo questionario.</p>
-     *TODO COMMENTO
+     * <p>Metodo per fare l'aggiornamento dei valori di una risposta data.</p>
+     * <p>Essendo un'intervista identificata dall'insieme delle risposte
+     * date, le quali a loro volta sono raggruppate in base a una specifica
+     * data ed una specifica ora, non &egrave; possibile inserire nella risposta
+     * una nuova data contestuale dal timestamp dell'aggiornamento.<br />
+     * Come sviluppo evolutivo, si consiglia di aggiungere una nuova coppia
+     * di campi 'data e ora' per memorizzare la data ed ora di effettivo primo
+     * inserimento, e riservare i campi "data_ultima_modifica"  ed
+     * "ora ultima modifica" effettivamente allo scopo per cui sono
+     * nominati, ovvero per contenere data e ora dell'aggiornamento,
+     * non del primo inserimento; occorrer&agrave; poi un porting
+     * sui dati per travasare le informazioni attualmente contenute
+     * nei due campi "data_ultima_modifica"  ed  "ora ultima modifica" 
+     * nei nuovi campi "data inserimento" ed "ora inserimento" e un 
+     * refactoring sul codice dell'applicazione.</p> 
+     *
      * @param user      utente loggato
      * @param params    mappa contenente i parametri di navigazione
-     * @param items     numero di quesiti a cui rispondere e quindi numero di risposte da inserire
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
     public void updateAnswer(PersonBean user, 
                              HashMap<String, LinkedHashMap<String, String>> params) 
-                       throws WebStorageException {
+                      throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
-            // Dizionario dei parametri delle strutture scelte dall'utente
-            LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
-            // Dizionario dei parametri dei processi scelti dall'utente
-            LinkedHashMap<String, String> proc = params.get(PART_PROCESS);
             // Dizionario dei parametri della risposta da aggiornare
             LinkedHashMap<String, String> quest = params.get(PART_RESUME_QST);
             try {
