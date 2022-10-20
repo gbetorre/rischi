@@ -62,7 +62,6 @@ import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
-import it.rol.bean.RiskBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
@@ -111,10 +110,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileCompileQuest = "/jsp/riQuestionario.jsp";
     /**
-     * Pagina a cui la command fa riferimento per riepilogare le risposte ai quesiti
-     */
-    private static final String nomeFileConfirmQuest = "/jsp/riAggiornamento.jsp";
-    /**
      * Pagina a cui la command fa riferimento per mostrare la lista delle interviste
      */
     private static final String nomeFileElencoQuest = "/jsp/riInterviste.jsp";
@@ -122,6 +117,10 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      * Pagina a cui la command fa riferimento per permettere l'aggiornamento delle risposte ai dei quesiti
      */
     private static final String nomeFileResumeQuest = "/jsp/riEpilogo.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per mostrare la form di ricerca
+     */
+    private static final String nomeFileSearch = "/jsp/riRicerca.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
@@ -160,13 +159,13 @@ public class RiskCommand extends ItemBean implements Command, Constants {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        nomeFile.put(COMMAND_RISK, nomeFileElenco);
+        nomeFile.put(COMMAND_RISK,    nomeFileElenco);
         nomeFile.put(PART_SELECT_STR, nomeFileSelectStruct);
-        nomeFile.put(PART_PROCESS, nomeFileSelectProcess);
+        nomeFile.put(PART_PROCESS,    nomeFileSelectProcess);
         nomeFile.put(PART_SELECT_QST, nomeFileCompileQuest);
-        nomeFile.put(PART_CONFIRM_QST, nomeFileConfirmQuest);
         nomeFile.put(PART_RESUME_QST, nomeFileResumeQuest);
         nomeFile.put(PART_SELECT_QSS, nomeFileElencoQuest);
+        nomeFile.put(PART_SEARCH,     nomeFileSearch);
     }  
   
     
@@ -519,14 +518,13 @@ public class RiskCommand extends ItemBean implements Command, Constants {
     /**
      * <p>Estrae l'elenco dei quesiti e, per ogni quesito figlio trovato,
      * lo valorizza con gli attributi aggiuntivi (tipo, formulazione, etc.)</p>
-     *TODO COMMENTO
-     * @param type          valore identificante se si vuol fare la query sulle strutture collegate a processi o a macroprocessi
-     * @param id            identificativo del processo o macroprocesso
-     * @param getAll        flag specificante, se vale -1, che si vogliono recuperare tutte le strutture collegate a tutti i macro/processi
-     * @param codeSurvey    codice testuale della rilevazione
+     * 
      * @param user          utente loggato
+     * @param codeSurvey    codice testuale della rilevazione
+     * @param idQ           identificativo del quesito 
+     * @param getAll        flag specificante, se vale -1, che si vogliono recuperare tutte le strutture collegate a tutti i macro/processi
      * @param db            databound gia' istanziato
-     * @return <code>ArrayList&lt;ItemBean&gt;</code> - ArrayList di strutture collegate alla rilevazione e al macro/processo specifico, oppure a tutti i macro/processi
+     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - ArrayList di quesiti trovati completi di quesiti figli (quesiti "di cui")
      * @throws CommandException se si verifica un problema nella query o nell'estrazione, nel recupero di valori o in qualche altro tipo di puntamento
      */
     public static ArrayList<QuestionBean> retrieveQuestions(PersonBean user,
@@ -540,7 +538,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Dichiara la lista di quesiti finiti
         ArrayList<QuestionBean> richQuestions = new ArrayList<>();
         try {
-            // Chiama il metodo del databound che estrae i quesiti valorizzati
+            // Chiama il metodo (ricorsivo) del databound che estrae i quesiti valorizzati
             ArrayList<QuestionBean> questions = db.getQuestions(user, survey, idQ, getAll);
             // Cicla sui quesiti trovati
             for (QuestionBean current : questions) {
@@ -575,20 +573,20 @@ public class RiskCommand extends ItemBean implements Command, Constants {
     
     
     /**
-     * <p>Valorizza per riferimento una mappa contenente i valori riscontrati  
-     * sulla richiesta.</p> 
+     * <p>Valorizza per riferimento una mappa contenente tutti i valori 
+     * parametrici riscontrati sulla richiesta.</p>
      * 
-     * @param part la sezione del sito che si vuole aggiornare
-     * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
-     * @param formParams mappa da valorizzare per riferimento (ByRef)
+     * @param part          la sezione del sito corrente
+     * @param parser        oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
+     * @param formParams    mappa da valorizzare per riferimento (ByRef)
      * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
      * @throws AttributoNonValorizzatoException se si fa riferimento a un attributo obbligatorio di bean che non viene trovato
      */
     public static void loadParams(String part, 
-                                   ParameterParser parser,
-                                   HashMap<String, LinkedHashMap<String, String>> formParams)
-                            throws CommandException, 
-                                   AttributoNonValorizzatoException {
+                                  ParameterParser parser,
+                                  HashMap<String, LinkedHashMap<String, String>> formParams)
+                           throws CommandException, 
+                                  AttributoNonValorizzatoException {
         LinkedHashMap<String, String> struct = new LinkedHashMap<>();
         LinkedHashMap<String, String> proat = new LinkedHashMap<>();
         LinkedHashMap<String, String> answs = new LinkedHashMap<>();
@@ -649,19 +647,19 @@ public class RiskCommand extends ItemBean implements Command, Constants {
     
     
     /**
-     * <p>Valorizza per riferimento una mappa contenente gli estremi
-     * di una singola intervista.</p> 
+     * <p>Restituisce una mappa contenente gli estremi identificanti
+     * una singola intervista.</p> 
      * 
-     * @param part la sezione del sito che si vuole aggiornare
-     * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
-     * @param formParams mappa da valorizzare per riferimento (ByRef)
+     * @param codeSur       codice rilevazione
+     * @param interview     oggetto intervista, contenente tutti i parametri al proprio interno, da estrarre e inserire nella mappa restituita
+     * @return <code>HashMap&lt;String, LinkedHashMap&lt;String, String&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il valore del parametro p, e per valore una mappa contenente i relativi parametri
      * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
      * @throws AttributoNonValorizzatoException se si fa riferimento a un attributo obbligatorio di bean che non viene trovato
      */
     public static HashMap<String, LinkedHashMap<String, String>> loadInterviewParams(String codeSur,
-                                            InterviewBean interview)
-                            throws CommandException, 
-                                   AttributoNonValorizzatoException {
+                                                                                     InterviewBean interview)
+                                                                              throws CommandException, 
+                                                                                     AttributoNonValorizzatoException {
         LinkedHashMap<String, String> struct = new LinkedHashMap<>();
         LinkedHashMap<String, String> proat = new LinkedHashMap<>();
         String liv2, liv3, liv4;
@@ -718,23 +716,23 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      * di tipo Dictionary, HashMap, in cui le chiavi sono rappresentate 
      * da oggetti String e i valori sono rappresentati dalle elenchi di figlie 
      * associate alla chiave.</p>
-     *
-     * @param 
-     * @return <code>HashMap&lt;String&comma; Vector&lt;DepartmentBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
+     * 
+     * @param objects struttura vettoriale contenente gli oggetti da travasare
+     * @param part    parametro di navigazione identificante la tipologia di oggetti da considerare
+     * @return <code>HashMap&lt;?&comma; ?&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     private static HashMap<?,?> decant(ArrayList<?> objects, 
-                                                     String part)
-                                              throws CommandException {
+                                       String part)
+                                throws CommandException {
         if (part.equals(PART_SELECT_STR)) {
             return decantStructs((ArrayList<DepartmentBean>) objects);
         /*} else if(part.equals(PART_SELECT_QST)) {
             return decantQuestions((ArrayList<QuestionBean>) objects);*/
-        } else {
-            String msg = FOR_NAME + "Valore di \'part\' non gestito.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg);
         }
+        String msg = FOR_NAME + "Valore di \'part\' non gestito.\n";
+        LOG.severe(msg);
+        throw new CommandException(msg);
     }
     
     
@@ -794,15 +792,20 @@ public class RiskCommand extends ItemBean implements Command, Constants {
     
     
     /**
-     * <p>TODO COMMENTO</p>
+     * <p>Prende in input una struttura vettoriale di QuestionBean 
+     * e una di ambiti cui i quesiti appartengono, e riconduce ogni quesito
+     * al proprio ambito, restituendo una struttura associativa (dictionary)
+     * in cui la chiave è costituita dall'ambito e il valore l'array
+     * di quesiti associati.</p>
      *
-     * @param questions Vector di DepartmentBean da travasare in HashMap
-     * @return <code>HashMap&lt;String&comma; Vector&lt;DepartmentBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
+     * @param questions Vector di QuestionBean da indicizzare per ambito
+     * @param ambits    Vector di ambiti cui ricondurre i quesiti
+     * @return <code>HashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     private static HashMap<ItemBean, ArrayList<QuestionBean>> decantQuestions(ArrayList<QuestionBean> questions, 
-                                                                            ArrayList<ItemBean> ambits)
-                                                                     throws CommandException {
+                                                                              ArrayList<ItemBean> ambits)
+                                                                       throws CommandException {
         HashMap<ItemBean, ArrayList<QuestionBean>> questionsByAmbit = new HashMap<>();
         try {
             for (ItemBean ambit : ambits) {
