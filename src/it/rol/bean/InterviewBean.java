@@ -36,7 +36,6 @@ package it.rol.bean;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Vector;
 
 import it.rol.exception.AttributoNonValorizzatoException;
 
@@ -106,6 +105,35 @@ public class InterviewBean extends CodeBean {
         autoreUltimaModifica = null;
         risposte = null;
 	}
+	
+	
+    /**
+     * <p>Costruttore parametrico: ammette come argomenti i valori obbligatori,
+     * pi&uacute; alcuni riferimenti temporali necessari per identificare
+     * l'intervista. Imposta gli altri campi a valori di default.</p>
+     * 
+     * @param id             identificativo dell'intervista
+     * @param nome           etichetta identificativa dell'intervista
+     * @param informativa    descrizione ampia dell'intervista
+     * @param data           data del sodaggio
+     * @param dataIntervista data del sondaggio
+     * @param oraIntervista  ora del sondaggio
+     */
+    public InterviewBean(int id, String nome, String informativa, Date data, Date dataIntervista, Time oraIntervista) {
+        super.setId(id);
+        super.setNome(nome);
+        super.setInformativa(informativa);
+        super.setOrdinale(BEAN_DEFAULT_ID);
+        descrizione = null;
+        this.data = data;
+        ultimo = false;
+        struttura = null;
+        processo = null;
+        dataUltimaModifica = dataIntervista;
+        oraUltimaModifica = oraIntervista;
+        autoreUltimaModifica = null;
+        risposte = null;
+    }
 
 
 	/* ********************************************************* *
