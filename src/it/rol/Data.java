@@ -36,11 +36,13 @@ package it.rol;
 import java.awt.Color;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Time;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
@@ -58,11 +60,8 @@ import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
-import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
 import it.rol.command.DepartmentCommand;
-import it.rol.command.PersonCommand;
-import it.rol.command.ProcessCommand;
 import it.rol.command.RiskCommand;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
@@ -122,7 +121,6 @@ import it.rol.exception.CommandException;
  * </p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
- *
  */
 public class Data extends HttpServlet implements Constants {
 
@@ -162,7 +160,7 @@ public class Data extends HttpServlet implements Constants {
     /**
      * Pagina a cui la command reindirizza per mostrare i processi nel contesto di una struttura
      */
-    private static final String nomeFileProcessiStruttureAjax = "/jsp/stElencoAjax.jsp";
+    //private static final String nomeFileProcessiStruttureAjax = "/jsp/stElencoAjax.jsp";
 
 
     /**
@@ -197,6 +195,8 @@ public class Data extends HttpServlet implements Constants {
         qToken = req.getParameter(ConfigManager.getEntToken());
         // Recupera il formato dell'output, se specificato
         format = req.getParameter(ConfigManager.getOutToken());
+        // Recupera o inizializza parametro per identificare la pagina
+        String part = req.getParameter("p");
         // Struttura da restituire in Request
         AbstractList<?> lista = null;
         // Message
@@ -212,7 +212,7 @@ public class Data extends HttpServlet implements Constants {
                     // Passaggio in request per uso delle lista
                     req.setAttribute("listaInterviste", lista);
                     // Genera il file CSV
-                    makeCSV(req, res, COMMAND_RISK);
+                    makeCSV(req, res, part);
                     // Ha finito
                     return;
                 }
@@ -225,10 +225,10 @@ public class Data extends HttpServlet implements Constants {
                     // Passaggio in request per uso delle lista
                     req.setAttribute("listaOrganigramma", lista);
                     // Genera il file CSV
-                    makeCSV(req, res, COMMAND_PROCESS);
+                    makeCSV(req, res, COMMAND_STRUCTURES);
                     // Esce
                     return;
-                }
+                }/*
                 // Processi estratti in base alla struttura
                 lista = retrieve(req, COMMAND_STRUCTURES);
                 req.setAttribute("listaProcessi", lista);
@@ -237,7 +237,7 @@ public class Data extends HttpServlet implements Constants {
                 //req.setAttribute("listaPersone", lista);
                 // Output in formato di default
                 fileJsp = nomeFileProcessiStruttureAjax;
-
+*/
             } else {
                 String msg = FOR_NAME + "Valore del parametro \'q\' (" + qToken + ") non consentito. Impossibile visualizzare i risultati.\n";
                 log.severe(msg);
@@ -256,7 +256,7 @@ public class Data extends HttpServlet implements Constants {
 
     /**
      * <p>Restituisce un elenco generico di elementi 
-     * (persone, macroprocessi, strutture...)
+     * (interviste, macroprocessi, strutture...)
      * relativi a una richiesta specifica.</p>
      *
      * @param req HttpServletRequest contenente i parametri per contestualizzare l'estrazione
@@ -301,13 +301,42 @@ public class Data extends HttpServlet implements Constants {
                         ArrayList<QuestionBean> answers = db.getAnswers(user, interviewParams, ConfigManager.getSurvey(codeSurvey));
                         // Imposta le risposte dell'intervista corrente 
                         interview.setRisposte(answers);
+                        // Calcola quanti quesiti hanno ricevuto effettivamente risposta
+                        interview.setInformativa(String.valueOf(db.getQuestionsAmountWithAnswerByInterview(interviewParams, ConfigManager.getSurvey(codeSurvey))));
                         // Aggiunge l'intervista completa di risposte alla lista di interviste corredate di risposte
                         interviewsWithAnswer.add(interview);
                     }
                     list = interviewsWithAnswer;
-                } else {
-                    //
+                // "&p=rqs"
+                } else if (part.equalsIgnoreCase(PART_RESUME_QST)) {
+                    // Tabella dei parametri
+                    HashMap<String, LinkedHashMap<String, String>> params = new HashMap<>();
+                    // Recupera tutti i parametri identificanti l'intervista
+                    RiskCommand.loadParams(part, parser, params);
+                    // Recupera l'ora del sondaggio
+                    String questTimeAsString = params.get(PARAM_SURVEY).get("t").replaceAll(String.valueOf(UNDERSCORE), String.valueOf(COLON));
+                    Time questTime = Utils.format(questTimeAsString, TIME_SQL_PATTERN);
+                    // Crea una lista (di una)
+                    ArrayList<InterviewBean> interviews = new ArrayList<>();
+                    // Crea un'intervista per fare da contenitore alle risposte
+                    InterviewBean interview = new InterviewBean(DEFAULT_ID, VOID_STRING, VOID_STRING, Utils.format(params.get(PARAM_SURVEY).get("d")), Utils.format(params.get(PARAM_SURVEY).get("d")), questTime);
+                    // Elenco risposte ai quesiti collegati all'intervista
+                    ArrayList<QuestionBean> answers = null;
+                    // Recupera dal Databound elenco di risposte in base a intervista
+                    answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSurvey));
+                    // Imposta le risposte nell'intervista
+                    interview.setRisposte(answers);
+                    // Aggiunge l'intervista alla lista (di una)
+                    interviews.add(interview);
+                    // Casta elenco di risposte a lista generica
+                    list = interviews;
                 }
+            // "data?q=st"
+            } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
+                // Fa la stessa query della navigazione per strutture
+                ArrayList<DepartmentBean> structures = DepartmentCommand.retrieveStructures(codeSurvey, user, db);
+                // Restituisce la lista gerarchica di strutture trovate in base alla rilevazione
+                list = structures;
             }
         } catch (CommandException ce) {
             String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + ce.getLocalizedMessage();
@@ -323,13 +352,13 @@ public class Data extends HttpServlet implements Constants {
 
 
     /**
-     * <p>Gestisce la generazione dell&apos;output in formato di uno stream CSV che sar&agrave;
-     * recepito come tale dal browser e trattato di conseguenza (normalmente con il
-     * download).</p>
+     * <p>Gestisce la generazione dell&apos;output in formato di uno stream CSV 
+     * che sar&agrave; recepito come tale dal browser e trattato di conseguenza 
+     * (normalmente con il download).</p>
      * <p>Usa altri metodi, interni, per ottenere il nome del file, che dev&apos;essere un
      * nome univoco, e per la stampa vera e propria nel PrintWriter.</p>
      * <p>Un&apos;avvertenza importante riguarda il formato del character encoding!
-     * Il db di processi &egrave; codificato in UTF&ndash;8;
+     * Il db di processi anticorruttivi &egrave; codificato in UTF&ndash;8;
      * pertanto nell'implementazione potrebbe sembrare ovvio che
      * il characterEncoding migliore da impostare sia il medesimo, cosa che si fa
      * con la seguente istruzione:
@@ -373,16 +402,16 @@ public class Data extends HttpServlet implements Constants {
     /**
      * <p>Genera un nome univoco a partire da un prefisso dato come parametro.</p>
      *
-     * @param q il prefisso che costituira' una parte del nome
+     * @param p il prefisso che costituira' una parte del nome
      * @return <code>String</code> - il nome univoco generato
      */
-    private static String makeFilename(String q) {
+    private static String makeFilename(String p) {
         // Crea un nome univoco per il file che andrà ad essere generato
         Calendar now = Calendar.getInstance();
-        String fileName = q + UNDERSCORE +
+        String fileName = ConfigManager.getLabels().get(p) + UNDERSCORE +
                           new Integer(now.get(Calendar.YEAR)).toString() + HYPHEN +
                           String.format("%02d", now.get(Calendar.MONTH) + 1) + HYPHEN +
-                          String.format("%02d", now.get(Calendar.DAY_OF_MONTH)) + '_' +
+                          String.format("%02d", now.get(Calendar.DAY_OF_MONTH)) + UNDERSCORE +
                           String.format("%02d", now.get(Calendar.HOUR_OF_DAY)) +
                           String.format("%02d", now.get(Calendar.MINUTE)) +
                           String.format("%02d", now.get(Calendar.SECOND));
@@ -398,7 +427,7 @@ public class Data extends HttpServlet implements Constants {
      * Storicamente, in programmazione <code> C, C++ </code> e affini,
      * le funzioni che scrivono sull'outputstream si chiamano tutte
      * <code>printf</code>, precedute da vari prefissi a seconda di
-     * quello che scrivono e dove lo scrivono.<br />
+     * quello che scrivono e di dove lo scrivono.<br />
      * <code>fprintf</code> &egrave; la funzione della libreria C che
      * invia output formattati allo stream, identificato con un puntatore
      * a un oggetto FILE passato come argomento
@@ -433,46 +462,128 @@ public class Data extends HttpServlet implements Constants {
          */
         int success = DEFAULT_ID;
         /* **************************************************************** *
-         *         Contenuto files CSV per interviste con risposte          *
+         *  Gestione elaborazione contenuto CSV per interviste con risposte *
          * **************************************************************** */
         if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_RISK)) {
-            try {
-                ArrayList<InterviewBean> list = (ArrayList<InterviewBean>) req.getAttribute("listaInterviste");
-                // Scrittura file CSV
-                out.println("N." + SEPARATOR +
-                            "Data" + SEPARATOR +
-                            "Ora" + SEPARATOR +
-                            "Processo" + SEPARATOR +
-                            "Struttura" + SEPARATOR +
-                            "Ufficio"
-                            );
-                if (list.size() > NOTHING) {
-                    int itCounts = NOTHING, record = NOTHING;
-                    do {
-                        InterviewBean iw = list.get(itCounts);
-                        out.println(
-                                    iw.getRisposte().size() + SEPARATOR +
-                                    iw.getDataUltimaModifica() + BLANK_SPACE + SEPARATOR +
-                                    iw.getOraUltimaModifica() + SEPARATOR +
-                                    iw.getProcesso().getNome() + SEPARATOR +
-                                    iw.getStruttura().getNome() + SEPARATOR +
-                                    iw.getStruttura().getFiglie().get(0).getNome()
-                                   );
-                        itCounts++;
-                    } while (itCounts < list.size());
-                    success = itCounts;
+            /* ************************************************************ *
+             *    Generazione contenuto files CSV di tutte le interviste    *
+             * ************************************************************ */
+            if (req.getParameter("p").equalsIgnoreCase(PART_SELECT_QSS)) {
+                try {
+                    // Recupera le interviste da Request
+                    ArrayList<InterviewBean> list = (ArrayList<InterviewBean>) req.getAttribute("listaInterviste");
+                    // Ottiene struttura contenente il numero di quesiti per ciascuna rilevazione
+                    ConcurrentHashMap<String, Integer> questionAmounts = ConfigManager.getQuestionAmount();
+                    // Ottiene il numero di quesiti della prima rilevazione (al massimo le colonne rimanenti resteranno senza intestazione)
+                    int questionsAmount = (questionAmounts.get(list.get(NOTHING).getDescrizione()).intValue());
+                    // Scrittura file CSV
+                    StringBuffer headers = new StringBuffer("N.Intervista" + SEPARATOR)
+                            .append("N.Quesiti").append(SEPARATOR)
+                            .append("N.Quesiti con Risposta").append(SEPARATOR)
+                            .append("Data").append(SEPARATOR)
+                            .append("Ora").append(SEPARATOR)
+                            .append("Macroprocesso").append(SEPARATOR)
+                            .append("Processo").append(SEPARATOR)
+                            .append("Sottoprocesso").append(SEPARATOR)
+                            .append("Ramo Strutture").append(SEPARATOR)
+                            .append("Struttura").append(SEPARATOR)
+                            .append("Sottostruttura").append(SEPARATOR)
+                            .append("Ufficio").append(SEPARATOR);
+                    for (int i = 0; i < questionsAmount; i++) {
+                            /*headers.append("Ambito").append(SEPARATOR);*/
+                            headers.append("Quesito").append(SEPARATOR);
+                            headers.append("Risposta").append(SEPARATOR);
+                    }
+                    out.println(headers);
+                    if (list.size() > NOTHING) {
+                        int itCounts = NOTHING, record = NOTHING;
+                        do {
+                            InterviewBean iw = list.get(itCounts);
+                            String processo = (iw.getProcesso().getProcessi() != null ? iw.getProcesso().getProcessi().get(0).getNome() : VOID_STRING);
+                            String subprocesso = (iw.getProcesso().getProcessi().get(0).getProcessi() != null ? iw.getProcesso().getProcessi().get(0).getProcessi().get(0).getNome() : VOID_STRING);
+                            String strutturaL3 = (iw.getStruttura().getFiglie().get(0).getFiglie() != null ? iw.getStruttura().getFiglie().get(0).getFiglie().get(0).getNome() : VOID_STRING);
+                            String strutturaL4 = (iw.getStruttura().getFiglie().get(0).getFiglie().get(0).getFiglie() != null ? iw.getStruttura().getFiglie().get(0).getFiglie().get(0).getFiglie().get(0).getNome() : VOID_STRING);
+                            StringBuffer tupla = new StringBuffer(++record + SEPARATOR)
+                                .append(iw.getRisposte().size()).append(SEPARATOR)
+                                .append(iw.getInformativa()).append(SEPARATOR)
+                                .append(iw.getDataUltimaModifica()).append(BLANK_SPACE).append(SEPARATOR)
+                                .append(iw.getOraUltimaModifica()).append(SEPARATOR)
+                                .append(iw.getProcesso().getNome()).append(SEPARATOR)
+                                .append(processo).append(SEPARATOR)
+                                .append(subprocesso).append(SEPARATOR)
+                                .append(iw.getStruttura().getNome()).append(SEPARATOR)
+                                .append(iw.getStruttura().getFiglie().get(0).getNome()).append(SEPARATOR)
+                                .append(strutturaL3).append(SEPARATOR)
+                                .append(strutturaL4).append(SEPARATOR);
+                            for (QuestionBean aw : iw.getRisposte()) {
+                                /*if (aw.getAmbito() != null) {
+                                    tupla.append(aw.getAmbito().getNome()).append(SEPARATOR);
+                                }*/
+                                if (aw.getFormulazione() != null) {
+                                    tupla.append(aw.getFormulazione().replace(SEMICOLON, HYPHEN)).append(SEPARATOR);
+                                }
+                                if (aw.getAnswer().getNome() != null) {
+                                    tupla.append(aw.getAnswer().getNome().replace(SEMICOLON, HYPHEN)).append(SEPARATOR);
+                                }
+                            }
+                            out.println(String.valueOf(tupla));
+                            itCounts++;
+                        } while (itCounts < list.size());
+                        success = itCounts;
+                    }
+                } catch (RuntimeException re) {
+                    log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco delle strutture collegate ai macroprocessi.\n" + re.getMessage());
+                    out.println(re.getMessage());
+                } catch (Exception e) {
+                    log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
+                    out.println(e.getMessage());
                 }
-            } catch (RuntimeException re) {
-                log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco delle strutture collegate ai macroprocessi.\n" + re.getMessage());
-                out.println(re.getMessage());
-            } catch (Exception e) {
-                log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
-                out.println(e.getMessage());
+            }
+            /* ************************************************************ *
+             *   Generazione contenuto files CSV di una singola intervista  *
+             * ************************************************************ */
+            else if (req.getParameter("p").equalsIgnoreCase(PART_RESUME_QST)) {
+                try {
+                    // Recupera le interviste da Request
+                    ArrayList<InterviewBean> list = (ArrayList<InterviewBean>) req.getAttribute("listaInterviste");
+                    // Bisogna recuperare una singola intervista (incapsulata in un elenco di uno)
+                    InterviewBean interview = list.get(NOTHING);
+                    // Scrittura file CSV
+                    StringBuffer headers = new StringBuffer("Intervista del: ")
+                            .append(interview.getData())
+                            .append(" alle ore: ").append(interview.getOraUltimaModifica()).append(SEPARATOR)
+                            .append("Ambito").append(SEPARATOR)
+                            .append("Quesito").append(SEPARATOR)
+                            .append("Risposta").append(SEPARATOR)
+                            .append("Annotazioni").append(SEPARATOR);
+                    out.println(headers);
+                    if (interview.getRisposte().size() > NOTHING) {
+                        int itCounts = NOTHING, record = NOTHING;
+                        do {
+                            QuestionBean aw = interview.getRisposte().get(itCounts); 
+                            StringBuffer tupla = new StringBuffer("Domanda ")
+                                .append(++record).append(SEPARATOR)
+                                .append(aw.getAmbito().getNome()).append(SEPARATOR)
+                                .append(aw.getFormulazione().replace(SEMICOLON, HYPHEN)).append(SEPARATOR)
+                                .append(aw.getAnswer().getNome().replace(SEMICOLON, HYPHEN)).append(SEPARATOR)
+                                .append(aw.getAnswer().getInformativa().replace(SEMICOLON, HYPHEN)).append(SEPARATOR);
+                            out.println(String.valueOf(tupla));
+                            itCounts++;
+                        } while (itCounts < interview.getRisposte().size());
+                        success = itCounts;
+                    }
+                } catch (RuntimeException re) {
+                    log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco delle strutture collegate ai macroprocessi.\n" + re.getMessage());
+                    out.println(re.getMessage());
+                } catch (Exception e) {
+                    log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
+                    out.println(e.getMessage());
+                }
             }
         }
         /* **************************************************************** *
          *        Contenuto files CSV per strutture in organigramma         *
-         * **************************************************************** *
+         * **************************************************************** */
         else if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_STRUCTURES)) {
             try {
                 ArrayList<ItemBean> l = (ArrayList<ItemBean>) req.getAttribute("listaOrganigramma");
@@ -481,41 +592,27 @@ public class Data extends HttpServlet implements Constants {
                             "Struttura liv.1" + SEPARATOR +
                             "Struttura liv.2" + SEPARATOR +
                             "Struttura liv.3" + SEPARATOR +
-                            "Struttura liv.4" + SEPARATOR +
-                            "Codice Macroprocesso" + SEPARATOR +
-                            "Macroprocesso" + SEPARATOR +
-                            "Personale FTE liv.1" + SEPARATOR +
-                            "Personale FTE liv.2" + SEPARATOR +
-                            "Personale FTE liv.3" + SEPARATOR +
-                            "Personale FTE liv.4"
+                            "Struttura liv.4"
                             );
                 if (l.size() > NOTHING) {
                     int itCounts = NOTHING, record = NOTHING;
                     do {
                         ItemBean tupla = l.get(itCounts);
                         String label_l2, label_l3, label_l4 = null;
-                        String fte_l2, fte_l3, fte_l4 = null;
                         String uo_l2 = tupla.getExtraInfo();
                         String uo_l3 = tupla.getLabelWeb();
                         String uo_l4 = tupla.getPaginaJsp();
                         if (uo_l4.equals(uo_l3)) {
-                            label_l4 = fte_l4 = VOID_STRING;
+                            label_l4 = VOID_STRING;
                         } else {
                             label_l4 = uo_l4.replace(';', ' ');
-                            fte_l4 = String.valueOf(tupla.getValue4());
                         }
                         out.println(
                                     ++record + SEPARATOR +
                                     tupla.getInformativa() + " " + SEPARATOR +
                                     uo_l2.replace(';', ' ') + " " + SEPARATOR +
                                     uo_l3.replace(';', ' ') + " " + SEPARATOR +
-                                    label_l4 + " " + SEPARATOR +
-                                    tupla.getUrl() + " " + SEPARATOR +
-                                    tupla.getIcona().replace(';', ',') + SEPARATOR +
-                                    tupla.getValue1() + SEPARATOR +
-                                    tupla.getValue2() + SEPARATOR +
-                                    tupla.getValue3() + SEPARATOR +
-                                    fte_l4
+                                    label_l4
                                    );
                         itCounts++;
                     } while (itCounts < l.size());
@@ -528,7 +625,7 @@ public class Data extends HttpServlet implements Constants {
                 log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
                 out.println(e.getMessage());
             }
-        }*/
+        }
         else {
             String msg = FOR_NAME + "La Servlet Data non accetta la stringa passata come valore di 'ent': " + req.getParameter(ConfigManager.getEntToken());
             log.severe(msg + "Tentativo di indirizzare alla Servlet Data una richiesta non gestita. Hacking test?\n");
