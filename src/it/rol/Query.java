@@ -75,13 +75,13 @@ public interface Query extends Serializable {
      */
     public static final String LOOKUP_COMMAND =
             "SELECT " +
-            "       id          AS \"id\"" +
-            "   ,   nome        AS \"nomeReale\"" +
-            "   ,   nome        AS \"nomeClasse\"" +
-            "   ,   token       AS \"nome\"" +
-            "   ,   labelweb    AS \"labelWeb\"" +
-            "   ,   jsp         AS \"paginaJsp\"" +
-            "   ,   informativa AS \"informativa\"" +
+            "       id                  AS \"id\"" +
+            "   ,   nome                AS \"nomeReale\"" +
+            "   ,   nome                AS \"nomeClasse\"" +
+            "   ,   token               AS \"nome\"" +
+            "   ,   labelweb            AS \"labelWeb\"" +
+            "   ,   jsp                 AS \"paginaJsp\"" +
+            "   ,   informativa         AS \"informativa\"" +
             "  FROM command";
 
     /**
@@ -89,7 +89,7 @@ public interface Query extends Serializable {
      */
     public static final String SELECT_MAX_ID =
             "SELECT " +
-            "       MAX(id)                     AS \"max\"" +
+            "       MAX(id)             AS \"max\"" +
             "   FROM ";
 
     /**
@@ -97,7 +97,7 @@ public interface Query extends Serializable {
      */
     public static final String SELECT_MIN_ID =
             "SELECT " +
-            "       MIN(id)                     AS \"min\"" +
+            "       MIN(id)             AS \"min\"" +
             "   FROM ";
 
     /**
@@ -128,8 +128,8 @@ public interface Query extends Serializable {
      */
     public static final String GET_RUOLOUTENTE =
             "SELECT " +
-            "       RA.id           AS \"id\"" +
-            "   ,   RA.nome         AS \"nome\"" +
+            "       RA.id               AS \"id\"" +
+            "   ,   RA.nome             AS \"nome\"" +
             "   FROM ruolo_applicativo RA " +
             "       INNER JOIN usr U on RA.id = U.id_ruolo" +
             "   WHERE U.login = ?";
@@ -140,7 +140,7 @@ public interface Query extends Serializable {
      */
     public static final String GET_ACCESSLOG_BY_LOGIN =
             "SELECT " +
-            "       A.id                    AS  \"id\"" +
+            "       A.id                AS  \"id\"" +
             "   FROM access_log A " +
             "   WHERE A.login = ? ";
 
@@ -150,8 +150,8 @@ public interface Query extends Serializable {
      */
     public static final String GET_ENCRYPTEDPASSWORD =
             "SELECT " +
-            "       U.passwdform    AS \"nome\"" +
-            "   ,   U.salt          AS \"informativa\"" +
+            "       U.passwdform        AS \"nome\"" +
+            "   ,   U.salt              AS \"informativa\"" +
             "   FROM usr U" +
             "   WHERE U.login = ?";
 
@@ -166,10 +166,10 @@ public interface Query extends Serializable {
      */
     public static final String GET_SURVEY =
             "SELECT " +
-            "       R.id        AS \"id\"" +
-            "   ,   R.codice    AS \"nome\"" +
-            "   ,   R.nome      AS \"informativa\"" +
-            "   ,   R.ordinale  AS \"ordinale\"" +
+            "       R.id                AS \"id\"" +
+            "   ,   R.codice            AS \"nome\"" +
+            "   ,   R.nome              AS \"informativa\"" +
+            "   ,   R.ordinale          AS \"ordinale\"" +
             "   FROM rilevazione R" +
             "   WHERE (R.id = ? OR -1 = ?)" +
             "       AND R.chiusa = true" +
@@ -365,11 +365,11 @@ public interface Query extends Serializable {
      */
     public static final String GET_PROCESSI_BY_MACRO_AND_PERSON =
             "SELECT DISTINCT" +
-            "       PR.id                AS \"id\"" +
-            "   ,   PR.codice            AS \"codice\"" +
-            "   ,   PR.nome              AS \"nome\"" +
-            "   ,   PR.ordinale          AS \"ordinale\"" +
-            "   ,   PR.smartworking      AS \"smartWorking\"" +
+            "       PR.id               AS \"id\"" +
+            "   ,   PR.codice           AS \"codice\"" +
+            "   ,   PR.nome             AS \"nome\"" +
+            "   ,   PR.ordinale         AS \"ordinale\"" +
+            "   ,   PR.smartworking     AS \"smartWorking\"" +
             "   ,   COALESCE(ROUND(100 * SUM(AP.quotaparte) OVER (PARTITION BY PR.id) / (SUM(AP.quotaparte) OVER ())::numeric, 2), 0) AS \"quotaParte\"" +
             "   ,   COALESCE(ROUND((SUM(AP.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY PR.id) / 100.0), 2), 0)         AS \"fte\"" +
             "   FROM processo PR" +
@@ -401,11 +401,11 @@ public interface Query extends Serializable {
      */
     public static final String GET_PROCESSI_BY_MACRO =
             "SELECT DISTINCT" +
-            "       PR.id                AS \"id\"" +
-            "   ,   PR.codice            AS \"codice\"" +
-            "   ,   PR.nome              AS \"nome\"" +
-            "   ,   PR.ordinale          AS \"ordinale\"" +
-            "   ,   PR.smartworking      AS \"smartWorking\"" +
+            "       PR.id               AS \"id\"" +
+            "   ,   PR.codice           AS \"codice\"" +
+            "   ,   PR.nome             AS \"nome\"" +
+            "   ,   PR.ordinale         AS \"ordinale\"" +
+            "   ,   PR.smartworking     AS \"smartWorking\"" +
             "   ,   COALESCE(ROUND(100 * SUM(AP.quotaparte) OVER (PARTITION BY PR.id) / (SUM(AP.quotaparte) OVER ())::numeric, 2), 0) AS \"quotaParte\"" +
             "   ,   COALESCE(ROUND((SUM(AP.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY PR.id) / 100.0), 2), 0)         AS \"fte\"" +
             "   FROM processo PR" +
@@ -420,10 +420,10 @@ public interface Query extends Serializable {
      */
     public static final String GET_PEOPLE_BY_MACRO =
             "SELECT " +
-            "       P.id        AS \"id\"" +
-            "   ,   P.nome      AS \"nome\"" +
-            "   ,   P.cognome   AS \"cognome\"" +
-            "   ,   P.sesso     AS \"sesso\"" +
+            "       P.id                AS \"id\"" +
+            "   ,   P.nome              AS \"nome\"" +
+            "   ,   P.cognome           AS \"cognome\"" +
+            "   ,   P.sesso             AS \"sesso\"" +
             "   FROM persona P" +
             "       INNER JOIN allocazione_macroprocesso AM ON AM.id_persona = P.id" +
             "   WHERE AM.id_macroprocesso = ?" +
@@ -435,47 +435,47 @@ public interface Query extends Serializable {
      */
     public static final String GET_PEOPLE_BY_PROCESS =
             "SELECT " +
-                    "       P.id        AS \"id\"" +
-                    "   ,   P.nome      AS \"nome\"" +
-                    "   ,   P.cognome   AS \"cognome\"" +
-                    "   ,   P.sesso     AS \"sesso\"" +
-                    "   FROM persona P" +
-                    "       INNER JOIN allocazione_processo AM ON AM.id_persona = P.id" +
-                    "   WHERE AM.id_processo = ?" +
-                    "       AND AM.id_rilevazione = ?" +
-                    "   ORDER BY P.cognome";
+            "       P.id                AS \"id\"" +
+            "   ,   P.nome              AS \"nome\"" +
+            "   ,   P.cognome           AS \"cognome\"" +
+            "   ,   P.sesso             AS \"sesso\"" +
+            "   FROM persona P" +
+            "       INNER JOIN allocazione_processo AM ON AM.id_persona = P.id" +
+            "   WHERE AM.id_processo = ?" +
+            "       AND AM.id_rilevazione = ?" +
+            "   ORDER BY P.cognome";
 
     /**
      * <p>Estrae la singola persona in base al suo identificativo, passato come parametro</p>
      */
     public static final String GET_PERSON =
             "SELECT " +
-                    "       P.id                        AS \"id\"" +
-                    "   ,   P.nome                      AS \"nome\"" +
-                    "   ,   P.cognome                   AS \"cognome\"" +
-                    "   ,   P.sesso                     AS \"sesso\"" +
-                    "   ,   P.data_nascita              AS \"dataNascita\"" +
-                    "   ,   P.sesso                     AS \"sesso\"" +
-                    "   ,   AF.codice_area_funz         AS \"codAreaFunzionale\"" +
-                    "   ,   AF.codice_ruolo_giuridico   AS \"codRuoloGiuridico\"" +
-                    "   ,   AF.responsabile             AS \"responsabile\"" +
-                    "   ,   AF.respons_organizzativa    AS \"livResponsabilitaOrganizzativa\"" +
-                    "   ,   AF.funzione_specialistica   AS \"livFunzioneSpecialistica\"" +
-                    "   ,   AF.tecnico_lab              AS \"livTecnicoLaboratorio\"" +
-                    "   ,   AF.tempo_pieno              AS \"tempoPieno\"" +
-                    "   ,   AF.perc_parttime            AS \"note\"" +
-                    "   ,   COALESCE(AF.id_struttura_liv4, AF.id_struttura_liv3, AF.id_struttura_liv2, AF.id_struttura_liv1) AS \"idDipartimento\"" +
-                    "   ,   CASE" +
-                    "           WHEN AF.id_struttura_liv4 IS NOT NULL THEN 4" +
-                    "           WHEN AF.id_struttura_liv3 IS NOT NULL THEN 3" +
-                    "           WHEN AF.id_struttura_liv2 IS NOT NULL THEN 2" +
-                    "           WHEN AF.id_struttura_liv1 IS NOT NULL THEN 1" +
-                    "           ELSE 0" +
-                    "       END AS \"urlDipartimento\"" +
-                    "   FROM persona P" +
-                    "       INNER JOIN afferenza AF ON AF.id_persona = P.id" +
-                    "   WHERE AF.id_rilevazione = ?" +
-                    "       AND P.id = ?";
+            "       P.id                        AS \"id\"" +
+            "   ,   P.nome                      AS \"nome\"" +
+            "   ,   P.cognome                   AS \"cognome\"" +
+            "   ,   P.sesso                     AS \"sesso\"" +
+            "   ,   P.data_nascita              AS \"dataNascita\"" +
+            "   ,   P.sesso                     AS \"sesso\"" +
+            "   ,   AF.codice_area_funz         AS \"codAreaFunzionale\"" +
+            "   ,   AF.codice_ruolo_giuridico   AS \"codRuoloGiuridico\"" +
+            "   ,   AF.responsabile             AS \"responsabile\"" +
+            "   ,   AF.respons_organizzativa    AS \"livResponsabilitaOrganizzativa\"" +
+            "   ,   AF.funzione_specialistica   AS \"livFunzioneSpecialistica\"" +
+            "   ,   AF.tecnico_lab              AS \"livTecnicoLaboratorio\"" +
+            "   ,   AF.tempo_pieno              AS \"tempoPieno\"" +
+            "   ,   AF.perc_parttime            AS \"note\"" +
+            "   ,   COALESCE(AF.id_struttura_liv4, AF.id_struttura_liv3, AF.id_struttura_liv2, AF.id_struttura_liv1) AS \"idDipartimento\"" +
+            "   ,   CASE" +
+            "           WHEN AF.id_struttura_liv4 IS NOT NULL THEN 4" +
+            "           WHEN AF.id_struttura_liv3 IS NOT NULL THEN 3" +
+            "           WHEN AF.id_struttura_liv2 IS NOT NULL THEN 2" +
+            "           WHEN AF.id_struttura_liv1 IS NOT NULL THEN 1" +
+            "           ELSE 0" +
+            "       END AS \"urlDipartimento\"" +
+            "   FROM persona P" +
+            "       INNER JOIN afferenza AF ON AF.id_persona = P.id" +
+            "   WHERE AF.id_rilevazione = ?" +
+            "       AND P.id = ?";
 
     /**
      * <p>Estrae le strutture allocate su un macroprocesso</p>
@@ -700,9 +700,9 @@ public interface Query extends Serializable {
      */
     public static final String GET_AREE_FUNZ =
             "SELECT " +
-            "       A.codice        AS \"codice\"" +
-            "   ,   A.nome          AS \"nome\"" +
-            "   ,   A.ordinale      AS \"ordinale\"" +
+            "       A.codice            AS \"codice\"" +
+            "   ,   A.nome              AS \"nome\"" +
+            "   ,   A.ordinale          AS \"ordinale\"" +
             "   FROM area_funzionale A" +
             "   WHERE A.nome ILIKE 'Area%'" +
             "   ORDER BY A.codice";
@@ -712,15 +712,16 @@ public interface Query extends Serializable {
      */
     public static final String GET_ROLES =
             "SELECT " +
-            "       RG.codice        AS \"codice\"" +
-            "   ,   RG.nome          AS \"nome\"" +
-            "   ,   RG.tipo_ruolo    AS \"informativa\"" +
-            "   ,   RG.ordinale      AS \"ordinale\"" +
+            "       RG.codice           AS \"codice\"" +
+            "   ,   RG.nome             AS \"nome\"" +
+            "   ,   RG.tipo_ruolo       AS \"informativa\"" +
+            "   ,   RG.ordinale         AS \"ordinale\"" +
             "   FROM ruolo_giuridico RG" +
             "   ORDER BY RG.codice";
 
     /**
-     * <p>Estrae le persone afferenti a una struttura allocata su un macroprocesso</p>
+     * <p>Costruisce dinamicamente la query di estrazione delle persone afferenti
+     * a una struttura allocata su un macroprocesso</p>
      *
      * @param idM identificativo del macroprocesso
      * @param idR identificativo della rilevazione
@@ -730,7 +731,8 @@ public interface Query extends Serializable {
     public String getQueryPeopleByStructureAndMacro(int idM, int idR, int[] idl);
 
     /**
-     * <p>Estrae le persone afferenti a una struttura allocata su un processo</p>
+     * <p>Costruisce dinamicamente la query di estrazione delle persone afferenti
+     * a una struttura allocata su un processo</p>
      *
      * @param idP identificativo del   processo
      * @param idR identificativo della rilevazione
@@ -794,11 +796,11 @@ public interface Query extends Serializable {
      */
     public static final String GET_MACRO_AT_BY_SURVEY =
             "SELECT DISTINCT" +
-            "       MAT.id                AS \"id\"" +
-            "   ,   MAT.codice            AS \"codice\"" +
-            "   ,   MAT.nome              AS \"nome\"" +
-            "   ,   MAT.ordinale          AS \"ordinale\"" +
-            "   ,   MAT.id_rilevazione    AS \"idAppo\"" +
+            "       MAT.id                  AS \"id\"" +
+            "   ,   MAT.codice              AS \"codice\"" +
+            "   ,   MAT.nome                AS \"nome\"" +
+            "   ,   MAT.ordinale            AS \"ordinale\"" +
+            "   ,   MAT.id_rilevazione      AS \"idAppo\"" +
             "   FROM macroprocesso_at MAT" +
             "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
             //"       INNER JOIN allocazione_macroprocesso_at AM ON AM.id_macroprocesso = M.id" +
@@ -814,11 +816,11 @@ public interface Query extends Serializable {
      */
     public static final String GET_PROCESSI_AT_BY_MACRO =
             "SELECT DISTINCT" +
-            "       PRAT.id                AS \"id\"" +
-            "   ,   PRAT.codice            AS \"codice\"" +
-            "   ,   PRAT.nome              AS \"nome\"" +
-            "   ,   PRAT.ordinale          AS \"ordinale\"" +
-            "   ,   PRAT.smartworking      AS \"smartWorking\"" +
+            "       PRAT.id                 AS \"id\"" +
+            "   ,   PRAT.codice             AS \"codice\"" +
+            "   ,   PRAT.nome               AS \"nome\"" +
+            "   ,   PRAT.ordinale           AS \"ordinale\"" +
+            "   ,   PRAT.smartworking       AS \"smartWorking\"" +
             "   FROM processo_at PRAT" +
             "       INNER JOIN macroprocesso_at MAT ON PRAT.id_macroprocesso_at = MAT.id" +
             "       INNER JOIN rilevazione R ON PRAT.id_rilevazione = R.id" +
@@ -951,6 +953,22 @@ public interface Query extends Serializable {
             "       count(*)                AS \"informativa\"" +
             "   FROM quesito Q" +
             "   WHERE Q.id_rilevazione = ?";
+    
+    /**
+     * <p>Conta il numero di quesiti che hanno ricevuto una risposta,
+     * data l'intervista cui sono collegati, 
+     * identificata tramite data e ora.</p>
+     */
+    public static final String GET_QUESTION_AMOUNT_WITH_ANSWER_BY_INTERVIEW =
+            "SELECT" +
+            "       count(*)                AS \"informativa\"" +
+            "   FROM risposta R" +
+            "       INNER JOIN quesito Q ON R.id_quesito = Q.id" +
+            "   WHERE (NOT R.valore ILIKE '')" +
+            "       AND R.valore IS NOT NULL" +
+            "       AND R.data_ultima_modifica = ?" +
+            "       AND R.ora_ultima_modifica = ?" +
+            "       AND R.id_rilevazione = ?";
 
     /**
      * <p>Estrae le interviste effettuate intervistando le strutture
@@ -999,7 +1017,9 @@ public interface Query extends Serializable {
             "   ,   R.id_sottoprocesso_at   AS \"value3\"" +       
             "   ,   R.data_ultima_modifica  AS \"codice\"" + 
             "   ,   R.ora_ultima_modifica   AS \"extraInfo\"" + 
+            "   ,   S.codice                AS \"labelWeb\"" +
             "   FROM risposta R" +
+            "       INNER JOIN rilevazione S ON R.id_rilevazione = S.id" +
             "   WHERE (R.id_rilevazione = ? OR -1 = ?)" +
             "   ORDER BY R.data_ultima_modifica DESC, R.ora_ultima_modifica DESC";    
 
@@ -1022,24 +1042,50 @@ public interface Query extends Serializable {
     public String getQueryAnswers(HashMap<String, LinkedHashMap<String, String>> params, int idSurvey, int limit, int idQuest, boolean getAll);
     
     /**
-     * TODO COMMENTO
-     * @param idR
-     * @param idl4
-     * @param idl3
-     * @param idl2
-     * @param idl1
-     * @return
+     * <p>Costruisce dinamicamente la query che seleziona una struttura 
+     * di qualsivoglia livello (tupla di struttura_liv1 oppure di struttura_liv2...
+     * etc.) in base ai parametri ricevuti.</p>
+     * <p>In particolare,
+     * verifica prima la significativit&agrave; 
+     * dell'identificativo dell'eventuale struttura di livello 4;<ul>
+     * <li>se questo &egrave; significativo, restituisce la query per recuperare
+     * la struttura di livello 4 ed esce;</li>
+     * <li>se invece questo non &egrave; significativo, verifica la 
+     * significativit&agrave; dell'identificativo dellaa struttura 
+     * di livello 3, etc.</li></ul>
+     * Alla fine dei test in cascata, restituisce la query per l'estrazione della 
+     * struttura di primo livello, o un valore convenzionale (&mdash;) se 
+     * nessun id &egrave; risultato significativo.
+     * 
+     * @param idR   identificativo della rilevazione
+     * @param idl4  identificativo della struttura di livello 4, oppure -2 se non interessa questo livello
+     * @param idl3  identificativo della struttura di livello 3, oppure -2 se non interessa questo livello
+     * @param idl2  identificativo della struttura di livello 2, oppure -2 se non interessa questo livello
+     * @param idl1  identificativo della struttura di livello 1, oppure -2 se non interessa questo livello
+     * @return <code>String</code> - la query che seleziona la struttura cercata oppure &lsquo;&ndash;&rsquo; se nessun parametro id e' stato trovato significativo
      */
     public String getQueryStructureBySurvey(int idR, int idl4, int idl3, int idl2, int idl1);
     
     /**
-     * TODO COMMENTO
-     * @param idR
+     * <p>Costruisce dinamicamente la query che seleziona un processo 
+     * di qualsivoglia livello (tupla di macroprocesso_at oppure di processo_at...
+     * etc.) in base ai parametri ricevuti.</p>
+     * <p>In particolare,
+     * verifica prima la significativit&agrave; 
+     * dell'identificativo dell'eventuale sottoprocesso_at;<ul>
+     * <li>se questo &egrave; significativo, restituisce la query per recuperare
+     * il sottoprocesso_at ed esce;</li>
+     * <li>se invece questo non &egrave; significativo, verifica la 
+     * significativit&agrave; dell'identificativo del processo_at, etc.</li></ul>
+     * Alla fine dei test in cascata, restituisce la query per l'estrazione del 
+     * macroprocesso_at, o un valore convenzionale (&mdash;) se 
+     * nessun id &egrave; risultato significativo.
+     * 
+     * @param idR   identificativo della rilevazione
      * @param idS   identificativo sottoprocesso anticorruzione
      * @param idP   identificativo processo anticorruzione
      * @param idM   identificativo macroprocesso anticorruzione
-     * @param idl1
-     * @return
+     * @return <code>String</code> - la query che seleziona il processo anticorruttivo cercato oppure &lsquo;&ndash;&rsquo; se nessun parametro id e' stato trovato significativo
      */
     public String getQueryProcessBySurvey(int idR, int idS, int idP, int idM);
     
