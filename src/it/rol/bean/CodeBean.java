@@ -1,11 +1,13 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
+ *   dell'ateneo possono essere esposti e per la gestione di reportistica
+ *   e mappature per la gestione dei "rischi on line" (rol).
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
+ *   Risk Mapping Software (rms)
+ *   web applications to make survey about the amount and kind of risk
+ *   which each process is exposed, and to publish, and manage,
+ *   report and risk information.
  *   Copyright (C) renewed 2022 Giovanroberto Torre
  *   all right reserved
  *
@@ -70,7 +72,8 @@ public class CodeBean implements Serializable {
      */
     private final String FOR_NAME = "\n" + this.getClass().getName() + ": "; //$NON-NLS-1$
     /**
-     * 
+     * Valore convenzionale definito nel bean padre CodeBean per comodit&agrave; 
+     * di accesso dal di fuori del package bean e delle sottoclassi di CodeBean
      */
     public static final int BEAN_DEFAULT_ID = -2;
     
@@ -132,17 +135,18 @@ public class CodeBean implements Serializable {
      * @param o oggetto CodeBean i cui valori devono essere copiati
      * @throws AttributoNonValorizzatoException se l'identificativo dell'oggetto passato come argomento non e' valorizzato!
      */
+    @SuppressWarnings("unused")
     public CodeBean(CodeBean o) 
              throws AttributoNonValorizzatoException {
         // Ammette la mancata valorizzazione di quasi tutti i valori, ma non transige sull'id!
         id = o.getId();
-        // Nome
+        // Tenta di recuperare: Nome; se non viene trovato, vi assegna il valore null
         try {
             nome = o.getNome();
         } catch (AttributoNonValorizzatoException anve) {
             nome = null;
         }
-        // Informativa
+        // Tenta di recuperare: Informativa; se l'attributo non viene trovato, vi assegna il valore null
         try {
             informativa = o.getInformativa();
         } catch (AttributoNonValorizzatoException anve) {
@@ -159,7 +163,7 @@ public class CodeBean implements Serializable {
     /**
      * Restituisce l'identificativo di un raggruppamento.
      * @return <code>id</code> - l'id del gruppo 
-     * @throws it.pms.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
+     * @throws AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
      */
     public int getId() throws AttributoNonValorizzatoException {
         if (id == BEAN_DEFAULT_ID) {
@@ -183,7 +187,7 @@ public class CodeBean implements Serializable {
     /**
      * Restituisce il nome di un raggruppamento.
      * @return <code>nome</code> - la denominazione del gruppo 
-     * @throws it.pms.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (potrebbe essere un dato obbligatorio)
+     * @throws AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (potrebbe essere un dato obbligatorio)
      */
     public String getNome() throws AttributoNonValorizzatoException {
         if (nome == null) {
@@ -207,7 +211,7 @@ public class CodeBean implements Serializable {
     /**
      * Restituisce la descrizione di un raggruppamento.
      * @return <code>informativa</code> - la descrizione del gruppo 
-     * @throws it.pms.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (potrebbe essere un dato obbligatorio)
+     * @throws AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (potrebbe essere un dato obbligatorio)
      */
     public String getInformativa() throws AttributoNonValorizzatoException {
         if (informativa == null) {
