@@ -127,9 +127,10 @@ public class Utils implements Constants {
         try {
             Integer.parseInt(s);
         } catch (NumberFormatException nfe) {
-            log.warning(": si e\' verificato un problema nel puntamento a qualche parametro.\n");
+            log.warning(": si e\' verificato un problema nella conversione da String a numero.\n" + nfe.getLocalizedMessage());
             return false;
         } catch (NullPointerException npe) {
+            log.warning(": si e\' verificato un problema nel puntamento a qualche parametro.\n" + npe.getLocalizedMessage());
             return false;
         }
         // Only got here if we didn't return false
@@ -234,7 +235,7 @@ public class Utils implements Constants {
         int day = calendar.get(Calendar.DATE);
         /* Questo mese (mese corrente) sotto forma numerica.
          * Indica il mese dell'anno (p.es. '3' del 22/04/1970*)
-         * <p><small>* Calenda.MONTH parte da zero</small></p> */
+         * <p><small>* Calendar.MONTH parte da zero</small></p> */
         int month = calendar.get(Calendar.MONTH);
         /* Quest'anno (mese corrente) sotto forma numerica.
          * <p>Indica l'anno corrente (p.es. '1970' del 22/04/1970)</p> */
@@ -354,8 +355,8 @@ public class Utils implements Constants {
 
 
     /**
-     * <p>Dato un anno in input, restituisce la data del 31 dicembre dell'
-     * anno stesso sotto forma di
+     * <p>Dato un anno in input, restituisce la data del 31 dicembre 
+     * dell'anno stesso sotto forma di
      * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/GregorianCalendar.html">
      * GregorianCalendar</a>.</p>
      *
@@ -580,6 +581,9 @@ public class Utils implements Constants {
      * {@link SimpleDateFormat}
      * (<a href="http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html">
      * javadoc</a>)</p>
+     * <p>Esempio:<pre><ul> 
+     * <li><strong>"Tue Jul 07 00:00:00 CEST 2020"</strong></li>
+     * <li> EEE MMM dd HH:mm:ss zzz  yyyy</li></ul></pre></p>
      *
      * @param date una String che deve essere convertita
      * @param initDateFormat il formato con cui la String e' formattata
@@ -599,8 +603,8 @@ public class Utils implements Constants {
             String parsedDate = formatter.format(initDate);
             returnDate = formatter.parse(parsedDate);
         } catch (ParseException pe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + pe.getLocalizedMessage();
-            log.warning(msg + "Attenzione: si e\' verificato un problema nel metodo di formattazione della data.\n");
+            String msg = FOR_NAME + "Si e\' verificato un problema. Verificare che il formato della String da convertire (\'" + date + "\') corrisponda a quello del pattern di formattazione (" + initDateFormat + ").\n";
+            log.warning(msg + "Attenzione: si e\' verificato un problema nel metodo di formattazione della data.\n" + pe.getLocalizedMessage());
             throw new CommandException(msg, pe);
         } catch (NullPointerException npe) {
             String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + npe.getLocalizedMessage();
@@ -628,6 +632,10 @@ public class Utils implements Constants {
         Date returnDate = null;
         try {
             returnDate = format(date, DATA_SQL_PATTERN, DATA_SQL_PATTERN);
+        } catch (CommandException ce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile convertire la String \'" + date + "\' in una java.util.Date.\n" + ce.getLocalizedMessage();
+            log.warning(msg + "Attenzione: si e\' verificato un problema nella conversione di tipi. Impossibile usare il pattern predefinito!\n");
+            throw new CommandException(msg, ce);
         } catch (NullPointerException npe) {
             String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + npe.getLocalizedMessage();
             log.warning(msg + "Attenzione: si e\' verificato un problema nel puntamento a qualche parametro.\n");
@@ -639,12 +647,11 @@ public class Utils implements Constants {
     
     /**
      * <p>Formatta un orario che riceve sotto forma di oggetto <code>String</code>
-     * basandosi su un parametro che ne indica il formato.</p>
-     *TODO COMMENTO
-     * @param date una String che deve essere convertita
-     * @param initDateFormat il formato con cui la String e' formattata
-     * @param endDateFormat il formato che l'oggetto Date restituito dovra' avere
-     * @return <code>java.util.Date</code> - un oggetto Date costruito a partire dalla String ricevuta e formattato secondo il formato indicato
+     * basandosi su un parametro che ne indica il formato di ingresso.</p>
+     *
+     * @param time un orario sotto forma di String, che deve essere convertito
+     * @param timeFormat il formato con cui la String da converire e' formattata
+     * @return <code>java.sql.Time</code> - un oggetto Time costruito a partire dalla String ricevuta
      * @throws CommandException se si verifica un problema nella conversione di tipo o in qualche tipo di puntamento
      */
     public static Time format(String time,
@@ -656,7 +663,7 @@ public class Utils implements Constants {
             Date initDate = format.parse(time);
             returnTime = new Time(initDate.getTime());
         } catch (ParseException pe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + pe.getLocalizedMessage();
+            String msg = FOR_NAME + "Si e\' verificato un problema: l\'ora fornita in input " + time + " non e\' convertibile!\n" + pe.getLocalizedMessage();
             log.warning(msg + "Attenzione: si e\' verificato un problema nel metodo di formattazione della data.\n");
             throw new CommandException(msg, pe);
         } catch (NullPointerException npe) {
@@ -809,7 +816,6 @@ public class Utils implements Constants {
     public static GregorianCalendar getUnixEpoch() {
         return new GregorianCalendar(1970, 0, 1);
     }
-
 
 
     /**
