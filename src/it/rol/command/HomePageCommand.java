@@ -1,11 +1,13 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
+ *   dell'ateneo possono essere esposti e per la gestione di reportistica
+ *   e mappature per la gestione dei "rischi on line" (rol).
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
+ *   Risk Mapping Software (rms)
+ *   web applications to make survey about the amount and kind of risk
+ *   which each process is exposed, and to publish, and manage,
+ *   report and risk information.
  *   Copyright (C) renewed 2022 Giovanroberto Torre
  *   all right reserved
  *
@@ -192,7 +194,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
         // Recupera o inizializza 'codice rilevazione' (Survey)
-        String codeSur = parser.getStringParameter("r", DASH);
+        String codeSur = parser.getStringParameter(PARAM_SURVEY, DASH);
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -495,7 +497,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
                                   String part,
                                   String surCode)
                            throws CommandException {
-        String entParam = "/?" + ConfigManager.getEntToken() + "=";
+        String entParam = SLASH + QM + ConfigManager.getEntToken() + EQ;
         StringBuffer url = new StringBuffer(appName);
         try {
             url.append(entParam).append(title.getNome());
@@ -524,13 +526,16 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
      * il metodo si arrangi a recuperare i parametri (con getParameterNames)
      * perch&eacute; la richiesta conosciuta da questa classe non corrisponde
      * alla richiesta del chiamante. In linea teorica, si potrebbe effettuare
-     * questa operazione, ma la richiesta &egrave; un oggetto oneroso, e soprattutto
+     * questa operazione, modificando questo metodo in modo che accetti la
+     * richiesta come argomento, e passandola come parametro; tuttavia, 
+     * la richiesta &egrave; un oggetto oneroso, e soprattutto
      * creerebbe confusione in una Command che &egrave;
      * creata a sua volta per gestire richieste...<br />
-     * <small>NOTA: I metodi di questa classe
-     * che gestiscono le richieste sono metodi di debug, utilizzati dal programmatore
-     * per ispezionare lo stato della richiesta, non metodi da utilizzare per
-     * generare output, quindi non &egrave; la stessa cosa.</small></p>
+     * <small>NOTA: In questa classe vi sono metodi che accettano come parametro
+     * una richiesta, ispezionandone e restituendone i valori, ma si tratta di
+     * metodi di debug, utilizzati dal programmatore finalizzati appunto ad
+     * ispezionare lo stato della richiesta, non metodi da utilizzare per
+     * generare output: quindi non &egrave; la stessa cosa.</small></p>
      *
      * @param appName    nome della web application, seguente la root
      * @param pageParams la queryString contenente tutti i parametri di navigazione
@@ -553,7 +558,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         String codeSurvey, tokenSurvey = null;
         // Dictonary contenente i soli valori del token 'p' permessi
         LinkedHashMap<String, String> allowedParams = new LinkedHashMap<>(prime);
-        // Lista dei token che non devono generare breadcrumbs ("token vietati")
+        // Lista dei token che NON devono generare breadcrumbs ("token vietati")
         LinkedList<String> deniedTokens = new LinkedList<>();
         // Aggiunge un tot di token vietati, caricati dinamicamente
         String deniedPattern1 = "sliv";
@@ -567,8 +572,8 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         // Aggiunge le esclusioni per data e ora
         deniedTokens.add("d");
         deniedTokens.add("t");
-        // Aggiunte i valori del token 'p' che devono generare breadcrumb associandoli a un'etichetta da mostrare in breadcrumb
-        allowedParams.put(PART_SEARCH_PERSON,   "Ricerca");
+        // Aggiunge i valori del token 'p' che devono generare breadcrumb associandoli a un'etichetta da mostrare in breadcrumb
+        allowedParams.put(PART_SEARCH,          "Ricerca");
         allowedParams.put(PART_SELECT_STR,      "Scelta Struttura");
         allowedParams.put(PART_PROCESS,         "Scelta Processi");
         allowedParams.put(PART_SELECT_QST,      "Quesiti");
@@ -582,27 +587,37 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
             Map<String, String> tokensAsMap = new LinkedHashMap<>(prime);
             // Esamina ogni token
             for (int i = 0; i < tokens.length; i++) {
+                // Ottiene la coppia: 'parametro=valore'
                 String couple = tokens[i];
+                // Estrae il solo parametro
                 String paramName = couple.substring(NOTHING, couple.indexOf(EQ));
+                // Estrae il solo valore
                 String paramValue = couple.substring(couple.indexOf(EQ));
-                // Test: il token trovato non rientra in quelli da escludere? 
+                // Test: il token trovato NON rientra in quelli da escludere? 
                 if (!deniedTokens.contains(paramName)) {
+                    // Allora il token genererà una breadcrumb
                     tokensAsMap.put(paramName, paramValue);
+                    // Le variabili locali non servono più...
                     couple = paramName = paramValue = null;
                 }
             }
+            // Recupera il codice rilevazione
             codeSurvey = tokensAsMap.get(PARAM_SURVEY).substring(SUB_MENU);
             // Controllo sull'input (il codice rilevazione deve essere valido!)
             if (!ConfigManager.getSurveys().containsKey(codeSurvey)) {
-                // Se non dispone di un avvocato, gliene verrà assegnato uno di ufficio...
+                // "Se non dispone di un codice rilevazione, gliene verrà assegnato uno d'ufficio"...
                 tokenSurvey = PARAM_SURVEY + EQ + ConfigManager.getSurveyList().get(MAIN_MENU).getNome();
             } else {
+                // Se dispone di un codice rilevazione valido, verrà usato quello
                 tokenSurvey = PARAM_SURVEY + tokensAsMap.get(PARAM_SURVEY);
             }
+            // Il link alla home è fisso
             final String homeLnk = appName + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_HOME + AMPERSAND + tokenSurvey;
+            // Crea un oggetto per incapsulare il link della root
             ItemBean root = new ItemBean(appName, homeLbl, homeLnk, MAIN_MENU);
+            // Aggiunge la root alle breadcrumbs
             nav.add(root);
-
+            // Scorre tutti i token calcolati per generare le corrispettive breadcrumbs
             for (java.util.Map.Entry<String, String> entry : tokensAsMap.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
