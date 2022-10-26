@@ -20,17 +20,6 @@
           <a class="small text-white stretched-link" href="${st}"></a>
         </div>
       </div>
-      <%--
-      <div class="col-xl-3 col-md-6 mx-auto">
-        <div class="card bg-success text-white mb-4">
-          <div class="card-body landing-card-body d-flex align-items-center">
-            <i class="fas fa-users fa-5x"></i>&nbsp;&nbsp;
-            <span class="h3 landing-card-title">Cerca persone</span>
-          </div>
-          <a class="small text-white stretched-link" href="${pe}"></a>
-        </div>
-      </div>
-     --%>
       <div class="col-xl-4 col-md-6 mx-auto">
         <div class="card bg-success text-white mb-4 shadow-nohover">
           <div class="card-body landing-card-body d-flex align-items-center">
@@ -54,14 +43,22 @@
           <a class="small text-white stretched-link" href="${sqs}"></a>
         </div>
       </div>
-      <div class="col-xl-4 col-md-6 mx-auto">
+<%--  <div class="col-xl-4 col-md-6 mx-auto">
         <div class="card bg-primary text-white mb-4">
           <div class="card-body landing-card-body d-flex align-items-center">
-<!--             <i class="fas fa-sitemap fa-5x"></i> -->
             <i class="fa-solid fa-cat fa-5x"></i>&nbsp;&nbsp;
             <span class="h4 landing-card-title">Cruscotto RAT</span>
           </div>
-<%--           <a class="small text-white stretched-link" href="${st}"></a> --%>
+           <a class="small text-white stretched-link" href="${st}"></a>
+        </div>
+      </div> --%>
+      <div class="col-xl-4 col-md-6 mx-auto">
+        <div class="card bgAct12 mb-4">
+          <div class="card-body landing-card-body d-flex align-items-center">
+            <i class="fa-solid fa-magnifying-glass-chart fa-5x"></i>&nbsp;&nbsp;
+            <span class="h4 landing-card-title">Ricerca Libera</span>
+          </div>
+           <a class="small text-white stretched-link" href="${ris}"></a>
         </div>
       </div>
       <div class="col-xl-4 col-md-6 mx-auto">
