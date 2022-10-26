@@ -1,11 +1,13 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
+ *   dell'ateneo possono essere esposti e per la gestione di reportistica
+ *   e mappature per la gestione dei "rischi on line" (rol).
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
+ *   Risk Mapping Software (rms)
+ *   web applications to make survey about the amount and kind of risk
+ *   which each process is exposed, and to publish, and manage,
+ *   report and risk information.
  *   Copyright (C) renewed 2022 Giovanroberto Torre
  *   all right reserved
  *
@@ -47,7 +49,6 @@ import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Main;
-import it.rol.Query;
 import it.rol.bean.CodeBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
@@ -127,7 +128,7 @@ public class PersonCommand extends ItemBean implements Command, Constants {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        nomeFile.put(PART_SEARCH_PERSON, nomeFileElenco);
+        //nomeFile.put(PART_SEARCH_PERSON, nomeFileElenco);
         //nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }
 
@@ -153,7 +154,7 @@ public class PersonCommand extends ItemBean implements Command, Constants {
         // Utente loggato
         PersonBean user = null;
         // Recupera o inizializza 'codice rilevazione' (Survey)
-        String codeSur = parser.getStringParameter("r", DASH);
+        String codeSur = parser.getStringParameter(PARAM_SURVEY, DASH);
         // Recupera o inizializza 'id persona'
         int idPe = parser.getIntParameter("idp", DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'
@@ -301,8 +302,8 @@ public class PersonCommand extends ItemBean implements Command, Constants {
 
     /**
      * <p>Restituisce un Vector di tutte le persone allocate su macro/processo
-     * il cui identificativo viene passato come argomento; ciascuna delle
-     * persone contiene al proprio interno specifici attributi
+     * organizzativo il cui identificativo viene passato come parametro; 
+     * ciascuna delle persone contiene al proprio interno specifici attributi
      * caratterizzanti l'associazione della persona alla propria struttura.</p>
      *
      * @param type          identifica se la richiesta riguarda un macroprocesso o un processo
@@ -346,9 +347,9 @@ public class PersonCommand extends ItemBean implements Command, Constants {
 
 
     /**
-     * <p>Restituisce un Vector di tutte le persone allocate su macro/processo
-     * il cui identificativo viene passato come argomento; ciascuna delle
-     * persone contiene al proprio interno specifici attributi
+     * <p>Restituisce un Vector di tutte le persone allocate su un macroprocesso
+     * organizzativo il cui identificativo viene passato come parametro; 
+     * ciascuna delle persone contiene al proprio interno specifici attributi
      * caratterizzanti l'associazione della persona alla propria struttura.</p>
      *
      * @param idMacro       l'identificativo del macroprocesso
@@ -368,9 +369,9 @@ public class PersonCommand extends ItemBean implements Command, Constants {
 
 
     /**
-     * <p>Restituisce un Vector di tutte le persone allocate su macro/processo
-     * il cui identificativo viene passato come argomento; ciascuna delle
-     * persone contiene al proprio interno specifici attributi
+     * <p>Restituisce un Vector di tutte le persone allocate su un processo
+     * organizzativo il cui identificativo viene passato come parametro; 
+     * ciascuna delle persone contiene al proprio interno specifici attributi
      * caratterizzanti l'associazione della persona alla propria struttura.</p>
      *
      * @param idProcess     l'identificativo del processo
@@ -390,14 +391,15 @@ public class PersonCommand extends ItemBean implements Command, Constants {
 
 
     /**
-     * <p>Restituisce ...</p>
-     *TODO COMMENTO
-     * @param fields
-     * @param type          identifica se la richiesta riguarda un macroprocesso o un processo
+     * <p>Restituisce una lista vettoriale di persone identificate tramite
+     * un dizionario di parametri di ricerca che il metodo accetta come
+     * argomento.</p>
+     *
+     * @param fields        mappa contenente i parametri di ricerca
      * @param codeSurvey    il codice della rilevazione
-     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param user          utente loggato; viene passato ai metodi del databound per controllare che abbia i diritti di fare quello che vuol fare
      * @param db            WebStorage per l'accesso ai dati
-     * @return <code>ArrayList&lt;PersonBean&gt;</code> - lista di persone recuperate
+     * @return <code>ArrayList&lt;PersonBean&gt;</code> - lista di persone recuperate sulla base dei parametri di ricerca passati
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
      */
     public static ArrayList<PersonBean> retrievePeople(HashMap<String, String> fields,
@@ -442,7 +444,7 @@ public class PersonCommand extends ItemBean implements Command, Constants {
                             throws CommandException {
         /* **************************************************** *
          *              Ramo di ricerca di una persona          *
-         * **************************************************** */
+         * **************************************************** *
         if (part.equalsIgnoreCase(PART_SEARCH_PERSON)) {
             LinkedHashMap<String, String> fields = new LinkedHashMap<String, String>();
             fields.put("pe-name",  parser.getStringParameter("pe-name", String.valueOf(Query.GET_ALL)));
@@ -451,7 +453,7 @@ public class PersonCommand extends ItemBean implements Command, Constants {
             fields.put("pe-giur",  parser.getStringParameter("pe-giur", String.valueOf(Query.GET_ALL)));
             fields.put("pe-resp",  parser.getStringParameter("pe-resp", String.valueOf(Query.GET_ALL)));
             params.put(PART_SEARCH_PERSON, fields);
-        }
+        }*/
     }
 
 }
