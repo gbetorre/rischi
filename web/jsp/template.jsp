@@ -84,9 +84,11 @@
     <div id="idHeader">
       <%@ include file="header.jspf"%>
     </div>
-    <div id="divMenu">
+    <%-- Menu orizzontale -->
+    <div id="divMenu"> -->
       <%@ include file="menu.jspf"%>
-    </div>
+    </div> 
+     --%>
     <div id="divBreadcrumbs">
       <%@ include file="breadcrumbs.jspf"%>
     </div>
