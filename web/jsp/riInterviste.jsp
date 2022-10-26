@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
 <c:set var="quests" value="${requestScope.elencoInterviste}" scope="page" />
     <h4 class="btn-lightgray">Interviste effettuate</h4>
@@ -15,6 +16,7 @@
           <th class="bg-warning" scope="col" width="12%">Macroprocesso</th>
           <th class="bgcolorgreen" scope="col" width="12%">Processo</th>
           <th class="reportWp" scope="col" width="12%">Sottoprocesso</th>
+          <th class="reportWp" scope="col" width="1%">CSV</th>
         </tr>
       </thead>
       <tbody>
@@ -36,13 +38,17 @@
         <c:param name="t" value="${iviewsqltime}" />
         <c:param name="r" value="${ril}" />
       </c:url>
+     <fmt:formatDate var="iviewitadate" value="${iview.dataUltimaModifica}" pattern="dd/MM/yyyy" /> 
+     <fmt:formatDate var="iviewitatime" value="${iview.oraUltimaModifica}" pattern="HH:mm" />
+      <c:set var="rqsInstanceCSV" value="${rqsInstance}&out=csv" scope="page" />
+      <c:set var="rqsCSV" value="${fn:replace(rqsInstanceCSV, '/rischi/?q=', '/rischi/data?q=')}" scope="page" />
         <tr class="active">
           <td class="bgcolor1" width="*">
             <%--a href="${initParam.appName}/?q=ri&p=rqs&sliv1=${iview.struttura.informativa}&sliv2=${iview.struttura.figlie.get(zero).informativa}&sliv3=${iview.struttura.figlie.get(zero).figlie.get(zero).informativa}&sliv4=${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).informativa}&r=${param['r']}"--%>
             <a href="${rqsInstance}">
               <c:out value="${loop.count}" /><sup>a</sup> &ndash; 
-              <fmt:formatDate value="${iview.dataUltimaModifica}" pattern="dd/MM/yyyy" /> 
-              <fmt:formatDate value="${iview.oraUltimaModifica}" pattern="HH:mm" />
+              <c:out value="${iviewitadate}" />
+              <c:out value="${iviewitatime}" />
             </a>
           </td>
           <td class="bg-primary text-white" width="12%"><strong><c:out value="${iview.struttura.nome}" /></strong></td>
@@ -52,11 +58,19 @@
           <td class="bgcolor1" width="12%"><strong><c:out value="${iview.processo.nome}" /></strong></td>
           <td class="bgcolor1" width="12%"><c:out value="${iview.processo.processi.get(zero).nome}" /></td>
           <td class="bgcolor1" width="12%"><c:out value="${iview.processo.processi.get(zero).processi.get(zero).nome}" /></td>
+          <td class="bgcolor1 text-center" width="1%"><a href="${rqsCSV}" title="Scarica i dati dell'intervista del ${iviewitadate} ore ${iviewitatime} in un file CSV"><i class="fas fa-download"></i> </a></td>
         </tr>
     </c:forEach>
       </tbody>
     </table>
-    <h4 class="heading avvisiTot">Interviste trovate: <button type="button" class="btn btn-success"><span class="badge badge-pill badge-light">${quests.size()}</span></button></h4>
+    <h4 class="reportStateAct">&nbsp; N. interviste trovate: 
+      <button type="button" class="btn btn-success">
+        <span class="badge badge-pill badge-light">${quests.size()}</span>
+      </button>
+      <a href="${sqsCSV}" class="float-right lastMenuContent" title="Scarica il database completo delle interviste">
+        <i class="fas fa-download"></i> <span class="sezioneElenco">Scarica tutti i dati&nbsp;</span>
+      </a>
+    </h4>
     <script type="text/javascript">
       $(document).ready(function() {
         $('#listInt').DataTable({
