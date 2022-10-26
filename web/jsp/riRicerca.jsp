@@ -19,26 +19,26 @@
   <c:set var="peFormFields" value="NOME,COGNOME,AREA FUNZIONALE,CATEGORIA,RESPONSABILITA" scope="page" />
 </c:if>
     <div class="row">
-      <h3 class="mt-1 m-0 font-weight-bold">Ricerca</h3>
+      <h3 class="mt-1 m-0 font-weight-bold">Ricerca nel database</h3>
       <hr class="riga"/>
       <div id="search_div">
-        <form id="pe_form" method="post" action="${pes}" class="panel bgcolorgreen">
+        <form id="pe_form" method="post" action="${pes}" class="panel reportWp">
           <input type="hidden" id="act-id" name="act-id" value="${actInstance.id}" />
           <div class="panel-body">
             <hr class="separatore" />
             <div class="form-row">
-              <div class="col-sm-5">Persona:</div>
+              <div class="col-sm-5">Quesito:</div>
               <div class="col-sm-3">
-                <input type="text" class="form-control" id="pe-name" name="pe-name" value="${peName}" placeholder="Nome">
+                <input type="text" class="form-control" id="pe-name" name="pe-name" value="${peName}" placeholder="test">
               </div>
               <div class="col-sm-3">
-                <input type="text" class="form-control" id="pe-surn" name="pe-surn" value="${peSurn}" placeholder="Cognome">
+                <input type="text" class="form-control" id="pe-surn" name="pe-surn" value="${peSurn}" placeholder="test">
               </div>
             </div>
             <br />
             <hr class="separatore" />
             <div class="row">
-              <div class="col-sm-5">Area funzionale:</div>
+              <div class="col-sm-5">Struttura:</div>
               <div class="col-sm-6">
                 <select class="custom-select" id="pe-funz" name="pe-funz">
                 <option value="">TUTTE</option>
@@ -58,7 +58,7 @@
             <br />
             <hr class="separatore" />
             <div class="row">
-              <div class="col-sm-5">Categoria:</div>
+              <div class="col-sm-5">Processo:</div>
               <div class="col-sm-6">
                 <select class="custom-select" id="pe-giur" name="pe-giur">
                 <option value="">TUTTE</option>
@@ -78,7 +78,7 @@
             <br />
             <hr class="separatore" />
             <div class="row">
-              <div class="col-sm-5">Responsabilit&agrave;:</div>
+              <div class="col-sm-5">Ambito di analisi:</div>
               <div class="col-sm-6">
                 <select class="custom-select" id="pe-resp" name="pe-resp">
                 <option value="">--</option>
