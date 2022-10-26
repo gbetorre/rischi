@@ -47,14 +47,25 @@
 	<target name="doc" depends="init" description="generate documentation">
 	<delete dir="${doc.dir}" />
 	<mkdir dir="${doc.dir}" />
-	    <javadoc destdir="${doc.dir}" access="private" 
-	    	author="true"
-	    	      bottom="&lt;i&gt;Copyright (c) 2022 by Giovanroberto Torre, Universita' degli Studi di Verona. Verona (I). All Rights Reserved.&lt;/i&gt;"
-	    	      classpath="${class.path}"
-	    	      doctitle="&lt;h1&gt;Rischi On Line (Rol)&lt;/h1&gt;"
-	    	      packagenames="it.rol.*" sourcepath="src" use="true" version="true"
-	    	      windowtitle="Documentazione di ROL"
-	    	>
+        <javadoc destdir="${doc.dir}" access="private" 
+                author="true" 
+                windowtitle="Documentazione di ROL"
+                doctitle="&lt;h1&gt;Rischi On Line (Rol)&lt;/h1&gt;"  
+                bottom="&lt;i&gt;Copyright (c) 2022 by Giovanroberto Torre, Universita' degli Studi di Verona. Verona (I). All Rights Reserved.&lt;/i&gt;"
+                classpath="/home/outer-root/Programs/apache-tomcat-8.5.60/lib/jsp-api.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/ext-lib/commons-text.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/ext-lib/cos.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/lib/el-api.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/ext-lib/jstl-1.2.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/lib/servlet-api.jar"
+                nodeprecated="false" 
+                nodeprecatedlist="false" 
+                noindex="false" 
+                nonavbar="false" 
+                notree="false" 
+                overview="/home/outer-root/git/rischi/javadoc/overview.html" 
+                packagenames="it.rol,it.rol.bean,it.rol.exception,it.rol.command" 
+                source="1.8" 
+                linkoffline="https://at.univr.it:8443/rischi/reference file:///home/outer-root/git/rischi/javadoc/index.html"
+                splitindex="true" 
+                use="true" 
+                version="true">
+            <link href="file:///home/outer-root/git/rischi/javadoc/"/>
 	        <fileset dir="${src}" />
 	    </javadoc>
 	</target>
