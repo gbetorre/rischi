@@ -3,7 +3,7 @@ Style.css - Global Stylesheet for /processi application
 =====================================================*/
 html, body {
     font-family: Verdana,sans-serif;
-    font-size: small;
+    font-size: smaller;
     line-height: 1.5;
 }
 
@@ -462,7 +462,7 @@ select:disabled.bgcolor3 {
 }
 
 .reportWp {
-	background-image: linear-gradient(to right, #cccccc, #ffffff);
+	background-image: linear-gradient(to right, #e0e0e0, #6699cc);
 }
 
 .reportRow {
