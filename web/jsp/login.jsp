@@ -21,7 +21,6 @@
       <div class="col text-center">
         <h1>Mappatura dei rischi corruttivi</h1>
         <hr class="separatore" />
-<!--         <h1>cui sono esposti i processi organizzativi</h1> -->
         <br />
         <div class="container justify-content-center">
           <br /><br />
@@ -46,5 +45,36 @@
       </div>
     </div>
   </form>
+  <!-- Nome e versione del software -->
+  <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000" id="about">
+      <div class="toast-header bgAddAct">
+        <%-- <img src="..." class="rounded mr-2" alt="...">--%>
+        <strong class="mr-auto">ROL [Rischi On Line]</strong>
+        <small><span id="countdown">5</span></small>
+        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="toast-body">
+        Versione: 1.18
+      </div>
+    </div>
+  </div>
+  <script>
+    $(document).ready(function(){
+        $('#about').toast('show');
+    });
+  </script>
+  <script type="text/javascript">
+    var ss = 6;
+    function justcountdown() {
+      ss = ss-1;
+        document.getElementById("countdown").innerHTML = ss;
+        window.setTimeout("justcountdown()", 1000);
+    }
+    // Avvia il countdown
+    justcountdown();
+  </script> 
 </c:catch>
   <p style="color:red;"><c:out value="${exception}" /></p>
