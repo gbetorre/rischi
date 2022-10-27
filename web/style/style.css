@@ -411,6 +411,120 @@ select:disabled.bgcolor3 {
 	color: red;
 }
 
+.bgAct {
+  background-color: #ffd9b3 !important;
+}
+
+.bgAct1 {
+  background-color: #b3e6ff !important;
+}
+
+.bgAct2 {
+  background-color: #ffffb3 !important;
+}
+
+.bgAct3 {
+  background-color: #c3e6cb !important;
+}
+
+.bgAct4 {
+  background-color: #d9d9d9 !important;
+}
+
+.bgAct5 {
+  background-color: #ffff33 !important;
+}
+
+.bgAct6 {
+  background-color: #ffb380 !important;
+}
+
+.bgAct7 {
+  background-color: #ff6600 !important;
+}
+
+.bgAct8 {
+  background-color: #bfff00 !important;
+}
+
+.bgAct9 {
+  background-color: #6fdc95 !important;
+}
+
+.bgAct10 {
+  background-color: #f5c6cb !important;
+}
+
+.bgAct11 {
+  background-color: #ff9933;
+  border: 1px solid #e67300;
+}
+
+.bgAct12 {
+  background-color: #99ccff;
+  border: 1px solid #3399ff;
+}
+
+.bgAct13 {
+  background-color: #ffd633;
+  border: 1px solid #cca300;
+}
+
+.bgAct14 {
+  background-color: #4d9900;
+  border: 1px solid #336600;
+}
+
+.bgAct15 {
+  background-color: #73e600;
+  border: 1px solid #4d9900;
+}
+
+.bgAct16 {
+  background-color: #ffff80;
+}
+
+.bgAct17 {
+  background-color: #cceeff;
+}
+
+.bgAct18 {
+  background-color: #80aaff;
+  border: 1px solid #004de6;
+}
+
+.bgAct19 {
+  background-color: #ccff99  !important;
+}
+
+.bgAct20 {
+  background-color: #eaeded  !important;
+}
+
+.bgAddAct {
+  background-color: #d9edf7;
+}
+
+.bgFade {
+  background-image: linear-gradient(to right, transparent, white) !important;
+}
+
+.bgWbs {
+  background-color: #ffccff;
+}
+
+.bgInd {
+  background-color: #99ff33;
+}
+
+.bgMis {
+  background-color: #0066FF;
+}
+
+.bg-note{
+  background-color: #ffc;
+}
+
 /* ----------------- Panes ---------------- */
 .panel {
 	margin: 1% auto;
@@ -737,110 +851,7 @@ hr.riga       {
 }
 
 /*---------------------- AMBITI DI ANALISI ------------------------*/
-.bgAct {
-  background-color: #ffd9b3 !important;
-}
-.bgAct1 {
-  background-color: #b3e6ff !important;
-}
 
-.bgAct2 {
-  background-color: #ffffb3 !important;
-}
-
-.bgAct3 {
-  background-color: #c3e6cb !important;
-}
-
-.bgAct4 {
-  background-color: #d9d9d9 !important;
-}
-
-.bgAct5 {
-  background-color: #ffff33 !important;
-}
-
-.bgAct6 {
-  background-color: #ffb380 !important;
-}
-
-.bgAct7 {
-  background-color: #ff6600 !important;
-}
-
-.bgAct8 {
-  background-color: #bfff00 !important;
-}
-
-.bgAct9 {
-  background-color: #6fdc95 !important;
-}
-
-.bgAct10 {
-  background-color: #f5c6cb !important;
-}
-
-.bgAct11 {
-  background-color: #ff9933;
-  border: 1px solid #e67300;
-}
-
-.bgAct12 {
-  background-color: #99ccff;
-  border: 1px solid #3399ff;
-}
-
-.bgAct13 {
-  background-color: #ffd633;
-  border: 1px solid #cca300;
-}
-
-.bgAct14 {
-  background-color: #4d9900;
-  border: 1px solid #336600;
-}
-
-.bgAct15 {
-  background-color: #73e600;
-  border: 1px solid #4d9900;
-}
-
-.bgAct16 {
-  background-color: #ffff80;
-}
-
-.bgAct17 {
-  background-color: #cceeff;
-}
-
-.bgAct18 {
-  background-color: #80aaff;
-  border: 1px solid #004de6;
-}
-
-.bgAct19 {
-  background-color: #ccff99;
-}
-
-.bgAddAct {
-  background-color: #d9edf7;
-}
-
-.bgFade {
-  background-image: linear-gradient(to right, transparent, white) !important;
-}
-
-.bgWbs {
-  background-color: #ffccff;
-}
-
-.bgInd {
-  background-color: #99ff33;
-}
-
-.bgMis {
-  background-color: #0066FF;
-}
 
 .lightTable{
   border-color: #d9d9d9;
@@ -866,10 +877,6 @@ hr.riga       {
   border-bottom-style: dotted;
   border-bottom-width: 1px;
   border-color: #d9d9d9;
-}
-
-.bg-note{
-  background-color: #ffc;
 }
 
 /*---------------------- POP-UP ------------------------*/
