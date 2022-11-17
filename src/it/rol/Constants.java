@@ -88,6 +88,38 @@ public interface Constants extends Serializable {
      * sottoclassi di CodeBean.</p>
      */
     public static final int BEAN_DEFAULT_ID = CodeBean.BEAN_DEFAULT_ID;
+    /**
+     * <p>Costante da utilizzare quando serve un valore convenzionale 
+     * per inizializzazione di un attributo di un Bean del Model di tipo
+     * float o da utilizzare come argomento.</p>
+     * <p>Incapsula un valore convenzionale definito nel bean padre CodeBean
+     * per comodit&agrave; di accesso dal di fuori del package bean e delle
+     * sottoclassi di CodeBean.</p>
+     */
+    public static final float BEAN_DEFAULT_FLOAT = CodeBean.BEAN_DEFAULT_FLOAT;
+    /**
+     * <p>Valore identificante la tabella contenente una struttura o un processo 
+     * di primo livello (p.es. 1 = struttura_liv1 | 1 = macroprocesso_at)</p>
+     */
+    public static final byte ELEMENT_LEV_1 = 1;
+    /**
+     * <p>Valore identificante la tabella contenente una struttura o un processo
+     * di secondo livello (2 = struttura_liv2 | 2 = processo_at)</p>
+     */
+    public static final byte ELEMENT_LEV_2 = 2;
+    /**
+     * <p>Valore identificante la tabella contenente una struttura o un processo
+     * di terzo livello (3 = struttura_liv3 | 3 = sottoprocesso_at)</p>
+     */
+    public static final byte ELEMENT_LEV_3 = 3;
+    /**
+     * <p>Valore identificante la tabella contenente una struttura
+     * di terzo livello (4 = struttura_liv4).
+     * Per quanto riguarda i processi, il quarto livello pu&ograve;
+     * identificare le fasi
+     * (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at)</p>
+     */
+    public static final byte ELEMENT_LEV_4 = 4;
     /* ************************************************************************ *
      *              Costanti parlanti per valori boolean di flags               *
      * ************************************************************************ */
@@ -174,9 +206,9 @@ public interface Constants extends Serializable {
      */
     static final String[] STATI_STRUTTURA = {"ATTIVA", "DISMESSA"};
     /**
-     * <p>Valori possibili di valori convenzionali corrispondenti a tipi diversi di responsabilit&agrave;.</p>
+     * <p>Valori possibili di valori convenzionali corrispondenti a tipi diversi di liste.</p>
      */
-    static final String[] TIPI_RESPONSABILITA = {"R", "F", "T"};
+    static final String[] TIPI_LISTE = {"I", "F", "O"};
     /**
      * <p>Valori possibili degli attributi probabilita, impatto, livello di rischio.</p>
      */
@@ -185,10 +217,6 @@ public interface Constants extends Serializable {
      * <p>Lista contenente i possibili valori dell'attributo stato della classe RiskBean.</p>
      */
     public static final LinkedList<String> STATI_STRUTTURA_AS_LIST = new LinkedList<>(Arrays.asList(STATI_STRUTTURA));
-    /**
-     * <p>Lista contenente i possibili valori convenzionali corrispondenti a tipi diversi di responsabilit&agrave;.</p>
-     */
-    public static final LinkedList<String> TIPI_RESPONSABILITA_AS_LIST = new LinkedList<>(Arrays.asList(TIPI_RESPONSABILITA));
     /**
      * <p>Lista contenente i possibili valori degli attributi probabilita, impatto, livello della classe RiskBean.</p>
      */
