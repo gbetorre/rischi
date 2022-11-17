@@ -56,12 +56,14 @@ import javax.servlet.http.HttpSession;
 
 import com.oreilly.servlet.ParameterParser;
 
+import it.rol.bean.ActivityBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.QuestionBean;
 import it.rol.command.DepartmentCommand;
+import it.rol.command.ProcessCommand;
 import it.rol.command.RiskCommand;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
@@ -146,7 +148,7 @@ public class Data extends HttpServlet implements Constants {
      */
     private ServletContext servletContext;
     /**
-     * Parametro della query string per richiedere una certa query.
+     * Parametro della query string identificante una Command.
      */
     private String qToken;
     /**
@@ -154,9 +156,9 @@ public class Data extends HttpServlet implements Constants {
      */
     private String format;
     /**
-     * Pagina a cui la command reindirizza per mostrare le strutture nel contesto dei processi
+     * Pagina a cui la command reindirizza per mostrare le fasi nel contesto dei processi
      */
-    //private static final String nomeFileStruttureProcessiAjax = "/jsp/prElencoAjax.jsp";
+    private static final String nomeFileFasiProcessoAjax = "/jsp/prFasiAjax.jsp";
     /**
      * Pagina a cui la command reindirizza per mostrare i processi nel contesto di una struttura
      */
@@ -216,6 +218,28 @@ public class Data extends HttpServlet implements Constants {
                     // Ha finito
                     return;
                 }
+            // "data?q=pr"
+            } else if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
+                // Verifica se deve servire un output csv
+                if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
+                    // Macro/Processi estratti in base alla rilevazione
+                    lista = retrieve(req, COMMAND_PROCESS);
+                    // Passaggio in request per uso delle lista
+                    req.setAttribute("listaProcessi", lista);
+                    // Genera il file CSV
+                    makeCSV(req, res, COMMAND_PROCESS);
+                    // Esce
+                    return;
+                }
+                // "data?q=pr&pliv=#&liv=#&r=$"
+                // Se non è uscito, vuol dire che deve servire una richiesta asincrona
+                HashMap<String, ArrayList<?>> processElements = retrieve(req, COMMAND_PROCESS, PART_PROCESS);
+                // Imposta nella request liste di elementi collegati a processo
+                req.setAttribute("listaInput", processElements.get(TIPI_LISTE[0]));
+                req.setAttribute("listaFasi", processElements.get(TIPI_LISTE[1]));
+                req.setAttribute("listaOutput", processElements.get(TIPI_LISTE[2]));
+                // Output in formato di default
+                fileJsp = nomeFileFasiProcessoAjax;
             // "data?q=st"
             } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
                 // Verifica se deve servire un output csv
@@ -350,6 +374,80 @@ public class Data extends HttpServlet implements Constants {
         return list;
     }
 
+
+    /**
+     * <p>Restituisce una mappa contenente elenchi di elementi generici 
+     * (input, fasi, output...) estratti in base alla richiesta ricevuta
+     * e indicizzati per una chiave convenzionale, definita nelle costanti.</p>
+     *
+     * @param req HttpServletRequest contenente i parametri per contestualizzare l'estrazione
+     * @param qToken il token della commmand in base al quale bisogna preparare la lista di elementi
+     * @param pToken il token relativo alla parte di gestione da effettuare
+     * @return <code>HashMap&lt;String,ArrayList&lt;?&gt;&gt; - dictionary contenente le liste di elementi desiderati, indicizzati per una chiave convenzionale
+     * @throws CommandException se si verifica un problema nella WebStorage (DBWrapper), nella Command interpellata, o in qualche puntamento
+     */
+    private static HashMap<String, ArrayList<?>> retrieve(HttpServletRequest req,
+                                                          String qToken,
+                                                          String pToken)
+                                                   throws CommandException {
+        // Dichiara generico elenco di elementi da restituire
+        HashMap<String,ArrayList<?>> list = null;
+        // Ottiene i parametri della richiesta
+        ParameterParser parser = new ParameterParser(req);
+        // Recupera o inizializza parametro per identificare la pagina
+        String part = parser.getStringParameter("p", VOID_STRING);
+        // Recupera o inizializza parametro per identificare la rilevazione
+        String codeSurvey = parser.getStringParameter("r", VOID_STRING);
+        // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
+        HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
+        PersonBean user = (PersonBean) ses.getAttribute("usr");
+        if (user == null) {
+            throw new CommandException(FOR_NAME + "Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+        }
+        // Gestisce la richiesta
+        try {
+            // Istanzia nuovo Databound
+            DBWrapper db = new DBWrapper();
+            // "data?q=pr"
+            if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
+                // "&p=pro"
+                if (part.equalsIgnoreCase(PART_PROCESS)) {
+                    // Cerca l'identificativo del processo anticorruttivo
+                    int idP = parser.getIntParameter("pliv", DEFAULT_ID);
+                    // Cerca la granularità del processo anticorruttivo
+                    int liv = parser.getIntParameter("liv", DEFAULT_ID);
+                    // Recupera Input estratti in base al processo
+                    ArrayList<ItemBean> listaInput = ProcessCommand.retrieveInputs(user, idP, liv, codeSurvey, db);
+                    // Recupera Fasi estratte in base al processo
+                    ArrayList<ActivityBean> listaFasi = ProcessCommand.retrieveActivities(user, idP, liv, codeSurvey, db);
+                    // Recupera Output estratti in base al processo
+                    ArrayList<ItemBean> listaOutput = ProcessCommand.retrieveOutputs(user, idP, liv, codeSurvey, db);
+                    // Istanzia la tabella in cui devono essere settate le liste
+                    list = new HashMap<>();
+                    // Imposta nella tabella le liste trovate
+                    list.put(TIPI_LISTE[0], listaInput);
+                    list.put(TIPI_LISTE[1], listaFasi);
+                    list.put(TIPI_LISTE[2], listaOutput);
+                }
+            // "data?q=st"
+            } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
+                // Fa la stessa query della navigazione per strutture
+                //ArrayList<DepartmentBean> structures = DepartmentCommand.retrieveStructures(codeSurvey, user, db);
+                // Restituisce la lista gerarchica di strutture trovate in base alla rilevazione
+                //list = structures;
+            }
+        } catch (CommandException ce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + ce.getLocalizedMessage();
+            log.severe(msg);
+            throw new CommandException(msg);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getLocalizedMessage();
+            log.severe(msg);
+            throw new CommandException(msg);
+        }
+        return list;
+    }
+    
 
     /**
      * <p>Gestisce la generazione dell&apos;output in formato di uno stream CSV 
@@ -643,6 +741,10 @@ public class Data extends HttpServlet implements Constants {
      * @param codicePadre   codice del nodo padre del nodo corrente
      * @param nome          etichetta del nodo
      * @param descr         descrizione del nodo
+     * @param lbl1          label aggiuntiva
+     * @param txt1          testo relativo alla label
+     * @param lbl2          label aggiuntiva
+     * @param txt2          testo relativo alla label
      * @param bgColor       parametro opzionale specificante il colore dei box/nodi in formato esadecimale
      * @param icona         parametro opzionale specificante il nome del file da mostrare come stereotipo
      * @param livello       livello gerarchico del nodo
@@ -653,6 +755,10 @@ public class Data extends HttpServlet implements Constants {
                                               String codicePadre,
                                               String nome,
                                               String descr,
+                                              String lbl1,
+                                              String txt1,
+                                              String lbl2,
+                                              String txt2,
                                               String bgColor,
                                               String icona,
                                               int livello) {
@@ -680,7 +786,7 @@ public class Data extends HttpServlet implements Constants {
                 "  \"backgroundColor\":{\"red\":" + backgroundColor.getRed() + ",\"green\":" + backgroundColor.getGreen() + ",\"blue\":" + backgroundColor.getBlue() + ",\"alpha\":1}," +
                 "  \"nodeImage\":{\"url\":\"web/img/" + nodeImage + "\",\"width\":50,\"height\":50,\"centerTopDistance\":0,\"centerLeftDistance\":0,\"cornerShape\":\"CIRCLE\",\"shadow\":false,\"borderWidth\":0,\"borderColor\":{\"red\":19,\"green\":123,\"blue\":128,\"alpha\":1}}," +
                 "  \"nodeIcon\":{\"icon\":\"\",\"size\":30}," +
-                "  \"template\":\"<div>\\n <div style=\\\"margin-left:15px;\\n margin-right:15px;\\n text-align: center;\\n margin-top:10px;\\n font-size:20px;\\n font-weight:bold;\\n \\\">" + nome + "</div>\\n <div style=\\\"margin-left:80px;\\n margin-right:15px;\\n margin-top:3px;\\n font-size:16px;\\n \\\">" + descr + "</div>\\n\\n </div>\"," +
+                "  \"template\":\"<div>\\n <div style=\\\"margin-left:15px;\\n margin-right:15px;\\n text-align: center;\\n margin-top:10px;\\n font-size:20px;\\n font-weight:bold;\\n \\\">" + nome + "</div>\\n <div style=\\\"margin-left:80px;\\n margin-right:15px;\\n margin-top:3px;\\n font-size:16px;\\n \\\">" + descr + "</div>\\n\\n <div style=\\\"margin-left:270px;\\n  margin-top:15px;\\n  font-size:13px;\\n  position:absolute;\\n  bottom:5px;\\n \\\">\\n<div>" + lbl1 + " " + txt1 +"</div>\\n<div style=\\\"margin-top:5px\\\">" + lbl2 + " " + txt2 + "</div>\\n</div>     </div>\"," +
                 "  \"connectorLineColor\":{\"red\":220,\"green\":189,\"blue\":207,\"alpha\":1}," +
                 "  \"connectorLineWidth\":5," +
               //"  \"dashArray\":\"\"," +
