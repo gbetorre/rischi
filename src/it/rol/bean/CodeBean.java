@@ -76,6 +76,11 @@ public class CodeBean implements Serializable {
      * di accesso dal di fuori del package bean e delle sottoclassi di CodeBean
      */
     public static final int BEAN_DEFAULT_ID = -2;
+    /**
+     * Valore convenzionale definito nel bean CodeBean per comodit&agrave; 
+     * di accesso dal di fuori del package bean e delle sottoclassi di CodeBean
+     */
+    public static final float BEAN_DEFAULT_FLOAT = -2.0f;
     
     /* **************************************************** *
      *                  Variabili d'istanza                 *
