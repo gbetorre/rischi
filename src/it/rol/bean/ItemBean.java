@@ -1,11 +1,13 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
+ *   dell'ateneo possono essere esposti e per la gestione di reportistica
+ *   e mappature per la gestione dei "rischi on line" (rol).
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
+ *   Risk Mapping Software (rms)
+ *   web applications to make survey about the amount and kind of risk
+ *   which each process is exposed, and to publish, and manage,
+ *   report and risk information.
  *   Copyright (C) renewed 2022 Giovanroberto Torre
  *   all right reserved
  *
@@ -31,17 +33,26 @@
 
 package it.rol.bean;
 
+import java.io.Serializable;
 
 /**
  * <p>Classe che serve a rappresentare oggetti generici (p.es. voci in un menu,
  * righe di un log, etc.)</p>
- * <p>Effettua l'override dei metodi necessari a permettere sia l'ordinamento in strutture
- * vettoriali, sia l'utilizzo di questo tipo di oggetto come chiave di
- * tabelle hash (dictionaries).</p>
+ * <p>Effettua l'override dei metodi necessari a permettere sia l'ordinamento 
+ * in strutture vettoriali, sia l'utilizzo di questo tipo di oggetto 
+ * come chiave di tabelle hash (dictionaries).</p>
  * 
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
-public class ItemBean implements Comparable<ItemBean> {
+public class ItemBean implements Serializable, Comparable<ItemBean> {
+    
+    /**
+     * La serializzazione necessita di dichiarare una costante di tipo long
+     * identificativa della versione seriale.
+     * (Se questo dato non fosse inserito, verrebbe calcolato in maniera automatica
+     * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione).
+     */
+    private static final long serialVersionUID = -4800164838294374204L;
     /**     Nome di questa classe                                           */
     private final String FOR_NAME = "\n" + this.getClass().getName() + ": "; //$NON-NLS-1$
     /* $NON-NLS-1$ silence a warning that Eclipse emits when it encounters string literals
@@ -103,7 +114,7 @@ public class ItemBean implements Comparable<ItemBean> {
      */
     public ItemBean() {
         id = cod1 = cod2 = cod3 = cod4 = ordinale = CodeBean.BEAN_DEFAULT_ID;
-        value1 = value2 = value3 = value4 = -2.0f;
+        value1 = value2 = value3 = value4 = CodeBean.BEAN_DEFAULT_FLOAT;
         nome = nomeReale = labelWeb = nomeClasse = paginaJsp = url = informativa = icona = null;
         livello = 0;
         urlInterno = true;
@@ -133,7 +144,7 @@ public class ItemBean implements Comparable<ItemBean> {
         this.livello = old.getLivello();
         this.urlInterno = true;
         this.cod1 = this.cod2 = this.cod3 = this.cod4 = -2;
-        this.value1 = this.value2 = this.value3 = this.value4 = -2.0f;
+        this.value1 = this.value2 = this.value3 = this.value4 = CodeBean.BEAN_DEFAULT_FLOAT;
         this.codice = null;
     }
     
@@ -262,7 +273,7 @@ public class ItemBean implements Comparable<ItemBean> {
     }
     
     /* **************************************************************** *
-     *  Metodi Ovverride per usare l'oggetto come  key di un dictionary *
+     *  Metodi Ovverride per usare l'oggetto come key di un dictionary  *
      * **************************************************************** */
     
     /* Compare only item ids */
