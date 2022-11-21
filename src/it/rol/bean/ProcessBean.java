@@ -1,11 +1,13 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
+ *   dell'ateneo possono essere esposti e per la gestione di reportistica
+ *   e mappature per la gestione dei "rischi on line" (rol).
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
+ *   Risk Mapping Software (rms)
+ *   web applications to make survey about the amount and kind of risk
+ *   which each process is exposed, and to publish, and manage,
+ *   report and risk information.
  *   Copyright (C) renewed 2022 Giovanroberto Torre
  *   all right reserved
  *
@@ -101,8 +103,8 @@ public class ProcessBean extends CodeBean {
     /* ------------------------------------------------------------------------ *
      *        Altri attributi del processo, o relazioni verso altre entita'     *
      * ------------------------------------------------------------------------ */
-    /** Identificativo di appoggio */
-    private int idAppo;
+    /** Identificativo della rilevazione */
+    private int idRilevazione;
     /** Rilevazione che ha rilevato il processo */
     private CodeBean rilevazione;
     /** Vincoli del processo */
@@ -148,13 +150,13 @@ public class ProcessBean extends CodeBean {
         autoreUltimaModifica = -2;
         descrizioneStatoCorrente = null;
         obiettiviMisurabili = null;
-        quotaParte = fte = -2.0f;
+        quotaParte = fte = BEAN_DEFAULT_FLOAT;
         smartWorking = null;
         vincoli = null;
         tag = tipo = null;
         idDipart = -2;
         dipart = null;
-        idAppo = -2;
+        idRilevazione = -2;
         statoprocesso = null;
         processi = null;
         persone = null;
@@ -515,22 +517,24 @@ public class ProcessBean extends CodeBean {
 
 
     /* ***************************************************** *
-     * Metodi getter e setter per identificativo di appoggio *
+     * Metodi getter e setter per identificativo rilevazione *
      * ***************************************************** */
     /**
-     * Restituisce l'identificativo di appoggio
-     * @return <code>idAppo</code> - identificativo di appoggio
+     * Restituisce l'identificativo della rilevazione cui il processo &egrave;
+     * collegato
+     * @return <code>idRilevazione</code> - identificativo della rilevazione
      */
-    public int getIdAppo() {
-        return idAppo;
+    public int getIdRilevazione() {
+        return idRilevazione;
     }
 
     /**
-     * Imposta l'id dello stato del processo
+     * Imposta l'identificativo della rilevazione cui il processo &egrave;
+     * collegato
      * @param id - identificativo generico
      */
-    public void setIdAppo(int id) {
-        this.idAppo = id;
+    public void setIdRilevazione(int id) {
+        this.idRilevazione = id;
     }
 
 
