@@ -235,9 +235,9 @@ public class PersonCommand extends ItemBean implements Command, Constants {
                         // Valorizza la tabella che conterrÃ  i valori dei parametri passati dalla form
                         params = new HashMap<String, LinkedHashMap<String, String>>();
                         // Carica la tabella dei parametri
-                        loadParams(part, parser, params);
+                        //loadParams(part, parser, params);
                         // Fa la query
-                        people = retrievePeople(params.get(part), codeSur, user, db);
+                        //people = retrievePeople(params.get(part), codeSur, user, db);
                         // Personalizza le breadcrumbs
                         bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), null);
                         // Imposta il valore della pagina di ricerca
@@ -272,8 +272,6 @@ public class PersonCommand extends ItemBean implements Command, Constants {
         req.setAttribute("areeFunz", aree);
         // Imposta nella request elenco ruoli giuridici
         req.setAttribute("ruoliGiur", qualifiche);
-        // Imposta nella request elenco valori convenzionali per tipi di responsabilitÃ 
-        req.setAttribute("tipiResp", TIPI_RESPONSABILITA_AS_LIST);
         // Imposta nella request elenco persone trovate, nel caso in cui siano valorizzate
         if (people != null) {
             req.setAttribute("persone", people);
@@ -387,73 +385,6 @@ public class PersonCommand extends ItemBean implements Command, Constants {
                                                                 DBWrapper db)
                                                          throws CommandException {
         return retrievePeopleByMacroOrProcess(PART_PROCESS, idProcess, codeSurvey, user, db);
-    }
-
-
-    /**
-     * <p>Restituisce una lista vettoriale di persone identificate tramite
-     * un dizionario di parametri di ricerca che il metodo accetta come
-     * argomento.</p>
-     *
-     * @param fields        mappa contenente i parametri di ricerca
-     * @param codeSurvey    il codice della rilevazione
-     * @param user          utente loggato; viene passato ai metodi del databound per controllare che abbia i diritti di fare quello che vuol fare
-     * @param db            WebStorage per l'accesso ai dati
-     * @return <code>ArrayList&lt;PersonBean&gt;</code> - lista di persone recuperate sulla base dei parametri di ricerca passati
-     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
-     */
-    public static ArrayList<PersonBean> retrievePeople(HashMap<String, String> fields,
-                                                                       String codeSurvey,
-                                                                       PersonBean user,
-                                                                       DBWrapper db)
-                                                                throws CommandException {
-        ArrayList<PersonBean> people = null;
-        CodeBean survey = ConfigManager.getSurvey(codeSurvey);
-        try {
-            // Estrae le persone in base alla ricerca utente
-            people = db.getPeople(user, fields, survey);
-        } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero delle persone su macro/processo.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + wse.getMessage(), wse);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + npe.getMessage(), npe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + e.getMessage(), e);
-        }
-        return people;
-    }
-
-
-    /**
-     * <p>Valorizza per riferimento una mappa contenente i valori relativi
-     * ad una ricerca tramite moduli.</p>
-     *
-     * @param part la sezione del sito che si vuole aggiornare
-     * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
-     * @param params mappa da valorizzare per riferimento (ByRef)
-     * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
-     */
-    private static void loadParams(String part,
-                                   ParameterParser parser,
-                                   HashMap<String, LinkedHashMap<String, String>> params)
-                            throws CommandException {
-        /* **************************************************** *
-         *              Ramo di ricerca di una persona          *
-         * **************************************************** *
-        if (part.equalsIgnoreCase(PART_SEARCH_PERSON)) {
-            LinkedHashMap<String, String> fields = new LinkedHashMap<String, String>();
-            fields.put("pe-name",  parser.getStringParameter("pe-name", String.valueOf(Query.GET_ALL)));
-            fields.put("pe-surn",  parser.getStringParameter("pe-surn", String.valueOf(Query.GET_ALL)));
-            fields.put("pe-funz",  parser.getStringParameter("pe-funz", String.valueOf(Query.GET_ALL)));
-            fields.put("pe-giur",  parser.getStringParameter("pe-giur", String.valueOf(Query.GET_ALL)));
-            fields.put("pe-resp",  parser.getStringParameter("pe-resp", String.valueOf(Query.GET_ALL)));
-            params.put(PART_SEARCH_PERSON, fields);
-        }*/
     }
 
 }
