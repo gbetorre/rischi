@@ -57,6 +57,7 @@ import it.rol.DBWrapper;
 import it.rol.Data;
 import it.rol.Main;
 import it.rol.Utils;
+import it.rol.bean.ActivityBean;
 import it.rol.bean.CodeBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
@@ -242,8 +243,6 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
-        // Imposta nella request elenco macroprocessi
-        //req.setAttribute("macroprocessi", macrosat);
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
@@ -288,25 +287,34 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
 
 
     /**
-     * <p>Restituisce un ArrayList di tutti processi/macroprocessi trovati in base 
-     * a una rilevazione, il cui identificativo viene passato come argomento.</p>
+     * <p>Restituisce un ArrayList di tutti gli input trovati in base all' 
+     * identificativo di un processo o un sottoprocesso anticorruttivo e 
+     * a quello di una rilevazione (per le regole di business implementate
+     * gli input possono essere collegati direttamente solo al processo 
+     * anticorruttivo o al sottoprocesso anticorruttivo, non al macroprocesso 
+     * anticorruttivo, i cui input sono costituiti dall'unione di tutti gli input 
+     * collegati ai suoi discendenti).</p>
      *
-     * @param codeSurvey    il codice della rilevazione
      * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
-     * @param db            WebStorage per l'accesso ai dati
-     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi recuperati
+     * @param id            identificativo del processo o del sottoprocesso (si capisce dal livello)
+     * @param level         valore specificante la tabella in cui cercare l'identificativo (2 = processo_at | 3 = sottoprocesso_at)
+     * @param codeSurvey    il codice della rilevazione
+     * @param db            istanza di WebStorage per l'accesso ai dati
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - lista di input recuperati
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
      */
-    private static ArrayList<ProcessBean> retrieveMacroBySurvey(PersonBean user,
-                                                                String codeSurvey,
-                                                                DBWrapper db)
-                                                         throws CommandException {
-        ArrayList<ProcessBean> macro = null;
+    public static ArrayList<ItemBean> retrieveInputs(PersonBean user,
+                                                     int id,
+                                                     int level,
+                                                     String codeSurvey,
+                                                     DBWrapper db)
+                                              throws CommandException {
+        ArrayList<ItemBean> inputs = null;
         try {
             // Estrae i macroprocessi in una data rilevazione
-            macro = db.getMacroBySurvey(user, codeSurvey);
+            inputs = db.getInputs(user, id, level, ConfigManager.getSurvey(codeSurvey));
         } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei macro/processi in base alla rilevazione.\n";
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero degli input.\n";
             LOG.severe(msg);
             throw new CommandException(msg + wse.getMessage(), wse);
         } catch (NullPointerException npe) {
@@ -318,7 +326,86 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg + e.getMessage(), e);
         }
-        return macro;
+        return inputs;
+    }
+    
+    
+    /**
+     * <p>Restituisce un ArrayList di tutte le fasi di un processo 
+     * (o sottoprocesso) anticorruttivo nel contesto di una rilevazione.</p>
+     *
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param id            identificativo del processo o del sottoprocesso (si capisce dal livello)
+     * @param level         valore specificante la tabella in cui cercare l'identificativo (2 = processo_at | 3 = sottoprocesso_at)
+     * @param codeSurvey    il codice della rilevazione
+     * @param db            istanza di WebStorage per l'accesso ai dati
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - lista di input recuperati
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static ArrayList<ActivityBean> retrieveActivities(PersonBean user,
+                                                             int id,
+                                                             int level,
+                                                             String codeSurvey,
+                                                             DBWrapper db)
+                                                      throws CommandException {
+        ArrayList<ActivityBean> fasi = null;
+        try {
+            // Estrae i macroprocessi in una data rilevazione
+            fasi = db.getActivities(user, id, level, ConfigManager.getSurvey(codeSurvey));
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero degli input.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return fasi;
+    }
+
+
+    /**
+     * <p>Restituisce un ArrayList di tutti gli output trovati in base all' 
+     * identificativo di un processo o un sottoprocesso anticorruttivo e 
+     * a quello di una rilevazione.</p>
+     *
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param id            identificativo del processo o del sottoprocesso (si capisce dal livello)
+     * @param level         valore specificante la tabella in cui cercare l'identificativo (2 = processo_at | 3 = sottoprocesso_at)
+     * @param codeSurvey    il codice della rilevazione
+     * @param db            istanza di WebStorage per l'accesso ai dati
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - lista di output recuperati
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static ArrayList<ItemBean> retrieveOutputs(PersonBean user,
+                                                      int id,
+                                                      int level,
+                                                      String codeSurvey,
+                                                      DBWrapper db)
+                                               throws CommandException {
+        ArrayList<ItemBean> outputs = null;
+        try {
+            // Estrae i macroprocessi in una data rilevazione
+            outputs = db.getOutputs(user, id, level, ConfigManager.getSurvey(codeSurvey));
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero degli input.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return outputs;
     }
 
 
@@ -522,7 +609,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             // Json begins
             StringBuilder json = new StringBuilder("[");
             // First Node: the principal
-            json.append(Data.getStructureJsonNode(COMMAND_PROCESS, "1000", null, "Processi Anticorruttivi", VOID_STRING, null, PRO_PFX, NOTHING)).append(",\n");
+            json.append(Data.getStructureJsonNode(COMMAND_PROCESS, "1000", null, "Processi Anticorruttivi", VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, null, PRO_PFX, NOTHING)).append(",\n");
             int count = NOTHING;
             do {
                 ProcessBean p1 = proc.get(count);
@@ -531,7 +618,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                                       p1.getTag(), 
                                                       "1000", 
                                                       Utils.checkQuote(p1.getNome()), 
-                                                      VOID_STRING, 
+                                                      VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING,
                                                       options.getNome(), options.getIcona(), 
                                                       p1.getLivello())).append(",\n");
                 // PROCESSI
@@ -540,7 +627,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                                           p2.getTag(), 
                                                           p1.getTag(), 
                                                           Utils.checkQuote(p2.getNome()), 
-                                                          VOID_STRING, 
+                                                          VOID_STRING, "input :", p2.getVincoli(), "fasi :", p2.getDescrizioneStatoCorrente(),
                                                           options.getNome(), options.getIcona(),
                                                           p2.getLivello())).append(",\n");
                     // SOTTOPROCESSI
@@ -549,7 +636,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                                               p3.getTag(), 
                                                               p2.getTag(), 
                                                               Utils.checkQuote(p3.getNome()), 
-                                                              VOID_STRING, 
+                                                              VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING,
                                                               options.getNome(), options.getIcona(),
                                                               p3.getLivello())).append(",\n");
                     }
