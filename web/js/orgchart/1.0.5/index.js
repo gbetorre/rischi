@@ -4,7 +4,7 @@ class Chart {
       const attrs = {
           id: `ID${Math.floor(Math.random() * 1000000)}`, // Id for event handlings
           svgWidth: 800,
-          svgHeight: 600,
+          svgHeight: 540,
           marginTop: 0,
           marginBottom: 0,
           marginRight: 0,
@@ -653,7 +653,8 @@ class Chart {
               height,
               data
           }) => height / 2 - data.nodeIcon.size - 5)
-
+          
+      /*
       // Add total descendants text
       nodeEnter
           .patternify({
@@ -695,7 +696,7 @@ class Chart {
           }) => `${data.directSubordinates} Direct `)
           .attr('fill', attrs.nodeTextFill)
           .attr('font-weight', 'bold')
-
+      */
 
       // Defined node images wrapper group
       const nodeImageGroups = nodeEnter.patternify({
