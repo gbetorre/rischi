@@ -118,27 +118,6 @@ public class Utils implements Constants {
 
 
     /**
-     * <p>Controlla se una stringa corrisponde a un valore intero.</p>
-     *
-     * @param s la String da controllare
-     * @return <code>true</code> se la String e' convertibile in intero, false altrimenti
-     */
-    public static boolean isInteger(String s) {
-        try {
-            Integer.parseInt(s);
-        } catch (NumberFormatException nfe) {
-            log.warning(": si e\' verificato un problema nella conversione da String a numero.\n" + nfe.getLocalizedMessage());
-            return false;
-        } catch (NullPointerException npe) {
-            log.warning(": si e\' verificato un problema nel puntamento a qualche parametro.\n" + npe.getLocalizedMessage());
-            return false;
-        }
-        // Only got here if we didn't return false
-        return true;
-    }
-
-
-    /**
      * <p>Controlla se una stringa contiene doppi apici.
      * In questo caso, fa l'escape di ognuno di essi e restituisce la String
      * modificata. Altrimenti, restituisce la stringa originale.</p>
@@ -168,6 +147,48 @@ public class Utils implements Constants {
     public static String capitalize(String s) {
         String s1 = s.substring(0, 1).toUpperCase();
         return new String(s1 + s.substring(1));
+    }
+    
+
+    /**
+     * <p>Controlla se una stringa corrisponde a un valore intero.</p>
+     *
+     * @param s la String da controllare
+     * @return <code>true</code> se la String e' convertibile in intero, false altrimenti
+     */
+    public static boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+        } catch (NumberFormatException nfe) {
+            log.warning(": si e\' verificato un problema nella conversione da String a numero.\n" + nfe.getLocalizedMessage());
+            return false;
+        } catch (NullPointerException npe) {
+            log.warning(": si e\' verificato un problema nel puntamento a qualche parametro.\n" + npe.getLocalizedMessage());
+            return false;
+        }
+        // Only got here if we didn't return false
+        return true;
+    }
+    
+
+    /**
+     * <p>Converte un valore di tipo primitivo float in uno di tipo primitivo
+     * int.</p>
+     *
+     * @param f il valore da convertire
+     * @return <code>int</code> il valore convertito, se tutto e' andato a buon fine
+     */
+    public static int parseInt(float f) {
+        int result = NOTHING;
+        try {
+            // I float possono avere una parte decimale significativa
+            result = Math.round(f);
+        } catch (NumberFormatException nfe) {
+            log.warning(": si e\' verificato un problema nella conversione da float a intero.\n" + nfe.getLocalizedMessage());
+        } catch (NullPointerException npe) {
+            log.warning(": si e\' verificato un problema in qualche puntamento.\n" + npe.getLocalizedMessage());
+        }
+        return result;
     }
 
     /* ************************************************************************ *
