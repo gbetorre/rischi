@@ -4,7 +4,8 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
 <c:set var="quests" value="${requestScope.elencoInterviste}" scope="page" />
-    <h4 class="btn-lightgray">Interviste effettuate</h4>
+    <h3 class="mt-1 m-0 font-weight-bold">Interviste effettuate</h3>
+    <hr class="riga"/>
     <table class="table table-bordered table-hover table-sm" id="listInt">
       <thead class="thead-light">
         <tr>
