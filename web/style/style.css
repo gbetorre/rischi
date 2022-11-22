@@ -456,40 +456,40 @@ select:disabled.bgcolor3 {
 }
 
 .bgAct11 {
-  background-color: #ff9933;
+  background-color: #ff9933 !important;
   border: 1px solid #e67300;
 }
 
 .bgAct12 {
-  background-color: #99ccff;
+  background-color: #99ccff !important;
   border: 1px solid #3399ff;
 }
 
 .bgAct13 {
-  background-color: #ffd633;
+  background-color: #ffd633 !important;
   border: 1px solid #cca300;
 }
 
 .bgAct14 {
-  background-color: #4d9900;
+  background-color: #4d9900 !important;
   border: 1px solid #336600;
 }
 
 .bgAct15 {
-  background-color: #73e600;
+  background-color: #73e600 !important;
   border: 1px solid #4d9900;
 }
 
 .bgAct16 {
-  background-color: #ffff80;
+  background-color: #ffff80 !important;
 }
 
 .bgAct17 {
-  background-color: #cceeff;
+  background-color: #cceeff !important;
 }
 
 .bgAct18 {
-  background-color: #80aaff;
+  background-color: #80aaff !important;
   border: 1px solid #004de6;
 }
 
@@ -502,7 +502,7 @@ select:disabled.bgcolor3 {
 }
 
 .bgAddAct {
-  background-color: #d9edf7;
+  background-color: #d9edf7  !important;
 }
 
 .bgFade {
@@ -704,6 +704,12 @@ textarea {
 }
 
 /*---------------------- Additional styles ------------------------*/
+ .heading {
+  border-color: #99CCCC;
+  border-style: groove;
+  border-width: 1px;
+}
+
 .mandatory {
   background-color: #dcdcdc;
   border-bottom-style: groove;
@@ -851,8 +857,6 @@ hr.riga       {
 }
 
 /*---------------------- AMBITI DI ANALISI ------------------------*/
-
-
 .lightTable{
   border-color: #d9d9d9;
   border-style: solid;
@@ -982,19 +986,3 @@ a:hover.linkPopup {
 	margin-bottom: 0;
 } 
  
-/*---------------------- Tot risultati ------------------------*/
-.avvisiTot {
-  font-weight: bold; 
-  font-style: italic;
-  padding: 3px;
-  margin-bottom: 10px;
-  border-top: 1px dotted #ddd;
-  background: #cccc99;
-  /*text-align: right;*/
-  }
-  
- .heading {
-  border-color: #99CCCC;
-  border-style: groove;
-  border-width: 1px;
-}
