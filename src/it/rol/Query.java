@@ -189,7 +189,7 @@ public interface Query extends Serializable {
             "   ,   M.nome              AS \"nome\"" +
             "   ,   M.descrizione       AS \"descrizione\"" +
             "   ,   M.ordinale          AS \"ordinale\"" +
-            "   ,   M.id_rilevazione    AS \"idAppo\"" +
+            "   ,   M.id_rilevazione    AS \"idRilevazione\"" +
             "   ,   ROUND(100 * SUM(AM.quotaparte) OVER (PARTITION BY M.id) / (SUM(AM.quotaparte) OVER ())::numeric, 2) AS \"quotaParte\"" +
             "   ,   ROUND((SUM(AM.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY M.id) / 100.0), 2)         AS \"fte\"" +
             "   FROM macroprocesso M" +
@@ -210,7 +210,7 @@ public interface Query extends Serializable {
             "   ,   M.nome              AS \"nome\"" +
             "   ,   M.descrizione       AS \"descrizione\"" +
             "   ,   M.ordinale          AS \"ordinale\"" +
-            "   ,   M.id_rilevazione    AS \"idAppo\"" +
+            "   ,   M.id_rilevazione    AS \"idRilevazione\"" +
             "   ,   ROUND(100 * SUM(AM.quotaparte) OVER (PARTITION BY M.id) / (SUM(AM.quotaparte) OVER ())::numeric, 2) AS \"quotaParte\"" +
             "   ,   ROUND((SUM(AM.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY M.id) / 100.0), 2)         AS \"fte\"" +
             "   FROM macroprocesso M" +
@@ -252,7 +252,7 @@ public interface Query extends Serializable {
             "   ,   M.nome              AS \"nome\"" +
             "   ,   M.descrizione       AS \"descrizione\"" +
             "   ,   M.ordinale          AS \"ordinale\"" +
-            "   ,   M.id_rilevazione    AS \"idAppo\"" +
+            "   ,   M.id_rilevazione    AS \"idRilevazione\"" +
             "   ,   ROUND(100 * SUM(AM.quotaparte) OVER (PARTITION BY M.id) / (SUM(AM.quotaparte) OVER ())::numeric, 2) AS \"quotaParte\"" +
             "   ,   ROUND((SUM(AM.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY M.id) / 100.0), 2)         AS \"fte\"" +
             "   FROM macroprocesso M" +
@@ -288,7 +288,7 @@ public interface Query extends Serializable {
             "   ,   M.nome              AS \"nome\"" +
             "   ,   M.descrizione       AS \"descrizione\"" +
             "   ,   M.ordinale          AS \"ordinale\"" +
-            "   ,   M.id_rilevazione    AS \"idAppo\"" +
+            "   ,   M.id_rilevazione    AS \"idRilevazione\"" +
             "   ,   ROUND(100 * SUM(AM.quotaparte) OVER (PARTITION BY M.id) / (SUM(AM.quotaparte) OVER ())::numeric, 2) AS \"quotaParte\"" +
             "   ,   ROUND((SUM(AM.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY M.id) / 100.0), 2)         AS \"fte\"" +
             "   FROM macroprocesso M" +
@@ -320,7 +320,7 @@ public interface Query extends Serializable {
             "   ,   M.nome              AS \"nome\"" +
             "   ,   M.descrizione       AS \"descrizione\"" +
             "   ,   M.ordinale          AS \"ordinale\"" +
-            "   ,   M.id_rilevazione    AS \"idAppo\"" +
+            "   ,   M.id_rilevazione    AS \"idRilevazione\"" +
             "   ,   ROUND(100 * SUM(AM.quotaparte) OVER (PARTITION BY M.id) / (SUM(AM.quotaparte) OVER ())::numeric, 2) AS \"quotaParte\"" +
             "   ,   ROUND((SUM(AM.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY M.id) / 100.0), 2)         AS \"fte\"" +
             "   FROM macroprocesso M" +
@@ -347,7 +347,7 @@ public interface Query extends Serializable {
             "   ,   M.nome              AS \"nome\"" +
             "   ,   M.descrizione       AS \"descrizione\"" +
             "   ,   M.ordinale          AS \"ordinale\"" +
-            "   ,   M.id_rilevazione    AS \"idAppo\"" +
+            "   ,   M.id_rilevazione    AS \"idRilevazione\"" +
             "   ,   ROUND(100 * SUM(AM.quotaparte) OVER (PARTITION BY M.id) / (SUM(AM.quotaparte) OVER ())::numeric, 2) AS \"quotaParte\"" +
             "   ,   ROUND((SUM(AM.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY M.id) / 100.0), 2)         AS \"fte\"" +
             "   FROM macroprocesso M" +
@@ -776,16 +776,6 @@ public interface Query extends Serializable {
      */
     public String getQueryStructure(int idS, byte level);
 
-    /**
-     * <p>Costruisce dinamicamente la query che seleziona un insieme di persone in base
-     * ad una serie di parametri di ricerca immessi dall'utente tramite funzionalit&agrave;
-     * di navigazione.</p>
-     *
-     * @param fields    mappa contenente i parametri utente, indicizzati per nome
-     * @param idSurvey  identificativo della rilevazione
-     * @return <code>String</code> - la query che seleziona l'insieme desiderato
-     */
-    public String getQueryPeople(HashMap<String, String> fields, int idSurvey);
     
     /* ********************************************************************** *
      *              3. Query di Selezione di ROL (Rischi On Line)             *
@@ -800,7 +790,7 @@ public interface Query extends Serializable {
             "   ,   MAT.codice              AS \"codice\"" +
             "   ,   MAT.nome                AS \"nome\"" +
             "   ,   MAT.ordinale            AS \"ordinale\"" +
-            "   ,   MAT.id_rilevazione      AS \"idAppo\"" +
+            "   ,   MAT.id_rilevazione      AS \"idRilevazione\"" +
             "   FROM macroprocesso_at MAT" +
             "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
             //"       INNER JOIN allocazione_macroprocesso_at AM ON AM.id_macroprocesso = M.id" +
@@ -821,6 +811,9 @@ public interface Query extends Serializable {
             "   ,   PRAT.nome               AS \"nome\"" +
             "   ,   PRAT.ordinale           AS \"ordinale\"" +
             "   ,   PRAT.smartworking       AS \"smartWorking\"" +
+            "   ,   (SELECT count(*) FROM input_processo_at INPAT WHERE INPAT.id_processo_at = PRAT.id AND INPAT.id_rilevazione = PRAT.id_rilevazione) AS \"vincoli\"" +
+            "   ,   (SELECT count(*) FROM attivita A WHERE A.id_processo_at = PRAT.id AND A.id_rilevazione = PRAT.id_rilevazione) AS \"descrizioneStatoCorrente\"" +
+            "   ,   (SELECT count(*) FROM output_processo_at OUTPAT WHERE OUTPAT.id_processo_at = PRAT.id AND OUTPAT.id_rilevazione = PRAT.id_rilevazione) AS \"obiettiviMisurabili\"" +
             "   FROM processo_at PRAT" +
             "       INNER JOIN macroprocesso_at MAT ON PRAT.id_macroprocesso_at = MAT.id" +
             "       INNER JOIN rilevazione R ON PRAT.id_rilevazione = R.id" +
@@ -839,6 +832,7 @@ public interface Query extends Serializable {
             "   ,   SPRAT.nome              AS \"nome\"" +
             "   ,   SPRAT.ordinale          AS \"ordinale\"" +
             "   ,   SPRAT.smartworking      AS \"smartWorking\"" +
+            
             "   FROM sottoprocesso_at SPRAT" +
             "       INNER JOIN processo_at PRAT ON SPRAT.id_processo_at = PRAT.id" +
             "       INNER JOIN rilevazione R ON PRAT.id_rilevazione = R.id" +
@@ -1021,8 +1015,212 @@ public interface Query extends Serializable {
             "   FROM risposta R" +
             "       INNER JOIN rilevazione S ON R.id_rilevazione = S.id" +
             "   WHERE (R.id_rilevazione = ? OR -1 = ?)" +
-            "   ORDER BY R.data_ultima_modifica DESC, R.ora_ultima_modifica DESC";    
+            "   ORDER BY R.data_ultima_modifica DESC, R.ora_ultima_modifica DESC";
 
+    /**
+     * <p>Estrae tutti gli input di un processo anticorruttivo
+     * il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_INPUT_BY_PROCESS_AT = 
+            "SELECT DISTINCT" +
+            "       INP.id                      AS \"id\"" +
+            "   ,   INP.nome                    AS \"nome\"" +
+            "   ,   INP.descrizione             AS \"informativa\"" +
+            "   ,   INP.ordinale                AS \"ordinale\"" +
+            "   ,   INP.interno                 AS \"urlInterno\"" +
+            "   ,   INP.data_ultima_modifica    AS \"codice\"" +
+            "   ,   INP.ora_ultima_modifica     AS \"extraInfo\"" +
+            "   ,   INP.id_output               AS \"value1\"" +
+            "   ,   INPAT.id_processo_at        AS \"value2\"" +
+            "   ,   INP.id_rilevazione          AS \"value3\"" +
+            "   ,   PAT.nome                    AS \"labelWeb\"" +
+            "   ,   AR.nome                     AS \"nomeReale\"" +
+            "   FROM input INP" +
+            "       INNER JOIN input_processo_at INPAT ON INPAT.id_input = INP.id" +
+            "       INNER JOIN processo_at PAT ON INPAT.id_processo_at = PAT.id" +
+            "       INNER JOIN macroprocesso_at MAT ON PAT.id_macroprocesso_at = MAT.id" +
+            "       INNER JOIN area_rischio AR ON MAT.id_area_rischio = AR.id" +
+            "   WHERE INPAT.id_processo_at = ?" +
+            "       AND INPAT.id_rilevazione = ?" +
+            "   ORDER BY INP.nome";
+    
+    /**
+     * <p>Estrae tutti gli input di un sottoprocesso anticorruttivo
+     * il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_INPUT_BY_SUBPROCESS_AT = 
+            "SELECT DISTINCT" +
+            "       INP.id                      AS \"id\"" +
+            "   ,   INP.nome                    AS \"nome\"" +
+            "   ,   INP.descrizione             AS \"informativa\"" +
+            "   ,   INP.ordinale                AS \"ordinale\"" +
+            "   ,   INP.interno                 AS \"urlInterno\"" +
+            "   ,   INP.data_ultima_modifica    AS \"codice\"" +
+            "   ,   INP.ora_ultima_modifica     AS \"extraInfo\"" +
+            "   ,   INP.id_output               AS \"value1\"" +
+            "   ,   INSPAT.id_sottoprocesso_at  AS \"value2\"" +
+            "   ,   INP.id_rilevazione          AS \"value3\"" +
+            "   ,   SPAT.nome                   AS \"labelWeb\"" +
+            "   ,   AR.nome                     AS \"nomeReale\"" +
+            "   FROM input INP" +
+            "       INNER JOIN input_sottoprocesso_at INSPAT ON INSPAT.id_input = INP.id" +
+            "       INNER JOIN sottoprocesso_at SPAT ON INSPAT.id_sottoprocesso_at = SPAT.id" +
+            "       INNER JOIN processo_at PAT ON SPAT.id_processo_at = PAT.id" +
+            "       INNER JOIN macroprocesso_at MAT ON PAT.id_macroprocesso_at = MAT.id" +
+            "       INNER JOIN area_rischio AR ON MAT.id_area_rischio = AR.id" +
+            "   WHERE INSPAT.id_sottoprocesso_at = ?" +
+            "       AND INSPAT.id_rilevazione = ?" +
+            "   ORDER BY INP.nome";
+
+    /**
+     * <p>Estrae gli estremi delle attivit&agrave; collegate ad un processo 
+     * anticorruttivo (fasi del processo at),
+     * il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_ACTIVITIES_BY_PROCESS_AT = 
+            "SELECT DISTINCT" +
+            "       A.id                        AS \"id\"" +
+            "   ,   A.codice                    AS \"codice\"" +                    
+            "   ,   A.nome                      AS \"nome\"" +
+            "   ,   A.descrizione               AS \"descrizione\"" +
+            "   ,   A.ordinale                  AS \"ordinale\"" +
+            "   ,   A.mandatory                 AS \"mandatory\"" +
+            "   FROM attivita A" +
+            "   WHERE A.id_processo_at = ?" +
+            "       AND A.id_rilevazione = ?" +
+            "   ORDER BY A.nome";
+
+    /**
+     * <p>Estrae gli estremi delle attivit&agrave; collegate ad un sottoprocesso 
+     * anticorruttivo (fasi del sottoprocesso at),
+     * il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_ACTIVITIES_BY_SUBPROCESS_AT = 
+            "SELECT DISTINCT" +
+            "       A.id                        AS \"id\"" +
+            "   ,   A.codice                    AS \"codice\"" +                    
+            "   ,   A.nome                      AS \"nome\"" +
+            "   ,   A.descrizione               AS \"informativa\"" +
+            "   ,   A.ordinale                  AS \"ordinale\"" +
+            "   ,   A.mandatory                 AS \"mandatory\"" +
+            "   FROM attivita A" +
+            "   WHERE A.id_sottoprocesso_at = ?" +
+            "       AND A.id_rilevazione = ?" +
+            "   ORDER BY A.nome";
+    
+    /**
+     * <p>Estrae un elenco di identificativi di strutture e soggetti contingenti
+     * collegati ad una specifica attivit&agrave;, di cui viene passato 
+     * l'identificativo come parametro.</p>
+     */
+    public static final String GET_STRUCTS_BY_ACTIVITY = 
+            "SELECT DISTINCT" +
+            "       SA.id_struttura_liv1        AS \"cod1\"" +
+            "   ,   SA.id_struttura_liv2        AS \"cod2\"" +
+            "   ,   SA.id_struttura_liv3        AS \"cod3\"" +
+            "   ,   SA.id_struttura_liv4        AS \"cod4\"" +
+            "   ,   SA.id_soggetto_contingente  AS \"value1\"" +      
+            "   ,   SA.id_attivita              AS \"value2\"" +
+            "   ,   SA.id_rilevazione           AS \"value3\"" +
+            "   ,   SA.data_ultima_modifica     AS \"codice\"" +
+            "   ,   SA.ora_ultima_modifica      AS \"extraInfo\"" +
+            "   FROM struttura_attivita SA" +
+            "   WHERE SA.id_attivita = ?" +
+            "       AND SA.id_rilevazione = ?";
+    
+    /**
+     * <p>Estrae gli estremi di un processo interessato a un'attivit&agrave;
+     * il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_SUBJECT_BY_ACTIVITY = 
+            "SELECT DISTINCT" +
+            "       SC.id                       AS \"id\"" +               
+            "   ,   SC.nome                     AS \"nome\"" +
+            "   ,   SC.descrizione              AS \"informativa\"" +
+            "   ,   SC.ordinale                 AS \"ordinale\"" +
+            "   ,   SC.data_ultima_modifica     AS \"codice\"" +
+            "   ,   SC.ora_ultima_modifica      AS \"extraInfo\"" +
+            "   ,   SC.id_tipo                  AS \"value1\"" +
+            "   ,   SC.id_stato                 AS \"value2\"" +            
+            "   ,   SC.id_rilevazione           AS \"value3\"" +
+            "   ,   SC.id_struttura_liv1        AS \"cod1\"" +
+            "   ,   SC.id_struttura_liv2        AS \"cod2\"" +
+            "   ,   SC.id_struttura_liv3        AS \"cod3\"" +
+            "   ,   SC.id_struttura_liv4        AS \"cod4\"" +
+            "   FROM soggetto_contingente SC" +
+            "       INNER JOIN struttura_attivita SA ON SA.id_soggetto_contingente = SC.id" +
+            "   WHERE SA.id_attivita = ?" +
+            "       AND SA.id_rilevazione = ?" +
+            "       AND SC.id_stato = 1" +
+            "   ORDER BY SC.nome";
+
+    /**
+     * <p>Estrae gli estremi di un soggetto interessato a un'attivit&agrave;
+     * in base all'identificativo dello stesso, purch&eacute; il soggetto
+     * stesso risulti in stato 'attivo'.</p>
+     */
+    public static final String GET_SUBJECT = 
+            "SELECT DISTINCT" +
+            "       SC.id                       AS \"id\"" +               
+            "   ,   SC.nome                     AS \"nome\"" +
+            "   ,   SC.descrizione              AS \"informativa\"" +
+            "   ,   SC.ordinale                 AS \"ordinale\"" +
+            "   ,   SC.data_ultima_modifica     AS \"codice\"" +
+            "   ,   SC.ora_ultima_modifica      AS \"extraInfo\"" +
+            "   ,   SC.id_tipo                  AS \"value1\"" +
+            "   ,   SC.id_stato                 AS \"value2\"" +            
+            "   ,   SC.id_rilevazione           AS \"value3\"" +
+            "   ,   SC.id_struttura_liv1        AS \"cod1\"" +
+            "   ,   SC.id_struttura_liv2        AS \"cod2\"" +
+            "   ,   SC.id_struttura_liv3        AS \"cod3\"" +
+            "   ,   SC.id_struttura_liv4        AS \"cod4\"" +
+            "   FROM soggetto_contingente SC" +
+            "   WHERE SC.id = ?" +
+            "       AND SC.id_rilevazione = ?" +
+            "       AND SC.id_stato = 1" +
+            "   ORDER BY SC.nome";
+    
+    /**
+     * <p>Estrae tutti gli output di un processo anticorruttivo
+     * il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_OUTPUT_BY_PROCESS_AT = 
+            "SELECT DISTINCT" +
+            "       OUT.id                      AS \"id\"" +
+            "   ,   OUT.nome                    AS \"nome\"" +
+            "   ,   OUT.descrizione             AS \"informativa\"" +
+            "   ,   OUT.ordinale                AS \"ordinale\"" +
+            "   ,   OUT.data_ultima_modifica    AS \"codice\"" +
+            "   ,   OUT.ora_ultima_modifica     AS \"extraInfo\"" +
+            "   ,   OUTPAT.id_processo_at       AS \"value2\"" +
+            "   ,   OUT.id_rilevazione          AS \"value3\"" +
+            "   FROM output OUT" +
+            "       INNER JOIN output_processo_at OUTPAT ON OUTPAT.id_output = OUT.id" +
+            "   WHERE OUTPAT.id_processo_at = ?" +
+            "       AND OUTPAT.id_rilevazione = ?" +
+            "   ORDER BY OUT.nome";
+
+    /**
+     * <p>Estrae tutti gli output di un sottoprocesso anticorruttivo
+     * il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_OUTPUT_BY_SUBPROCESS_AT = 
+            "SELECT DISTINCT" +
+            "       OUT.id                      AS \"id\"" +
+            "   ,   OUT.nome                    AS \"nome\"" +
+            "   ,   OUT.descrizione             AS \"informativa\"" +
+            "   ,   OUT.ordinale                AS \"ordinale\"" +
+            "   ,   OUT.data_ultima_modifica    AS \"codice\"" +
+            "   ,   OUT.ora_ultima_modifica     AS \"extraInfo\"" +
+            "   ,   OUTSPAT.id_sottoprocesso_at AS \"value2\"" +
+            "   ,   OUT.id_rilevazione          AS \"value3\"" +
+            "   FROM output OUT" +
+            "       INNER JOIN output_sottoprocesso_at OUTSPAT ON OUTSPAT.id_output = OUT.id" +
+            "   WHERE OUTSPAT.id_sottoprocesso_at = ?" +
+            "       AND OUTSPAT.id_rilevazione = ?" +
+            "   ORDER BY OUT.nome";
+    
+    
     /**
      * <p>Costruisce dinamicamente la query che seleziona un insieme di risposte
      * ad una serie di quesiti associati a una data rilevazione.</p>
