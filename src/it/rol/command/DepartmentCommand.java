@@ -559,7 +559,7 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
             // Json begins
             StringBuilder json = new StringBuilder("[");
             // First Node: the principal
-            json.append(Data.getStructureJsonNode(COMMAND_STRUCTURES, "1000", null, "ATENEO", VOID_STRING, null, STR_PFX, NOTHING)).append(",\n");
+            json.append(Data.getStructureJsonNode(COMMAND_STRUCTURES, "1000", null, "ATENEO", VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, null, STR_PFX, NOTHING)).append(",\n");
             int count = NOTHING;
             do {
                 DepartmentBean s1 = structs.get(count);
@@ -568,7 +568,7 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
                                                       s1.getExtraInfo().getCodice(), 
                                                       "1000", 
                                                       Utils.checkQuote(s1.getNome()), 
-                                                      VOID_STRING, 
+                                                      VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING,
                                                       options.getNome(), options.getIcona(), 
                                                       s1.getLivello())).append(",\n");
                 // II LIVELLO
@@ -577,7 +577,7 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
                                                           s2.getExtraInfo().getCodice(), 
                                                           s1.getExtraInfo().getCodice(), 
                                                           Utils.checkQuote(s2.getPrefisso() + BLANK_SPACE + s2.getNome()), 
-                                                          (s2.getPersone() != null ? Data.makeDescrJsonNode(s2.getPersone(), s2.getLivello()) : VOID_STRING), 
+                                                          (s2.getPersone() != null ? Data.makeDescrJsonNode(s2.getPersone(), s2.getLivello()) : VOID_STRING), VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING,
                                                           options.getNome(), options.getIcona(), 
                                                           s2.getLivello())).append(",\n");
                     // III LIVELLO
@@ -586,7 +586,7 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
                                                               s3.getExtraInfo().getCodice(), 
                                                               s2.getExtraInfo().getCodice(), 
                                                               Utils.checkQuote(s3.getPrefisso() + BLANK_SPACE + s3.getNome()), 
-                                                              (s3.getPersone() != null ? Data.makeDescrJsonNode(s3.getPersone(), s3.getLivello()) : VOID_STRING), 
+                                                              (s3.getPersone() != null ? Data.makeDescrJsonNode(s3.getPersone(), s3.getLivello()) : VOID_STRING), VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING,
                                                               options.getNome(), options.getIcona(), 
                                                               s3.getLivello())).append(",\n");
                         // IV LIVELLO
@@ -595,7 +595,7 @@ public class DepartmentCommand extends ItemBean implements Command, Constants {
                                                                   s4.getExtraInfo().getCodice(), 
                                                                   s3.getExtraInfo().getCodice(), 
                                                                   Utils.checkQuote(s4.getPrefisso() + BLANK_SPACE + s4.getNome()), 
-                                                                  (s4.getPersone() != null ? Data.makeDescrJsonNode(s4.getPersone(), s4.getLivello()) : VOID_STRING), 
+                                                                  (s4.getPersone() != null ? Data.makeDescrJsonNode(s4.getPersone(), s4.getLivello()) : VOID_STRING), VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, 
                                                                   options.getNome(), options.getIcona(), 
                                                                   s4.getLivello())).append(",\n");
                         }
