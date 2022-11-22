@@ -303,7 +303,7 @@ function ajaxCall(urlAjax, tipo, data, idDest, success) {
  })
  .fail(function(jqXHR, textStatus, errorThrown) {
 //   alert("Errore!");
-   $( idDest ).html("<a href='#Retry'><span class='glyphicon glyphicon-refresh' aria-hidden='true'></span> Retry</a>");
+   $( idDest ).html("<a href='#Retry'><span class='glyphicon glyphicon-refresh' aria-hidden='true'></span> Informazione non disponibile</a>");
    $( idDest ).append("<!-- Error: " + errorThrown + " -->");
    $( idDest + " a[href=#Retry]").click(function(e){
     ajaxCall(urlAjax, tipo, data, idDest, success);
