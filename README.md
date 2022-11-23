@@ -134,24 +134,6 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
-<!-- ROADMAP 
-## Roadmap
-
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-    - [ ] Chinese
-    - [ ] Spanish
-
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
 <!-- CONTRIBUTING 
 ## Contributing
 
@@ -190,21 +172,30 @@ Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/r
 
 
 
-<!-- ACKNOWLEDGMENTS 
-## Acknowledgments
+<!-- ROADMAP -->
+## History
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+Questa sezione illustra l'evoluzione del software ROL nel contesto delle varie release.<br />
+NOTA: Per convenzione, nel software la versione viene mostrata in formato x.xx
+quindi accorpando la cifra della sub-sub versione a quella della subversione,
+mentre, per la precisione, nel changelog ha il classico formato x.x.x
 
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
+- [1.2.1] Aggiunta possibilit&agrave; di scaricare albero completo processi in formato CSV
+- [1.2.0] Aggiunto dettaglio processo anticorruttivo: input, fasi, output
+
+<!--
+- [1.1.9] Add Additional Templates w/ Examples
+- [ ] Add "components" document to easily copy & paste sections of the readme
+- [ ] Multi-language Support
+    - [ ] Chinese
+    - [ ] Spanish
+-->
+
+Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una lista completa di funzionalit&agrave; proposte (e problemi conosciuti).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
 
 
 
