@@ -61,6 +61,7 @@ import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
+import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
 import it.rol.command.DepartmentCommand;
 import it.rol.command.ProcessCommand;
@@ -71,12 +72,12 @@ import it.rol.exception.CommandException;
 
 /**
  * <p><code>Data</code> &egrave; la servlet della web-application rol
- * che pu&ograve; essere utilizzata in due distinti contesti:<ol>
+ * che pu&ograve; essere utilizzata in pi&uacute; contesti:<ol>
  * <li>su una richiesta sincrona: per produrre output con contentType differenti da
  * 'text/html'</li>
  * <li>su una richiesta asincrona: per ottenere tuple da mostrare asincronamente
  * nelle pagine</li></ol></p>
- * <p>Questa servlet fa a meno, legittimamente, del design (View),
+ * <p>Nel primo caso, questa servlet fa a meno, legittimamente, del design (View),
  * in quanto l'output prodotto consiste in pure tuple prive di presentazione
  * (potenzialmente: fileset CSV, formati XML, dati con o senza metadati, RDF,
  * JSON, <cite>and so on</cite>).<br />
@@ -158,7 +159,7 @@ public class Data extends HttpServlet implements Constants {
     /**
      * Pagina a cui la command reindirizza per mostrare le fasi nel contesto dei processi
      */
-    private static final String nomeFileFasiProcessoAjax = "/jsp/prFasiAjax.jsp";
+    private static final String nomeFileProcessoAjax = "/jsp/prProcessoAjax.jsp";
     /**
      * Pagina a cui la command reindirizza per mostrare i processi nel contesto di una struttura
      */
@@ -205,7 +206,7 @@ public class Data extends HttpServlet implements Constants {
         log.info("===> Log su servlet Data. <===");
         // Decodifica la richiesta
         try {
-            // "data?q=ri"
+            // Gestione estrazione interviste ("data?q=ri")
             if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
                 // Verifica se deve servire un output csv
                 if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
@@ -218,7 +219,7 @@ public class Data extends HttpServlet implements Constants {
                     // Ha finito
                     return;
                 }
-            // "data?q=pr"
+            // Gestione estrazione processi ("data?q=pr")
             } else if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
                 // Verifica se deve servire un output csv
                 if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
@@ -230,17 +231,16 @@ public class Data extends HttpServlet implements Constants {
                     makeCSV(req, res, COMMAND_PROCESS);
                     // Esce
                     return;
-                }
-                // "data?q=pr&pliv=#&liv=#&r=$"
-                // Se non è uscito, vuol dire che deve servire una richiesta asincrona
+                } // Gestione dettaglio processo via XHR
+                // Se non è uscito, vuol dire che deve servire una richiesta asincrona ("data?q=pr&p=pro&pliv=#&liv=#&r=$")
                 HashMap<String, ArrayList<?>> processElements = retrieve(req, COMMAND_PROCESS, PART_PROCESS);
                 // Imposta nella request liste di elementi collegati a processo
                 req.setAttribute("listaInput", processElements.get(TIPI_LISTE[0]));
                 req.setAttribute("listaFasi", processElements.get(TIPI_LISTE[1]));
                 req.setAttribute("listaOutput", processElements.get(TIPI_LISTE[2]));
                 // Output in formato di default
-                fileJsp = nomeFileFasiProcessoAjax;
-            // "data?q=st"
+                fileJsp = nomeFileProcessoAjax;
+            // Gestione estrazione strutture ("data?q=st")
             } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
                 // Verifica se deve servire un output csv
                 if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
@@ -252,7 +252,7 @@ public class Data extends HttpServlet implements Constants {
                     makeCSV(req, res, COMMAND_STRUCTURES);
                     // Esce
                     return;
-                }/*
+                }/* inserire qui il codice invocato sulla richiesta asincrona
                 // Processi estratti in base alla struttura
                 lista = retrieve(req, COMMAND_STRUCTURES);
                 req.setAttribute("listaProcessi", lista);
@@ -261,7 +261,7 @@ public class Data extends HttpServlet implements Constants {
                 //req.setAttribute("listaPersone", lista);
                 // Output in formato di default
                 fileJsp = nomeFileProcessiStruttureAjax;
-*/
+                 */
             } else {
                 String msg = FOR_NAME + "Valore del parametro \'q\' (" + qToken + ") non consentito. Impossibile visualizzare i risultati.\n";
                 log.severe(msg);
@@ -355,6 +355,12 @@ public class Data extends HttpServlet implements Constants {
                     // Casta elenco di risposte a lista generica
                     list = interviews;
                 }
+            // "data?q=pr"
+            } else if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
+                // Fa la stessa query della navigazione per processi anticorruttivi
+                ArrayList<ItemBean> mats = db.getMacroSubProcessAtBySurvey(user, codeSurvey);
+                // Restituisce la lista gerarchica di processi trovati in base alla rilevazione
+                list = mats;
             // "data?q=st"
             } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
                 // Fa la stessa query della navigazione per strutture
@@ -551,14 +557,14 @@ public class Data extends HttpServlet implements Constants {
     @SuppressWarnings("unchecked")
     private static int fprintf(HttpServletRequest req, HttpServletResponse res)
                         throws ServletException, IOException {
-        /*
-         *  Genera l'oggetto per lo standard output
-         */
+        // Genera l'oggetto per lo standard output
         PrintWriter out = res.getWriter();
-        /*
-         *  Tradizionalmente, ogni funzione della famiglia x-printf restituisce un intero
-         */
+        // Tradizionalmente, ogni funzione della famiglia x-printf restituisce un intero
         int success = DEFAULT_ID;
+        // Ottiene i parametri della richiesta
+        ParameterParser parser = new ParameterParser(req);
+        // Recupera o inizializza parametro per identificare la pagina
+        String part = parser.getStringParameter("p", VOID_STRING);
         /* **************************************************************** *
          *  Gestione elaborazione contenuto CSV per interviste con risposte *
          * **************************************************************** */
@@ -566,7 +572,7 @@ public class Data extends HttpServlet implements Constants {
             /* ************************************************************ *
              *    Generazione contenuto files CSV di tutte le interviste    *
              * ************************************************************ */
-            if (req.getParameter("p").equalsIgnoreCase(PART_SELECT_QSS)) {
+            if (part.equalsIgnoreCase(PART_SELECT_QSS)) {
                 try {
                     // Recupera le interviste da Request
                     ArrayList<InterviewBean> list = (ArrayList<InterviewBean>) req.getAttribute("listaInterviste");
@@ -640,7 +646,7 @@ public class Data extends HttpServlet implements Constants {
             /* ************************************************************ *
              *   Generazione contenuto files CSV di una singola intervista  *
              * ************************************************************ */
-            else if (req.getParameter("p").equalsIgnoreCase(PART_RESUME_QST)) {
+            else if (part.equalsIgnoreCase(PART_RESUME_QST)) {
                 try {
                     // Recupera le interviste da Request
                     ArrayList<InterviewBean> list = (ArrayList<InterviewBean>) req.getAttribute("listaInterviste");
@@ -672,6 +678,67 @@ public class Data extends HttpServlet implements Constants {
                     }
                 } catch (RuntimeException re) {
                     log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco delle strutture collegate ai macroprocessi.\n" + re.getMessage());
+                    out.println(re.getMessage());
+                } catch (Exception e) {
+                    log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
+                    out.println(e.getMessage());
+                }
+            }
+        }
+        /* **************************************************************** *
+         *  Gestione elaborazione contenuto CSV per processi anticorruttivi *
+         * **************************************************************** */
+        if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_PROCESS)) {
+            /* ************************************************************ *
+             *    Generazione contenuto files CSV di un singolo processo    *
+             * ************************************************************ */
+            if (part.equalsIgnoreCase(PART_PROCESS)) {
+                // Recupera suo macro, suoi sottop, input, fasi, output
+            }
+            /* ************************************************************ *
+             *    Generazione contenuto files CSV di tutti i processi at    *
+             * ************************************************************ */
+            else {
+                try {
+                    // Recupera i macro at da Request
+                    ArrayList<ItemBean> list = (ArrayList<ItemBean>) req.getAttribute("listaProcessi");
+                    // Scrittura file CSV
+                    StringBuffer headers = new StringBuffer("N." + SEPARATOR)
+                            .append("Codice Area Rischio").append(SEPARATOR)
+                            .append("Area Rischio").append(SEPARATOR)
+                            .append("Codice Macroprocesso").append(SEPARATOR)
+                            .append("Macroprocesso").append(SEPARATOR)
+                            .append("Codice Processo").append(SEPARATOR)
+                            .append("Processo").append(SEPARATOR)
+                            .append("N. Input Processo").append(SEPARATOR)
+                            .append("N. Fasi Processo").append(SEPARATOR)
+                            .append("N. Output Processo").append(SEPARATOR)
+                            .append("Codice Sottoprocesso").append(SEPARATOR)
+                            .append("Sottoprocesso").append(SEPARATOR);
+                    out.println(headers);
+                    if (list.size() > NOTHING) {
+                        int itCounts = NOTHING, record = NOTHING;
+                        do {
+                            ItemBean item = list.get(itCounts);
+                            StringBuffer tupla = new StringBuffer(++record + SEPARATOR)
+                                .append(item.getCodice()).append(SEPARATOR)
+                                .append(item.getNome()).append(SEPARATOR)
+                                .append(item.getInformativa()).append(SEPARATOR)
+                                .append(item.getNomeReale()).append(SEPARATOR)
+                                .append(item.getUrl()).append(SEPARATOR)
+                                .append(item.getLabelWeb()).append(SEPARATOR)
+                                .append(item.getCod1()).append(SEPARATOR)
+                                .append(item.getCod2()).append(SEPARATOR)
+                                .append(item.getCod3()).append(SEPARATOR)
+                                .append(item.getIcona()).append(SEPARATOR)
+                                .append(item.getExtraInfo()).append(SEPARATOR);
+                            out.println(String.valueOf(tupla));
+                            itCounts++;
+                        } while (itCounts < list.size());
+                        success = itCounts;
+                    }
+                } catch (RuntimeException re) {
+                    log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco dei macroprocessi.\n" + re.getMessage());
                     out.println(re.getMessage());
                 } catch (Exception e) {
                     log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
