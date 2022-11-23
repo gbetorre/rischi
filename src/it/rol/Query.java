@@ -793,8 +793,6 @@ public interface Query extends Serializable {
             "   ,   MAT.id_rilevazione      AS \"idRilevazione\"" +
             "   FROM macroprocesso_at MAT" +
             "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
-            //"       INNER JOIN allocazione_macroprocesso_at AM ON AM.id_macroprocesso = M.id" +
-            //"       INNER JOIN afferenza A ON R.id = A.id_rilevazione AND A.id_persona = AM.id_persona" +
             "   WHERE R.codice ILIKE ?" +
             "   ORDER BY MAT.codice";
     
@@ -840,6 +838,41 @@ public interface Query extends Serializable {
             "       AND R.codice ILIKE ?" +
             "   ORDER BY SPRAT.codice";
     
+    /**
+     * <p>Estrae tutti i macroprocessi censiti dall'anticorruzione filtrati 
+     * in base all'identificativo della rilevazione, passato come parametro,
+     * rappresentando in ogni tupla anche i valori delle entit&agrave; 
+     * collegate.</p>
+     */
+    public static final String GET_MACRO_AT_BY_SURVEY_AS_LIST =
+            "SELECT DISTINCT" +
+            "       AR.codice               AS \"codice\"" +
+            "   ,   AR.nome                 AS \"nome\"" +
+            "   ,   AR.ordinale" +
+            "   ,   MAT.id                  AS \"id\"" +
+            "   ,   MAT.codice              AS \"informativa\"" +
+            "   ,   MAT.nome                AS \"nomeReale\"" +
+            "   ,   MAT.ordinale" +
+            "   ,   MAT.id_rilevazione" +
+            "   ,   PAT.id" +
+            "   ,   PAT.codice              AS \"url\"" +
+            "   ,   PAT.nome                AS \"labelWeb\"" +
+            "   ,   PAT.ordinale" +
+            "   ,   (SELECT count(*) FROM input_processo_at INPAT WHERE INPAT.id_processo_at = PAT.id AND INPAT.id_rilevazione = PAT.id_rilevazione) AS \"cod1\"" +
+            "   ,   (SELECT count(*) FROM attivita A WHERE A.id_processo_at = PAT.id AND A.id_rilevazione = PAT.id_rilevazione) AS \"cod2\"" +
+            "   ,   (SELECT count(*) FROM output_processo_at OUTPAT WHERE OUTPAT.id_processo_at = PAT.id AND OUTPAT.id_rilevazione = PAT.id_rilevazione) AS \"cod3\"" +
+            "   ,   SAT.id" +
+            "   ,   SAT.codice              AS \"icona\"" +
+            "   ,   SAT.nome                AS \"extraInfo\"" +
+            "   ,   SAT.ordinale" +
+            "   FROM macroprocesso_at MAT" +
+            "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
+            "       LEFT JOIN area_rischio AR ON MAT.id_area_rischio = AR.id" +
+            "       LEFT JOIN processo_at PAT ON PAT.id_macroprocesso_at = MAT.id" +
+            "       LEFT JOIN sottoprocesso_at SAT ON SAT.id_processo_at = PAT.id" +
+            "   WHERE R.codice ILIKE ?" +
+            "   ORDER BY AR.ordinale, MAT.codice, MAT.ordinale, PAT.ordinale, SAT.ordinale";
+
     /**
      * <p>Se sul terzo parametro viene passato il valore convenzionale -1 
      * estrae tutti i quesiti filtrati in base all'identificativo 
