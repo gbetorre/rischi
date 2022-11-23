@@ -1,14 +1,14 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ include file="URL.jspf" %>
-    <h3 class="mt-1 m-0 font-weight-bold">Processi Anticorruttivi</h3>
+    <h3 class="mt-1 m-0 font-weight-bold">Processi Anticorruttivi</h3>    
+    <a href="${prCSV}" class="float-right" title="Scarica il database completo dei processi censiti a fini anticorruttivi">
+      <i class="fas fa-download"></i>Scarica tutti i dati
+    </a>
     <hr class="riga"/>
     <div class="chart-container col-12" style="padding-top:10px;"> </div>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />orgchart/1.0.5/d3.v5.min.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />orgchart/1.0.5/index.js"></script>
-    <a href="${stCSV}" class="float-right btn btn-primary" title="Scarica il database completo dei processi">
-      <i class="fas fa-download"></i> <span class="badge badge-light">Scarica tutti i dati</span>
-    </a>
-    <div class="row" id="fas-pro"></div>
+      <div class="row col-12" id="fas-pro"></div>
     <script>
     /* Ajax call per lista fasi di processo */
     function asyncCallee(d) {
