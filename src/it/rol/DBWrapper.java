@@ -2658,13 +2658,76 @@ public class DBWrapper implements Query, Constants {
     
     
     /**
+     * <p>Data una rilevazione, restituisce un ArrayList di macroprocessi 
+     * censiti dall'anticorruzione ad essa afferenti, corredati, sullo
+     * stesso recor, degli estremi dei processi e sottoprocessi anticorrutivi
+     * ad essi collegati, delle aree di rischio e di altri indicatori.</p>
+     * <p>Questa estrazione, ridondante e non normalizzata, &egrave;
+     * adatta a generare file csv e simili set di tuple denormalizzate.</p>
+     *
+     * @param user oggetto rappresentante la persona loggata
+     * @param codeSurvey identificativo della rilevazione di cui si vogliono recuperare i macroprocessi e relative informazioni
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - un Vector di ItemBean, ciascuno rappresentante una tupla completa
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings("static-method")
+    public ArrayList<ItemBean> getMacroSubProcessAtBySurvey(PersonBean user,
+                                                            String codeSurvey)
+                                                     throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            ItemBean item = null;
+            AbstractList<ItemBean> macroprocessi = new ArrayList<>();
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_MACRO_AT_BY_SURVEY_AS_LIST);
+                pst.clearParameters();
+                pst.setString(1, codeSurvey);
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Crea un item vuoto
+                    item = new ItemBean();
+                    // Valorizza l'item col contenuto della query
+                    BeanUtil.populate(item, rs);
+                    // Aggiunge l'item all'elenco
+                    macroprocessi.add(item);
+                }
+                // Tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<ItemBean>) macroprocessi;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query dei macroprocessi denormalizzati..\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+
+
+    /**
      * <p>Restituisce un ArrayList contenente tutti gli ambiti di analisi trovati.</p>
      *
      * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @return <code>ArrayList&lt;ItemBean&gt;</code> - un vettore ordinato di ItemBean, che rappresentano gli ambiti di analisi trovati
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "static-method" })
     public ArrayList<ItemBean> getAmbits(PersonBean user)
                                   throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
