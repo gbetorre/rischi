@@ -176,12 +176,35 @@ Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/r
 ## History
 
 Questa sezione illustra l'evoluzione del software ROL nel contesto delle varie release.<br />
+In corrispondenza di ogni numero di versione non vengono descritte tutte le modifiche 
+effettuate ma solo i rilasci delle funzionalit&agrave; pi&uacute; significative.<br />
+Ogni numero di versione &egrave; per&ograve; corredato della data del commit 
+dei sorgenti, per cui consultando la History del repository sar&agrave; facile
+entrare nel merito di tutte le modifiche effettuate in corrispondenza della
+sottoversione.<br />
+<p>
 NOTA: Per convenzione, nel software la versione viene mostrata in formato x.xx
 quindi accorpando la cifra della sub-sub versione a quella della subversione,
-mentre, per la precisione, nel changelog ha il classico formato x.x.x
+mentre in questo changelog ha il classico formato x.x.x (ci&ograve;
+per apportare maggiore precisione descrittiva).<br />
+Inoltre, il significato delle subversioni &egrave; abbastanza differente da
+quello generale; infatti non identifica se la versione sia stabile o meno
+(aspetto solitamente identificato rispettivamente dalla cifra finale diversa da zero o uguale a zero)
+n&eacute; presenta salti rilevanti in funzione di modifiche di elevato impatto
+(p.es. passaggio dalla versione 6.1.38 alla versione 7.0.1 di VirtualBox, che ha
+segnato una modifica abbastanza grossa); nel caso dell'applicazione corrente, infatti,
+i numeri di versione hanno solo il signficato di tenere traccia dei deploy che
+sono stati effettuati (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)
+e fornirvi il relativo significato e la relativa motivazione.
+</p>
 
-- [1.2.1] Aggiunta possibilit&agrave; di scaricare albero completo processi in formato CSV
-- [1.2.0] Aggiunto dettaglio processo anticorruttivo: input, fasi, output
+- [1.2.5] Aggiunta funzionalit&agrave; di download dettagli processo in formato CSV
+- [1.2.4] Mostrati dettagli di un processo in una finestra separata a fini di stampa in pdf
+- [1.2.3] (29/11/2022) Implementati primi esempi di generazione grafici
+- [1.2.2] (23/11/2022) Aggiunta funzionalit&agrave; di download albero completo processi in formato CSV
+- [1.2.1] (22/11/2022) Mostrato in nodo albero processi numero di input e fasi
+- [1.2.0] (21/11/2022) Implementato questo file di documentazione
+- [1.1.9] (17/11/2022) Aggiunto dettaglio processo anticorruttivo: input, fasi, output
 
 <!--
 - [1.1.9] Add Additional Templates w/ Examples
