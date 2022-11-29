@@ -59,12 +59,12 @@ import it.rol.exception.WebStorageException;
 
 
 /**
- * <p><code>PersonCommand.java</code><br>
+ * <p><code>ChartCommand.java</code><br>
  * Implementa la logica per la gestione delle persone collegate ai processi on line (PROL).</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
-public class PersonCommand extends ItemBean implements Command, Constants {
+public class ChartCommand extends ItemBean implements Command, Constants {
 
     /**
      * La serializzazione necessita di dichiarare una costante di tipo long
@@ -85,7 +85,7 @@ public class PersonCommand extends ItemBean implements Command, Constants {
     /**
      * Pagina a cui la command reindirizza per mostrare la pagina iniziale relativa alla funzione persone
      */
-    private static final String nomeFileElenco = "/jsp/peElenco.jsp";
+    private static final String nomeFileElenco = "/jsp/muElenco.jsp";
     /**
      * Pagina a cui la command reindirizza per mostrare i dettagli basati una ricerca per id
      */
@@ -103,7 +103,7 @@ public class PersonCommand extends ItemBean implements Command, Constants {
     /**
      * Crea una nuova istanza di questa Command
      */
-    public PersonCommand() {
+    public ChartCommand() {
         /*;*/   // It Doesn't Anything
     }
 
