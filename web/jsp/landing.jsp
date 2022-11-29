@@ -67,7 +67,7 @@
             <i class="fas fa-chart-line fa-5x"></i>&nbsp;&nbsp;
             <span class="h4 landing-card-title">Monitoraggio e Report</span>
           </div>
-<%--          <a class="small text-white stretched-link" href="${mul}"></a>--%>
+          <a class="small text-white stretched-link" href="${mu}"></a>
         </div>
       </div>
     </div>
