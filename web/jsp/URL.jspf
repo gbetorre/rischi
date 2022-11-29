@@ -47,11 +47,6 @@
   <c:param name="r" value="${ril}" />
   <c:param name="out" value="csv" />
 </c:url>
-<c:url var="mac" context="${initParam.appName}" value="/" scope="page">
-  <c:param name="q" value="pr" />
-  <c:param name="p" value="mac" />
-  <c:param name="r" value="${ril}" />
-</c:url>
 <c:url var="st" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="st" />
   <c:param name="r" value="${ril}" />
@@ -61,8 +56,8 @@
   <c:param name="r" value="${ril}" />
   <c:param name="out" value="csv" />
 </c:url>
-<c:url var="pe" context="${initParam.appName}" value="/" scope="page">
-  <c:param name="q" value="pe" />
+<c:url var="mu" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="mu" />
   <c:param name="r" value="${ril}" />
 </c:url>
 <c:url var="usr" context="${initParam.appName}" value="/" scope="page">
