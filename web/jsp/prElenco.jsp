@@ -15,7 +15,7 @@
       var url = "data?q=pr" ; // -> Command token
       var idP = d.substring(d.indexOf('.')+1, d.indexOf('-'));  // -> id processo
       var lev = d.substring(d.lastIndexOf('-')+1, d.length);  // -> livello
-      var params = "&p=pro&pliv=" + idP + "&liv=" + lev + "&r=${param['r']}";
+      var params = "p=pro&pliv=" + idP + "&liv=" + lev + "&r=${param['r']}";
       updateCount = function(data, textStatus, jqXHR) {
         $("div#fas-pro").html(data);
       }
