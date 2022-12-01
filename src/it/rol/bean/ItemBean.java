@@ -35,9 +35,11 @@ package it.rol.bean;
 
 import java.io.Serializable;
 
+import it.rol.Utils;
+
 /**
  * <p>Classe che serve a rappresentare oggetti generici (p.es. voci in un menu,
- * righe di un log, etc.)</p>
+ * righe di un log, tuple generiche etc.)</p>
  * <p>Effettua l'override dei metodi necessari a permettere sia l'ordinamento 
  * in strutture vettoriali, sia l'utilizzo di questo tipo di oggetto 
  * come chiave di tabelle hash (dictionaries).</p>
@@ -695,6 +697,14 @@ public class ItemBean implements Serializable, Comparable<ItemBean> {
     public float getValue1() {
         return value1;
     }
+    
+    
+    /**
+     * @return restituisce un intero che corrisponde ad un indice quantitativo arrotondato della voce
+     */
+    public int getValue1AsInt() {
+        return Utils.parseInt(value1);
+    }
 
 
     /**
@@ -710,6 +720,14 @@ public class ItemBean implements Serializable, Comparable<ItemBean> {
      */
     public float getValue2() {
         return value2;
+    }
+    
+    
+    /**
+     * @return restituisce un intero che corrisponde ad un indice quantitativo arrotondato della voce
+     */
+    public int getValue2AsInt() {
+        return Utils.parseInt(value2);
     }
 
 
@@ -728,7 +746,15 @@ public class ItemBean implements Serializable, Comparable<ItemBean> {
         return value3;
     }
 
+    
+    /**
+     * @return restituisce un intero che corrisponde ad un indice quantitativo arrotondato della voce
+     */
+    public int getValue3AsInt() {
+        return Utils.parseInt(value3);
+    }
 
+    
     /**
      * @param value3 numero a virgola mobile per rappresentare un indice quantitativo, da impostare
      */
@@ -744,6 +770,14 @@ public class ItemBean implements Serializable, Comparable<ItemBean> {
         return value4;
     }
 
+    
+    /**
+     * @return restituisce un intero che corrisponde ad un indice quantitativo arrotondato della voce
+     */
+    public int getValue4AsInt() {
+        return Utils.parseInt(value4);
+    }
+    
 
     /**
      * @param value4 numero a virgola mobile per rappresentare un indice quantitativo, da impostare
