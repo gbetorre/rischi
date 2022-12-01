@@ -1,4 +1,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:if test="${not empty param['out']}">
+  <c:if test="${param['out'] eq 'pop'}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />style.css" type="text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" integrity="sha384-/frq1SRXYH/bSyou/HUp/hib7RVN1TawQYja658FEOodR/FQBKVqT9Ol+Oz3Olq5" crossorigin="anonymous">
+  </c:if>
+</c:if> 
 <c:set var="input" value="${requestScope.listaInput}" scope="page" />
 <c:set var="fasi" value="${requestScope.listaFasi}" scope="page" />
 <c:set var="output" value="${requestScope.listaOutput}" scope="page" />
@@ -11,7 +18,55 @@
   <c:if test="${not empty input}">
     <c:set var="arearischio" value="${input.get(0).nomeReale}" scope="page" />
   </c:if>
-    <h3>Processo: <c:out value="${processo}" /></h3>
+    <script type="text/javascript">
+      function openPrint(){
+        myWindow=window.open('','','width=200,height=100');
+        myWindow.document.write("<p>This is 'myWindow'</p>");
+        myWindow.focus();
+        print(myWindow);
+      }
+
+      function openWin() {
+        var token = "data?q=pr" ; // -> Command token
+        var idP = "<c:out value='${input.get(0).value2AsInt}' />";  // -> id processo (lo recupera dal primo input)
+        var lev =  <c:out value="${param['liv']}" />;  // -> livello: (2 = processo_at | 3 = sottoprocesso_at)
+        var url = token + "&p=pro&pliv=" + idP + "&liv=" + lev + "&r=${param['r']}" + "&out=pop";
+        // e.g.: /data?q=pr&p=pro&pliv=#&liv=#&r=$
+        myWindow = window.open(url, "_blank", "toolbar=no,scrollbars=yes,resizable=no,top=400,left=500,width=1024,height=768");
+      }
+      
+      function openWin(url) {
+          myWindow = window.open(url, "_blank", "toolbar=no,scrollbars=yes,resizable=no,top=400,left=500,width=1024,height=768");
+        }
+
+      function closeWin() {
+        myWindow.close();
+      }
+      
+      let myWindow;
+    </script>
+    <div class="row">
+      <div class="col-xl-7 col-md-6 mx-auto">
+        <h3 class="mt-1 m-0">Processo: <c:out value="${processo}" /></h3>
+      </div>
+      <div class="col-xl-5 col-md-6 mx-auto">
+      <c:choose>
+      <c:when test="${empty param['out']}">
+        <a href="javascript:openWin('data?q=pr&p=pro&pliv=${input.get(0).value2AsInt}&liv=2&r=AT2022&out=pop')" title="Apri in una finestra separata per la stampa">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Apri in una finestra per la stampa
+        </a>
+        <a href="#" class="float-right" title="Scarica i dati del processo '${processo}'">
+          <i class="fas fa-download"></i>Scarica i dati di questo processo
+        </a>
+      </c:when>
+      <c:when test="${not empty param['out'] and (param['out'] eq 'pop')}">
+        <a href="javascript:print()" title="Anteprima di stampa">
+          <i class="fas fa-print"></i> Stampa
+        </a>
+      </c:when>
+      </c:choose>
+      </div>
+    </div> 
     <div class="subfields ">Area di rischio: <span class="file-data"><c:out value="${arearischio}" /></span>
       <hr class="separatore" />
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples info">
