@@ -64,7 +64,7 @@ Vi sono inoltre alcune possibili evoluzioni:
 * Predisposizione di monitoraggi e reportistica per tenere il controllo sugli stati di avanzamento e sui risultati raggiunti
 * Predisposizione di appositi strumenti di ricerca per consentire all'ufficio trasparenza di ottenere query analitiche sulle interviste effettuate.
 
-Naturalmente, nessuno strumento informatico &grave; in grado da solo di ottenere risultati come l'abbassamento dei rischi corruttivi; pertanto ogni approfondimento analitico permesso dal software dovr&agrave; essere esaminato ed interpretato dagli esperti dell'anticorruzione.
+Naturalmente, nessuno strumento informatico &egrave; in grado da solo di ottenere risultati come l'abbassamento dei rischi corruttivi; pertanto ogni approfondimento analitico permesso dal software dovr&agrave; essere esaminato ed interpretato dagli esperti dell'anticorruzione.
 
 Ognuno pu&ograve; sentirsi libero di proporre miglioramenti ed evoluzioni..
 
@@ -74,13 +74,14 @@ Ognuno pu&ograve; sentirsi libero di proporre miglioramenti ed evoluzioni..
 
 ### Built With
 
-Questa sezione illustra le principali librerie e tecnologie utilizzate per sviluppare ed eseguire il progetto. Maggiori dettagli sui linguaggi utilizzati si trovano <a href="https://at.univr.it:8443/rischi/">qui</a>
+Questa sezione illustra le principali librerie e tecnologie utilizzate per sviluppare ed eseguire il progetto. Maggiori dettagli sui linguaggi utilizzati si trovano <a href="https://github.com/gbetorre/rischi">qui</a>
 
 * [![Java][Java]][Java-url]
 * [![JavaScript][JavaScript]][javascript-url]
 * [![EL][EL]][EL-url]
 * [![HTML][HTML]][HTML-url]
 * [![CSS][CSS]][CSS-url]
+* [![SQL][SQL]][SQL-url]
 * [![Bootstrap][Bootstrap.com]][Bootstrap-url]
 * [![JQuery][JQuery.com]][JQuery-url]
 
@@ -228,8 +229,6 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
 [forks-url]: https://github.com/gbetorre/rischi/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/othneildrew/Best-README-Template/issues
 [license-shield]: https://img.shields.io/badge/license-GPL-blue
@@ -249,6 +248,8 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [Angular-url]: https://angular.io/
 [CSS]: https://img.shields.io/badge/linguaggio-CSS-orange
 [CSS-url]: https://www.w3.org/Style/CSS/Overview.en.html
+[SQL]: https://img.shields.io/badge/linguaggio-SQL-lime
+[SQL-url]: https://www.w3schools.com/sql/
 [Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
 [Bootstrap-url]: https://getbootstrap.com
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
