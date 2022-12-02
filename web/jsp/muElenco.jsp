@@ -69,4 +69,30 @@
       }
     </script>
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
+
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawMaterial);
+
+      function drawMaterial() {
+        var data = google.visualization.arrayToDataTable([
+          ['Anno', 'Istanze totali', 'Istanze in materia di TFA'],
+          ['2020', 215, 70],
+          ['2021', 177, 75],
+          ['2022', 196, 75]
+        ]);
+
+        var options = {
+          chart: {
+            title: 'Istanze di accesso agli atti',
+            subtitle: 'Istanze totali e in materia di TFA: 2020-2022',
+          }
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+    </script>
+    <div id="columnchart_material" style="width: 800px; height: 500px;"></div>
     
