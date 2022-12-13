@@ -199,8 +199,9 @@ sono stati effettuati (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy;
 e fornirvi il relativo significato e la relativa motivazione.
 </p>
 
-- [1.2.5] Aggiunta funzionalit&agrave; di download dettagli processo in formato CSV
-- [1.2.4] Mostrati dettagli di un processo in una finestra separata a fini di stampa in pdf
+- [1.2.6] Aggiunta funzionalit&agrave; di download dettagli processo in formato CSV
+- [1.2.5] (13/12/2022) Aggiunti estremi input, fasi, output nel CSV di estrazione generale dei processi
+- [1.2.4] (01/12/2022) Mostrati dettagli di un processo in una finestra separata a fini di stampa in pdf
 - [1.2.3] (29/11/2022) Implementati primi esempi di generazione grafici
 - [1.2.2] (23/11/2022) Aggiunta funzionalit&agrave; di download albero completo processi in formato CSV
 - [1.2.1] (22/11/2022) Mostrato in nodo albero processi numero di input e fasi
