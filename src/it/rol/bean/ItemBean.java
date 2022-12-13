@@ -90,6 +90,14 @@ public class ItemBean implements Serializable, Comparable<ItemBean> {
     private boolean privato;
     /**     Attributo che serve a memorizzare ulteriori informazioni        */
     private String extraInfo;
+    /**     Attributo che serve a memorizzare informazioni aggiuntive       */
+    private String extraInfo1;
+    /**     Attributo che serve a memorizzare informazioni ancora aggiuntive*/
+    private String extraInfo2;
+    /**     Attributo che serve a memorizzare ancora ulteriori informazioni */
+    private String extraInfo3;
+    /**     Attributo che serve a memorizzare ancora ulteriori informazioni aggiuntive */
+    private String extraInfo4;
     /**     Attributo utile per rappresentare un codice descrittivo         */
     private String codice;
     /**     Attributo per rappresentare un codice numerico della voce       */
@@ -121,7 +129,7 @@ public class ItemBean implements Serializable, Comparable<ItemBean> {
         livello = 0;
         urlInterno = true;
         privato = false;
-        extraInfo = codice = null;
+        extraInfo = extraInfo1 = extraInfo2 = extraInfo3 = extraInfo4 = codice = null;
     }
     
     
@@ -609,8 +617,88 @@ public class ItemBean implements Serializable, Comparable<ItemBean> {
     public void setExtraInfo(String extraInfo) {
         this.extraInfo = extraInfo;
     }
+    
+
+    /**
+     * <p>Attributo che serve a memorizzare ulteriori informazioni, 
+     * utile e.g. quando questo oggetto viene usato per incapsulare valori 
+     * che necessitano di molte informazioni aggiuntive.</p>
+     * 
+     * @return <code>String</code> extraInfo1 - un oggetto String contenente eventuali informazioni aggiuntive
+     */
+    public String getExtraInfo1() {
+        return extraInfo1;
+    }
 
 
+    /**
+     * @param extraInfo1 le eventuali informazioni extra da impostare
+     */
+    public void setExtraInfo1(String extraInfo1) {
+        this.extraInfo1 = extraInfo1;
+    }
+    
+
+    /**
+     * <p>Attributo che serve a memorizzare ulteriori informazioni, 
+     * utile e.g. quando questo oggetto viene usato per incapsulare valori 
+     * che necessitano di molte informazioni aggiuntive.</p>
+     * 
+     * @return <code>String</code> extraInfo2 - un oggetto String contenente eventuali informazioni aggiuntive
+     */
+    public String getExtraInfo2() {
+        return extraInfo2;
+    }
+
+
+    /**
+     * @param extraInfo2 le eventuali informazioni extra da impostare
+     */
+    public void setExtraInfo2(String extraInfo2) {
+        this.extraInfo2 = extraInfo2;
+    }
+    
+
+    /**
+     * <p>Attributo che serve a memorizzare ulteriori informazioni, 
+     * utile e.g. quando questo oggetto viene usato per incapsulare valori 
+     * che necessitano di molte informazioni aggiuntive.</p>
+     * 
+     * @return <code>String</code> extraInfo3 - un oggetto String contenente eventuali informazioni aggiuntive
+     */
+    public String getExtraInfo3() {
+        return extraInfo3;
+    }
+
+
+    /**
+     * @param extraInfo3 le eventuali informazioni extra da impostare
+     */
+    public void setExtraInfo3(String extraInfo3) {
+        this.extraInfo3 = extraInfo3;
+    }
+    
+
+    /**
+     * <p>Attributo che serve a memorizzare ulteriori informazioni, 
+     * utile e.g. quando questo oggetto viene usato per incapsulare valori 
+     * che necessitano di molte informazioni aggiuntive.</p>
+     * 
+     * @return <code>String</code> extraInfo4 - un oggetto String contenente eventuali informazioni aggiuntive
+     */
+    public String getExtraInfo4() {
+        return extraInfo4;
+    }
+
+
+    /**
+     * @param extraInfo4 le eventuali informazioni extra da impostare
+     */
+    public void setExtraInfo4(String extraInfo4) {
+        this.extraInfo4 = extraInfo4;
+    }
+
+    
     /**
      * @return Restituisce un codice impostato per la voce
      */
