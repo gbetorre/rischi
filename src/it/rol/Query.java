@@ -852,7 +852,7 @@ public interface Query extends Serializable {
             "   ,   MAT.id                  AS \"id\"" +
             "   ,   MAT.codice              AS \"informativa\"" +
             "   ,   MAT.nome                AS \"nomeReale\"" +
-            "   ,   MAT.ordinale" +
+            "   ,   MAT.ordinale            AS \"ordinale\"" +
             "   ,   MAT.id_rilevazione" +
             "   ,   PAT.id" +
             "   ,   PAT.codice              AS \"url\"" +
@@ -861,6 +861,10 @@ public interface Query extends Serializable {
             "   ,   (SELECT count(*) FROM input_processo_at INPAT WHERE INPAT.id_processo_at = PAT.id AND INPAT.id_rilevazione = PAT.id_rilevazione) AS \"cod1\"" +
             "   ,   (SELECT count(*) FROM attivita A WHERE A.id_processo_at = PAT.id AND A.id_rilevazione = PAT.id_rilevazione) AS \"cod2\"" +
             "   ,   (SELECT count(*) FROM output_processo_at OUTPAT WHERE OUTPAT.id_processo_at = PAT.id AND OUTPAT.id_rilevazione = PAT.id_rilevazione) AS \"cod3\"" +
+            "   ,   I.nome                  AS \"extraInfo1\"" +
+            "   ,   lag(I.nome,1) over(ORDER BY AR.ordinale, MAT.codice, MAT.ordinale, PAT.ordinale, SAT.ordinale, I.nome)  AS \"extraInfo2\"" +
+            "   ,   A.nome                  AS \"extraInfo3\"" +
+            "   ,   O.nome                  AS \"extraInfo4\"" +
             "   ,   SAT.id" +
             "   ,   SAT.codice              AS \"icona\"" +
             "   ,   SAT.nome                AS \"extraInfo\"" +
@@ -869,6 +873,11 @@ public interface Query extends Serializable {
             "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
             "       LEFT JOIN area_rischio AR ON MAT.id_area_rischio = AR.id" +
             "       LEFT JOIN processo_at PAT ON PAT.id_macroprocesso_at = MAT.id" +
+            "       LEFT JOIN input_processo_at INPAT ON INPAT.id_processo_at = PAT.id" + 
+            "       LEFT JOIN input I ON INPAT.id_input = I.id" +
+            "       LEFT JOIN attivita A ON A.id_processo_at = PAT.id" +
+            "       LEFT JOIN output_processo_at OUTPAT ON OUTPAT.id_processo_at = PAT.id" +
+            "       LEFT JOIN output O ON OUTPAT.id_output = O.id" +
             "       LEFT JOIN sottoprocesso_at SAT ON SAT.id_processo_at = PAT.id" +
             "   WHERE R.codice ILIKE ?" +
             "   ORDER BY AR.ordinale, MAT.codice, MAT.ordinale, PAT.ordinale, SAT.ordinale";
