@@ -223,7 +223,7 @@ public class Data extends HttpServlet implements Constants {
             } else if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
                 // Verifica se deve servire un output csv
                 if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
-                    // Macro/Processi estratti in base alla rilevazione
+                    // Macro/Sotto/Processi estratti in base alla rilevazione
                     lista = retrieve(req, COMMAND_PROCESS);
                     // Passaggio in request per uso delle lista
                     req.setAttribute("listaProcessi", lista);
@@ -712,7 +712,10 @@ public class Data extends HttpServlet implements Constants {
                             .append("Processo").append(SEPARATOR)
                             .append("N. Input Processo").append(SEPARATOR)
                             .append("N. Fasi Processo").append(SEPARATOR)
-                            .append("N. Output Processo").append(SEPARATOR)
+                            .append("N. Output Processo").append(SEPARATOR)                           
+                            .append("Input Processo").append(SEPARATOR)
+                            .append("Fase Processo").append(SEPARATOR)
+                            .append("Output Processo").append(SEPARATOR)
                             .append("Codice Sottoprocesso").append(SEPARATOR)
                             .append("Sottoprocesso").append(SEPARATOR);
                     out.println(headers);
@@ -729,7 +732,12 @@ public class Data extends HttpServlet implements Constants {
                                 .append(item.getLabelWeb()).append(SEPARATOR)
                                 .append(item.getCod1()).append(SEPARATOR)
                                 .append(item.getCod2()).append(SEPARATOR)
-                                .append(item.getCod3()).append(SEPARATOR)
+                                .append(item.getCod3()).append(SEPARATOR);
+                            String input = !(item.getExtraInfo1().equals(item.getExtraInfo2())) ? item.getExtraInfo1() : VOID_STRING;
+                            tupla
+                                .append(input).append(SEPARATOR)
+                                .append(item.getExtraInfo3()).append(SEPARATOR)
+                                .append(item.getExtraInfo4()).append(SEPARATOR)
                                 .append(item.getIcona()).append(SEPARATOR)
                                 .append(item.getExtraInfo()).append(SEPARATOR);
                             out.println(String.valueOf(tupla));
