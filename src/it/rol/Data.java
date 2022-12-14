@@ -357,10 +357,22 @@ public class Data extends HttpServlet implements Constants {
                 }
             // "data?q=pr"
             } else if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
-                // Fa la stessa query della navigazione per processi anticorruttivi
-                ArrayList<ItemBean> mats = db.getMacroSubProcessAtBySurvey(user, codeSurvey);
-                // Restituisce la lista gerarchica di processi trovati in base alla rilevazione
-                list = mats;
+                // "&p=pro"
+                if (part.equalsIgnoreCase(PART_PROCESS)) {
+                    // Cerca l'identificativo del processo anticorruttivo
+                    int idP = parser.getIntParameter("pliv", DEFAULT_ID);
+                    // Cerca la granularità del processo anticorruttivo
+                    byte liv = parser.getByteParameter("liv", NOTHING);
+                    // Deve recuperare uno specifico sottoinsieme di processi identificato dai parametri di navigazione
+                    ArrayList<ItemBean> mats = db.getMacroSubProcessAtBySurvey(user, idP, liv, codeSurvey);
+                    // Restituisce la lista gerarchica di processi trovati in base alla rilevazione
+                    list = mats;
+                } else {    
+                    // Deve recuperare tutti i macro_at con relativi figli e nipoti
+                    ArrayList<ItemBean> mats = db.getMacroSubProcessAtBySurvey(user, DEFAULT_ID, NOTHING, codeSurvey);
+                    // Restituisce la lista gerarchica di processi trovati in base alla rilevazione
+                    list = mats;
+                }
             // "data?q=st"
             } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
                 // Fa la stessa query della navigazione per strutture
@@ -691,14 +703,14 @@ public class Data extends HttpServlet implements Constants {
         if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_PROCESS)) {
             /* ************************************************************ *
              *    Generazione contenuto files CSV di un singolo processo    *
-             * ************************************************************ */
+             * ************************************************************ *
             if (part.equalsIgnoreCase(PART_PROCESS)) {
                 // Recupera suo macro, suoi sottop, input, fasi, output
-            }
+            }*/
             /* ************************************************************ *
              *    Generazione contenuto files CSV di tutti i processi at    *
              * ************************************************************ */
-            else {
+            //else {
                 try {
                     // Recupera i macro at da Request
                     ArrayList<ItemBean> list = (ArrayList<ItemBean>) req.getAttribute("listaProcessi");
@@ -753,7 +765,7 @@ public class Data extends HttpServlet implements Constants {
                     out.println(e.getMessage());
                 }
             }
-        }
+        //}
         /* **************************************************************** *
          *        Contenuto files CSV per strutture in organigramma         *
          * **************************************************************** */
