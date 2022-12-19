@@ -357,22 +357,14 @@ public class Data extends HttpServlet implements Constants {
                 }
             // "data?q=pr"
             } else if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
-                // "&p=pro"
-                if (part.equalsIgnoreCase(PART_PROCESS)) {
-                    // Cerca l'identificativo del processo anticorruttivo
-                    int idP = parser.getIntParameter("pliv", DEFAULT_ID);
-                    // Cerca la granularità del processo anticorruttivo
-                    byte liv = parser.getByteParameter("liv", NOTHING);
-                    // Deve recuperare uno specifico sottoinsieme di processi identificato dai parametri di navigazione
-                    ArrayList<ItemBean> mats = db.getMacroSubProcessAtBySurvey(user, idP, liv, codeSurvey);
-                    // Restituisce la lista gerarchica di processi trovati in base alla rilevazione
-                    list = mats;
-                } else {    
-                    // Deve recuperare tutti i macro_at con relativi figli e nipoti
-                    ArrayList<ItemBean> mats = db.getMacroSubProcessAtBySurvey(user, DEFAULT_ID, NOTHING, codeSurvey);
-                    // Restituisce la lista gerarchica di processi trovati in base alla rilevazione
-                    list = mats;
-                }
+                // Cerca l'identificativo del processo anticorruttivo
+                int idP = parser.getIntParameter("pliv", DEFAULT_ID);
+                // Cerca la granularità del processo anticorruttivo
+                byte liv = parser.getByteParameter("liv", NOTHING);
+                // Deve recuperare uno specifico sottoinsieme di processi identificato dai parametri di navigazione oppure tutti i macro_at con relativi figli e nipoti
+                ArrayList<ItemBean> mats = db.getMacroSubProcessAtBySurvey(user, idP, liv, codeSurvey);
+                // Restituisce la lista gerarchica di processi trovati in base alla rilevazione
+                list = mats;
             // "data?q=st"
             } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
                 // Fa la stessa query della navigazione per strutture
@@ -702,70 +694,62 @@ public class Data extends HttpServlet implements Constants {
          * **************************************************************** */
         if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_PROCESS)) {
             /* ************************************************************ *
-             *    Generazione contenuto files CSV di un singolo processo    *
-             * ************************************************************ *
-            if (part.equalsIgnoreCase(PART_PROCESS)) {
-                // Recupera suo macro, suoi sottop, input, fasi, output
-            }*/
-            /* ************************************************************ *
-             *    Generazione contenuto files CSV di tutti i processi at    *
+             * Generazione contenuto files CSV di uno o tutti i processi at *
              * ************************************************************ */
-            //else {
-                try {
-                    // Recupera i macro at da Request
-                    ArrayList<ItemBean> list = (ArrayList<ItemBean>) req.getAttribute("listaProcessi");
-                    // Scrittura file CSV
-                    StringBuffer headers = new StringBuffer("N." + SEPARATOR)
-                            .append("Codice Area Rischio").append(SEPARATOR)
-                            .append("Area Rischio").append(SEPARATOR)
-                            .append("Codice Macroprocesso").append(SEPARATOR)
-                            .append("Macroprocesso").append(SEPARATOR)
-                            .append("Codice Processo").append(SEPARATOR)
-                            .append("Processo").append(SEPARATOR)
-                            .append("N. Input Processo").append(SEPARATOR)
-                            .append("N. Fasi Processo").append(SEPARATOR)
-                            .append("N. Output Processo").append(SEPARATOR)                           
-                            .append("Input Processo").append(SEPARATOR)
-                            .append("Fase Processo").append(SEPARATOR)
-                            .append("Output Processo").append(SEPARATOR)
-                            .append("Codice Sottoprocesso").append(SEPARATOR)
-                            .append("Sottoprocesso").append(SEPARATOR);
-                    out.println(headers);
-                    if (list.size() > NOTHING) {
-                        int itCounts = NOTHING, record = NOTHING;
-                        do {
-                            ItemBean item = list.get(itCounts);
-                            StringBuffer tupla = new StringBuffer(++record + SEPARATOR)
-                                .append(item.getCodice()).append(SEPARATOR)
-                                .append(item.getNome()).append(SEPARATOR)
-                                .append(item.getInformativa()).append(SEPARATOR)
-                                .append(item.getNomeReale()).append(SEPARATOR)
-                                .append(item.getUrl()).append(SEPARATOR)
-                                .append(item.getLabelWeb()).append(SEPARATOR)
-                                .append(item.getCod1()).append(SEPARATOR)
-                                .append(item.getCod2()).append(SEPARATOR)
-                                .append(item.getCod3()).append(SEPARATOR);
-                            String input = !(item.getExtraInfo1().equals(item.getExtraInfo2())) ? item.getExtraInfo1() : VOID_STRING;
-                            tupla
-                                .append(input).append(SEPARATOR)
-                                .append(item.getExtraInfo3()).append(SEPARATOR)
-                                .append(item.getExtraInfo4()).append(SEPARATOR)
-                                .append(item.getIcona()).append(SEPARATOR)
-                                .append(item.getExtraInfo()).append(SEPARATOR);
-                            out.println(String.valueOf(tupla));
-                            itCounts++;
-                        } while (itCounts < list.size());
-                        success = itCounts;
-                    }
-                } catch (RuntimeException re) {
-                    log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco dei macroprocessi.\n" + re.getMessage());
-                    out.println(re.getMessage());
-                } catch (Exception e) {
-                    log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
-                    out.println(e.getMessage());
+            try {
+                // Recupera i macro at da Request
+                ArrayList<ItemBean> list = (ArrayList<ItemBean>) req.getAttribute("listaProcessi");
+                // Scrittura file CSV
+                StringBuffer headers = new StringBuffer("N." + SEPARATOR)
+                        .append("Codice Area Rischio").append(SEPARATOR)
+                        .append("Area Rischio").append(SEPARATOR)
+                        .append("Codice Macroprocesso").append(SEPARATOR)
+                        .append("Macroprocesso").append(SEPARATOR)
+                        .append("Codice Processo").append(SEPARATOR)
+                        .append("Processo").append(SEPARATOR)
+                        .append("N. Input Processo").append(SEPARATOR)
+                        .append("N. Fasi Processo").append(SEPARATOR)
+                        .append("N. Output Processo").append(SEPARATOR)                           
+                        .append("Input Processo").append(SEPARATOR)
+                        .append("Fase Processo").append(SEPARATOR)
+                        .append("Output Processo").append(SEPARATOR)
+                        .append("Codice Sottoprocesso").append(SEPARATOR)
+                        .append("Sottoprocesso").append(SEPARATOR);
+                out.println(headers);
+                if (list.size() > NOTHING) {
+                    int itCounts = NOTHING, record = NOTHING;
+                    do {
+                        ItemBean item = list.get(itCounts);
+                        StringBuffer tupla = new StringBuffer(++record + SEPARATOR)
+                            .append(item.getCodice()).append(SEPARATOR)
+                            .append(item.getNome()).append(SEPARATOR)
+                            .append(item.getInformativa()).append(SEPARATOR)
+                            .append(item.getNomeReale()).append(SEPARATOR)
+                            .append(item.getUrl()).append(SEPARATOR)
+                            .append(item.getLabelWeb()).append(SEPARATOR)
+                            .append(item.getCod1()).append(SEPARATOR)
+                            .append(item.getCod2()).append(SEPARATOR)
+                            .append(item.getCod3()).append(SEPARATOR);
+                        String input = !(item.getExtraInfo1().equals(item.getExtraInfo2())) ? item.getExtraInfo1() : VOID_STRING;
+                        tupla
+                            .append(input).append(SEPARATOR)
+                            .append(item.getExtraInfo3()).append(SEPARATOR)
+                            .append(item.getExtraInfo4()).append(SEPARATOR)
+                            .append(item.getIcona()).append(SEPARATOR)
+                            .append(item.getExtraInfo()).append(SEPARATOR);
+                        out.println(String.valueOf(tupla));
+                        itCounts++;
+                    } while (itCounts < list.size());
+                    success = itCounts;
                 }
+            } catch (RuntimeException re) {
+                log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco dei macroprocessi.\n" + re.getMessage());
+                out.println(re.getMessage());
+            } catch (Exception e) {
+                log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
+                out.println(e.getMessage());
             }
-        //}
+        }
         /* **************************************************************** *
          *        Contenuto files CSV per strutture in organigramma         *
          * **************************************************************** */
