@@ -20,7 +20,7 @@
   </c:if>
     <script type="text/javascript">
       function openPrint(){
-        myWindow=window.open('','','width=200,height=100');
+        myWindow = window.open('','','width=200,height=100');
         myWindow.document.write("<p>This is 'myWindow'</p>");
         myWindow.focus();
         print(myWindow);
@@ -36,8 +36,8 @@
       }
       
       function openWin(url) {
-          myWindow = window.open(url, "_blank", "toolbar=no,scrollbars=yes,resizable=no,top=400,left=500,width=1024,height=768");
-        }
+        myWindow = window.open(url, "_blank", "toolbar=no,scrollbars=yes,resizable=no,top=400,left=500,width=1024,height=768");
+      }
 
       function closeWin() {
         myWindow.close();
@@ -53,9 +53,9 @@
       <c:choose>
       <c:when test="${empty param['out']}">
         <a href="javascript:openWin('data?q=pr&p=pro&pliv=${input.get(0).value2AsInt}&liv=2&r=AT2022&out=pop')" title="Apri in una finestra separata per la stampa">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i> Apri in una finestra per la stampa
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Apri in una nuova finestra
         </a>
-        <a href="#" class="float-right" title="Scarica i dati del processo '${processo}'">
+        <a href="data?q=pr&p=pro&pliv=${input.get(0).value2AsInt}&liv=${param['liv']}&r=${param['r']}&out=csv" class="float-right" title="Scarica i dati del processo '${processo}'">
           <i class="fas fa-download"></i>Scarica i dati di questo processo
         </a>
       </c:when>
