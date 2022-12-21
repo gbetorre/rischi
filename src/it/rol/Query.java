@@ -837,50 +837,6 @@ public interface Query extends Serializable {
             "   WHERE SPRAT.id_processo_at = ?" +
             "       AND R.codice ILIKE ?" +
             "   ORDER BY SPRAT.codice";
-    
-    /**
-     * <p>Estrae tutti i macroprocessi censiti dall'anticorruzione filtrati 
-     * in base all'identificativo della rilevazione, passato come parametro,
-     * rappresentando in ogni tupla anche i valori delle entit&agrave; 
-     * collegate.</p>
-     */
-    public static final String GET_MACRO_AT_BY_SURVEY_AS_LIST =
-            "SELECT DISTINCT" +
-            "       AR.codice               AS \"codice\"" +
-            "   ,   AR.nome                 AS \"nome\"" +
-            "   ,   AR.ordinale" +
-            "   ,   MAT.id                  AS \"id\"" +
-            "   ,   MAT.codice              AS \"informativa\"" +
-            "   ,   MAT.nome                AS \"nomeReale\"" +
-            "   ,   MAT.ordinale            AS \"ordinale\"" +
-            "   ,   MAT.id_rilevazione" +
-            "   ,   PAT.id" +
-            "   ,   PAT.codice              AS \"url\"" +
-            "   ,   PAT.nome                AS \"labelWeb\"" +
-            "   ,   PAT.ordinale" +
-            "   ,   (SELECT count(*) FROM input_processo_at INPAT WHERE INPAT.id_processo_at = PAT.id AND INPAT.id_rilevazione = PAT.id_rilevazione) AS \"cod1\"" +
-            "   ,   (SELECT count(*) FROM attivita A WHERE A.id_processo_at = PAT.id AND A.id_rilevazione = PAT.id_rilevazione) AS \"cod2\"" +
-            "   ,   (SELECT count(*) FROM output_processo_at OUTPAT WHERE OUTPAT.id_processo_at = PAT.id AND OUTPAT.id_rilevazione = PAT.id_rilevazione) AS \"cod3\"" +
-            "   ,   I.nome                  AS \"extraInfo1\"" +
-            "   ,   lag(I.nome,1) over(ORDER BY AR.ordinale, MAT.codice, MAT.ordinale, PAT.ordinale, SAT.ordinale, I.nome)  AS \"extraInfo2\"" +
-            "   ,   A.nome                  AS \"extraInfo3\"" +
-            "   ,   O.nome                  AS \"extraInfo4\"" +
-            "   ,   SAT.id" +
-            "   ,   SAT.codice              AS \"icona\"" +
-            "   ,   SAT.nome                AS \"extraInfo\"" +
-            "   ,   SAT.ordinale" +
-            "   FROM macroprocesso_at MAT" +
-            "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
-            "       LEFT JOIN area_rischio AR ON MAT.id_area_rischio = AR.id" +
-            "       LEFT JOIN processo_at PAT ON PAT.id_macroprocesso_at = MAT.id" +
-            "       LEFT JOIN input_processo_at INPAT ON INPAT.id_processo_at = PAT.id" + 
-            "       LEFT JOIN input I ON INPAT.id_input = I.id" +
-            "       LEFT JOIN attivita A ON A.id_processo_at = PAT.id" +
-            "       LEFT JOIN output_processo_at OUTPAT ON OUTPAT.id_processo_at = PAT.id" +
-            "       LEFT JOIN output O ON OUTPAT.id_output = O.id" +
-            "       LEFT JOIN sottoprocesso_at SAT ON SAT.id_processo_at = PAT.id" +
-            "   WHERE R.codice ILIKE ?" +
-            "   ORDER BY AR.ordinale, MAT.codice, MAT.ordinale, PAT.ordinale, SAT.ordinale";
 
     /**
      * <p>Se sul terzo parametro viene passato il valore convenzionale -1 
@@ -1262,6 +1218,22 @@ public interface Query extends Serializable {
             "       AND OUTSPAT.id_rilevazione = ?" +
             "   ORDER BY OUT.nome";
     
+    
+    /**
+     * <p>In funzione del parametro specificante il livello
+     * (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at),
+     * costruisce dinamicamente la query che estrae tutti i macroprocessi 
+     * censiti dall'anticorruzione (oppure uno specifico macroprocesso) 
+     * filtrati in base all'identificativo della rilevazione, passato 
+     * come parametro, rappresentando in ogni tupla anche i valori 
+     * delle entit&agrave; collegate.</p>
+     * 
+     * @param idP       identificativo di macroprocesso_at, processo_at o sottoprocesso_at
+     * @param level     identificativo del livello a cui e' relativo l'id (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at)
+     * @param codeSur   codice identificativo della rilevazione
+     * @return <code>String</code> - la query che seleziona l'insieme desiderato
+     */
+    public String getQueryMacroSubProcessAtBySurvey(int idP, byte level, String codeSur);
     
     /**
      * <p>Costruisce dinamicamente la query che seleziona un insieme di risposte
