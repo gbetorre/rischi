@@ -2655,6 +2655,69 @@ public class DBWrapper implements Query, Constants {
             }
         }
     }
+
+    
+    /* (non-Javadoc)
+     * @see it.rol.Query#getQueryMacroByStruct(int, byte, java.lang.String)
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String getQueryMacroSubProcessAtBySurvey(int idP, byte level, String codeSur) {
+        String tableClause = null;
+        switch(level) {
+            case ELEMENT_LEV_1:
+                tableClause = " AND MAT.id = " + idP;
+                break;
+            case ELEMENT_LEV_2:
+                tableClause = " AND PAT.id = " + idP;
+                break;
+            case ELEMENT_LEV_3:
+                tableClause = " AND SAT.id = " + idP;
+                break;
+            default:
+                tableClause = VOID_STRING;
+                break;
+        }
+        final String GET_MACRO_AT_BY_SURVEY_AS_LIST =
+                "SELECT DISTINCT" +
+                        "       AR.codice               AS \"codice\"" +
+                        "   ,   AR.nome                 AS \"nome\"" +
+                        "   ,   AR.ordinale" +
+                        "   ,   MAT.id                  AS \"id\"" +
+                        "   ,   MAT.codice              AS \"informativa\"" +
+                        "   ,   MAT.nome                AS \"nomeReale\"" +
+                        "   ,   MAT.ordinale            AS \"ordinale\"" +
+                        "   ,   MAT.id_rilevazione" +
+                        "   ,   PAT.id" +
+                        "   ,   PAT.codice              AS \"url\"" +
+                        "   ,   PAT.nome                AS \"labelWeb\"" +
+                        "   ,   PAT.ordinale" +
+                        "   ,   (SELECT count(*) FROM input_processo_at INPAT WHERE INPAT.id_processo_at = PAT.id AND INPAT.id_rilevazione = PAT.id_rilevazione)    AS \"cod1\"" +
+                        "   ,   (SELECT count(*) FROM attivita A WHERE A.id_processo_at = PAT.id AND A.id_rilevazione = PAT.id_rilevazione)                         AS \"cod2\"" +
+                        "   ,   (SELECT count(*) FROM output_processo_at OUTPAT WHERE OUTPAT.id_processo_at = PAT.id AND OUTPAT.id_rilevazione = PAT.id_rilevazione) AS \"cod3\"" +
+                        "   ,   I.nome                  AS \"extraInfo1\"" +
+                        "   ,   lag(I.nome,1) over(ORDER BY AR.ordinale, MAT.codice, MAT.ordinale, PAT.ordinale, SAT.ordinale, I.nome)  AS \"extraInfo2\"" +
+                        "   ,   A.nome                  AS \"extraInfo3\"" +
+                        "   ,   O.nome                  AS \"extraInfo4\"" +
+                        "   ,   SAT.id" +
+                        "   ,   SAT.codice              AS \"icona\"" +
+                        "   ,   SAT.nome                AS \"extraInfo\"" +
+                        "   ,   SAT.ordinale" +
+                        "   FROM macroprocesso_at MAT" +
+                        "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
+                        "       LEFT JOIN area_rischio AR ON MAT.id_area_rischio = AR.id" +
+                        "       LEFT JOIN processo_at PAT ON PAT.id_macroprocesso_at = MAT.id" +
+                        "       LEFT JOIN input_processo_at INPAT ON INPAT.id_processo_at = PAT.id" + 
+                        "       LEFT JOIN input I ON INPAT.id_input = I.id" +
+                        "       LEFT JOIN attivita A ON A.id_processo_at = PAT.id" +
+                        "       LEFT JOIN output_processo_at OUTPAT ON OUTPAT.id_processo_at = PAT.id" +
+                        "       LEFT JOIN output O ON OUTPAT.id_output = O.id" +
+                        "       LEFT JOIN sottoprocesso_at SAT ON SAT.id_processo_at = PAT.id" +
+                        "   WHERE R.codice ILIKE '" + codeSur + "'" +
+                                tableClause +
+                        "   ORDER BY AR.ordinale, MAT.codice, MAT.ordinale, PAT.ordinale, SAT.ordinale";
+        return GET_MACRO_AT_BY_SURVEY_AS_LIST;
+    }
     
     
     /**
@@ -2665,13 +2728,16 @@ public class DBWrapper implements Query, Constants {
      * <p>Questa estrazione, ridondante e non normalizzata, &egrave;
      * adatta a generare file csv e simili set di tuple denormalizzate.</p>
      *
-     * @param user oggetto rappresentante la persona loggata
-     * @param codeSurvey identificativo della rilevazione di cui si vogliono recuperare i macroprocessi e relative informazioni
+     * @param user      oggetto rappresentante la persona loggata
+     * @param idMPSAT   identificativo di un macroprocesso, di un processo o di un sottoprocesso anticorruttivo 
+     * @param level     insieme in cui cercare l'identificativo (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at)
+     * @param codeSurvey codice identificativo della rilevazione di cui si vogliono recuperare i macroprocessi e relative informazioni
      * @return <code>ArrayList&lt;ItemBean&gt;</code> - un Vector di ItemBean, ciascuno rappresentante una tupla completa
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings("static-method")
     public ArrayList<ItemBean> getMacroSubProcessAtBySurvey(PersonBean user,
+                                                            int idMPSAT,
+                                                            byte level,
                                                             String codeSurvey)
                                                      throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
@@ -2681,9 +2747,9 @@ public class DBWrapper implements Query, Constants {
             AbstractList<ItemBean> macroprocessi = new ArrayList<>();
             try {
                 // TODO: Controllare se user è superuser
-                pst = con.prepareStatement(GET_MACRO_AT_BY_SURVEY_AS_LIST);
+                String query = getQueryMacroSubProcessAtBySurvey(idMPSAT, level, codeSurvey);
+                pst = con.prepareStatement(query);
                 pst.clearParameters();
-                pst.setString(1, codeSurvey);
                 rs = pst.executeQuery();
                 while (rs.next()) {
                     // Crea un item vuoto
@@ -2698,7 +2764,7 @@ public class DBWrapper implements Query, Constants {
                 // Get out
                 return (ArrayList<ItemBean>) macroprocessi;
             } catch (SQLException sqle) {
-                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query dei macroprocessi denormalizzati..\n";
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query dei macroprocessi denormalizzati.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally {
