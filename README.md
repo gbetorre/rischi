@@ -194,12 +194,24 @@ quello generale; infatti non identifica se la versione sia stabile o meno
 n&eacute; presenta salti rilevanti in funzione di modifiche di elevato impatto
 (p.es. passaggio dalla versione 6.1.38 alla versione 7.0.1 di VirtualBox, che ha
 segnato una modifica abbastanza grossa); nel caso dell'applicazione corrente, infatti,
-i numeri di versione hanno solo il signficato di tenere traccia dei deploy che
-sono stati effettuati (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)
+i numeri di versione hanno solo il signficato di tenere traccia dei rilasci 
+e dei deploy che sono stati effettuati 
+(1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)
 e fornirvi il relativo significato e la relativa motivazione.
 </p>
 
-- [1.2.6] Aggiunta funzionalit&agrave; di download dettagli processo in formato CSV
+
+- [1.3.6] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
+- [1.3.5] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
+- [1.3.4] Implementata estrazione risultati in formato CSV
+- [1.3.3] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
+- [1.3.2] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
+- [1.3.1] Implementata form di ricerca sui quesiti per chiave testuale
+- [1.3.0] Aggiunta pagina che mostra i processi erogati dalla struttura evocata in maniera asincrona al clic sul nodo di una struttura
+- [1.2.9] Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
+- [1.2.8] Implementata pagina di dettaglio soggetto contingente/interessato
+- [1.2.7] Implementata pagina di dettaglio struttura
+- [1.2.6] (21/12/2022) Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
 - [1.2.5] (13/12/2022) Aggiunti estremi input, fasi, output nel CSV di estrazione generale dei processi
 - [1.2.4] (01/12/2022) Mostrati dettagli di un processo in una finestra separata a fini di stampa in pdf
 - [1.2.3] (29/11/2022) Implementati primi esempi di generazione grafici
