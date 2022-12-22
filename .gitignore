@@ -23,14 +23,8 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-# Javadoc
+#Javadoc
 /javadoc/
 
-# ORI docs backup
+#ORI docs backup
 /.ori/
-
-# Administrative scripts
-aggiornaRol.sh
-copiaRol.sh
-rol_build.sh
-rol_compile.bat
