@@ -55,12 +55,16 @@ Applicazione web per la mappatura dei rischi corruttivi cui sono esposti i proce
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
+[![Product Name Screen Shot][product-screenshot]](https://github.com/gbetorre/rischi/blob/main/web/img/product-screenshot.png)
 
 L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare i responsabili della trasparenza ad individuare i punti di attenzione nel contesto dei processi organizzativi e ad indirizzarli a proporre le contromisure adeguate.
 
+Attraverso la risposta ad una serie di quesiti posti a responsabili e operatori presso specifiche strutture amministrative (intervista), l'applicazione permette di ottenere una serie di indici relativi a specifici rischi
+corruttivi cui possono essere esposti i processi organizzativi presidiati dalle strutture stesse. 
+Ogni quesito, infatti, &egrave; collegato ad uno o pi&uacute; specifici rischi corruttivi; perci&ograve;, in funzione della risposta data dal personale intervistato, l'applicazione esprime specifici indici e punti di attenzione. Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le misure da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
+
 Vi sono inoltre alcune possibili evoluzioni:
-* Predisposizione di un cruscotto per i RAT per consentirgli di compilare autonomamente le risposte ai quesiti
+* Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentirgli di compilare autonomamente le risposte ai quesiti
 * Predisposizione di monitoraggi e reportistica per tenere il controllo sugli stati di avanzamento e sui risultati raggiunti
 * Predisposizione di appositi strumenti di ricerca per consentire all'ufficio trasparenza di ottenere query analitiche sulle interviste effettuate.
 
@@ -183,7 +187,8 @@ Ogni numero di versione &egrave; per&ograve; corredato della data del commit
 dei sorgenti, per cui consultando la History del repository sar&agrave; facile
 entrare nel merito di tutte le modifiche effettuate in corrispondenza della
 sottoversione.<br />
-<p>
+
+<p><small>
 NOTA: Per convenzione, nel software la versione viene mostrata in formato x.xx
 quindi accorpando la cifra della sub-sub versione a quella della subversione,
 mentre in questo changelog ha il classico formato x.x.x (ci&ograve;
@@ -198,9 +203,10 @@ i numeri di versione hanno solo il signficato di tenere traccia dei rilasci
 e dei deploy che sono stati effettuati 
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)
 e fornirvi il relativo significato e la relativa motivazione.
-</p>
+</small></p>
 
 
+### ToDo (Roadmap)
 - [1.3.6] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
 - [1.3.5] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
 - [1.3.4] Implementata estrazione risultati in formato CSV
@@ -211,6 +217,8 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.2.9] Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
 - [1.2.8] Implementata pagina di dettaglio soggetto contingente/interessato
 - [1.2.7] Implementata pagina di dettaglio struttura
+
+### Done
 - [1.2.6] (21/12/2022) Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
 - [1.2.5] (13/12/2022) Aggiunti estremi input, fasi, output nel CSV di estrazione generale dei processi
 - [1.2.4] (01/12/2022) Mostrati dettagli di un processo in una finestra separata a fini di stampa in pdf
@@ -219,6 +227,8 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.2.1] (22/11/2022) Mostrato in nodo albero processi numero di input e fasi
 - [1.2.0] (21/11/2022) Implementato questo file di documentazione
 - [1.1.9] (17/11/2022) Aggiunto dettaglio processo anticorruttivo: input, fasi, output
+
+- [&le; 1.1.9] Implementata intervista (scelta struttura e processo anticorruttivo, compilazione risposte ai quesiti), pagina di elenco interviste, estrazioni varie in CSV, organigramma ed elenco processi in albero navigabile
 
 <!--
 - [1.1.9] Add Additional Templates w/ Examples
