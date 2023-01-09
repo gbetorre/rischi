@@ -205,7 +205,7 @@ e dei deploy che sono stati effettuati
 e fornirvi il relativo significato e la relativa motivazione.
 </small></p>
 
-
+<!--
 ### ToDo (Roadmap)
 - [1.3.6] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
 - [1.3.5] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
@@ -218,7 +218,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.2.8] Implementata pagina di dettaglio soggetto contingente/interessato
 - [1.2.7] Implementata pagina di dettaglio struttura
 
+
 ### Done
+-->
 - [1.2.6] (21/12/2022) Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
 - [1.2.5] (13/12/2022) Aggiunti estremi input, fasi, output nel CSV di estrazione generale dei processi
 - [1.2.4] (01/12/2022) Mostrati dettagli di un processo in una finestra separata a fini di stampa in pdf
