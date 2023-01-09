@@ -24,10 +24,11 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
+  <!--
   <a href="https://github.com/othneildrew/Best-README-Template">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
-
+  -->
   <h3 align="center">ROL [Rischi On Line]</h3>
 
   <p align="center">
@@ -221,6 +222,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+
 - [1.2.6] (21/12/2022) Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
 - [1.2.5] (13/12/2022) Aggiunti estremi input, fasi, output nel CSV di estrazione generale dei processi
 - [1.2.4] (01/12/2022) Mostrati dettagli di un processo in una finestra separata a fini di stampa in pdf
