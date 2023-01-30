@@ -1217,7 +1217,25 @@ public interface Query extends Serializable {
             "   WHERE OUTSPAT.id_sottoprocesso_at = ?" +
             "       AND OUTSPAT.id_rilevazione = ?" +
             "   ORDER BY OUT.nome";
-    
+
+    /**
+     * <p>Estrae l'elenco di tutti i rischi corruttivi trovati per una data
+     * rilevazione, oppure indipendentemente dalla rilevazione (in funzione
+     * dei parametri), selezionando le tuple atte a comporre il registro 
+     * dei rischi corruttivi.</p>
+     * <p>Ogni riga, quindi, corrisponder&agrave; ad un distinto rischio.</p>
+     */
+    public static final String GET_RISKS = 
+            "SELECT DISTINCT" +
+            "       RC.id                   AS \"id\"" +
+            "   ,   RC.codice               AS \"informativa\"" +
+            "   ,   RC.nome                 AS \"nome\"" +
+            "   ,   RC.descrizione          AS \"stato\"" +
+            "   ,   RC.ordinale             AS \"ordinale\"" +
+            "   FROM rischio_corruttivo RC" +
+            "       INNER JOIN rilevazione S ON RC.id_rilevazione = S.id" +
+            "   WHERE (RC.id_rilevazione = ? OR -1 = ?)" +
+            "   ORDER BY RC.nome";
     
     /**
      * <p>In funzione del parametro specificante il livello
