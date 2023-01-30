@@ -63,6 +63,7 @@ import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
+import it.rol.bean.RiskBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
@@ -3526,6 +3527,75 @@ public class DBWrapper implements Query, Constants {
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally { // ...still...
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un ArrayList contenente tutti i rischi corruttivi
+     * censiti nel contesto di una data rilevazione, oppure tutti i rischi
+     * corruttivi trovati indipendentemente dalla rilevazione, in funzione del
+     * valore dei parametri.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param getAll    valore convenzionale; se vale -1 comporta il recupero di tutti i rischi, indipendentemente dall'id della rilevazione
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ArrayList&lt;RiskBean&gt;</code> - un vettore ordinato di RiskBean, che rappresentano i rischi corruttivi trovati
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<RiskBean> getRisks(PersonBean user, 
+                                        int getAll, 
+                                        CodeBean survey)
+                                 throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            AbstractList<RiskBean> risks = new ArrayList<>();
+            int nextParam = NOTHING;
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_RISKS);
+                pst.clearParameters();
+                pst.setInt(++nextParam, survey.getId());
+                pst.setInt(++nextParam, getAll);
+                rs = pst.executeQuery();
+                // Punta al rischio
+                while (rs.next()) {
+                    // Prepara il rischio
+                    RiskBean risk = new RiskBean();
+                    // Valorizza il rischio
+                    BeanUtil.populate(risk, rs);
+                    // Aggiunge il rischio alla lista dei rischi
+                    risks.add(risk);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<RiskBean>) risks;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio non recuperabile; problema nel metodo di estrazione dei rischi.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "RiskBean non valorizzato; problema nella query dei rischi.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
                 try {
                     con.close();
                 } catch (NullPointerException npe) {
