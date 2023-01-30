@@ -270,6 +270,7 @@ function ajaxCall(urlAjax, tipo, data, idDest, success) {
     type: tipo,
     data: data,
     beforeSend: function(jqXHR, settings) {
+                $('#imgload').css('visibility', 'visible');
                 jqXHR.url = settings.url; // Salvo nell'oggetto jqXHR l'url della chiamata ajax per poterlo leggere dopo nella funzione success
             },
     success: success, // Funzione passata come parametro ed eseguita in caso di successo. Type: Function( Anything data, String textStatus, jqXHR jqXHR )
