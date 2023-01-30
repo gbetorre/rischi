@@ -6,6 +6,9 @@
     </a>
     <hr class="riga"/>
     <div class="chart-container col-12" style="padding-top:10px;"> </div>
+    <div class="ajax-loader" id="imgload">
+      <img src="${initParam.urlDirectoryImmagini}ajax-loader.gif" class="img-responsive" />
+    </div>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />orgchart/1.0.5/d3.v5.min.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />orgchart/1.0.5/index.js"></script>
       <div class="row col-12" id="fas-pro"></div>
@@ -17,6 +20,7 @@
       var lev = d.substring(d.lastIndexOf('-')+1, d.length);  // -> livello
       var params = "p=pro&pliv=" + idP + "&liv=" + lev + "&r=${param['r']}";
       updateCount = function(data, textStatus, jqXHR) {
+        $('#imgload').css('visibility', 'hidden');  
         $("div#fas-pro").html(data);
       }
       ajaxCall(url, "GET", params, '#fas-pro', updateCount);
