@@ -1,5 +1,5 @@
 /*=====================================================
-Style.css - Global Stylesheet for /processi application 
+Style.css - Global Stylesheet for /rischi application 
 =====================================================*/
 html, body {
     font-family: Verdana,sans-serif;
@@ -501,24 +501,20 @@ select:disabled.bgcolor3 {
   background-color: #eaeded  !important;
 }
 
-.bgAddAct {
+.bgAct21 {
+  background-color: #99ff33  !important;
+}
+
+.bgAct22 {
+  background-color: #0066FF  !important;
+}
+
+.bgAct23 {
   background-color: #d9edf7  !important;
 }
 
 .bgFade {
   background-image: linear-gradient(to right, transparent, white) !important;
-}
-
-.bgWbs {
-  background-color: #ffccff;
-}
-
-.bgInd {
-  background-color: #99ff33;
-}
-
-.bgMis {
-  background-color: #0066FF;
 }
 
 .bg-note{
@@ -766,7 +762,10 @@ textarea {
   line-height: 1.45em;
   }
 
-.file-data {color: #999;  font-style: italic;}
+.file-data {
+	color: #999;  
+	font-style: italic;
+	}	
 
 /*---------------------- Righe Orizzontali ------------------------*/
 hr  {
@@ -881,6 +880,22 @@ hr.riga       {
   border-bottom-style: dotted;
   border-bottom-width: 1px;
   border-color: #d9d9d9;
+}
+
+/*---------------------- Loader ------------------------*/
+.ajax-loader {
+  visibility: hidden;
+  background-color: rgba(255,255,255,0.7);
+  position: absolute;
+  z-index: +100 !important;
+  width: 100%;
+  height:100%;
+}
+
+.ajax-loader img {
+  position: relative;
+  top:10%;
+  left:30%;
 }
 
 /*---------------------- POP-UP ------------------------*/
