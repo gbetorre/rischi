@@ -692,7 +692,7 @@ public class Data extends HttpServlet implements Constants {
         /* **************************************************************** *
          *  Gestione elaborazione contenuto CSV per processi anticorruttivi *
          * **************************************************************** */
-        if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_PROCESS)) {
+        else if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_PROCESS)) {
             /* ************************************************************ *
              * Generazione contenuto files CSV di uno o tutti i processi at *
              * ************************************************************ */
