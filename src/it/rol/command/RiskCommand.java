@@ -62,6 +62,7 @@ import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
+import it.rol.bean.RiskBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
@@ -193,6 +194,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         PersonBean user = null;
         // Data di oggi sotto forma di oggetto String
         GregorianCalendar today = Utils.getCurrentDate();
+        // Elenco dei rischi corruttivi legati alla rilevazione
+        ArrayList<RiskBean> risks = null;
         // Elenco strutture collegate alla rilevazione
         ArrayList<DepartmentBean> structs = null;
         // Elenco processi collegati alla rilevazione
@@ -434,7 +437,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                         }
                         fileJspT = nomeFile.get(part);
                     } else {
-                        //riskOfRuntimeProject = db.getRisks(idPrj, user);
+                        risks = db.getRisks(user, ConfigManager.getSurvey(codeSur).getId(), ConfigManager.getSurvey(codeSur));
                         fileJspT = nomeFileElenco;
                     }
                 }
@@ -470,6 +473,10 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
+        // Imposta nella request elenco completo strutture
+        if (risks != null) {
+            req.setAttribute("rischi", risks);
+        }
         // Imposta nella request elenco completo strutture
         if (structs != null) {
             req.setAttribute("strutture", structs);
