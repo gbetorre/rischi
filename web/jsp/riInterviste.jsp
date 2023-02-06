@@ -53,9 +53,17 @@
             </a>
           </td>
           <td class="bg-primary text-white" width="12%"><strong><c:out value="${iview.struttura.nome}" /></strong></td>
-          <td class="bg-primary text-white" width="12%"><strong><c:out value="${iview.struttura.figlie.get(zero).nome}" /></strong></td>
-          <td class="bg-primary text-white" width="12%"><div class="text-center"><strong><c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).nome}" /></strong></div></td>
-          <td class="bg-primary text-white" width="12%"><div class="text-center"><strong><c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).nome}" /></strong></div></td>
+          <td class="bg-primary text-white" width="12%"><strong><c:out value="${iview.struttura.figlie.get(zero).prefisso}" /> <c:out value="${iview.struttura.figlie.get(zero).nome}" /></strong></td>
+          <td class="bg-primary text-white" width="12%">
+            <div class="text-center">
+              <strong><c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).prefisso}" /> <c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).nome}" /></strong>
+            </div>
+          </td>
+          <td class="bg-primary text-white" width="12%">
+            <div class="text-center">
+              <strong><c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).prefisso}" /> <c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).nome}" /></strong>
+            </div>
+          </td>
           <td class="bgcolor1" width="12%"><strong><c:out value="${iview.processo.nome}" /></strong></td>
           <td class="bgcolor1" width="12%"><c:out value="${iview.processo.processi.get(zero).nome}" /></td>
           <td class="bgcolor1" width="12%"><c:out value="${iview.processo.processi.get(zero).processi.get(zero).nome}" /></td>
