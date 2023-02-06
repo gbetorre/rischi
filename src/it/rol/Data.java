@@ -63,6 +63,7 @@ import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
+import it.rol.bean.RiskBean;
 import it.rol.command.DepartmentCommand;
 import it.rol.command.ProcessCommand;
 import it.rol.command.RiskCommand;
@@ -238,6 +239,7 @@ public class Data extends HttpServlet implements Constants {
                 req.setAttribute("listaInput", processElements.get(TIPI_LISTE[0]));
                 req.setAttribute("listaFasi", processElements.get(TIPI_LISTE[1]));
                 req.setAttribute("listaOutput", processElements.get(TIPI_LISTE[2]));
+                req.setAttribute("listaRischi", processElements.get(TIPI_LISTE[3]));
                 // Output in formato di default
                 fileJsp = nomeFileProcessoAjax;
             // Gestione estrazione strutture ("data?q=st")
@@ -432,12 +434,15 @@ public class Data extends HttpServlet implements Constants {
                     ArrayList<ActivityBean> listaFasi = ProcessCommand.retrieveActivities(user, idP, liv, codeSurvey, db);
                     // Recupera Output estratti in base al processo
                     ArrayList<ItemBean> listaOutput = ProcessCommand.retrieveOutputs(user, idP, liv, codeSurvey, db);
+                    // Recupera Rischi estratti in base al processo
+                    ArrayList<RiskBean> listaRischi = ProcessCommand.retrieveRisks(user, idP, liv, codeSurvey, db);
                     // Istanzia la tabella in cui devono essere settate le liste
                     list = new HashMap<>();
                     // Imposta nella tabella le liste trovate
                     list.put(TIPI_LISTE[0], listaInput);
                     list.put(TIPI_LISTE[1], listaFasi);
                     list.put(TIPI_LISTE[2], listaOutput);
+                    list.put(TIPI_LISTE[3], listaRischi);
                 }
             // "data?q=st"
             } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
