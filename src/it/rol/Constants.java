@@ -208,7 +208,7 @@ public interface Constants extends Serializable {
     /**
      * <p>Valori possibili di valori convenzionali corrispondenti a tipi diversi di liste.</p>
      */
-    static final String[] TIPI_LISTE = {"I", "F", "O"};
+    static final String[] TIPI_LISTE = {"I", "F", "O", "R"};
     /**
      * <p>Valori possibili degli attributi probabilita, impatto, livello di rischio.</p>
      */
