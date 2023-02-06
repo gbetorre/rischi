@@ -222,6 +222,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [1.2.8] (06/02/2023) Ampliato dettaglio processo anticorruttivo: mostrati i rischi corsi dal processo
 - [1.2.7] (30/01/2023) Implementato registro dei rischi corruttivi; correzione di bug
 - [1.2.6] (21/12/2022) Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
 - [1.2.5] (13/12/2022) Aggiunti estremi input, fasi, output nel CSV di estrazione generale dei processi
