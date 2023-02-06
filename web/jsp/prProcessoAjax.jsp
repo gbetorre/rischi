@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:if test="${not empty param['out']}">
   <c:if test="${param['out'] eq 'pop'}">
@@ -9,6 +10,7 @@
 <c:set var="input" value="${requestScope.listaInput}" scope="page" />
 <c:set var="fasi" value="${requestScope.listaFasi}" scope="page" />
 <c:set var="output" value="${requestScope.listaOutput}" scope="page" />
+<c:set var="risks" value="${requestScope.listaRischi}" scope="page" />
 <c:catch var="exception">
   <c:set var="processo" value="informazione non disponibile" scope="page" />
   <c:if test="${not empty input}">
@@ -127,6 +129,19 @@
             <c:set var="bgAct" value="bgAct20" scope="page" />
           </c:if>
           <li class="list-group-item ${bgAct}"><c:out value="${output.nome}" /></li>
+        </c:forEach>
+        </ul>
+      </div>
+      <hr class="separatore" />
+      <div class="p-3 p-md-4 border rounded-3 icon-demo-examples errorPwd">
+        <div class="fs-2 mb-3">Rischi:</div>
+        <ul class="list-group">
+        <c:forEach var="risk" items="${risks}" varStatus="status">
+          <c:set var="bgAct" value="bgAct4" scope="page" />
+          <c:if test="${status.index mod 2 eq 0}">
+            <c:set var="bgAct" value="bgAct20" scope="page" />
+          </c:if>
+          <li class="list-group-item ${bgAct}"><c:out value="${risk.nome}" /></li>
         </c:forEach>
         </ul>
       </div>
