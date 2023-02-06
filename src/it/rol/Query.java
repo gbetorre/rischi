@@ -1086,7 +1086,7 @@ public interface Query extends Serializable {
             "   FROM attivita A" +
             "   WHERE A.id_processo_at = ?" +
             "       AND A.id_rilevazione = ?" +
-            "   ORDER BY A.nome";
+            "   ORDER BY A.ordinale, A.codice";
 
     /**
      * <p>Estrae gli estremi delle attivit&agrave; collegate ad un sottoprocesso 
@@ -1104,7 +1104,7 @@ public interface Query extends Serializable {
             "   FROM attivita A" +
             "   WHERE A.id_sottoprocesso_at = ?" +
             "       AND A.id_rilevazione = ?" +
-            "   ORDER BY A.nome";
+            "   ORDER BY A.ordinale, A.codice";
     
     /**
      * <p>Estrae un elenco di identificativi di strutture e soggetti contingenti
@@ -1223,9 +1223,30 @@ public interface Query extends Serializable {
      * rilevazione, oppure indipendentemente dalla rilevazione (in funzione
      * dei parametri), selezionando le tuple atte a comporre il registro 
      * dei rischi corruttivi.</p>
-     * <p>Ogni riga, quindi, corrisponder&agrave; ad un distinto rischio.</p>
+     * <p>Ogni riga, quindi, corrisponder&agrave; ad un distinto rischio,
+     * contenente anche il numero di processi_at che corrono tale rischio.</p>
      */
     public static final String GET_RISKS = 
+            "SELECT DISTINCT" +
+            "       RC.id                               AS \"id\"" +
+            "   ,   RC.codice                           AS \"informativa\"" +
+            "   ,   RC.nome                             AS \"nome\"" +
+            "   ,   RC.descrizione                      AS \"stato\"" +
+            "   ,   RC.ordinale                         AS \"ordinale\"" +
+            "   ,   count(RPAT.id_processo_at)::VARCHAR AS \"impatto\"" +
+            "   FROM rischio_corruttivo RC" +
+            "       INNER JOIN rilevazione S ON RC.id_rilevazione = S.id" +
+            "       LEFT JOIN rischio_processo_at RPAT ON RPAT.id_rischio_corruttivo = RC.id" +
+            "   WHERE (RC.id_rilevazione = ? OR -1 = ?)" +
+            "   GROUP BY (RC.id, RC.codice, RC.nome, RC.descrizione, RC.ordinale)" +
+            "   ORDER BY RC.nome";
+    
+    /**
+     * <p>Estrae i rischi collegati ad uno specifico processo anticorruttivo,
+     * il cui identificativo viene passato come parametro, nel contesto di una
+     * specifica rilevazione, il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_RISK_BY_PROCESS = 
             "SELECT DISTINCT" +
             "       RC.id                   AS \"id\"" +
             "   ,   RC.codice               AS \"informativa\"" +
@@ -1233,8 +1254,27 @@ public interface Query extends Serializable {
             "   ,   RC.descrizione          AS \"stato\"" +
             "   ,   RC.ordinale             AS \"ordinale\"" +
             "   FROM rischio_corruttivo RC" +
-            "       INNER JOIN rilevazione S ON RC.id_rilevazione = S.id" +
-            "   WHERE (RC.id_rilevazione = ? OR -1 = ?)" +
+            "       INNER JOIN rischio_processo_at RPAT ON RPAT.id_rischio_corruttivo = RC.id" +
+            "   WHERE RPAT.id_processo_at = ?" +
+            "       AND RPAT.id_rilevazione = ?" +
+            "   ORDER BY RC.nome";
+    
+    /**
+     * <p>Estrae i rischi collegati ad uno specifico sottoprocesso anticorruttivo,
+     * il cui identificativo viene passato come parametro, nel contesto di una
+     * specifica rilevazione, il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_RISK_BY_SUB = 
+            "SELECT DISTINCT" +
+            "       RC.id                   AS \"id\"" +
+            "   ,   RC.codice               AS \"informativa\"" +
+            "   ,   RC.nome                 AS \"nome\"" +
+            "   ,   RC.descrizione          AS \"stato\"" +
+            "   ,   RC.ordinale             AS \"ordinale\"" +
+            "   FROM rischio_corruttivo RC" +
+            "       INNER JOIN rischio_sottoprocesso_at RSPAT ON RSPAT.id_rischio_corruttivo = RC.id" +
+            "   WHERE RSPAT.id_sottoprocesso_at = ?" +
+            "       AND RSPAT.id_rilevazione = ?" +
             "   ORDER BY RC.nome";
     
     /**
