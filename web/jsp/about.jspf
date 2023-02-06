@@ -17,10 +17,10 @@
         </button>
       </div>
       <div class="toast-body">
-        Versione: 1.27
+        Versione: 1.28
         <hr class="riga" />
-          &copy; 2022 &mdash; <c:out value="${requestScope.theCurrentYear}" />&nbsp;
-          &nbsp;&nbsp;Universit&agrave; degli studi di Verona&nbsp;<br />&nbsp;<%-- 
+          &copy; 2022 &mdash; <c:out value="${requestScope.theCurrentYear}" />&nbsp;<%-- 
+          &nbsp;&nbsp;Universit&agrave; degli studi di Verona&nbsp;<br />&nbsp;
           &nbsp;Via dell'Artigliere 8, 37129 Verona &nbsp;<br />&nbsp; 
           &nbsp;Partita IVA IT01541040232 &nbsp;<br />&nbsp; 
           &nbsp;Codice Fiscale 93009870234 
