@@ -38,7 +38,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -62,6 +61,7 @@ import it.rol.bean.CodeBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
+import it.rol.bean.RiskBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
@@ -311,7 +311,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                               throws CommandException {
         ArrayList<ItemBean> inputs = null;
         try {
-            // Estrae i macroprocessi in una data rilevazione
+            // Estrae gli input di un dato processo in una data rilevazione
             inputs = db.getInputs(user, id, level, ConfigManager.getSurvey(codeSurvey));
         } catch (WebStorageException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero degli input.\n";
@@ -350,10 +350,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                                       throws CommandException {
         ArrayList<ActivityBean> fasi = null;
         try {
-            // Estrae i macroprocessi in una data rilevazione
+            // Estrae le fasi di un dato processo in una data rilevazione
             fasi = db.getActivities(user, id, level, ConfigManager.getSurvey(codeSurvey));
         } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero degli input.\n";
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero delle attivita\'.\n";
             LOG.severe(msg);
             throw new CommandException(msg + wse.getMessage(), wse);
         } catch (NullPointerException npe) {
@@ -390,10 +390,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                                throws CommandException {
         ArrayList<ItemBean> outputs = null;
         try {
-            // Estrae i macroprocessi in una data rilevazione
+            // Estrae gli output di un dato processo in una data rilevazione
             outputs = db.getOutputs(user, id, level, ConfigManager.getSurvey(codeSurvey));
         } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero degli input.\n";
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero degli output.\n";
             LOG.severe(msg);
             throw new CommandException(msg + wse.getMessage(), wse);
         } catch (NullPointerException npe) {
@@ -406,6 +406,50 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             throw new CommandException(msg + e.getMessage(), e);
         }
         return outputs;
+    }
+
+
+    /**
+     * <p>Restituisce un ArrayList di tutti i rischi trovati in base all' 
+     * identificativo di un processo o un sottoprocesso anticorruttivo e 
+     * a quello di una rilevazione.</p>
+     *
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param id            identificativo del processo o del sottoprocesso (si capisce dal livello)
+     * @param level         valore specificante la tabella in cui cercare l'identificativo (2 = processo_at | 3 = sottoprocesso_at)
+     * @param codeSurvey    il codice della rilevazione
+     * @param db            istanza di WebStorage per l'accesso ai dati
+     * @return <code>ArrayList&lt;RiskBean&gt;</code> - lista di rischi recuperati
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static ArrayList<RiskBean> retrieveRisks(PersonBean user,
+                                                    int id,
+                                                    int level,
+                                                    String codeSurvey,
+                                                    DBWrapper db)
+                                             throws CommandException {
+        ArrayList<RiskBean> risks = null;
+        try {
+            // Prepara l'oggetto rilevazione
+            CodeBean survey = ConfigManager.getSurvey(codeSurvey);
+            // Prepara il processo da passare
+            ProcessBean p = new ProcessBean(id, VOID_STRING, VOID_STRING, level, survey.getId());
+            // Estrae i rischi di un dato processo in una data rilevazione
+            risks = db.getRiskByProcess(user, p, survey);
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei rischi.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return risks;
     }
 
 
