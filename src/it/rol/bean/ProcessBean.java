@@ -117,7 +117,7 @@ public class ProcessBean extends CodeBean {
     private int idDipart;
     /** Dipartimento del processo */
     private DepartmentBean dipart;
-    /** Processi aggregati dal macroprocesso */
+    /** Processi aggregati dal processo corrente */
     private AbstractList<ProcessBean> processi;
     /** Persone allocate sul processo/macroprocesso */
     private AbstractList<PersonBean> persone;
@@ -137,6 +137,7 @@ public class ProcessBean extends CodeBean {
     /* ************************************************************************ *
      *                               Costruttori                                *
      * ************************************************************************ */
+    
     /**
      * <p>Costruttore, e da superclasse: inizializza i campi a valori di default.</p>
      */
@@ -154,15 +155,35 @@ public class ProcessBean extends CodeBean {
         smartWorking = null;
         vincoli = null;
         tag = tipo = null;
-        idDipart = -2;
+        idDipart = BEAN_DEFAULT_ID;
         dipart = null;
-        idRilevazione = -2;
+        idRilevazione = livello = BEAN_DEFAULT_ID;
         statoprocesso = null;
         processi = null;
         persone = null;
         rilevazione = null;
     }
 
+    
+    /**
+     * <p>Costruttore parametrizzato</p>
+     * <p>
+     * ProcessBean(int id, String codice, String nome, int livello, int idRilevazione)</p>
+     * 
+     * @param id            identificativo del processo da creare
+     * @param codice        codice del processo da creare 
+     * @param nome          nome del processo da creare
+     * @param livello       livello di indentazione della voce da creare
+     * @param idRilevazione identificativo della rilevazione a cui &egrave; relativo il processo
+     */
+    public ProcessBean(int id, String codice, String nome, int livello, int idRilevazione) {
+        super();
+        super.setId(id);
+        super.setNome(nome);        
+        this.codice = codice;
+        this.livello = livello;
+        this.idRilevazione = idRilevazione;
+    }
 
     /* **************************************************** *
      *           Metodi getter e setter per codice          *
@@ -568,22 +589,24 @@ public class ProcessBean extends CodeBean {
      *       Metodi getter e setter per sottoprocessi      *
      * *************************************************** */
     /**
-     * Restituisce una lista di sottoprocessi che sono stati aggregati
-     * per il processo (che in tal caso &egrave; in realt&agrave; un macroprocesso);
+     * Restituisce una lista di processi di ordine gerarchico inferiore a 
+     * quello corrente (p.es. se corrente = macro i figli sono processi;
+     * se corrente = processo i figli sono sottoprocessi) che sono stati aggregati
+     * per il processo corrente;
      * non solleva un'eccezione se questo attributo &egrave;
      * non significativo (perch&eacute; il presente bean serve a rappresentare sia
-     * il sottprocesso sia il macroprocesso).
+     * il macroprocesso, sia il processo, sia il sottoprocesso).
      *
-     * @return <code>processi</code> - lista di sottoprocessi del macroprocesso
+     * @return <code>processi</code> - lista di processi di ordine gerarchico inferiore, aggregati dal processo corrente
      */
     public AbstractList<ProcessBean> getProcessi() {
         return processi;
     }
 
     /**
-     * Imposta i sottoprocessi di un macroprocesso.
+     * Imposta i processi (di ordine inferiore) aggregati dal processo corrente.
      *
-     * @param processi - sottoprocessi di macroprocesso da impostare
+     * @param processi - processi figli del processo corrente, da impostare
      */
     public void setProcessi(AbstractList<ProcessBean> processi) {
         this.processi = processi;
