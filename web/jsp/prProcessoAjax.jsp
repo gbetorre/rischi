@@ -69,7 +69,9 @@
       </c:choose>
       </div>
     </div> 
-    <div class="subfields ">Area di rischio: <span class="file-data"><c:out value="${arearischio}" /></span>
+    <div class="subfields errorPwd">
+      Area di rischio: 
+      <span class="breadcrumb-item bgcolor3"><c:out value="${arearischio}" /></span>
       <hr class="separatore" />
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples info">
         <div class="fs-2 mb-3">Input:</div>
@@ -113,7 +115,15 @@
             </a><br />
           </c:forEach>
           <c:forEach var="soggetto" items="${fase.soggetti}">
-            <c:out value="${soggetto.nome}" /><br />
+          <c:choose>
+          <c:when test="${empty soggetto.informativa}">
+            <c:out value="${soggetto.nome}" />
+          </c:when>
+          <c:otherwise>
+            <c:out value="${soggetto.informativa}" />
+          </c:otherwise>
+          </c:choose>
+            <br />
           </c:forEach>
           </td>
         </tr>
