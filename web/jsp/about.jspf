@@ -17,7 +17,7 @@
         </button>
       </div>
       <div class="toast-body">
-        Versione: 1.28
+        Versione: 1.29
         <hr class="riga" />
           &copy; 2022 &mdash; <c:out value="${requestScope.theCurrentYear}" />&nbsp;<%-- 
           &nbsp;&nbsp;Universit&agrave; degli studi di Verona&nbsp;<br />&nbsp;
