@@ -214,14 +214,16 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.3.3] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
 - [1.3.2] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [1.3.1] Implementata form di ricerca sui quesiti per chiave testuale
-- [1.3.0] Aggiunta pagina che mostra i processi erogati dalla struttura evocata in maniera asincrona al clic sul nodo di una struttura
-- [1.2.9] Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
-- [1.2.8] Implementata pagina di dettaglio soggetto contingente/interessato
-- [1.2.7] Implementata pagina di dettaglio struttura
+- Aggiunta pagina che mostra i processi erogati dalla struttura evocata in maniera asincrona al clic sul nodo di una struttura
+- Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
+- Implementata pagina di dettaglio soggetto contingente/interessato
+- Implementata pagina di dettaglio struttura
+- [1.3.0] (xx/02/2023) Aggiunta pagina dettaglio rischio corruttivo: mostrati i processi esposti a un rischio cliccato. Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
 
 
 ### Done
 -->
+- [1.2.9] (08/02/2023) Piccole migliorie di presentazione nei dettagli di un processo: evidenziata area di rischio, mostrato dettaglio soggetto contingente
 - [1.2.8] (06/02/2023) Ampliato dettaglio processo anticorruttivo: mostrati i rischi corsi dal processo
 - [1.2.7] (30/01/2023) Implementato registro dei rischi corruttivi; correzione di bug
 - [1.2.6] (21/12/2022) Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
