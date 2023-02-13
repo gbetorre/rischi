@@ -218,11 +218,12 @@ e fornirvi il relativo significato e la relativa motivazione.
 - Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
 - Implementata pagina di dettaglio soggetto contingente/interessato
 - Implementata pagina di dettaglio struttura
-- [1.3.0] (xx/02/2023) Aggiunta pagina dettaglio rischio corruttivo: mostrati i processi esposti a un rischio cliccato. Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
+- Aggiunta funzionalit&agrave; di download registro dei rischi in formato CSV.
 
 
 ### Done
 -->
+- [1.3.0] (13/02/2023) Aggiunta pagina dettagli rischio corruttivo, elencante i processi esposti al rischio selezionato. Implementata pagina stand-alone dettagli processo. Riordinata pagina di landing.
 - [1.2.9] (08/02/2023) Piccole migliorie di presentazione nei dettagli di un processo: evidenziata area di rischio, mostrato dettaglio soggetto contingente
 - [1.2.8] (06/02/2023) Ampliato dettaglio processo anticorruttivo: mostrati i rischi corsi dal processo
 - [1.2.7] (30/01/2023) Implementato registro dei rischi corruttivi; correzione di bug
