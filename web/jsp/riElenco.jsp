@@ -20,10 +20,12 @@
         <c:if test="${risk.impatto gt 2}">
           <c:set var="alarm" value="pHeader" scope="page" />
         </c:if>
+          <a href="${initParam.appName}/?q=ri&idR=${risk.id}&r=${param['r']}">
           <c:out value="${risk.nome}" />
           <span class="float-right ${alarm}">
             (<c:out value="${risk.impatto}" />)
-          </span> 
+          </span>
+          </a>
         </li>
       </c:forEach>
       </ul>
