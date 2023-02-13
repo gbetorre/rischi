@@ -36,9 +36,9 @@ package it.rol.command;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,6 +49,7 @@ import javax.servlet.http.HttpSession;
 
 import com.oreilly.servlet.ParameterParser;
 
+import it.rol.command.HomePageCommand;
 import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
@@ -95,9 +96,13 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
     /**
-     * Pagina a cui la command reindirizza per mostrare la lista dei rischi del progetto
+     * Pagina a cui la command reindirizza per mostrare la lista dei rischi corruttivi
      */
     private static final String nomeFileElenco = "/jsp/riElenco.jsp";
+    /**
+     * Pagina a cui la command reindirizza per mostrare i dettagli di un rischio
+     */
+    private static final String nomeFileDettaglio = "/jsp/riRischio.jsp";
     /**
      * Pagina a cui la command fa riferimento per permettere la scelta di una struttura
      */
@@ -123,7 +128,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileSearch = "/jsp/riRicerca.jsp";
     /**
-     * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
+     * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<>();
     /**
@@ -192,8 +197,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         String fileJspT = null;
         // Utente loggato
         PersonBean user = null;
-        // Data di oggi sotto forma di oggetto String
-        GregorianCalendar today = Utils.getCurrentDate();
+        // Rischio corruttivo specifico
+        RiskBean risk = null;
         // Elenco dei rischi corruttivi legati alla rilevazione
         ArrayList<RiskBean> risks = null;
         // Elenco strutture collegate alla rilevazione
@@ -212,6 +217,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         HashMap<ItemBean, ArrayList<QuestionBean>> flatQuestions = null;
         // Tabella che conterrà i valori dei parametri passati dalle form
         HashMap<String, LinkedHashMap<String, String>> params = null;
+        // Predispone le BreadCrumbs personalizzate per la Command corrente
+        LinkedList<ItemBean> bC = null;
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
         String redirect = null;
         /* ******************************************************************** *
@@ -227,6 +234,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Dichiara data ed ora di una intervista cercata
         Date questDate = null;
         Time questTime = null;
+        // Recupera o inizializza 'id processo'
+        int idRk = parser.getIntParameter("idR", DEFAULT_ID);
         /* ******************************************************************** *
          *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
          * ******************************************************************** */
@@ -437,8 +446,21 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                         }
                         fileJspT = nomeFile.get(part);
                     } else {
-                        risks = db.getRisks(user, ConfigManager.getSurvey(codeSur).getId(), ConfigManager.getSurvey(codeSur));
-                        fileJspT = nomeFileElenco;
+                        /* ************************************************ *
+                         *              SELECT a Specific Risk              *
+                         * ************************************************ */
+                        if (idRk > DEFAULT_ID) {
+                            risk = db.getRisk(user, idRk, ConfigManager.getSurvey(codeSur));
+                            // Ha bisogno di personalizzare le breadcrumbs perché sull'indirizzo non c'è il parametro 'p'
+                            bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), "Rischio");
+                            fileJspT = nomeFileDettaglio;
+                        } else {
+                            /* ************************************************ *
+                             *                SELECT List of Risks              *
+                             * ************************************************ */
+                            risks = db.getRisks(user, ConfigManager.getSurvey(codeSur).getId(), ConfigManager.getSurvey(codeSur));
+                            fileJspT = nomeFileElenco;                            
+                        }
                     }
                 }
             } else {
@@ -473,7 +495,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
-        // Imposta nella request elenco completo strutture
+        // Imposta nella request elenco completo rischi corruttivi
         if (risks != null) {
             req.setAttribute("rischi", risks);
         }
@@ -516,6 +538,15 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Imposta nella request ora di un'intervista cercata
         if (questTime != null) {
             req.setAttribute("oraRisposte", questTime);
+        }
+        // Imposta nella request oggetto rischio corruttivo specifico
+        if (risk != null) {
+            req.setAttribute("rischio", risk);
+        }
+        // Imposta nella request le breadcrumbs in caso siano state personalizzate
+        if (bC != null) {
+            req.removeAttribute("breadCrumbs");
+            req.setAttribute("breadCrumbs", bC);
         }
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
