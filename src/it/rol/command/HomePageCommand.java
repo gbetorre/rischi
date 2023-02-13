@@ -93,16 +93,6 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
     /**
-     * Costante parlante per impostare il livello di voci di menu
-     * che non hanno un livello superiore (sono padri di sottomenu)
-     */
-    public static final int MAIN_MENU = 0;
-    /**
-     * Costante parlante per impostare il livello di voci di sottomenu
-     * che hanno un solo livello superiore (padre di livello 0)
-     */
-    public static final int SUB_MENU = 1;
-    /**
      * Pagina a cui la command reindirizza per mostrare la form di login
      */
     private static final String nomeFileElenco = "/jsp/login.jsp";
@@ -657,6 +647,44 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg + e.getMessage(), e);
         }
+    }
+    
+    
+    /**
+     * <p>Prende in input una struttura di breadcrumbs gi&agrave; formata 
+     * (serie di link corenti con il percorso seguito dall'utente fino 
+     * alla richiesta corrente) e restituisce una struttura di breadcrumbs 
+     * basata su quella ottenuta come parametro ma avente,
+     * come ultima foglia, un'etichetta passata come parametro, se questo
+     * &egrave; significativo, dando anche la possibilit&agrave; di eliminare 
+     * un numero di foglie a piacere, specificato tramite un parametro: <dl>
+     * <dt>0</dt><dd> =&gt; non toglie nulla,</dd>
+     * <dt>1</dt><dd> =&gt; toglie l'ultima foglia,</dd> 
+     * <dt>2</dt><dd> =&gt; toglie l'ultima e la penultima foglia</dd>
+     * </dl>etc.</p>
+     * 
+     * @param nav       lista di breadcrumbs preesistente
+     * @param items     numero di foglie da potare (opzionale)
+     * @param extraInfo etichetta da aggiungere come ultima foglia (opzionale)
+     * @return <code>LinkedList&lt;ItemBean&gt;</code> - struttura vettoriale, rispettante l'ordine di inserimento, rimaneggiata
+     * @throws CommandException se si verifica un problema nell'accesso a qualche parametro o in qualche altro puntamento
+     */
+    public static LinkedList<ItemBean> makeBreadCrumbs(LinkedList<ItemBean> nav,
+                                                       int items,
+                                                       String extraInfo)
+                                                throws CommandException {
+        // Pota le foglie di Lorien
+        if (items > NOTHING) {
+            for (int i = 0; i < items; i++) {
+                nav.removeLast();
+            }
+        }
+        // Aggiunge una foglia di Valinor
+        if (extraInfo != null && !extraInfo.equals(VOID_STRING)) {
+            nav.add(new ItemBean(extraInfo, extraInfo, extraInfo, SUB_MENU));
+        }
+        // Restituisce l'albero potato e/o rimaneggiato
+        return nav;
     }
 
 
