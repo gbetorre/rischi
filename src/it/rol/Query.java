@@ -821,7 +821,9 @@ public interface Query extends Serializable {
 
     /**
      * <p>Estrae tutti i sottoprocessi anticorruzione appartenenti a un processo
-     * anticorruzione, il cui identificativo viene passato come parametro.</p>
+     * anticorruzione, il cui identificativo viene passato come parametro.
+     * e che sono collegati al codice identificativo della rilevazione corrente,
+     * che viene passato come parametro.</p>
      */
     public static final String GET_SOTTOPROCESSI_AT_BY_PROCESS =
             "SELECT DISTINCT" +
@@ -830,14 +832,33 @@ public interface Query extends Serializable {
             "   ,   SPRAT.nome              AS \"nome\"" +
             "   ,   SPRAT.ordinale          AS \"ordinale\"" +
             "   ,   SPRAT.smartworking      AS \"smartWorking\"" +
-            
+            // Eventualmente contare qui quanti input, fasi, output, rischi... ha un sottoprocesso
             "   FROM sottoprocesso_at SPRAT" +
             "       INNER JOIN processo_at PRAT ON SPRAT.id_processo_at = PRAT.id" +
-            "       INNER JOIN rilevazione R ON PRAT.id_rilevazione = R.id" +
+            "       INNER JOIN rilevazione R ON SPRAT.id_rilevazione = R.id" +
             "   WHERE SPRAT.id_processo_at = ?" +
             "       AND R.codice ILIKE ?" +
             "   ORDER BY SPRAT.codice";
 
+    /**
+     * <p>Estrae il macroprocesso censito dall'anticorruzione sulla base 
+     * dell'identificativo di un suo processo anticorruttivo figlio, 
+     * e della rilevazione, i cui identificativi sono entrambi passati 
+     * come parametri.</p>
+     */
+    public static final String GET_MACRO_AT_BY_CHILD =
+            "SELECT" +
+            "       MAT.id                  AS \"id\"" +
+            "   ,   MAT.codice              AS \"codice\"" +
+            "   ,   MAT.nome                AS \"nome\"" +
+            "   ,   MAT.ordinale            AS \"ordinale\"" +
+            "   ,   MAT.id_rilevazione      AS \"idRilevazione\"" +
+            "   FROM macroprocesso_at MAT" +
+            "       INNER JOIN processo_at PAT ON PAT.id_macroprocesso_at = MAT.id" +
+            "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
+            "   WHERE PAT.id = ?" +
+            "       AND R.id = ?" ;
+    
     /**
      * <p>Se sul terzo parametro viene passato il valore convenzionale -1 
      * estrae tutti i quesiti filtrati in base all'identificativo 
@@ -1242,17 +1263,34 @@ public interface Query extends Serializable {
             "   ORDER BY RC.nome";
     
     /**
+     * <p>Estrae un rischio corruttivo dato il suo identificativo e quello
+     * della rilevazione entro cui &egrave; collocato, passati entrambi
+     * come parametri.</p> 
+     */
+    public static final String GET_RISK = 
+            "SELECT" +
+            "       RC.id                               AS \"id\"" +
+            "   ,   RC.codice                           AS \"informativa\"" +
+            "   ,   RC.nome                             AS \"nome\"" +
+            "   ,   RC.descrizione                      AS \"stato\"" +
+            "   ,   RC.ordinale                         AS \"ordinale\"" +
+            "   FROM rischio_corruttivo RC" +
+            "       INNER JOIN rilevazione S ON RC.id_rilevazione = S.id" +
+            "   WHERE RC.id = ?" +
+            "       AND RC.id_rilevazione = ?";
+
+    /**
      * <p>Estrae i rischi collegati ad uno specifico processo anticorruttivo,
      * il cui identificativo viene passato come parametro, nel contesto di una
      * specifica rilevazione, il cui identificativo viene passato come parametro.</p>
      */
     public static final String GET_RISK_BY_PROCESS = 
             "SELECT DISTINCT" +
-            "       RC.id                   AS \"id\"" +
-            "   ,   RC.codice               AS \"informativa\"" +
-            "   ,   RC.nome                 AS \"nome\"" +
-            "   ,   RC.descrizione          AS \"stato\"" +
-            "   ,   RC.ordinale             AS \"ordinale\"" +
+            "       RC.id                               AS \"id\"" +
+            "   ,   RC.codice                           AS \"informativa\"" +
+            "   ,   RC.nome                             AS \"nome\"" +
+            "   ,   RC.descrizione                      AS \"stato\"" +
+            "   ,   RC.ordinale                         AS \"ordinale\"" +
             "   FROM rischio_corruttivo RC" +
             "       INNER JOIN rischio_processo_at RPAT ON RPAT.id_rischio_corruttivo = RC.id" +
             "   WHERE RPAT.id_processo_at = ?" +
@@ -1266,16 +1304,37 @@ public interface Query extends Serializable {
      */
     public static final String GET_RISK_BY_SUB = 
             "SELECT DISTINCT" +
-            "       RC.id                   AS \"id\"" +
-            "   ,   RC.codice               AS \"informativa\"" +
-            "   ,   RC.nome                 AS \"nome\"" +
-            "   ,   RC.descrizione          AS \"stato\"" +
-            "   ,   RC.ordinale             AS \"ordinale\"" +
+            "       RC.id                               AS \"id\"" +
+            "   ,   RC.codice                           AS \"informativa\"" +
+            "   ,   RC.nome                             AS \"nome\"" +
+            "   ,   RC.descrizione                      AS \"stato\"" +
+            "   ,   RC.ordinale                         AS \"ordinale\"" +
             "   FROM rischio_corruttivo RC" +
             "       INNER JOIN rischio_sottoprocesso_at RSPAT ON RSPAT.id_rischio_corruttivo = RC.id" +
             "   WHERE RSPAT.id_sottoprocesso_at = ?" +
             "       AND RSPAT.id_rilevazione = ?" +
             "   ORDER BY RC.nome";
+    
+    /**
+     * <p>Estrae i processi - livello 2, quindi no Macro (= 1) no Sub (= 3) -
+     * collegati a un rischio corruttivo il cui identificativo 
+     * viene passato come parametro, e che sono stati rilevati nel contesto 
+     * di una data rilevazione, il cui identificativo 
+     * viene passato come parametro.</p>
+     */
+    public static final String GET_PROCESS_BY_RISK = 
+            "SELECT DISTINCT" +
+            "           PAT.id                          AS \"id\"" +
+            "   ,       PAT.codice                      AS \"codice\"" +
+            "   ,       PAT.nome                        AS \"nome\"" +
+            "   , " +   Constants.ELEMENT_LEV_2 + "     AS \"livello\"" +
+            "   ,       PAT.ordinale                    AS \"ordinale\"" +
+            "   ,       PAT.id_macroprocesso_at" +
+            "   FROM processo_at PAT" +
+            "       INNER JOIN rischio_processo_at RPAT ON RPAT.id_processo_at = PAT.id" +
+            "   WHERE RPAT.id_rischio_corruttivo = ?" +
+            "       AND RPAT.id_rilevazione = ?" +
+            "   ORDER BY PAT.id_macroprocesso_at, PAT.nome";
     
     /**
      * <p>In funzione del parametro specificante il livello
