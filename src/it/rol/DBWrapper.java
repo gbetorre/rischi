@@ -885,7 +885,7 @@ public class DBWrapper implements Query, Constants {
                 // Imposta la rilevazione nel macroprocesso
                 macro.setRilevazione(survey);
                 // Recupera le persone allocate sul macroprocesso
-                macro.setPersone(getPeopleByStructureAndMacro(user, macro.getId(), survey.getId(), sl));
+                //macro.setPersone(getPeopleByStructureAndMacro(user, macro.getId(), survey.getId(), sl));
                 // Recupera i sottoprocessi
                 pst = null;
                 pst = con.prepareStatement(GET_PROCESSI_BY_MACRO);
@@ -895,7 +895,7 @@ public class DBWrapper implements Query, Constants {
                 while (rs1.next()) {
                     processo = new ProcessBean();
                     BeanUtil.populate(processo, rs1);
-                    processo.setPersone(getPeopleByStructureAndProcess(user, processo.getId(), survey.getId(), sl));
+                    //processo.setPersone(getPeopleByStructureAndProcess(user, processo.getId(), survey.getId(), sl));
                     sottoprocessi.add(processo);
                 }
                 // Imposta i sottoprocessi
@@ -3615,6 +3615,73 @@ public class DBWrapper implements Query, Constants {
     
     
     /**
+     * <p>Restituisce un oggetto corrispondente ad un rischio corruttivo
+     * censito nel contesto di una data rilevazione, i cui identificativi
+     * accetta come argomenti.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param idRisk    identificativo del rischio corruttivo 
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>RiskBean</code> - un RiskBean, che rappresenta il rischio corruttivo trovato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public RiskBean getRisk(PersonBean user, 
+                            int idRisk, 
+                            CodeBean survey)
+                     throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            RiskBean risk = null;
+            int nextParam = NOTHING;
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_RISK);
+                pst.clearParameters();
+                pst.setInt(++nextParam, idRisk);
+                pst.setInt(++nextParam, survey.getId());
+                rs = pst.executeQuery();
+                // Punta al rischio
+                if (rs.next()) {
+                    // Prepara il rischio
+                    risk = new RiskBean();
+                    // Valorizza il rischio
+                    BeanUtil.populate(risk, rs);
+                    // Recupera i processi del rischio
+                    risk.setProcessi(getProcessByRisk(user, risk, survey));
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return risk;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio non recuperabile; problema nel metodo di estrazione del singolo rischio.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "RiskBean non valorizzato; problema nella query del singolo rischio.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
      * <p>Restituisce un ArrayList contenente tutti i rischi corruttivi
      * collegati ad un dato processo o sottoprocesso e censiti nel contesto 
      * di una data rilevazione.</p>
@@ -3662,6 +3729,92 @@ public class DBWrapper implements Query, Constants {
                 throw new WebStorageException(msg + anve.getMessage(), anve);
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "RiskBean non valorizzato; problema nella query dei rischi.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un ArrayList contenente tutti i processi (livello 2)
+     * collegati ad un dato rischio corruttivo il cui identificativo viene
+     * accettato come argomento, e censiti nel contesto di una data rilevazione.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param risk      oggetto contenente i dati del rischio
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ArrayList&lt;RiskBean&gt;</code> - un vettore ordinato di RiskBean, che rappresentano i rischi corruttivi trovati per il sotto/processo dato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<ProcessBean> getProcessByRisk(PersonBean user, 
+                                                   RiskBean risk, 
+                                                   CodeBean survey)
+                                            throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs, rs1 = null;
+            AbstractList<ProcessBean> pats = new ArrayList<>();
+            int nextParam = NOTHING;
+            try {
+                // TODO: Controllare se user è superuser
+                //String query = (process.getLivello() == ELEMENT_LEV_2 ? GET_PROCESS_BY_RISK : GET_SUB_BY_RISK);
+                pst = con.prepareStatement(GET_PROCESS_BY_RISK);
+                pst.clearParameters();
+                pst.setInt(++nextParam, risk.getId());
+                pst.setInt(++nextParam, survey.getId());
+                rs = pst.executeQuery();
+                // Punta al rischio
+                while (rs.next()) {
+                    // Prepara il processo
+                    ProcessBean pat = new ProcessBean();
+                    // Valorizza il processo
+                    BeanUtil.populate(pat, rs);
+                    /* == Recupera il macroprocesso_at padre == */
+                    nextParam = NOTHING;
+                    pst = null;
+                    pst = con.prepareStatement(GET_MACRO_AT_BY_CHILD);
+                    pst.clearParameters();
+                    pst.setInt(++nextParam, pat.getId());
+                    pst.setInt(++nextParam,survey.getId());
+                    rs1 = pst.executeQuery();
+                    // Punta al padre (se c'è, è solo uno!)
+                    if (rs1.next()) {
+                        // Prepara il padre
+                        ProcessBean mat = new ProcessBean();
+                        // Valorizza il padre
+                        BeanUtil.populate(mat, rs1);
+                        // Aggiunge il padre al filgio
+                        pat.setPadre(mat);
+                    }
+                    // Aggiunge il processo alla lista dei processi trovati
+                    pats.add(pat);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<ProcessBean>) pats;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio non recuperabile; problema nel metodo di estrazione dei processi appartenenti a rischio.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "ProcessBean non valorizzato; problema nella query dei processi di rischio.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally {
