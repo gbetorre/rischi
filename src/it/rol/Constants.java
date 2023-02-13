@@ -120,6 +120,16 @@ public interface Constants extends Serializable {
      * (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at)</p>
      */
     public static final byte ELEMENT_LEV_4 = 4;
+    /**
+     * <p>Costante parlante per impostare il livello di voci di menu
+     * che non hanno un livello superiore (sono padri di sottomenu)</p>
+     */
+    public static final int MAIN_MENU = 0;
+    /**
+     * <p>Costante parlante per impostare il livello di voci di sottomenu
+     * che hanno un solo livello superiore (padre di livello 0)</p>
+     */
+    public static final int SUB_MENU = 1;
     /* ************************************************************************ *
      *              Costanti parlanti per valori boolean di flags               *
      * ************************************************************************ */
