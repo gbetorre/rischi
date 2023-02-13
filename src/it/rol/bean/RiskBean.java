@@ -33,6 +33,8 @@
 
 package it.rol.bean;
 
+import java.util.AbstractList;
+
 import it.rol.exception.AttributoNonValorizzatoException;
 
 /**
@@ -54,9 +56,6 @@ public class RiskBean extends CodeBean {
      *  Viene utilizzato per contestualizzare i messaggi di errore.
      */
     private final String FOR_NAME = "\n" + this.getClass().getName() + ": "; //$NON-NLS-1$
-    /* *************************************************************************** *  
-     *                      Dati identificativi del rischio                        *
-     * *************************************************************************** */
     /** Impatto del rischio */
     private String impatto;
     /** Livello del rischio */
@@ -64,16 +63,23 @@ public class RiskBean extends CodeBean {
     /** Stato del rischio */
     private String stato;
     /** Urgenza del rischio */
-    private boolean urgenza;
-	
+    private boolean urgente;
+    /** Processi esposti al rischio */
+    private AbstractList<ProcessBean> processi;
     
+	
+    /* ************************************************************ *  
+     *                         Costruttori                          *
+     * ************************************************************ */
     /**
-     * <p>Costruttore: inizializza i campi a valori di default.</p>
+     * <p>Costruttore senza parametri: inizializza i campi a valori di default.</p>
      */
     public RiskBean() {
     	super();
     	impatto = livello = null;
     	stato = null;
+    	urgente = false;
+    	processi = null;
     }
 	
 	
@@ -113,8 +119,7 @@ public class RiskBean extends CodeBean {
 	/**
 	 * Restituisce il livello del rischio
 	 * @return <code>livello</code> - livello del rischio
-	 * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e livello non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-	 * oppure livello non &egrave; stato valorizzato correttamente
+	 * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e livello non &egrave; stato valorizzato (&egrave; un dato obbligatorio) oppure se l'attributo livello non risulta valorizzato correttamente
 	 */
 	public String getLivello() throws AttributoNonValorizzatoException {
 		if (livello == null) {
@@ -144,22 +149,16 @@ public class RiskBean extends CodeBean {
 	 * Restituisce lo stato del rischio
 	 * @return <code>stato</code> - stato del rischio
 	 * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e stato non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-	 * oppure stato non &egrave; stato valorizzato correttamente
 	 */
 	public String getStato() throws AttributoNonValorizzatoException {
 		if (stato == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo stato non valorizzato!");
-		}/*
-		else if (!STATO_RISCHIO_AS_LIST.contains(stato)) {
-			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo stato non valorizzato correttamente!");
-		}*/
-		else {
-			return stato;
 		}
+        return stato;
 	}
 
 	/**
-	 * Imposta il stato di rischio
+	 * Imposta lo stato di rischio
 	 * @param stato - stato del rischio
 	 */
 	public void setStato(String stato) {
@@ -171,21 +170,48 @@ public class RiskBean extends CodeBean {
      *           Metodi getter e setter per urgenza              *
      * ********************************************************* */
     /**
-     * Restituisce true se il rischio &egrave; urgenze - false (default) se non lo &egrave;
+     * Restituisce true se il rischio &egrave; urgente - false (default) se non lo &egrave;
      * 
      * @return <code>Boolean</code> - true/false rischio urgente
      */
-    public boolean isUrgenza() {
-        return urgenza;
+    public boolean isUrgente() {
+        return urgente;
     }
 
     /**
      * Imposta l'urgenza del rischio
      *  
-     * @param urgenza - urgenza true/false da impostare
+     * @param urgente - urgenza true/false da impostare
      */
-    public void setUrgenza(boolean urgenza) {
-        this.urgenza = urgenza;
+    public void setUrgente(boolean urgente) {
+        this.urgente = urgente;
+    }
+
+    
+    /* ********************************************************* *
+     *          Metodi getter e setter per processi              *
+     * ********************************************************* */
+    /**
+     * Restituisce una lista di processi che risultano esposti
+     * al rischio corrente;
+     * non solleva un'eccezione se questo attributo &egrave;
+     * non significativo (perch&eacute; i rischi potrebbero anche essere
+     * previsti nel registro dei rischio ma non attualmente applicati 
+     * all'insieme dei processi mappati ai fini anticorruttivi).
+     *
+     * @return <code>processi</code> - lista di processi esposti al rischio corrente
+     */
+    public AbstractList<ProcessBean> getProcessi() {
+        return processi;
+    }
+
+    /**
+     * Imposta i processi esposti al rischio corrente.
+     *
+     * @param processi - processi esposti al rischio corrente, da impostare
+     */
+    public void setProcessi(AbstractList<ProcessBean> processi) {
+        this.processi = processi;
     }
 	
 }
