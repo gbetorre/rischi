@@ -38,8 +38,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -97,17 +99,17 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileElenco = "/jsp/prElenco.jsp";
     /**
+     * Pagina per mostrare il dettaglio di un processo
+     */
+    private static final String nomeFileDettaglio = "/jsp/prProcessoAjax.jsp";
+    /**
      * Nome del file json della Command (dipende dalla pagina di default)
      */
     private String nomeFileJson = nomeFileElenco.substring(nomeFileElenco.lastIndexOf('/'), nomeFileElenco.indexOf(DOT));
     /**
-     * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
-     */
-    //private static final HashMap<String, String> nomeFile = new HashMap<>();
-    /**
-     *  Processo di dato id
-     */
-    ProcessBean runtimeProcess = null;
+     * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
+     */    
+    private static final HashMap<String, String> nomeFile = new HashMap<>();
 
 
     /**
@@ -138,7 +140,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        //nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
+        nomeFile.put(PART_PROCESS, nomeFileDettaglio);
     }
 
 
@@ -165,15 +167,21 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Recupera o inizializza 'codice rilevazione' (Survey)
         String codeSur = parser.getStringParameter("r", DASH);
         // Recupera o inizializza 'id processo'
-        //int idPr = parser.getIntParameter("id", -1);
+        int idP = parser.getIntParameter("pliv", DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'
-        //String part = parser.getStringParameter("p", DASH);
+        String part = parser.getStringParameter("p", DASH);
+        // Recupera o inizializza livello di granularità del processo anticorruttivo
+        int liv = parser.getIntParameter("liv", DEFAULT_ID);
         // Dichiara la pagina a cui reindirizzare
         String fileJspT = null;
         // Dichiara elenco di processi
         AbstractList<ProcessBean> macrosat = new ArrayList<>();
+        // Dichiara generico elenco di elementi afferenti a un processo
+        HashMap<String, ArrayList<?>> processElements = null;
         // Prepara un oggetto contenente i parametri opzionali per i nodi
         ItemBean options = new ItemBean("#009966",  VOID_STRING,  VOID_STRING, VOID_STRING, PRO_PFX, NOTHING);
+        // Predispone le BreadCrumbs personalizzate per la Command corrente
+        LinkedList<ItemBean> bC = null;
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -216,12 +224,36 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         try {
             // Il parametro di navigazione 'rilevazione' è obbligatorio
             if (!codeSur.equals(DASH)) {
-                // Viene richiesta la visualizzazione di un elenco di macroprocessi
-                macrosat = retrieveMacroAtBySurvey(user, codeSur, db);
-                // Genera il file json contenente le informazioni strutturate
-                printJson(req, macrosat, nomeFileJson, options);
-                // Imposta la jsp
-                fileJspT = nomeFileElenco;
+                // Il parametro di navigazione 'p' permette di addentrarsi nelle funzioni
+                if (nomeFile.containsKey(part)) { // Viene richiesta la visualizzazione del dettaglio di un processo
+                    // Recupera Input estratti in base al processo
+                    ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
+                    // Recupera Fasi estratte in base al processo
+                    ArrayList<ActivityBean> listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
+                    // Recupera Output estratti in base al processo
+                    ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
+                    // Recupera Rischi estratti in base al processo
+                    ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
+                    // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                    processElements = new HashMap<>();
+                    // Imposta nella tabella le liste trovate
+                    processElements.put(TIPI_LISTE[0], listaInput);
+                    processElements.put(TIPI_LISTE[1], listaFasi);
+                    processElements.put(TIPI_LISTE[2], listaOutput);
+                    processElements.put(TIPI_LISTE[3], listaRischi);
+                    // Ha bisogno di personalizzare le breadcrumbs
+                    LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                    bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
+                    // Imposta la jsp
+                    fileJspT = nomeFile.get(part);
+                } else {
+                    // Viene richiesta la visualizzazione di un elenco di macroprocessi
+                    macrosat = retrieveMacroAtBySurvey(user, codeSur, db);
+                    // Genera il file json contenente le informazioni strutturate
+                    printJson(req, macrosat, nomeFileJson, options);
+                    // Imposta la jsp
+                    fileJspT = nomeFileElenco;
+                }
             } else {    // Manca il codice rilevazione!!
                 String msg = FOR_NAME + "Impossibile recuperare il codice della rilevazione.\n";
                 LOG.severe(msg + "Qualcuno ha probabilmente alterato il codice rilevazione nell\'URL della pagina.\n");
@@ -243,6 +275,27 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
+        // Imposta nella request elenco completo input di processo, se presenti
+        if (processElements != null && !processElements.get(TIPI_LISTE[0]).isEmpty()) {
+            req.setAttribute("listaInput", processElements.get(TIPI_LISTE[0]));
+        }
+        // Imposta nella request elenco completo fasi di processo, se presenti
+        if (processElements != null && !processElements.get(TIPI_LISTE[1]).isEmpty()) {
+            req.setAttribute("listaFasi", processElements.get(TIPI_LISTE[1]));
+        }
+        // Imposta nella request elenco completo output di processo, se presenti
+        if (processElements != null && !processElements.get(TIPI_LISTE[2]).isEmpty()) {
+            req.setAttribute("listaOutput", processElements.get(TIPI_LISTE[2]));
+        }
+        // Imposta nella request elenco completo rischi di processo, se presenti
+        if (processElements != null && !processElements.get(TIPI_LISTE[3]).isEmpty()) {
+            req.setAttribute("listaRischi", processElements.get(TIPI_LISTE[3]));
+        }
+        // Imposta nella request le breadcrumbs in caso siano state personalizzate
+        if (bC != null) {
+            req.removeAttribute("breadCrumbs");
+            req.setAttribute("breadCrumbs", bC);
+        }
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
