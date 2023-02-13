@@ -1,4 +1,5 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> 
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
   <script type="text/javascript">
   function pickOne(){
       let x = Math.floor((Math.random() * 20) + 1);
@@ -17,7 +18,14 @@
         </button>
       </div>
       <div class="toast-body">
-        Versione: 1.29
+        Versione: 1.30
+        <fmt:setLocale value="it_IT"/>
+        <c:set var="deployDate" value="10-02-2023" scope="page" />
+        <fmt:parseDate var="releaseDate" value="${deployDate}" pattern="dd-MM-yyyy" scope="page" />
+        <fmt:formatDate var="dataRilascio" value="${releaseDate}" pattern="dd MMMMM, yyyy" />
+        <span class="float-right">
+          <em>(data di rilascio: <c:out value="${dataRilascio}" />)</em>
+        </span>
         <hr class="riga" />
           &copy; 2022 &mdash; <c:out value="${requestScope.theCurrentYear}" />&nbsp;<%-- 
           &nbsp;&nbsp;Universit&agrave; degli studi di Verona&nbsp;<br />&nbsp;
