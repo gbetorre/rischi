@@ -151,10 +151,22 @@
           <c:if test="${status.index mod 2 eq 0}">
             <c:set var="bgAct" value="bgAct20" scope="page" />
           </c:if>
-          <li class="list-group-item ${bgAct}"><c:out value="${risk.nome}" /></li>
+          <li class="list-group-item ${bgAct}">
+            <a href="${initParam.appName}/?q=ri&idR=${risk.id}&r=${param['r']}">
+              <c:out value="${risk.nome}" />
+            </a>
+          </li>
         </c:forEach>
         </ul>
       </div>
     </div>
 </c:catch>
-<c:out value="${exception}" />
+<c:if test="${not empty exception}">
+  <div class="alert alert-danger">
+    <strong>Spiacente!</strong>
+    <p>
+      Si &egrave; verificato un problema<br/>
+      <c:out value="${exception}" />
+    </p>
+  </div>
+</c:if>
