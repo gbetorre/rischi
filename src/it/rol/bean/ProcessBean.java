@@ -119,8 +119,8 @@ public class ProcessBean extends CodeBean {
     private DepartmentBean dipart;
     /** Processi aggregati dal processo corrente */
     private AbstractList<ProcessBean> processi;
-    /** Persone allocate sul processo/macroprocesso */
-    private AbstractList<PersonBean> persone;
+    /** Processo padre del processo corrente */
+    private ProcessBean padre;
     /** Livello gerarchico del processo in una gerarchia di tipi di processi */
     private int livello;
     /* ------------------------------------------------------------------------ *
@@ -160,7 +160,7 @@ public class ProcessBean extends CodeBean {
         idRilevazione = livello = BEAN_DEFAULT_ID;
         statoprocesso = null;
         processi = null;
-        persone = null;
+        padre = null;
         rilevazione = null;
     }
 
@@ -614,28 +614,28 @@ public class ProcessBean extends CodeBean {
 
 
     /* *************************************************** *
-     *     Metodi getter e setter per persone allocate     *
+     *      Metodi getter e setter per processo padre      *
      * *************************************************** */
     /**
-     * Restituisce una lista di persone che sono stati allocate
-     * per il processo (o il macroprocesso);
+     * Restituisce il processo padre del processo corrente;
+     * per il processo restituisce il macroprocesso che lo aggrega;
+     * per il sottoprocesso restituisce il processo che lo aggrega;
      * non solleva un'eccezione se questo attributo &egrave;
-     * non valorizzato (perch&eacute; questo dato, anche se significativo,
-     * non deve essere necessariamente caricato).
+     * non valorizzato.
      *
-     * @return <code>persone</code> - lista di persone del macro/processo
+     * @return <code>padre</code> - processo padre del processo corrente
      */
-    public AbstractList<PersonBean> getPersone() {
-        return persone;
+    public ProcessBean getPadre() {
+        return padre;
     }
 
     /**
-     * Imposta le persone allocate su di un macro/processo.
+     * Imposta il processo padre del processo corrente.
      *
-     * @param persone - persone di macro/processo da impostare
+     * @param padre - padre di sotto/processo da impostare
      */
-    public void setPersone(AbstractList<PersonBean> persone) {
-        this.persone = persone;
+    public void setPadre(ProcessBean padre) {
+        this.padre = padre;
     }
     
     /* **************************************************** *
