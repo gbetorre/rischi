@@ -211,12 +211,14 @@ public class Data extends HttpServlet implements Constants {
             if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
                 // Verifica se deve servire un output csv
                 if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
-                    // Recupero macroprocessi in base alla rilevazione
+                    // Recupero elementi in base alla richiesta
                     lista = retrieve(req, COMMAND_RISK);
                     // Passaggio in request per uso delle lista
-                    req.setAttribute("listaInterviste", lista);
+                    req.setAttribute("lista", lista);
+                    // Assegnazione di un valore di default se il parametro 'p' è nullo
+                    String key = (part == null ? COMMAND_RISK : part);
                     // Genera il file CSV
-                    makeCSV(req, res, part);
+                    makeCSV(req, res, key);
                     // Ha finito
                     return;
                 }
@@ -356,6 +358,21 @@ public class Data extends HttpServlet implements Constants {
                     interviews.add(interview);
                     // Casta elenco di risposte a lista generica
                     list = interviews;
+                // Non c'è il parametro 'p'
+                } else {
+                    // Recupera tutti i rischi della rilevazione corrente
+                    ArrayList<RiskBean> risks = db.getRisks(user, ConfigManager.getSurvey(codeSurvey).getId(), ConfigManager.getSurvey(codeSurvey));
+                    // Prepara una lista di rischi contenenti ciascuno l'elenco dei processi che sono esposti al rischio stesso
+                    ArrayList<RiskBean> risksWithProcess = new ArrayList<>();
+                    // Per ogni rischio trovato...
+                    for (RiskBean risk : risks) {
+                        // ...Ne recupera i processi esposti e li carica nel rischio stesso
+                        risk.setProcessi(db.getProcessByRisk(user, risk, ConfigManager.getSurvey(codeSurvey)));
+                        // Carica il rischio valorizzato con i processi alla lista dei rischi
+                        risksWithProcess.add(risk);
+                    }
+                    // In questo modo restituisce solo i rischi aventi processi esposti, ma per le regole di business, non devono esserci rischi nel registro non associati a processi
+                    list = risksWithProcess;
                 }
             // "data?q=pr"
             } else if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
@@ -515,19 +532,19 @@ public class Data extends HttpServlet implements Constants {
     /**
      * <p>Genera un nome univoco a partire da un prefisso dato come parametro.</p>
      *
-     * @param p il prefisso che costituira' una parte del nome
+     * @param label il prefisso che costituira' una parte del nome del file generato
      * @return <code>String</code> - il nome univoco generato
      */
-    private static String makeFilename(String p) {
+    private static String makeFilename(String label) {
         // Crea un nome univoco per il file che andrà ad essere generato
         Calendar now = Calendar.getInstance();
-        String fileName = ConfigManager.getLabels().get(p) + UNDERSCORE +
+        String fileName = ConfigManager.getLabels().get(label) + UNDERSCORE +
                           new Integer(now.get(Calendar.YEAR)).toString() + HYPHEN +
-                          String.format("%02d", now.get(Calendar.MONTH) + 1) + HYPHEN +
-                          String.format("%02d", now.get(Calendar.DAY_OF_MONTH)) + UNDERSCORE +
-                          String.format("%02d", now.get(Calendar.HOUR_OF_DAY)) +
-                          String.format("%02d", now.get(Calendar.MINUTE)) +
-                          String.format("%02d", now.get(Calendar.SECOND));
+                          String.format("%02d", new Integer(now.get(Calendar.MONTH) + 1)) + HYPHEN +
+                          String.format("%02d", new Integer(now.get(Calendar.DAY_OF_MONTH))) + UNDERSCORE +
+                          String.format("%02d", new Integer(now.get(Calendar.HOUR_OF_DAY))) +
+                          String.format("%02d", new Integer(now.get(Calendar.MINUTE))) +
+                          String.format("%02d", new Integer(now.get(Calendar.SECOND)));
         return fileName;
     }
 
@@ -584,7 +601,7 @@ public class Data extends HttpServlet implements Constants {
             if (part.equalsIgnoreCase(PART_SELECT_QSS)) {
                 try {
                     // Recupera le interviste da Request
-                    ArrayList<InterviewBean> list = (ArrayList<InterviewBean>) req.getAttribute("listaInterviste");
+                    ArrayList<InterviewBean> list = (ArrayList<InterviewBean>) req.getAttribute("lista");
                     // Ottiene struttura contenente il numero di quesiti per ciascuna rilevazione
                     ConcurrentHashMap<String, Integer> questionAmounts = ConfigManager.getQuestionAmount();
                     // Ottiene il numero di quesiti della prima rilevazione (al massimo le colonne rimanenti resteranno senza intestazione)
@@ -658,7 +675,7 @@ public class Data extends HttpServlet implements Constants {
             else if (part.equalsIgnoreCase(PART_RESUME_QST)) {
                 try {
                     // Recupera le interviste da Request
-                    ArrayList<InterviewBean> list = (ArrayList<InterviewBean>) req.getAttribute("listaInterviste");
+                    ArrayList<InterviewBean> list = (ArrayList<InterviewBean>) req.getAttribute("lista");
                     // Bisogna recuperare una singola intervista (incapsulata in un elenco di uno)
                     InterviewBean interview = list.get(NOTHING);
                     // Scrittura file CSV
@@ -683,6 +700,49 @@ public class Data extends HttpServlet implements Constants {
                             out.println(String.valueOf(tupla));
                             itCounts++;
                         } while (itCounts < interview.getRisposte().size());
+                        success = itCounts;
+                    }
+                } catch (RuntimeException re) {
+                    log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco delle strutture collegate ai macroprocessi.\n" + re.getMessage());
+                    out.println(re.getMessage());
+                } catch (Exception e) {
+                    log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
+                    out.println(e.getMessage());
+                }
+            }
+            /* ************************************************************ *
+             *    Generazione contenuto files CSV del registro dei rischi   *
+             * ************************************************************ */
+            else {
+                try {
+                    // Recupera i macro at da Request
+                    ArrayList<RiskBean> list = (ArrayList<RiskBean>) req.getAttribute("lista");
+                    // Scrittura file CSV
+                    StringBuffer headers = new StringBuffer()
+                            .append("Rischio").append(SEPARATOR)
+                            //.append("N. Processi esposti").append(SEPARATOR)
+                            .append("Codice Macroprocesso").append(SEPARATOR)
+                            .append("Macroprocesso").append(SEPARATOR)
+                            .append("Codice Processo").append(SEPARATOR)
+                            .append("Processo").append(SEPARATOR);
+                    out.println(headers);
+                    if (list.size() > NOTHING) {
+                        int itCounts = NOTHING;
+                        do {
+                            RiskBean item = list.get(itCounts);
+                            // Stampa rischi che hanno processi associati
+                            for (ProcessBean pat : item.getProcessi()) {
+                                String labelR = item.getNome().replace(SEMICOLON, BLANK_SPACE).replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE);
+                                StringBuffer tupla = new StringBuffer()
+                                    .append(labelR).append(SEPARATOR)
+                                    .append(pat.getPadre().getCodice()).append(SEPARATOR)
+                                    .append(pat.getPadre().getNome()).append(SEPARATOR)
+                                    .append(pat.getCodice()).append(SEPARATOR)
+                                    .append(pat.getNome()).append(SEPARATOR);
+                                out.println(String.valueOf(tupla));
+                            }
+                            itCounts++;
+                        } while (itCounts < list.size());
                         success = itCounts;
                     }
                 } catch (RuntimeException re) {
