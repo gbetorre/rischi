@@ -208,21 +208,21 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 <!--
 ### ToDo (Roadmap)
-- [1.3.6] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
-- [1.3.5] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
-- [1.3.4] Implementata estrazione risultati in formato CSV
-- [1.3.3] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
-- [1.3.2] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
-- [1.3.1] Implementata form di ricerca sui quesiti per chiave testuale
+- [1.3.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
+- [1.3.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
+- [1.3.7] Implementata estrazione risultati in formato CSV
+- [1.3.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
+- [1.3.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
+- [1.3.4] Implementata form di ricerca sui quesiti per chiave testuale
 - Aggiunta pagina che mostra i processi erogati dalla struttura evocata in maniera asincrona al clic sul nodo di una struttura
 - Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
 - Implementata pagina di dettaglio soggetto contingente/interessato
 - Implementata pagina di dettaglio struttura
-- Aggiunta funzionalit&agrave; di download registro dei rischi in formato CSV.
-
+- Implementata funzione di aggiunta di un rischio corruttivo al registro dei rischi
 
 ### Done
 -->
+- [1.3.1] (15/02/2023) Aggiunta funzionalit&agrave; di download registro dei rischi in formato CSV (estrae solo rischi con processi associati, come da regole di business)
 - [1.3.0] (13/02/2023) Aggiunta pagina dettagli rischio corruttivo, elencante i processi esposti al rischio selezionato. Implementata pagina stand-alone dettagli processo. Riordinata pagina di landing.
 - [1.2.9] (08/02/2023) Piccole migliorie di presentazione nei dettagli di un processo: evidenziata area di rischio, mostrato dettaglio soggetto contingente
 - [1.2.8] (06/02/2023) Ampliato dettaglio processo anticorruttivo: mostrati i rischi corsi dal processo
