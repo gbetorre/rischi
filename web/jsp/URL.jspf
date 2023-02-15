@@ -6,6 +6,11 @@
   <c:param name="q" value="ri" />
   <c:param name="r" value="${ril}" />
 </c:url>
+<c:url var="riCSV" context="${initParam.appName}" value="/data" scope="page">
+  <c:param name="q" value="ri" />
+  <c:param name="r" value="${ril}" />
+  <c:param name="out" value="csv" />
+</c:url>
 <c:url var="str" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="ri" />
   <c:param name="p" value="str" />
