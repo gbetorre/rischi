@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ include file="URL.jspf" %>
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
     <h3 class="mt-1 m-0 font-weight-bold">Registro rischi corruttivi</h3>
     <hr class="riga"/>
@@ -34,7 +35,7 @@
       <button type="button" class="btn btn-danger">
         <span class="badge badge-pill badge-light">${risks.size()}</span>
       </button>
-      <a href="${sqsCSV}" class="float-right lastMenuContent" title="Scarica il database completo del registro dei rischi corruttivi">
+      <a href="${riCSV}" class="float-right lastMenuContent" title="Scarica il database completo del registro dei rischi corruttivi">
         <i class="fas fa-download"></i> <span class="sezioneElenco">Scarica tutti i dati&nbsp;</span>
       </a>
     </h4>
