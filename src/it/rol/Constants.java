@@ -270,6 +270,14 @@ public interface Constants extends Serializable {
      */
     public static final char QM = '?';
     /**
+     * Costante per far riferimento al carattere di virgoletta semplice, o apostrofo
+     */
+    public static final char APOSTROPHE = '\'';
+    /**
+     * Costante per far riferimento al carattere tipografico di virgoletta inglese
+     */
+    public static final char ENGLISH_SINGLE_QUOTE = '’';
+    /**
      * <p>Costante da utilizzare quando serve un valore per inizializzazione,
      * o da utilizzare come argomento, per effettuare test, etc.</p>
      * <p>Graficamente maggiormente visibile e chiara della stringa vuota
@@ -358,6 +366,10 @@ public interface Constants extends Serializable {
      * Costante per i nomi di estrazioni dati processi anticorruzione
      */
     public static final String PROCESS = "processi";
+    /**
+     * Costante per i nomi di estrazioni dati registro rischi corruttivi
+     */
+    public static final String RISKS = "registrorischi";
     /* ************************************************************************ *
      * Costanti di tempo (p.es. formati di data, date significative, etc.) *
      * ************************************************************************ */
