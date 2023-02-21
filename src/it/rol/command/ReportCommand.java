@@ -59,12 +59,12 @@ import it.rol.exception.WebStorageException;
 
 
 /**
- * <p><code>ChartCommand.java</code><br>
+ * <p><code>ReportCommand.java</code><br>
  * Implementa la logica per la gestione delle persone collegate ai processi on line (PROL).</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
-public class ChartCommand extends ItemBean implements Command, Constants {
+public class ReportCommand extends ItemBean implements Command, Constants {
 
     /**
      * La serializzazione necessita di dichiarare una costante di tipo long
@@ -87,9 +87,9 @@ public class ChartCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileElenco = "/jsp/muElenco.jsp";
     /**
-     * Pagina a cui la command reindirizza per mostrare i dettagli basati una ricerca per id
+     * Pagina a cui la command fa riferimento per mostrare la form di ricerca
      */
-    private static final String nomeFilePersona = "/jsp/peDettaglio.jsp";
+    private static final String nomeFileSearch = "/jsp/muRicerca.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */
@@ -103,7 +103,7 @@ public class ChartCommand extends ItemBean implements Command, Constants {
     /**
      * Crea una nuova istanza di questa Command
      */
-    public ChartCommand() {
+    public ReportCommand() {
         /*;*/   // It Doesn't Anything
     }
 
@@ -128,7 +128,7 @@ public class ChartCommand extends ItemBean implements Command, Constants {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        //nomeFile.put(PART_SEARCH_PERSON, nomeFileElenco);
+        nomeFile.put(PART_SEARCH,     nomeFileSearch);
         //nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }
 
@@ -221,28 +221,8 @@ public class ChartCommand extends ItemBean implements Command, Constants {
                 qualifiche = db.getRuoliGiuridici(user);
                 // Il parametro di navigazione 'p' permette di addentrarsi nelle funzioni
                 if (nomeFile.containsKey(part)) {
-                    // Viene richiesta la visualizzazione di una persona specifica
-                    if (idPe > 0) {
-                        // Recupera il singolo individuo
-                        person = db.getPerson(user, idPe, ConfigManager.getSurvey(codeSur));
-                        // Ne recupera i macroprocessi, contenenti i processi al loro interno
-                        mp = db.getMacroByPerson(user, person, ConfigManager.getSurvey(codeSur));
-                        // Personalizza le breadcrumbs
-                        bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), "ExtraInfo");
-                        // Imposta il valore della pagina personale
-                        fileJspT = nomeFilePersona;
-                    } else {    // Viene richiesta la visualizzazione di un elenco
-                        // Valorizza la tabella che conterrÃ  i valori dei parametri passati dalla form
-                        params = new HashMap<String, LinkedHashMap<String, String>>();
-                        // Carica la tabella dei parametri
-                        //loadParams(part, parser, params);
-                        // Fa la query
-                        //people = retrievePeople(params.get(part), codeSur, user, db);
-                        // Personalizza le breadcrumbs
-                        bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), null);
-                        // Imposta il valore della pagina di ricerca
-                        fileJspT = nomeFile.get(part);
-                    }
+                    // Imposta il valore della pagina di ricerca
+                    fileJspT = nomeFile.get(part);
                 } else {
                     // Viene richiesta la visualizzazione della pagina di ricerca
                     fileJspT = nomeFileElenco;
