@@ -37,9 +37,9 @@
   <c:param name="p" value="rqs" />
   <c:param name="r" value="${ril}" />
 </c:url>
-<c:url var="ris" context="${initParam.appName}" value="/" scope="page">
+<c:url var="adr" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="ri" />
-  <c:param name="p" value="ris" />
+  <c:param name="p" value="adr" />
   <c:param name="r" value="${ril}" />
 </c:url>
 
@@ -65,6 +65,12 @@
   <c:param name="q" value="mu" />
   <c:param name="r" value="${ril}" />
 </c:url>
+<c:url var="ris" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="mu" />
+  <c:param name="p" value="ris" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+
 <c:url var="usr" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="ho" />
   <c:param name="p" value="usr" />
