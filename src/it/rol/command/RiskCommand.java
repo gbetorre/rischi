@@ -126,7 +126,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
     /**
      * Pagina a cui la command fa riferimento per mostrare la form di ricerca
      */
-    private static final String nomeFileSearch = "/jsp/riRicerca.jsp";
+    private static final String nomeFileInsertRisk = "/jsp/riRischioForm.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
      */    
@@ -171,7 +171,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_SELECT_QST, nomeFileCompileQuest);
         nomeFile.put(PART_RESUME_QST, nomeFileResumeQuest);
         nomeFile.put(PART_SELECT_QSS, nomeFileElencoQuest);
-        nomeFile.put(PART_SEARCH,     nomeFileSearch);
+        nomeFile.put(INSERT_RISK,     nomeFileInsertRisk);
     }  
   
     
@@ -388,7 +388,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                         PARAM_SURVEY + EQ + codeSur;
                         }
                     } else {
-                        // Deve eseguire una eliminazione
+                        // Azione di default
+                        // do delete?
                     }
                 // @GetMapping
                 } else {
@@ -440,9 +441,13 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                              *          SELECT List of Interview Part           *
                              * ************************************************ */
                             interviews = db.getInterviewsBySurvey(user, params, ConfigManager.getSurvey(codeSur));
-                            //answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
-                            //ArrayList<ItemBean> ambits = db.getAmbits(user);
-                            //flatQuestions = decantQuestions(questions, ambits);
+                        } else if (part.equalsIgnoreCase(INSERT_RISK)) {
+                            /* ************************************************ *
+                             *          SHOWS Form to INSERT new Risk           *
+                             * ************************************************ */
+                            // Ha bisogno di personalizzare le breadcrumbs
+                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuovo Rischio");
                         }
                         fileJspT = nomeFile.get(part);
                     } else {
