@@ -151,7 +151,11 @@ public interface Constants extends Serializable {
     /**
      * <p>Costante per il parametro identificante la Command delle persone.</p>
      */
-    public static final String COMMAND_PERSON           = "pe";    
+    public static final String COMMAND_PERSON           = "pe";
+    /**
+     * <p>Costante per il parametro identificante la Command delle strutture.</p>
+     */
+    public static final String COMMAND_STRUCTURES       = "st";    
     /**
      * <p>Costante per il parametro identificante la Command dei processi.</p>
      */
@@ -160,10 +164,6 @@ public interface Constants extends Serializable {
      * <p>Costante per il parametro identificante la Command dei rischi.</p>
      */
     public static final String COMMAND_RISK             = "ri";
-      /**
-     * <p>Costante per il parametro identificante la Command delle strutture.</p>
-     */
-    public static final String COMMAND_STRUCTURES       = "st";
     /**
      * <p>Costante per il parametro identificante la parte dei macroprocessi.</p>
      */
@@ -208,6 +208,22 @@ public interface Constants extends Serializable {
      * <p>Costante per il parametro identificante la pagina dei credits dell'applicazione.</p>
      */
     public static final String PART_CREDITS             = "cre";
+    /**
+     * <p>Costante per il parametro identificante la funzione di aggiunta di un nuovo rischio.</p>
+     */
+    public static final String INSERT_RISK              = "adr";
+    /**
+     * <p>Costante per il parametro identificante la funzione di associazione tra un rischio e un processo.</p>
+     */
+    public static final String INSERT_RISK_PROCESS      = "adp";
+    /**
+     * <p>Costante per il parametro identificante la funzione di aggiornamento di una entit&agrave;.</p>
+     */
+    public static final String UPDATE                   = "upd";
+    /**
+     * <p>Costante per il parametro identificante la funzione di eliminazione di una entit&agrave;.</p>
+     */
+    public static final String DELETE                   = "del";
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
