@@ -130,15 +130,19 @@
         </c:forEach>
       </table>
       <hr class="separatore" />
-      <div class="p-3 p-md-4 border rounded-3 icon-demo-examples successPwd">
+      <div class="p-3 p-md-4 border rounded-3 icon-demo-examples bgAct">
         <div class="fs-2 mb-3">Output:</div>
         <ul class="list-group">
-        <c:forEach var="output" items="${output}" varStatus="status">
+        <c:forEach var="outp" items="${output}" varStatus="status">
           <c:set var="bgAct" value="bgAct4" scope="page" />
           <c:if test="${status.index mod 2 eq 0}">
             <c:set var="bgAct" value="bgAct20" scope="page" />
           </c:if>
-          <li class="list-group-item ${bgAct}"><c:out value="${output.nome}" /></li>
+          <li class="list-group-item ${bgAct}">
+            <a href="${initParam.appName}/?q=pr&p=out&idO=${outp.id}&r=${param['r']}">
+              <c:out value="${outp.nome}" />
+            </a>
+          </li>
         </c:forEach>
         </ul>
       </div>
