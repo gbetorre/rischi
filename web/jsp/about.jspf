@@ -2,7 +2,8 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
   <script type="text/javascript">
   function pickOne(){
-      let x = Math.floor((Math.random() * 20) + 1);
+      var colors = 21;
+      let x = Math.floor((Math.random() * colors) + 1);
       return x;
   }
   </script>
@@ -18,9 +19,9 @@
         </button>
       </div>
       <div class="toast-body">
-        Versione: 1.31
+        Versione: 1.32
         <fmt:setLocale value="it_IT"/>
-        <c:set var="deployDate" value="15-02-2023" scope="page" />
+        <c:set var="deployDate" value="24-02-2023" scope="page" />
         <fmt:parseDate var="releaseDate" value="${deployDate}" pattern="dd-MM-yyyy" scope="page" />
         <fmt:formatDate var="dataRilascio" value="${releaseDate}" pattern="dd MMMMM, yyyy" />
         <span class="float-right">
