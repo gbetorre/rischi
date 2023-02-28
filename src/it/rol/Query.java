@@ -1238,7 +1238,79 @@ public interface Query extends Serializable {
             "   WHERE OUTSPAT.id_sottoprocesso_at = ?" +
             "       AND OUTSPAT.id_rilevazione = ?" +
             "   ORDER BY OUT.nome";
-
+    
+    /**
+     * <p>Estrae l'elenco di tutti gli output trovati per una data
+     * rilevazione, selezionando le tuple atte a comporre l'elenco
+     * degli output dei processi - livello 2, quindi no Macro (= 1) no Sub (= 3) -
+     * anticorruttivi.</p>
+     * <p>Ogni riga, quindi, corrisponder&agrave; ad un distinto output di processo,
+     * contenente anche il numero di processi_at che sono generati da tale output.
+     * Per generazione di un processo_at a partire da un output si intende
+     * la generazione di quel processo_at avente in input l'output stesso;
+     * i processi, infatti, vengono considerati come generati dagli input e, 
+     * laddove un output di un processo funge anche da input di un altro processo,
+     * questa informazione viene calcolata.</p>
+     */
+    public static final String GET_OUTPUTS = 
+            "SELECT DISTINCT" +
+            "       OUT.id                      AS \"id\"" +
+            "   ,   OUT.nome                    AS \"nome\"" +
+            "   ,   OUT.descrizione             AS \"descrizione\"" +
+            "   ,   OUT.ordinale                AS \"ordinale\"" +
+            "   ,   OUT.data_ultima_modifica    AS \"dataUltimaModifica\"" +
+            "   ,   OUT.ora_ultima_modifica     AS \"oraUltimaModifica\"" +
+            "   ,   OUT.id_rilevazione          AS \"idRilevazione\"" +
+            "   ,   count(INPAT.id_processo_at) AS \"fte\"" +
+            "   FROM output OUT" +
+            "       INNER JOIN rilevazione S ON OUT.id_rilevazione = S.id" +
+            "       LEFT JOIN input INP ON INP.id_output = OUT.id" + 
+            "       LEFT JOIN input_processo_at INPAT ON INPAT.id_input = INP.id" +
+            "   WHERE (OUT.id_rilevazione = ?)" +
+            "   GROUP BY (OUT.id, OUT.nome, OUT.descrizione, OUT.ordinale, OUT.data_ultima_modifica, OUT.ora_ultima_modifica, OUT.id_rilevazione)" +
+            "   ORDER BY OUT.nome";
+    
+    /**
+     * <p>Estrae un dato output di un processo anticorruttivo
+     * in funzione del suo identificativo, passato come parametro.</p>
+     */
+    public static final String GET_OUTPUT = 
+            "SELECT" +
+            "       OUT.id                      AS \"id\"" +
+            "   ,   OUT.nome                    AS \"nome\"" +
+            "   ,   OUT.descrizione             AS \"descrizione\"" +
+            "   ,   OUT.ordinale                AS \"ordinale\"" +
+            "   ,   OUT.data_ultima_modifica    AS \"dataUltimaModifica\"" +
+            "   ,   OUT.ora_ultima_modifica     AS \"oraUltimaModifica\"" +
+            "   ,   OUT.id_rilevazione          AS \"idRilevazione\"" +
+            "   FROM output OUT" +
+            "   ,   rilevazione R" +            // Old-style inner join, sometimes...
+            "   WHERE OUT.id_rilevazione = R.id" +
+            "       AND OUT.id = ?" +
+            "       AND R.id = ?";
+    
+    /**
+     * <p>Estrae i processi - livello 2, quindi no Macro (= 1) no Sub (= 3) -
+     * collegati ad un input che funge da output, dove l'identificativo 
+     * di quest'ultimo viene passato come parametro, e che sono stati rilevati 
+     * nel contesto di una data rilevazione, il cui identificativo 
+     * viene passato come parametro.</p>
+     */
+    public static final String GET_PROCESS_AT_BY_OUTPUT = 
+            "SELECT DISTINCT" +
+            "           PAT.id                          AS \"id\"" +
+            "   ,       PAT.codice                      AS \"codice\"" +
+            "   ,       PAT.nome                        AS \"nome\"" +
+            "   , " +   Constants.ELEMENT_LEV_2 + "     AS \"livello\"" +
+            "   ,       PAT.ordinale                    AS \"ordinale\"" +
+            "   ,       PAT.id_macroprocesso_at" +
+            "   FROM processo_at PAT" +
+            "       INNER JOIN input_processo_at INPAT ON INPAT.id_processo_at = PAT.id" +
+            "       INNER JOIN input INP ON INPAT.id_input = INP.id" +
+            "   WHERE INP.id_output = ?" +
+            "       AND INP.id_rilevazione = ?" +
+            "   ORDER BY PAT.id_macroprocesso_at, PAT.nome";
+    
     /**
      * <p>Estrae l'elenco di tutti i rischi corruttivi trovati per una data
      * rilevazione, oppure indipendentemente dalla rilevazione (in funzione
@@ -1347,10 +1419,10 @@ public interface Query extends Serializable {
      * 
      * @param idP       identificativo di macroprocesso_at, processo_at o sottoprocesso_at
      * @param level     identificativo del livello a cui e' relativo l'id (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at)
-     * @param codeSur   codice identificativo della rilevazione
+     * @param idSur     codice identificativo della rilevazione
      * @return <code>String</code> - la query che seleziona l'insieme desiderato
      */
-    public String getQueryMacroSubProcessAtBySurvey(int idP, byte level, String codeSur);
+    public String getQueryMacroSubProcessAtBySurvey(int idP, byte level, int idSur);
     
     /**
      * <p>Costruisce dinamicamente la query che seleziona un insieme di risposte
