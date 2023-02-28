@@ -32,6 +32,15 @@
     </div>
     <div class="row">
       <div class="col-xl-4 col-md-6 mx-auto">
+        <div class="card bgAct24 text-dark mb-4 shadow-nohover">
+          <div class="card-body landing-card-body d-flex align-items-center">
+            <i class="fa-solid fa-flag-checkered fa-5x"></i></i>&nbsp;&nbsp;
+            <span class="h4 landing-card-title">&nbsp;&nbsp;&nbsp;&nbsp;Fattori abilitanti</span>
+          </div>
+          <a class="small stretched-link" href="#"></a>
+        </div>
+      </div>
+      <div class="col-xl-4 col-md-6 mx-auto">
         <div class="card bgAct10 mb-4">
           <div class="card-body landing-card-body d-flex align-items-center">
             <i class="fa-solid fa-triangle-exclamation fa-5x"></i>&nbsp;&nbsp;
@@ -40,7 +49,17 @@
           <a class="small text-white stretched-link" href="${ri}"></a>
         </div>
       </div>
+      <div class="col-xl-4 col-md-6 mx-auto">
+        <div class="card bgAct11 mb-4 shadow-nohover">
+          <div class="card-body landing-card-body d-flex align-items-center">
+            <i class="fa-solid fa-right-from-bracket fa-5x"></i>&nbsp;&nbsp;
+            <span class="h4 landing-card-title">&nbsp;&nbsp;&nbsp;&nbsp;Output dei processi</span>
+          </div>
+          <a class="small stretched-link" href="${out}"></a>
+        </div>
+      </div>
     </div>
+    <hr class="separatore" />
     <div class="row">
       <h3 class="mt-1 m-0 font-weight-bold">Strumenti di Analisi</h3>
       <hr class="riga" />
