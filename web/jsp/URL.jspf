@@ -52,6 +52,11 @@
   <c:param name="r" value="${ril}" />
   <c:param name="out" value="csv" />
 </c:url>
+<c:url var="out" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="pr" />
+  <c:param name="p" value="out" />
+  <c:param name="r" value="${ril}" />
+</c:url>
 <c:url var="st" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="st" />
   <c:param name="r" value="${ril}" />
