@@ -37,7 +37,8 @@
     <!-- <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery-datatables.js"></script> -->
     <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery-datatables-bootstrap4.js"></script>
-    <script src="<c:out value="${initParam.urlDirectoryScript}" />gpro.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />rol.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />popup.js"></script>
     <!-- Begin Cookie Consent plugin by Silktide - http://silktide.com/cookieconsent -->
     <script>
       window.addEventListener("load", function(){
@@ -109,7 +110,7 @@
     --%>
   </c:catch>
   <c:out value="${exception}" />
-    <script src="<c:out value="${initParam.urlDirectoryScript}" />gpro.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />rol.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />menu.js"></script>
     <script>
       $(document).ready(function(){
