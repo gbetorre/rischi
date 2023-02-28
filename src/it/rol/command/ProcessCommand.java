@@ -60,6 +60,7 @@ import it.rol.Main;
 import it.rol.Utils;
 import it.rol.bean.ActivityBean;
 import it.rol.bean.CodeBean;
+import it.rol.bean.DepartmentBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
@@ -103,9 +104,17 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileDettaglio = "/jsp/prProcessoAjax.jsp";
     /**
+     * Pagina per mostrare l'elenco degli output
+     */
+    private static final String nomeFileOutputs = "/jsp/prOutputs.jsp";
+    /**
+     * Pagina per mostrare il dettaglio di un output
+     */
+    private static final String nomeFileOutput = "/jsp/prOutput.jsp";
+    /**
      * Nome del file json della Command (dipende dalla pagina di default)
      */
-    private String nomeFileJson = nomeFileElenco.substring(nomeFileElenco.lastIndexOf('/'), nomeFileElenco.indexOf(DOT));
+    private String nomeFileJson = nomeFileElenco.substring(nomeFileElenco.lastIndexOf(SLASH), nomeFileElenco.indexOf(DOT));
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
      */    
@@ -141,6 +150,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         nomeFile.put(PART_PROCESS, nomeFileDettaglio);
+        nomeFile.put(PART_OUTPUT, nomeFileOutputs);
     }
 
 
@@ -168,6 +178,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         String codeSur = parser.getStringParameter("r", DASH);
         // Recupera o inizializza 'id processo'
         int idP = parser.getIntParameter("pliv", DEFAULT_ID);
+        // Recupera o inizializza 'id output'
+        int idO = parser.getIntParameter("idO", DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'
         String part = parser.getStringParameter("p", DASH);
         // Recupera o inizializza livello di granularità del processo anticorruttivo
@@ -180,6 +192,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         HashMap<String, ArrayList<?>> processElements = null;
         // Prepara un oggetto contenente i parametri opzionali per i nodi
         ItemBean options = new ItemBean("#009966",  VOID_STRING,  VOID_STRING, VOID_STRING, PRO_PFX, NOTHING);
+        // Prepara un output di rischio corruttivo
+        ProcessBean output = null;
+        // Dichiara elenco di output
+        AbstractList<ProcessBean> outputs = new ArrayList<>();
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
         /* ******************************************************************** *
@@ -225,27 +241,48 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             // Il parametro di navigazione 'rilevazione' è obbligatorio
             if (!codeSur.equals(DASH)) {
                 // Il parametro di navigazione 'p' permette di addentrarsi nelle funzioni
-                if (nomeFile.containsKey(part)) { // Viene richiesta la visualizzazione del dettaglio di un processo
-                    // Recupera Input estratti in base al processo
-                    ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
-                    // Recupera Fasi estratte in base al processo
-                    ArrayList<ActivityBean> listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
-                    // Recupera Output estratti in base al processo
-                    ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
-                    // Recupera Rischi estratti in base al processo
-                    ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
-                    // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
-                    processElements = new HashMap<>();
-                    // Imposta nella tabella le liste trovate
-                    processElements.put(TIPI_LISTE[0], listaInput);
-                    processElements.put(TIPI_LISTE[1], listaFasi);
-                    processElements.put(TIPI_LISTE[2], listaOutput);
-                    processElements.put(TIPI_LISTE[3], listaRischi);
-                    // Ha bisogno di personalizzare le breadcrumbs
-                    LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                    bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
-                    // Imposta la jsp
-                    fileJspT = nomeFile.get(part);
+                if (nomeFile.containsKey(part)) {
+                    // Viene richiesta la visualizzazione del dettaglio di un processo
+                    if (part.equalsIgnoreCase(PART_PROCESS)) {
+                        /* ************************************************ *
+                         *               SELECT Process Part                *
+                         * ************************************************ */
+                        // Recupera Input estratti in base al processo
+                        ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
+                        // Recupera Fasi estratte in base al processo
+                        ArrayList<ActivityBean> listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
+                        // Recupera Output estratti in base al processo
+                        ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
+                        // Recupera Rischi estratti in base al processo
+                        ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
+                        // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                        processElements = new HashMap<>();
+                        // Imposta nella tabella le liste trovate
+                        processElements.put(TIPI_LISTE[0], listaInput);
+                        processElements.put(TIPI_LISTE[1], listaFasi);
+                        processElements.put(TIPI_LISTE[2], listaOutput);
+                        processElements.put(TIPI_LISTE[3], listaRischi);
+                        // Ha bisogno di personalizzare le breadcrumbs
+                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
+                        // Imposta la jsp
+                        fileJspT = nomeFile.get(part);
+                    } else if (part.equalsIgnoreCase(PART_OUTPUT)) {
+                        /* ************************************************ *
+                         *                SELECT Output Part                *
+                         * ************************************************ */
+                        if (idO > DEFAULT_ID) {
+                            // Recupera un output specifico
+                            output = db.getOutput(user, idO, ConfigManager.getSurvey(codeSur));
+                            // Imposta la jsp
+                            fileJspT = nomeFileOutput;
+                        } else {
+                            // Deve recuperare l'elenco degli output
+                            outputs = db.getOutputs(user, ConfigManager.getSurvey(codeSur));
+                            // Imposta la jsp
+                            fileJspT = nomeFile.get(part);
+                        }
+                    }
                 } else {
                     // Viene richiesta la visualizzazione di un elenco di macroprocessi
                     macrosat = retrieveMacroAtBySurvey(user, codeSur, db);
@@ -290,6 +327,14 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Imposta nella request elenco completo rischi di processo, se presenti
         if (processElements != null && !processElements.get(TIPI_LISTE[3]).isEmpty()) {
             req.setAttribute("listaRischi", processElements.get(TIPI_LISTE[3]));
+        }
+        // Imposta nella request elenco completo degli output
+        if (outputs != null) {
+            req.setAttribute("outputs", outputs);
+        }
+        // Imposta nella request oggetto specifico output di processo anticorruttivo 
+        if (output != null) {
+            req.setAttribute("output", output);
         }
         // Imposta nella request le breadcrumbs in caso siano state personalizzate
         if (bC != null) {
