@@ -149,10 +149,6 @@ public interface Constants extends Serializable {
      */
     public static final String COMMAND_HOME             = "home";
     /**
-     * <p>Costante per il parametro identificante la Command delle persone.</p>
-     */
-    public static final String COMMAND_PERSON           = "pe";
-    /**
      * <p>Costante per il parametro identificante la Command delle strutture.</p>
      */
     public static final String COMMAND_STRUCTURES       = "st";    
@@ -169,13 +165,13 @@ public interface Constants extends Serializable {
      */
     public static final String PART_MACROPROCESS        = "mac";
     /**
-     * <p>Costante per il parametro identificante parte applicazione legata a un processo.</p>
+     * <p>Costante per il parametro identificante parte applicazione legata ad un processo.</p>
      */
     public static final String PART_PROCESS             = "pro";
     /**
-     * <p>Costante per il parametro identificante la parte della multi-rilevazione.</p>
+     * <p>Costante per il parametro identificante parte applicazione legata ad output.</p>
      */
-    public static final String PART_MULTIFACT           = "mul";
+    public static final String PART_OUTPUT              = "out";
     /**
      * <p>Costante per il parametro identificante la form di ricerca.</p>
      */
