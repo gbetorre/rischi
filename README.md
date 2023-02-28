@@ -187,7 +187,8 @@ effettuate ma solo i rilasci delle funzionalit&agrave; pi&uacute; significative.
 Ogni numero di versione &egrave; per&ograve; corredato della data del commit 
 dei sorgenti, per cui consultando la History del repository sar&agrave; facile
 entrare nel merito di tutte le modifiche effettuate in corrispondenza della
-sottoversione.<br />
+sottoversione: inoltre, ogni versione corrisponde ad un commit, ma non ogni commit
+genera una versione.<br />
 
 <p><small>
 NOTA: Per convenzione, nel software la versione viene mostrata in formato x.xx
@@ -222,6 +223,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [1.3.2] (28/02/2023) Aggiunta pagina dettagli output, elencante i processi generati a partire dall'output corrente laddove esso abbia agito da input di processo. Implementata pagina di elenco output. Correzione di bug.
 - [1.3.1] (15/02/2023) Aggiunta funzionalit&agrave; di download registro dei rischi in formato CSV (estrae solo rischi con processi associati, come da regole di business)
 - [1.3.0] (13/02/2023) Aggiunta pagina dettagli rischio corruttivo, elencante i processi esposti al rischio selezionato. Implementata pagina stand-alone dettagli processo. Riordinata pagina di landing.
 - [1.2.9] (08/02/2023) Piccole migliorie di presentazione nei dettagli di un processo: evidenziata area di rischio, mostrato dettaglio soggetto contingente
