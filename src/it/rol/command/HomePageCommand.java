@@ -424,7 +424,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         ItemBean vO = new ItemBean();
         vO.setId(++nextId);
         vO.setNome(COMMAND_PROCESS);
-        vO.setNomeReale(PART_MACROPROCESS);
+        vO.setNomeReale(PART_PROCESS);
         vO.setLabelWeb("Macroprocessi");
         vO.setInformativa("La navigazione per macroprocessi fornisce un quadro d\'insieme dei rischi");
         vO.setUrl(makeUrl(appName, vO, vO.getNomeReale(), surCode));
@@ -442,13 +442,13 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         vO.setIcona("act.png");
         vO.setLivello(MAIN_MENU);
         mO.add(vO);
-        // PERSONE
+        // RISCHI
         vO = null;
         vO = new ItemBean();
         vO.setId(++nextId);
-        vO.setNome(COMMAND_PERSON);
-        vO.setLabelWeb("Risorse Umane");
-        vO.setInformativa("La navigazione per persone fornisce un quadro delle allocazioni");
+        vO.setNome(COMMAND_RISK);
+        vO.setLabelWeb("Rischi Corruttivi");
+        vO.setInformativa("La navigazione per rischio corruttivo fornisce un quadro delle problematiche relative");
         vO.setUrl(makeUrl(appName, vO, null, surCode));
         vO.setIcona("per.png");
         vO.setLivello(MAIN_MENU);
@@ -458,7 +458,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         vO = new ItemBean();
         vO.setId(++nextId);
         vO.setNome(COMMAND_PROCESS);
-        vO.setNomeReale(PART_MULTIFACT);
+        vO.setNomeReale(PART_SEARCH);
         vO.setLabelWeb("Report");
         vO.setInformativa("La reportistica permette di incrociare varie dimensioni");
         vO.setUrl(makeUrl(appName, vO, vO.getNomeReale(), surCode));
@@ -559,9 +559,10 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
             deniedTokens.add(patternToDeny1);
             deniedTokens.add(patternToDeny2);
         }
-        // Aggiunge le esclusioni per data e ora
+        // Aggiunge le esclusioni per data e ora ed eventuali altri parametri (p.es. id) che non devono essere marcati
         deniedTokens.add("d");
         deniedTokens.add("t");
+        deniedTokens.add("idO");
         // Aggiunge i valori del token 'p' che devono generare breadcrumb associandoli a un'etichetta da mostrare in breadcrumb
         allowedParams.put(PART_SEARCH,          "Ricerca");
         allowedParams.put(PART_SELECT_STR,      "Scelta Struttura");
@@ -570,6 +571,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         allowedParams.put(PART_CONFIRM_QST,     "Riepilogo");
         allowedParams.put(PART_SELECT_QSS,      "Interviste");
         allowedParams.put(PART_RESUME_QST,      "Risposte");
+        allowedParams.put(PART_OUTPUT,          "Output");
         try {
             // Tokenizza la querystring in base all'ampersand
             String[] tokens = pageParams.split(AMPERSAND);
