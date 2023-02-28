@@ -381,7 +381,7 @@ public class Data extends HttpServlet implements Constants {
                 // Cerca la granularità del processo anticorruttivo
                 byte liv = parser.getByteParameter("liv", NOTHING);
                 // Deve recuperare uno specifico sottoinsieme di processi identificato dai parametri di navigazione oppure tutti i macro_at con relativi figli e nipoti
-                ArrayList<ItemBean> mats = db.getMacroSubProcessAtBySurvey(user, idP, liv, codeSurvey);
+                ArrayList<ItemBean> mats = db.getMacroSubProcessAtBySurvey(user, idP, liv, ConfigManager.getSurvey(codeSurvey));
                 // Restituisce la lista gerarchica di processi trovati in base alla rilevazione
                 list = mats;
             // "data?q=st"
