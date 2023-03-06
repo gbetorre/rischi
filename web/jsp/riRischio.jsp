@@ -5,35 +5,19 @@
 <c:catch var="exception">
     <h3 class="mt-1 m-0 font-weight-bold">Rischio corruttivo</h3>
     <hr class="riga"/>
-    <%-- 
-    <div class="row">
-      <div class="col-xl-7 col-md-6 mx-auto">
-        <h3 class="mt-1 m-0">Rischio corruttivo:</h3>
-      </div>
-      <div class="col-xl-5 col-md-6 mx-auto">
-      <c:choose>
-      <c:when test="${empty param['out']}">
-        <a href="javascript:openWin('data?q=pr&p=pro&pliv=${input.get(0).value2AsInt}&liv=2&r=AT2022&out=pop')" title="Apri in una finestra separata per la stampa">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i> Apri in una nuova finestra
-        </a>
-        <a href="data?q=pr&p=pro&pliv=${input.get(0).value2AsInt}&liv=${param['liv']}&r=${param['r']}&out=csv" class="float-right" title="Scarica i dati del processo '${processo}'">
-          <i class="fas fa-download"></i>Scarica i dati di questo rischio
-        </a>
-      </c:when>
-      <c:when test="${not empty param['out'] and (param['out'] eq 'pop')}">
-        <a href="javascript:print()" title="Anteprima di stampa">
-          <i class="fas fa-print"></i> Stampa
-        </a>
-      </c:when>
-      </c:choose>
-      </div>
-    </div>
-    --%>
     <div class="form-custom">
-      <h3 class="mt-1 m-0 bgAct24"><c:out value="${risk.nome}" /></h3> 
+      <div class="panel-heading bgAct24">
+        <div class="noHeader">
+          <i class="fa-solid fa-triangle-exclamation" title="rischio corruttivo"></i>&nbsp; 
+          <c:out value="${risk.nome}" />
+        </div>
+      </div>
       <hr class="separatore" />
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples successPwd">
-        <div class="fs-2 mb-3">Processi esposti a questo rischio:</div>
+        <div class="fs-2 mb-3">
+          <i class="fas fa-cogs" title="processi"></i>&nbsp; 
+          Processi esposti a questo rischio:
+        </div>
         <ul class="list-group">
         <c:forEach var="pat" items="${risk.processi}" varStatus="status">
           <c:set var="bgAct" value="bgAct4" scope="page" />
