@@ -32,13 +32,13 @@
     </div>
     <div class="row">
       <div class="col-xl-4 col-md-6 mx-auto">
-        <div class="card bgAct24 text-dark mb-4 shadow-nohover">
+        <%--<div class="card bgAct20 text-dark mb-4 shadow-nohover">
           <div class="card-body landing-card-body d-flex align-items-center">
-            <i class="fa-solid fa-flag-checkered fa-5x"></i></i>&nbsp;&nbsp;
-            <span class="h4 landing-card-title">&nbsp;&nbsp;&nbsp;&nbsp;Fattori abilitanti</span>
+             <i class="fa-solid fa-person-circle-question fa-5x"></i>&nbsp;&nbsp; 
+            <span class="h4 landing-card-title">&nbsp;&nbsp;&nbsp;&nbsp; </span>
           </div>
           <a class="small stretched-link" href="#"></a>
-        </div>
+        </div>--%>
       </div>
       <div class="col-xl-4 col-md-6 mx-auto">
         <div class="card bgAct10 mb-4">
