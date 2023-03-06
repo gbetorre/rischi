@@ -207,7 +207,7 @@ public interface Constants extends Serializable {
     /**
      * <p>Costante per il parametro identificante la funzione di aggiunta di un nuovo rischio.</p>
      */
-    public static final String INSERT_RISK              = "adr";
+    public static final String PART_INSERT_RISK              = "adr";
     /**
      * <p>Costante per il parametro identificante la funzione di associazione tra un rischio e un processo.</p>
      */
@@ -285,6 +285,10 @@ public interface Constants extends Serializable {
      * Costante per far riferimento al carattere di virgoletta semplice, o apostrofo
      */
     public static final char APOSTROPHE = '\'';
+    /**
+     * Costante per far riferimento al carattere di percentuale
+     */
+    public static final char PER_CENT = '%';
     /**
      * Costante per far riferimento al carattere tipografico di virgoletta inglese
      */
