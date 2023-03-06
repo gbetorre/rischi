@@ -212,6 +212,7 @@ label.error {
 	display: block; 
 	float: left; 
 	padding-left: 10px;
+	padding-top: 10px;
 	color: red; 
 }
 
@@ -251,6 +252,7 @@ div.substatus {
 div.charNum {
 	color: red;
 	padding-left: 10px;
+	padding-top: 10px;
 }
 
 div.errorPwd {
