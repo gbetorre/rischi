@@ -171,7 +171,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_SELECT_QST, nomeFileCompileQuest);
         nomeFile.put(PART_RESUME_QST, nomeFileResumeQuest);
         nomeFile.put(PART_SELECT_QSS, nomeFileElencoQuest);
-        nomeFile.put(INSERT_RISK,     nomeFileInsertRisk);
+        nomeFile.put(PART_INSERT_RISK,nomeFileInsertRisk);
     }  
   
     
@@ -386,6 +386,15 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                         paramsProc.toString() +
                                         dateTimeProc.toString() + AMPERSAND +
                                         PARAM_SURVEY + EQ + codeSur;
+                        } else if (part.equalsIgnoreCase(PART_INSERT_RISK)) {
+                            /* ************************************************ *
+                             *               INSERT new Risk Part               *
+                             * ************************************************ */
+                            // Inserisce nel DB nuovo rischio corruttivo definito dall'utente
+                            db.insertRisk(user, params);
+                            // Prepara la redirect 
+                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + AMPERSAND + 
+                                       PARAM_SURVEY + EQ + codeSur;
                         }
                     } else {
                         // Azione di default
@@ -441,7 +450,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                              *          SELECT List of Interview Part           *
                              * ************************************************ */
                             interviews = db.getInterviewsBySurvey(user, params, ConfigManager.getSurvey(codeSur));
-                        } else if (part.equalsIgnoreCase(INSERT_RISK)) {
+                        } else if (part.equalsIgnoreCase(PART_INSERT_RISK)) {
                             /* ************************************************ *
                              *          SHOWS Form to INSERT new Risk           *
                              * ************************************************ */
@@ -635,6 +644,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         LinkedHashMap<String, String> answs = new LinkedHashMap<>();
         LinkedHashMap<String, String> survey = new LinkedHashMap<>();
         LinkedHashMap<String, String> quest = new LinkedHashMap<>();
+        LinkedHashMap<String, String> risk = new LinkedHashMap<>();
         /* **************************************************** *
          *     Caricamento parametro di Codice Rilevazione      *
          * **************************************************** */      
@@ -685,6 +695,15 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             quest.put("risp",    parser.getStringParameter("q-risp", VOID_STRING));
             quest.put("note",    parser.getStringParameter("q-note", VOID_STRING));
             formParams.put(PART_RESUME_QST, quest);
+        }
+        /* **************************************************** *
+         *     Caricamento parametri di Inserimento Rischio     *
+         * **************************************************** */
+        if (part.equals(PART_INSERT_RISK)) {
+            // Recupera gli estremi del rischio da inserire
+            risk.put("risk",    parser.getStringParameter("r-name", VOID_STRING));
+            risk.put("desc",    parser.getStringParameter("r-descr", VOID_STRING));
+            formParams.put(PART_INSERT_RISK, risk);
         }
     }
     
