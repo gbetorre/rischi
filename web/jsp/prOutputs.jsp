@@ -3,9 +3,6 @@
 <%@ include file="URL.jspf" %>
 <c:set var="outputs" value="${requestScope.outputs}" scope="page" />
     <h3 class="mt-1 m-0 font-weight-bold">Output dei processi anticorruttivi</h3>
-    <a href="#" class="float-right" title="Scarica il database completo del registro degli output">
-      <i class="fas fa-download"></i>Scarica tutti i dati
-    </a>
     <hr class="riga"/>
     <div class="p-3 p-md-4 border rounded-3 icon-demo-examples bgAct">
       <div class="fs-2 mb-3">
@@ -35,8 +32,5 @@
       <button type="button" class="btn btn-danger">
         <span class="badge badge-pill badge-light">${outputs.size()}</span>
       </button>
-      <a href="#" class="float-right lastMenuContent" title="Scarica il database completo del registro degli output">
-        <i class="fas fa-download"></i> <span class="sezioneElenco">Scarica tutti i dati&nbsp;</span>
-      </a>
     </h4>
 
