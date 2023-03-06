@@ -101,6 +101,16 @@ public interface Query extends Serializable {
             "   FROM ";
 
     /**
+     * <p>Estrae il massimo codice di un rischio avente data tipologia di codice 
+     * dalla tabella del rischio corruttivo</p>
+     */
+    public static final String SELECT_MAX_RISK_CODE =
+            "SELECT " +
+            "       MAX(codice)         AS \"nome\"" +
+            "   FROM rischio_corruttivo" +
+            "   WHERE codice ILIKE ?";
+    
+    /**
      * <p>Estrae l'utente con username e password passati come parametri.</p>
      */
     public static final String GET_USR =
@@ -1291,7 +1301,7 @@ public interface Query extends Serializable {
     
     /**
      * <p>Estrae i processi - livello 2, quindi no Macro (= 1) no Sub (= 3) -
-     * collegati ad un input che funge da output, dove l'identificativo 
+     * collegati ad un input che deriva da un output, dove l'identificativo 
      * di quest'ultimo viene passato come parametro, e che sono stati rilevati 
      * nel contesto di una data rilevazione, il cui identificativo 
      * viene passato come parametro.</p>
@@ -1547,6 +1557,34 @@ public interface Query extends Serializable {
             "   ,       ? " +       // id_sottoprocesso_at
             "          )" ;
     
+    /**
+     * <p>Query per inserimento di un rischio corruttivo.
+     * Deve gestire anche l'inserimento dell'identificativo perch&eacute; 
+     * il sequence <code>rischio_corruttivo_id_seq</code> 
+     * potrebbe essere sfasato.</p>
+     */
+    public static final String INSERT_RISK =
+            "INSERT INTO rischio_corruttivo" +
+            "   (   id" +
+            "   ,   codice" +
+            "   ,   nome" +
+            "   ,   descrizione" +
+            "   ,   ordinale" +            
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // codice
+            "   ,       ? " +       // nome
+            "   ,       ? " +       // descrizione
+            "   ,       ? " +       // ordinale           
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id_rilevazione
+            "          )" ;
     
     /* ********************************************************************** *
      *                       5. Query di aggiornamento                        *
