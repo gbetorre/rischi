@@ -6,10 +6,16 @@
     <h3 class="mt-1 m-0 font-weight-bold">Output di processo</h3>
     <hr class="riga"/>
     <div class="form-custom">
-      <h3 class="mt-1 m-0 bgAct11"><c:out value="${output.nome}" /></h3> 
+      <div class="panel-heading bgAct11">
+        <div class="noHeader">
+          <i class="fa-solid fa-right-from-bracket" title="output"></i>&nbsp; 
+          <c:out value="${output.nome}" />
+        </div>
+      </div>
       <hr class="separatore" />
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples successPwd">
         <div class="fs-2 mb-3">
+          <i class="fas fa-cogs" title="processi"></i>&nbsp; 
           Processi generati da questo output:
           <span class="float-right" title="I processi generati da questo output sono i processi che prendono questo output come proprio input">
             <i class="fa-solid fa-circle-question"></i>
