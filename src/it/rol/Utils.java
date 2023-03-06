@@ -190,6 +190,29 @@ public class Utils implements Constants {
         }
         return result;
     }
+    
+
+    /**
+     * <p>Converte un valore di tipo primitivo int in un oggetto di tipo String
+     * avente un formato predefinito.</p>
+     * <p>In particolare, se l'intero passato &egrave; strettamente minore di 10,
+     * aggiunge uno zero prima della cifra intera da convertire in String.</p>
+     *
+     * @param i il valore numerico da convertire
+     * @return <code>String</code> il valore convertito, se tutto e' andato a buon fine
+     */
+    public static String parseString(int i) {
+        String result = null;
+        try {
+            String convert = String.valueOf(i);
+            result = (i < 10) ? String.valueOf(NOTHING) + convert : convert;
+        } catch (NullPointerException npe) {
+            log.warning(": si e\' verificato un problema in qualche puntamento.\n" + npe.getLocalizedMessage());
+        } catch (Exception e) {
+            log.warning(": si e\' verificato un problema nel metodo di conversione da intero a stringa formattata.\n" + e.getLocalizedMessage());
+        }
+        return result;
+    }
 
     /* ************************************************************************ *
      *   Metodi di utilita' per la definizione e la manipolazione delle date    *
