@@ -8,7 +8,10 @@
     <hr class="riga"/>
     <div class="p-3 p-md-4 border rounded-3 icon-demo-examples errorPwd">
       <div class="fs-2 mb-3">
-        Rischi
+        Rischi &nbsp;
+        <a href="${adr}" class="btn btn-success btn-lg" title="Aggiungi un nuovo rischio corruttivo al registro dei rischi">
+          <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Rischio
+        </a>
         <span class="float-right panel-body monospace">
           <cite>in parentesi: (n. di processi esposti a questo rischio)</cite>
         </span> 
