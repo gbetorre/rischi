@@ -161,6 +161,10 @@ public interface Constants extends Serializable {
      */
     public static final String COMMAND_RISK             = "ri";
     /**
+     * <p>Costante per il parametro identificante la Command delle interviste.</p>
+     */
+    public static final String COMMAND_AUDIT            = "in";
+    /**
      * <p>Costante per il parametro identificante la parte dei macroprocessi.</p>
      */
     public static final String PART_MACROPROCESS        = "mac";
@@ -207,11 +211,11 @@ public interface Constants extends Serializable {
     /**
      * <p>Costante per il parametro identificante la funzione di aggiunta di un nuovo rischio.</p>
      */
-    public static final String PART_INSERT_RISK              = "adr";
+    public static final String PART_INSERT_RISK         = "adr";
     /**
      * <p>Costante per il parametro identificante la funzione di associazione tra un rischio e un processo.</p>
      */
-    public static final String INSERT_RISK_PROCESS      = "adp";
+    public static final String PART_INSERT_RISK_PROCESS = "adp";
     /**
      * <p>Costante per il parametro identificante la funzione di aggiornamento di una entit&agrave;.</p>
      */
