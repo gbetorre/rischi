@@ -1,7 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set var="ril" value="${param['r']}" scope="page" />
 <c:set var="zero" value="0" scope="page" />
-<%-- ri --%>
 <c:url var="ri" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="ri" />
   <c:param name="r" value="${ril}" />
@@ -11,38 +10,41 @@
   <c:param name="r" value="${ril}" />
   <c:param name="out" value="csv" />
 </c:url>
-<c:url var="str" context="${initParam.appName}" value="/" scope="page">
-  <c:param name="q" value="ri" />
-  <c:param name="p" value="str" />
-  <c:param name="r" value="${ril}" />
-</c:url>
-<c:url var="pro" context="${initParam.appName}" value="/" scope="page">
-  <c:param name="q" value="ri" />
-  <c:param name="p" value="pro" />
-  <c:param name="r" value="${ril}" />
-</c:url>
-<c:url var="sqs" context="${initParam.appName}" value="/" scope="page">
-  <c:param name="q" value="ri" />
-  <c:param name="p" value="sqs" />
-  <c:param name="r" value="${ril}" />
-</c:url>
-<c:url var="sqsCSV" context="${initParam.appName}" value="/data" scope="page">
-  <c:param name="q" value="ri" />
-  <c:param name="p" value="sqs" />
-  <c:param name="r" value="${ril}" />
-  <c:param name="out" value="csv" />
-</c:url>
-<c:url var="rqs" context="${initParam.appName}" value="/" scope="page">
-  <c:param name="q" value="ri" />
-  <c:param name="p" value="rqs" />
-  <c:param name="r" value="${ril}" />
-</c:url>
 <c:url var="adr" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="ri" />
   <c:param name="p" value="adr" />
   <c:param name="r" value="${ril}" />
 </c:url>
-
+<c:url var="in" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="in" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="str" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="in" />
+  <c:param name="p" value="str" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="pro" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="in" />
+  <c:param name="p" value="pro" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="sqs" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="in" />
+  <c:param name="p" value="sqs" />
+  <c:param name="r" value="${ril}" />
+</c:url>
+<c:url var="sqsCSV" context="${initParam.appName}" value="/data" scope="page">
+  <c:param name="q" value="in" />
+  <c:param name="p" value="sqs" />
+  <c:param name="r" value="${ril}" />
+  <c:param name="out" value="csv" />
+</c:url>
+<c:url var="rqs" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="in" />
+  <c:param name="p" value="rqs" />
+  <c:param name="r" value="${ril}" />
+</c:url>
 <c:url var="pr" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pr" />
   <c:param name="r" value="${ril}" />
