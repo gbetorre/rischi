@@ -104,29 +104,13 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileDettaglio = "/jsp/riRischio.jsp";
     /**
-     * Pagina a cui la command fa riferimento per permettere la scelta di una struttura
-     */
-    private static final String nomeFileSelectStruct = "/jsp/riStruttura.jsp";
-    /**
-     * Pagina a cui la command fa riferimento per permettere la scelta di un processo
-     */
-    private static final String nomeFileSelectProcess = "/jsp/riProcesso.jsp";
-    /**
-     * Pagina a cui la command fa riferimento per permettere la compilazione dei quesiti
-     */
-    private static final String nomeFileCompileQuest = "/jsp/riQuestionario.jsp";
-    /**
-     * Pagina a cui la command fa riferimento per mostrare la lista delle interviste
-     */
-    private static final String nomeFileElencoQuest = "/jsp/riInterviste.jsp";
-    /**
-     * Pagina a cui la command fa riferimento per permettere l'aggiornamento delle risposte ai dei quesiti
-     */
-    private static final String nomeFileResumeQuest = "/jsp/riEpilogo.jsp";
-    /**
      * Pagina a cui la command fa riferimento per mostrare la form di ricerca
      */
     private static final String nomeFileInsertRisk = "/jsp/riRischioForm.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per mostrare la form di aggiunta di un processo a un rischio
+     */
+    private static final String nomeFileAddProcess = "/jsp/riProcessoForm.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
      */    
@@ -165,13 +149,9 @@ public class RiskCommand extends ItemBean implements Command, Constants {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        nomeFile.put(COMMAND_RISK,    nomeFileElenco);
-        nomeFile.put(PART_SELECT_STR, nomeFileSelectStruct);
-        nomeFile.put(PART_PROCESS,    nomeFileSelectProcess);
-        nomeFile.put(PART_SELECT_QST, nomeFileCompileQuest);
-        nomeFile.put(PART_RESUME_QST, nomeFileResumeQuest);
-        nomeFile.put(PART_SELECT_QSS, nomeFileElencoQuest);
-        nomeFile.put(PART_INSERT_RISK,nomeFileInsertRisk);
+        nomeFile.put(COMMAND_RISK,              nomeFileElenco);
+        nomeFile.put(PART_INSERT_RISK,          nomeFileInsertRisk);
+        nomeFile.put(PART_INSERT_RISK_PROCESS,  nomeFileAddProcess);
     }  
   
     
@@ -209,8 +189,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         ArrayList<QuestionBean> questions = null;
         // Elenco risposte ai quesiti collegati all'intervista
         ArrayList<QuestionBean> answers = null;
-        // Elenco interviste collegate alla rilevazione
-        ArrayList<InterviewBean> interviews = null;
         // Elenco strutture collegate alla rilevazione indicizzate per codice
         HashMap<String, Vector<DepartmentBean>> flatStructs = null;
         // Elenco quesiti collegati alla rilevazione raggruppati per ambito
@@ -234,7 +212,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Dichiara data ed ora di una intervista cercata
         Date questDate = null;
         Time questTime = null;
-        // Recupera o inizializza 'id processo'
+        // Recupera o inizializza 'id rischio'
         int idRk = parser.getIntParameter("idR", DEFAULT_ID);
         /* ******************************************************************** *
          *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
@@ -322,70 +300,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                 paramsProc.append("p" + set.getKey() + EQ + set.getValue());
                             }
                             redirect = "q=" + COMMAND_RISK + "&p=" + PART_SELECT_QST + paramsStruct.toString() + paramsProc.toString() + "&r=" + codeSur;
-                        } else if (part.equalsIgnoreCase(PART_SELECT_QST)) {
-                            /* ************************************************ *
-                             *                INSERT Answers Part               *
-                             * ************************************************ */
-                            // Recupera il numero di quesiti associati alla rilevazione
-                            Integer itemsAsInteger = questionAmounts.get(codeSur);
-                            // Unboxing
-                            int items = itemsAsInteger.intValue();
-                            // Inserisce nel DB le risposte a tutti gli item quesiti
-                            db.insertAnswers(user, params, items);
-                            // Prepara il passaggio dei parametri identificativi dei processi
-                            LinkedHashMap<String, String> macro = params.get(PART_PROCESS);
-                            // Stringa dinamica per contenere i parametri di scelta processi
-                            StringBuffer paramsProc = new StringBuffer();
-                            for (Map.Entry<String, String> set : macro.entrySet()) {
-                                // Printing all elements of a Map
-                                paramsProc.append(AMPERSAND);
-                                paramsProc.append("p" + set.getKey() + "=" + set.getValue());
-                            }
-                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_SELECT_QSS + "&r=" + codeSur;
-                        } else if (part.equalsIgnoreCase(PART_RESUME_QST)) {
-                            /* ************************************************ *
-                             *                UPDATE Answers Part               *
-                             * ************************************************ */
-                            /* Riduce il rischio di attacchi di tipo Cross-site request forgery (CSRF)
-                             * perche' tutte le funzioni che modificano lo stato degli oggetti sono invocate tramite POST (infatti
-                             * qui siamo nel ramo @PostMapping). In altre parole, avrei potuto passare l'id del quesito da
-                             * aggiornare come parametro dell'action, e inviare la form stessa tramite metodo GET (in tal caso qui non
-                             * ci saremmo arrivati e saremmo andati nel ramo @GetMapping). Siccome pero' questa form induce
-                             * un aggiornamento dei dati, cio' avrebbe esposto al rischio di attacchi CSRF. Invece, la form viene
-                             * gestita tramite POST e l'id del quesito da aggiornare viene passato tramite un campo hidden.
-                             * Cio' non impedisce attacchi di tipo "fake form" (non so bene come si chiamino) pero' in tal caso
-                             * il browser che invia la fake form con il valore del campo hidden modificato deve essere loggato,
-                             * cioe' e' l'hacker stesso che deve essere loggato, il che non e' banale ed e' ben diverso da inviare
-                             * una gif (con i parametri) a un utente che ha gia' il browser loggato nell'applicazione e ci clicca sopra. */
-                            // Aggiorna il quesito
-                            db.updateAnswer(user, params);
-                            // Prepara il passaggio dei parametri identificativi dei processi
-                            LinkedHashMap<String, String> macro = params.get(PART_PROCESS);
-                            // Stringa dinamica per contenere i parametri di scelta processi
-                            StringBuffer paramsProc = new StringBuffer();
-                            for (Map.Entry<String, String> set : macro.entrySet()) {
-                                // Printing all elements of a Map
-                                paramsProc.append(AMPERSAND);
-                                paramsProc.append("p" + set.getKey() + "=" + set.getValue());
-                            }
-                            // Prepara il passaggio dei parametri identificativi del timestamp della rilevazione
-                            LinkedHashMap<String, String> dateTime = params.get(PARAM_SURVEY);
-                            // Stringa dinamica per contenere i parametri di scelta processi
-                            StringBuffer dateTimeProc = new StringBuffer();
-                            for (Map.Entry<String, String> set : dateTime.entrySet()) {
-                                // Printing all elements of a Map but 'r'
-                                if (!set.getKey().equals(PARAM_SURVEY)) {
-                                    dateTimeProc.append(AMPERSAND);
-                                    dateTimeProc.append(set.getKey() + EQ + set.getValue());
-                                }
-                            }
-                            // Costruisce l'indirizzo a cui redirezionare
-                            redirect =  "q" + EQ + COMMAND_RISK + AMPERSAND +
-                                        "p" + EQ + PART_RESUME_QST + 
-                                        paramsStruct.toString() + 
-                                        paramsProc.toString() +
-                                        dateTimeProc.toString() + AMPERSAND +
-                                        PARAM_SURVEY + EQ + codeSur;
                         } else if (part.equalsIgnoreCase(PART_INSERT_RISK)) {
                             /* ************************************************ *
                              *               INSERT new Risk Part               *
@@ -409,19 +323,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                         // Recupera le strutture della rilevazione corrente
                         structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
                         macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
-                        if (part.equalsIgnoreCase(PART_SELECT_STR)) {
-                            /* ************************************************ *
-                             *              SELECT Structure Part               *
-                             * ************************************************ */
-                            flatStructs = (HashMap<String, Vector<DepartmentBean>>) decant(structs, part);
-                        } else if (part.equalsIgnoreCase(PART_SELECT_QST)) {
-                            /* ************************************************ *
-                             *              SELECT Questions Part               *
-                             * ************************************************ */
-                            questions = retrieveQuestions(user, codeSur, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
-                            ArrayList<ItemBean> ambits = db.getAmbits(user);
-                            flatQuestions = decantQuestions(questions, ambits);
-                        } else if (part.equalsIgnoreCase(PART_CONFIRM_QST)) {
+                        if (part.equalsIgnoreCase(PART_CONFIRM_QST)) {
                             /* ************************************************ *
                              *                   Confirm Part                   *
                              * ************************************************ */
@@ -430,26 +332,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                             answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
                             //ArrayList<ItemBean> ambits = db.getAmbits(user);
                             //flatQuestions = decantQuestions(questions, ambits);
-                        } else if (part.equalsIgnoreCase(PART_RESUME_QST)) {
-                            /* ************************************************ *
-                             *  SELECT Set of Answers belonging to an Inverview *
-                             * ************************************************ */
-                            //answers = retrieveAnswers(user, codeSur, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
-                            answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
-                            // Prepara data intervista di cui si vogliono visualizzare le risposte
-                            if (params.get(PARAM_SURVEY).get("d") != null && !params.get(PARAM_SURVEY).get("d").equals(VOID_STRING)) {
-                                questDate = Utils.format(params.get(PARAM_SURVEY).get("d"));
-                            }
-                            // Prepara ora intervista di cui si vogliono visualizzare le risposte
-                            if (params.get(PARAM_SURVEY).get("t") != null && !params.get(PARAM_SURVEY).get("t").equals(VOID_STRING)) {
-                                String questTimeAsString = params.get(PARAM_SURVEY).get("t").replaceAll("_", ":");
-                                questTime = Utils.format(questTimeAsString, TIME_SQL_PATTERN);
-                            }
-                        } else if (part.equalsIgnoreCase(PART_SELECT_QSS)) {
-                            /* ************************************************ *
-                             *          SELECT List of Interview Part           *
-                             * ************************************************ */
-                            interviews = db.getInterviewsBySurvey(user, params, ConfigManager.getSurvey(codeSur));
                         } else if (part.equalsIgnoreCase(PART_INSERT_RISK)) {
                             /* ************************************************ *
                              *          SHOWS Form to INSERT new Risk           *
@@ -457,8 +339,13 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuovo Rischio");
+                        } else if (part.equalsIgnoreCase(PART_INSERT_RISK_PROCESS)) {
+                            /* ************************************************ *
+                             *       SHOWS Form to LINK A PROCESS TO A Risk     *
+                             * ************************************************ */
+                            risk = db.getRisk(user, idRk, ConfigManager.getSurvey(codeSur));
                         }
-                        fileJspT = nomeFile.get(part);
+                        fileJspT = nomeFile.get(part);//
                     } else {
                         /* ************************************************ *
                          *              SELECT a Specific Risk              *
@@ -529,10 +416,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         if (flatQuestions != null) {
             req.setAttribute("elencoQuesiti", flatQuestions);
         }
-        // Imposta l'eventuale lista di inteviste trovate
-        if (interviews != null) {
-            req.setAttribute("elencoInterviste", interviews);
-        }
         // Imposta nella request elenco completo domande e risposte di un'intervista
         if (answers != null) {
             req.setAttribute("elencoRisposte", answers);
@@ -544,14 +427,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Imposta struttura contenente tutti i parametri di navigazione già estratti
         if (!params.isEmpty()) {
             req.setAttribute("params", params);
-        }
-        // Imposta nella request data di un'intervista cercata
-        if (questDate != null) {
-            req.setAttribute("dataRisposte", questDate);
-        }
-        // Imposta nella request ora di un'intervista cercata
-        if (questTime != null) {
-            req.setAttribute("oraRisposte", questTime);
         }
         // Imposta nella request oggetto rischio corruttivo specifico
         if (risk != null) {
@@ -641,9 +516,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                   AttributoNonValorizzatoException {
         LinkedHashMap<String, String> struct = new LinkedHashMap<>();
         LinkedHashMap<String, String> proat = new LinkedHashMap<>();
-        LinkedHashMap<String, String> answs = new LinkedHashMap<>();
         LinkedHashMap<String, String> survey = new LinkedHashMap<>();
-        LinkedHashMap<String, String> quest = new LinkedHashMap<>();
         LinkedHashMap<String, String> risk = new LinkedHashMap<>();
         /* **************************************************** *
          *     Caricamento parametro di Codice Rilevazione      *
@@ -675,28 +548,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         proat.put("liv3",    parser.getStringParameter("pliv3", VOID_STRING));
         formParams.put(PART_PROCESS, proat);
         /* **************************************************** *
-         *    Caricamento parametri di Compilazione Quesiti     *
-         * **************************************************** */
-        if (part.equals(PART_SELECT_QST)) {
-            // Carica la tabella che ad ogni rilevazione associa il numero di quesiti corrispondenti
-            questionAmounts = ConfigManager.getQuestionAmount();
-            // Recupera il numero di quesiti associati alla rilevazione
-            int limit = questionAmounts.get(codeSur).intValue();
-            for (int i = NOTHING; i < limit; i++) {
-                answs.put("quid" + String.valueOf(i),  parser.getStringParameter("Q" + String.valueOf(i) + "-id", VOID_STRING));
-                answs.put("risp" + String.valueOf(i),  parser.getStringParameter("Q" + String.valueOf(i), VOID_STRING));
-                answs.put("note" + String.valueOf(i),  parser.getStringParameter("Q" + String.valueOf(i) + "-note", VOID_STRING));
-            }
-            formParams.put(PART_SELECT_QST, answs);
-        }
-        if (part.equals(PART_RESUME_QST)) {
-            // Recupera gli estremi del quesito di cui aggiornare la risposta
-            quest.put("quid",    parser.getStringParameter("q-id", VOID_STRING));
-            quest.put("risp",    parser.getStringParameter("q-risp", VOID_STRING));
-            quest.put("note",    parser.getStringParameter("q-note", VOID_STRING));
-            formParams.put(PART_RESUME_QST, quest);
-        }
-        /* **************************************************** *
          *     Caricamento parametri di Inserimento Rischio     *
          * **************************************************** */
         if (part.equals(PART_INSERT_RISK)) {
@@ -705,199 +556,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             risk.put("desc",    parser.getStringParameter("r-descr", VOID_STRING));
             formParams.put(PART_INSERT_RISK, risk);
         }
-    }
-    
-    
-    /**
-     * <p>Restituisce una mappa contenente gli estremi identificanti
-     * una singola intervista.</p> 
-     * 
-     * @param codeSur       codice rilevazione
-     * @param interview     oggetto intervista, contenente tutti i parametri al proprio interno, da estrarre e inserire nella mappa restituita
-     * @return <code>HashMap&lt;String, LinkedHashMap&lt;String, String&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il valore del parametro p, e per valore una mappa contenente i relativi parametri
-     * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
-     * @throws AttributoNonValorizzatoException se si fa riferimento a un attributo obbligatorio di bean che non viene trovato
-     */
-    public static HashMap<String, LinkedHashMap<String, String>> loadInterviewParams(String codeSur,
-                                                                                     InterviewBean interview)
-                                                                              throws CommandException, 
-                                                                                     AttributoNonValorizzatoException {
-        LinkedHashMap<String, String> struct = new LinkedHashMap<>();
-        LinkedHashMap<String, String> proat = new LinkedHashMap<>();
-        String liv2, liv3, liv4;
-        String pro2, pro3;
-        LinkedHashMap<String, String> survey = new LinkedHashMap<>();
-        HashMap<String, LinkedHashMap<String, String>> formParams = new HashMap<String, LinkedHashMap<String, String>>();
-        /* **************************************************** *
-         *     Caricamento parametro di Codice Rilevazione      *
-         * **************************************************** */      
-        // Recupera l'oggetto rilevazione a partire dal suo codice
-        CodeBean surveyAsBean = ConfigManager.getSurvey(codeSur);
-        // Inserisce l'ìd della rilevazione come valore del parametro
-        survey.put(PARAM_SURVEY, String.valueOf(surveyAsBean.getId()));
-        // Aggiunge data e ora
-        survey.put("d", interview.getDataUltimaModifica().toString());
-        survey.put("t", interview.getOraUltimaModifica().toString());
-        // Aggiunge il tutto al dizionario dei parametri
-        formParams.put(PARAM_SURVEY, survey);
-        /* **************************************************** *
-         *     Caricamento parametri di Struttura Scelta        *
-         * **************************************************** */        
-        struct.put("liv1",  interview.getStruttura().getInformativa());
-        liv2 = (interview.getStruttura().getFiglie() != null) ? interview.getStruttura().getFiglie().get(0).getInformativa() : VOID_STRING; 
-        struct.put("liv2", liv2);
-        struct.put("liv3", VOID_STRING);
-        struct.put("liv4", VOID_STRING);
-        if (liv2 != VOID_STRING) {
-            liv3 = (interview.getStruttura().getFiglie().get(0).getFiglie() != null) ? interview.getStruttura().getFiglie().get(0).getFiglie().get(0).getInformativa() : VOID_STRING;
-            struct.replace("liv3",  liv3);
-            if (liv3 != VOID_STRING) {
-                liv4 = (interview.getStruttura().getFiglie().get(0).getFiglie().get(0).getFiglie() != null) ? interview.getStruttura().getFiglie().get(0).getFiglie().get(0).getFiglie().get(0).getInformativa() : VOID_STRING;
-                struct.replace("liv4",  liv4);
-            }
-        }
-        formParams.put(PART_SELECT_STR, struct);
-        /* **************************************************** *
-         *       Caricamento parametri di Processo Scelto       *
-         * **************************************************** */
-        proat.put("liv1",    interview.getProcesso().getInformativa());
-        pro2 = (interview.getProcesso().getProcessi() != null) ? interview.getProcesso().getProcessi().get(0).getInformativa() : VOID_STRING;
-        proat.put("liv2", pro2);
-        proat.put("liv3", VOID_STRING);
-        if (pro2 != VOID_STRING) {
-            pro3 = (interview.getProcesso().getProcessi().get(0).getProcessi() != null) ? interview.getProcesso().getProcessi().get(0).getProcessi().get(0).getInformativa() : VOID_STRING;
-            proat.put("liv3", pro3);
-        }
-        formParams.put(PART_PROCESS, proat);
-        return formParams;
-    }
-    
-    
-    /**
-     * <p>Travasa una struttura vettoriale in una corrispondente struttura 
-     * di tipo Dictionary, HashMap, in cui le chiavi sono rappresentate 
-     * da oggetti String e i valori sono rappresentati dalle elenchi di figlie 
-     * associate alla chiave.</p>
-     * 
-     * @param objects struttura vettoriale contenente gli oggetti da travasare
-     * @param part    parametro di navigazione identificante la tipologia di oggetti da considerare
-     * @return <code>HashMap&lt;?&comma; ?&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
-     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
-     */
-    private static HashMap<?,?> decant(ArrayList<?> objects, 
-                                       String part)
-                                throws CommandException {
-        if (part.equals(PART_SELECT_STR)) {
-            return decantStructs((ArrayList<DepartmentBean>) objects);
-        /*} else if(part.equals(PART_SELECT_QST)) {
-            return decantQuestions((ArrayList<QuestionBean>) objects);*/
-        }
-        String msg = FOR_NAME + "Valore di \'part\' non gestito.\n";
-        LOG.severe(msg);
-        throw new CommandException(msg);
-    }
-    
-    
-    /**
-     * <p>Travasa una struttura vettoriale matriciale (Vector con Vector con Vector etc.) 
-     * di DepartmentBean, ciascuno dei quali pu&ograve; contenere un Vector di 
-     * figlie, in una corrispondente struttura di tipo Dictionary, HashMap, 
-     * in cui le chiavi sono rappresentate da oggetti String e i valori
-     * sono rappresentati dalle figlie del nodo avente codice corrispondente
-     * alla chiave.</p>
-     * <p>&Egrave; utile per un accesso pi&uacute; diretto alle figlie
-     * di ogni struttura, evitando di dover ogni volta ciclare la struttura
-     * matriciale fino al nodo di cui si vogliono ottenere le strutture figlie.</p>
-     *
-     * @param structs Vector di DepartmentBean da travasare in HashMap
-     * @return <code>HashMap&lt;String&comma; Vector&lt;DepartmentBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
-     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
-     */
-    private static HashMap<String, Vector<DepartmentBean>> decantStructs(ArrayList<DepartmentBean> structs)
-                                                                  throws CommandException {
-        HashMap<String, Vector<DepartmentBean>> flatStructs = new HashMap<>();
-        try {
-            for (DepartmentBean l1 : structs) {
-                String keyL1 = l1.getExtraInfo().getCodice(); 
-                Vector<DepartmentBean> vL2 = l1.getFiglie();
-                flatStructs.put(keyL1, vL2);
-                for (DepartmentBean l2 : vL2) {
-                    String keyL2 = l2.getExtraInfo().getCodice(); 
-                    Vector<DepartmentBean> vL3 = l2.getFiglie();
-                    flatStructs.put(keyL2, vL3);
-                    for (DepartmentBean l3 : vL3) {
-                        String keyL3 = l3.getExtraInfo().getCodice(); 
-                        Vector<DepartmentBean> vL4 = l3.getFiglie();
-                        flatStructs.put(keyL3, vL4);
-                    }
-                }
-            }
-        } catch (ArrayIndexOutOfBoundsException aiobe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento fuori tabella.\n" + aiobe.getMessage();
-            LOG.severe(msg);
-            throw new CommandException(msg, aiobe);
-        } catch (ClassCastException cce) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di conversione di tipo.\n" + cce.getMessage();
-            LOG.severe(msg);
-            throw new CommandException(msg, cce);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n" + npe.getMessage();
-            LOG.severe(msg);
-            throw new CommandException(msg, npe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel travaso di un Vector in un Dictionary.\n" + e.getMessage();
-            LOG.severe(msg);
-            throw new CommandException(msg, e);
-        }
-        return flatStructs;
-    }
-    
-    
-    /**
-     * <p>Prende in input una struttura vettoriale di QuestionBean 
-     * e una di ambiti cui i quesiti appartengono, e riconduce ogni quesito
-     * al proprio ambito, restituendo una struttura associativa (dictionary)
-     * in cui la chiave è costituita dall'ambito e il valore l'array
-     * di quesiti associati.</p>
-     *
-     * @param questions Vector di QuestionBean da indicizzare per ambito
-     * @param ambits    Vector di ambiti cui ricondurre i quesiti
-     * @return <code>HashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
-     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
-     */
-    private static HashMap<ItemBean, ArrayList<QuestionBean>> decantQuestions(ArrayList<QuestionBean> questions, 
-                                                                              ArrayList<ItemBean> ambits)
-                                                                       throws CommandException {
-        HashMap<ItemBean, ArrayList<QuestionBean>> questionsByAmbit = new HashMap<>();
-        try {
-            for (ItemBean ambit : ambits) {
-                int key = ambit.getId();
-                ArrayList<QuestionBean> qs = new ArrayList<>();
-                for (QuestionBean q : questions) {
-                    if (q.getCod1() == key) {
-                        qs.add(q);
-                    }
-                }
-                questionsByAmbit.put(ambit, qs);
-            }
-        } catch (ArrayIndexOutOfBoundsException aiobe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento fuori tabella.\n" + aiobe.getMessage();
-            LOG.severe(msg);
-            throw new CommandException(msg, aiobe);
-        } catch (ClassCastException cce) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di conversione di tipo.\n" + cce.getMessage();
-            LOG.severe(msg);
-            throw new CommandException(msg, cce);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n" + npe.getMessage();
-            LOG.severe(msg);
-            throw new CommandException(msg, npe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel travaso di un Vector in un Dictionary.\n" + e.getMessage();
-            LOG.severe(msg);
-            throw new CommandException(msg, e);
-        }
-        return questionsByAmbit;
     }
     
 }
