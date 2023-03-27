@@ -26,7 +26,7 @@
       <fmt:formatDate var="iviewsqldate" value="${iview.dataUltimaModifica}" pattern="yyyy-MM-dd" scope="page" />
       <fmt:formatDate var="iviewsqltime" value="${iview.oraUltimaModifica}" pattern="HH_mm_ss" scope="page" />
       <c:url var="rqsInstance" context="${initParam.appName}" value="/" scope="page">
-        <c:param name="q" value="ri" />
+        <c:param name="q" value="in" />
         <c:param name="p" value="rqs" />
         <c:param name="sliv1" value="${iview.struttura.informativa}" />
         <c:param name="sliv2" value="${iview.struttura.figlie.get(zero).informativa}" />
