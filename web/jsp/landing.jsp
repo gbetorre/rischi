@@ -69,7 +69,7 @@
             <i class="fa-solid fa-headphones fa-5x"></i>&nbsp;&nbsp;
             <span class="h4 landing-card-title">Archivio Interviste</span>
           </div>
-          <a class="small text-white stretched-link" href="${sqs}"></a>
+          <a class="small text-white stretched-link" href="${in}"></a>
         </div>
       </div>
 <%--  <div class="col-xl-4 col-md-6 mx-auto">
