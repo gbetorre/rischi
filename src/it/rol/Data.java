@@ -64,6 +64,7 @@ import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
 import it.rol.bean.RiskBean;
+import it.rol.command.AuditCommand;
 import it.rol.command.DepartmentCommand;
 import it.rol.command.ProcessCommand;
 import it.rol.command.RiskCommand;
@@ -207,8 +208,23 @@ public class Data extends HttpServlet implements Constants {
         log.info("===> Log su servlet Data. <===");
         // Decodifica la richiesta
         try {
+            // Gestione estrazione interviste ("data?q=in")
+            if (qToken.equalsIgnoreCase(COMMAND_AUDIT)) {
+                // Verifica se deve servire un output csv
+                if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
+                    // Recupero elementi in base alla richiesta
+                    lista = retrieve(req, COMMAND_AUDIT);
+                    // Passaggio in request per uso delle lista
+                    req.setAttribute("lista", lista);
+                    // Assegnazione di un valore di default se il parametro 'p' è nullo
+                    String key = (part == null ? COMMAND_AUDIT : part);
+                    // Genera il file CSV
+                    makeCSV(req, res, key);
+                    // Ha finito
+                    return;
+                }
             // Gestione estrazione interviste ("data?q=ri")
-            if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
+            } else if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
                 // Verifica se deve servire un output csv
                 if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
                     // Recupero elementi in base alla richiesta
@@ -313,8 +329,8 @@ public class Data extends HttpServlet implements Constants {
         try {
             // Istanzia nuovo Databound
             DBWrapper db = new DBWrapper();
-            // "data?q=ri"
-            if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
+            // "data?q=in"
+            if (qToken.equalsIgnoreCase(COMMAND_AUDIT)) {
                 // "&p=sqs"
                 if (part.equalsIgnoreCase(PART_SELECT_QSS)) {
                     // Recupera dal Databound elenco di interviste in base a rilevazione
@@ -324,7 +340,7 @@ public class Data extends HttpServlet implements Constants {
                     // Per ogni intervista
                     for (InterviewBean interview : interviews) {
                         // Recupera tutti i parametri identificanti l'intervista
-                        HashMap<String, LinkedHashMap<String, String>> interviewParams = RiskCommand.loadInterviewParams(codeSurvey, interview);
+                        HashMap<String, LinkedHashMap<String, String>> interviewParams = AuditCommand.loadInterviewParams(codeSurvey, interview);
                         // Recupera tutte le risposte identificate in base ai parametri dell'intervista
                         ArrayList<QuestionBean> answers = db.getAnswers(user, interviewParams, ConfigManager.getSurvey(codeSurvey));
                         // Imposta le risposte dell'intervista corrente 
@@ -360,20 +376,23 @@ public class Data extends HttpServlet implements Constants {
                     list = interviews;
                 // Non c'è il parametro 'p'
                 } else {
-                    // Recupera tutti i rischi della rilevazione corrente
-                    ArrayList<RiskBean> risks = db.getRisks(user, ConfigManager.getSurvey(codeSurvey).getId(), ConfigManager.getSurvey(codeSurvey));
-                    // Prepara una lista di rischi contenenti ciascuno l'elenco dei processi che sono esposti al rischio stesso
-                    ArrayList<RiskBean> risksWithProcess = new ArrayList<>();
-                    // Per ogni rischio trovato...
-                    for (RiskBean risk : risks) {
-                        // ...Ne recupera i processi esposti e li carica nel rischio stesso
-                        risk.setProcessi(db.getProcessByRisk(user, risk, ConfigManager.getSurvey(codeSurvey)));
-                        // Carica il rischio valorizzato con i processi alla lista dei rischi
-                        risksWithProcess.add(risk);
-                    }
-                    // In questo modo restituisce solo i rischi aventi processi esposti, ma per le regole di business, non devono esserci rischi nel registro non associati a processi
-                    list = risksWithProcess;
+                    // chiamata di sola in senza parametri
                 }
+            // "data?q=ri"
+            } else if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
+                // Recupera tutti i rischi della rilevazione corrente
+                ArrayList<RiskBean> risks = db.getRisks(user, ConfigManager.getSurvey(codeSurvey).getId(), ConfigManager.getSurvey(codeSurvey));
+                // Prepara una lista di rischi contenenti ciascuno l'elenco dei processi che sono esposti al rischio stesso
+                ArrayList<RiskBean> risksWithProcess = new ArrayList<>();
+                // Per ogni rischio trovato...
+                for (RiskBean risk : risks) {
+                    // ...Ne recupera i processi esposti e li carica nel rischio stesso
+                    risk.setProcessi(db.getProcessByRisk(user, risk, ConfigManager.getSurvey(codeSurvey)));
+                    // Carica il rischio valorizzato con i processi alla lista dei rischi
+                    risksWithProcess.add(risk);
+                }
+                // In questo modo restituisce solo i rischi aventi processi esposti, ma per le regole di business, non devono esserci rischi nel registro non associati a processi
+                list = risksWithProcess;
             // "data?q=pr"
             } else if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
                 // Cerca l'identificativo del processo anticorruttivo
@@ -594,7 +613,7 @@ public class Data extends HttpServlet implements Constants {
         /* **************************************************************** *
          *  Gestione elaborazione contenuto CSV per interviste con risposte *
          * **************************************************************** */
-        if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_RISK)) {
+        if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_AUDIT)) {
             /* ************************************************************ *
              *    Generazione contenuto files CSV di tutte le interviste    *
              * ************************************************************ */
@@ -710,48 +729,48 @@ public class Data extends HttpServlet implements Constants {
                     out.println(e.getMessage());
                 }
             }
-            /* ************************************************************ *
-             *    Generazione contenuto files CSV del registro dei rischi   *
-             * ************************************************************ */
-            else {
-                try {
-                    // Recupera i macro at da Request
-                    ArrayList<RiskBean> list = (ArrayList<RiskBean>) req.getAttribute("lista");
-                    // Scrittura file CSV
-                    StringBuffer headers = new StringBuffer()
-                            .append("Rischio").append(SEPARATOR)
-                            //.append("N. Processi esposti").append(SEPARATOR)
-                            .append("Codice Macroprocesso").append(SEPARATOR)
-                            .append("Macroprocesso").append(SEPARATOR)
-                            .append("Codice Processo").append(SEPARATOR)
-                            .append("Processo").append(SEPARATOR);
-                    out.println(headers);
-                    if (list.size() > NOTHING) {
-                        int itCounts = NOTHING;
-                        do {
-                            RiskBean item = list.get(itCounts);
-                            // Stampa rischi che hanno processi associati
-                            for (ProcessBean pat : item.getProcessi()) {
-                                String labelR = item.getNome().replace(SEMICOLON, BLANK_SPACE).replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE);
-                                StringBuffer tupla = new StringBuffer()
-                                    .append(labelR).append(SEPARATOR)
-                                    .append(pat.getPadre().getCodice()).append(SEPARATOR)
-                                    .append(pat.getPadre().getNome()).append(SEPARATOR)
-                                    .append(pat.getCodice()).append(SEPARATOR)
-                                    .append(pat.getNome()).append(SEPARATOR);
-                                out.println(String.valueOf(tupla));
-                            }
-                            itCounts++;
-                        } while (itCounts < list.size());
-                        success = itCounts;
-                    }
-                } catch (RuntimeException re) {
-                    log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco delle strutture collegate ai macroprocessi.\n" + re.getMessage());
-                    out.println(re.getMessage());
-                } catch (Exception e) {
-                    log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
-                    out.println(e.getMessage());
+        }
+        /* **************************************************************** *
+         *   Gestione elaborazione contenuto CSV per registro dei rischi    *
+         * **************************************************************** */
+        else if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_RISK)) {
+            try {
+                // Recupera i macro at da Request
+                ArrayList<RiskBean> list = (ArrayList<RiskBean>) req.getAttribute("lista");
+                // Scrittura file CSV
+                StringBuffer headers = new StringBuffer()
+                        .append("Rischio").append(SEPARATOR)
+                        //.append("N. Processi esposti").append(SEPARATOR)
+                        .append("Codice Macroprocesso").append(SEPARATOR)
+                        .append("Macroprocesso").append(SEPARATOR)
+                        .append("Codice Processo").append(SEPARATOR)
+                        .append("Processo").append(SEPARATOR);
+                out.println(headers);
+                if (list.size() > NOTHING) {
+                    int itCounts = NOTHING;
+                    do {
+                        RiskBean item = list.get(itCounts);
+                        // Stampa rischi che hanno processi associati
+                        for (ProcessBean pat : item.getProcessi()) {
+                            String labelR = item.getNome().replace(SEMICOLON, BLANK_SPACE).replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE);
+                            StringBuffer tupla = new StringBuffer()
+                                .append(labelR).append(SEPARATOR)
+                                .append(pat.getPadre().getCodice()).append(SEPARATOR)
+                                .append(pat.getPadre().getNome()).append(SEPARATOR)
+                                .append(pat.getCodice()).append(SEPARATOR)
+                                .append(pat.getNome()).append(SEPARATOR);
+                            out.println(String.valueOf(tupla));
+                        }
+                        itCounts++;
+                    } while (itCounts < list.size());
+                    success = itCounts;
                 }
+            } catch (RuntimeException re) {
+                log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco delle strutture collegate ai macroprocessi.\n" + re.getMessage());
+                out.println(re.getMessage());
+            } catch (Exception e) {
+                log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
+                out.println(e.getMessage());
             }
         }
         /* **************************************************************** *
