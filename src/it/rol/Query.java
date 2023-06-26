@@ -8,7 +8,7 @@
  *   web applications to make survey about the amount and kind of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -1419,6 +1419,28 @@ public interface Query extends Serializable {
             "   ORDER BY PAT.id_macroprocesso_at, PAT.nome";
     
     /**
+     * <p>Conta quanti sono i processi - livello 2, quindi no Macro (= 1) no Sub (= 3) -
+     * collegati a un dato rischio corruttivo.</p>
+     */
+    public static final String GET_RISK_PROCESS = 
+            "SELECT count(*)" +
+            "   FROM rischio_processo_at RAT" +
+            "   WHERE RAT.id_processo_at = ?" +
+            "       AND RAT.id_rischio_corruttivo = ?" +
+            "       AND RAT.id_rilevazione = ?";
+    
+    /**
+     * <p>Conta quanti sono i processi - livello 2, quindi no Macro (= 1) no Sub (= 3) -
+     * collegati a un dato rischio corruttivo.</p>
+     */
+    public static final String GET_RISK_SUBPROCESS = 
+            "SELECT count(*)" +
+            "   FROM rischio_sottoprocesso_at RSPAT" +
+            "   WHERE RSPAT.id_sottoprocesso_at = ?" +
+            "       AND RSPAT.id_rischio_corruttivo = ?" +
+            "       AND RSPAT.id_rilevazione = ?";
+    
+    /**
      * <p>In funzione del parametro specificante il livello
      * (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at),
      * costruisce dinamicamente la query che estrae tutti i macroprocessi 
@@ -1583,6 +1605,48 @@ public interface Query extends Serializable {
             "   ,       ? " +       // data ultima modifica
             "   ,       ? " +       // ora ultima modifica
             "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id_rilevazione
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di un'associazione tra un rischio corruttivo
+     * ed un processo censito dall'anticorruzione.</p>
+     */
+    public static final String INSERT_RISK_PROCESS =
+            "INSERT INTO rischio_processo_at" +
+            "   (   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_processo_at" +
+            "   ,   id_rischio_corruttivo" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id_processo_at
+            "   ,       ? " +       // id_rischio_corruttivo
+            "   ,       ? " +       // id_rilevazione
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di un'associazione tra un rischio corruttivo
+     * ed un sottoprocesso censito dall'anticorruzione.</p>
+     */
+    public static final String INSERT_RISK_SUBPROCESS =
+            "INSERT INTO rischio_sottoprocesso_at" +
+            "   (   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_sottoprocesso_at" +
+            "   ,   id_rischio_corruttivo" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id_sottoprocesso_at
+            "   ,       ? " +       // id_rischio_corruttivo
             "   ,       ? " +       // id_rilevazione
             "          )" ;
     
