@@ -8,7 +8,7 @@
  *   web applications to make survey about the amount and kind of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -224,6 +224,10 @@ public interface Constants extends Serializable {
      * <p>Costante per il parametro identificante la funzione di eliminazione di una entit&agrave;.</p>
      */
     public static final String DELETE                   = "del";
+    /**
+     * <p>Costante per il parametro identificante un messaggio (conferma, codice di errore, etc.).</p>
+     */
+    public static final String MESSAGE                  = "msg";    
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
