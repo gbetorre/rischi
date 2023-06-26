@@ -8,7 +8,7 @@
  *   web applications to make survey about the amount and kind of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -212,7 +212,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
                 fileJspT = nomeFileLanding;
             } else {
                 if (isLoggedUser(req)) {
-                    error = "Codice di rilevazione non valido.";
+                    error = "Funzione non trovata.";
                 }
                 fileJspT = nomeFileElenco;
             }
@@ -563,6 +563,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         deniedTokens.add("d");
         deniedTokens.add("t");
         deniedTokens.add("idO");
+        deniedTokens.add("msg");
         // Aggiunge i valori del token 'p' che devono generare breadcrumb associandoli a un'etichetta da mostrare in breadcrumb
         allowedParams.put(PART_SEARCH,          "Ricerca");
         allowedParams.put(PART_SELECT_STR,      "Scelta Struttura");
