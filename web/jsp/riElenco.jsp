@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ include file="URL.jspf" %>
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
@@ -6,6 +7,17 @@
       <i class="fas fa-download"></i>Scarica tutti i dati
     </a>
     <hr class="riga"/>
+    <c:if test="${param['msg'] eq 'newRel'}">
+    <script>
+      $(function () { 
+          var duration = 4000; // 4 seconds
+          setTimeout(function () { $('#mainAlertMessage').hide(); }, duration);
+      });
+    </script>
+    <div id="mainAlertMessage" class="alert alert-success alert-dismissible" role="alert">
+      Nuova associazione tra rischio e processo creata con successo
+    </div>
+    </c:if>
     <div class="p-3 p-md-4 border rounded-3 icon-demo-examples errorPwd">
       <div class="fs-2 mb-3">
         Rischi &nbsp;
@@ -24,18 +36,21 @@
         </c:if>
         <li class="list-group-item ${bgAct}">
         <c:set var="alarm" value="" scope="page" />
-        <c:set var="explain" value="" scope="page" />
+        <c:set var="explain" value="Clicca per visualizzare i dettagli del rischio" scope="page" />
         <c:if test="${risk.impatto eq zero}">
           <c:set var="explain" value="Questo rischio &egrave; contrassegnato perch&eacute; non &egrave; ancora associato ad alcun processo" scope="page" />
           <c:set var="alarm" value="pHeader heading bgAct13 alert-danger" scope="page" />
           <i class="fa-solid fa-triangle-exclamation"></i>
         </c:if>
           <a href="${initParam.appName}/?q=ri&idR=${risk.id}&r=${param['r']}" class="${alarm}" title="${explain}">
-          <c:out value="${risk.nome}" />
-          <span class="float-right ${alarm}">
-            (<c:out value="${risk.impatto}" />)
-          </span>
+            <c:out value="${risk.nome}" />
           </a>
+          <span class="float-right ${alarm}">
+            <a href="${initParam.appName}/?q=ri&p=adp&idR=${risk.id}&r=${param['r']}" id="btn-tar" title="Clicca per associare un processo a questo rischio">
+              (<c:out value="${risk.impatto}" />)&nbsp;&nbsp;
+              <i class="fa-regular fa-square-plus"></i>&nbsp;
+            </a>
+          </span>
         </li>
       </c:forEach>
       </ul>
