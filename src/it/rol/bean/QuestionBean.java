@@ -8,7 +8,7 @@
  *   web applications to make survey about the amount and kind of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,6 @@
 
 package it.rol.bean;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import it.rol.exception.AttributoNonValorizzatoException;
@@ -44,7 +43,7 @@ import it.rol.exception.AttributoNonValorizzatoException;
  * 
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
-public class QuestionBean extends ItemBean implements Serializable {
+public class QuestionBean extends ItemBean {
     
     /**
      * Generated Serial Version ID (let's compliant with Hybernate, man!)
