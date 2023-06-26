@@ -8,7 +8,7 @@
  *   web applications to make survey about the amount and kind of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -185,8 +185,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         ArrayList<DepartmentBean> structs = null;
         // Elenco processi collegati alla rilevazione
         ArrayList<ProcessBean> macros = null;
-        // Elenco quesiti collegati alla rilevazione
-        ArrayList<QuestionBean> questions = null;
         // Elenco risposte ai quesiti collegati all'intervista
         ArrayList<QuestionBean> answers = null;
         // Elenco strutture collegate alla rilevazione indicizzate per codice
@@ -307,8 +305,29 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                             // Inserisce nel DB nuovo rischio corruttivo definito dall'utente
                             db.insertRisk(user, params);
                             // Prepara la redirect 
-                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + AMPERSAND + 
-                                       PARAM_SURVEY + EQ + codeSur;
+                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
+                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                        } else if (part.equalsIgnoreCase(PART_INSERT_RISK_PROCESS)) {
+                            /* ************************************************ *
+                             *   INSERT new relation between Risk and Process   *
+                             * ************************************************ */
+                            // Controlla che non sia già presente l'associazione 
+                            int check = db.getRiskProcess(user, params);
+                            if (check > NOTHING) {
+                                // Duplicate key value violates unique constraint 
+                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
+                                           AMPERSAND + "p" + EQ + PART_INSERT_RISK_PROCESS +
+                                           AMPERSAND + "idR" + EQ + parser.getStringParameter("r-id", VOID_STRING) + 
+                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur +
+                                           AMPERSAND + MESSAGE + EQ + "dupKey";
+                            } else {
+                                // Inserisce nel DB nuovo rischio corruttivo definito dall'utente
+                                db.insertRiskProcess(user, params);
+                                // Prepara la redirect 
+                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
+                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur +
+                                           AMPERSAND + MESSAGE + EQ + "newRel";
+                            }
                         }
                     } else {
                         // Azione di default
@@ -344,6 +363,9 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                              *       SHOWS Form to LINK A PROCESS TO A Risk     *
                              * ************************************************ */
                             risk = db.getRisk(user, idRk, ConfigManager.getSurvey(codeSur));
+                            // Ha bisogno di personalizzare le breadcrumbs
+                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuovo legame R-P");
                         }
                         fileJspT = nomeFile.get(part);//
                     } else {
@@ -411,10 +433,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Imposta nella request elenco completo processi
         if (macros != null) {
             req.setAttribute("processi", macros);
-        }
-        // Imposta nella request elenco completo quesiti raggruppati per ambito
-        if (flatQuestions != null) {
-            req.setAttribute("elencoQuesiti", flatQuestions);
         }
         // Imposta nella request elenco completo domande e risposte di un'intervista
         if (answers != null) {
@@ -555,6 +573,13 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             risk.put("risk",    parser.getStringParameter("r-name", VOID_STRING));
             risk.put("desc",    parser.getStringParameter("r-descr", VOID_STRING));
             formParams.put(PART_INSERT_RISK, risk);
+        /* **************************************************** *
+         *  Caricamento parametri Associazione Processo-Rischio *
+         * **************************************************** */
+        } else if (part.equals(PART_INSERT_RISK_PROCESS)) {
+            // Recupera gli estremi del rischio da inserire
+            risk.put("risk",    parser.getStringParameter("r-id", VOID_STRING));
+            formParams.put(PART_INSERT_RISK_PROCESS, risk);
         }
     }
     
