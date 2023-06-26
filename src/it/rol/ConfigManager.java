@@ -8,7 +8,7 @@
  *   web applications to make survey about the amount and kind of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -468,7 +468,7 @@ public class ConfigManager extends HttpServlet {
      * se si desidera un formato diverso da text/html, che &egrave; il formato di default.</p>
      * <p>Metodo getter sulla variabile privata di classe.</p>
      *
-     * @return <code>String</code> - il nome usato nell'applicazione per identificare il token delle command
+     * @return <code>String</code> - il nome usato nell'applicazione per identificare il token dell'output
      */
     public static String getOutToken() {
         return new String(outToken);
