@@ -8,7 +8,7 @@
  *   web applications to make survey about the amount and kind of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) 2022 - 2023 Giovanroberto Torre
+ *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -96,15 +96,15 @@ public class AuditCommand extends ItemBean implements Command, Constants {
     /**
      * Pagina a cui la command fa riferimento per permettere la scelta di una struttura
      */
-    private static final String nomeFileSelectStruct = "/jsp/riStruttura.jsp";
+    private static final String nomeFileSelectStruct = "/jsp/inStruttura.jsp";
     /**
      * Pagina a cui la command fa riferimento per permettere la scelta di un processo
      */
-    private static final String nomeFileSelectProcess = "/jsp/riProcesso.jsp";
+    private static final String nomeFileSelectProcess = "/jsp/inProcesso.jsp";
     /**
      * Pagina a cui la command fa riferimento per permettere la compilazione dei quesiti
      */
-    private static final String nomeFileCompileQuest = "/jsp/riQuestionario.jsp";
+    private static final String nomeFileCompileQuest = "/jsp/inQuestionario.jsp";
     /**
      * Pagina a cui la command fa riferimento per mostrare la lista delle interviste
      */
@@ -112,7 +112,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
     /**
      * Pagina a cui la command fa riferimento per permettere l'aggiornamento delle risposte ai dei quesiti
      */
-    private static final String nomeFileResumeQuest = "/jsp/riEpilogo.jsp";
+    private static final String nomeFileResumeQuest = "/jsp/inEpilogo.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
      */    
