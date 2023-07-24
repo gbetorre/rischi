@@ -66,6 +66,8 @@ public class RiskBean extends CodeBean {
     private boolean urgente;
     /** Processi esposti al rischio */
     private AbstractList<ProcessBean> processi;
+    /** Fattori abilitanti associati al rischio */
+    private AbstractList<CodeBean> fattori;
     
 	
     /* ************************************************************ *  
@@ -80,6 +82,7 @@ public class RiskBean extends CodeBean {
     	stato = null;
     	urgente = false;
     	processi = null;
+    	fattori = null;
     }
 	
 	
@@ -95,13 +98,8 @@ public class RiskBean extends CodeBean {
 	public String getImpatto() throws AttributoNonValorizzatoException {
 		if (impatto == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo impatto non valorizzato!");
-		}/*
-		else if (!LIVELLI_RISCHIO_AS_LIST.contains(impatto)) {
-			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo impatto non valorizzato correttamente!");
-		}*/
-		else {
-			return impatto;
 		}
+        return impatto;
 	}
 
 	/**
@@ -124,13 +122,8 @@ public class RiskBean extends CodeBean {
 	public String getLivello() throws AttributoNonValorizzatoException {
 		if (livello == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo livello non valorizzato!");
-		}/*
-		else if (!LIVELLI_RISCHIO_AS_LIST.contains(livello)) {
-			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo livello non valorizzato correttamente!");
-		}*/
-		else {
-			return livello;
 		}
+        return livello;
 	}
 
 	/**
@@ -212,6 +205,29 @@ public class RiskBean extends CodeBean {
      */
     public void setProcessi(AbstractList<ProcessBean> processi) {
         this.processi = processi;
+    }
+    
+    
+    /* ********************************************************* *
+     *       Metodi getter e setter per fattori abilitanti       *
+     * ********************************************************* */
+    /**
+     * Restituisce una lista di fattori abilitanti che risultano associati
+     * al rischio corrente.
+     *
+     * @return <code>fattori</code> - lista di fattori abilitanti associati al rischio corrente
+     */
+    public AbstractList<CodeBean> getFattori() {
+        return fattori;
+    }
+
+    /**
+     * Imposta i fattori abilitanti associati al rischio corrente.
+     *
+     * @param fattori - fattori abilitanti associati al rischio corrente, da impostare
+     */
+    public void setFattori(AbstractList<CodeBean> fattori) {
+        this.fattori = fattori;
     }
 	
 }
