@@ -209,20 +209,20 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 <!--
 ### ToDo (Roadmap)
+- Aggiunta pagina che mostra i processi erogati dalla struttura evocata in maniera asincrona al clic sul nodo di una struttura
+- Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
+- Implementata pagina di dettaglio soggetto contingente/interessato
+- Implementata pagina di dettaglio struttura
 - [1.3.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
 - [1.3.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
 - [1.3.7] Implementata estrazione risultati in formato CSV
 - [1.3.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
 - [1.3.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [1.3.4] Implementata form di ricerca sui quesiti per chiave testuale
-- Aggiunta pagina che mostra i processi erogati dalla struttura evocata in maniera asincrona al clic sul nodo di una struttura
-- Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
-- Implementata pagina di dettaglio soggetto contingente/interessato
-- Implementata pagina di dettaglio struttura
-- Implementata funzione di valorizzazione della relazione tra rischio corruttivo e processo
 
 ### Done
 -->
+- [1.3.6] (24/07/2023) Implementato registro dei fattori abilitanti i rischi; mostrati fattori abilitanti collegati a rischi nel contesto di un processo
 - [1.3.5] (26/06/2023) Implementata funzione inserimento relazione tra rischio corruttivo e processo censito dall'anticorruzione
 - [1.3.4] (27/03/2023) Delegata gestione interviste (visualizzazione, inserimento, aggiornamento risposte) a un nuovo componente sofware gemmato dalla Command dei rischi
 - [1.3.3] (06/03/2023) Implementata funzione di aggiunta di un rischio corruttivo al registro dei rischi
