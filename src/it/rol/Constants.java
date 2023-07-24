@@ -177,6 +177,10 @@ public interface Constants extends Serializable {
      */
     public static final String PART_OUTPUT              = "out";
     /**
+     * <p>Costante per il parametro identificante parte applicazione legata ai fattori abilitanti.</p>
+     */
+    public static final String PART_FACTORS             = "fat";
+    /**
      * <p>Costante per il parametro identificante la form di ricerca.</p>
      */
     public static final String PART_SEARCH              = "ris";
@@ -207,7 +211,7 @@ public interface Constants extends Serializable {
     /**
      * <p>Costante per il parametro identificante la pagina dei credits dell'applicazione.</p>
      */
-    public static final String PART_CREDITS             = "cre";
+    public static final String PART_CREDITS             = "crd";
     /**
      * <p>Costante per il parametro identificante la funzione di aggiunta di un nuovo rischio.</p>
      */
@@ -216,6 +220,11 @@ public interface Constants extends Serializable {
      * <p>Costante per il parametro identificante la funzione di associazione tra un rischio e un processo.</p>
      */
     public static final String PART_INSERT_RISK_PROCESS = "adp";
+    /**
+     * <p>Costante per il parametro identificante la funzione di associazione tra 
+     * un rischio e un fattore abilitante nel contesto di un processo.</p>
+     */
+    public static final String PART_INSERT_F_R_P        = "adf";
     /**
      * <p>Costante per il parametro identificante la funzione di aggiornamento di una entit&agrave;.</p>
      */
