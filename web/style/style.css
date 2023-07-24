@@ -413,6 +413,10 @@ select:disabled.bgcolor3 {
 	color: red;
 }
 
+.textcolormaroon {
+  color: maroon;
+}
+
 .bgAct {
   background-color: #ffd9b3 !important;
 }
