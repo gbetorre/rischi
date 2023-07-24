@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <c:if test="${not empty param['out']}">
   <c:if test="${param['out'] eq 'pop'}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
@@ -148,20 +149,42 @@
       </div>
       <hr class="separatore" />
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples errorPwd">
-        <div class="fs-2 mb-3">Rischi:</div>
-        <ul class="list-group">
-        <c:forEach var="risk" items="${risks}" varStatus="status">
-          <c:set var="bgAct" value="bgAct4" scope="page" />
-          <c:if test="${status.index mod 2 eq 0}">
-            <c:set var="bgAct" value="bgAct20" scope="page" />
-          </c:if>
-          <li class="list-group-item ${bgAct}">
-            <a href="${initParam.appName}/?q=ri&idR=${risk.id}&r=${param['r']}">
-              <c:out value="${risk.nome}" />
-            </a>
-          </li>
-        </c:forEach>
-        </ul>
+        <h3 class="bordo">
+          Rischi e fattori abilitanti 
+          <button type="button" class="btn btn-danger float-right">
+            <span class="badge badge-pill badge-light"><c:out value="${risks.size()}" /></span>
+          </button>
+        </h3>
+        <table class="table table-striped risultati" id="foundRisk">
+          <thead>
+            <tr>
+              <th width="45%">Rischio </th>
+              <th width="40%">Fattori abilitanti</th>
+              <th width="15%" class="text-center">Funzioni</th>
+            </tr>
+          </thead>
+          <c:forEach var="risk" items="${risks}" varStatus="status">
+          <tr class="bgAct20">
+            <td width="45%">
+              <a href="${initParam.appName}/?q=ri&idR=${risk.id}&r=${param['r']}">
+                <c:out value="${risk.nome}" />
+              </a>
+            </td>
+            <td width="40%">
+              <ul class="list-group">
+            <c:forEach var="fat" items="${risk.fattori}">
+              <li class="list-group-item popupMenu textcolormaroon"><c:out value="${fat.nome}" /></li>
+            </c:forEach>
+              </ul>
+            </td>
+            <td width="15%" class="text-center"><%--
+              <a href="#" class="btn btn-primary" title="Aggiungi un fattore abilitante al rischio &quot;${fn:substring(risk.nome, 0, 22)}...&quot; nel contesto del processo &quot;${processo}&quot;">
+                <small><i class="fas fa-plus"></i> Fattore</small>
+              </a> --%>
+            </td>
+          </tr>
+          </c:forEach>
+        </table>
       </div>
     </div>
 </c:catch>
