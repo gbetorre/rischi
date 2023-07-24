@@ -112,6 +112,15 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileOutput = "/jsp/prOutput.jsp";
     /**
+     * Pagina per mostrare elenco dei fattori abilitanti
+     */
+    private static final String nomeFileFattori = "/jsp/prFattori.jsp";
+    /**
+     * Pagina a cui la command inoltra per mostrare la form di aggiunta di un 
+     * fattore abilitante a un rischio entro il contesto del processo corrente
+     */
+    private static final String nomeFileAddFactor = "/jsp/prFattoreForm.jsp";
+    /**
      * Nome del file json della Command (dipende dalla pagina di default)
      */
     private String nomeFileJson = nomeFileElenco.substring(nomeFileElenco.lastIndexOf(SLASH), nomeFileElenco.indexOf(DOT));
@@ -151,6 +160,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         nomeFile.put(PART_PROCESS, nomeFileDettaglio);
         nomeFile.put(PART_OUTPUT, nomeFileOutputs);
+        nomeFile.put(PART_FACTORS, nomeFileFattori);
+        nomeFile.put(PART_INSERT_F_R_P, nomeFileAddFactor);
     }
 
 
@@ -196,6 +207,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         ProcessBean output = null;
         // Dichiara elenco di output
         AbstractList<ProcessBean> outputs = new ArrayList<>();
+        // Dichiara elenco di fattori abilitanti
+        AbstractList<CodeBean> factors = new ArrayList<>();
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
         /* ******************************************************************** *
@@ -282,6 +295,28 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Imposta la jsp
                             fileJspT = nomeFile.get(part);
                         }
+                    } else if (part.equalsIgnoreCase(PART_FACTORS)) {
+                        /* ************************************************ *
+                         *                SELECT Factors Part               *
+                         * ************************************************ */
+                        // Deve recuperare l'elenco dei fattori abilitanti
+                        factors = db.getFactors(user, ConfigManager.getSurvey(codeSur));
+                        // Ha bisogno di personalizzare le breadcrumbs
+                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Fattori abilitanti");
+                        // Imposta la jsp
+                        fileJspT = nomeFile.get(part);
+                    } else if (part.equalsIgnoreCase(PART_INSERT_F_R_P)) {
+                        /* **************************************************** *
+                         * SHOWS Form to LINK A FACTOR TO A Risk into a Process *
+                         * **************************************************** */
+                        // Deve recuperare l'elenco dei fattori abilitanti
+                        factors = db.getFactors(user, ConfigManager.getSurvey(codeSur));
+                        // Ha bisogno di personalizzare le breadcrumbs
+                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Fattori abilitanti");
+                        // Imposta la jsp
+                        fileJspT = nomeFile.get(part);
                     }
                 } else {
                     // Viene richiesta la visualizzazione di un elenco di macroprocessi
@@ -335,6 +370,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Imposta nella request oggetto specifico output di processo anticorruttivo 
         if (output != null) {
             req.setAttribute("output", output);
+        }
+        // Imposta nella request elenco completo dei fattori abilitanti
+        if (factors != null) {
+            req.setAttribute("fattori", factors);
         }
         // Imposta nella request le breadcrumbs in caso siano state personalizzate
         if (bC != null) {
@@ -533,7 +572,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             // Prepara il processo da passare
             ProcessBean p = new ProcessBean(id, VOID_STRING, VOID_STRING, level, survey.getId());
             // Estrae i rischi di un dato processo in una data rilevazione
-            risks = db.getRiskByProcess(user, p, survey);
+            risks = db.getRisksByProcess(user, p, survey);
         } catch (WebStorageException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei rischi.\n";
             LOG.severe(msg);
