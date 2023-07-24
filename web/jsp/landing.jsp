@@ -12,10 +12,10 @@
         </div>
       </div>
       <div class="col-xl-4 col-md-6 mx-auto">
-        <div class="card bgAct4 mb-4">
+        <div class="card bg-primary mb-4">
           <div class="card-body landing-card-body d-flex align-items-center">
             <i class="fas fa-sitemap fa-5x"></i>&nbsp;&nbsp;
-            <span class="h4 landing-card-title">Organigramma e strutture</span>
+            <span class="h4 landing-card-title text-white">Organigramma e strutture</span>
           </div>
           <a class="small text-white stretched-link" href="${st}"></a>
         </div>
@@ -32,13 +32,13 @@
     </div>
     <div class="row">
       <div class="col-xl-4 col-md-6 mx-auto">
-        <%--<div class="card bgAct20 text-dark mb-4 shadow-nohover">
+        <div class="card bgAct20 text-dark mb-4 shadow-nohover">
           <div class="card-body landing-card-body d-flex align-items-center">
-             <i class="fa-solid fa-person-circle-question fa-5x"></i>&nbsp;&nbsp; 
-            <span class="h4 landing-card-title">&nbsp;&nbsp;&nbsp;&nbsp; </span>
+            <i class="fa-solid fa-cloud-bolt fa-5x"></i>&nbsp;&nbsp; 
+            <span class="h4 landing-card-title">&nbsp;&nbsp;&nbsp;&nbsp;Fattori abilitanti </span>
           </div>
-          <a class="small stretched-link" href="#"></a>
-        </div>--%>
+          <a class="small stretched-link" href="${fat}"></a>
+        </div>
       </div>
       <div class="col-xl-4 col-md-6 mx-auto">
         <div class="card bgAct10 mb-4">
