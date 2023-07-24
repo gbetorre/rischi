@@ -573,6 +573,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         allowedParams.put(PART_SELECT_QSS,      "Interviste");
         allowedParams.put(PART_RESUME_QST,      "Risposte");
         allowedParams.put(PART_OUTPUT,          "Output");
+        allowedParams.put(PART_FACTORS,         "Fattori abilitanti");
         try {
             // Tokenizza la querystring in base all'ampersand
             String[] tokens = pageParams.split(AMPERSAND);
