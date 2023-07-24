@@ -1395,8 +1395,46 @@ public interface Query extends Serializable {
             "       INNER JOIN rischio_sottoprocesso_at RSPAT ON RSPAT.id_rischio_corruttivo = RC.id" +
             "   WHERE RSPAT.id_sottoprocesso_at = ?" +
             "       AND RSPAT.id_rilevazione = ?" +
-            "   ORDER BY RC.nome";
+            "   ORDER BY RC.nome";   
+
+    /**
+     * <p>Estrae i fattori abilitanti collegati ad uno specifico rischio e ad
+     * uno specifico processo anticorruttivo,
+     * il cui identificativo viene passato come parametro, nel contesto di una
+     * specifica rilevazione, il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_FACTORS_BY_RISK_AND_PROCESS = 
+            "SELECT DISTINCT" +
+            "       FA.id                               AS \"id\"" +
+            "   ,   FA.nome                             AS \"nome\"" +
+            "   ,   FA.descrizione                      AS \"informativa\"" +
+            "   ,   FA.ordinale                         AS \"ordinale\"" +
+            "   FROM fattore_rischio_processo_at FRP" +
+            "       INNER JOIN fattore_abilitante FA ON FRP.id_fattore_abilitante = FA.id" +
+            "   WHERE FRP.id_processo_at = ?" +
+            "       AND FRP.id_rischio_corruttivo = ?" +
+            "       AND FRP.id_rilevazione = ?" +
+            "   ORDER BY FA.nome";
     
+    /**
+     * <p>Estrae il registro dei fattori abilitanti.
+     * I fattori abilitanti sono un'entit&agrave; forte, astorica e indipendente 
+     * persino dalla rilevazione (sono trasversali alle varie rilevazioni).
+     * La contestualizzazione temporale dei fattori abilitanti, infatti,
+     * interviene nella relazione ternaria che è identificata dalla tupla
+     * (id_fattore, id_rischio, id_processo); in questo caso &egrave; stata
+     * anche introdotta la dipendenza dalla rilevazione, che contribuisce alla
+     * chiave primaria della relazione.</p>
+     */
+    public static final String GET_FACTORS = 
+            "SELECT DISTINCT" +
+            "       FA.id                               AS \"id\"" +
+            "   ,   FA.nome                             AS \"nome\"" +
+            "   ,   FA.descrizione                      AS \"informativa\"" +
+            "   ,   FA.ordinale                         AS \"ordinale\"" +
+            "   FROM fattore_abilitante FA" +
+            "   ORDER BY FA.ordinale, FA.nome";
+ 
     /**
      * <p>Estrae i processi - livello 2, quindi no Macro (= 1) no Sub (= 3) -
      * collegati a un rischio corruttivo il cui identificativo 
