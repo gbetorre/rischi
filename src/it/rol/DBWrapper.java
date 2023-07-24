@@ -2506,7 +2506,7 @@ public class DBWrapper implements Query, Constants {
                             ProcessBean mat = new ProcessBean();
                             // Valorizza il padre
                             BeanUtil.populate(mat, rs2);
-                            // Aggiunge il padre al filgio
+                            // Aggiunge il padre al figlio
                             pat.setPadre(mat);
                         }
                         // Aggiunge il processo alla lista di processi per l'output trovato
@@ -3876,14 +3876,15 @@ public class DBWrapper implements Query, Constants {
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "static-method" })
-    public ArrayList<RiskBean> getRiskByProcess(PersonBean user, 
-                                                ProcessBean process, 
-                                                CodeBean survey)
-                                         throws WebStorageException {
+    public ArrayList<RiskBean> getRisksByProcess(PersonBean user, 
+                                                 ProcessBean process, 
+                                                 CodeBean survey)
+                                          throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
-            ResultSet rs = null;
+            ResultSet rs, rs1 = null;
             AbstractList<RiskBean> risks = new ArrayList<>();
+            AbstractList<CodeBean> factors = null;
             int nextParam = NOTHING;
             try {
                 // TODO: Controllare se user è superuser
@@ -3899,6 +3900,29 @@ public class DBWrapper implements Query, Constants {
                     RiskBean risk = new RiskBean();
                     // Valorizza il rischio
                     BeanUtil.populate(risk, rs);
+                    // Recupera i fattori abilitanti collegati al rischio corrente
+                    nextParam = NOTHING;
+                    pst = null;
+                    // TODO: Gestire il caso dei sottoprocessi (al momento non ci sono)
+                    pst = con.prepareStatement(GET_FACTORS_BY_RISK_AND_PROCESS);
+                    pst.clearParameters();
+                    pst.setInt(++nextParam, process.getId());
+                    pst.setInt(++nextParam, risk.getId());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs1 = pst.executeQuery();
+                    // Prepara lista di fattori per il rischio corrente
+                    factors = new ArrayList<>();
+                    // Carica la lista
+                    while (rs1.next()) {
+                        // Prepara il fattore
+                        CodeBean fat = new CodeBean();
+                        // Valorizza il fattore
+                        BeanUtil.populate(fat, rs1);
+                        // Aggiunge il fattore alla lista
+                        factors.add(fat);
+                    }
+                    // Aggiunge la lista di fattori al rischio
+                    risk.setFattori(factors);
                     // Aggiunge il rischio alla lista dei rischi
                     risks.add(risk);
                 }
@@ -3982,7 +4006,7 @@ public class DBWrapper implements Query, Constants {
                         ProcessBean mat = new ProcessBean();
                         // Valorizza il padre
                         BeanUtil.populate(mat, rs1);
-                        // Aggiunge il padre al filgio
+                        // Aggiunge il padre al figlio
                         pat.setPadre(mat);
                     }
                     // Aggiunge il processo alla lista dei processi trovati
@@ -4068,6 +4092,67 @@ public class DBWrapper implements Query, Constants {
                 throw new WebStorageException(msg, nfe);
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "ProcessBean non valorizzato; problema nella query dei processi di rischio.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un ArrayList contenente tutti i fattori abilitanti
+     * censiti indipendentemente dalla rilevazione.
+     * Quest'ultimo parametro, che &egrave; "gratis", viene passato 
+     * "just in case", qualora si decidesse, in secondo tempo, di storicizzare 
+     * quest'entit&agrave; forte <code>(fattore_abilitante)</code>.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ArrayList&lt;CodeBean&gt;</code> - un vettore ordinato di CodeBean, che rappresentano i fattori abilitanti trovati
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<CodeBean> getFactors(PersonBean user, 
+                                          CodeBean survey)
+                                   throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            AbstractList<CodeBean> factors = new ArrayList<>();
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_FACTORS);
+                pst.clearParameters();
+                rs = pst.executeQuery();
+                // Punta al fattore
+                while (rs.next()) {
+                    // Prepara il fattore
+                    CodeBean fat = new CodeBean();
+                    // Valorizza il fattore
+                    BeanUtil.populate(fat, rs);
+                    // Aggiunge il fattore alla lista dei fattori
+                    factors.add(fat);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<CodeBean>) factors;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "RiskBean non valorizzato; problema nella query dei rischi.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally {
