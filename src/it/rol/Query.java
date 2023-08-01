@@ -1442,7 +1442,7 @@ public interface Query extends Serializable {
      * di una data rilevazione, il cui identificativo 
      * viene passato come parametro.</p>
      */
-    public static final String GET_PROCESS_BY_RISK = 
+    public static final String GET_PROCESS_AT_BY_RISK = 
             "SELECT DISTINCT" +
             "           PAT.id                          AS \"id\"" +
             "   ,       PAT.codice                      AS \"codice\"" +
@@ -1477,6 +1477,41 @@ public interface Query extends Serializable {
             "   WHERE RSPAT.id_sottoprocesso_at = ?" +
             "       AND RSPAT.id_rischio_corruttivo = ?" +
             "       AND RSPAT.id_rilevazione = ?";
+    
+    /**
+     * <p>Estrae un processo - livello 2, quindi no Macro (= 1) no Sub (= 3) -
+     * dato l'id che viene passato come parametro.</p>
+     */
+    public static final String GET_PROCESS_AT_BY_ID = 
+            "SELECT " +
+            "           PAT.id                          AS \"id\"" +
+            "   ,       PAT.codice                      AS \"codice\"" +
+            "   ,       PAT.nome                        AS \"nome\"" +
+            "   , " +   Constants.ELEMENT_LEV_2 + "     AS \"livello\"" +
+            "   ,       PAT.ordinale                    AS \"ordinale\"" +
+            "   ,       PAT.id_rilevazione              AS \"idRilevazione\"" +
+            "   FROM processo_at PAT" +
+            "   WHERE PAT.id = ?" +
+            "       AND PAT.id_rilevazione = ?";
+    
+    /**
+     * <p>Conta quante sono le associazioni esistenti tra:
+     * dato processo, dato rischio e dato fattore abilitante
+     * collegate a una data rilevazione.<br>
+     * Dati i vincoli della relazione, ovvero
+     * <pre>PRIMARY KEY (id_fattore_abilitante, 
+     *             id_rischio_corruttivo, 
+     *             id_processo_at, 
+     *             id_rilevazione)</pre>
+     * pu&ograve; restituire soltanto o 0 o 1.</p>
+     */
+    public static final String GET_FACTOR_RISK_PROCESS = 
+            "SELECT count(*)" +
+            "   FROM fattore_rischio_processo_at FRAT" +
+            "   WHERE FRAT.id_processo_at = ?" +
+            "       AND FRAT.id_rischio_corruttivo = ?" +
+            "       AND FRAT.id_fattore_abilitante = ?" +
+            "       AND FRAT.id_rilevazione = ?";
     
     /**
      * <p>In funzione del parametro specificante il livello
@@ -1686,6 +1721,34 @@ public interface Query extends Serializable {
             "   ,       ? " +       // id_sottoprocesso_at
             "   ,       ? " +       // id_rischio_corruttivo
             "   ,       ? " +       // id_rilevazione
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di un'associazione tra:<ul>
+     * <li>un rischio corruttivo</li>
+     * <li>un fattore abilitante</li>
+     * <li>un processo censito dall'anticorruzione</li>
+     * <li>nel contesto di una data rilevazione</li>
+     * </ul>
+     * (entità debole associativa 4-aria PxRxFxS).</p>
+     */
+    public static final String INSERT_FACTOR_RISK_PROCESS =
+            "INSERT INTO fattore_rischio_processo_at" +
+            "   (   id_fattore_abilitante" +
+            "   ,   id_rischio_corruttivo" +
+            "   ,   id_processo_at" +
+            "   ,   id_rilevazione" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       // id_fattore_abilitante
+            "   ,       ? " +       // id_rischio_corruttivo
+            "   ,       ? " +       // id_processo_at
+            "   ,       ? " +       // id_rilevazione
+            "   ,       ? " +       // data_ultima_modifica
+            "   ,       ? " +       // ora_ultima_modifica
+            "   ,       ? " +       // id_usr_ultima_modifica
             "          )" ;
     
     /* ********************************************************************** *
