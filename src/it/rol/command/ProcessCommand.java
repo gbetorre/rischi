@@ -8,7 +8,7 @@
  *   web applications to make survey about the amount and kind of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -187,16 +187,18 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         PersonBean user = null;
         // Recupera o inizializza 'codice rilevazione' (Survey)
         String codeSur = parser.getStringParameter("r", DASH);
-        // Recupera o inizializza 'id processo'
-        int idP = parser.getIntParameter("pliv", DEFAULT_ID);
-        // Recupera o inizializza 'id output'
-        int idO = parser.getIntParameter("idO", DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'
         String part = parser.getStringParameter("p", DASH);
+        // Recupera o inizializza 'id processo'
+        int idP = parser.getIntParameter("pliv", DEFAULT_ID);
         // Recupera o inizializza livello di granularità del processo anticorruttivo
         int liv = parser.getIntParameter("liv", DEFAULT_ID);
-        // Dichiara la pagina a cui reindirizzare
-        String fileJspT = null;
+        // Recupera o inizializza 'id output'
+        int idO = parser.getIntParameter("idO", DEFAULT_ID);
+        // Recupera o inizializza eventuale 'id rischio'
+        int idR = parser.getIntParameter("idR", DEFAULT_ID);
+        // Recupera l'oggetto rilevazione a partire dal suo codice
+        CodeBean survey = ConfigManager.getSurvey(codeSur);
         // Dichiara elenco di processi
         AbstractList<ProcessBean> macrosat = new ArrayList<>();
         // Dichiara generico elenco di elementi afferenti a un processo
@@ -205,12 +207,23 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         ItemBean options = new ItemBean("#009966",  VOID_STRING,  VOID_STRING, VOID_STRING, PRO_PFX, NOTHING);
         // Prepara un output di rischio corruttivo
         ProcessBean output = null;
+        // Prepara un rischio corruttivo cui è esposto un processo
+        RiskBean risk = null;
         // Dichiara elenco di output
         AbstractList<ProcessBean> outputs = new ArrayList<>();
         // Dichiara elenco di fattori abilitanti
         AbstractList<CodeBean> factors = new ArrayList<>();
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
+        // Tabella che conterrà i valori dei parametri passati dalle form
+        HashMap<String, LinkedHashMap<String, String>> params = null;
+        // Flag di scrittura
+        Boolean writeAsObject = (Boolean) req.getAttribute("w");
+        boolean write = writeAsObject.booleanValue();
+        // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
+        String redirect = null;
+        // Dichiara la pagina a cui reindirizzare
+        String fileJspT = null;
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -253,78 +266,123 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         try {
             // Il parametro di navigazione 'rilevazione' è obbligatorio
             if (!codeSur.equals(DASH)) {
-                // Il parametro di navigazione 'p' permette di addentrarsi nelle funzioni
-                if (nomeFile.containsKey(part)) {
-                    // Viene richiesta la visualizzazione del dettaglio di un processo
-                    if (part.equalsIgnoreCase(PART_PROCESS)) {
-                        /* ************************************************ *
-                         *               SELECT Process Part                *
-                         * ************************************************ */
-                        // Recupera Input estratti in base al processo
-                        ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
-                        // Recupera Fasi estratte in base al processo
-                        ArrayList<ActivityBean> listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
-                        // Recupera Output estratti in base al processo
-                        ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
-                        // Recupera Rischi estratti in base al processo
-                        ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
-                        // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
-                        processElements = new HashMap<>();
-                        // Imposta nella tabella le liste trovate
-                        processElements.put(TIPI_LISTE[0], listaInput);
-                        processElements.put(TIPI_LISTE[1], listaFasi);
-                        processElements.put(TIPI_LISTE[2], listaOutput);
-                        processElements.put(TIPI_LISTE[3], listaRischi);
-                        // Ha bisogno di personalizzare le breadcrumbs
-                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
-                        // Imposta la jsp
-                        fileJspT = nomeFile.get(part);
-                    } else if (part.equalsIgnoreCase(PART_OUTPUT)) {
-                        /* ************************************************ *
-                         *                SELECT Output Part                *
-                         * ************************************************ */
-                        if (idO > DEFAULT_ID) {
-                            // Recupera un output specifico
-                            output = db.getOutput(user, idO, ConfigManager.getSurvey(codeSur));
+                // Creazione della tabella che conterrà i valori dei parametri passati dalle form
+                params = new HashMap<>();
+                // Carica in ogni caso i parametri di navigazione
+                RiskCommand.loadParams(part, parser, params);
+                // @PostMapping
+                if (write) {
+                    // Controlla quale azione vuole fare l'utente
+                    if (nomeFile.containsKey(part)) {
+                        if (part.equalsIgnoreCase(PART_INSERT_F_R_P)) {
+                            /* ************************************************ *
+                             * INSERT new relation between Risk Process Factor  *
+                             * ************************************************ */
+                            // Controlla che non sia già presente l'associazione 
+                            int check = db.getFactorRiskProcess(user, params);
+                            if (check > NOTHING) {  // Genera un errore
+                                // Duplicate key value violates unique constraint 
+                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
+                                           AMPERSAND + "p" + EQ + PART_INSERT_F_R_P +
+                                           AMPERSAND + "idR" + EQ + parser.getStringParameter("r-id", VOID_STRING) + 
+                                           AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
+                                           AMPERSAND + "liv" + EQ + "2" +
+                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur +
+                                           AMPERSAND + MESSAGE + EQ + "dupKey";
+                            } else {
+                                // Inserisce nel DB nuova associazione pxrxf
+                                db.insertFactorRiskProcess(user, params);
+                                // Prepara la redirect 
+                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
+                                           AMPERSAND + "p" + EQ + PART_PROCESS +
+                                           AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
+                                           AMPERSAND + "liv" + EQ + "2" +
+                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur +
+                                           AMPERSAND + MESSAGE + EQ + "newRel#rischi";
+                            }
+                        }
+                    }
+                // @GetMapping
+                } else {
+                    // Il parametro di navigazione 'p' permette di addentrarsi nelle funzioni
+                    if (nomeFile.containsKey(part)) {
+                        // Viene richiesta la visualizzazione del dettaglio di un processo
+                        if (part.equalsIgnoreCase(PART_PROCESS)) {
+                            /* ************************************************ *
+                             *               SELECT Process Part                *
+                             * ************************************************ */
+                            // Recupera Input estratti in base al processo
+                            ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
+                            // Recupera Fasi estratte in base al processo
+                            ArrayList<ActivityBean> listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
+                            // Recupera Output estratti in base al processo
+                            ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
+                            // Recupera Rischi estratti in base al processo
+                            ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
+                            // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                            processElements = new HashMap<>();
+                            // Imposta nella tabella le liste trovate
+                            processElements.put(TIPI_LISTE[0], listaInput);
+                            processElements.put(TIPI_LISTE[1], listaFasi);
+                            processElements.put(TIPI_LISTE[2], listaOutput);
+                            processElements.put(TIPI_LISTE[3], listaRischi);
+                            // Ha bisogno di personalizzare le breadcrumbs
+                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
                             // Imposta la jsp
-                            fileJspT = nomeFileOutput;
-                        } else {
-                            // Deve recuperare l'elenco degli output
-                            outputs = db.getOutputs(user, ConfigManager.getSurvey(codeSur));
+                            fileJspT = nomeFile.get(part);
+                        } else if (part.equalsIgnoreCase(PART_OUTPUT)) {
+                            /* ************************************************ *
+                             *                SELECT Output Part                *
+                             * ************************************************ */
+                            if (idO > DEFAULT_ID) {
+                                // Recupera un output specifico
+                                output = db.getOutput(user, idO, survey);
+                                // Imposta la jsp
+                                fileJspT = nomeFileOutput;
+                            } else {
+                                // Deve recuperare l'elenco degli output
+                                outputs = db.getOutputs(user, survey);
+                                // Imposta la jsp
+                                fileJspT = nomeFile.get(part);
+                            }
+                        } else if (part.equalsIgnoreCase(PART_FACTORS)) {
+                            /* ************************************************ *
+                             *                SELECT Factors Part               *
+                             * ************************************************ */
+                            // Deve recuperare l'elenco dei fattori abilitanti
+                            factors = db.getFactors(user, survey);
+                            // Ha bisogno di personalizzare le breadcrumbs
+                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Fattori abilitanti");
+                            // Imposta la jsp
+                            fileJspT = nomeFile.get(part);
+                        } else if (part.equalsIgnoreCase(PART_INSERT_F_R_P)) {
+                            /* **************************************************** *
+                             * SHOWS Form to LINK A FACTOR TO A Risk into a Process *
+                             * **************************************************** */
+                            // Deve recuperare l'elenco completo dei fattori abilitanti
+                            factors = db.getFactors(user, survey);
+                            // Prepara un ProcessBean di cui recuperare tutti i rischi
+                            output = db.getProcessById(user, idP, survey);
+                            // Recupera tutti i rischi del processo; tra questi ci sarà quello cui si vuole aggiungere il fattore
+                            ArrayList<RiskBean> risks = db.getRisksByProcess(user, output, survey);
+                            // Individua il rischio specifico a cui si vuole aggiungere il fattore abilitante
+                            risk = decant(risks, idR);
+                            // Ha bisogno di personalizzare le breadcrumbs
+                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-F");
                             // Imposta la jsp
                             fileJspT = nomeFile.get(part);
                         }
-                    } else if (part.equalsIgnoreCase(PART_FACTORS)) {
-                        /* ************************************************ *
-                         *                SELECT Factors Part               *
-                         * ************************************************ */
-                        // Deve recuperare l'elenco dei fattori abilitanti
-                        factors = db.getFactors(user, ConfigManager.getSurvey(codeSur));
-                        // Ha bisogno di personalizzare le breadcrumbs
-                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Fattori abilitanti");
+                    } else {
+                        // Viene richiesta la visualizzazione di un elenco di macroprocessi
+                        macrosat = retrieveMacroAtBySurvey(user, codeSur, db);
+                        // Genera il file json contenente le informazioni strutturate
+                        printJson(req, macrosat, nomeFileJson, options);
                         // Imposta la jsp
-                        fileJspT = nomeFile.get(part);
-                    } else if (part.equalsIgnoreCase(PART_INSERT_F_R_P)) {
-                        /* **************************************************** *
-                         * SHOWS Form to LINK A FACTOR TO A Risk into a Process *
-                         * **************************************************** */
-                        // Deve recuperare l'elenco dei fattori abilitanti
-                        factors = db.getFactors(user, ConfigManager.getSurvey(codeSur));
-                        // Ha bisogno di personalizzare le breadcrumbs
-                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Fattori abilitanti");
-                        // Imposta la jsp
-                        fileJspT = nomeFile.get(part);
+                        fileJspT = nomeFileElenco;
                     }
-                } else {
-                    // Viene richiesta la visualizzazione di un elenco di macroprocessi
-                    macrosat = retrieveMacroAtBySurvey(user, codeSur, db);
-                    // Genera il file json contenente le informazioni strutturate
-                    printJson(req, macrosat, nomeFileJson, options);
-                    // Imposta la jsp
-                    fileJspT = nomeFileElenco;
                 }
             } else {    // Manca il codice rilevazione!!
                 String msg = FOR_NAME + "Impossibile recuperare il codice della rilevazione.\n";
@@ -367,13 +425,21 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         if (outputs != null) {
             req.setAttribute("outputs", outputs);
         }
-        // Imposta nella request oggetto specifico output di processo anticorruttivo 
+        // Imposta output di processo anticorruttivo oppure processo_at 
         if (output != null) {
             req.setAttribute("output", output);
         }
         // Imposta nella request elenco completo dei fattori abilitanti
         if (factors != null) {
             req.setAttribute("fattori", factors);
+        }
+        // Imposta in request specifico rischio cui aggiungere fattore abilitante
+        if (risk != null) {
+            req.setAttribute("rischio", risk);
+        }
+        // Imposta l'eventuale indirizzo a cui redirigere
+        if (redirect != null) {
+            req.setAttribute("redirect", redirect);
         }
         // Imposta nella request le breadcrumbs in caso siano state personalizzate
         if (bC != null) {
@@ -633,7 +699,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         }
         return mP;
     }
-
+    
 
     /**
      * <p>Travasa un Vector di ProcessBean in una corrispondente struttura di
@@ -680,42 +746,31 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         return userProcesses;
     }
 
-
+    
     /**
-     * <p>Restituisce:<dl>
-     * <dt>'true'</dt> <dd>se almeno uno dei dipartimenti, il cui identificativo
-     * viene usato come chiave di una mappa sincronizzata passata come
-     * argomento, ha processi associati per l'utente loggato.</dd>
-     * <dt>'False'</dt>
-     * <dd>se neanche un dipartimento di cui sopra ha almeno
-     * un processo associato per l'utente loggato.</dd></dl></p>
-     * <p>Attenzione: 'false' di questo metodo non significa che nessun
-     * dipartimento ha alcun processo, cio&egrave; che non esistono processi,
-     * ma semplicemente che l'utente che si &egrave; loggato (in base al
-     * quale la mappa sincronizzata viene costruita) non ha diritto di vederne
-     * alcuno.</p>
-     * <p>Pi&uacute; in generale, questo metodo potrebbe essere usato per
-     * verificare se in una mappa esiste almeno un valore significativo
-     * (quantunque le chiavi esistano, ed &egrave; per questo che c'&egrave;
-     * bisogno di un metodo di calcolo, in quanto il test JSTL fatto nella
-     * pagina JSP con ${not empty map} non funziona: perch&eacute; in effetti
-     * la map non &egrave; empty!).</p>
+     * <p>Estrae da una struttura di rischi, uno di essi,
+     * identificato a partire da un identificativo, passato come parametro,
+     * oppure null, se il rischio non &egrave; stato identificato.</p>
      *
-     * @param map una mappa sincronizzata contenente i processi indicizzati per Wrapper di identificativo dipartimentale
-     * @return <code>boolean</code> - true se e' stato estratto almeno un processo in uno dei possibili dipartimenti, false altrimenti
-     * @throws CommandException se si verifica un problema nello scorrimento di liste o in qualche tipo di puntamento
+     * @param risks     struttura vettoriale di RiskBean in cui individuare l'oggetto di interesse
+     * @param riskId    identificativo del rischio corruttivo cercato
+     * @return <code>RiskBean</code> - Rischio cercato, oppure null (se non e' stato trovato)
+     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
-    private static boolean decant(ConcurrentHashMap<Integer, Vector<ProcessBean>> map)
-                           throws CommandException {
+    private static RiskBean decant(AbstractList<RiskBean> risks,
+                                   int riskId)
+                            throws CommandException {
         try {
-            Iterator<Map.Entry<Integer, Vector<ProcessBean>>> it = map.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<Integer, Vector<ProcessBean>> entry = it.next();
-                if (entry.getValue().size() > 0) {
-                    return true;
+            for (RiskBean risk : risks) {
+                if (risk.getId() == riskId) {
+                    return risk;
                 }
             }
-            return false;
+            return null;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio del bean, probabilmente l\'id.\n" + anve.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, anve);
         } catch (ArrayIndexOutOfBoundsException aiobe) {
             String msg = FOR_NAME + "Si e\' verificato un problema di puntamento fuori tabella.\n" + aiobe.getMessage();
             LOG.severe(msg);
@@ -729,7 +784,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg, npe);
         } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel calcolo di un boolean da un Dictionary.\n" + e.getMessage();
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
             LOG.severe(msg);
             throw new CommandException(msg, e);
         }
