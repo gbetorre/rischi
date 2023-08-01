@@ -223,7 +223,7 @@ public class Data extends HttpServlet implements Constants {
                     // Ha finito
                     return;
                 }
-            // Gestione estrazione interviste ("data?q=ri")
+            // Gestione estrazione rischi ("data?q=ri")
             } else if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
                 // Verifica se deve servire un output csv
                 if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
@@ -651,7 +651,13 @@ public class Data extends HttpServlet implements Constants {
                             String processo = (iw.getProcesso().getProcessi() != null ? iw.getProcesso().getProcessi().get(0).getNome() : VOID_STRING);
                             String subprocesso = (iw.getProcesso().getProcessi().get(0).getProcessi() != null ? iw.getProcesso().getProcessi().get(0).getProcessi().get(0).getNome() : VOID_STRING);
                             String strutturaL3 = (iw.getStruttura().getFiglie().get(0).getFiglie() != null ? iw.getStruttura().getFiglie().get(0).getFiglie().get(0).getNome() : VOID_STRING);
-                            String strutturaL4 = (iw.getStruttura().getFiglie().get(0).getFiglie().get(0).getFiglie() != null ? iw.getStruttura().getFiglie().get(0).getFiglie().get(0).getFiglie().get(0).getNome() : VOID_STRING);
+                            // Puo' cercare una struttura di livello 4 se esiste una struttura di livello 3, cosa che non è detta
+                            String strutturaL4 = null;  // NON si inizializza a VOID_STRING perché String è immutabile!
+                            if (!strutturaL3.equals(VOID_STRING)) {
+                                strutturaL4 = (iw.getStruttura().getFiglie().get(0).getFiglie().get(0).getFiglie() != null ? iw.getStruttura().getFiglie().get(0).getFiglie().get(0).getFiglie().get(0).getNome() : VOID_STRING);    
+                            } else {
+                                strutturaL4 = VOID_STRING;
+                            }
                             StringBuffer tupla = new StringBuffer(++record + SEPARATOR)
                                 .append(iw.getRisposte().size()).append(SEPARATOR)
                                 .append(iw.getInformativa()).append(SEPARATOR)
