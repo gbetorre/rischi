@@ -3980,8 +3980,8 @@ public class DBWrapper implements Query, Constants {
             int nextParam = NOTHING;
             try {
                 // TODO: Controllare se user è superuser
-                //String query = (process.getLivello() == ELEMENT_LEV_2 ? GET_PROCESS_BY_RISK : GET_SUB_BY_RISK);
-                pst = con.prepareStatement(GET_PROCESS_BY_RISK);
+                //String query = (process.getLivello() == ELEMENT_LEV_2 ? GET_PROCESS_AT_BY_RISK : GET_SUB_BY_RISK);
+                pst = con.prepareStatement(GET_PROCESS_AT_BY_RISK);
                 pst.clearParameters();
                 pst.setInt(++nextParam, risk.getId());
                 pst.setInt(++nextParam, survey.getId());
@@ -4114,6 +4114,87 @@ public class DBWrapper implements Query, Constants {
     
     
     /**
+     * <p>Restituisce un oggetto corrispondente ad un processo censito 
+     * a fini anticorruttivi, il cui identificativo accetta come argomento.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param idP       identificativo del processo organizzativo censito dall'anticorruzione 
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ProcessBean</code> - il ProcessBean rappresentante il processo anticorruttivo trovato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings("static-method")
+    public ProcessBean getProcessById(PersonBean user, 
+                                      int idP, 
+                                      CodeBean survey)
+                               throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs, rs1 = null;
+            ProcessBean pat = null;
+            int nextParam = NOTHING;
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_PROCESS_AT_BY_ID);
+                pst.clearParameters();
+                pst.setInt(++nextParam, idP);
+                pst.setInt(++nextParam, survey.getId());
+                rs = pst.executeQuery();
+                // Punta al processo
+                if (rs.next()) {
+                    // Prepara il processo
+                    pat = new ProcessBean();
+                    // Valorizza il processo
+                    BeanUtil.populate(pat, rs);
+                    // Recupera il padre del processo trovato
+                    pst = null;
+                    pst = con.prepareStatement(GET_MACRO_AT_BY_CHILD);
+                    pst.clearParameters();
+                    pst.setInt(1, pat.getId());
+                    pst.setInt(2,survey.getId());
+                    rs1 = pst.executeQuery();
+                    // Punta al padre (se c'è, è solo uno!)
+                    if (rs1.next()) {
+                        // Prepara il padre
+                        ProcessBean mat = new ProcessBean();
+                        // Valorizza il padre
+                        BeanUtil.populate(mat, rs1);
+                        // Aggiunge il padre al figlio
+                        pat.setPadre(mat);
+                    }
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return pat;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio non recuperabile; problema nel metodo di estrazione del singolo processo_at.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "RiskBean non valorizzato; problema nella query del singolo processo_at.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
      * <p>Restituisce un ArrayList contenente tutti i fattori abilitanti
      * censiti indipendentemente dalla rilevazione.
      * Quest'ultimo parametro, che &egrave; "gratis", viene passato 
@@ -4153,6 +4234,79 @@ public class DBWrapper implements Query, Constants {
                 return (ArrayList<CodeBean>) factors;
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "RiskBean non valorizzato; problema nella query dei rischi.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce il numero di associazioni ternarie gi&agrave; esistenti per
+     * <ul>
+     * <li>un dato rischio corruttivo,</li> 
+     * <li>un dato processo</li>
+     * <li>e un dato fattore abilitante</li></ul> 
+     * oppure zero se non ce ne sono.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param params    mappa contenente i parametri di navigazione
+     * @return <code>int</code> - il totale delle associazioni processo corrente/rischio corrente/fattore corrente
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public int getFactorRiskProcess(PersonBean user, 
+                                    HashMap<String, LinkedHashMap<String, String>> params)
+                             throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            // Variabili per l'accesso ai dati
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            int nextParam = NOTHING;
+            int count = NOTHING;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri dei processi scelti dall'utente per l'associazione al rischio
+            LinkedHashMap<String, String> proc = params.get(PART_PROCESS);
+            // Dizionario dei parametri contenente l'identificativo del rischio e del fattore
+            LinkedHashMap<String, String> risk = params.get(PART_INSERT_F_R_P);
+            try {
+                // TODO: Controllare se user è superuser
+                String query = GET_FACTOR_RISK_PROCESS; // TODO: Controllare il livello del processo
+                pst = con.prepareStatement(query);
+                pst.clearParameters();
+                pst.setInt(++nextParam, Integer.parseInt(risk.get("proc")));
+                pst.setInt(++nextParam, Integer.parseInt(risk.get("risk")));
+                pst.setInt(++nextParam, Integer.parseInt(risk.get("fact")));
+                pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return count;
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "ProcessBean non valorizzato; problema nella query dei processi di rischio.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally {
@@ -4488,6 +4642,98 @@ public class DBWrapper implements Query, Constants {
                     pst.setInt(++nextParam, Integer.parseInt(risk.get("risk")));
                     /* === Collegamento a rilevazione === */
                     pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    // CR (Carriage Return) o 0DH
+                    pst.executeUpdate();
+                } catch (NumberFormatException nfe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, nfe);
+                } catch (ClassCastException cce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di tipo.\n" + cce.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, cce);
+                } catch (ArrayIndexOutOfBoundsException aiobe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, aiobe);
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, npe);
+                } catch (Exception e) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
+                // End: <==
+                con.commit();
+                pst.close();
+                pst = null;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Metodo per fare l'inserimento di una nuova tupla identificante
+     * la relazione ternaria tra un rischio ed un fattore abilitante,
+     * nel contesto di un dato processo e di una data rilevazione.</p>
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    @SuppressWarnings("static-method")
+    public void insertFactorRiskProcess(PersonBean user, 
+                                        HashMap<String, LinkedHashMap<String, String>> params) 
+                                 throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri contenente l'identificativo del rischio da associare
+            LinkedHashMap<String, String> risk = params.get(PART_INSERT_F_R_P);
+            try {
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                // Al momento (rilevazione AT2022 = triennio 2022-25) i sottoprocessi non sono gestiti
+                pst = con.prepareStatement(INSERT_FACTOR_RISK_PROCESS);
+                pst.clearParameters();
+                 // Prepara i parametri per l'inserimento
+                try {
+                    // Definisce un indice per il numero di parametro da passare alla query
+                    int nextParam = NOTHING;
+                    /* === Id Fattore === */
+                    pst.setInt(++nextParam, Integer.parseInt(risk.get("fact")));
+                    /* === Id Rischio === */
+                    pst.setInt(++nextParam, Integer.parseInt(risk.get("risk")));
+                    /* === Id Processo === */
+                    pst.setInt(++nextParam, Integer.parseInt(risk.get("proc")));
+                    /* === Collegamento a rilevazione === */
+                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());
                     // CR (Carriage Return) o 0DH
                     pst.executeUpdate();
                 } catch (NumberFormatException nfe) {
