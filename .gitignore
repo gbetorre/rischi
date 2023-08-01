@@ -25,6 +25,7 @@ hs_err_pid*
 
 # Javadoc
 /javadoc/
+/javadoc*
 
 # ORI docs backup
 /.ori/
