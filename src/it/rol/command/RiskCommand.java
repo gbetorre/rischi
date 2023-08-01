@@ -313,7 +313,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                              * ************************************************ */
                             // Controlla che non sia già presente l'associazione 
                             int check = db.getRiskProcess(user, params);
-                            if (check > NOTHING) {
+                            if (check > NOTHING) {  // Genera un errore
                                 // Duplicate key value violates unique constraint 
                                 redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
                                            AMPERSAND + "p" + EQ + PART_INSERT_RISK_PROCESS +
@@ -321,7 +321,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "dupKey";
                             } else {
-                                // Inserisce nel DB nuovo rischio corruttivo definito dall'utente
+                                // Inserisce nel DB nuova associazione tra rischio e processo
                                 db.insertRiskProcess(user, params);
                                 // Prepara la redirect 
                                 redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
@@ -580,6 +580,15 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             // Recupera gli estremi del rischio da inserire
             risk.put("risk",    parser.getStringParameter("r-id", VOID_STRING));
             formParams.put(PART_INSERT_RISK_PROCESS, risk);
+        /* **************************************************** *
+         *     Caricamento parametri Fattore-Processo-Rischio   *
+         * **************************************************** */
+        } else if (part.equals(PART_INSERT_F_R_P)) {
+            // Recupera gli estremi del rischio da inserire
+            risk.put("risk",    parser.getStringParameter("r-id", VOID_STRING));
+            risk.put("fact",    parser.getStringParameter("fliv1", VOID_STRING));
+            risk.put("proc",    parser.getStringParameter("pliv", VOID_STRING));
+            formParams.put(PART_INSERT_F_R_P, risk);
         }
     }
     
