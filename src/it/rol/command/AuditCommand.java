@@ -209,6 +209,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         String codeSur = parser.getStringParameter(PARAM_SURVEY, DASH);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", DASH);
+        // Recupera o inizializza eventuale parametro messaggio
+        String mess = parser.getStringParameter("msg", DASH);
         // Flag di scrittura
         Boolean writeAsObject = (Boolean) req.getAttribute("w");
         boolean write = writeAsObject.booleanValue();
@@ -358,13 +360,16 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                                     dateTimeProc.append(set.getKey() + EQ + set.getValue());
                                 }
                             }
+                            // Controlla il valore del parametro facoltativo
+                            String msg = (mess.equalsIgnoreCase("getAll")) ? AMPERSAND + MESSAGE + EQ + mess : VOID_STRING;
                             // Costruisce l'indirizzo a cui redirezionare
                             redirect =  "q" + EQ + COMMAND_AUDIT + AMPERSAND +
                                         "p" + EQ + PART_RESUME_QST + 
                                         paramsStruct.toString() + 
                                         paramsProc.toString() +
                                         dateTimeProc.toString() + AMPERSAND +
-                                        PARAM_SURVEY + EQ + codeSur;
+                                        PARAM_SURVEY + EQ + codeSur
+                                        + msg;
                         }
                     } else {
                         // Azione di default
@@ -404,8 +409,12 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *  SELECT Set of Answers belonging to an Inverview *
                              * ************************************************ */
-                            //answers = retrieveAnswers(user, codeSur, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
-                            answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
+                            // Condiziona il recupero di tutte le risposte o solo quelle valide a eventuale parametro
+                            if (mess.equalsIgnoreCase("getAll")) {
+                                answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
+                            } else {
+                                answers = filter(db.getAnswers(user, params, ConfigManager.getSurvey(codeSur)));
+                            }
                             // Prepara data intervista di cui si vogliono visualizzare le risposte
                             if (params.get(PARAM_SURVEY).get("d") != null && !params.get(PARAM_SURVEY).get("d").equals(VOID_STRING)) {
                                 questDate = Utils.format(params.get(PARAM_SURVEY).get("d"));
@@ -834,6 +843,44 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             throw new CommandException(msg, e);
         }
         return questionsByAmbit;
+    }
+    
+    
+    /**
+     * <p>Prende in input una struttura vettoriale di QuestionBean 
+     * contenenti internamente le risposte e scarta le domande con risposte vuote.</p>
+     *
+     * @param questions Vector di QuestionBean da indicizzare per ambito
+     * @return <code>HashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
+     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
+     */
+    private static ArrayList<QuestionBean> filter(ArrayList<QuestionBean> questions)
+                                           throws CommandException {
+        ArrayList<QuestionBean> questionsWithAnswers = new ArrayList<>();
+        try {
+            for (QuestionBean q : questions) {
+                if (q.getAnswer().getNome() != null && !(q.getAnswer().getNome().equals(VOID_STRING))) {
+                    questionsWithAnswers.add(q);
+                }
+            }
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento fuori tabella.\n" + aiobe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, aiobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di conversione di tipo.\n" + cce.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n" + npe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel travaso di un Vector in un Dictionary.\n" + e.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, e);
+        }
+        return questionsWithAnswers;
     }
     
 }
