@@ -2,7 +2,7 @@
 Style.css - Global Stylesheet for /rischi application 
 =====================================================*/
 html, body {
-    font-family: Verdana,sans-serif;
+    font-family: Verdana, sans-serif;
     font-size: smaller;
     line-height: 1.5;
 }
@@ -14,6 +14,34 @@ pm.body {
     font-size:90%;
     margin:0;
 }
+
+/* Style 7 
+  (https://codepen.io/vedadesigns/pen/GPxYZg     mixed with
+   https://wdexplorer.com/20-examples-beautiful-css-typography-design/) */
+.seven h1 {
+    color: #111; 
+    font-family: 'Open Sans Condensed', sans-serif; 
+    font-size: 54px; 
+    font-weight: 300; 
+    line-height: 64px; 
+    margin: 0 0 0; 
+    padding: 20px 30px;  
+    text-align: center;
+    letter-spacing:2px;
+    display: grid;
+    grid-template-columns: 1fr max-content 1fr;
+    grid-template-rows: 27px 0;
+    grid-gap: 20px;
+    align-items: center;
+}
+
+.seven h1:after,.seven h1:before {
+  content: " ";
+  display: block;
+  border-bottom: 2px solid #ccc;
+  background-color:#f8f8f8;
+}
+/* -------------- End Style 7 -------------- */
 
 h3.heading {
 	border-color: #d9d6d6;
@@ -415,6 +443,8 @@ select:disabled.bgcolor3 {
 
 .textcolormaroon {
   color: maroon;
+  border: none;
+  padding: 2px;
 }
 
 .bgAct {
@@ -545,7 +575,6 @@ select:disabled.bgcolor3 {
   border-bottom: 1px solid transparent;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
-  min-height: 70px;
 }
 
 .panel-body {
@@ -794,6 +823,16 @@ hr.separatore {
   clear: both;  
   margin-bottom: 10px;  
   margin-top: 10px;
+}
+
+hr.separapoco {
+  height: 1px; 
+  border-style: none;
+  background-color: transparent; 
+  display: block; 
+  clear: both;  
+  margin-bottom: 4px;  
+  margin-top: 4px;
 }
 
 hr.home {
