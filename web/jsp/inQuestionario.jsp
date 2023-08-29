@@ -69,7 +69,7 @@
         <div class="panel-body form-group">      
           <div class="accordion" id="accordionExample">     
     <c:forEach var="entry" items="${quests}" varStatus="status">
-            <div class="card">
+            <div class="">
               <div class="card-header" id="heading${status.count}">
                 <h2 class="mb-0">
                   <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse${status.count}" aria-expanded="false" aria-controls="collapse${status.count}">
