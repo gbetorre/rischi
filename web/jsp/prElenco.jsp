@@ -1,7 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ include file="URL.jspf" %>
-    <h3 class="mt-1 m-0 font-weight-bold">Processi Anticorruttivi</h3>    
-    <a href="${prCSV}" class="float-right" title="Scarica il database completo dei processi censiti a fini anticorruttivi">
+    <h3 class="mt-1 m-0 font-weight-bold float-left">Processi Organizzativi</h3>    
+    <a href="${prCSV}" class="float-right badge badge-pill lightTable bgAct20" title="Scarica il database completo dei processi organizzativi censiti a fini anticorruttivi">
       <i class="fas fa-download"></i>Scarica tutti i dati
     </a>
     <hr class="riga"/>
