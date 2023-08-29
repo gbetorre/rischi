@@ -17,25 +17,30 @@
       </div>
     </div>
     <br />
+    <hr class="separatore" />
     <div class="row justify-content-center">
       <div class="col text-center">
-        <h1>Mappatura dei rischi corruttivi</h1>
-        <hr class="separatore" />
+        <div class="seven">
+          <h1>Mappatura dei rischi corruttivi</h1>
+        </div>
         <br />
-        <div class="container justify-content-center">
-          <br /><br />
-          <div class="row justify-content-center">
-            <div class="col-11">
-              <div class="input-group">
-                <input id="usr" type="text" class="form-control" name="usr" placeholder="Username">
-              </div>
-              <br />
-              <div class="input-group">
-                <input id="pwd" type="password" class="form-control" name="pwd" placeholder="Password">
-              </div>
+        <hr class="separatore" />
+        <div class="container justify-content-center bgAct8">
+          <br />
+          <div class="col-12">
+            <h3>Login</h3>
+            <p>Inserisci username e password.</p>
+            <hr class="riga" />
+            <div class="input-group">
+              <input id="usr" type="text" class="form-control" name="usr" placeholder="Username">
+            </div>
+            <br />
+            <div class="input-group">
+              <input id="pwd" type="password" class="form-control" name="pwd" placeholder="Password">
             </div>
           </div>
           <br />
+          <hr class="separatore" />
           <div class="row justify-content-center">
             <div class="col text-center">
               <input type="submit" class="btn btn-primary" value="LOGIN">
