@@ -4,20 +4,23 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
 <c:set var="quests" value="${requestScope.elencoInterviste}" scope="page" />
-    <h3 class="mt-1 m-0 font-weight-bold">Interviste effettuate</h3>
+    <h3 class="mt-1 m-0 font-weight-bold float-left">Interviste effettuate</h3>
+    <a href="${sqsCSV}" class="float-right badge badge-pill lightTable bgAct20" title="Scarica il database completo delle interviste">
+      <i class="fas fa-download"></i> <span class="sezioneElenco">Scarica tutti i dati&nbsp;</span>
+    </a>
     <hr class="riga"/>
     <table class="table table-bordered table-hover table-sm" id="listInt">
       <thead class="thead-light">
         <tr>
-          <th class="bg-primary text-white" scope="col" width="*"><div class="text-center">Data Intervista</div></th>
-          <th class="" scope="col" width="12%">Struttura Liv 1</th>
-          <th class="" scope="col" width="12%">Struttura Liv 2</th>
-          <th class="" scope="col" width="12%">Struttura Liv 3</th>
-          <th class="" scope="col" width="12%">Struttura Liv 4</th>
-          <th class="bg-warning" scope="col" width="12%">Macroprocesso</th>
+          <th class="bg-primary text-white" scope="col" width="5%"><div class="text-center">Data Intervista</div></th>
+          <th class="" scope="col" width="12%">Struttura<br /> Liv 1</th>
+          <th class="" scope="col" width="20%">Struttura<br /> Liv 2</th>
+          <th class="" scope="col" width="10%">Struttura<br /> Liv 3</th>
+          <th class="" scope="col" width="10%">Struttura<br /> Liv 4</th>
+          <th class="bg-warning" scope="col" width="23%">Macroprocesso</th>
           <th class="bgcolorgreen" scope="col" width="12%">Processo</th>
-          <th class="reportWp" scope="col" width="12%">Sottoprocesso</th>
-          <th class="reportWp" scope="col" width="1%">CSV</th>
+          <th class="reportWp" scope="col" width="5%">Sotto<br />processo</th>
+          <th class="reportWp" scope="col" width="3%">CSV</th>
         </tr>
       </thead>
       <tbody>
@@ -44,30 +47,47 @@
       <c:set var="rqsInstanceCSV" value="${rqsInstance}&out=csv" scope="page" />
       <c:set var="rqsCSV" value="${fn:replace(rqsInstanceCSV, '/rischi/?q=', '/rischi/data?q=')}" scope="page" />
         <tr class="active">
-          <td class="bgcolor1" width="*">
+          <td class="bgcolor1" width="5%">
             <%--a href="${initParam.appName}/?q=ri&p=rqs&sliv1=${iview.struttura.informativa}&sliv2=${iview.struttura.figlie.get(zero).informativa}&sliv3=${iview.struttura.figlie.get(zero).figlie.get(zero).informativa}&sliv4=${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).informativa}&r=${param['r']}"--%>
             <a href="${rqsInstance}">
-              <c:out value="${loop.count}" /><sup>a</sup> &ndash; 
               <c:out value="${iviewitadate}" />
               <c:out value="${iviewitatime}" />
             </a>
           </td>
           <td class="bg-primary text-white" width="12%"><strong><c:out value="${iview.struttura.nome}" /></strong></td>
-          <td class="bg-primary text-white" width="12%"><strong><c:out value="${iview.struttura.figlie.get(zero).prefisso}" /> <c:out value="${iview.struttura.figlie.get(zero).nome}" /></strong></td>
-          <td class="bg-primary text-white" width="12%">
+          <td class="bg-primary text-white" width="20%"><strong><c:out value="${iview.struttura.figlie.get(zero).prefisso}" /> <c:out value="${iview.struttura.figlie.get(zero).nome}" /></strong></td>
+          <td class="bg-primary text-white" width="10%">
             <div class="text-center">
-              <strong><c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).prefisso}" /> <c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).nome}" /></strong>
+              <strong>
+                <c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).prefisso}" /> 
+                <c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).nome}" />
+              </strong>
             </div>
           </td>
-          <td class="bg-primary text-white" width="12%">
+          <td class="bg-primary text-white" width="10%">
             <div class="text-center">
-              <strong><c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).prefisso}" /> <c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).nome}" /></strong>
+              <strong>
+                <c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).prefisso}" /> 
+                <c:out value="${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).nome}" />
+              </strong>
             </div>
           </td>
-          <td class="bgcolor1" width="12%"><strong><c:out value="${iview.processo.nome}" /></strong></td>
-          <td class="bgcolor1" width="12%"><c:out value="${iview.processo.processi.get(zero).nome}" /></td>
-          <td class="bgcolor1" width="12%"><c:out value="${iview.processo.processi.get(zero).processi.get(zero).nome}" /></td>
-          <td class="bgcolor1 text-center" width="1%"><a href="${rqsCSV}" title="Scarica i dati dell'intervista del ${iviewitadate} ore ${iviewitatime} in un file CSV"><i class="fas fa-download"></i> </a></td>
+          <td class="bgcolor1" width="23%">
+            <strong><c:out value="${iview.processo.nome}" /></strong>
+          </td>
+          <td class="bgcolor1" width="12%">
+            <a href="${initParam.appName}/?q=pr&p=pro&pliv=${iview.processo.processi.get(zero).id}&liv=2&r=${param['r']}">
+              <c:out value="${iview.processo.processi.get(zero).nome}" />
+            </a>
+          </td>
+          <td class="bgcolor1" width="5%">
+            <c:out value="${iview.processo.processi.get(zero).processi.get(zero).nome}" />
+          </td>
+          <td class="bgcolor1 text-center" width="3%">
+            <a href="${rqsCSV}" title="Scarica i dati dell'intervista del ${iviewitadate} ore ${iviewitatime} in un file CSV">
+              <i class="fas fa-download"></i> 
+            </a>
+          </td>
         </tr>
     </c:forEach>
       </tbody>
@@ -76,7 +96,7 @@
       <button type="button" class="btn btn-success">
         <span class="badge badge-pill badge-light">${quests.size()}</span>
       </button>
-      <a href="${sqsCSV}" class="float-right lastMenuContent" title="Scarica il database completo delle interviste">
+      <a href="${sqsCSV}" class="float-right badge badge-pill lightTable" title="Scarica il database completo delle interviste">
         <i class="fas fa-download"></i> <span class="sezioneElenco">Scarica tutti i dati&nbsp;</span>
       </a>
     </h4>
