@@ -37,7 +37,7 @@
         <hr class="separatore" />
         <div class="centerlayout">
           <a href="${initParam.appName}/?q=ri&p=adp&idR=${risk.id}&r=${param['r']}" class="btn btn-success" id="btn-tar" title="Clicca per aggiungere un processo a questo rischio corruttivo">
-            <i class="fa-solid fa-gear"></i> &nbsp;Aggiungi Processo
+            <i class="fa-solid fa-gear"></i> &nbsp;Associa Processo
           </a>
         </div>
       </div>
