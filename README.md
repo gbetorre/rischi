@@ -56,22 +56,53 @@ Applicazione web per la mappatura dei rischi corruttivi cui sono esposti i proce
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://github.com/gbetorre/rischi/blob/main/web/img/product-screenshot.png)
+[![Product Name Screen Shot][product-screenshot]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/product-screenshot.png)
+<br>
+<strong>*Fig.1 - prima versione del software*</strong>
+
 <p>
 L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare i responsabili della trasparenza ad individuare i punti di attenzione nel contesto dei processi organizzativi e ad indirizzarli a proporre le contromisure adeguate.
 </p>
-Attraverso la risposta ad una serie di quesiti posti a responsabili e operatori presso specifiche strutture amministrative (intervista), l'applicazione permette di ottenere una serie di indici relativi a specifici rischi
-corruttivi cui possono essere esposti i processi organizzativi presidiati dalle strutture stesse. 
-Ogni quesito, infatti, &egrave; collegato ad uno o pi&uacute; specifici rischi corruttivi; perci&ograve;, in funzione della risposta data dal personale intervistato, l'applicazione esprime specifici indici e punti di attenzione. Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le misure da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
+
+[![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.40.png)
+<br>
+<strong>*Fig.2 - il software &egrave; un'applicazione ad accesso riservato (per accedere &egrave; necessario disporre di credenziali)*</strong>
+
+[![Product Landing Page][product-landing]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing1.40.png)
+<br>
+<strong>*Fig.3 - pagina di landing, versione 1.40*</strong>
+
+<p>
+Attraverso la risposta ad una serie di quesiti posti a responsabili e operatori presso specifiche strutture amministrative (intervista), l'applicazione permette di ottenere una serie di indici relativi a specifici rischi corruttivi cui possono essere esposti i processi organizzativi presidiati dalle strutture stesse. 
+Ogni quesito, infatti, &egrave; collegato ad uno o pi&uacute; specifici rischi corruttivi; perci&ograve;, in funzione della risposta data dal personale intervistato, l'applicazione esprime specifici indici e punti di attenzione e, in sintesi, calcola il livello di rischio cui il processo esaminato risulta esposto. 
+
+[![Product Interview][product-interview]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/interview-sample.png)
+<br>
+<strong>*Fig.4 - esempio di quesiti che concorrono a fornire il quadro della vulnerabilit&agrave; di un processo organizzativo*</strong>
+
+[![Product Algorithm][product-algorithm]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png)
+<br>
+<strong>*Fig.5 - esempio di algoritmo di calcolo di un indicatore di probabilit&agrave;*</strong>
+
+Incrociando i valori ottenuti negli indicatori di probabilità (P) con quelli ottenuti negli indicatori di impatto (I) si ottiene, per ogni processo organizzativo censito, un indice sintetico PxI, che esprime il livello finale di rischio cui &egrave; esposto il processo.
+
+Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le misure da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
+
+Inoltre, per ogni processo, oltre al livello di rischio, che &egrave; l'obiettivo principale di tutta l'applicazione, viene fornita una pagina di dettaglio, contenente le informazioni aggregate, tra cui i rischi cui il processo risulta esposto, ed i fattori abilitanti.
+
+[![Product Sample Process][process-29]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-29.png)
+<br>
+<strong>*Fig.6 - esempio di pagina di dettaglio di un processo censito a fini anticorruttivi*</strong>
 
 Vi sono inoltre alcune possibili evoluzioni:
-* Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentirgli di compilare autonomamente le risposte ai quesiti
+* Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentire loro di compilare autonomamente le risposte ai quesiti
 * Predisposizione di monitoraggi e reportistica per tenere il controllo sugli stati di avanzamento e sui risultati raggiunti
 * Predisposizione di appositi strumenti di ricerca per consentire all'ufficio trasparenza di ottenere query analitiche sulle interviste effettuate.
 
 Naturalmente, nessuno strumento informatico &egrave; in grado da solo di ottenere risultati come l'abbassamento dei rischi corruttivi; pertanto ogni approfondimento analitico permesso dal software dovr&agrave; essere esaminato ed interpretato dagli esperti dell'anticorruzione.
 
-Ognuno pu&ograve; sentirsi libero di proporre miglioramenti ed evoluzioni..
+Ognuno pu&ograve; sentirsi libero di proporre miglioramenti ed evoluzioni.
+</p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -222,6 +253,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [1.4.0] (04/09/2023) Correzione etichetta, tipografia; aggiunti screenshot.
 - [1.3.9] (29/08/2023) Implementata pagina consultazione intervista per nascondere/mostrare le domande senza risposta. Migliorie grafiche di presentazione dei dettagli di un processo; revisione grafica pagina di login, link per scaricare csv, etichette e altri ornamenti.
 - [1.3.8] (24/08/2023) Implementata facility in consultazione intervista per nascondere/mostrare le domande senza risposta.
 - [1.3.7] (01/08/2023) Implementata funzione inserimento relazione ternaria tra rischio corruttivo e fattore abilitante, nel contesto di un processo. Correzione di bug.
@@ -267,7 +299,15 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
 [contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[product-screenshot]: https://github.com/gbetorre/rischi/blob/main/web/img/product-screenshot.png
+[product-screenshot]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/product-screenshot.png
+[product-login]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.40.png
+[product-landing]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing1.40.png
+[product-interview]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/interview-sample.png
+[product-algorithm]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png
+[product-orgchart]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png
+[product-process]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png
+[process-29]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-29.png
+[process-45]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-45.png
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/othneildrew/Best-README-Template/issues
 [license-shield]: https://img.shields.io/badge/license-GPL-blue
