@@ -67,7 +67,7 @@ L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare i res
 [![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.40.png)
 <br>
 <strong>*Fig.2 - il software &egrave; un'applicazione ad accesso riservato (per accedere &egrave; necessario disporre di credenziali)*</strong>
-
+<br><br>
 [![Product Landing Page][product-landing]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing1.40.png)
 <br>
 <strong>*Fig.3 - pagina di landing, versione 1.40*</strong>
@@ -79,12 +79,12 @@ Ogni quesito, infatti, &egrave; collegato ad uno o pi&uacute; specifici rischi c
 [![Product Interview][product-interview]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/interview-sample.png)
 <br>
 <strong>*Fig.4 - esempio di quesiti che concorrono a fornire il quadro della vulnerabilit&agrave; di un processo organizzativo*</strong>
-
+<br><br>
 [![Product Algorithm][product-algorithm]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png)
 <br>
 <strong>*Fig.5 - esempio di algoritmo di calcolo di un indicatore di probabilit&agrave;*</strong>
 
-Incrociando i valori ottenuti negli indicatori di probabilità (P) con quelli ottenuti negli indicatori di impatto (I) si ottiene, per ogni processo organizzativo censito, un indice sintetico PxI, che esprime il livello finale di rischio cui &egrave; esposto il processo.
+Incrociando i valori ottenuti negli indicatori di probabilità (P) con quelli ottenuti negli indicatori di impatto (I) si ottiene, per ogni processo organizzativo censito, un indice sintetico <code>P x I</code>, che esprime il livello finale di rischio cui &egrave; esposto il processo stesso.
 
 Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le misure da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
 
@@ -250,9 +250,12 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.4.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
 - [1.4.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [1.4.4] Implementata form di ricerca sui quesiti per chiave testuale
+- [1.4.3] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4
+- [1.4.2] (12/09/2023) Corretta gestione charset nella form di modifica della risposta; aggiunto id fase come title nella pagina di dettaglio del processo
 
 ### Done
 -->
+- [1.4.1] (11/09/2023) Aggiunta gestione in intervista del tipo di quesito che prevede come risposta una percentuale; aggiunta di immagini svg come marcatori di alberatura; revisione pagina di landing; spostamento di alcune ricerche predefinite dalla pagina di landing alla pagina della ricerca libera; ampliata larghezza visibile applicazione. 
 - [1.4.0] (04/09/2023) Correzione etichetta, tipografia; aggiunti screenshot.
 - [1.3.9] (29/08/2023) Implementata pagina consultazione intervista per nascondere/mostrare le domande senza risposta. Migliorie grafiche di presentazione dei dettagli di un processo; revisione grafica pagina di login, link per scaricare csv, etichette e altri ornamenti.
 - [1.3.8] (24/08/2023) Implementata facility in consultazione intervista per nascondere/mostrare le domande senza risposta.
