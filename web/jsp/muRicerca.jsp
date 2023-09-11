@@ -19,6 +19,28 @@
   <c:set var="peFormFields" value="NOME,COGNOME,AREA FUNZIONALE,CATEGORIA,RESPONSABILITA" scope="page" />
 </c:if>
     <div class="row">
+      <h3 class="mt-1 m-0 font-weight-bold">Ricerche predefinite</h3>
+      <hr class="riga"/>
+      <div class="col-xl-4 col-md-6 mx-auto">
+        <div class="card bgAct20 text-dark mb-4 shadow-nohover">
+          <div class="card-body landing-card-body d-flex align-items-center">
+            <i class="fa-solid fa-cloud-bolt fa-5x"></i>&nbsp;&nbsp; 
+            <span class="h4 landing-card-title">&nbsp;&nbsp;&nbsp;&nbsp;Fattori abilitanti </span>
+          </div>
+          <a class="small stretched-link" href="${fat}"></a>
+        </div>
+      </div>
+      <div class="col-xl-4 col-md-6 mx-auto">
+        <div class="card bgAct11 mb-4 shadow-nohover">
+          <div class="card-body landing-card-body d-flex align-items-center">
+            <i class="fa-solid fa-right-from-bracket fa-5x"></i>&nbsp;&nbsp;
+            <span class="h4 landing-card-title">&nbsp;&nbsp;&nbsp;&nbsp;Output dei processi</span>
+          </div>
+          <a class="small stretched-link" href="${out}"></a>
+        </div>
+      </div>
+    </div>
+    <div class="row">
       <h3 class="mt-1 m-0 font-weight-bold">Ricerca nel database</h3>
       <hr class="riga"/>
       <div id="search_div">
@@ -175,11 +197,11 @@
     <table class="table table-striped risultati" id="foundPerson">
       <thead>
         <tr>
-          <th class="Content_Medio" width="10%"> </th>
-          <th class="Content_Medio" width="60%"> </th>
-          <th class="Content_Medio" width="10%"> </th>
-          <th class="Content_Medio" width="10%"> </th>
-          <th class="Content_Medio" width="10%"> </th>
+          <th width="10%"> </th>
+          <th width="60%"> </th>
+          <th width="10%"> </th>
+          <th width="10%"> </th>
+          <th width="10%"> </th>
         </tr>
       </thead>
       <c:forEach var="persona" items="${requestScope.persone}" varStatus="status">
@@ -206,66 +228,4 @@
       </tr>
       </c:forEach>
     </table>
-  </c:if>
-  <c:if test="${param.keywords ne null}">
-    <div id="results" class="tab-container" style="display: none;">
-      <!-- Voci delle Tabs -->
-      <ul class="nav nav-tabs nav-big" role="tablist">
-        <li role="presentation"><a href="#tab-pubbDip" role="tab" data-toggle="tab">Pubblicazioni trovate <span class="badge">0</span></a></li>
-        <li role="presentation"><a href="#tab-prjDip" role="tab" data-toggle="tab">Progetti trovati <span class="badge">0</span></a></li>
-        <%--<li role="presentation"><a href="#tab-oi" role="tab" data-toggle="tab">Insegnamenti attinenti <span class="badge">${requestScope.insegnamenti.size()}</span></a></li> --%>
-      </ul>
-      <!-- Tab panes -->
-      <div class="tab-content">
-        <!-- Pubblicazioni trovate -->
-        <div role="tabpanel" class="tab-pane fade in active" id="tab-pubbDip">&nbsp;</div>
-        <!-- Progetti trovati -->
-        <div role="tabpanel" class="tab-pane fade" id="tab-prjDip">&nbsp;</div>
-        <!-- Occorrenze Insegnamento trovate -->
-        <div role="tabpanel" class="tab-pane fade" id="tab-oi">
-          <table class="table table-striped risultati" data-count="${requestScope.insegnamenti.size()}" id="foundOIs">
-            <thead>
-              <tr>
-                <th class="Content_Medio" width="5%">N&deg;</th>
-                <th class="Content_Medio" width="30%">Corso di studi</th>
-                <th class="Content_Medio" width="25%">Nome insegnamento</th>
-                <th class="Content_Medio" width="30%">Nome modulo</th>
-                <th class="Content_Medio" width="5%">Rilevanza sul corso di studi</th>
-                <th class="Content_Medio" width="5%">Rilevanza sull' insegnamento</th>
-              </tr>
-            </thead>
-            <c:forEach var="oi" items="${requestScope.insegnamenti}" varStatus="status">
-            <tr>
-              <td width="5%">
-                <c:out value="${status.count}" />
-              </td>
-              <td width="30%">
-                ${oi.codiceCs}
-              </td>
-              <td width="30%">
-                <a href="<uol:dataurl getEnt="oi" data="id=${oi.id}" />">
-                ${oi.nomeInsegnamento}
-                </a>
-              </td>
-              <td width="30%">
-                <a href="<uol:dataurl getEnt="oi" data="id=${oi.id}" />">
-                ${oi.nomeModulo}
-                </a>
-              </td>
-              <td align="center" width="5%">
-                ${oi.codiceEsame}
-              </td>
-              <td align="center" width="5%">
-                ${oi.misura}
-              </td>
-            </tr>
-            </c:forEach>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div id='loading-indicator' style="position: fixed; left: 50%; top: 50%; display: none;">
-               <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-          <span class="sr-only">Loading...</span>
-    </div>
   </c:if>
