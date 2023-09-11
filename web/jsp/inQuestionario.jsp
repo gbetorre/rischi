@@ -18,13 +18,24 @@
         <c:out value="${strLiv1.nome}" />
         <c:forEach var="strLiv2" items="${strLiv1.figlie}">
           <c:if test="${strLiv2.extraInfo.codice eq codLiv2}"><br />
-            <big style="font-size:x-large">˪</big>&nbsp;&nbsp;<c:out value="${strLiv2.prefisso}" /> <c:out value="${strLiv2.nome}" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-square-dotted" viewBox="0 0 16 16">
+              <path d="M2.5 0c-.166 0-.33.016-.487.048l.194.98A1.51 1.51 0 0 1 2.5 1h.458V0H2.5zm2.292 0h-.917v1h.917V0zm1.833 0h-.917v1h.917V0zm1.833 0h-.916v1h.916V0zm1.834 0h-.917v1h.917V0zm1.833 0h-.917v1h.917V0zM13.5 0h-.458v1h.458c.1 0 .199.01.293.029l.194-.981A2.51 2.51 0 0 0 13.5 0zm2.079 1.11a2.511 2.511 0 0 0-.69-.689l-.556.831c.164.11.305.251.415.415l.83-.556zM1.11.421a2.511 2.511 0 0 0-.689.69l.831.556c.11-.164.251-.305.415-.415L1.11.422zM16 2.5c0-.166-.016-.33-.048-.487l-.98.194c.018.094.028.192.028.293v.458h1V2.5zM.048 2.013A2.51 2.51 0 0 0 0 2.5v.458h1V2.5c0-.1.01-.199.029-.293l-.981-.194zM0 3.875v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zM0 5.708v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zM0 7.542v.916h1v-.916H0zm15 .916h1v-.916h-1v.916zM0 9.375v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zm-16 .916v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zm-16 .917v.458c0 .166.016.33.048.487l.98-.194A1.51 1.51 0 0 1 1 13.5v-.458H0zm16 .458v-.458h-1v.458c0 .1-.01.199-.029.293l.981.194c.032-.158.048-.32.048-.487zM.421 14.89c.183.272.417.506.69.689l.556-.831a1.51 1.51 0 0 1-.415-.415l-.83.556zm14.469.689c.272-.183.506-.417.689-.69l-.831-.556c-.11.164-.251.305-.415.415l.556.83zm-12.877.373c.158.032.32.048.487.048h.458v-1H2.5c-.1 0-.199-.01-.293-.029l-.194.981zM13.5 16c.166 0 .33-.016.487-.048l-.194-.98A1.51 1.51 0 0 1 13.5 15h-.458v1h.458zm-9.625 0h.917v-1h-.917v1zm1.833 0h.917v-1h-.917v1zm1.834 0h.916v-1h-.916v1zm1.833 0h.917v-1h-.917v1zm1.833 0h.917v-1h-.917v1zM4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7z"/>
+            </svg>&nbsp;&nbsp;
+            <c:out value="${strLiv2.prefisso}" /> <c:out value="${strLiv2.nome}" />
             <c:forEach var="strLiv3" items="${strLiv2.figlie}">
               <c:if test="${strLiv3.extraInfo.codice eq codLiv3}"><br />
-                &nbsp;&nbsp;&nbsp;&nbsp;<big style="font-size:x-large">˪</big>&nbsp;&nbsp;<c:out value="${strLiv3.prefisso}" /> <c:out value="${strLiv3.nome}" />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-square-dotted" viewBox="0 0 16 16">
+                  <path d="M2.5 0c-.166 0-.33.016-.487.048l.194.98A1.51 1.51 0 0 1 2.5 1h.458V0H2.5zm2.292 0h-.917v1h.917V0zm1.833 0h-.917v1h.917V0zm1.833 0h-.916v1h.916V0zm1.834 0h-.917v1h.917V0zm1.833 0h-.917v1h.917V0zM13.5 0h-.458v1h.458c.1 0 .199.01.293.029l.194-.981A2.51 2.51 0 0 0 13.5 0zm2.079 1.11a2.511 2.511 0 0 0-.69-.689l-.556.831c.164.11.305.251.415.415l.83-.556zM1.11.421a2.511 2.511 0 0 0-.689.69l.831.556c.11-.164.251-.305.415-.415L1.11.422zM16 2.5c0-.166-.016-.33-.048-.487l-.98.194c.018.094.028.192.028.293v.458h1V2.5zM.048 2.013A2.51 2.51 0 0 0 0 2.5v.458h1V2.5c0-.1.01-.199.029-.293l-.981-.194zM0 3.875v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zM0 5.708v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zM0 7.542v.916h1v-.916H0zm15 .916h1v-.916h-1v.916zM0 9.375v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zm-16 .916v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zm-16 .917v.458c0 .166.016.33.048.487l.98-.194A1.51 1.51 0 0 1 1 13.5v-.458H0zm16 .458v-.458h-1v.458c0 .1-.01.199-.029.293l.981.194c.032-.158.048-.32.048-.487zM.421 14.89c.183.272.417.506.69.689l.556-.831a1.51 1.51 0 0 1-.415-.415l-.83.556zm14.469.689c.272-.183.506-.417.689-.69l-.831-.556c-.11.164-.251.305-.415.415l.556.83zm-12.877.373c.158.032.32.048.487.048h.458v-1H2.5c-.1 0-.199-.01-.293-.029l-.194.981zM13.5 16c.166 0 .33-.016.487-.048l-.194-.98A1.51 1.51 0 0 1 13.5 15h-.458v1h.458zm-9.625 0h.917v-1h-.917v1zm1.833 0h.917v-1h-.917v1zm1.834 0h.916v-1h-.916v1zm1.833 0h.917v-1h-.917v1zm1.833 0h.917v-1h-.917v1zM4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7z"/>
+                </svg>&nbsp;&nbsp;                
+                <c:out value="${strLiv3.prefisso}" /> <c:out value="${strLiv3.nome}" />
                 <c:forEach var="strLiv4" items="${strLiv3.figlie}">
                   <c:if test="${strLiv4.extraInfo.codice eq codLiv4}"><br />
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<big style="font-size:x-large">˪</big>&nbsp;&nbsp;<c:out value="${strLiv4.prefisso}" /> <c:out value="${strLiv4.nome}" />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-square-dotted" viewBox="0 0 16 16">
+                      <path d="M2.5 0c-.166 0-.33.016-.487.048l.194.98A1.51 1.51 0 0 1 2.5 1h.458V0H2.5zm2.292 0h-.917v1h.917V0zm1.833 0h-.917v1h.917V0zm1.833 0h-.916v1h.916V0zm1.834 0h-.917v1h.917V0zm1.833 0h-.917v1h.917V0zM13.5 0h-.458v1h.458c.1 0 .199.01.293.029l.194-.981A2.51 2.51 0 0 0 13.5 0zm2.079 1.11a2.511 2.511 0 0 0-.69-.689l-.556.831c.164.11.305.251.415.415l.83-.556zM1.11.421a2.511 2.511 0 0 0-.689.69l.831.556c.11-.164.251-.305.415-.415L1.11.422zM16 2.5c0-.166-.016-.33-.048-.487l-.98.194c.018.094.028.192.028.293v.458h1V2.5zM.048 2.013A2.51 2.51 0 0 0 0 2.5v.458h1V2.5c0-.1.01-.199.029-.293l-.981-.194zM0 3.875v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zM0 5.708v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zM0 7.542v.916h1v-.916H0zm15 .916h1v-.916h-1v.916zM0 9.375v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zm-16 .916v.917h1v-.917H0zm16 .917v-.917h-1v.917h1zm-16 .917v.458c0 .166.016.33.048.487l.98-.194A1.51 1.51 0 0 1 1 13.5v-.458H0zm16 .458v-.458h-1v.458c0 .1-.01.199-.029.293l.981.194c.032-.158.048-.32.048-.487zM.421 14.89c.183.272.417.506.69.689l.556-.831a1.51 1.51 0 0 1-.415-.415l-.83.556zm14.469.689c.272-.183.506-.417.689-.69l-.831-.556c-.11.164-.251.305-.415.415l.556.83zm-12.877.373c.158.032.32.048.487.048h.458v-1H2.5c-.1 0-.199-.01-.293-.029l-.194.981zM13.5 16c.166 0 .33-.016.487-.048l-.194-.98A1.51 1.51 0 0 1 13.5 15h-.458v1h.458zm-9.625 0h.917v-1h-.917v1zm1.833 0h.917v-1h-.917v1zm1.834 0h.916v-1h-.916v1zm1.833 0h.917v-1h-.917v1zm1.833 0h.917v-1h-.917v1zM4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7z"/>
+                    </svg>&nbsp;&nbsp;
+                    <c:out value="${strLiv4.prefisso}" /> <c:out value="${strLiv4.nome}" />
                   </c:if>
                 </c:forEach>
               </c:if>
@@ -43,11 +54,15 @@
         <c:forEach var="proc" items="${mac.processi}">
           <c:set var="idPro2" value="${proc.id}.${proc.codice}" scope="page" />
           <c:if test="${idPro2 eq selPro.get('liv2')}"><br />
-            <big style="font-size:x-large">˪</big>&nbsp;&nbsp;<c:out value="${proc.codice}" /> <c:out value="${proc.nome}" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-square" viewBox="0 0 16 16">
+              <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+              <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
+            </svg>&nbsp;&nbsp;
+            <c:out value="${proc.codice}" /> <c:out value="${proc.nome}" />
             <c:forEach var="sub" items="${proc.processi}">
               <c:set var="idPro3" value="${sub.id}.${sub.codice}" scope="page" />
               <c:if test="${idPro3 eq selPro.get('liv3')}"><br />
-                &nbsp;&nbsp;&nbsp;&nbsp;<big style="font-size:x-large">˪</big>&nbsp;&nbsp;<c:out value="${sub.codice}" /> <c:out value="${sub.nome}" />
+                &nbsp;&nbsp;&nbsp;&nbsp;<big style="font-size:x-large">&#746;</big>&nbsp;&nbsp;<c:out value="${sub.codice}" /> <c:out value="${sub.nome}" />
               </c:if>
             </c:forEach>
           </c:if>
@@ -98,6 +113,9 @@
                       <c:when test="${quesito.tipo.nome eq 'Quantitativo'}">
                         <input type="text" class="form-custom" id="Q${quesito.id}-V" name="Q${itCounts}" size="4" placeholder="#">
                       </c:when>
+                      <c:when test="${quesito.tipo.nome eq 'Percentuale'}">
+                        <input type="text" class="form-custom" id="Q${quesito.id}-P" name="Q${itCounts}" size="4" placeholder="%">
+                      </c:when>
                     </c:choose>
                       </div>
                     </div>
@@ -114,13 +132,16 @@
                       <input type="hidden" name="Q${itCounts}-id" value="${quesitoFiglio.id}">
                     <c:choose>
                       <c:when test="${quesitoFiglio.tipo.nome eq 'On/Off'}">
-                        <input type="radio" id="Q${quesitoFiglio.id}-Y" name="Q${itCounts}" value="SI" disabled>
+                        <input type="radio" id="Q${quesitoFiglio.id}-Y" name="Q${itCounts}" value="SI">
                         <label for="Q${quesitoFiglio.id}-Y"> SI &nbsp;</label>
-                        <input type="radio" id="Q${quesitoFiglio.id}-N" name="Q${itCounts}" value="NO" disabled>
+                        <input type="radio" id="Q${quesitoFiglio.id}-N" name="Q${itCounts}" value="NO">
                         <label for="Q${quesitoFiglio.id}-N"> NO &nbsp;</label>
                       </c:when>
                       <c:when test="${quesitoFiglio.tipo.nome eq 'Quantitativo'}">
                         <input type="text" class="form-custom" id="Q${quesitoFiglio.id}-V" name="Q${itCounts}" size="4" placeholder="#" disabled>
+                      </c:when>
+                      <c:when test="${quesitoFiglio.tipo.nome eq 'Percentuale'}">
+                        <input type="text" class="form-custom" id="Q${quesitoFiglio.id}-P" name="Q${itCounts}" size="4" placeholder="%" disabled>
                       </c:when>
                     </c:choose>
                       </div>
@@ -138,82 +159,6 @@
             </div>
     </c:forEach>      
           </div>     
-      
-      <%--
-          <div class="accordion" id="accordionExample">
-      <c:forEach var="entry" items="${quests}" varStatus="status">
-      <c:if test="${status.count gt 1}"><c:set var="show" value="" scope="page" /></c:if>
-          <!--  Ambito di Analisi -->
-            <div class="card">
-              <div class="card-header" id="heading${status.count}">
-                <h2 class="mb-0">
-                  <button class="btn btn-link btn-block text-left" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${status.count}" aria-expanded="true" aria-controls="collapse${status.count}">
-                    <c:out value="${status.count}. ${entry.key.nome}" />
-                  </button>
-                </h2>
-              </div>
-              <div id="collapse${status.count}" class="collapse" aria-labelledby="heading${status.count}" data-bs-parent="#accordionExample">
-                <div class="card-body">
-        <c:forEach var="quesito" items="${quests.get(entry.key)}">
-          <c:if test="${empty quesito.parentQuestion}">
-            <div class="panel panel-default subfields">
-              <div class="row panel-heading">
-                <div class="col-sm-10">
-                  <cite><c:out value="${quesito.formulazione}" /></cite>
-                </div>
-                <div class="col-sm-2">
-                <input type="hidden" name="Q${itCounts}-id" value="${quesito.id}">
-              <c:choose>
-                <c:when test="${quesito.tipo.nome eq 'On/Off'}">
-                  <input type="radio" id="Q${quesito.id}-Y" name="Q${itCounts}" value="SI">
-                  <label for="Q${quesito.id}-Y"> SI &nbsp;</label>
-                  <input type="radio" id="Q${quesito.id}-N" name="Q${itCounts}" value="NO">
-                  <label for="Q${quesito.id}-N"> NO &nbsp;</label>
-                </c:when>
-                <c:when test="${quesito.tipo.nome eq 'Quantitativo'}">
-                  <input type="text" class="form-custom" id="Q${quesito.id}-V" name="Q${itCounts}" size="4" placeholder="#">
-                </c:when>
-              </c:choose>
-                </div>
-              </div>
-              <div class="panel-body contractedTree">
-                <textarea class="form-control" name="Q${itCounts}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione"></textarea>  
-              </div>
-              <c:set var="itCounts" value="${itCounts + 1}" scope="page" />
-            <c:forEach var="quesitoFiglio" items="${quesito.childQuestions}">
-              <div class="row panel-heading">
-                <div class="col-sm-10">
-                  <cite><c:out value="${quesitoFiglio.formulazione}" /></cite>
-                </div>
-                <div class="col-sm-2" id="T${quesitoFiglio.parentQuestion.id}">
-                <input type="hidden" name="Q${itCounts}-id" value="${quesitoFiglio.id}">
-              <c:choose>
-                <c:when test="${quesitoFiglio.tipo.nome eq 'On/Off'}">
-                  <input type="radio" id="Q${quesitoFiglio.id}-Y" name="Q${itCounts}" value="SI" disabled>
-                  <label for="Q${quesitoFiglio.id}-Y"> SI &nbsp;</label>
-                  <input type="radio" id="Q${quesitoFiglio.id}-N" name="Q${itCounts}" value="NO" disabled>
-                  <label for="Q${quesitoFiglio.id}-N"> NO &nbsp;</label>
-                </c:when>
-                <c:when test="${quesitoFiglio.tipo.nome eq 'Quantitativo'}">
-                  <input type="text" class="form-custom" id="Q${quesitoFiglio.id}-V" name="Q${itCounts}" size="4" placeholder="#" disabled>
-                </c:when>
-              </c:choose>
-                </div>
-              </div>
-              <div class="panel-body contractedTree">
-                <textarea class="form-control" id="A${quesitoFiglio.parentQuestion.id}" name="Q${itCounts}-note" aria-label="With textarea" maxlength="8104" placeholder="Inserisci facoltativamente una descrizione" readonly></textarea>  
-              </div>
-              <c:set var="itCounts" value="${itCounts + 1}" scope="page" />
-            </c:forEach>
-            </div>
-          </c:if>
-        </c:forEach>
-          </div>
-        </div>
-        </div>
-        <hr class="riga" />
-      </c:forEach>
-        </div>--%>
           <br />
           &nbsp;
           <div class="centerlayout">
@@ -255,6 +200,20 @@
                 $("#Q${quesito.id}-V").addClass("bgcolor1");
             }
         });
+      </c:when>
+      <c:when test="${quesito.tipo.nome eq 'Percentuale'}">
+      $("#Q${quesito.id}-P").change(function() {
+          $("#Q${quesito.id}-P").removeClass("form-custom");
+          $("#Q${quesito.id}-P").removeClass("bgcolorred");
+          var textValue = this.value; 
+          if (isNaN(textValue)) {
+              alert("Attenzione: la risposta a questa domanda deve essere un valore numerico! Correggere, prego.");
+              $("#Q${quesito.id}-P").addClass("bgcolorred");
+          }
+          else {
+              $("#Q${quesito.id}-P").addClass("bgcolor1");
+          }
+      });
       </c:when>
       </c:choose>
       </c:forEach>
