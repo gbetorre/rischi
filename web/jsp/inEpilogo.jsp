@@ -234,7 +234,7 @@
           });  
       }
     </script>
-    <form id="upd-form" method="post" action="" class="modal" style="height:440px;">
+    <form accept-charset="ISO-8859-1" id="upd-form" method="post" action="" class="modal" style="height:440px;">
       <input type="hidden" class="form-control" id="q-id" name="q-id" value="">
       <h3 class="heading">Edita Risposta</h3>
       <div class="row bgcolor2" id="q-question"></div>
