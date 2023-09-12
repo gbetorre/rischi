@@ -251,10 +251,10 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.4.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [1.4.4] Implementata form di ricerca sui quesiti per chiave testuale
 - [1.4.3] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4
-- [1.4.2] (12/09/2023) Corretta gestione charset nella form di modifica della risposta; aggiunto id fase come title nella pagina di dettaglio del processo
 
 ### Done
 -->
+- [1.4.2] (12/09/2023) Corretta gestione charset nella form di modifica della risposta; mostrato id della fase come title nella pagina di dettaglio del processo
 - [1.4.1] (11/09/2023) Aggiunta gestione in intervista del tipo di quesito che prevede come risposta una percentuale; aggiunta di immagini svg come marcatori di alberatura; revisione pagina di landing; spostamento di alcune ricerche predefinite dalla pagina di landing alla pagina della ricerca libera; ampliata larghezza visibile applicazione. 
 - [1.4.0] (04/09/2023) Correzione etichetta, tipografia; aggiunti screenshot.
 - [1.3.9] (29/08/2023) Implementata pagina consultazione intervista per nascondere/mostrare le domande senza risposta. Migliorie grafiche di presentazione dei dettagli di un processo; revisione grafica pagina di login, link per scaricare csv, etichette e altri ornamenti.
@@ -268,7 +268,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.3.1] (15/02/2023) Aggiunta funzionalit&agrave; di download registro dei rischi in formato CSV (estrae solo rischi con processi associati, come da regole di business)
 - [1.3.0] (13/02/2023) Aggiunta pagina dettagli rischio corruttivo, elencante i processi esposti al rischio selezionato. Implementata pagina stand-alone dettagli processo. Riordinata pagina di landing.
 - [1.2.9] (08/02/2023) Piccole migliorie di presentazione nei dettagli di un processo: evidenziata area di rischio, mostrato dettaglio soggetto contingente
-- [1.2.8] (06/02/2023) Ampliato dettaglio processo anticorruttivo: mostrati i rischi corsi dal processo
+- [1.2.8] (06/02/2023) Ampliato dettaglio processo anticorruttivo: mostrati i rischi cui il processo &egrave; esposto
 - [1.2.7] (30/01/2023) Implementato registro dei rischi corruttivi; correzione di bug
 - [1.2.6] (21/12/2022) Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
 - [1.2.5] (13/12/2022) Aggiunti estremi input, fasi, output nel CSV di estrazione generale dei processi
