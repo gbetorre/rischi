@@ -919,6 +919,18 @@ public interface Query extends Serializable {
             "   ORDER BY Q.id";
     
     /**
+     * <p>Estrae i codici indicatore e i relativi quesiti associati.</p>
+     */
+    public static final String GET_QUESTIONS_BY_INDICATOR = 
+            "SELECT DISTINCT" +
+            "       IQ.cod_indicatore       AS \"nome\"" +
+            "   ,   IQ.id_quesito           AS \"id\"" +
+            "   FROM indicatore_quesito IQ" +
+            "       INNER JOIN rilevazione R ON IQ.id_rilevazione = R.id" +
+            "   WHERE (IQ.id_rilevazione = ? OR -1 = ?)" +
+            "   ORDER BY IQ.cod_indicatore";
+    
+    /**
      * <p>Estrae l'ambito di analisi in base all'identificativo 
      * del quesito, oppure tutti gli ambiti di analisi se viene passato 
      * il valore fittizio -1.</p>
@@ -1046,6 +1058,20 @@ public interface Query extends Serializable {
             "   WHERE (R.id_rilevazione = ? OR -1 = ?)" +
             "   ORDER BY R.data_ultima_modifica DESC, R.ora_ultima_modifica DESC";
 
+    /**
+     * <p>Estrae gli indicatori trovati nel contesto di una rilevazione
+     * specifica, oppure indipendentemente dalla rilevazione.</p>
+     */
+    public static final String GET_INDICATORS = 
+            "SELECT DISTINCT" +
+            "       IND.codice              AS \"nome\"" +
+            "   ,   IND.nome                AS \"informativa\"" +
+            "   ,   IND.ordinale            AS \"ordinale\"" +
+            "   FROM indicatore IND" +
+            "       INNER JOIN rilevazione R ON IND.id_rilevazione = R.id" +
+            "   WHERE (IND.id_rilevazione = ? OR -1 = ?)" +
+            "   ORDER BY ordinale";
+    
     /**
      * <p>Estrae tutti gli input di un processo anticorruttivo
      * il cui identificativo viene passato come parametro.</p>
