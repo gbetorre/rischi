@@ -245,13 +245,47 @@ public interface Constants extends Serializable {
      */
     static final String[] STATI_STRUTTURA = {"ATTIVA", "DISMESSA"};
     /**
-     * <p>Valori possibili di valori convenzionali corrispondenti a tipi diversi di liste.</p>
+     * <p>Valori possibili di valori convenzionali corrispondenti 
+     * a tipi diversi di liste.<br>
+     * Rispettivamente:<dl>
+     * <dt>I</dt>
+     * <dd>Lista Input</dd>
+     * <dt>F</dt>
+     * <dd>Lista Fasi</dd>
+     * <dt>O</dt>
+     * <dd>Lista Output</dd>
+     * <dt>R</dt>
+     * <dd>Lista Rischi</dd></dl>
+     * </p>
      */
     static final String[] TIPI_LISTE = {"I", "F", "O", "R"};
     /**
      * <p>Valori possibili degli attributi probabilita, impatto, livello di rischio.</p>
      */
-    static final String[] LIVELLI_RISCHIO = {"ALTO", "MEDIO", "BASSO"};
+    static final String[] LIVELLI_RISCHIO = {"MINIMO", "BASSO", "MEDIO", "ALTO", "ALTISSIMO"};
+    /**
+     * <p>Valori possibili per i nomi degli indicatori.</p>
+     */
+    static final String P1 = "P1";
+    static final String P2 = "P2";
+    static final String P3 = "P3";
+    static final String P4 = "P4";
+    static final String P5 = "P5";
+    static final String P6 = "P6";
+    static final String P7 = "P7";
+    static final String I1 = "I1";
+    static final String I2 = "I2";
+    static final String I3 = "I3";
+    static final String I4 = "I4";
+    /**
+     * <p>Valori possibili per i tipi degli indicatori.</p>
+     */
+    static final String P = "Probabilità";
+    static final String I = "Impatto";
+    /**
+     * <p>Messaggio di errore sul calcolo degli indicatori.</p>
+     */
+    static final String ERR = "Non determinabile";
     /**
      * <p>Lista contenente i possibili valori dell'attributo stato della classe RiskBean.</p>
      */
