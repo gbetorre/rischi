@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -2986,7 +2987,6 @@ public class DBWrapper implements Query, Constants {
             AbstractList<ItemBean> ambits = new ArrayList<>();
             try {
                 // TODO: Controllare se user è superuser
-                pst = null;
                 pst = con.prepareStatement(GET_AMBIT);
                 pst.clearParameters();
                 pst.setInt(1, GET_ALL_BY_CLAUSE);
@@ -3211,7 +3211,7 @@ public class DBWrapper implements Query, Constants {
     
     
     /* (non-Javadoc)
-     * @see it.rol.Query#getQueryStructures(int, int, int, int, int)
+     * @see it.rol.Query#getQueryAnswers(HashMap<String, LinkedHashMap<String, String>>, int, int, int, boolean);
      */
     @SuppressWarnings("javadoc")
     @Override
@@ -3362,6 +3362,177 @@ public class DBWrapper implements Query, Constants {
                 throw new WebStorageException(msg + anve.getMessage(), anve);
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Estrae un elenco completo di indicatori</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ArrayList&lt;CodeBean&gt;</code> - la lista di indicatori cercati
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<CodeBean> getIndicators(PersonBean user,
+                                             CodeBean survey)
+                                      throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            int nextParam = NOTHING;
+            CodeBean indicator = null;
+            AbstractList<CodeBean> indicators = new ArrayList<>();
+            // TODO: Controllare se user è superuser
+            try {
+                // Calcola la query in funzione del livello (2 = processo_at)
+                pst = con.prepareStatement(GET_INDICATORS);
+                pst.clearParameters();
+                pst.setInt(++nextParam, survey.getId());                
+                pst.setInt(++nextParam, survey.getId());
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Crea un oggetto
+                    indicator = new CodeBean();
+                    // Lo valorizza col contenuto della query
+                    BeanUtil.populate(indicator, rs);
+                    // Lo aggiunge alla lista di elementi trovati
+                    indicators.add(indicator);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get Out
+                return (ArrayList<CodeBean>) indicators;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean; verificare identificativo della rilevazione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query degli indicatori in base all\'id della rilevazione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+
+    
+    /**
+     * <p>Restituisce un HashMap contenente insiemi di identificativi dei quesiti
+     * indicizzati per codice di indicatore.</p>
+     *
+     * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param survey   oggetto rilevazione
+     * @return <code>HashMap&lt;String&comma; LinkedList&lt;Integer&gt;&gt;</code> - dictionary con ogni entry costituita dal codice indicatore (chiave) e dalla lista degli identificativi dei quesiti ad esso associati (valore)
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public HashMap<String, LinkedList<Integer>> getQuestionsByIndicator(PersonBean user,
+                                                                        CodeBean survey)
+                                                                 throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            AbstractList<CodeBean> couples = new ArrayList<>();
+            HashMap<String, LinkedList<Integer>> questionsIndicator = new HashMap<>();
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_QUESTIONS_BY_INDICATOR);
+                pst.clearParameters();
+                pst.setInt(1, survey.getId());
+                pst.setInt(2, survey.getId());
+                rs = pst.executeQuery();
+                // Punta alla coppia indicatore-quesito
+                while (rs.next()) {
+                    // Prepara, valorizza e aggiunge il bean
+                    CodeBean couple = new CodeBean();
+                    BeanUtil.populate(couple, rs);
+                    couples.add(couple);
+                }
+                // Indice di tupla
+                int index = 0;
+                // Lista linkata di identificativi quesiti corrispondenti a codici chiave
+                LinkedList<Integer> ids = new LinkedList<>();
+                // Scorre i bean trovati per raggrupparli in una tabella indicizzata per codice indicatore
+                while (index < couples.size()) {
+                    // Ottiene la coppia codice_indicatore-id_quesito
+                    CodeBean c1 = couples.get(index);
+                    // Mette in una variabile il codice indicatore 
+                    String cod1 = c1.getNome();
+                    // Mette in una variabile l'id quesito
+                    Integer idq1 = new Integer(c1.getId());
+                    // Se l'id quesito non c'è già nella lista da collegare all'indicatore...
+                    if (!ids.contains(idq1) ) {
+                        // ...lo aggiunge
+                        ids.add(idq1);
+                    }
+                    // Incrementa l'indice generale
+                    index++;
+                    // Controlla che non siamo fuori tabella
+                    if (index < couples.size()) {
+                        // Ottiene la successiva coppia codice_indicatore-id_quesito
+                        CodeBean c2 = couples.get(index);
+                        // Mette in una variabile il nuovo codice indicatore
+                        String cod2 = c2.getNome();
+                        // Se il nuovo indicatore è uguale al vecchio indicatore...
+                        if (cod1.equals(cod2)) {
+                            // ...aggiunge il nuovo id quesito alla lista esistente
+                            Integer idq2 = new Integer(c2.getId());
+                            ids.add(idq2);
+                        } else {
+                            // Se il nuovo indicatore è diverso dal vecchio indicatore
+                            questionsIndicator.put(cod1, ids);
+                            // Azzera la lista degli id quesiti associati
+                            ids = new LinkedList<>();
+                            // Fa un altro giro
+                            continue;
+                        }
+                    } else {
+                        // Aggiunge l'ultimo ed esce (in automatico perché stiamo puntando all'ultimo)
+                        questionsIndicator.put(cod1, ids);
+                    }
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return questionsIndicator;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio non recuperabile; problema nel metodo di estrazione dei quesiti abbinati agli indicatori.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "QuestionBean non valorizzato; problema nella query dei quesiti.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally {
