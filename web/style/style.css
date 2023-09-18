@@ -561,6 +561,23 @@ select:disabled.bgcolor3 {
   background-color: #ffc;
 }
 
+.bgcolor-basso {
+  background-image: linear-gradient(to right, #ffffff, #99ff66);
+}
+
+.bgcolor-medio {
+  background-image: linear-gradient(to right,  #ffffff, #ffff00);
+}
+
+.bgcolor-alto {
+  background-image: linear-gradient(to right, #ffffff, #ff5232);
+}
+
+.bgcolor-non {
+  color: #333300;
+  background-image: linear-gradient(to right, #ffccba, #cc33ff);
+}
+
 /* ----------------- Panes ---------------- */
 .panel {
 	margin: 1% auto;
