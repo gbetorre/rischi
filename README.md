@@ -37,8 +37,6 @@
     <a href="https://github.com/gbetorre/rischi"><strong>Esplora i files »</strong></a>
     <br />
     <br />
-    <a href="https://at.univr.it:8443/rischi/">View Site</a>
-    ·
     <a href="https://github.com/gbetorre/rischi/issues">Report Bug</a>
     ·
     <a href="https://github.com/pulls">Request Feature</a>
@@ -54,6 +52,7 @@
 Applicazione web per la mappatura dei rischi corruttivi cui sono esposti i processi organizzativi
 
 <!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
 [![Product Name Screen Shot][product-screenshot]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/product-screenshot.png)
@@ -75,26 +74,77 @@ L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare i res
 <p>
 Attraverso la risposta ad una serie di quesiti posti a responsabili e operatori presso specifiche strutture amministrative (intervista), l'applicazione permette di ottenere una serie di indici relativi a specifici rischi corruttivi cui possono essere esposti i processi organizzativi presidiati dalle strutture stesse. 
 Ogni quesito, infatti, &egrave; collegato ad uno o pi&uacute; specifici rischi corruttivi; perci&ograve;, in funzione della risposta data dal personale intervistato, l'applicazione esprime specifici indici e punti di attenzione e, in sintesi, calcola il livello di rischio cui il processo esaminato risulta esposto. 
-
+<br><br>
 [![Product Interview][product-interview]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/interview-sample.png)
 <br>
 <strong>*Fig.4 - esempio di quesiti che concorrono a fornire il quadro della vulnerabilit&agrave; di un processo organizzativo*</strong>
-<br><br>
-[![Product Algorithm][product-algorithm]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png)
-<br>
-<strong>*Fig.5 - esempio di algoritmo di calcolo di un indicatore di probabilit&agrave;*</strong>
 
 Incrociando i valori ottenuti negli indicatori di probabilità (P) con quelli ottenuti negli indicatori di impatto (I) si ottiene, per ogni processo organizzativo censito, un indice sintetico <code>P x I</code>, che esprime il livello finale di rischio cui &egrave; esposto il processo stesso.
 
 Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le misure da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
 
-Inoltre, per ogni processo, oltre al livello di rischio, che &egrave; l'obiettivo principale di tutta l'applicazione, viene fornita una pagina di dettaglio, contenente le informazioni aggregate, tra cui i rischi cui il processo risulta esposto, ed i fattori abilitanti.
+## Come funziona il software
+Ovviamente l'applicazione Rischi On Line (ROL) si appoggia su un database, specificamente un database relazionale di tipo postgreSQL (versione 12 e successive).
+
+In una prima fase viene effettuato il caricamento delle strutture organizzative (organigramma) e quello dei processi organizzativi che vengono prodotti dalle strutture stesse.
+
+Questi caricamenti nel database possono essere effettuati tramite query di inserimento generate automaticamente o tramite ETL ma, allo studio, vi &egrave; una modalit&agrave; di caricamento massivo tramite l'upload di file formattati opportunamente.
+
+Le strutture sono organizzate in un albero con vari livelli mentre i processi sono strutturati in 3 livelli principali (macroprocesso, processo e sottoprocesso). 
+
+[![Product Sample OrgChart][product-orgchart]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png)
+<br>
+<strong>*Fig.5 - funzione di navigazione dell'organigramma*</strong>
+<br><br>
+[![Product Sample Macro][product-process](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png)
+<br>
+<strong>*Fig.6 - funzione di navigazione dell'albero dei macroprocessi*</strong>
+
+Ogni processo o sottoprocesso (ma non il macroprocesso) pu&ograve; essere a sua volta suddiviso in fasi (o attivit&agrave;). Ad ogni fase possono essere associate una o pi&ugrave; strutture e uno o pi&ugrave; soggetti terzi (che sono entit&agrave; non strutturate in organigramma ma comunque agenti sulla fase del processo).
+
+Il software prevede apposite funzionalit&agrave; di navigazione nell'albero dei macroprocessi ed in quello dell'organigramma (cfr. <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png">Fig. 5</a> e <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png">6</a>), in modo da verificare rapidamente che la mappatura corrisponda a quanto effettivamente presente nell'organizzazione.
+
+Inoltre, per ogni processo viene fornita una pagina di dettaglio, contenente, oltre al livello di rischio cui il processo &egrave; esposto (informazione che &egrave; l'obiettivo principale di tutta l'applicazione), anche tutte le altre informazioni aggregate che riguardano il processo stesso, tra cui: gli input, le fasi, gli output, i rischi ed i fattori abilitanti.
 
 [![Product Sample Process][process-29]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-29.png)
 <br>
-<strong>*Fig.6 - esempio di pagina di dettaglio di un processo censito a fini anticorruttivi*</strong>
+<strong>*Fig.7 - esempio di pagina di dettaglio di un processo censito a fini anticorruttivi*</strong>
 
-Vi sono inoltre alcune possibili evoluzioni:
+Dopo aver popolato il database con le strutture, i macroprocessi e i loro sottolivelli, si pu&ograve; passare alla fase dell'intervista, che consiste nel rivolgere una serie di quesiti ad una specifica struttura che presiede uno specifico processo. La batteria di quesiti &egrave; ampia (pi&uacute; di 150) ma la decisione circa la quali quesiti somministrare pu&ograve; essere stabilita di volta in volta dall'intervistatore, nel senso che tutti i quesiti sono facoltativi e vi sono quesiti pi&uacute; generici, che probabilmente ha senso rivolgere in ogni intervista, e quesiti pi&uacute; specifici, che ha senso somministrare soltanto se si sta prendendo in esame processi molto peculiari. I quesiti sono raggruppati in ambiti di analisi e nel caso di alcune strutture potrebbe anche aver senso omettere i quesiti di interi ambiti di analisi.
+
+Le risposte vengono poi utilizzate per ottenere il valore di una serie di indicatori.
+Sono presenti 7 indicatori di probabilità (P) e 4 indicatori di impatto (I).
+Tutti gli indicatori, tranne uno, dipendono dalle risposte ai quesiti, nel senso che il valore ottenuto nell'indicatore viene calcolato tramite un algoritmo che tiene conto delle risposte ottenute.
+Vi &egrave; soltanto un indicatore di impatto che non dipende dai quesiti ma dal numero e dalla tipologia di strutture coinvolte nel processo misurato.
+
+Gli algoritmi di calcolo degli indicatori sono tutti diversi tra loro.
+
+<br><br>
+[![Product Algorithm][product-algorithm]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png)
+<br>
+<strong>*Fig.8 - esempio di algoritmo di calcolo di uno specifico indicatore di probabilit&agrave;*</strong>
+
+Tramite ulteriori algoritmi vengono incrociati tutti i valori ottenuti negli indicatori di probabilit&agrave; (indice globale di P) e tutti i valori ottenuti negli indicatori di impatto (indice globale I).
+
+Infine, tramite una classica tabella della Quantitative Risk Analysis, viene calcolato l'indice P x I, o giudizio sintetico, ottenuto per ogni processo censito ed investigato tramite le interviste.
+
+## Sviluppi futuri
+Allo stato attuale il software &egrave; gi&agrave; pronto per essere adattato,
+con un minimo adeguamento, a qualunque realt&agrave; organizzativa che voglia
+effettuare un'analisi dettagliata dei rischi corruttivi cui i processi erogati
+dall'organizzazione stessa sono attualmente esposti.
+<br><br>
+
+In sostanza, acquisite:
+* le dimensioni dell'organizzazione (in particolare, il numero di livelli dell'organigramma ed il numero assoluto di strutture da mappare)
+* e il numero di livelli e la numerosit&agrave; dei processi prodotti dall'organizzazione stessa, 
+diventa possibile effettuare una stima relativamente accurata del tempo necessario 
+affinch&eacute; sia possibile iniziare la campagna di interviste e, 
+conseguentemente, ottenere i risultati dei vari indicatori di rischio
+e del giudizio sintetico P x I.
+<br><br>
+
+Vi sono, inoltre, alcune possibili evoluzioni, che potrebbero essere implementate in versioni successive:
 * Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentire loro di compilare autonomamente le risposte ai quesiti
 * Predisposizione di monitoraggi e reportistica per tenere il controllo sugli stati di avanzamento e sui risultati raggiunti
 * Predisposizione di appositi strumenti di ricerca per consentire all'ufficio trasparenza di ottenere query analitiche sulle interviste effettuate.
@@ -201,7 +251,7 @@ Distribuito nei termini della licenza GNU GPL-2.0 License. Consulta <a href="htt
 <!-- CONTACT -->
 ## Contatti
 
-Giovanroberto Torre - [@GianroTorres](https://twitter.com/GianroTorres) - gianroberto.torre@gmail.com
+Software Engineer: Giovanroberto Torre - [@GianroTorres](https://twitter.com/GianroTorres) - gianroberto.torre@gmail.com
 
 Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/rischi)
 
@@ -221,7 +271,7 @@ entrare nel merito di tutte le modifiche effettuate in corrispondenza della
 sottoversione: inoltre, ogni versione corrisponde ad un commit, ma non ogni commit
 genera una versione.<br />
 
-<p><small>
+<p style="font-size:small">
 NOTA: Per convenzione, nel software la versione viene mostrata in formato x.xx
 quindi accorpando la cifra della sub-sub versione a quella della subversione,
 mentre in questo changelog ha il classico formato x.x.x (ci&ograve;
@@ -236,7 +286,7 @@ i numeri di versione hanno solo il signficato di tenere traccia dei rilasci
 e dei deploy che sono stati effettuati 
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)
 e fornirvi il relativo significato e la relativa motivazione.
-</small></p>
+</p>
 
 <!--
 ### ToDo (Roadmap)
@@ -244,16 +294,18 @@ e fornirvi il relativo significato e la relativa motivazione.
 - Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
 - Implementata pagina di dettaglio soggetto contingente/interessato
 - Implementata pagina di dettaglio struttura
-- [1.4.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
-- [1.4.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
-- [1.4.7] Implementata estrazione risultati in formato CSV
-- [1.4.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
-- [1.4.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
-- [1.4.4] Implementata form di ricerca sui quesiti per chiave testuale
-- [1.4.3] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4
+- [1.5.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
+- [1.5.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
+- [1.5.7] Implementata estrazione risultati in formato CSV
+- [1.5.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
+- [1.5.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
+- [1.5.4] Implementata form di ricerca sui quesiti per chiave testuale
+- [1.4.5] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
+- [1.4.4] (25/09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista
 
 ### Done
 -->
+- [1.4.3] (18/09/2023) Implementata la logica di calcolo (da perfezionare) degli indicatori P1, P2, P3 nel contesto della singola intervista
 - [1.4.2] (12/09/2023) Corretta gestione charset nella form di modifica della risposta; mostrato id della fase come title nella pagina di dettaglio del processo
 - [1.4.1] (11/09/2023) Aggiunta gestione in intervista del tipo di quesito che prevede come risposta una percentuale; aggiunta di immagini svg come marcatori di alberatura; revisione pagina di landing; spostamento di alcune ricerche predefinite dalla pagina di landing alla pagina della ricerca libera; ampliata larghezza visibile applicazione. 
 - [1.4.0] (04/09/2023) Correzione etichetta, tipografia; aggiunti screenshot.
