@@ -3,6 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
+<c:set var="indics" value="${requestScope.indicatori}" scope="page" />
 <c:set var="structs" value="${requestScope.strutture}" scope="page" />
 <c:set var="macros" value="${requestScope.processi}" scope="page" />
 <c:set var="quests" value="${requestScope.elencoRisposte}" scope="page" />
@@ -29,6 +30,7 @@
   <c:param name="r" value="${ril}" />
 </c:url>
 <c:set var="checked" value="" />
+  <c:catch var="exception">
     <style>
         .loader,
         .loader:after {
@@ -76,8 +78,8 @@
             top:0;
             left:0;
             width:100%;
-            height:100%;
-            background-color:#000;
+            height:150%;
+            background-color: rgba(0, 0, 0, .25);
         }
     </style>
     <h4 class="btn-lightgray">Riepilogo struttura selezionata</h4>
@@ -113,7 +115,8 @@
         </c:forEach>
       </c:if>
     </c:forEach>
-    </div><hr class="separatore" />
+    </div>
+    <hr class="separatore" />
     <h4 class="btn-lightgray">Riepilogo processo selezionato</h4>
     <div class="successPwd">
     <c:forEach var="mac" items="${macros}">
@@ -138,7 +141,48 @@
         </c:forEach>
       </c:if>
     </c:forEach>
-    </div><br />
+    </div>
+    <br>
+    <div id="rischi">
+      <h4 class="btn-lightgray">Indicatori di rischio</h4>
+      <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+          <tr>
+            <th>Indicatore</th>
+            <th>Quesiti considerati</th>
+            <th>Tipologia</th>
+            <th>Livello</th>
+          </tr>
+        </thead>
+        <tbody>
+    <c:set var="keys" value="${indics.keySet()}" />
+      <c:forEach var="key" items="${keys}">
+        <c:set var="ind" value="${indics.get(key)}" />
+          <tr>
+            <td><c:out value="${ind.nome}" />: <c:out value="${ind.descrizione}" /></td>
+            <td>
+          <c:set var="comma" value="," scope="page" />
+          <c:forEach var="quesito" items="${ind.risposte}" varStatus="status">
+            <c:if test="${status.count eq ind.risposte.size()}">
+              <c:set var="comma" value="" scope="page" />
+            </c:if>
+              <a href="#" title="${quesito.formulazione} (&quot;${quesito.answer.nome}&quot;)"><c:out value="${quesito.codice}" /></a><c:out value="${comma}" />
+          </c:forEach>
+            </td>
+            <td><c:out value="${ind.processo.tipo}" /></td>
+            <c:set var="classSuffix" value="${fn:toLowerCase(ind.informativa)}" scope="page" />
+            <c:if test="${fn:indexOf(classSuffix, ' ') gt -1}">
+              <c:set var="classSuffix" value="${fn:substring(classSuffix, zero, fn:indexOf(classSuffix, ' '))}" scope="page" />
+            </c:if>
+            <td class="text-center bgcolor-${classSuffix}" title="${ind.processo.descrizioneStatoCorrente}">
+              <c:out value="${ind.informativa}" />
+            </td>
+          </tr>
+      </c:forEach>
+        </tbody>
+      </table>
+    </div>
+    <hr class="separatore" />
     <h4 class="btn-lightgray float-left">
       Riepilogo risposte questionario registrato in data
       <fmt:formatDate value="${requestScope.dataRisposte}" pattern="dd/MM/yyyy" /> alle ore
@@ -267,3 +311,5 @@
         </div>
       </div>
     </form>
+  </c:catch>
+  <c:out value="${exception}" />
