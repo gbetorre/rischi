@@ -68,8 +68,11 @@ import it.rol.exception.WebStorageException;
 
 
 /** 
- * <p><code>RiskCommand.java</code><br />
- * Implementa la logica per la gestione dei rischi corruttivi (ROL).</p>
+ * <p><code>AuditCommand.java</code><br />
+ * Implementa la logica per la presentazione dei quesiti (interviste) 
+ * e per la gestione dell'inserimento, dell'aggiornamento e della visualizzazione 
+ * delle risposte, nel contesto della raccolta e dell'analisi dei dati
+ * relativi alla mappatura e analisi dei rischi corruttivi in ateneo (ROL).</p>
  * 
  * <p>Created on Tue 12 Apr 2022 09:46:04 AM CEST</p>
  * 
@@ -198,6 +201,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         HashMap<ItemBean, ArrayList<QuestionBean>> flatQuestions = null;
         // Tabella che conterrà i valori dei parametri passati dalle form
         HashMap<String, LinkedHashMap<String, String>> params = null;
+        // Tabella che conterrà i valori degli indicatori calcolati
+        HashMap<String, InterviewBean> indicators = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
@@ -400,20 +405,27 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *                   Confirm Part                   *
                              * ************************************************ */
-                            // TODO IMPLEMENTARE
-                            //answers = retrieveAnswers(user, codeSur, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
-                            answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
-                            //ArrayList<ItemBean> ambits = db.getAmbits(user);
-                            //flatQuestions = decantQuestions(questions, ambits);
+                            // TODO IMPLEMENTARE O ELIMINARE se non necessaria conferma
                         } else if (part.equalsIgnoreCase(PART_RESUME_QST)) {
                             /* ************************************************ *
                              *  SELECT Set of Answers belonging to an Inverview *
                              * ************************************************ */
+                            // Recupera le risposte date ai quesiti dell'intervista
+                            answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
+                            // Recupera i quesiti
+                            questions = retrieveQuestions(user, codeSur, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
+                            // Recupera gli indicatori
+                            ArrayList<CodeBean> indicatorsAsList = db.getIndicators(user, ConfigManager.getSurvey(codeSur));
+                            // Indicizza ogni risposta per il rispettivo id Quesito
+                            HashMap<Integer, QuestionBean> answersByQuestions = decantAnswers(questions, answers);
+                            // Calcola gli identificativi dei quesiti corrispondenti a tutti gli indicatori
+                            HashMap<String, LinkedList<Integer>> questionsByIndicator = retrieveQuestionsByIndicators(user, answers, ConfigManager.getSurvey(codeSur), db);
+                            // Valorizza la tabella degli indicatori indicizzati per nome
+                            indicators = compute(questionsByIndicator, answersByQuestions, decantIndicators(indicatorsAsList));
+
                             // Condiziona il recupero di tutte le risposte o solo quelle valide a eventuale parametro
-                            if (mess.equalsIgnoreCase("getAll")) {
-                                answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
-                            } else {
-                                answers = filter(db.getAnswers(user, params, ConfigManager.getSurvey(codeSur)));
+                            if (!mess.equalsIgnoreCase("getAll")) {
+                                answers = filter(answers);
                             }
                             // Prepara data intervista di cui si vogliono visualizzare le risposte
                             if (params.get(PARAM_SURVEY).get("d") != null && !params.get(PARAM_SURVEY).get("d").equals(VOID_STRING)) {
@@ -423,7 +435,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                             if (params.get(PARAM_SURVEY).get("t") != null && !params.get(PARAM_SURVEY).get("t").equals(VOID_STRING)) {
                                 String questTimeAsString = params.get(PARAM_SURVEY).get("t").replaceAll("_", ":");
                                 questTime = Utils.format(questTimeAsString, TIME_SQL_PATTERN);
-                            }
+                            }                            
                         } else if (part.equalsIgnoreCase(PART_SELECT_QSS)) {
                             /* ************************************************ *
                              *          SELECT List of Interview Part           *
@@ -495,6 +507,10 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         if (answers != null) {
             req.setAttribute("elencoRisposte", answers);
         }
+        // Imposta nella request elenco completo valori degli indicatori
+        if (indicators != null) {
+            req.setAttribute("indicatori", indicators);
+        }
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
@@ -521,62 +537,10 @@ public class AuditCommand extends ItemBean implements Command, Constants {
     }
     
     
-    /**
-     * <p>Estrae l'elenco dei quesiti e, per ogni quesito figlio trovato,
-     * lo valorizza con gli attributi aggiuntivi (tipo, formulazione, etc.)</p>
-     * 
-     * @param user          utente loggato
-     * @param codeSurvey    codice testuale della rilevazione
-     * @param idQ           identificativo del quesito 
-     * @param getAll        flag specificante, se vale -1, che si vogliono recuperare tutte le strutture collegate a tutti i macro/processi
-     * @param db            databound gia' istanziato
-     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - ArrayList di quesiti trovati completi di quesiti figli (quesiti "di cui")
-     * @throws CommandException se si verifica un problema nella query o nell'estrazione, nel recupero di valori o in qualche altro tipo di puntamento
-     */
-    public static ArrayList<QuestionBean> retrieveQuestions(PersonBean user,
-                                                            String codeSurvey,
-                                                            int idQ,
-                                                            int getAll,
-                                                            DBWrapper db)
-                                                     throws CommandException {
-        // Recupera l'oggetto rilevazione a partire dal suo codice
-        CodeBean survey = ConfigManager.getSurvey(codeSurvey);
-        // Dichiara la lista di quesiti finiti
-        ArrayList<QuestionBean> richQuestions = new ArrayList<>();
-        try {
-            // Chiama il metodo (ricorsivo) del databound che estrae i quesiti valorizzati
-            ArrayList<QuestionBean> questions = db.getQuestions(user, survey, idQ, getAll);
-            // Cicla sui quesiti trovati
-            for (QuestionBean current : questions) {
-                // Per ogni quesito verifica se ha figli
-                ArrayList<QuestionBean> childQuestions = current.getChildQuestions();
-                // Se li ha:
-                if (childQuestions != null) {
-                    // Per ogni figlio (i figli hanno solo gli id)
-                    for (int i = NOTHING; i < childQuestions.size(); i++) {
-                        // Recupera il figlio
-                        QuestionBean child = childQuestions.get(i);
-                        // Lo arricchisce con il tipo e gli altri attributi
-                        QuestionBean richChild = db.getQuestions(user, survey, child.getId(), child.getId()).get(NOTHING);
-                        // Sostituisce il tipo "arricchito" al tipo "povero"
-                        childQuestions.set(i, richChild);
-                    }
-                    current.setChildQuestions(childQuestions);
-                }
-                richQuestions.add(current);
-            }
-            return richQuestions;
-        } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + wse.getMessage(), wse);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + e.getMessage(), e);
-        }
-    }
-    
+    /* **************************************************************** *
+     *              Metodi di caricamento dei parametri                 *                     
+     *                              (load)                              *
+     * **************************************************************** */
     
     /**
      * <p>Valorizza per riferimento una mappa contenente tutti i valori 
@@ -672,7 +636,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         String liv2, liv3, liv4;
         String pro2, pro3;
         LinkedHashMap<String, String> survey = new LinkedHashMap<>();
-        HashMap<String, LinkedHashMap<String, String>> formParams = new HashMap<String, LinkedHashMap<String, String>>();
+        HashMap<String, LinkedHashMap<String, String>> formParams = new HashMap<>();
         /* **************************************************** *
          *     Caricamento parametro di Codice Rilevazione      *
          * **************************************************** */      
@@ -717,6 +681,119 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         return formParams;
     }
     
+    
+    /* **************************************************************** *
+     *                  Metodi di recupero dei dati                     *                     
+     *                            (retrieve)                            *
+     * **************************************************************** */
+    
+    /**
+     * <p>Estrae l'elenco dei quesiti e, per ogni quesito figlio trovato,
+     * lo valorizza con gli attributi aggiuntivi (tipo, formulazione, etc.)</p>
+     * 
+     * @param user          utente loggato
+     * @param codeSurvey    codice testuale della rilevazione
+     * @param idQ           identificativo del quesito 
+     * @param getAll        flag specificante, se vale -1, che si vogliono recuperare tutte le strutture collegate a tutti i macro/processi
+     * @param db            databound gia' istanziato
+     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - ArrayList di quesiti trovati completi di quesiti figli (quesiti "di cui")
+     * @throws CommandException se si verifica un problema nella query o nell'estrazione, nel recupero di valori o in qualche altro tipo di puntamento
+     */
+    public static ArrayList<QuestionBean> retrieveQuestions(PersonBean user,
+                                                            String codeSurvey,
+                                                            int idQ,
+                                                            int getAll,
+                                                            DBWrapper db)
+                                                     throws CommandException {
+        // Recupera l'oggetto rilevazione a partire dal suo codice
+        CodeBean survey = ConfigManager.getSurvey(codeSurvey);
+        // Dichiara la lista di quesiti finiti
+        ArrayList<QuestionBean> richQuestions = new ArrayList<>();
+        try {
+            // Chiama il metodo (ricorsivo) del databound che estrae i quesiti valorizzati
+            ArrayList<QuestionBean> questions = db.getQuestions(user, survey, idQ, getAll);
+            // Cicla sui quesiti trovati
+            for (QuestionBean current : questions) {
+                // Per ogni quesito verifica se ha figli
+                ArrayList<QuestionBean> childQuestions = current.getChildQuestions();
+                // Se li ha:
+                if (childQuestions != null) {
+                    // Per ogni figlio (i figli hanno solo gli id)
+                    for (int i = NOTHING; i < childQuestions.size(); i++) {
+                        // Recupera il figlio
+                        QuestionBean child = childQuestions.get(i);
+                        // Lo arricchisce con il tipo e gli altri attributi
+                        QuestionBean richChild = db.getQuestions(user, survey, child.getId(), child.getId()).get(NOTHING);
+                        // Sostituisce il tipo "arricchito" al tipo "povero"
+                        childQuestions.set(i, richChild);
+                    }
+                    current.setChildQuestions(childQuestions);
+                }
+                richQuestions.add(current);
+            }
+            return richQuestions;
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+
+    
+    /**
+     * <p>Estrae gli identificativi dei quesiti 
+     * e li indicizza per codice di indicatore.</p>
+     * 
+     * @param user          utente loggato
+     * @param answers       lista delle risposte
+     * @param survey        oggetto rilevazione
+     * @param db            databound gia' istanziato
+     * @return <code>HashMap&lt;String&comma; LinkedList&lt;Integer&gt;&gt;</code> - Mappa degli identificativi dei quesiti corrispondenti a ciascun indicatore
+     * @throws WebStorageException se si verifica un problema a livello di query o di estrazione
+     * @throws CommandException se si verifica un problema nel recupero di valori o in qualche altro tipo di puntamento
+     */
+    private static HashMap<String, LinkedList<Integer>> retrieveQuestionsByIndicators(PersonBean user, 
+                                                                                      ArrayList<QuestionBean> answers, 
+                                                                                      CodeBean survey, 
+                                                                                      DBWrapper db)
+                                                                               throws WebStorageException, 
+                                                                                      CommandException {
+        // Recupera i quesiti per il calcolo degli indicatori
+        return db.getQuestionsByIndicator(user, survey);
+        /*
+        // Imposta un ID fittizio (l'implementazione dell'ItemBean come chiave si basa sull'ID per i confronti)
+        int assignedId = NOTHING;
+        // Cicla sull'HashMap, sostituendo ogni chiave con un oggetto più complesso di una String
+        for (java.util.Map.Entry<String, LinkedList<Integer>> entry : questByIndicators.entrySet()) {
+            String key = entry.getKey();
+            LinkedList<Integer> value = entry.getValue();
+            ItemBean item = new ItemBean();
+            item.setId(++assignedId);
+            item.setCodice(key);
+            item.setNome(v);
+            //LinkedList<Integer> valueGet = questionsByIndicator.get(key);
+            
+            if (key.equals(P1)) {
+                indicator = computeP1(questionsByIndicator.get(P1), answersByQuestion);
+                indicatorsByName.put(P1, indicator);
+                break;
+            } else if (key.equals(P2)) {
+                indicator = computeP1(questionsByIndicator.get(P2), answersByQuestion);
+                indicatorsByName.put(P2, indicator);
+                break;
+            }
+        }*/
+    }
+    
+    
+    /* **************************************************************** *
+     *                   Metodi di travaso dei dati                     *                     
+     *                             (decant)                             *
+     * **************************************************************** */
     
     /**
      * <p>Travasa una struttura vettoriale in una corrispondente struttura 
@@ -881,6 +958,380 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             throw new CommandException(msg, e);
         }
         return questionsWithAnswers;
+    }
+    
+    
+    /**
+     * <p>Prende in input una struttura vettoriale di quesiti contenenti ciascuno
+     * internamente la relativa risposta e restituisce una mappa di risposte,
+     * ciascuna indicizzata per identificativo quesito.</p>
+     * 
+     * @param questions ArrayList di QuestionBean rappresentanti ciascuno una domanda con risposta 
+     * @param answers   ArrayList di QuestionBean rappresentanti ciascuno una risposta con domanda
+     * @return <code>HashMap&lt;Integer&comma; QuestionBean&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il quesito e per valore l'oggetto risposta
+     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
+     */
+    private static HashMap<Integer, QuestionBean> decantAnswers(ArrayList<QuestionBean> questions, 
+                                                                ArrayList<QuestionBean> answers)
+                                                         throws CommandException {
+        HashMap<Integer, QuestionBean> answersByQuestions = new HashMap<>();
+        try {
+            for (QuestionBean question : questions) {
+                int idQ = question.getId();
+                for (QuestionBean answer : answers) {
+                    if (answer.getAnswer().getLivello() == idQ) {
+                        answersByQuestions.put(new Integer(idQ), answer);
+                        break;
+                    }
+                }
+            }
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento fuori tabella.\n" + aiobe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, aiobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di conversione di tipo.\n" + cce.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n" + npe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel travaso di un Vector in un Dictionary.\n" + e.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, e);
+        }
+        return answersByQuestions;
+    }
+    
+    
+    /**
+     * <p>Prende in input una struttura vettoriale di indicatori,
+     * li indicizza per codice e restituisce una tabella indicizzata.</p>
+     * 
+     * @param indicators ArrayList di CodeBean rappresentanti ciascuno un indicatore 
+     * @return <code>HashMap&lt;String&comma; CodeBean&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice indicatore e per valore l'oggetto indicatore
+     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
+     */
+    private static HashMap<String, CodeBean> decantIndicators(ArrayList<CodeBean> indicators)
+                                                       throws CommandException {
+        HashMap<String, CodeBean> indicatorsByCode = new HashMap<>();
+        try {
+            for (CodeBean value : indicators) {
+                String key = value.getNome();
+                indicatorsByCode.put(key, value);
+            }
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento fuori tabella.\n" + aiobe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, aiobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di conversione di tipo.\n" + cce.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n" + npe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel travaso di un ArrayList in un Dictionary.\n" + e.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, e);
+        }
+        return indicatorsByCode;
+    }
+    
+    
+    /* **************************************************************** *
+     *              Metodi di calcolo degli indicatori                  *                     
+     *                          (compute)                               *
+     * **************************************************************** */
+    
+    /**
+     * Restituisce la lista degli identificativi dei quesiti corrispondenti
+     * a una chiave che accetta come argomento 
+     * 
+     * //TODO COMMENTO 
+     * @param user
+     * @param codInd
+     * @param answers
+     * @param survey
+     * @param db
+     * @return
+     * @throws WebStorageException
+     * @throws CommandException
+     */
+    private LinkedList<Integer> getIdQByIndicator (String codInd, HashMap<String, LinkedList<Integer>> questionsByIndicator)
+                    throws WebStorageException, CommandException {
+        return  questionsByIndicator.get(codInd);
+    }
+    
+    
+    /**
+     * <p>Calcola e restituisce una tabella avente come chiavi i codici degli
+     * indicatori e come valori corrispondenti oggetti valorizzati con ogni
+     * possibile attributo che sia utile per la visualizzazione dell'indicatore 
+     * stesso.<br />
+     * Siccome la logica di calcolo di ogni indicatore &egrave; diversa da quella
+     * di ogni altro indicatore, il presente metodo richiama lo specifico metodo 
+     * di calcolo di ciascun indicatore di probabilit&agrave; e di ciascun 
+     * indicatore di impatto.<br />
+     * Acquisite queste informazioni, effettua in autonomia il calcolo degli 
+     * indici sintetici P ed I e infine, sulla base di questi, calcola il valore 
+     * del giudizio sintetico P x I, che memorizza in un oggetto 
+     * associato alla chiave PI.</p>
+     * // TODO COMMENTO PARAMS
+     * @param questByIndicator
+     * @param answerByQuestion
+     * @param indicatorByCode
+     * @return
+     * @throws CommandException
+     */
+    private HashMap<String, InterviewBean> compute(HashMap<String, LinkedList<Integer>> questByIndicator, 
+                                                   HashMap<Integer, QuestionBean> answerByQuestion,
+                                                   HashMap<String, CodeBean> indicatorByCode) 
+                                            throws CommandException {
+        try {
+
+            // Mappa destinata a contenere gli indicatori indicizzati per nome
+            HashMap<String, InterviewBean> indicatorsByKey = new HashMap<>();
+            // Mappa contenente gli indicatori indicizzati per codice
+            //HashMap<String, CodeBean> indicatorsByCode = this.decantIndicators(indicators);
+            
+            // Ogni indicatore viene calcolato con un diverso algoritmo, implementato in un metodo ad hoc
+            indicatorsByKey.put(P1, computeP1(questByIndicator.get(P1), answerByQuestion, indicatorByCode));
+            indicatorsByKey.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
+            indicatorsByKey.put(P3, computeP3(questByIndicator.get(P3), answerByQuestion, indicatorByCode));
+            // to be continued...
+            return indicatorsByKey;
+        } catch (CommandException ce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + ce.getMessage(), ce);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce il valore dell'indicatore di probabilit&agrave; P1.<br />
+     * Ogni indicatore ha un proprio algoritmo di calcolo, pertanto 
+     * il valore di ogni indicatore viene calcolato in un metodo dedicato.</p> 
+     * 
+     * @param allowedIds        elenco degli identificativi dei quesiti associati all'indicatore considerato
+     * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
+     * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
+     * @return <code>InterviewBean</code> - il livello di rischio calcolato dall'algoritmo in base alle risposte date ai quesiti associati
+     * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
+     */
+    private static InterviewBean computeP1(LinkedList<Integer> allowedIds, 
+                                           HashMap<Integer, QuestionBean> answerByQuestion,
+                                           HashMap<String, CodeBean> indicatorByCode) 
+                                    throws CommandException {
+        try {
+            InterviewBean p1 = new InterviewBean();
+            ArrayList<QuestionBean> quesiti = new ArrayList<>();
+            ProcessBean extraInfo = new ProcessBean();
+            String result = null;
+            // Oggetti id quesiti necessari per il calcolo dell'indicatore
+            Integer id20 = new Integer(20);
+            Integer id21 = new Integer(21);
+            // Prepara la lista di quesiti che permettono di calcolare l'indicatore
+            quesiti.add(answerByQuestion.get(id20));
+            quesiti.add(answerByQuestion.get(id21));
+            // Memorizza il tipo dell'indicatore corrente
+            extraInfo.setTipo(P);
+            // I quesiti dichiarati devono risultare associati all'indicatore P1
+            if (allowedIds.contains(id20) && allowedIds.contains(id21)) {
+                // 1° test
+                if (answerByQuestion.get(id20).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                    try {
+                        int answerId21AsInt = Integer.parseInt(answerByQuestion.get(id21).getAnswer().getNome());
+                        // Se vero 2° test
+                        if (answerId21AsInt < 100) {
+                            result = LIVELLI_RISCHIO[2];
+                        } else {
+                            result = LIVELLI_RISCHIO[3];
+                        }
+                    // Se la risposta non è numerica, non puo' calcolare il valore dell'indicatore
+                    } catch (NumberFormatException nfe) {
+                        String msg = "Risposta al quesito " + answerByQuestion.get(id21).getCodice() + " non valida ";
+                        LOG.severe(FOR_NAME + msg + nfe.getMessage());
+                        result = ERR;
+                        extraInfo.setDescrizioneStatoCorrente(msg + answerByQuestion.get(id21).getAnswer().getNome());
+                    }
+                } else {
+                    result = LIVELLI_RISCHIO[1];
+                }
+            // Se i quesiti associati a P1 non risultano essere quelli considerati c'è un problema da qualche parte
+            } else {
+                result = ERR;
+            }
+            // Valorizza e restituisce l'oggetto per l'indicatore
+            p1.setNome(P1);
+            p1.setInformativa(result);
+            p1.setDescrizione(indicatorByCode.get(P1).getInformativa());
+            p1.setRisposte(quesiti);
+            p1.setProcesso(extraInfo);
+            return p1;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce il valore dell'indicatore di probabilit&agrave; P2.<br />
+     * Ogni indicatore ha un proprio algoritmo di calcolo, pertanto 
+     * il valore di ogni indicatore viene calcolato in un metodo dedicato.</p> 
+     * 
+     * @param allowedIds        elenco degli identificativi dei quesiti associati all'indicatore considerato
+     * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
+     * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
+     * @return <code>InterviewBean</code> - il livello di rischio calcolato dall'algoritmo in base alle risposte date ai quesiti associati
+     * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
+     */
+    private static InterviewBean computeP2(LinkedList<Integer> allowedIds, 
+                                           HashMap<Integer, QuestionBean> answerByQuestion,
+                                           HashMap<String, CodeBean> indicatorByCode) 
+                                    throws CommandException {
+        try {
+            InterviewBean p2 = new InterviewBean();
+            ArrayList<QuestionBean> quesiti = new ArrayList<>();
+            ProcessBean extraInfo = new ProcessBean();
+            String result = null;
+            // Oggetti id quesiti necessari per il calcolo dell'indicatore
+            Integer id1 = new Integer(1);
+            Integer id2 = new Integer(2);
+            // Prepara la lista di quesiti che permettono di calcolare l'indicatore
+            quesiti.add(answerByQuestion.get(id1));
+            quesiti.add(answerByQuestion.get(id2));
+            // Memorizza il tipo dell'indicatore corrente
+            extraInfo.setTipo(P);
+            // I quesiti dichiarati devono risultare associati all'indicatore P2
+            if (allowedIds.contains(id1) && allowedIds.contains(id2)) {
+                // 1° test
+                if (answerByQuestion.get(id1).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                    // Se vero 2° test
+                    if (answerByQuestion.get(id2).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                        result = LIVELLI_RISCHIO[1];
+                    } else {
+                        result = LIVELLI_RISCHIO[2];
+                    }
+                } else {
+                    // Se falso 3° test
+                    if (answerByQuestion.get(id2).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                        result = LIVELLI_RISCHIO[2];
+                    } else {
+                        result = LIVELLI_RISCHIO[3];
+                    }
+                }
+            } else {
+                result = ERR;
+            }
+            p2.setNome(P2);
+            p2.setInformativa(result);
+            p2.setDescrizione(indicatorByCode.get(P2).getInformativa());
+            p2.setRisposte(quesiti);
+            p2.setProcesso(extraInfo);
+            return p2;
+        } catch (RuntimeException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce il valore dell'indicatore di probabilit&agrave; P3.<br />
+     * Ogni indicatore ha un proprio algoritmo di calcolo, pertanto 
+     * il valore di ogni indicatore viene calcolato in un metodo dedicato.</p> 
+     * 
+     * @param allowedIds        elenco degli identificativi dei quesiti associati all'indicatore considerato
+     * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
+     * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
+     * @return <code>String</code> - il livello di rischio calcolato dall'algoritmo in base alle risposte riscontrate degli indicatori associati
+     * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
+     */
+    private static InterviewBean computeP3(LinkedList<Integer> allowedIds, 
+                                           HashMap<Integer, QuestionBean> answerByQuestion,
+                                           HashMap<String, CodeBean> indicatorByCode) 
+                                    throws CommandException {
+        try {
+            InterviewBean p3 = new InterviewBean();
+            ArrayList<QuestionBean> quesiti = new ArrayList<>();
+            ProcessBean extraInfo = new ProcessBean();
+            String result = null;
+            // Oggetti id quesiti necessari per il calcolo dell'indicatore
+            Integer id3 = new Integer(3);
+            Integer id4 = new Integer(4);
+            Integer id5 = new Integer(5);
+            Integer id11 = new Integer(11);
+            Integer id12 = new Integer(12);
+            // Prepara la lista di quesiti che permettono di calcolare l'indicatore
+            quesiti.add(answerByQuestion.get(id3));
+            quesiti.add(answerByQuestion.get(id4));
+            quesiti.add(answerByQuestion.get(id5));
+            quesiti.add(answerByQuestion.get(id11));
+            quesiti.add(answerByQuestion.get(id12));
+            // Memorizza il tipo dell'indicatore corrente
+            extraInfo.setTipo(P);
+            // Controlla che i quesiti dichiarati risultino associati all'indicatore
+            if (allowedIds.contains(id3) && 
+                allowedIds.contains(id4) &&
+                allowedIds.contains(id5) &&
+                allowedIds.contains(id11) &&
+                allowedIds.contains(id12)) {
+                // 1° test
+                if (answerByQuestion.get(id5).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                    // Se vero ha finito
+                    result = LIVELLI_RISCHIO[3];
+                } else {
+                    // 2° test
+                    if (answerByQuestion.get(id3).getAnswer().getNome().equalsIgnoreCase("NO") &&
+                        answerByQuestion.get(id4).getAnswer().getNome().equalsIgnoreCase("NO") &&
+                        answerByQuestion.get(id11).getAnswer().getNome().equalsIgnoreCase("NO") && 
+                        answerByQuestion.get(id12).getAnswer().getNome().equalsIgnoreCase("NO")) {
+                        result = LIVELLI_RISCHIO[1];
+                    } else {
+                        result = LIVELLI_RISCHIO[2];
+                    }
+                }
+            // Se i quesiti associati a P1 non risultano essere quelli considerati c'è un problema da qualche parte
+            } else {
+                result = ERR;
+            }
+            // Valorizza e restituisce l'oggetto per l'indicatore
+            p3.setNome(P3);
+            p3.setInformativa(result);
+            p3.setDescrizione(indicatorByCode.get(P3).getInformativa());
+            p3.setRisposte(quesiti);
+            p3.setProcesso(extraInfo);
+            return p3;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
     }
     
 }
