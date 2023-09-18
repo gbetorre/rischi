@@ -67,21 +67,25 @@ L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare i res
 <br>
 <strong>*Fig.2 - il software &egrave; un'applicazione ad accesso riservato (per accedere &egrave; necessario disporre di credenziali)*</strong>
 <br><br>
+
 [![Product Landing Page][product-landing]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing1.40.png)
 <br>
 <strong>*Fig.3 - pagina di landing, versione 1.40*</strong>
 
 <p>
-Attraverso la risposta ad una serie di quesiti posti a responsabili e operatori presso specifiche strutture amministrative (intervista), l'applicazione permette di ottenere una serie di indici relativi a specifici rischi corruttivi cui possono essere esposti i processi organizzativi presidiati dalle strutture stesse. 
+Attraverso la risposta ad una serie di quesiti posti a responsabili e operatori presso specifiche strutture amministrative (intervista), l'applicazione permette di ottenere una serie di indici relativi a specifici rischi corruttivi cui possono essere esposti i processi organizzativi presidiati dalle strutture stesse.<br>
+
 Ogni quesito, infatti, &egrave; collegato ad uno o pi&uacute; specifici rischi corruttivi; perci&ograve;, in funzione della risposta data dal personale intervistato, l'applicazione esprime specifici indici e punti di attenzione e, in sintesi, calcola il livello di rischio cui il processo esaminato risulta esposto. 
 <br><br>
+
 [![Product Interview][product-interview]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/interview-sample.png)
 <br>
 <strong>*Fig.4 - esempio di quesiti che concorrono a fornire il quadro della vulnerabilit&agrave; di un processo organizzativo*</strong>
 
-Incrociando i valori ottenuti negli indicatori di probabilità (P) con quelli ottenuti negli indicatori di impatto (I) si ottiene, per ogni processo organizzativo censito, un indice sintetico <code>P x I</code>, che esprime il livello finale di rischio cui &egrave; esposto il processo stesso.
+In particolare, per ogni porocesso sondato attraverso l'intervista, si ottengono i valori di 7 indicatori di probabilit&agrave; (P) e di 4 indicatori di impatto (I).<br>
+Incrociando i valori ottenuti negli indicatori di probabilit&agrave; (P) con quelli ottenuti negli indicatori di impatto (I) si ottiene, per ogni processo organizzativo censito, un indice sintetico <code>P x I</code>, che esprime il livello finale di rischio cui &egrave; esposto il processo stesso.
 
-Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le misure da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
+Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le azioni organizzative da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
 
 ## Come funziona il software
 Ovviamente l'applicazione Rischi On Line (ROL) si appoggia su un database, specificamente un database relazionale di tipo postgreSQL (versione 12 e successive).
@@ -96,7 +100,7 @@ Le strutture sono organizzate in un albero con vari livelli mentre i processi so
 <br>
 <strong>*Fig.5 - funzione di navigazione dell'organigramma*</strong>
 <br><br>
-[![Product Sample Macro][product-process](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png)
+[![Product Sample Macro][product-process]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png)
 <br>
 <strong>*Fig.6 - funzione di navigazione dell'albero dei macroprocessi*</strong>
 
@@ -110,21 +114,19 @@ Inoltre, per ogni processo viene fornita una pagina di dettaglio, contenente, ol
 <br>
 <strong>*Fig.7 - esempio di pagina di dettaglio di un processo censito a fini anticorruttivi*</strong>
 
-Dopo aver popolato il database con le strutture, i macroprocessi e i loro sottolivelli, si pu&ograve; passare alla fase dell'intervista, che consiste nel rivolgere una serie di quesiti ad una specifica struttura che presiede uno specifico processo. La batteria di quesiti &egrave; ampia (pi&uacute; di 150) ma la decisione circa la quali quesiti somministrare pu&ograve; essere stabilita di volta in volta dall'intervistatore, nel senso che tutti i quesiti sono facoltativi e vi sono quesiti pi&uacute; generici, che probabilmente ha senso rivolgere in ogni intervista, e quesiti pi&uacute; specifici, che ha senso somministrare soltanto se si sta prendendo in esame processi molto peculiari. I quesiti sono raggruppati in ambiti di analisi e nel caso di alcune strutture potrebbe anche aver senso omettere i quesiti di interi ambiti di analisi.
+Dopo aver popolato il database con le strutture, i macroprocessi e i loro sottolivelli, si pu&ograve; passare alla fase dell'intervista, che consiste nel rivolgere una serie di quesiti ad una serie di specifiche strutture che presiedono uno specifico processo. La batteria di quesiti &egrave; ampia (pi&uacute; di 150) ma la decisione circa la quali quesiti somministrare pu&ograve; essere stabilita di volta in volta dall'intervistatore, nel senso che tutti i quesiti sono facoltativi e vi sono quesiti pi&uacute; generici, che probabilmente ha senso rivolgere in ogni intervista, e quesiti pi&uacute; specifici, che ha senso somministrare soltanto se si sta prendendo in esame processi molto peculiari. I quesiti sono raggruppati in ambiti di analisi e nel caso di alcune strutture potrebbe anche aver senso omettere i quesiti di interi ambiti di analisi.
 
-Le risposte vengono poi utilizzate per ottenere il valore di una serie di indicatori.
-Sono presenti 7 indicatori di probabilità (P) e 4 indicatori di impatto (I).
+Le risposte vengono poi utilizzate per ottenere il valore di una serie di indicatori, come accennato sopra.<br>
 Tutti gli indicatori, tranne uno, dipendono dalle risposte ai quesiti, nel senso che il valore ottenuto nell'indicatore viene calcolato tramite un algoritmo che tiene conto delle risposte ottenute.
 Vi &egrave; soltanto un indicatore di impatto che non dipende dai quesiti ma dal numero e dalla tipologia di strutture coinvolte nel processo misurato.
 
 Gli algoritmi di calcolo degli indicatori sono tutti diversi tra loro.
-
 <br><br>
 [![Product Algorithm][product-algorithm]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png)
 <br>
-<strong>*Fig.8 - esempio di algoritmo di calcolo di uno specifico indicatore di probabilit&agrave;*</strong>
+<strong>*Fig.8 - esempio (semplificato) di algoritmo di calcolo di uno specifico indicatore di probabilit&agrave;*</strong>
 
-Tramite ulteriori algoritmi vengono incrociati tutti i valori ottenuti negli indicatori di probabilit&agrave; (indice globale di P) e tutti i valori ottenuti negli indicatori di impatto (indice globale I).
+Come accennato nel paragrafo precedente, tramite ulteriori algoritmi vengono incrociati tutti i valori ottenuti negli indicatori di probabilit&agrave; (indice globale di P) e tutti i valori ottenuti negli indicatori di impatto (indice globale I).
 
 Infine, tramite una classica tabella della Quantitative Risk Analysis, viene calcolato l'indice P x I, o giudizio sintetico, ottenuto per ogni processo censito ed investigato tramite le interviste.
 
@@ -132,23 +134,26 @@ Infine, tramite una classica tabella della Quantitative Risk Analysis, viene cal
 Allo stato attuale il software &egrave; gi&agrave; pronto per essere adattato,
 con un minimo adeguamento, a qualunque realt&agrave; organizzativa che voglia
 effettuare un'analisi dettagliata dei rischi corruttivi cui i processi erogati
-dall'organizzazione stessa sono attualmente esposti.
+dall'organizzazione stessa sono esposti.
+<br>
+
+&Egrave; anche possibile stimare, con relativa precisione, quanto tempo &egrave; necessario per customizzare il software in funzione di una specifica realt&agrave; organizzativa.
+Infatti, acquisite:
+* le dimensioni dell'organizzazione (in particolare, il numero di livelli dell'organigramma ed il numero assoluto di strutture da mappare)
+* il numero di livelli e la numerosit&agrave; dei processi prodotti dall'organizzazione stessa,
+  
+diventa possibile effettuare una stima relativamente accurata del tempo necessario 
+affinch&eacute; sia possibile iniziare la campagna di interviste e, conseguentemente, ottenere i risultati dei vari indicatori di rischio e del giudizio sintetico P x I.
 <br><br>
 
-In sostanza, acquisite:
-* le dimensioni dell'organizzazione (in particolare, il numero di livelli dell'organigramma ed il numero assoluto di strutture da mappare)
-* e il numero di livelli e la numerosit&agrave; dei processi prodotti dall'organizzazione stessa, 
-diventa possibile effettuare una stima relativamente accurata del tempo necessario 
-affinch&eacute; sia possibile iniziare la campagna di interviste e, 
-conseguentemente, ottenere i risultati dei vari indicatori di rischio
-e del giudizio sintetico P x I.
-<br><br>
+---
 
 Vi sono, inoltre, alcune possibili evoluzioni, che potrebbero essere implementate in versioni successive:
-* Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentire loro di compilare autonomamente le risposte ai quesiti
-* Predisposizione di monitoraggi e reportistica per tenere il controllo sugli stati di avanzamento e sui risultati raggiunti
+* Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentire loro di compilare autonomamente le risposte ai quesiti (certificando, automaticamente, i dati inseriti)
+* Predisposizione di monitoraggi e reportistica per consentire alla <em>governance</em> di effettuare controlli sugli stati di avanzamento e sui risultati raggiunti tramite il progetto di mappatura dei rischi
 * Predisposizione di appositi strumenti di ricerca per consentire all'ufficio trasparenza di ottenere query analitiche sulle interviste effettuate.
 
+<br>
 Naturalmente, nessuno strumento informatico &egrave; in grado da solo di ottenere risultati come l'abbassamento dei rischi corruttivi; pertanto ogni approfondimento analitico permesso dal software dovr&agrave; essere esaminato ed interpretato dagli esperti dell'anticorruzione.
 
 Ognuno pu&ograve; sentirsi libero di proporre miglioramenti ed evoluzioni.
