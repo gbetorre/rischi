@@ -422,7 +422,6 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                             HashMap<String, LinkedList<Integer>> questionsByIndicator = retrieveQuestionsByIndicators(user, answers, ConfigManager.getSurvey(codeSur), db);
                             // Valorizza la tabella degli indicatori indicizzati per nome
                             indicators = compute(questionsByIndicator, answersByQuestions, decantIndicators(indicatorsAsList));
-
                             // Condiziona il recupero di tutte le risposte o solo quelle valide a eventuale parametro
                             if (!mess.equalsIgnoreCase("getAll")) {
                                 answers = filter(answers);
@@ -1049,22 +1048,87 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * **************************************************************** */
     
     /**
-     * Restituisce la lista degli identificativi dei quesiti corrispondenti
-     * a una chiave che accetta come argomento 
+     * <p>Implementa il controllo lato server sulle risposte che sono necessarie
+     * per il calcolo degli indicatori.</p> 
      * 
-     * //TODO COMMENTO 
-     * @param user
-     * @param codInd
-     * @param answers
-     * @param survey
-     * @param db
-     * @return
-     * @throws WebStorageException
-     * @throws CommandException
+     * @param algorythmIds      id quesiti che l'algoritmo di calcolo chiamante stabilisce necessari per effettuare il calcolo del suo valore
+     * @param allowedIds        id dei quesiti che da db risultano associati all'indicatore chiamante
+     * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
+     * @param reason            motivo dell'errore
+     * @return <code>boolean</code> - true se tutti i controlli sono andati a buon fine, false in caso almeno uno dei controlli sia vero
+     * @throws CommandException se si verifica un problema nel recupero di un attributo di un bean o in qualche tipo di puntamento
      */
-    private LinkedList<Integer> getIdQByIndicator (String codInd, HashMap<String, LinkedList<Integer>> questionsByIndicator)
-                    throws WebStorageException, CommandException {
-        return  questionsByIndicator.get(codInd);
+    private static boolean validateAnswers(LinkedList<Integer> algorythmIds,
+                                           LinkedList<Integer> allowedIds,
+                                           HashMap<Integer, QuestionBean> answerByQuestion,
+                                           StringBuffer reason)
+                                    throws CommandException {
+        try {
+            // I controllo: gli id quesiti che servono all'algoritmo devono corrispondere agli id quesiti associati all'indicatore
+            for (Integer idQ : algorythmIds) {
+                if (!allowedIds.contains(idQ)) {
+                    reason.append("Il quesito ID" + idQ + " non risulta tra quelli associati all\'indicatore ");
+                    return false;
+                }
+            }
+            // Controlli sull'esistenza e coerenza della risposta
+            for (Integer idQ : algorythmIds) {
+                // Per ogni quesito recupera il tipo di quesito
+                QuestionBean question = answerByQuestion.get(idQ);
+                // II controllo: nessuna risposta puo' valere (null)
+                if (question.getNome() == null) {
+                    reason.append("Risposta al quesito " + question.getCodice() + " nulla ");
+                    return false;
+                }
+                // III controllo: la risposta deve essere congruente con il tipo di quesito
+                if (question.getTipo().getId() == ELEMENT_LEV_1) {        // Se il quesito è di tipo Si/No
+                    // ...si applica il principio del terzo escluso
+                    if (!(question.getAnswer().getNome().equalsIgnoreCase("SI") || question.getAnswer().getNome().equalsIgnoreCase("NO"))) {
+                        // cioè la risposta dev'essere o "SI" o "NO", non c'è una terza possibilità, che pertanto resta esclusa
+                        reason.append("Risposta al quesito " + question.getCodice() + " non valida ");
+                        return false;
+                    }
+                } else if (question.getTipo().getId() == ELEMENT_LEV_2) { // Se il quesito è di tipo numerico
+                    // ...la risposta deve essere convertibile in un numero
+                    try {
+                        Integer.parseInt(question.getAnswer().getNome());
+                        // Se la risposta non è numerica, e il tipo di quesito è numerico, non puo' calcolare il valore dell'indicatore
+                    } catch (NumberFormatException nfe) {
+                        reason.append("Risposta al quesito " + question.getCodice() + " non numerica ");
+                        return false;
+                    }
+                } else if (question.getTipo().getId() == ELEMENT_LEV_3) { // Se il quesito è di tipo percentuale, non solo deve essere convertibile ma amche compreso tra 0.00 e 100.00
+                    // ...la risposta deve essere convertibile in un numero
+                    try {
+                        float value = Float.parseFloat(question.getAnswer().getNome());
+                        // Non solo numerico, ma compreso tra 0 e 100
+                        if ((value < NOTHING) || (value > 100) ) {
+                            reason.append("Risposta al quesito " + question.getCodice() + " non compresa tra 0.00 e 100.00 ");
+                            return false;
+                        }
+                    } catch (NumberFormatException nfe) {
+                        reason.append("Risposta al quesito " + question.getCodice() + " non percentuale ");
+                        return false;
+                    }
+                } else if (question.getTipo().getId() == ELEMENT_LEV_4) { // Se il quesito è di tipo descrittivo
+                    // ...non puo' essere stringa vuota
+                    if (question.getAnswer().getNome().equals(VOID_STRING)) {
+                        reason.append("Risposta al quesito " + question.getCodice() + " non valorizzata ");
+                        return false;
+                    }
+                }
+            }
+            // Se nessuno dei controlli precedenti è vero, allora, per esclusione, la risposta è valida
+            return true;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
     }
     
     
@@ -1081,17 +1145,17 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * indici sintetici P ed I e infine, sulla base di questi, calcola il valore 
      * del giudizio sintetico P x I, che memorizza in un oggetto 
      * associato alla chiave PI.</p>
-     * // TODO COMMENTO PARAMS
-     * @param questByIndicator
-     * @param answerByQuestion
-     * @param indicatorByCode
-     * @return
-     * @throws CommandException
+     * 
+     * @param questByIndicator  tabella degli identificativi dei quesiti che, da db, risultano associati a ogni specifico codice indicatore, usato come chiave
+     * @param answerByQuestion  tabella in cui ogni id quesito permette di ottenere la relativa risposta
+     * @param indicatorByCode   tabella in cui ogni oggetto contenente i dati di un indicatore e' ricavabile utilizzando come chiave il codice dell'indicatore stesso
+     * @return HashMap&lt;String&comma; InterviewBean&gt; - tabella contenente tutti i valori degli indicatori e anche quelli degli indici generali, indicizzati per nome
+     * @throws CommandException se si verifica un problema nel calcolo di un indicatore, nel recupero di dati o in qualche tipo di puntamento
      */
-    private HashMap<String, InterviewBean> compute(HashMap<String, LinkedList<Integer>> questByIndicator, 
-                                                   HashMap<Integer, QuestionBean> answerByQuestion,
-                                                   HashMap<String, CodeBean> indicatorByCode) 
-                                            throws CommandException {
+    private static HashMap<String, InterviewBean> compute(HashMap<String, LinkedList<Integer>> questByIndicator, 
+                                                          HashMap<Integer, QuestionBean> answerByQuestion,
+                                                          HashMap<String, CodeBean> indicatorByCode) 
+                                                   throws CommandException {
         try {
 
             // Mappa destinata a contenere gli indicatori indicizzati per nome
@@ -1103,10 +1167,12 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             indicatorsByKey.put(P1, computeP1(questByIndicator.get(P1), answerByQuestion, indicatorByCode));
             indicatorsByKey.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
             indicatorsByKey.put(P3, computeP3(questByIndicator.get(P3), answerByQuestion, indicatorByCode));
+            indicatorsByKey.put(P4, computeP4(questByIndicator.get(P4), answerByQuestion, indicatorByCode));
+            indicatorsByKey.put(P5, computeP5(questByIndicator.get(P5), answerByQuestion, indicatorByCode));
             // to be continued...
             return indicatorsByKey;
         } catch (CommandException ce) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori o attributi.\n";
             LOG.severe(msg);
             throw new CommandException(msg + ce.getMessage(), ce);
         } catch (Exception e) {
@@ -1125,7 +1191,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @param allowedIds        elenco degli identificativi dei quesiti associati all'indicatore considerato
      * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
      * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
-     * @return <code>InterviewBean</code> - il livello di rischio calcolato dall'algoritmo in base alle risposte date ai quesiti associati
+     * @return <code>InterviewBean</code> - oggetto contenente il livello di rischio dell'indicatore, calcolato dall'algoritmo in base alle risposte date ai quesiti associati, e informazioni attinenti
      * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
      */
     private static InterviewBean computeP1(LinkedList<Integer> allowedIds, 
@@ -1198,7 +1264,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @param allowedIds        elenco degli identificativi dei quesiti associati all'indicatore considerato
      * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
      * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
-     * @return <code>InterviewBean</code> - il livello di rischio calcolato dall'algoritmo in base alle risposte date ai quesiti associati
+     * @return <code>InterviewBean</code> - oggetto contenente il livello di rischio per l'indicatore, calcolato dall'algoritmo in base alle risposte date ai quesiti associati, e informazioni attinenti
      * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
      */
     private static InterviewBean computeP2(LinkedList<Integer> allowedIds, 
@@ -1210,16 +1276,23 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             ArrayList<QuestionBean> quesiti = new ArrayList<>();
             ProcessBean extraInfo = new ProcessBean();
             String result = null;
+            StringBuffer reason = new StringBuffer(VOID_STRING);
             // Oggetti id quesiti necessari per il calcolo dell'indicatore
             Integer id1 = new Integer(1);
             Integer id2 = new Integer(2);
+            LinkedList<Integer> algorythmIds = new LinkedList<>();
+            algorythmIds.add(id1);
+            algorythmIds.add(id2);
             // Prepara la lista di quesiti che permettono di calcolare l'indicatore
             quesiti.add(answerByQuestion.get(id1));
             quesiti.add(answerByQuestion.get(id2));
             // Memorizza il tipo dell'indicatore corrente
             extraInfo.setTipo(P);
-            // I quesiti dichiarati devono risultare associati all'indicatore P2
-            if (allowedIds.contains(id1) && allowedIds.contains(id2)) {
+            // Controlli lato server sulla validità delle risposte
+            if (!validateAnswers(algorythmIds, allowedIds, answerByQuestion, reason)) {
+                extraInfo.setDescrizioneStatoCorrente(String.valueOf(reason));
+                result = ERR;
+            } else {
                 // 1° test
                 if (answerByQuestion.get(id1).getAnswer().getNome().equalsIgnoreCase("SI")) {
                     // Se vero 2° test
@@ -1236,8 +1309,6 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                         result = LIVELLI_RISCHIO[3];
                     }
                 }
-            } else {
-                result = ERR;
             }
             p2.setNome(P2);
             p2.setInformativa(result);
@@ -1265,7 +1336,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @param allowedIds        elenco degli identificativi dei quesiti associati all'indicatore considerato
      * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
      * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
-     * @return <code>String</code> - il livello di rischio calcolato dall'algoritmo in base alle risposte riscontrate degli indicatori associati
+     * @return <code>InterviewBean</code> - oggetto contenente il livello di rischio nell'indicatore e informazioni attinenti
      * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
      */
     private static InterviewBean computeP3(LinkedList<Integer> allowedIds, 
@@ -1277,12 +1348,19 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             ArrayList<QuestionBean> quesiti = new ArrayList<>();
             ProcessBean extraInfo = new ProcessBean();
             String result = null;
+            StringBuffer reason = new StringBuffer(VOID_STRING);
             // Oggetti id quesiti necessari per il calcolo dell'indicatore
             Integer id3 = new Integer(3);
             Integer id4 = new Integer(4);
             Integer id5 = new Integer(5);
             Integer id11 = new Integer(11);
             Integer id12 = new Integer(12);
+            LinkedList<Integer> algorythmIds = new LinkedList<>();
+            algorythmIds.add(id3);
+            algorythmIds.add(id4);
+            algorythmIds.add(id5);
+            algorythmIds.add(id11);
+            algorythmIds.add(id12);
             // Prepara la lista di quesiti che permettono di calcolare l'indicatore
             quesiti.add(answerByQuestion.get(id3));
             quesiti.add(answerByQuestion.get(id4));
@@ -1291,30 +1369,36 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             quesiti.add(answerByQuestion.get(id12));
             // Memorizza il tipo dell'indicatore corrente
             extraInfo.setTipo(P);
-            // Controlla che i quesiti dichiarati risultino associati all'indicatore
-            if (allowedIds.contains(id3) && 
-                allowedIds.contains(id4) &&
-                allowedIds.contains(id5) &&
-                allowedIds.contains(id11) &&
-                allowedIds.contains(id12)) {
-                // 1° test
-                if (answerByQuestion.get(id5).getAnswer().getNome().equalsIgnoreCase("SI")) {
-                    // Se vero ha finito
-                    result = LIVELLI_RISCHIO[3];
-                } else {
-                    // 2° test
-                    if (answerByQuestion.get(id3).getAnswer().getNome().equalsIgnoreCase("NO") &&
-                        answerByQuestion.get(id4).getAnswer().getNome().equalsIgnoreCase("NO") &&
-                        answerByQuestion.get(id11).getAnswer().getNome().equalsIgnoreCase("NO") && 
-                        answerByQuestion.get(id12).getAnswer().getNome().equalsIgnoreCase("NO")) {
-                        result = LIVELLI_RISCHIO[1];
-                    } else {
-                        result = LIVELLI_RISCHIO[2];
-                    }
-                }
-            // Se i quesiti associati a P1 non risultano essere quelli considerati c'è un problema da qualche parte
-            } else {
+            // Controlli lato server sulla validità delle risposte
+            if (!validateAnswers(algorythmIds, allowedIds, answerByQuestion, reason)) {
+                extraInfo.setDescrizioneStatoCorrente(String.valueOf(reason));
                 result = ERR;
+            } else {
+                // Controlla che i quesiti dichiarati risultino associati all'indicatore
+                if (allowedIds.contains(id3) && 
+                    allowedIds.contains(id4) &&
+                    allowedIds.contains(id5) &&
+                    allowedIds.contains(id11) &&
+                    allowedIds.contains(id12)) {
+                    // 1° test
+                    if (answerByQuestion.get(id5).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                        // Se vero ha finito
+                        result = LIVELLI_RISCHIO[3];
+                    } else {
+                        // 2° test
+                        if (answerByQuestion.get(id3).getAnswer().getNome().equalsIgnoreCase("NO") &&
+                            answerByQuestion.get(id4).getAnswer().getNome().equalsIgnoreCase("NO") &&
+                            answerByQuestion.get(id11).getAnswer().getNome().equalsIgnoreCase("NO") && 
+                            answerByQuestion.get(id12).getAnswer().getNome().equalsIgnoreCase("NO")) {
+                            result = LIVELLI_RISCHIO[1];
+                        } else {
+                            result = LIVELLI_RISCHIO[2];
+                        }
+                    }
+                // Se i quesiti associati a P1 non risultano essere quelli considerati c'è un problema da qualche parte
+                } else {
+                    result = ERR;
+                }
             }
             // Valorizza e restituisce l'oggetto per l'indicatore
             p3.setNome(P3);
@@ -1323,6 +1407,249 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             p3.setRisposte(quesiti);
             p3.setProcesso(extraInfo);
             return p3;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce il valore dell'indicatore di probabilit&agrave; P4.<br />
+     * Ogni indicatore ha un proprio algoritmo di calcolo, pertanto 
+     * il valore di ogni indicatore viene calcolato in un metodo dedicato.<br />
+     * I casi mappati per l’indicatore P4 devono essere generati dall'algoritmo
+     * implementato dal presente metodo e derivano dalla seguente tabella:
+     * <pre>
+     *                       P4
+     * (grado di discrezionalità del decisore interno alla PA)
+     * RIGA     ID1      ID2     ID13    ID14    RISCHIO
+     * -----------------------------------------
+     * 1a       SI       SI|NO   SI|NO   >=2     BASSO
+     * 2a       NO       SI      SI|NO   >=2     BASSO
+     * 3a       SI|NO    SI      NO      >=2     BASSO
+     * 4a       SI       SI|NO   NO      <2      MEDIO
+     * 5a       SI|NO    SI      NO      <2      MEDIO
+     * 6a       SI       SI|NO   SI      <2      MEDIO
+     * 7a       NO       NO      NO      *       ALTO
+     * </pre>
+     * Espandendo i possibili valori si ottengono le disposizioni di valori 
+     * (un sottoinsieme di D'(n,k) = n<sup>k</sup>) riportate nella tabella seguente:
+     * <pre>
+     * ID1 ID2 ID13 ID14    RESULT
+     * ------------------------------
+     * (disposizioni 1a riga)
+     * SI  SI  SI   >=2     BASSO
+     * SI  SI  NO   >=2     BASSO
+     * SI  NO  SI   >=2     BASSO
+     * SI  NO  NO   >=2     BASSO
+     * (disposizioni 2a riga)
+     * NO  SI  SI   >=2     BASSO
+     * NO  SI  NO   >=2     BASSO
+     * (disposizioni 3a riga)
+     * SI  SI  NO   >=2     BASSO
+     * NO  SI  NO   >=2     rientra nelle disposizioni 2a riga (BASSO)
+     * (disposizioni indecidibili)
+     * NO  NO  SI   >=2     NON DETERMINABILE
+     * ------------------------------
+     * (disposizioni 4a riga)
+     * SI  SI  NO   <2      MEDIO
+     * SI  NO  NO   <2      MEDIO
+     * (disposizioni 5a riga)
+     * SI  SI  NO   <2      rientra nelle disposizioni 4a riga (MEDIO)
+     * NO  SI  NO   <2      MEDIO
+     * (disposizioni 6a riga)
+     * SI  SI  SI   <2      MEDIO
+     * SI  NO  SI   <2      MEDIO
+     * ------------------------------
+     * (disposizioni 7a riga)
+     * NO  NO  NO   *       ALTO
+     * </pre>
+     * L'implementazione del metodo deve essere in grado di generare
+     * un risultato consistente per ognuna di queste disposizioni, nonch&eacute;
+     * per eventuali altre non determinate (e che rientrano nelle disposizioni
+     * indecidibili).</p> 
+     * 
+     * @param allowedIds        elenco degli identificativi dei quesiti associati all'indicatore considerato
+     * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
+     * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
+     * @return <code>InterviewBean</code> - oggetto contenente il livello di rischio nell'indicatore, calcolato dall'algoritmo in base alle risposte date ai quesiti associati, e informazioni attinenti 
+     * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
+     */
+    private static InterviewBean computeP4(LinkedList<Integer> allowedIds, 
+                                           HashMap<Integer, QuestionBean> answerByQuestion,
+                                           HashMap<String, CodeBean> indicatorByCode) 
+                                    throws CommandException {
+        try {
+            InterviewBean p4 = new InterviewBean();
+            ArrayList<QuestionBean> quesiti = new ArrayList<>();
+            ProcessBean extraInfo = new ProcessBean();
+            String result = null;
+            StringBuffer reason = new StringBuffer(VOID_STRING);
+            // Oggetti id quesiti necessari per il calcolo dell'indicatore
+            Integer id1 = new Integer(1);
+            Integer id2 = new Integer(2);
+            Integer id13 = new Integer(13);
+            Integer id14 = new Integer(14);
+            LinkedList<Integer> algorythmIds = new LinkedList<>();
+            algorythmIds.add(id1);
+            algorythmIds.add(id2);
+            algorythmIds.add(id13);
+            algorythmIds.add(id14);
+            // Prepara la lista di quesiti che permettono di calcolare l'indicatore
+            quesiti.add(answerByQuestion.get(id1));
+            quesiti.add(answerByQuestion.get(id2));
+            quesiti.add(answerByQuestion.get(id13));
+            quesiti.add(answerByQuestion.get(id14));
+            // Memorizza il tipo dell'indicatore corrente
+            extraInfo.setTipo(P);
+            // Controlli lato server sulla validità delle risposte
+            if (!validateAnswers(algorythmIds, allowedIds, answerByQuestion, reason)) {
+                extraInfo.setDescrizioneStatoCorrente(String.valueOf(reason));
+                result = ERR;
+            } else {
+                // Disposizioni di valori generanti rischio ALTO
+                if (answerByQuestion.get(id1).getAnswer().getNome().equalsIgnoreCase("NO") &&
+                    answerByQuestion.get(id2).getAnswer().getNome().equalsIgnoreCase("NO") &&
+                    answerByQuestion.get(id13).getAnswer().getNome().equalsIgnoreCase("NO")) {
+                        result = LIVELLI_RISCHIO[3];
+                }
+                // Disposizioni di valori generanti rischio MEDIO
+                else if (Integer.parseInt(answerByQuestion.get(id14).getAnswer().getNome()) < 2 &&
+                        (answerByQuestion.get(id1).getAnswer().getNome().equalsIgnoreCase("SI") ||
+                         answerByQuestion.get(id2).getAnswer().getNome().equalsIgnoreCase("SI") || 
+                         answerByQuestion.get(id13).getAnswer().getNome().equalsIgnoreCase("SI"))) {
+                            result = LIVELLI_RISCHIO[2];
+                }
+                // Disposizioni di valori generanti rischio BASSO
+                else if (Integer.parseInt(answerByQuestion.get(id14).getAnswer().getNome()) >= 2) {
+                    if (answerByQuestion.get(id1).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                        result = LIVELLI_RISCHIO[1];
+                    } else if (answerByQuestion.get(id1).getAnswer().getNome().equalsIgnoreCase("NO") && 
+                               answerByQuestion.get(id2).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                                result = LIVELLI_RISCHIO[1];
+                    } else {
+                        extraInfo.setDescrizioneStatoCorrente("La combinazione di ID1 ID2 ID13 ID14 (" + 
+                                answerByQuestion.get(id1).getAnswer().getNome() + BLANK_SPACE + 
+                                answerByQuestion.get(id2).getAnswer().getNome() + BLANK_SPACE + 
+                                answerByQuestion.get(id13).getAnswer().getNome() + BLANK_SPACE + 
+                                answerByQuestion.get(id14).getAnswer().getNome() + BLANK_SPACE + 
+                               ") non permette di determinare il livello di rischio");
+                        result = ERR;
+                    }
+                // Qui sotto finiscono combinazioni residue, p.es. (NO, NO, SI, >=2)
+                } else {
+                    extraInfo.setDescrizioneStatoCorrente("Combinazione ID1 ID2 ID13 ID14 (" + 
+                                                           answerByQuestion.get(id1).getAnswer().getNome() + BLANK_SPACE + 
+                                                           answerByQuestion.get(id2).getAnswer().getNome() + BLANK_SPACE + 
+                                                           answerByQuestion.get(id13).getAnswer().getNome() + BLANK_SPACE + 
+                                                           answerByQuestion.get(id14).getAnswer().getNome() + BLANK_SPACE + 
+                                                          ") non erronea ma indecidibile");
+                    result = ERR;
+                }
+            }
+            // Valorizza e restituisce l'oggetto per l'indicatore
+            p4.setNome(P4);
+            p4.setInformativa(result);
+            p4.setDescrizione(indicatorByCode.get(P4).getInformativa());
+            p4.setRisposte(quesiti);
+            p4.setProcesso(extraInfo);
+            return p4;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce il valore dell'indicatore di probabilit&agrave; P5.<br />
+     * Ogni indicatore ha un proprio algoritmo di calcolo, pertanto 
+     * il valore di ogni indicatore viene calcolato in un metodo dedicato.</p> 
+     * 
+     * @param allowedIds        elenco degli identificativi dei quesiti associati all'indicatore considerato
+     * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
+     * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
+     * @return <code>InterviewBean</code> - oggetto contenente il livello di rischio nell'indicatore, calcolato dall'algoritmo in base alle risposte date ai quesiti associati, e informazioni attinenti 
+     * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
+     */
+    private static InterviewBean computeP5(LinkedList<Integer> allowedIds, 
+                                           HashMap<Integer, QuestionBean> answerByQuestion,
+                                           HashMap<String, CodeBean> indicatorByCode) 
+                                    throws CommandException {
+        try {
+            InterviewBean p5 = new InterviewBean();
+            ArrayList<QuestionBean> quesiti = new ArrayList<>();
+            ProcessBean extraInfo = new ProcessBean();
+            String result = null;
+            StringBuffer reason = new StringBuffer(VOID_STRING);
+            // Oggetti id quesiti necessari per il calcolo dell'indicatore
+            Integer id15 = new Integer(15);
+            Integer id17 = new Integer(17);
+            Integer id18 = new Integer(18);
+            Integer id19 = new Integer(19);
+            LinkedList<Integer> algorythmIds = new LinkedList<>();
+            algorythmIds.add(id15);
+            algorythmIds.add(id17);
+            algorythmIds.add(id18);
+            algorythmIds.add(id19);
+            // Prepara la lista di quesiti che permettono di calcolare l'indicatore
+            quesiti.add(answerByQuestion.get(id15));
+            quesiti.add(answerByQuestion.get(id17));
+            quesiti.add(answerByQuestion.get(id18));
+            quesiti.add(answerByQuestion.get(id19));
+            // Memorizza il tipo dell'indicatore corrente
+            extraInfo.setTipo(P);
+            // Controlli lato server sulla validità delle risposte
+            if (!validateAnswers(algorythmIds, allowedIds, answerByQuestion, reason)) {
+                extraInfo.setDescrizioneStatoCorrente(String.valueOf(reason));
+                result = ERR;
+            } else {
+             // Vengono gestite tutte le combinazioni
+                if (Integer.parseInt(answerByQuestion.get(id18).getAnswer().getNome()) < ELEMENT_LEV_2) {
+                    if (Integer.parseInt(answerByQuestion.get(id19).getAnswer().getNome()) < ELEMENT_LEV_2) {
+                        if (answerByQuestion.get(id15).getAnswer().getNome().equalsIgnoreCase("SI") && 
+                            answerByQuestion.get(id17).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                            result = LIVELLI_RISCHIO[2];
+                        } else {
+                            result = LIVELLI_RISCHIO[3];
+                        } // ID19 è >= 2
+                    } else if (answerByQuestion.get(id15).getAnswer().getNome().equalsIgnoreCase("SI") && 
+                               answerByQuestion.get(id17).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                                result = LIVELLI_RISCHIO[1];
+                    } else {
+                        result = LIVELLI_RISCHIO[2];
+                    } // ID18 è >= 2
+                } else if (Integer.parseInt(answerByQuestion.get(id19).getAnswer().getNome()) < ELEMENT_LEV_2) {
+                    if (answerByQuestion.get(id15).getAnswer().getNome().equalsIgnoreCase("SI") && 
+                        answerByQuestion.get(id17).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                        result = LIVELLI_RISCHIO[1];
+                    } else {
+                        result = LIVELLI_RISCHIO[2];
+                    } // ID18 >=2 && ID19 >= 2
+                } else if (answerByQuestion.get(id15).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                    result = LIVELLI_RISCHIO[1];
+                } else {
+                    result = LIVELLI_RISCHIO[2];
+                }
+            }   
+            // Valorizza e restituisce l'oggetto per l'indicatore
+            p5.setNome(P5);
+            p5.setInformativa(result);
+            p5.setDescrizione(indicatorByCode.get(P5).getInformativa());
+            p5.setRisposte(quesiti);
+            p5.setProcesso(extraInfo);
+            return p5;
         } catch (AttributoNonValorizzatoException anve) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
             LOG.severe(msg);
