@@ -149,7 +149,7 @@
         <thead class="thead-light">
           <tr>
             <th>Indicatore</th>
-            <th>Quesiti considerati</th>
+            <th>Quesiti connessi</th>
             <th>Tipologia</th>
             <th>Livello</th>
           </tr>
@@ -166,7 +166,7 @@
             <c:if test="${status.count eq ind.risposte.size()}">
               <c:set var="comma" value="" scope="page" />
             </c:if>
-              <a href="#" title="${quesito.formulazione} (&quot;${quesito.answer.nome}&quot;)"><c:out value="${quesito.codice}" /></a><c:out value="${comma}" />
+              <a href="#${quesito.id}" title="ID${quesito.id} = ${quesito.formulazione} (RISPOSTA: &quot;${quesito.answer.nome}&quot;)"><c:out value="${quesito.codice}" /></a><c:out value="${comma}" />
           </c:forEach>
             </td>
             <td><c:out value="${ind.processo.tipo}" /></td>
@@ -221,7 +221,7 @@
           <c:if test="${not empty answer.parentQuestion}">&nbsp;
             <big style="font-size:x-large">&#8614;</big>&nbsp;
           </c:if>
-            <cite><c:out value="${answer.formulazione}" /></cite>
+            <cite id="${answer.id}"><c:out value="${answer.formulazione}" /></cite>
           </td>
           <td class="text-center" width="5%">
         <c:choose>
