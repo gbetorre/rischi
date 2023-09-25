@@ -55,9 +55,9 @@ Applicazione web per la mappatura dei rischi corruttivi cui sono esposti i proce
 
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/product-screenshot.png)
+[![Goal Sample][indicator-sample01]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample01.png)
 <br>
-<strong>*Fig.1 - prima versione del software*</strong>
+<strong>*Fig.1 - L'obiettivo del software &egrave; ottenere in automatico il valore di rischio per ogni processo organizzativo considerato (dati fittizi&#770;)*</strong>
 
 <p>
 L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare i responsabili della trasparenza ad individuare i punti di attenzione nel contesto dei processi organizzativi e ad indirizzarli a proporre le contromisure adeguate.
@@ -65,12 +65,12 @@ L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare i res
 
 [![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.40.png)
 <br>
-<strong>*Fig.2 - il software &egrave; un'applicazione ad accesso riservato (per accedere &egrave; necessario disporre di credenziali)*</strong>
+<strong>*Fig.2 - Il software &egrave; un'applicazione ad accesso riservato (per accedere &egrave; necessario disporre di credenziali)*</strong>
 <br><br>
 
 [![Product Landing Page][product-landing]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing1.40.png)
 <br>
-<strong>*Fig.3 - pagina di landing, versione 1.40*</strong>
+<strong>*Fig.3 - Pagina di landing, versione 1.40*</strong>
 
 <p>
 Attraverso la risposta ad una serie di quesiti posti a responsabili e operatori presso specifiche strutture amministrative (intervista), l'applicazione permette di ottenere una serie di indici relativi a specifici rischi corruttivi cui possono essere esposti i processi organizzativi presidiati dalle strutture stesse.<br>
@@ -80,9 +80,19 @@ Ogni quesito, infatti, &egrave; collegato ad uno o pi&uacute; specifici rischi c
 
 [![Product Interview][product-interview]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/interview-sample.png)
 <br>
-<strong>*Fig.4 - esempio di quesiti che concorrono a fornire il quadro della vulnerabilit&agrave; di un processo organizzativo*</strong>
+<strong>*Fig.4 - Esempio di quesiti che concorrono a fornire il quadro della vulnerabilit&agrave; di un processo organizzativo*</strong>
 
-In particolare, per ogni porocesso sondato attraverso l'intervista, si ottengono i valori di 7 indicatori di probabilit&agrave; (P) e di 4 indicatori di impatto (I).<br>
+In particolare, per ogni porocesso sondato attraverso l'intervista, si ottengono i valori di 7 indicatori di probabilit&agrave; (P) e di 4 indicatori di impatto (I).
+<br>
+
+[![Goal Sample alt][indicator-sample02]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample02.png)
+<br>
+<strong>*Fig.5 - Le risposte ai quesiti considerati per il calcolo dell'indicatore potrebbero, occasionalmente, non permettere di ottenere il valore di rischio nella dimensione considerata (dati fittizi&#770;)*</strong>
+
+[![Sample alt][indicator-sample03]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample03.png)
+<br>
+<strong>*Fig.6 - In tali casi il software riporta il motivo del mancato calcolo; se i motivi sono molteplici, vengono mostrati uno per volta finch&acute; il problema non viene corretto (dati fittizi&#770;)*</strong>
+
 Incrociando i valori ottenuti negli indicatori di probabilit&agrave; (P) con quelli ottenuti negli indicatori di impatto (I) si ottiene, per ogni processo organizzativo censito, un indice sintetico <code>P x I</code>, che esprime il livello finale di rischio cui &egrave; esposto il processo stesso.
 
 Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le azioni organizzative da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
@@ -98,21 +108,21 @@ Le strutture sono organizzate in un albero con vari livelli mentre i processi so
 
 [![Product Sample OrgChart][product-orgchart]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png)
 <br>
-<strong>*Fig.5 - funzione di navigazione dell'organigramma*</strong>
+<strong>*Fig.7 - Funzione di navigazione dell'organigramma*</strong>
 <br><br>
 [![Product Sample Macro][product-process]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png)
 <br>
-<strong>*Fig.6 - funzione di navigazione dell'albero dei macroprocessi*</strong>
+<strong>*Fig.8 - Funzione di navigazione dell'albero dei macroprocessi*</strong>
 
 Ogni processo o sottoprocesso (ma non il macroprocesso) pu&ograve; essere a sua volta suddiviso in fasi (o attivit&agrave;). Ad ogni fase possono essere associate una o pi&ugrave; strutture e uno o pi&ugrave; soggetti terzi (che sono entit&agrave; non strutturate in organigramma ma comunque agenti sulla fase del processo).
 
-Il software prevede apposite funzionalit&agrave; di navigazione nell'albero dei macroprocessi ed in quello dell'organigramma (cfr. <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png">Fig. 5</a> e <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png">6</a>), in modo da verificare rapidamente che la mappatura corrisponda a quanto effettivamente presente nell'organizzazione.
+Il software prevede apposite funzionalit&agrave; di navigazione nell'albero dei macroprocessi ed in quello dell'organigramma (cfr. <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png">Fig. 7</a> e <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png">8</a>), in modo da verificare rapidamente che la mappatura corrisponda a quanto effettivamente presente nell'organizzazione.
 
 Inoltre, per ogni processo viene fornita una pagina di dettaglio, contenente, oltre al livello di rischio cui il processo &egrave; esposto (informazione che &egrave; l'obiettivo principale di tutta l'applicazione), anche tutte le altre informazioni aggregate che riguardano il processo stesso, tra cui: gli input, le fasi, gli output, i rischi ed i fattori abilitanti.
 
 [![Product Sample Process][process-29]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-29.png)
 <br>
-<strong>*Fig.7 - esempio di pagina di dettaglio di un processo censito a fini anticorruttivi*</strong>
+<strong>*Fig.9 - Esempio di pagina di dettaglio di un processo censito a fini anticorruttivi*</strong>
 
 Dopo aver popolato il database con le strutture, i macroprocessi e i loro sottolivelli, si pu&ograve; passare alla fase dell'intervista, che consiste nel rivolgere una serie di quesiti ad una serie di specifiche strutture che presiedono uno specifico processo. La batteria di quesiti &egrave; ampia (pi&uacute; di 150) ma la decisione circa la quali quesiti somministrare pu&ograve; essere stabilita di volta in volta dall'intervistatore, nel senso che tutti i quesiti sono facoltativi e vi sono quesiti pi&uacute; generici, che probabilmente ha senso rivolgere in ogni intervista, e quesiti pi&uacute; specifici, che ha senso somministrare soltanto se si sta prendendo in esame processi molto peculiari. I quesiti sono raggruppati in ambiti di analisi e nel caso di alcune strutture potrebbe anche aver senso omettere i quesiti di interi ambiti di analisi.
 
@@ -124,11 +134,15 @@ Gli algoritmi di calcolo degli indicatori sono tutti diversi tra loro.
 <br><br>
 [![Product Algorithm][product-algorithm]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png)
 <br>
-<strong>*Fig.8 - esempio (semplificato) di algoritmo di calcolo di uno specifico indicatore di probabilit&agrave;*</strong>
+<strong>*Fig.10 - Esempio (semplificato) di algoritmo di calcolo di uno specifico indicatore di probabilit&agrave;*</strong>
 
 Come accennato nel paragrafo precedente, tramite ulteriori algoritmi vengono incrociati tutti i valori ottenuti negli indicatori di probabilit&agrave; (indice globale di P) e tutti i valori ottenuti negli indicatori di impatto (indice globale I).
 
-Infine, tramite una classica tabella della Quantitative Risk Analysis, viene calcolato l'indice P x I, o giudizio sintetico, ottenuto per ogni processo censito ed investigato tramite le interviste.
+Infine, tramite una classica tabella della Quantitative Risk Analysis, viene calcolato l'indice  <code>P x I</code>, o giudizio sintetico, ottenuto per ogni processo censito ed investigato tramite le interviste.
+<br>
+[![PxI][pxi]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/PxI.png)
+<br>
+<strong>*Fig.11 - Tabella di decisione dell’algoritmo per il calcolo del PxI, con i 9 valori possibili derivanti dalle disposizioni con ripetizione D'(3,2) = 3<sup>2</sup> dei 3 valori possibili del P e dei 3 valori possibili di I.*</strong>
 
 ## Sviluppi futuri
 Allo stato attuale il software &egrave; gi&agrave; pronto per essere adattato,
@@ -305,12 +319,13 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.5.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
 - [1.5.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [1.5.4] Implementata form di ricerca sui quesiti per chiave testuale
-- [1.4.5] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
-- [1.4.4] (25/09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista
+- [1.4.6] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
+- [1.4.5] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista; prima bozza calcolo indicatori P1, P2, P3 nel contesto del singolo processo
 
 ### Done
 -->
-- [1.4.3] (18/09/2023) Implementata la logica di calcolo (da perfezionare) degli indicatori P1, P2, P3 nel contesto della singola intervista
+- [1.4.4] (25/09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5 nel contesto della singola intervista; implementato metodo per effettuare i controlli lato server riguardo la validit&agrave; della risposta
+- [1.4.3] (18/09/2023) Prima bozza di implementazione degli indicatori P1, P2, P3 nel contesto della singola intervista
 - [1.4.2] (12/09/2023) Corretta gestione charset nella form di modifica della risposta; mostrato id della fase come title nella pagina di dettaglio del processo
 - [1.4.1] (11/09/2023) Aggiunta gestione in intervista del tipo di quesito che prevede come risposta una percentuale; aggiunta di immagini svg come marcatori di alberatura; revisione pagina di landing; spostamento di alcune ricerche predefinite dalla pagina di landing alla pagina della ricerca libera; ampliata larghezza visibile applicazione. 
 - [1.4.0] (04/09/2023) Correzione etichetta, tipografia; aggiunti screenshot.
@@ -368,6 +383,10 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [product-process]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png
 [process-29]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-29.png
 [process-45]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-45.png
+[indicator-sample01]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample01.png
+[indicator-sample02]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample02.png
+[indicator-sample03]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample03.png
+[pxi]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/PxI.png
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/othneildrew/Best-README-Template/issues
 [license-shield]: https://img.shields.io/badge/license-GPL-blue
