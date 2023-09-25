@@ -256,32 +256,71 @@ public interface Constants extends Serializable {
      * <dd>Lista Output</dd>
      * <dt>R</dt>
      * <dd>Lista Rischi</dd></dl>
+     * <dt>V</dt>
+     * <dd>Lista Interviste</dd></dl>
      * </p>
      */
-    static final String[] TIPI_LISTE = {"I", "F", "O", "R"};
+    static final String[] TIPI_LISTE = {"I", "F", "O", "R", "V"};
     /**
      * <p>Valori possibili degli attributi probabilita, impatto, livello di rischio.</p>
      */
     static final String[] LIVELLI_RISCHIO = {"MINIMO", "BASSO", "MEDIO", "ALTO", "ALTISSIMO"};
     /**
-     * <p>Valori possibili per i nomi degli indicatori.</p>
+     * <p>Indicatore di probabiit&agrave; 1.</p>
      */
     static final String P1 = "P1";
+    /**
+     * <p>Indicatore di probabiit&agrave; 2.</p>
+     */
     static final String P2 = "P2";
+    /**
+     * <p>Indicatore di probabiit&agrave; 3.</p>
+     */
     static final String P3 = "P3";
+    /**
+     * <p>Indicatore di probabiit&agrave; 4.</p>
+     */
     static final String P4 = "P4";
+    /**
+     * <p>Indicatore di probabiit&agrave; 5.</p>
+     */
     static final String P5 = "P5";
+    /**
+     * <p>Indicatore di probabiit&agrave; 6.</p>
+     */
     static final String P6 = "P6";
+    /**
+     * <p>Indicatore di probabiit&agrave; 7.</p>
+     */
     static final String P7 = "P7";
+    /**
+     * <p>Indicatore di impatto 1.</p>
+     */
     static final String I1 = "I1";
+    /**
+     * <p>Indicatore di impatto 2.</p>
+     */
     static final String I2 = "I2";
+    /**
+     * <p>Indicatore di impatto 3.</p>
+     */
     static final String I3 = "I3";
+    /**
+     * <p>Indicatore di impatto 4.</p>
+     */
     static final String I4 = "I4";
     /**
-     * <p>Valori possibili per i tipi degli indicatori.</p>
+     * <p>Indice sintetico di probabilit&agrave;.</p>
      */
     static final String P = "Probabilità";
+    /**
+     * <p>Indice sintetico di impatto.</p>
+     */
     static final String I = "Impatto";
+    /**
+     * <p>Giudizio sintetico (P x I).</p>
+     */
+    static final String PI = "Giudizio sintetico";
     /**
      * <p>Messaggio di errore sul calcolo degli indicatori.</p>
      */
