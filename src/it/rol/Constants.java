@@ -493,13 +493,24 @@ public interface Constants extends Serializable {
      */
     public static final SimpleDateFormat DATA_FORMAT = new SimpleDateFormat(DATA_SQL_PATTERN);
     /**
-     * <p>Pattern per un oggetto Time espresso su ore:minuti:secondi.</p> 
+     * <p>Pattern per un oggetto Time espresso su ore:minuti:secondi.<br />
+     * <strong>ATTENZIONE:</strong> nella localizzazione italiana 
+     * la maschera di formattazione deve essere del tipo HH:mm e non hh:mm, 
+     * altrimenti un orario come le 12:05 viene interpretato come 00:05! 
+     * Capital H permette di specificare il reset delle ore 
+     * su un totale di 24, non su un totale di 12.<br />
+     * cfr. https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
+     * <pre>
+     * Letter   Date or Time Component
+     *  H       Hour in day (0-23)    
+     *  h       Hour in am/pm (1-12)   
+     * </pre></p> 
      */
-    public static final String TIME_SQL_PATTERN = "hh:mm:ss";
+    public static final String TIME_SQL_PATTERN = "HH:mm:ss";
     /**
      * <p>Pattern per un oggetto Time espresso su 12 ore.</p>
      */
-    public static final String TWELWE_HOUR_FORMAT = "HH:mm";
+    public static final String TWELWE_HOUR_FORMAT = "hh:mm";
     /**
      * <p>Numero di anni da spostare per l'estrazione degli elementi
      * nella visualizzazione di default.
