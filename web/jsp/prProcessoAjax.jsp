@@ -1,6 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ include file="URL.jspf" %>
 <c:if test="${not empty param['out']}">
   <c:if test="${param['out'] eq 'pop'}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
@@ -12,6 +14,8 @@
 <c:set var="fasi" value="${requestScope.listaFasi}" scope="page" />
 <c:set var="output" value="${requestScope.listaOutput}" scope="page" />
 <c:set var="risks" value="${requestScope.listaRischi}" scope="page" />
+<c:set var="interviews" value="${requestScope.listaInterviste}" scope="page" />
+<c:set var="indics" value="${requestScope.listaIndicatori}" scope="page" />
 <c:catch var="exception">
   <c:set var="processo" value="informazione non disponibile" scope="page" />
   <c:set var="arearischio" value="informazione non disponibile" scope="page" />
@@ -223,6 +227,99 @@
         </table>
       </div>
       </section>
+      <hr class="separatore" />
+    <c:choose>
+      <c:when test="${empty interviews}">
+        <c:set var="surveyLabel" value="nessuna intervista" scope="page" />
+      </c:when>
+      <c:when test="${interviews.size() eq 1}">
+        <c:set var="surveyLabel" value="una intervista" scope="page" />
+      </c:when>
+      <c:otherwise>
+        <c:set var="surveyLabel" value="${interviews.size()} interviste" scope="page" />
+      </c:otherwise>
+    </c:choose>
+      <div class="p-3 p-md-4 border rounded-3 icon-demo-examples bgAct13">
+        <div class="fs-2 mb-3">Indicatori di rischio:</div>
+        <ol class="breadcrumb mb-4">
+          <li class="breadcrumb-item active">
+            Il processo &egrave; stato esaminato in&nbsp;
+            <span class="badge heading bgAct5 textcolormaroon"><c:out value="${surveyLabel}" /></span>
+          <c:if test="${not empty interviews}">
+            &nbsp;totalizzando i seguenti risultati negli indicatori di rischio
+          </c:if>
+          </li>
+        </ol>
+        <section>
+          <div class="errorPwd">
+          <c:forEach var="interview" items="${interviews}" varStatus="status">
+            <fmt:formatDate var="iviewitadate" value="${interview.dataUltimaModifica}" pattern="dd/MM/yyyy" /> 
+            <fmt:formatDate var="iviewsqltime" value="${interview.oraUltimaModifica}" pattern="HH:mm" scope="page" />
+            <c:if test="${status.index gt zero}">
+            <hr class="riga" />
+            </c:if>
+            <ol class="breadcrumb mb-3">
+              <li><a href="${in}">Intervista del <c:out value="${iviewitadate}" /> <c:out value="${iviewsqltime}" /></a></li>
+            </ol>
+            <dl class="row">
+            <c:set var="keys" value="${interview.indicatori.keySet()}" />
+            <c:forEach var="key" items="${keys}">
+              <c:set var="indicatore" value="${interview.indicatori.get(key)}" />
+              <dt class="col-sm-4"><c:out value="${indicatore.nome}" /> &ndash; <em><c:out value="${indicatore.descrizione}" />:</em></dt> 
+              <dd class="col-sm-8">Rischio <c:out value="${indicatore.informativa}" /></dd><br />
+            </c:forEach>
+            </dl>
+          </c:forEach>
+          <c:choose>
+            <c:when test="${not empty interviews}">
+            <hr class="separatore" />
+            <div id="rischi">
+              <h4 class="btn-lightgray">&nbsp;Valori <c:if test="${interviews.size() gt 1}">complessivi </c:if>di rischio</h4>
+              <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                  <tr>
+                    <th>Indicatore</th>
+                    <th>Quesiti connessi</th>
+                    <th>Tipologia</th>
+                    <th>Livello</th>
+                  </tr>
+                </thead>
+                <tbody>
+                <c:set var="keys" value="${indics.keySet()}" />
+                <c:forEach var="key" items="${keys}">
+                  <c:set var="ind" value="${indics.get(key)}" />
+                  <tr>
+                    <td><c:out value="${ind.nome}" />: <c:out value="${ind.descrizione}" /></td>
+                    <td>
+                    <c:set var="comma" value="," scope="page" />
+                    <c:forEach var="quesito" items="${ind.risposte}" varStatus="status">
+                      <c:if test="${status.count eq ind.risposte.size()}">
+                        <c:set var="comma" value="" scope="page" />
+                      </c:if>
+                      <span title="ID${quesito.id} = ${quesito.formulazione}"><c:out value="${quesito.codice}" /></span><c:out value="${comma}" />
+                    </c:forEach>
+                    </td>
+                    <td><c:out value="${ind.processo.tipo}" /></td>
+                      <c:set var="classSuffix" value="${fn:toLowerCase(ind.informativa)}" scope="page" />
+                      <c:if test="${fn:indexOf(classSuffix, ' ') gt -1}">
+                        <c:set var="classSuffix" value="${fn:substring(classSuffix, zero, fn:indexOf(classSuffix, ' '))}" scope="page" />
+                      </c:if>
+                    <td class="text-center bgcolor-${classSuffix}" title="${ind.processo.descrizioneStatoCorrente}">
+                      <c:out value="${ind.informativa}" />
+                    </td>
+                  </tr>
+                </c:forEach>
+                </tbody>
+              </table>
+            </div>
+            </c:when>
+            <c:otherwise>
+            Processo non oggetto di intervista: indicatori non calcolabili!
+            </c:otherwise>
+          </c:choose>
+          </div><br />
+        </section>
+      </div>
     </div>
   </c:when>
   <c:otherwise>
