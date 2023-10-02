@@ -147,477 +147,6 @@ public class DBWrapper implements Query, Constants {
         }
     }
 
-    /* ********************************************************** *
-     *               Metodi generali dell'applicazione            *
-     * ********************************************************** */
-
-    /**
-     * <p>Restituisce un Vector di Command.</p>
-     *
-     * @return <code>Vector&lt;ItemBean&gt;</code> - lista di ItemBean rappresentanti ciascuno una Command dell'applicazione
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public Vector<ItemBean> lookupCommand()
-                                   throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        ItemBean cmd = null;
-        Vector<ItemBean> commands = new Vector<>();
-        try {
-            con = prol_manager.getConnection();
-            pst = con.prepareStatement(LOOKUP_COMMAND);
-            pst.clearParameters();
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                cmd = new ItemBean();
-                BeanUtil.populate(cmd, rs);
-                commands.add(cmd);
-            }
-            return commands;
-        } catch (SQLException sqle) {
-            throw new WebStorageException(FOR_NAME + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = "Connessione al database in stato inconsistente!\nAttenzione: la connessione vale " + con + "\n";
-                LOG.severe(msg);
-                throw new WebStorageException(FOR_NAME + msg + npe.getMessage(), npe);
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage(), sqle);
-            }
-        }
-    }
-
-
-    /**
-     * <p>Restituisce
-     * <ul>
-     * <li>il massimo valore del contatore identificativo di una
-     * tabella il cui nome viene passato come argomento</li>
-     * <li>oppure zero se nella tabella non sono presenti record.</li>
-     * </ul></p>
-     *
-     * @param table nome della tabella di cui si vuol recuperare il max(id)
-     * @return <code>int</code> - un intero che rappresenta il massimo valore trovato, oppure zero se non sono stati trovati valori
-     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
-     */
-    @SuppressWarnings({ "static-method", "null" })
-    public int getMax(String table)
-               throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        try {
-            int count = 0;
-            String query = SELECT_MAX_ID + table;
-            con = prol_manager.getConnection();
-            pst = con.prepareStatement(query);
-            pst.clearParameters();
-            rs = pst.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-            return count;
-        }  catch (SQLException sqle) {
-            String msg = FOR_NAME + "Impossibile recuperare il max(id).\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-
-    /**
-     * <p>Restituisce
-     * <ul>
-     * <li>il minimo valore del contatore identificativo di una
-     * tabella il cui nome viene passato come argomento</li>
-     * <li>oppure zero se nella tabella non sono presenti record.</li>
-     * </ul></p>
-     *
-     * @param table nome della tabella di cui si vuol recuperare il min(id)
-     * @return <code>int</code> - un intero che rappresenta il minimo valore trovato, oppure zero se non sono stati trovati valori
-     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
-     */
-    @SuppressWarnings({ "static-method", "null" })
-    public int getMin(String table)
-               throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        try {
-            int count = 0;
-            String query = SELECT_MIN_ID + table;
-            con = prol_manager.getConnection();
-            pst = con.prepareStatement(query);
-            pst.clearParameters();
-            rs = pst.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-            return count;
-        }  catch (SQLException sqle) {
-            String msg = FOR_NAME + "Impossibile recuperare il max(id).\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-    
-    /**
-     * <p>Restituisce
-     * <ul>
-     * <li>il massimo codice del rischio se per tale categoria di codice  
-     * ne sono stati gi&agrave; inseriti</li>
-     * <li>oppure il primo codice se nella tabella non sono presenti rischi 
-     * inseriti nella categoria identificata da quel tipo di codice.</li>
-     * </ul></p>
-     *
-     * @param code prefisso del codice di cui si vuol recuperare il primo codice nuovo utile all'inserimento
-     * @return <code>String</code> - il codice utile all'inserimento
-     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
-     */
-    @SuppressWarnings({ "static-method" })
-    public String getMaxRiskCode(String code)
-                          throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
-            PreparedStatement pst = null;
-            ResultSet rs = null;
-            CodeBean prevCode = null;
-            String nextCode = null;
-            StringBuffer codeFormatted = new StringBuffer()
-                    .append(code)
-                    .append(PER_CENT);
-            try {
-                pst = con.prepareStatement(SELECT_MAX_RISK_CODE);
-                pst.clearParameters();
-                pst.setString(1, String.valueOf(codeFormatted));
-                rs = pst.executeQuery();
-                if (rs.next()) {
-                    prevCode = new CodeBean();
-                    BeanUtil.populate(prevCode, rs);
-                    String prevCodeAsString = prevCode.getNome();
-                    if (prevCodeAsString != null && !prevCodeAsString.equals(VOID_STRING)) {
-                        // Identifica l'ultimo progressivo per la tipologia di codice data
-                        int start = prevCodeAsString.indexOf(DOT);
-                        int maxCode = Integer.parseInt(prevCodeAsString.substring(++start, prevCodeAsString.length()));
-                        // Lo incrementa di un'unità
-                        ++maxCode;
-                        // Genera il nuovo codice
-                        nextCode = code + DOT + Utils.parseString(maxCode);
-                    } else {
-                        nextCode = code + DOT + "01";
-                    }
-                } else {
-                    nextCode = code + DOT + "01";
-                }
-                return nextCode;
-            } catch (AttributoNonValorizzatoException anve) {
-                String msg = FOR_NAME + "Probabile problema nel recupero del codice del rischio.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + anve.getMessage(), anve);
-            } catch (ArrayIndexOutOfBoundsException aiobe) {
-                String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di stringhe.\n" + aiobe.getMessage();
-                LOG.severe(msg);
-                throw new WebStorageException(msg, aiobe);
-            } catch (NumberFormatException nfe) {
-                String msg = FOR_NAME + "Problema nella conversione da String a intero.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + nfe.getMessage(), nfe);
-            }  catch (SQLException sqle) {
-                String msg = FOR_NAME + "Impossibile recuperare il max(code).\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + sqle.getMessage(), sqle);
-            } finally {
-                try {
-                    con.close();
-                } catch (NullPointerException npe) {
-                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                    LOG.severe(msg);
-                    throw new WebStorageException(msg + npe.getMessage());
-                } catch (SQLException sqle) {
-                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
-                }
-            }
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        }
-    }
-    
-
-    /**
-     * <p>Restituisce il primo valore trovato data una query 
-     * passata come parametro</p>
-     *
-     * @param query da eseguire
-     * @return <code>String</code> - stringa restituita
-     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public String get(String query)
-               throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        String value = null;
-        try {
-            con = prol_manager.getConnection();
-            pst = con.prepareStatement(query);
-            pst.clearParameters();
-            rs = pst.executeQuery();
-            if (rs.next()) {
-                value = rs.getString(1);
-            }
-            return value;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Impossibile recuperare un valore.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-
-    /**
-     * <p>Restituisce un CodeBean contenente la password criptata e il seme
-     * per poter verificare le credenziali inserite dall'utente.</p>
-     *
-     * @param username   username della persona che ha richiesto il login
-     * @return <code>CodeBean</code> - CodeBean contenente la password criptata e il seme
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public CodeBean getEncryptedPassword(String username)
-                                  throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        CodeBean password = null;
-        int nextInt = 0;
-        try {
-            con = prol_manager.getConnection();
-            pst = con.prepareStatement(GET_ENCRYPTEDPASSWORD);
-            pst.clearParameters();
-            pst.setString(++nextInt, username);
-            rs = pst.executeQuery();
-            if (rs.next()) {
-                password = new CodeBean();
-                BeanUtil.populate(password, rs);
-            }
-            return password;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-
-    /**
-     * <p>Restituisce un PersonBean rappresentante un utente loggato.</p>
-     *
-     * @param username  username della persona che ha eseguito il login
-     * @param password  password della persona che ha eseguito il login
-     * @return <code>PersonBean</code> - PersonBean rappresentante l'utente loggato
-     * @throws it.rol.exception.WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
-     * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id della persona non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public PersonBean getUser(String username,
-                              String password)
-                       throws WebStorageException, AttributoNonValorizzatoException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs, rs1 = null;
-        PersonBean usr = null;
-        int nextInt = 0;
-        Vector<CodeBean> vRuoli = new Vector<>();
-        try {
-            con = prol_manager.getConnection();
-            pst = con.prepareStatement(GET_USR);
-            pst.clearParameters();
-            pst.setString(++nextInt, username);
-            pst.setString(++nextInt, password);
-            pst.setString(++nextInt, password);
-            rs = pst.executeQuery();
-            if (rs.next()) {
-                usr = new PersonBean();
-                BeanUtil.populate(usr, rs);
-                // Se ha trovato l'utente, ne cerca il ruolo
-                pst = null;
-                pst = con.prepareStatement(GET_RUOLOUTENTE);
-                pst.clearParameters();
-                pst.setString(1, username);
-                rs1 = pst.executeQuery();
-                while(rs1.next()) {
-                    CodeBean ruolo = new CodeBean();
-                    BeanUtil.populate(ruolo, rs1);
-                    vRuoli.add(ruolo);
-                }
-                usr.setRuoli(vRuoli);
-            }
-            // Just tries to engage the Garbage Collector
-            pst = null;
-            // Get Out
-            return usr;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } catch (ClassCastException cce) {
-            String msg = FOR_NAME + "Problema in una conversione di tipi nella query dell\'utente.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + cce.getMessage(), cce);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-
-    /**
-     * <p>Verifica se per l'utente loggato esiste una tupla che indica
-     * un precedente login.
-     * <ul>
-     * <li>Se non esiste una tupla per l'utente loggato, la inserisce.</li>
-     * <li>Se esiste una tupla per l'utente loggato, la aggiorna.</li>
-     * </ul>
-     * In questo modo, il metodo gestisce nella tabella degli accessi
-     * sempre l'ultimo accesso e non quelli precedenti.</p>
-     *
-     * @param username      login dell'utente (username usato per accedere)
-     * @throws WebStorageException se si verifica un problema SQL o in qualche tipo di puntamento
-     */
-    @SuppressWarnings({ "null" })
-    public void manageAccess(String username)
-                      throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        CodeBean accessRow = null;
-        int nextParam = NOTHING;
-        try {
-            // Ottiene la connessione
-            con = prol_manager.getConnection();
-            // Verifica se la login abbia già fatto un accesso
-            pst = con.prepareStatement(GET_ACCESSLOG_BY_LOGIN);
-            pst.clearParameters();
-            pst.setString(++nextParam, username);
-            rs = pst.executeQuery();
-            if (rs.next()) {    // Esiste già un accesso: lo aggiorna
-                accessRow = new CodeBean();
-                BeanUtil.populate(accessRow, rs);
-                pst = null;
-                con.setAutoCommit(false);
-                pst = con.prepareStatement(UPDATE_ACCESSLOG_BY_USER);
-                pst.clearParameters();
-                pst.setString(nextParam, username);
-                // Campi automatici: ora ultimo accesso, data ultimo accesso
-                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
-                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
-                pst.setInt(++nextParam, accessRow.getId());
-                pst.executeUpdate();
-                con.commit();
-            } else {            // Non esiste un accesso: ne crea uno nuovo
-                // Chiude e annulla il PreparedStatement rimasto inutilizzato
-                pst.close();
-                pst = null;
-                // BEGIN;
-                con.setAutoCommit(false);
-                pst = con.prepareStatement(INSERT_ACCESSLOG_BY_USER);
-                pst.clearParameters();
-                int nextVal = getMax("access_log") + 1;
-                pst.setInt(nextParam, nextVal);
-                pst.setString(++nextParam, username);
-                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
-                pst.setTime(++nextParam, Utils.getCurrentTime());
-                pst.executeUpdate();
-                // END;
-                con.commit();
-            }
-            String msg = "Si e\' loggato l\'utente: " + username +
-                         " in data:" + Utils.format(Utils.getCurrentDate()) +
-                         " alle ore:" + Utils.getCurrentTime() +
-                         ".\n";
-            LOG.info(msg);
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Probabile problema nel recupero dell'id dell\'ultimo accesso\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + anve.getMessage(), anve);
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } catch (NumberFormatException nfe) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + nfe.getMessage(), nfe);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + npe.getMessage(), npe);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
 
     /* ********************************************************** *
      *                     Metodi di SELEZIONE                    *
@@ -746,630 +275,6 @@ public class DBWrapper implements Query, Constants {
                 throw new WebStorageException(FOR_NAME + sqle.getMessage());
             }
         }
-    }
-    
-
-    /**
-     * <p>Data una rilevazione, restituisce un ArrayList di macroprocessi
-     * ad essa afferenti, contenenti ciascuno i processi figli al proprio interno
-     * (albero, o struttura gerarchica).</p>
-     * <p>Recupera solo i macroprocessi su cui un utente, il cui username viene
-     * passato come argomento, ha i diritti di accesso (in base al ruolo <em>per se</em>).</p>
-     *
-     * @param user oggetto rappresentante la persona loggata
-     * @param codeSurvey identificativo della rilevazione di cui si vogliono recuperare i macroprocessi
-     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - un Vector di ProcessBean, che rappresentano i processi su cui l'utente ha i diritti di lettura
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    @SuppressWarnings({ "null" })
-    public ArrayList<ProcessBean> getMacroBySurvey(PersonBean user,
-                                                   String codeSurvey)
-                                            throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs, rs1 = null;
-        ProcessBean macro = null;
-        ProcessBean processo = null;
-        CodeBean rilevazione = null;
-        AbstractList<ProcessBean> macroprocessi = new ArrayList<>();
-        AbstractList<ProcessBean> sottoprocessi = null;
-        try {
-            // TODO: Controllare se user è superuser
-            con = prol_manager.getConnection();
-            pst = con.prepareStatement(GET_MACRO_BY_SURVEY);
-            pst.clearParameters();
-            pst.setString(1, codeSurvey);
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                // Crea un macroprocesso vuoto
-                macro = new ProcessBean();
-                // Istanzia una struttura vettoriale per contenere i suoi sottoprocessi
-                sottoprocessi = new Vector<>();
-                // Valorizza il macroprocesso col contenuto della query
-                BeanUtil.populate(macro, rs);
-                // Recupera la rilevazione
-                rilevazione = getSurvey(macro.getIdRilevazione(), macro.getIdRilevazione());
-                // Imposta la rilevazione
-                macro.setRilevazione(rilevazione);
-                // Recupera i sottoprocessi
-                pst = null;
-                pst = con.prepareStatement(GET_PROCESSI_BY_MACRO);
-                pst.clearParameters();
-                pst.setInt(1, macro.getId());
-                rs1 = pst.executeQuery();
-                while (rs1.next()) {
-                    processo = new ProcessBean();
-                    BeanUtil.populate(processo, rs1);
-                    sottoprocessi.add(processo);
-                }
-                // Imposta i sottoprocessi
-                macro.setProcessi(sottoprocessi);
-                // Aggiunge il macroprocesso valorizzato all'elenco
-                macroprocessi.add(macro);
-                rs1 = null;
-            }
-            // Tries (just tries) to engage the Garbage Collector
-            pst = null;
-            // Let's go away (leva di ùlo)
-            return (ArrayList<ProcessBean>) macroprocessi;
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Oggetto ProcessBean.some non valorizzato; problema nel metodo di estrazione dei processi/macroprocessi.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + anve.getMessage(), anve);
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto ProcessBean non valorizzato; problema nella query dei processi/macroprocessi..\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-
-    /* (non-Javadoc)
-     * @see it.rol.Query#getQueryMacroByStruct(int, byte, java.lang.String)
-     */
-    @SuppressWarnings("javadoc")
-    @Override
-    public String getQueryMacroByStruct(int idS, byte level, String codeSur) {
-        String tableFrom = "struttura_liv" + String.valueOf(level);
-        String tableWhere = "id_struttura_liv" + String.valueOf(level);
-        final String GET_MACROPROCESSI_BY_STRUCT =
-                "SELECT DISTINCT" +
-                        "       M.id                AS \"id\"" +
-                        "   ,   M.codice            AS \"codice\"" +
-                        "   ,   M.nome              AS \"nome\"" +
-                        "   ,   M.descrizione       AS \"descrizione\"" +
-                        "   ,   M.ordinale          AS \"ordinale\"" +
-                        "   ,   M.id_rilevazione    AS \"idRilevazione\"" +
-                        "   ,   ROUND(100 * SUM(AM.quotaparte) OVER (PARTITION BY M.id) / (SUM(AM.quotaparte) OVER ())::numeric, 2) AS \"quotaParte\"" +
-                        "   ,   ROUND((SUM(AM.quotaparte * (A.perc_parttime / 100.0)) OVER (PARTITION BY M.id) / 100.0), 2)         AS \"fte\"" +
-                        "   FROM macroprocesso M" +
-                        "       INNER JOIN rilevazione R ON M.id_rilevazione = R.id" +
-                        "       INNER JOIN allocazione_macroprocesso AM ON AM.id_macroprocesso = M.id" +
-                        "       INNER JOIN afferenza A ON R.id = A.id_rilevazione AND A.id_persona = AM.id_persona" +
-                        "       INNER JOIN " + tableFrom + " ST ON ST.id_rilevazione = R.id" +
-                        "   WHERE R.codice ILIKE '" + codeSur + "'" +
-                        "       AND ST.id = " + idS +
-                        "       AND AM.id_persona IN" +
-                        "           (SELECT P.id FROM persona P" +
-                        "               INNER JOIN afferenza AF ON AF.id_persona = P.id" +
-                        "               WHERE " + tableWhere + " = " + idS + ")" +
-                        "   ORDER BY M.codice";
-        return GET_MACROPROCESSI_BY_STRUCT;
-    }
-
-
-    /**
-     * <p>Dato un identificativo di una struttura, passato come parametro,
-     * restituisce un ArrayList di macroprocessi ad essa afferenti,
-     * contenenti ciascuno i processi figli al proprio interno; l'estrazione ovviamente
-     * tiene conto anche della rilevazione.</p>
-     * <p>Recupera solo i macroprocessi su cui un utente, il cui username viene
-     * passato come argomento, ha i diritti di accesso (in base al ruolo <em>per se</em>).</p>
-     *
-     * @param user   oggetto rappresentante la persona loggata
-     * @param idS    identificativo della struttura di cui si vogliono recuperare i macroprocessi
-     * @param level  livello della struttura di cui si vogliono recuperare i macroprocessi
-     * @param survey CodeBean incapsulante la rilevazione di cui si vogliono recuperare i macroprocessi
-     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - un Vector di ProcessBean, che rappresentano i processi su cui l'utente ha i diritti di lettura
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    @SuppressWarnings({ "null" })
-    public ArrayList<ProcessBean> getMacroByStruct(PersonBean user,
-                                                   int idS,
-                                                   byte level,
-                                                   CodeBean survey)
-                                            throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs, rs1 = null;
-        int nextParam = NOTHING;
-        ProcessBean macro = null;
-        ProcessBean processo = null;
-        String codeSurvey = null;
-        AbstractList<ProcessBean> macroprocessi = new ArrayList<>();
-        AbstractList<ProcessBean> sottoprocessi = null;
-        DepartmentBean struttura = null;
-        int[] sl = null;
-        // TODO: Controllare se user è superuser
-        // Recupera gli estremi della struttura (è uguale per tutti i macroprocessi trovati)
-        try {
-            codeSurvey = survey.getNome();
-            struttura = getStructure(user, idS, level, codeSurvey);
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Impossibile recuperare il codice rilevazione; problema nel metodo di estrazione macroprocessi in base alla struttura.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + anve.getMessage(), anve);
-        } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Problema nel metodo di estrazione dei macroprocessi in base alla struttura.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + wse.getMessage(), wse);
-        }
-        // Estrae i macroprocessi in base alla struttura
-        try {
-            con = prol_manager.getConnection();
-            // Determina la query da fare in base al livello
-            switch(level) {
-                case 1:
-                    pst = con.prepareStatement(GET_MACROPROCESSI_BY_STRUCT_L1);
-                    pst.clearParameters();
-                    pst.setString(++nextParam, codeSurvey);
-                    pst.setInt(++nextParam, idS);
-                    pst.setInt(++nextParam, idS);
-                    pst.setInt(++nextParam, idS);
-                    pst.setInt(++nextParam, idS);
-                    pst.setInt(++nextParam, idS);
-                    sl = new int[]{idS, DEFAULT_ID, DEFAULT_ID, DEFAULT_ID};
-                    break;
-                case 2:
-                    pst = con.prepareStatement(GET_MACROPROCESSI_BY_STRUCT_L2);
-                    pst.clearParameters();
-                    pst.setString(++nextParam, codeSurvey);
-                    pst.setInt(++nextParam, idS);
-                    pst.setInt(++nextParam, idS);
-                    pst.setInt(++nextParam, idS);
-                    pst.setInt(++nextParam, idS);
-                    sl = new int[]{DEFAULT_ID, idS, DEFAULT_ID, DEFAULT_ID};
-                    break;
-                case 3:
-                    pst = con.prepareStatement(GET_MACROPROCESSI_BY_STRUCT_L3);
-                    pst.clearParameters();
-                    pst.setString(++nextParam, codeSurvey);
-                    pst.setInt(++nextParam, idS);
-                    pst.setInt(++nextParam, idS);
-                    pst.setInt(++nextParam, idS);
-                    sl = new int[]{DEFAULT_ID, DEFAULT_ID, idS, DEFAULT_ID};
-                    break;
-                case 4:
-                    pst = con.prepareStatement(GET_MACROPROCESSI_BY_STRUCT_L4);
-                    pst.clearParameters();
-                    pst.setString(++nextParam, codeSurvey);
-                    pst.setInt(++nextParam, idS);
-                    pst.setInt(++nextParam, idS);
-                    sl = new int[]{DEFAULT_ID, DEFAULT_ID, DEFAULT_ID, idS};
-                    break;
-            }
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                // Crea un macroprocesso vuoto
-                macro = new ProcessBean();
-                // Istanzia una struttura vettoriale per contenere i suoi sottoprocessi
-                sottoprocessi = new Vector<>();
-                // Valorizza il macroprocesso col contenuto della query
-                BeanUtil.populate(macro, rs);
-                // Imposta la rilevazione nel macroprocesso
-                macro.setRilevazione(survey);
-                // Recupera le persone allocate sul macroprocesso
-                //macro.setPersone(getPeopleByStructureAndMacro(user, macro.getId(), survey.getId(), sl));
-                // Recupera i sottoprocessi
-                pst = null;
-                pst = con.prepareStatement(GET_PROCESSI_BY_MACRO);
-                pst.clearParameters();
-                pst.setInt(1, macro.getId());
-                rs1 = pst.executeQuery();
-                while (rs1.next()) {
-                    processo = new ProcessBean();
-                    BeanUtil.populate(processo, rs1);
-                    //processo.setPersone(getPeopleByStructureAndProcess(user, processo.getId(), survey.getId(), sl));
-                    sottoprocessi.add(processo);
-                }
-                // Imposta i sottoprocessi
-                macro.setProcessi(sottoprocessi);
-                // Imposta la struttura
-                macro.setDipart(struttura);
-                // Aggiunge il macroprocesso valorizzato all'elenco
-                macroprocessi.add(macro);
-                rs1 = null;
-            }
-            // Just tries to engage the Garbage Collector
-            pst = null;
-            // Get out
-            return (ArrayList<ProcessBean>) macroprocessi;
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Oggetto ProcessBean.some non valorizzato; problema nel metodo di estrazione dei processi/macroprocessi.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + anve.getMessage(), anve);
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto ProcessBean non valorizzato; problema nella query dei processi/macroprocessi..\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-
-    /**
-     * <p>Data una rilevazione e l'identificativo di una persona, passati come argomenti,
-     * restituisce un ArrayList di macroprocessi ad essa afferenti, 
-     * contenenti ciascuno i processi figli al proprio interno.</p>
-     * <p>Recupera solo i macroprocessi su cui un utente, il cui username viene
-     * passato come argomento, ha i diritti di accesso (in base al ruolo <em>per se</em>).</p>
-     *
-     * @param user oggetto rappresentante la persona loggata
-     * @param person persona di cui si vogliono recuperare i macroprocessi di allocazione
-     * @param survey oggetto incapsulante la rilevazione rispetto a cui si vogliono recuperare i macroprocessi
-     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - un Vector di ProcessBean, che rappresentano i processi su cui l'utente ha i diritti di lettura
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    @SuppressWarnings({ "null" })
-    public ArrayList<ProcessBean> getMacroByPerson(PersonBean user,
-                                                   PersonBean person,
-                                                   CodeBean survey)
-                                            throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs, rs1 = null;
-        int nextParam = NOTHING;
-        ProcessBean macro = null;
-        ProcessBean processo = null;
-        CodeBean rilevazione = null;
-        AbstractList<ProcessBean> macroprocessi = new ArrayList<>();
-        AbstractList<ProcessBean> sottoprocessi = null;
-        try {
-            // TODO: Controllare se user è superuser
-            con = prol_manager.getConnection();
-            pst = con.prepareStatement(GET_MACRO_BY_PERSON);
-            pst.clearParameters();
-            pst.setString(++nextParam, survey.getNome());
-            pst.setInt(++nextParam, person.getId());
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                // Riporta a zero il contatore
-                nextParam = NOTHING;
-                // Crea un macroprocesso vuoto
-                macro = new ProcessBean();
-                // Istanzia una struttura vettoriale per contenere i suoi sottoprocessi
-                sottoprocessi = new Vector<>();
-                // Valorizza il macroprocesso col contenuto della query
-                BeanUtil.populate(macro, rs);
-                // Recupera la rilevazione
-                rilevazione = getSurvey(macro.getIdRilevazione(), macro.getIdRilevazione());
-                // Imposta la rilevazione
-                macro.setRilevazione(rilevazione);
-                // Recupera i sottoprocessi
-                pst = null;
-                pst = con.prepareStatement(GET_PROCESSI_BY_MACRO_AND_PERSON);
-                pst.clearParameters();
-                pst.setString(++nextParam, survey.getNome());
-                pst.setInt(++nextParam, macro.getId());
-                pst.setInt(++nextParam, person.getId());
-                rs1 = pst.executeQuery();
-                while (rs1.next()) {
-                    processo = new ProcessBean();
-                    BeanUtil.populate(processo, rs1);
-                    sottoprocessi.add(processo);
-                }
-                // Imposta i sottoprocessi
-                macro.setProcessi(sottoprocessi);
-                // Aggiunge il macroprocesso valorizzato all'elenco
-                macroprocessi.add(macro);
-                rs1 = null;
-            }
-            // Tries (just tries) to engage the Garbage Collector
-            pst = null;
-            // Get out
-            return (ArrayList<ProcessBean>) macroprocessi;
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Oggetto ProcessBean.some non valorizzato; problema in un metodo di estrazione dei processi/macroprocessi.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + anve.getMessage(), anve);
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto ProcessBean non valorizzato; problema nella query dei processi/macroprocessi..\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-
-    /**
-     * <p>Data una rilevazione e l'identificativo di un macroprocesso, restituisce
-     * un ArrayList di persone ad essi afferenti.</p>
-     *
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param idType    identifica se si devono recuperare macroprocessi o processi
-     * @param id        identificativo del macroprocesso o processo di cui si vogliono recuperare le persone
-     * @param idSurvey  identificativo della rilevazione di cui si vogliono recuperare le allocazioni
-     * @return <code>ArrayList&lt;PersonBean&gt;</code> - un Vector di PersonBean, che rappresentano le persone allocate sul macroprocesso nel contesto della rilevazione
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    @SuppressWarnings({"null", "static-method"})
-    public ArrayList<PersonBean> getPeopleByMacroOrProcess(PersonBean user,
-                                                           String idType,
-                                                           int id,
-                                                           int idSurvey)
-                                                    throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        int nextParam = NOTHING;
-        PersonBean person = null;
-        AbstractList<PersonBean> people = new ArrayList<>();
-        try {
-            // TODO: Controllare se user è superuser
-            con = prol_manager.getConnection();
-            if (idType.equals(PART_MACROPROCESS))
-                pst = con.prepareStatement(GET_PEOPLE_BY_MACRO);
-            else
-                pst = con.prepareStatement(GET_PEOPLE_BY_PROCESS);
-            pst.clearParameters();
-            pst.setInt(++nextParam, id);
-            pst.setInt(++nextParam, idSurvey);
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                // Crea una persona vuota
-                person = new PersonBean();
-                // La valorizza col contenuto della query
-                BeanUtil.populate(person, rs);
-                // Aggiunge all'elenco
-                people.add(person);
-            }
-            // Tries (just tries) to engage the Garbage Collector
-            pst = null;
-            // Let's go away
-            return (ArrayList<PersonBean>) people;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query delle persone su macroprocesso.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-    
-    /**
-     * <p>Data una rilevazione e l'identificativo di un macroprocesso, restituisce
-     * un ArrayList di persone ad essi afferenti.</p>
-     *
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param idMacro   identificativo del macroprocesso di cui si vogliono recuperare le persone
-     * @param idSurvey  identificativo della rilevazione di cui si vogliono recuperare le allocazioni
-     * @return <code>ArrayList&lt;PersonBean&gt;</code> - un Vector di PersonBean, che rappresentano le persone allocate sul macroprocesso nel contesto della rilevazione
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    public ArrayList<PersonBean> getPeopleByMacro(PersonBean user, int idMacro, int idSurvey) throws WebStorageException {
-        return getPeopleByMacroOrProcess(user, PART_MACROPROCESS, idMacro, idSurvey);
-    }
-
-
-    /**
-     * <p>Data una rilevazione e l'identificativo di un processo, restituisce
-     * un ArrayList di persone ad essi afferenti.</p>
-     *
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param idProcess identificativo del processo di cui si vogliono recuperare le persone
-     * @param idSurvey  identificativo della rilevazione di cui si vogliono recuperare le allocazioni
-     * @return <code>ArrayList&lt;PersonBean&gt;</code> - un Vector di PersonBean, che rappresentano le persone allocate sul macroprocesso nel contesto della rilevazione
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    public ArrayList<PersonBean> getPeopleByProcess(PersonBean user,
-                                                    int idProcess,
-                                                    int idSurvey)
-                                             throws WebStorageException {
-        return getPeopleByMacroOrProcess(user, PART_PROCESS, idProcess, idSurvey);
-    }
-
-
-    /* (non-Javadoc)
-     * @see it.rol.Query#getQueryPeopleByStructureAndMacro(int, int, int[])
-     */
-    @SuppressWarnings("javadoc")
-    @Override
-    public String getQueryPeopleByStructureAndMacro(int idM,
-                                                    int idR,
-                                                    int[] idl) {
-        String idL4 = (idl[3] == DEFAULT_ID ? "IS NULL" : " = " + String.valueOf(idl[3]));
-        String idL3 = (idl[2] == DEFAULT_ID ? "IS NULL" : " = " + String.valueOf(idl[2]));
-        String idL2 = (idl[1] == DEFAULT_ID ? "IS NULL" : " = " + String.valueOf(idl[1]));
-        String idL1 = (idl[0] == DEFAULT_ID ? "IS NULL" : " = " + String.valueOf(idl[0]));
-        return  "SELECT " +
-                "       P.id            AS \"id\"" +
-                "   ,   P.nome          AS \"nome\"" +
-                "   ,   P.cognome       AS \"cognome\"" +
-                "   ,   P.sesso         AS \"sesso\"" +
-                "   ,   AM.quotaparte   AS \"note\"" +
-                "   FROM persona P" +
-                "       INNER JOIN allocazione_macroprocesso AM ON AM.id_persona = P.id" +
-                "       INNER JOIN afferenza AF ON AF.id_persona = P.id" +
-                "   WHERE AM.id_macroprocesso = " + idM +
-                "       AND AF.id_rilevazione = " + idR +
-                "       AND AF.id_struttura_liv4 " + idL4 +
-                "       AND AF.id_struttura_liv3 " + idL3 +
-                "       AND AF.id_struttura_liv2 " + idL2 +
-                "       AND AF.id_struttura_liv1 " + idL1 +
-                "   ORDER BY P.cognome";
-    }
-
-
-    /* (non-Javadoc)
-     * @see it.rol.Query#getQueryPeopleByStructureAndProcess(int, int, int[])
-     */
-    @SuppressWarnings("javadoc")
-    @Override
-    public String getQueryPeopleByStructureAndProcess(int idP,
-                                                      int idR,
-                                                      int[] idl) {
-        String idL4 = (idl[3] == DEFAULT_ID ? "IS NULL" : " = " + String.valueOf(idl[3]));
-        String idL3 = (idl[2] == DEFAULT_ID ? "IS NULL" : " = " + String.valueOf(idl[2]));
-        String idL2 = (idl[1] == DEFAULT_ID ? "IS NULL" : " = " + String.valueOf(idl[1]));
-        String idL1 = (idl[0] == DEFAULT_ID ? "IS NULL" : " = " + String.valueOf(idl[0]));
-        return  "SELECT " +
-                "       P.id            AS \"id\"" +
-                "   ,   P.nome          AS \"nome\"" +
-                "   ,   P.cognome       AS \"cognome\"" +
-                "   ,   P.sesso         AS \"sesso\"" +
-                "   ,   AM.quotaparte   AS \"note\"" +
-                "   FROM persona P" +
-                "       INNER JOIN allocazione_processo AM ON AM.id_persona = P.id" +
-                "       INNER JOIN afferenza AF ON AF.id_persona = P.id" +
-                "   WHERE AM.id_processo = " + idP +
-                "       AND AF.id_rilevazione = " + idR +
-                "       AND AF.id_struttura_liv4 " + idL4 +
-                "       AND AF.id_struttura_liv3 " + idL3 +
-                "       AND AF.id_struttura_liv2 " + idL2 +
-                "       AND AF.id_struttura_liv1 " + idL1 +
-                "   ORDER BY P.cognome";
-    }
-
-
-    /**
-     * <p>Data una rilevazione e l'identificativo di un macroprocesso, restituisce
-     * un ArrayList di persone ad essi afferenti.</p>
-     *
-     * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param idType   tipo (macroprocesso o processo) dell'ID passato
-     * @param id       identificativo del macroprocesso di cui si vogliono recuperare le persone
-     * @param idSurvey identificativo della rilevazione di cui si vogliono recuperare le allocazioni
-     * @param idl      identificativi delle strutture di livello 4, 3, 2 e 1 (-1 se null)
-     * @return <code>ArrayList&lt;PersonBean&gt;</code> - un Vector di PersonBean, che rappresentano le persone allocate sul macroprocesso nel contesto della rilevazione
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    @SuppressWarnings({ "null" })
-    public ArrayList<PersonBean> getPeopleByStructureAndMacroOrProcess(PersonBean user,
-                                                                       String idType,
-                                                                       int id,
-                                                                       int idSurvey,
-                                                                       int[] idl)
-                                                                throws WebStorageException {
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-        PersonBean person = null;
-        AbstractList<PersonBean> people = new ArrayList<>();
-        try {
-            // TODO: Controllare se user è superuser
-            // Chiama il metodo che costruisce la query
-            String query = null;
-            if (idType.equals(PART_MACROPROCESS))
-                query = getQueryPeopleByStructureAndMacro(id, idSurvey, idl);
-            if (idType.equals(PART_PROCESS))
-                query = getQueryPeopleByStructureAndProcess(id, idSurvey, idl);
-            con = prol_manager.getConnection();
-            st = con.createStatement();
-            rs = st.executeQuery(query);
-            while (rs.next()) {
-                // Crea una persona vuota
-                person = new PersonBean();
-                // La valorizza col contenuto della query
-                BeanUtil.populate(person, rs);
-                // Aggiunge all'elenco
-                people.add(person);
-            }
-            // Tries (just tries) to engage the Garbage Collector
-            st = null;
-            // Let's go away
-            return (ArrayList<PersonBean>) people;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query delle persone su struttura.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-    
-    /**
-     * <p>Data una rilevazione e l'identificativo di un macroprocesso, restituisce
-     * un ArrayList di persone ad essi afferenti.</p>
-     *
-     * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param idMacro  identificativo del macroprocesso di cui si vogliono recuperare le persone
-     * @param idSurvey identificativo della rilevazione di cui si vogliono recuperare le allocazioni
-     * @param idl      identificativi delle strutture di livello 4, 3, 2 e 1 (-1 se null)
-     * @return <code>ArrayList&lt;PersonBean&gt;</code> - un Vector di PersonBean, che rappresentano le persone allocate sul macroprocesso nel contesto della rilevazione
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    public ArrayList<PersonBean> getPeopleByStructureAndMacro(PersonBean user,
-                                                              int idMacro,
-                                                              int idSurvey,
-                                                              int[] idl)
-                                                       throws WebStorageException {
-        return getPeopleByStructureAndMacroOrProcess(user, PART_MACROPROCESS, idMacro, idSurvey, idl);
-    }
-
-
-    /**
-     * <p>Data una rilevazione e l'identificativo di un processo, restituisce
-     * un ArrayList di persone ad essi afferenti.</p>
-     *
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param idProcess identificativo del macroprocesso di cui si vogliono recuperare le persone
-     * @param idSurvey  identificativo della rilevazione di cui si vogliono recuperare le allocazioni
-     * @param idl       identificativi delle strutture di livello 4, 3, 2 e 1 (-1 se null)
-     * @return <code>ArrayList&lt;PersonBean&gt;</code> - un Vector di PersonBean, che rappresentano le persone allocate sul macroprocesso nel contesto della rilevazione
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    public ArrayList<PersonBean> getPeopleByStructureAndProcess(PersonBean user,
-                                                                int idProcess,
-                                                                int idSurvey,
-                                                                int[] idl)
-                                                         throws WebStorageException {
-        return getPeopleByStructureAndMacroOrProcess(user, PART_PROCESS, idProcess, idSurvey, idl);
     }
 
 
@@ -1628,116 +533,6 @@ public class DBWrapper implements Query, Constants {
     }
 
 
-    /**
-     * <p>Data una rilevazione e l'identificativo di un macroprocesso o di un processo,
-     * restituisce un ArrayList di strutture ad essi collegate,
-     * oppure l'elenco di tutte le strutture collegate a tutti i macroprocessi
-     * o a tutti i processi (in funzione del flag type) se il valore del flag getAll
-     * vale -1.</p>
-     *
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param type    identifica il tipo (macroprocesso o processo) di cui si vogliono recuperare le strutture
-     * @param id        identificativo del macroprocesso di cui si vogliono recuperare le strutture
-     * @param getAll    intero rappresentante il valore convenzionale -1 se si desidera ottenere l'ultima rilevazione (o un valore qualunque se si cerca una specifica rilevazione)
-     * @param idSurvey  identificativo della rilevazione nel contesto della quale si vogliono recuperare le strutture
-     * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - un Vector di DepartmentBean, che rappresentano le strutture allocate sul macroprocesso nel contesto della rilevazione
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public ArrayList<ItemBean> getStructsByMacroOrProcess(PersonBean user,
-                                                          String type,
-                                                          int id,
-                                                          int getAll,
-                                                          int idSurvey)
-                                                   throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        int nextParam = NOTHING;
-        ItemBean item = null;
-        AbstractList<ItemBean> items = new ArrayList<>();
-        try {
-            // TODO: Controllare se user è superuser
-            con = prol_manager.getConnection();
-            if (type.equals(PART_MACROPROCESS))
-                pst = con.prepareStatement(GET_STRUCTS_BY_MACRO);
-            else if (type.equals(PART_PROCESS))
-                pst = con.prepareStatement(GET_STRUCTS_BY_PROCESS);
-            pst.clearParameters();
-            pst.setInt(++nextParam, idSurvey);
-            pst.setInt(++nextParam, idSurvey);
-            pst.setInt(++nextParam, idSurvey);
-            pst.setInt(++nextParam, idSurvey);
-            pst.setInt(++nextParam, idSurvey);
-            pst.setInt(++nextParam, id);
-            pst.setInt(++nextParam, getAll);
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                // Crea una tupla vuota
-                item = new ItemBean();
-                // La valorizza col contenuto della query
-                BeanUtil.populate(item, rs);
-                // Aggiunge all'elenco
-                items.add(item);
-            }
-            // Tries (just tries) to engage the Garbage Collector
-            pst = null;
-            // Let's go away
-            return (ArrayList<ItemBean>) items;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query delle strutture su macroprocesso.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-
-    /**
-     * <p>Data una rilevazione e l'identificativo di un macroprocesso, restituisce
-     * un ArrayList di strutture ad essi collegate.</p>
-     *
-     * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param idMacro  identificativo del macroprocesso di cui si vogliono recuperare le strutture
-     * @param idSurvey identificativo della rilevazione nel contesto della quale si vogliono recuperare le strutture
-     * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - un Vector di DepartmentBean, che rappresentano le strutture allocate sul macroprocesso nel contesto della rilevazione
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    public ArrayList<ItemBean> getStructsByMacro(PersonBean user,
-                                                 int idMacro,
-                                                 int idSurvey)
-                                          throws WebStorageException {
-        return getStructsByMacroOrProcess(user, PART_MACROPROCESS, idMacro, idMacro, idSurvey);
-    }
-
-
-    /**
-     * <p>Data una rilevazione e l'identificativo di un processo, restituisce
-     * un ArrayList di strutture ad essi collegate.</p>
-     *
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param idProcess identificativo del macroprocesso di cui si vogliono recuperare le strutture
-     * @param idSurvey  identificativo della rilevazione nel contesto della quale si vogliono recuperare le strutture
-     * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - un Vector di DepartmentBean, che rappresentano le strutture allocate sul macroprocesso nel contesto della rilevazione
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    public ArrayList<ItemBean> getStructsByProcess(PersonBean user,
-                                                   int idProcess,
-                                                   int idSurvey)
-                                            throws WebStorageException {
-        return getStructsByMacroOrProcess(user, PART_PROCESS, idProcess, idProcess, idSurvey);
-    }
-
-
     /* (non-Javadoc)
      * @see it.rol.Query#getQueryStructure(int, byte)
      */
@@ -1815,109 +610,6 @@ public class DBWrapper implements Query, Constants {
             return uo;
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query della struttura in base all'id.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-
-    /**
-     * <p>Restituisce l'elenco delle aree funzionali, depurate di valori non significativi
-     * per l'utente (p.es. "DATO ERRATO", "NON DEFINITO"...).</p>
-     *
-     * @param user  oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @return <code></code> - la lista di aree funzionali cercata
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public ArrayList<ItemBean> getAreeFunzionali(PersonBean user)
-                                          throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        ItemBean a = null;
-        ArrayList<ItemBean> aree = new ArrayList<>();
-        // TODO: Controllare se user è superuser
-        try {
-            con = prol_manager.getConnection();
-            pst = con.prepareStatement(GET_AREE_FUNZ);
-            pst.clearParameters();
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                // Crea una struttura vuota
-                a = new ItemBean();
-                // La valorizza col contenuto della query
-                BeanUtil.populate(a, rs);
-                // La aggiunge all'elenco
-                aree.add(a);
-            }
-            // Tries (just tries) to engage the Garbage Collector
-            pst = null;
-            // Get out
-            return aree;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query di selezione delle aree funzionali.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-
-
-    /**
-     * <p>Restituisce la lista dei ruoli giuridici.</p>
-     *
-     * @param user  oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @return <code>ArrayList&lt;ItemBean&gt;</code> - la lista di ruoli giuridici cercata
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public ArrayList<ItemBean> getRuoliGiuridici(PersonBean user)
-                                          throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        ItemBean rg = null;
-        ArrayList<ItemBean> qualifiche = new ArrayList<>();
-        // TODO: Controllare se user è superuser
-        try {
-            con = prol_manager.getConnection();
-            pst = con.prepareStatement(GET_ROLES);
-            pst.clearParameters();
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                // Crea una struttura vuota
-                rg = new ItemBean();
-                // La valorizza col contenuto della query
-                BeanUtil.populate(rg, rs);
-                // La aggiunge all'elenco
-                qualifiche.add(rg);
-            }
-            // Tries (just tries) to engage the Garbage Collector
-            pst = null;
-            // Get out
-            return qualifiche;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query di selezione dei ruoli giuridici.\n";
             LOG.severe(msg);
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
@@ -3304,7 +1996,8 @@ public class DBWrapper implements Query, Constants {
     
     /**
      * <p>Estrae un elenco di risposte ad una serie di quesiti 
-     * associati a una data rilevazione.</p>
+     * in funzione di una serie di parametri 
+     * e nel contesto di una data rilevazione.</p>
      *
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param params    mappa contenente i parametri di navigazione
@@ -3331,6 +2024,188 @@ public class DBWrapper implements Query, Constants {
                 int limit = questionAmounts.get(survey.getNome()).intValue();
                 // Costruisce la query di selezione delle risposte
                 String query = getQueryAnswers(params, survey.getId(), limit, GET_ALL_BY_CLAUSE, GET_ALL);
+                // Prepara l'estrazione
+                pst = con.prepareStatement(query);
+                pst.clearParameters();
+                rs = pst.executeQuery();
+                // Per ogni record
+                while (rs.next()) {
+                    // Crea un oggetto per la risposta
+                    answer = new QuestionBean();
+                    // Lo valorizza col contenuto della query
+                    BeanUtil.populate(answer, rs);
+                    // Recupera il quesito della risposta sotto forma di lista tramite il metodo ricorsivo
+                    ArrayList<QuestionBean> questionAsList = getQuestions(user, survey, answer.getLivello(), answer.getLivello());
+                    // Assunzione: la relazione tra quesito e risposta è 1 : 1
+                    question = questionAsList.get(NOTHING);
+                    // Aggiunge al quesito la risposta corrente
+                    question.setAnswer(answer);
+                    // Lo aggiunge alla lista di risposte trovate
+                    answers.add(question);
+                }
+                // Closes the statement
+                pst.close();
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<QuestionBean>) answers;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio non recuperabile; problema nel metodo di estrazione delle risposte.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /* (non-Javadoc)
+     * @see it.rol.Query#getQueryAnswers(ItemBean, int);
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String getQueryAnswers(InterviewBean params,
+                                  int idSurvey) 
+                           throws AttributoNonValorizzatoException,
+                                  WebStorageException {
+        String idStrLiv1 = null;
+        String idStrLiv2 = null;
+        String idStrLiv3 = null;
+        String idStrLiv4 = null;
+        // Controllo sull'input: se manca data o ora è inutile perdere tempo
+        if (params.getDataUltimaModifica() == null || params.getDataUltimaModifica() == new Date(0)) {
+            String msg = FOR_NAME + "Impossibile recuperare le risposte in assenza di una data significativa.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg);
+        }
+        if (params.getOraUltimaModifica() == null || params.getOraUltimaModifica().equals(VOID_STRING)) {
+            String msg = FOR_NAME + "Impossibile recuperare le risposte in assenza di un\'ora significativa.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg);
+        }
+        // Preparazione dei parametri
+        if (params.getStruttura() != null) {
+            idStrLiv1 = (params.getStruttura().getId() > BEAN_DEFAULT_ID) ? String.valueOf(params.getStruttura().getId()) : VOID_STRING;
+            if (params.getStruttura().getFiglie() != null) {
+                idStrLiv2 = (params.getStruttura().getFiglie().get(NOTHING).getId() > BEAN_DEFAULT_ID) ? String.valueOf(params.getStruttura().getFiglie().get(NOTHING).getId()) : VOID_STRING;
+                if (params.getStruttura().getFiglie().get(NOTHING).getFiglie() != null) {
+                    idStrLiv3 = (params.getStruttura().getFiglie().get(NOTHING).getFiglie().get(NOTHING).getId() > BEAN_DEFAULT_ID) ? String.valueOf(params.getStruttura().getFiglie().get(NOTHING).getFiglie().get(NOTHING).getId()) : VOID_STRING;
+                    if (params.getStruttura().getFiglie().get(NOTHING).getFiglie().get(NOTHING).getFiglie() != null) {
+                        idStrLiv4 = (params.getStruttura().getFiglie().get(NOTHING).getFiglie().get(NOTHING).getFiglie().get(NOTHING).getId() > BEAN_DEFAULT_ID) ? String.valueOf(params.getStruttura().getFiglie().get(NOTHING).getFiglie().get(NOTHING).getFiglie().get(NOTHING).getId()) : VOID_STRING;
+                    }
+                }
+            }
+        }
+
+        String idProLiv1 = /*(params.getCod1() > BEAN_DEFAULT_ID) ? String.valueOf(params.getCod1()) :*/ VOID_STRING;
+        String idProLiv2 = /*(params.getCod2() > BEAN_DEFAULT_ID) ? String.valueOf(params.getCod2()) :*/ VOID_STRING;
+        String idProLiv3 = /*(params.getCod3() > BEAN_DEFAULT_ID) ? String.valueOf(params.getCod3()) :*/ VOID_STRING;
+        String date = String.valueOf(params.getDataUltimaModifica());
+        String time = String.valueOf(params.getOraUltimaModifica());
+        // Clausole
+        StringBuffer clause = new StringBuffer("R.id_rilevazione = " + idSurvey);
+        // Filtro per id struttura_*
+        if (idStrLiv1 != null && !idStrLiv1.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv1 = " + idStrLiv1);
+        }
+        if (idStrLiv2 != null && !idStrLiv2.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv2 = " + idStrLiv2);
+        }
+        if (idStrLiv3 != null && !idStrLiv3.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv3 = " + idStrLiv3);
+        }
+        if (idStrLiv4 != null && !idStrLiv4.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv4 = " + idStrLiv4);
+        }
+        // Filtro per id *processo_at
+        if (!idProLiv1.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_macroprocesso_at = " + idProLiv1);
+        }
+        if (!idProLiv2.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_processo_at = " + idProLiv2);
+        }
+        if (!idProLiv3.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_sottoprocesso_at = " + idProLiv3);
+        }
+        // Filtro per data e ora
+        if (!date.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.data_ultima_modifica = '" + date + "'");
+        }
+        if (!time.equals(VOID_STRING)) {
+            //String timeFormat = time.replaceAll("_", ":")
+            clause.append(BLANK_SPACE).append("AND R.ora_ultima_modifica = '" + time + "'");
+        }
+        // Query
+        final String GET_ANSWERS =
+                "SELECT DISTINCT" +
+                "       R.id                        AS \"id\"" +
+                "   ,   R.valore                    AS \"nome\"" +
+                "   ,   R.note                      AS \"informativa\"" +
+                "   ,   R.ordinale                  AS \"ordinale\"" +
+                "   ,   R.id_struttura_liv1         AS \"value1\"" +
+                "   ,   R.id_struttura_liv2         AS \"value2\"" +
+                "   ,   R.id_struttura_liv3         AS \"value3\"" +
+                "   ,   R.id_struttura_liv4         AS \"value4\"" +
+                "   ,   R.id_macroprocesso_at       AS \"cod1\""   +
+                "   ,   R.id_processo_at            AS \"cod2\""   +
+                "   ,   R.id_sottoprocesso_at       AS \"cod3\""   +
+                "   ,   R.id_rilevazione            AS \"cod4\"" + 
+                "   ,   R.id_quesito                AS \"livello\"" +
+                "   ,   R.data_ultima_modifica      AS \"extraInfo\"" +
+                "   ,   R.ora_ultima_modifica       AS \"labelWeb\"" +
+                "   ,   AM.id" +
+                "   FROM risposta R" +
+                "       INNER JOIN quesito Q ON R.id_quesito = Q.id" +
+                "       INNER JOIN ambito_analisi AM ON Q.id_ambito_analisi = AM.id" +
+                "   WHERE " + clause +
+                "   ORDER BY R.data_ultima_modifica DESC, R.ora_ultima_modifica DESC, AM.id"; 
+        return GET_ANSWERS;
+    }
+    
+    
+    /**
+     * <p>Estrae un elenco di risposte ad una serie di quesiti 
+     * in funzione di una serie di parametri 
+     * e nel contesto di una data rilevazione.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param params    oggetto contenente i parametri di navigazione
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - la lista di risposte trovate
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public ArrayList<QuestionBean> getAnswers(PersonBean user,
+                                              InterviewBean params,
+                                              CodeBean survey)
+                                       throws WebStorageException { 
+        // Resource 'con' should be managed by try-with-resource
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            QuestionBean question = null;
+            QuestionBean answer = null;
+            AbstractList<QuestionBean> answers = new ArrayList<>();
+            // TODO: Controllare se user è superuser
+            try {
+                // Costruisce la query di selezione delle risposte
+                String query = getQueryAnswers(params, survey.getId());
                 // Prepara l'estrazione
                 pst = con.prepareStatement(query);
                 pst.clearParameters();
@@ -3682,13 +2557,11 @@ public class DBWrapper implements Query, Constants {
      * Infine, restituisce la lista di InterviewBean.</p> 
      *
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param params    mappa contenente i parametri di navigazione
      * @param survey    oggetto contenente i dati della rilevazione
      * @return <code>ArrayList&lt;InterviewBean&gt;</code> - la lista di interviste trovate
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     public ArrayList<InterviewBean> getInterviewsBySurvey(PersonBean user,
-                                                          HashMap<String, LinkedHashMap<String, String>> params,
                                                           CodeBean survey)
                                                    throws WebStorageException {
         PreparedStatement pst = null;
@@ -5067,6 +3940,479 @@ public class DBWrapper implements Query, Constants {
                 String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
                 LOG.severe(msg);
                 throw new WebStorageException(msg, e);
+        }
+    }
+    
+    
+    /* ********************************************************** *
+     *                      Metodi "di servizio"                  *
+     * ********************************************************** */
+
+    /**
+     * <p>Restituisce un Vector di Command.</p>
+     *
+     * @return <code>Vector&lt;ItemBean&gt;</code> - lista di ItemBean rappresentanti ciascuno una Command dell'applicazione
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<ItemBean> lookupCommand()
+                                   throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        ItemBean cmd = null;
+        Vector<ItemBean> commands = new Vector<>();
+        try {
+            con = prol_manager.getConnection();
+            pst = con.prepareStatement(LOOKUP_COMMAND);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                cmd = new ItemBean();
+                BeanUtil.populate(cmd, rs);
+                commands.add(cmd);
+            }
+            return commands;
+        } catch (SQLException sqle) {
+            throw new WebStorageException(FOR_NAME + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = "Connessione al database in stato inconsistente!\nAttenzione: la connessione vale " + con + "\n";
+                LOG.severe(msg);
+                throw new WebStorageException(FOR_NAME + msg + npe.getMessage(), npe);
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage(), sqle);
+            }
+        }
+    }
+
+
+    /**
+     * <p>Restituisce
+     * <ul>
+     * <li>il massimo valore del contatore identificativo di una
+     * tabella il cui nome viene passato come argomento</li>
+     * <li>oppure zero se nella tabella non sono presenti record.</li>
+     * </ul></p>
+     *
+     * @param table nome della tabella di cui si vuol recuperare il max(id)
+     * @return <code>int</code> - un intero che rappresenta il massimo valore trovato, oppure zero se non sono stati trovati valori
+     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method", "null" })
+    public int getMax(String table)
+               throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        try {
+            int count = 0;
+            String query = SELECT_MAX_ID + table;
+            con = prol_manager.getConnection();
+            pst = con.prepareStatement(query);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+            return count;
+        }  catch (SQLException sqle) {
+            String msg = FOR_NAME + "Impossibile recuperare il max(id).\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+
+
+    /**
+     * <p>Restituisce
+     * <ul>
+     * <li>il minimo valore del contatore identificativo di una
+     * tabella il cui nome viene passato come argomento</li>
+     * <li>oppure zero se nella tabella non sono presenti record.</li>
+     * </ul></p>
+     *
+     * @param table nome della tabella di cui si vuol recuperare il min(id)
+     * @return <code>int</code> - un intero che rappresenta il minimo valore trovato, oppure zero se non sono stati trovati valori
+     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method", "null" })
+    public int getMin(String table)
+               throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        try {
+            int count = 0;
+            String query = SELECT_MIN_ID + table;
+            con = prol_manager.getConnection();
+            pst = con.prepareStatement(query);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+            return count;
+        }  catch (SQLException sqle) {
+            String msg = FOR_NAME + "Impossibile recuperare il max(id).\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+
+    
+    /**
+     * <p>Restituisce
+     * <ul>
+     * <li>il massimo codice del rischio se per tale categoria di codice  
+     * ne sono stati gi&agrave; inseriti</li>
+     * <li>oppure il primo codice se nella tabella non sono presenti rischi 
+     * inseriti nella categoria identificata da quel tipo di codice.</li>
+     * </ul></p>
+     *
+     * @param code prefisso del codice di cui si vuol recuperare il primo codice nuovo utile all'inserimento
+     * @return <code>String</code> - il codice utile all'inserimento
+     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public String getMaxRiskCode(String code)
+                          throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            CodeBean prevCode = null;
+            String nextCode = null;
+            StringBuffer codeFormatted = new StringBuffer()
+                    .append(code)
+                    .append(PER_CENT);
+            try {
+                pst = con.prepareStatement(SELECT_MAX_RISK_CODE);
+                pst.clearParameters();
+                pst.setString(1, String.valueOf(codeFormatted));
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    prevCode = new CodeBean();
+                    BeanUtil.populate(prevCode, rs);
+                    String prevCodeAsString = prevCode.getNome();
+                    if (prevCodeAsString != null && !prevCodeAsString.equals(VOID_STRING)) {
+                        // Identifica l'ultimo progressivo per la tipologia di codice data
+                        int start = prevCodeAsString.indexOf(DOT);
+                        int maxCode = Integer.parseInt(prevCodeAsString.substring(++start, prevCodeAsString.length()));
+                        // Lo incrementa di un'unità
+                        ++maxCode;
+                        // Genera il nuovo codice
+                        nextCode = code + DOT + Utils.parseString(maxCode);
+                    } else {
+                        nextCode = code + DOT + "01";
+                    }
+                } else {
+                    nextCode = code + DOT + "01";
+                }
+                return nextCode;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Probabile problema nel recupero del codice del rischio.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (ArrayIndexOutOfBoundsException aiobe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di stringhe.\n" + aiobe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, aiobe);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Problema nella conversione da String a intero.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + nfe.getMessage(), nfe);
+            }  catch (SQLException sqle) {
+                String msg = FOR_NAME + "Impossibile recuperare il max(code).\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+
+    /**
+     * <p>Restituisce il primo valore trovato data una query 
+     * passata come parametro</p>
+     *
+     * @param query da eseguire
+     * @return <code>String</code> - stringa restituita
+     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public String get(String query)
+               throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        String value = null;
+        try {
+            con = prol_manager.getConnection();
+            pst = con.prepareStatement(query);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                value = rs.getString(1);
+            }
+            return value;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Impossibile recuperare un valore.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+
+
+    /**
+     * <p>Restituisce un CodeBean contenente la password criptata e il seme
+     * per poter verificare le credenziali inserite dall'utente.</p>
+     *
+     * @param username   username della persona che ha richiesto il login
+     * @return <code>CodeBean</code> - CodeBean contenente la password criptata e il seme
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public CodeBean getEncryptedPassword(String username)
+                                  throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        CodeBean password = null;
+        int nextInt = 0;
+        try {
+            con = prol_manager.getConnection();
+            pst = con.prepareStatement(GET_ENCRYPTEDPASSWORD);
+            pst.clearParameters();
+            pst.setString(++nextInt, username);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                password = new CodeBean();
+                BeanUtil.populate(password, rs);
+            }
+            return password;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+
+
+    /**
+     * <p>Restituisce un PersonBean rappresentante un utente loggato.</p>
+     *
+     * @param username  username della persona che ha eseguito il login
+     * @param password  password della persona che ha eseguito il login
+     * @return <code>PersonBean</code> - PersonBean rappresentante l'utente loggato
+     * @throws it.rol.exception.WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id della persona non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public PersonBean getUser(String username,
+                              String password)
+                       throws WebStorageException, AttributoNonValorizzatoException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs, rs1 = null;
+        PersonBean usr = null;
+        int nextInt = 0;
+        Vector<CodeBean> vRuoli = new Vector<>();
+        try {
+            con = prol_manager.getConnection();
+            pst = con.prepareStatement(GET_USR);
+            pst.clearParameters();
+            pst.setString(++nextInt, username);
+            pst.setString(++nextInt, password);
+            pst.setString(++nextInt, password);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                usr = new PersonBean();
+                BeanUtil.populate(usr, rs);
+                // Se ha trovato l'utente, ne cerca il ruolo
+                pst = null;
+                pst = con.prepareStatement(GET_RUOLOUTENTE);
+                pst.clearParameters();
+                pst.setString(1, username);
+                rs1 = pst.executeQuery();
+                while(rs1.next()) {
+                    CodeBean ruolo = new CodeBean();
+                    BeanUtil.populate(ruolo, rs1);
+                    vRuoli.add(ruolo);
+                }
+                usr.setRuoli(vRuoli);
+            }
+            // Just tries to engage the Garbage Collector
+            pst = null;
+            // Get Out
+            return usr;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Problema in una conversione di tipi nella query dell\'utente.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + cce.getMessage(), cce);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+
+
+    /**
+     * <p>Verifica se per l'utente loggato esiste una tupla che indica
+     * un precedente login.
+     * <ul>
+     * <li>Se non esiste una tupla per l'utente loggato, la inserisce.</li>
+     * <li>Se esiste una tupla per l'utente loggato, la aggiorna.</li>
+     * </ul>
+     * In questo modo, il metodo gestisce nella tabella degli accessi
+     * sempre l'ultimo accesso e non quelli precedenti.</p>
+     *
+     * @param username      login dell'utente (username usato per accedere)
+     * @throws WebStorageException se si verifica un problema SQL o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null" })
+    public void manageAccess(String username)
+                      throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        CodeBean accessRow = null;
+        int nextParam = NOTHING;
+        try {
+            // Ottiene la connessione
+            con = prol_manager.getConnection();
+            // Verifica se la login abbia già fatto un accesso
+            pst = con.prepareStatement(GET_ACCESSLOG_BY_LOGIN);
+            pst.clearParameters();
+            pst.setString(++nextParam, username);
+            rs = pst.executeQuery();
+            if (rs.next()) {    // Esiste già un accesso: lo aggiorna
+                accessRow = new CodeBean();
+                BeanUtil.populate(accessRow, rs);
+                pst = null;
+                con.setAutoCommit(false);
+                pst = con.prepareStatement(UPDATE_ACCESSLOG_BY_USER);
+                pst.clearParameters();
+                pst.setString(nextParam, username);
+                // Campi automatici: ora ultimo accesso, data ultimo accesso
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                pst.setInt(++nextParam, accessRow.getId());
+                pst.executeUpdate();
+                con.commit();
+            } else {            // Non esiste un accesso: ne crea uno nuovo
+                // Chiude e annulla il PreparedStatement rimasto inutilizzato
+                pst.close();
+                pst = null;
+                // BEGIN;
+                con.setAutoCommit(false);
+                pst = con.prepareStatement(INSERT_ACCESSLOG_BY_USER);
+                pst.clearParameters();
+                int nextVal = getMax("access_log") + 1;
+                pst.setInt(nextParam, nextVal);
+                pst.setString(++nextParam, username);
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                pst.setTime(++nextParam, Utils.getCurrentTime());
+                pst.executeUpdate();
+                // END;
+                con.commit();
+            }
+            String msg = "Si e\' loggato l\'utente: " + username +
+                         " in data:" + Utils.format(Utils.getCurrentDate()) +
+                         " alle ore:" + Utils.getCurrentTime() +
+                         ".\n";
+            LOG.info(msg);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Probabile problema nel recupero dell'id dell\'ultimo accesso\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + npe.getMessage(), npe);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
         }
     }
 
