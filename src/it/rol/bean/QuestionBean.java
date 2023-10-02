@@ -103,6 +103,14 @@ public class QuestionBean extends ItemBean {
         this.childQuestions = null;
     }
     
+    
+    /**
+     * Costruttore parametrico
+     */
+    public QuestionBean(Integer idAsInt) {
+        super.setId(idAsInt.intValue());
+    }
+    
  
     /* **************************************************** *
      *  Metodi getter e setter per formulazione del quesito *
@@ -248,10 +256,10 @@ public class QuestionBean extends ItemBean {
 
     /**
      * Imposta i quesiti "di cui" del quesito corrente.
-     * @param childs i quesiti "di cui" del quesito corrente
+     * @param children i quesiti "di cui" del quesito corrente
      */
-    public void setChildQuestions(ArrayList<QuestionBean> childs) {
-        this.childQuestions = childs;
+    public void setChildQuestions(ArrayList<QuestionBean> children) {
+        this.childQuestions = children;
     }
 
     
