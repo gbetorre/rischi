@@ -35,11 +35,15 @@ package it.rol.command;
 
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -439,14 +443,14 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *          SELECT List of Interview Part           *
                              * ************************************************ */
-                            interviews = db.getInterviewsBySurvey(user, params, ConfigManager.getSurvey(codeSur));
+                            interviews = db.getInterviewsBySurvey(user, ConfigManager.getSurvey(codeSur));
                         }
                         fileJspT = nomeFile.get(part);
                     } else {
                         /* ************************************************ *
                          *          SELECT List of Interview Part           *
                          * ************************************************ */
-                        interviews = db.getInterviewsBySurvey(user, params, ConfigManager.getSurvey(codeSur));
+                        interviews = db.getInterviewsBySurvey(user, ConfigManager.getSurvey(codeSur));
                         fileJspT = nomeFileElencoQuest;
                     }
                 }
@@ -755,12 +759,12 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @throws WebStorageException se si verifica un problema a livello di query o di estrazione
      * @throws CommandException se si verifica un problema nel recupero di valori o in qualche altro tipo di puntamento
      */
-    private static HashMap<String, LinkedList<Integer>> retrieveQuestionsByIndicators(PersonBean user, 
-                                                                                      ArrayList<QuestionBean> answers, 
-                                                                                      CodeBean survey, 
-                                                                                      DBWrapper db)
-                                                                               throws WebStorageException, 
-                                                                                      CommandException {
+    public static HashMap<String, LinkedList<Integer>> retrieveQuestionsByIndicators(PersonBean user, 
+                                                                                     ArrayList<QuestionBean> answers, 
+                                                                                     CodeBean survey, 
+                                                                                     DBWrapper db)
+                                                                              throws WebStorageException, 
+                                                                                     CommandException {
         // Recupera i quesiti per il calcolo degli indicatori
         return db.getQuestionsByIndicator(user, survey);
         /*
@@ -970,9 +974,9 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @return <code>HashMap&lt;Integer&comma; QuestionBean&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il quesito e per valore l'oggetto risposta
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
-    private static HashMap<Integer, QuestionBean> decantAnswers(ArrayList<QuestionBean> questions, 
-                                                                ArrayList<QuestionBean> answers)
-                                                         throws CommandException {
+    public static HashMap<Integer, QuestionBean> decantAnswers(ArrayList<QuestionBean> questions, 
+                                                               ArrayList<QuestionBean> answers)
+                                                        throws CommandException {
         HashMap<Integer, QuestionBean> answersByQuestions = new HashMap<>();
         try {
             for (QuestionBean question : questions) {
@@ -1013,8 +1017,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @return <code>HashMap&lt;String&comma; CodeBean&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice indicatore e per valore l'oggetto indicatore
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
-    private static HashMap<String, CodeBean> decantIndicators(ArrayList<CodeBean> indicators)
-                                                       throws CommandException {
+    public static HashMap<String, CodeBean> decantIndicators(ArrayList<CodeBean> indicators)
+                                                      throws CommandException {
         HashMap<String, CodeBean> indicatorsByCode = new HashMap<>();
         try {
             for (CodeBean value : indicators) {
@@ -1075,12 +1079,17 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             for (Integer idQ : algorythmIds) {
                 // Per ogni quesito recupera il tipo di quesito
                 QuestionBean question = answerByQuestion.get(idQ);
-                // II controllo: nessuna risposta puo' valere (null)
+                // II controllo: nessun quesito puo' valere null
+                if (question == null) {
+                    reason.append("Quesito ID " + idQ + " nullo ");
+                    return false;
+                }
+                // III controllo: nessuna risposta puo' valere (null)
                 if (question.getNome() == null) {
                     reason.append("Risposta al quesito " + question.getCodice() + " nulla ");
                     return false;
                 }
-                // III controllo: la risposta deve essere congruente con il tipo di quesito
+                // IV controllo: la risposta deve essere congruente con il tipo di quesito
                 if (question.getTipo().getId() == ELEMENT_LEV_1) {        // Se il quesito è di tipo Si/No
                     // ...si applica il principio del terzo escluso
                     if (!(question.getAnswer().getNome().equalsIgnoreCase("SI") || question.getAnswer().getNome().equalsIgnoreCase("NO"))) {
@@ -1152,10 +1161,10 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @return HashMap&lt;String&comma; InterviewBean&gt; - tabella contenente tutti i valori degli indicatori e anche quelli degli indici generali, indicizzati per nome
      * @throws CommandException se si verifica un problema nel calcolo di un indicatore, nel recupero di dati o in qualche tipo di puntamento
      */
-    private static HashMap<String, InterviewBean> compute(HashMap<String, LinkedList<Integer>> questByIndicator, 
-                                                          HashMap<Integer, QuestionBean> answerByQuestion,
-                                                          HashMap<String, CodeBean> indicatorByCode) 
-                                                   throws CommandException {
+    public static HashMap<String, InterviewBean> compute(HashMap<String, LinkedList<Integer>> questByIndicator, 
+                                                         HashMap<Integer, QuestionBean> answerByQuestion,
+                                                         HashMap<String, CodeBean> indicatorByCode) 
+                                                  throws CommandException {
         try {
 
             // Mappa destinata a contenere gli indicatori indicizzati per nome
@@ -1203,16 +1212,23 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             ArrayList<QuestionBean> quesiti = new ArrayList<>();
             ProcessBean extraInfo = new ProcessBean();
             String result = null;
+            StringBuffer reason = new StringBuffer(VOID_STRING);
             // Oggetti id quesiti necessari per il calcolo dell'indicatore
             Integer id20 = new Integer(20);
             Integer id21 = new Integer(21);
+            LinkedList<Integer> algorythmIds = new LinkedList<>();
+            algorythmIds.add(id20);
+            algorythmIds.add(id21);
             // Prepara la lista di quesiti che permettono di calcolare l'indicatore
             quesiti.add(answerByQuestion.get(id20));
             quesiti.add(answerByQuestion.get(id21));
             // Memorizza il tipo dell'indicatore corrente
             extraInfo.setTipo(P);
-            // I quesiti dichiarati devono risultare associati all'indicatore P1
-            if (allowedIds.contains(id20) && allowedIds.contains(id21)) {
+            // Controlli lato server sulla validità delle risposte
+            if (!validateAnswers(algorythmIds, allowedIds, answerByQuestion, reason)) {
+                extraInfo.setDescrizioneStatoCorrente(String.valueOf(reason));
+                result = ERR;
+            } else {
                 // 1° test
                 if (answerByQuestion.get(id20).getAnswer().getNome().equalsIgnoreCase("SI")) {
                     try {
@@ -1233,9 +1249,6 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                 } else {
                     result = LIVELLI_RISCHIO[1];
                 }
-            // Se i quesiti associati a P1 non risultano essere quelli considerati c'è un problema da qualche parte
-            } else {
-                result = ERR;
             }
             // Valorizza e restituisce l'oggetto per l'indicatore
             p1.setNome(P1);
@@ -1659,6 +1672,77 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg + e.getMessage(), e);
         }
+    }
+    
+    
+    /**
+     * <p>Implementa l'algoritmo "In dubio pro peior" (nel dubbio si
+     * consideri il caso peggiore, ovvero il rischio pi&uacute; alto)
+     * in caso esistano pi&uacute; valori per lo stesso indicatore,
+     * in particolare valori diversi raccolti nel contesto di interviste diverse.<br />
+     * Controlla se effettivamente vi possono essere più valori per lo stesso indicatore;
+     * se vi sono pi&uacute; interviste, procede alla scelta.</p>
+     * <p>Effettua una ricerca lineare dal momento che il numero di interviste
+     * in cui lo stesso processo pu&ograve; essere esaminato sar&agrave; sempre
+     * molto basso (in genere per ogni processo c'&egrave; al pi&uacute; un'intervista)
+     * per cui, essendo il presente metodo pi&uacute; implementato a fini precauzionali
+     * (pu&ograve; sempre verificarsi il caso in cui lo stesso processo sia
+     * esaminato nel contesto di due interviste rivolte a due differenti strutture)
+     * non pareva necessario implementare un algoritmo di ricerca binario (divide
+     * et impera). Al limite, per velocizzare i confronti, potrebbe essere utile
+     * effettuare un ordinamento prima del confronto, o meglio ancora utilizzare
+     * in partenza strutture con insertion order, come LinkedHashMap 
+     * piuttosto che HashMap.
+     * 
+     * @param interviews    elenco di interviste sui cui indicatori applicare l'algoritmo
+     * @return <code>HashMap&lt;String&comma; InterviewBean&gt;</code> - tabella contenente i valori scelti per gli indicatori, indicizzati per codice
+     * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
+     */
+    public static HashMap<String, InterviewBean> compare(ArrayList<InterviewBean> interviews) 
+                                    throws CommandException {
+        HashMap<String, InterviewBean> indicators = null;
+        // Controllo sull'input
+        if (interviews == null || interviews.isEmpty()) {
+            return indicators;
+        }
+        try {
+            // Recupera la tabella della prima intervista
+            HashMap<String, InterviewBean> indicatorsOrig = interviews.get(NOTHING).getIndicatori();
+            // La clona altrimenti, manipolandola, si manipolerebbe (malissimo) il valore del parametro 
+            indicators = (HashMap<String, InterviewBean>) indicatorsOrig.clone();
+            // Se il processo di dato id è stato sondato in solo 1 intervista i valori già li abbiamo
+            if (interviews.size() > ELEMENT_LEV_1) {
+                // ...se invece c'è più di un'intervista ci sono tanti valori di indicatori quante sono le interviste
+                for (InterviewBean interview : interviews) {
+                    HashMap<String, InterviewBean> indics = interview.getIndicatori();
+                    Set<String> keys = indics.keySet();
+                    for (String key : keys) {
+                        // Indicatore dell'intervista corrente
+                        InterviewBean value = indics.get(key);
+                        // Indicatore della prima intervista
+                        InterviewBean first = indicators.get(key);
+                        // Recupera gli indici del rischio corrente... 
+                        int riskIndexCurrent = Arrays.asList(LIVELLI_RISCHIO).indexOf(value.getInformativa());
+                        // ...e di quello della prima intervista
+                        int riskIndexFirst = Arrays.asList(LIVELLI_RISCHIO).indexOf(first.getInformativa());
+                        // Considera il rischio più alto
+                        if (riskIndexFirst < riskIndexCurrent) {
+                            // Fa lo switch (sostituisce i valori iniziali con quelli correnti)
+                            indicators.put(key, value);
+                        }
+                    }
+                }
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return indicators;
     }
     
 }
