@@ -39,12 +39,9 @@ import java.io.IOException;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -57,13 +54,15 @@ import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Data;
 import it.rol.Main;
+import it.rol.Query;
 import it.rol.Utils;
 import it.rol.bean.ActivityBean;
 import it.rol.bean.CodeBean;
-import it.rol.bean.DepartmentBean;
+import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
+import it.rol.bean.QuestionBean;
 import it.rol.bean.RiskBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
@@ -158,9 +157,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        nomeFile.put(PART_PROCESS, nomeFileDettaglio);
-        nomeFile.put(PART_OUTPUT, nomeFileOutputs);
-        nomeFile.put(PART_FACTORS, nomeFileFattori);
+        nomeFile.put(PART_PROCESS,      nomeFileDettaglio);
+        nomeFile.put(PART_OUTPUT,       nomeFileOutputs);
+        nomeFile.put(PART_FACTORS,      nomeFileFattori);
         nomeFile.put(PART_INSERT_F_R_P, nomeFileAddFactor);
     }
 
@@ -217,6 +216,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         LinkedList<ItemBean> bC = null;
         // Tabella che conterrà i valori dei parametri passati dalle form
         HashMap<String, LinkedHashMap<String, String>> params = null;
+        // Tabella degli indicatori con i valori elaborati relativi a un processo
+        HashMap<String, InterviewBean> indicators = null;
         // Flag di scrittura
         Boolean writeAsObject = (Boolean) req.getAttribute("w");
         boolean write = writeAsObject.booleanValue();
@@ -319,6 +320,15 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
                             // Recupera Rischi estratti in base al processo
                             ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
+                            // Recupera le interviste in cui il processo è stato esaminato
+                            ArrayList<InterviewBean> listaInterviste = retrieveInterviews(user, idP, liv, codeSur, db);
+                            /* Se sul processo sono state effettuate interviste
+                            if (!listaInterviste.isEmpty()) {
+                                // Recupera gli indicatori con i valori finali di rischio ottenuti a partire dai dati grezzi delle interviste
+                                indicators = AuditCommand.compare(listaInterviste);
+                            }*/
+                            // Recupera gli indicatori con i valori finali di rischio ottenuti a partire dai dati grezzi delle interviste
+                            indicators = AuditCommand.compare(listaInterviste);
                             // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                             processElements = new HashMap<>();
                             // Imposta nella tabella le liste trovate
@@ -326,6 +336,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             processElements.put(TIPI_LISTE[1], listaFasi);
                             processElements.put(TIPI_LISTE[2], listaOutput);
                             processElements.put(TIPI_LISTE[3], listaRischi);
+                            processElements.put(TIPI_LISTE[4], listaInterviste);
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
@@ -359,7 +370,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             fileJspT = nomeFile.get(part);
                         } else if (part.equalsIgnoreCase(PART_INSERT_F_R_P)) {
                             /* **************************************************** *
-                             * SHOWS Form to LINK A FACTOR TO A Risk into a Process *
+                             * SHOWS Form to LINK A Factor TO A Risk INTO A Process *
                              * **************************************************** */
                             // Deve recuperare l'elenco completo dei fattori abilitanti
                             factors = db.getFactors(user, survey);
@@ -405,31 +416,39 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
-        // Imposta nella request elenco completo input di processo, se presenti
+        // Imposta in request elenco completo input di processo, se presenti
         if (processElements != null && !processElements.get(TIPI_LISTE[0]).isEmpty()) {
             req.setAttribute("listaInput", processElements.get(TIPI_LISTE[0]));
         }
-        // Imposta nella request elenco completo fasi di processo, se presenti
+        // Imposta in request elenco completo fasi di processo, se presenti
         if (processElements != null && !processElements.get(TIPI_LISTE[1]).isEmpty()) {
             req.setAttribute("listaFasi", processElements.get(TIPI_LISTE[1]));
         }
-        // Imposta nella request elenco completo output di processo, se presenti
+        // Imposta in request elenco completo output di processo, se presenti
         if (processElements != null && !processElements.get(TIPI_LISTE[2]).isEmpty()) {
             req.setAttribute("listaOutput", processElements.get(TIPI_LISTE[2]));
         }
-        // Imposta nella request elenco completo rischi di processo, se presenti
+        // Imposta in request elenco completo rischi di processo, se presenti
         if (processElements != null && !processElements.get(TIPI_LISTE[3]).isEmpty()) {
             req.setAttribute("listaRischi", processElements.get(TIPI_LISTE[3]));
         }
-        // Imposta nella request elenco completo degli output
+        // Imposta in request elenco completo interviste che hanno sondato il processo, se presenti
+        if (processElements != null && !processElements.get(TIPI_LISTE[4]).isEmpty()) {
+            req.setAttribute("listaInterviste", processElements.get(TIPI_LISTE[4]));
+        }
+        // Imposta in request elenco indicatori di rischio con i valori raffinati
+        if (indicators != null) {
+            req.setAttribute("listaIndicatori", indicators);
+        }
+        // Imposta in request elenco completo degli output
         if (outputs != null) {
             req.setAttribute("outputs", outputs);
         }
-        // Imposta output di processo anticorruttivo oppure processo_at 
+        // Imposta in request output di processo anticorruttivo
         if (output != null) {
             req.setAttribute("output", output);
         }
-        // Imposta nella request elenco completo dei fattori abilitanti
+        // Imposta in request elenco completo dei fattori abilitanti
         if (factors != null) {
             req.setAttribute("fattori", factors);
         }
@@ -441,7 +460,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
         }
-        // Imposta nella request le breadcrumbs in caso siano state personalizzate
+        // Imposta in request le breadcrumbs in caso siano state personalizzate
         if (bC != null) {
             req.removeAttribute("breadCrumbs");
             req.setAttribute("breadCrumbs", bC);
@@ -449,13 +468,18 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
-
+    
+    
+    /* **************************************************************** *
+     *                  Metodi di recupero dei dati                     *                     
+     *                            (retrieve)                            *
+     * **************************************************************** */
     
     /**
      * <p>Restituisce un ArrayList (albero, vista gerarchica) 
      * di tutti macroprocessi censiti dall'anticorruzione 
      * trovati in base a una rilevazione il cui identificativo 
-     * viene passato come argomento; ogni macroprocesso contiene 
+     * viene accettato come argomento; ogni macroprocesso contiene 
      * internamente i suoi processi e questi gli eventuali sottoprocessi.</p>
      *
      * @param codeSurvey    il codice della rilevazione
@@ -486,6 +510,58 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             throw new CommandException(msg + e.getMessage(), e);
         }
         return macro;
+    }
+    
+    
+    /**
+     * <p>Restituisce un ArrayList (albero, vista gerarchica) 
+     * di tutti processi censiti dall'anticorruzione nel contesto
+     * di una data rilevazione il cui identificativo 
+     * viene accettato come argomento; ogni processo contiene 
+     * internamente gli estremi del padre, dei figli e degli indicatori
+     * di rischio, se &egrave; stato oggetto di indagine (intervista).</p>
+     *
+     * @param codeSurvey    il codice della rilevazione
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param db            WebStorage per l'accesso ai dati
+     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi recuperati
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static ArrayList<ProcessBean> retrieveProcessAtBySurvey(PersonBean user,
+                                                                   String codeSurvey,
+                                                                 DBWrapper db)
+                                                          throws CommandException {
+        AbstractList<ProcessBean> mats = null;
+        AbstractList<ProcessBean> pats = new ArrayList<>();
+        try {
+            // Estrae i macroprocessi anticorruttivi in una data rilevazione
+            mats = db.getMacroAtBySurvey(user, codeSurvey);
+            // Destruttura l'albero (il ramo diventa tronco)
+            for (ProcessBean mat : mats) {
+                ArrayList<ProcessBean> children = (ArrayList<ProcessBean>) mat.getProcessi();
+                for (ProcessBean pat : children) {
+                    // Controllare se serve aggiungere il padre, o sta già "in pancia" del figlio
+                    // TODO CONTROL
+                    // Calcola i valori degli indicatori di rischio per il processo corrente
+                    pats.add(pat);
+                }
+
+                
+            }
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei macro/processi in base alla rilevazione.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return (ArrayList<ProcessBean>) pats;
     }
 
 
@@ -657,35 +733,62 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
 
 
     /**
-     * <p>Restituisce un ArrayList di tutti processi/macroprocessi trovati in base a
-     * una struttura il cui identificativo viene passato come argomento,
-     * nel contesto di una rilevazione, il cui codice viene passato come argomento.</p>
-     * <p>Siccome vengono estratti i macroprocessi collegati non solo alla struttura
-     * ma anche a tutte le sue eventuali sottostrutture, viene passato anche il livello
-     * della struttura stessa, per poter effettuare ricerche ramificate.</p>
+     * <p>Restituisce un ArrayList di tutte le interviste che hanno fatto
+     * riferimento al processo di cui viene passato l'identificativo ed 
+     * il livello, nel contesto di una data rilevazione.<br />
+     * Per ogni intervista rivolta al processo di dato id, calcola e aggiunge
+     * gli indicatori all'intervista stessa.</p>
      *
      * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
-     * @param idS           identificativo della struttura le cui persone sono allocate sul macroprocesso
-     * @param level         livello della struttura, per identificare la query
-     * @param codeSurvey    codice della rilevazione
-     * @param db            WebStorage per l'accesso ai dati
-     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi recuperati
+     * @param id            identificativo del processo o del sottoprocesso (si capisce dal livello)
+     * @param level         valore specificante la tabella in cui cercare l'identificativo (2 = processo_at | 3 = sottoprocesso_at)
+     * @param codeSurvey    il codice della rilevazione
+     * @param db            istanza di WebStorage per l'accesso ai dati
+     * @return <code>ArrayList&lt;InterviewBean&gt;</code> - lista di interviste recuperate
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
-     * @see it.rol.DBWrapper#getMacroByStruct(it.rol.bean.PersonBean, int, byte, it.rol.bean.CodeBean)
      */
-    private static ArrayList<ProcessBean> retrieveMacroByStruct(PersonBean user,
-                                                                int idS,
-                                                                byte level,
-                                                                String codeSurvey,
-                                                                DBWrapper db)
-                                                         throws CommandException {
-        ArrayList<ProcessBean> mP = null;
-        CodeBean survey = ConfigManager.getSurvey(codeSurvey);
+    public static ArrayList<InterviewBean> retrieveInterviews(PersonBean user,
+                                                              int id,
+                                                              int level,
+                                                              String codeSurvey,
+                                                              DBWrapper db)
+                                                       throws CommandException {
+        ArrayList<InterviewBean> interviews = null;
+        ArrayList<InterviewBean> processInterviews = new ArrayList<>();
         try {
-            // Estrae i macroprocessi allocati su una struttura di dato id in una data rilevazione
-            mP = db.getMacroByStruct(user, idS, level, survey);
+            // Prepara l'oggetto rilevazione
+            CodeBean survey = ConfigManager.getSurvey(codeSurvey);
+            // Estrae tutte le interviste in una data rilevazione
+            interviews = db.getInterviewsBySurvey(user, survey);
+            // Filtra solo le interviste del processo di interesse
+            for (InterviewBean interview : interviews) {
+                // Per il momento getisce solo il caso del processo (no macro-, no sotto-)
+                if (level == ELEMENT_LEV_2) {
+                    Vector<ProcessBean> processi = (Vector<ProcessBean>) interview.getProcesso().getProcessi();
+                    for (ProcessBean processo : processi) {
+                        if (processo.getId() == id) {
+                            // Recupera le risposte date ai quesiti dell'intervista
+                            ArrayList<QuestionBean> answers = db.getAnswers(user, interview, survey);
+                            // Recupera i quesiti
+                            ArrayList<QuestionBean> questions = AuditCommand.retrieveQuestions(user, codeSurvey, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
+                            // Recupera gli indicatori
+                            ArrayList<CodeBean> indicatorsAsList = db.getIndicators(user, survey);
+                            // Indicizza ogni risposta per il rispettivo id Quesito
+                            HashMap<Integer, QuestionBean> answersByQuestions = AuditCommand.decantAnswers(questions, answers);
+                            // Calcola gli identificativi dei quesiti corrispondenti a tutti gli indicatori
+                            HashMap<String, LinkedList<Integer>> questionsByIndicator = AuditCommand.retrieveQuestionsByIndicators(user, answers, survey, db);
+                            // Valorizza la tabella degli indicatori indicizzati per nome
+                            HashMap<String, InterviewBean> indicators = AuditCommand.compute(questionsByIndicator, answersByQuestions, AuditCommand.decantIndicators(indicatorsAsList));
+                            // Aggiunge gli indicatori calcolati all'intervista in cui è coinvolto il processo
+                            interview.setIndicatori(indicators);
+                            // Aggiunge l'intervista con gli indicatori alla lista delle interviste che hanno riguardato il processo di dato id
+                            processInterviews.add(interview);
+                        }
+                    }
+                }
+            }
         } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei macro/processi in base alla struttura.\n";
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero delle interviste.\n";
             LOG.severe(msg);
             throw new CommandException(msg + wse.getMessage(), wse);
         } catch (NullPointerException npe) {
@@ -697,10 +800,67 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg + e.getMessage(), e);
         }
-        return mP;
+        return processInterviews;
     }
     
-
+    
+    /**
+     * <p>Restituisce un HashMap di tutti gli indicatori, con i valori
+     * calcolati in riferimento al processo censito dall'anticorruzione 
+     * di cui viene passato l'identificativo ed il livello, 
+     * nel contesto di una data rilevazione.<br />
+     * Nel caso in cui il processo di dato id sia stato esaminato 
+     * nel contesto di pi&uacute; di un'intervista, producendo quindi
+     * valori molteplici, ricava un valore unico tramite 
+     * l'applicazione dell'algoritmo "In dubio pro peior", 
+     * che sceglie sempre il valore peggiore
+     * (ovvero il rischio pi&uacute; alto) per ogni serie di valori
+     * contrastanti.</p>
+     *
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param id            identificativo del processo o del sottoprocesso (si capisce dal livello)
+     * @param level         valore specificante la tabella in cui cercare l'identificativo (2 = processo_at | 3 = sottoprocesso_at)
+     * @param codeSurvey    il codice della rilevazione
+     * @param db            istanza di WebStorage per l'accesso ai dati
+     * @return <code>ArrayList&lt;InterviewBean&gt;</code> - lista di interviste recuperate
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static HashMap<String, InterviewBean> retrieveIndicators(PersonBean user,
+                                                              int id,
+                                                              int level,
+                                                              String codeSurvey,
+                                                              DBWrapper db)
+                                                       throws CommandException {
+        ArrayList<InterviewBean> interviews = null;
+        HashMap<String, InterviewBean> patIndicators = new HashMap<>();
+        try {
+            // Prepara l'oggetto rilevazione
+            CodeBean survey = ConfigManager.getSurvey(codeSurvey);
+            // Recupera le interviste che, in una data rilevazione, hanno riguardato il processo di dato id
+            interviews = retrieveInterviews(user, id, level, codeSurvey, db);
+/*
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero delle interviste.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);*/
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return patIndicators;
+    }
+    
+    
+    /* **************************************************************** *
+     *                   Metodi di travaso dei dati                     *                     
+     *                             (decant)                             *
+     * **************************************************************** */
+    
     /**
      * <p>Travasa un Vector di ProcessBean in una corrispondente struttura di
      * tipo Dictionary, LinkedHashMap, in cui le chiavi sono rappresentate
@@ -790,7 +950,12 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         }
     }
     
-
+    
+    /* **************************************************************** *
+     *                          Metodi di stampa                        *                     
+     *                              (print)                             *
+     * **************************************************************** */
+    
     /**
      * <p>Gestisce la creazione di un file JSON formattato per la libreria
      * orgchart.js (versione 1.0.5) contenente le informazioni relative alla
@@ -909,6 +1074,5 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             }
         }
     }
-
 
 }
