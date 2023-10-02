@@ -60,7 +60,7 @@ Applicazione web per la mappatura dei rischi corruttivi cui sono esposti i proce
 <strong>*Fig.1 - L'obiettivo del software &egrave; ottenere in automatico il valore di rischio per ogni processo organizzativo considerato (dati fittizi&#770;)*</strong><br>
 
 <p>
-L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare i responsabili della trasparenza ad individuare i punti di attenzione nel contesto dei processi organizzativi e ad indirizzarli a proporre le contromisure adeguate.<br><br>
+L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti e Pubbliche Amministrazioni ad individuare i rischi corruttivi cui i processi organizzativi sono esposti e ad indirizzare questi soggetti a mettere in atto le contromisure adeguate.<br><br>
 </p>
 
 [![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.40.png)
@@ -321,11 +321,12 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.5.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
 - [1.5.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [1.5.4] Implementata form di ricerca sui quesiti per chiave testuale
-- [1.4.6] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
-- [1.4.5] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista; prima bozza calcolo indicatori P1, P2, P3 nel contesto del singolo processo
+- [1.4.7] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
+- [1.4.6] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista; prima bozza calcolo indicatori P1, P2, P3 nel contesto del singolo processo
 
 ### Done
 -->
+- [1.4.5] (02/10/2023) Mostrate interviste nella pagina di dettaglio del processo, con valori degli indicatori calcolati; implementato algoritmo di scelta in caso di valori di rischio divergenti tra interviste multiple sullo stesso processo. Rimosso codice legacy.
 - [1.4.4] (25/09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5 nel contesto della singola intervista; implementato metodo per effettuare i controlli lato server riguardo la validit&agrave; della risposta
 - [1.4.3] (18/09/2023) Prima bozza di implementazione degli indicatori P1, P2, P3 nel contesto della singola intervista
 - [1.4.2] (12/09/2023) Corretta gestione charset nella form di modifica della risposta; mostrato id della fase come title nella pagina di dettaglio del processo
