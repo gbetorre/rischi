@@ -8,7 +8,7 @@
  *   web applications to make survey about the amount and kind of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -258,6 +258,8 @@ public class Data extends HttpServlet implements Constants {
                 req.setAttribute("listaFasi", processElements.get(TIPI_LISTE[1]));
                 req.setAttribute("listaOutput", processElements.get(TIPI_LISTE[2]));
                 req.setAttribute("listaRischi", processElements.get(TIPI_LISTE[3]));
+                req.setAttribute("listaInterviste", processElements.get(TIPI_LISTE[4]));
+                req.setAttribute("listaIndicatori", AuditCommand.compare((ArrayList<InterviewBean>) processElements.get(TIPI_LISTE[4])));
                 // Output in formato di default
                 fileJsp = nomeFileProcessoAjax;
             // Gestione estrazione strutture ("data?q=st")
@@ -334,7 +336,7 @@ public class Data extends HttpServlet implements Constants {
                 // "&p=sqs"
                 if (part.equalsIgnoreCase(PART_SELECT_QSS)) {
                     // Recupera dal Databound elenco di interviste in base a rilevazione
-                    ArrayList<InterviewBean> interviews = db.getInterviewsBySurvey(user, new HashMap<String, LinkedHashMap<String, String>>(), ConfigManager.getSurvey(codeSurvey));
+                    ArrayList<InterviewBean> interviews = db.getInterviewsBySurvey(user, ConfigManager.getSurvey(codeSurvey));
                     // Dichiara elenco di interviste corredate di risposte
                     ArrayList<InterviewBean> interviewsWithAnswer = new ArrayList<>();
                     // Per ogni intervista
@@ -472,6 +474,8 @@ public class Data extends HttpServlet implements Constants {
                     ArrayList<ItemBean> listaOutput = ProcessCommand.retrieveOutputs(user, idP, liv, codeSurvey, db);
                     // Recupera Rischi estratti in base al processo
                     ArrayList<RiskBean> listaRischi = ProcessCommand.retrieveRisks(user, idP, liv, codeSurvey, db);
+                    // Recupera Interviste estratte in base al processo
+                    ArrayList<InterviewBean> listaInterviste = ProcessCommand.retrieveInterviews(user, idP, liv, codeSurvey, db);
                     // Istanzia la tabella in cui devono essere settate le liste
                     list = new HashMap<>();
                     // Imposta nella tabella le liste trovate
@@ -479,6 +483,7 @@ public class Data extends HttpServlet implements Constants {
                     list.put(TIPI_LISTE[1], listaFasi);
                     list.put(TIPI_LISTE[2], listaOutput);
                     list.put(TIPI_LISTE[3], listaRischi);
+                    list.put(TIPI_LISTE[4], listaInterviste);
                 }
             // "data?q=st"
             } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
