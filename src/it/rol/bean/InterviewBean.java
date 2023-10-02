@@ -8,7 +8,7 @@
  *   web applications to make survey about the amount and kind of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -36,6 +36,7 @@ package it.rol.bean;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 import it.rol.exception.AttributoNonValorizzatoException;
 
@@ -85,9 +86,13 @@ public class InterviewBean extends CodeBean {
      *                         Allegati                         *
      * ******************************************************** */
     /**
-     * Vector di risposte fornite nel contesto dell'intervista
+     * Struttura vettoriale di risposte fornite nel contesto dell'intervista
      */
     private ArrayList<QuestionBean> risposte;
+    /**
+     * HashMap di indicatori ricavati in base alle risposte all'intervista indicizzati per codice
+     */
+    private HashMap<String, InterviewBean>  indicatori;
     
 	
     /**
@@ -104,6 +109,7 @@ public class InterviewBean extends CodeBean {
         oraUltimaModifica = null;
         autoreUltimaModifica = null;
         risposte = null;
+        indicatori = null;
 	}
 	
 	
@@ -133,6 +139,7 @@ public class InterviewBean extends CodeBean {
         oraUltimaModifica = oraIntervista;
         autoreUltimaModifica = null;
         risposte = null;
+        indicatori = null;
     }
 
 
@@ -140,15 +147,15 @@ public class InterviewBean extends CodeBean {
      *         Metodi getter e setter per descrizione            *
      * ********************************************************* */
 	/**
-	 * Restituisce la descrizione di una misurazione  
-	 * @return <code>descrizione</code> - descrizione della misurazione
+	 * Restituisce la descrizione di una intervista  
+	 * @return <code>descrizione</code> - descrizione della intervista
 	 */
 	public String getDescrizione() {
 		return descrizione;
 	}
 
 	/**
-	 * Imposta la descrizione di una misurazione
+	 * Imposta la descrizione di una intervista
 	 * @param descrizione - descrizione da settare
 	 */
 	public void setDescrizione(String descrizione) {
@@ -332,6 +339,26 @@ public class InterviewBean extends CodeBean {
      */
     public void setRisposte(ArrayList<QuestionBean> risposte) {
         this.risposte = risposte;
+    }
+    
+
+    /* ********************************************************* *
+     *          Metodi getter e setter per indicatori            *
+     * ********************************************************* */
+    /**
+     * Restituisce la lista di indicatori calcolati per l'intervista corrente, indicizzati per codice
+     * @return <code>HashMap&lt;String&comma;&nbsp;InterviewBean&gt;</code> - indicatori calcolati sulle risposte dell'intervista corrente
+     */
+    public HashMap<String, InterviewBean> getIndicatori() {
+        return indicatori;
+    }
+
+    /**
+     * Imposta la lista di indicatori calcolati per l'intervista corrente, indicizzati per codice
+     * @param indicatori - tabella degli indicatori, indicizzati per codice, da settare
+     */
+    public void setIndicatori(HashMap<String, InterviewBean> indicatori) {
+        this.indicatori = indicatori;
     }
 
 }
