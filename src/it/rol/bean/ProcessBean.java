@@ -8,7 +8,7 @@
  *   web applications to make survey about the amount and kind of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -36,6 +36,7 @@ package it.rol.bean;
 import java.sql.Time;
 import java.util.AbstractList;
 import java.util.Date;
+import java.util.HashMap;
 
 import it.rol.Constants;
 import it.rol.exception.AttributoNonValorizzatoException;
@@ -123,6 +124,8 @@ public class ProcessBean extends CodeBean {
     private ProcessBean padre;
     /** Livello gerarchico del processo in una gerarchia di tipi di processi */
     private int livello;
+    /** Tabella di indicatori contenenti i valori di rischio ottenuti dal processo corrente */
+    private HashMap<String, InterviewBean>  indicatori;
     /* ------------------------------------------------------------------------ *
      *                   Dati descrittivi dell'ultima modifica                  *
      * ------------------------------------------------------------------------ */
@@ -162,6 +165,7 @@ public class ProcessBean extends CodeBean {
         processi = null;
         padre = null;
         rilevazione = null;
+        indicatori = null;
     }
 
     
@@ -728,5 +732,24 @@ public class ProcessBean extends CodeBean {
         this.autoreUltimaModifica = autoreUltimaModifica;
     }
 
+
+    /* ********************************************************* *
+     *          Metodi getter e setter per indicatori            *
+     * ********************************************************* */
+    /**
+     * Restituisce la lista di indicatori calcolati per il processo corrente, indicizzati per codice
+     * @return <code>HashMap&lt;String&comma;&nbsp;InterviewBean&gt;</code> - indicatori calcolati sulle risposte dell'intervista, o delle interviste, che hanno riguardato il processo
+     */
+    public HashMap<String, InterviewBean> getIndicatori() {
+        return indicatori;
+    }
+
+    /**
+     * Imposta la lista di indicatori calcolati per il processo corrente, indicizzati per codice
+     * @param indicatori - tabella degli indicatori, indicizzati per codice, da settare
+     */
+    public void setIndicatori(HashMap<String, InterviewBean> indicatori) {
+        this.indicatori = indicatori;
+    }
 
 }
