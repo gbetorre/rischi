@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,7 +50,9 @@ import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Main;
+import it.rol.Query;
 import it.rol.bean.CodeBean;
+import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
@@ -60,7 +63,9 @@ import it.rol.exception.WebStorageException;
 
 /**
  * <p><code>ReportCommand.java</code><br>
- * Implementa la logica per la gestione delle persone collegate ai processi on line (PROL).</p>
+ * Implementa la logica per la generazione di informazioni aggregate
+ * inerenti la mappatura dei rischi corruttivi cui possono essere esposti
+ * i processi organizzativi (ROL).</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
@@ -83,7 +88,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
     /**
-     * Pagina a cui la command reindirizza per mostrare la pagina iniziale relativa alla funzione persone
+     * Pagina a cui la command reindirizza per mostrare la pagina iniziale della Command
      */
     private static final String nomeFileElenco = "/jsp/muElenco.jsp";
     /**
@@ -91,13 +96,17 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileSearch = "/jsp/muRicerca.jsp";
     /**
-     * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
+     * Struttura contenente le pagine a cui la Command fa riferimento
      */
     private static final HashMap<String, String> nomeFile = new HashMap<>();
     /**
-     *  Processo di dato id
+     * DataBound.
+     *
+    private static DBWrapper db;
+    /**
+     *  Elenco di macroprocessi anticorruttivi collegati alla rilevazione
      */
-    ProcessBean runtimeProcess = null;
+    ConcurrentHashMap<String, ArrayList<ProcessBean>> macroBySurvey = new ConcurrentHashMap<>();
 
 
     /**
@@ -127,9 +136,34 @@ public class ReportCommand extends ItemBean implements Command, Constants {
           String msg = FOR_NAME + "La voce menu' " + this.getNome() + " non ha il campo paginaJsp. Impossibile visualizzare i risultati.\n";
           throw new CommandException(msg);
         }
+        /* Fa il caching in memoria degli indicatori
+        try {
+            // Genera un utente con privilegi assoluti
+            PersonBean user = new PersonBean();
+            // Attiva la connessione al database
+            db = new DBWrapper();
+            // Recupera tutte le rilevazioni
+            ArrayList<CodeBean> surveys = db.getSurveys(Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE);
+            // Per ogni rilevazione
+            for (CodeBean s : surveys) {
+                // Calcola i macroprocessi della rilevazione corrente
+                ArrayList<ProcessBean> macro = ProcessCommand.retrieveMacroAtBySurvey(user, s.getNome(), db);
+                // Calcola i valori degli indicatori di rischio 
+                ArrayList<ProcessBean> mats = retrieveIndicatorsByMacroAt(macro, user, s.getNome(), db);
+                // Carica in un'unica tabella i macroprocessi indicizzati per codice rilevazione
+                macroBySurvey.put(s.getNome(), mats);
+            }
+        }
+        catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Non e\' possibile avere una connessione al database.\n" + wse.getMessage();
+            throw new CommandException(msg, wse);
+        }
+        catch (Exception e) {
+            String msg = FOR_NAME + "Problemi nel caricare gli stati.\n" + e.getMessage();
+            throw new CommandException(msg, e);
+        }*/
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         nomeFile.put(PART_SEARCH,     nomeFileSearch);
-        //nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }
 
 
@@ -161,6 +195,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         String part = parser.getStringParameter("p", DASH);
         // Dichiara la pagina a cui reindirizzare
         String fileJspT = null;
+        // Dichiara elenco di macroprocessi anticorruttivi collegati alla rilevazione
+        AbstractList<ProcessBean> mats = null;
         // Dichiara mappa di parametri di ricerca
         HashMap<String, LinkedHashMap<String, String>> params = null;
         // Preprara BreadCrumbs
@@ -211,7 +247,25 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                     // Imposta il valore della pagina di ricerca
                     fileJspT = nomeFile.get(part);
                 } else {
-                    // Viene richiesta la visualizzazione della pagina di report
+                /* *********************************************************** *
+                 *  Viene richiesta la visualizzazione della pagina di report  *
+                 * *********************************************************** */
+                    ArrayList<ProcessBean> macro = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
+                    mats = retrieveIndicatorsByMacroAt(macro, user, codeSur, db);
+                    //pats = ProcessCommand.retrieveProcessAtBySurvey(user, codeSur, db);
+                    /*ArrayList<CodeBean> surveys = db.getSurveys(Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE);
+                    // Per ogni rilevazione
+                    for (CodeBean s : surveys) {
+                        // Calcola i macroprocessi della rilevazione corrente
+                        ArrayList<ProcessBean> macro = ProcessCommand.retrieveMacroAtBySurvey(user, s.getNome(), db);
+                        // Calcola i valori degli indicatori di rischio 
+                        ArrayList<ProcessBean> mats2 = retrieveIndicatorsByMacroAt(macro, user, s.getNome(), db);
+                        // Carica in un'unica tabella i macroprocessi indicizzati per codice rilevazione
+                        macroBySurvey.put(s.getNome(), mats2);
+                    }
+                    
+                    mats = macroBySurvey.get(codeSur);
+                    */
                     fileJspT = nomeFileElenco;
                 }
             } else {    // manca il codice rilevazione
@@ -231,6 +285,10 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
+        // Imposta in request, se ci sono, lista di processi anticorruttivi
+        if (mats != null) {
+            req.setAttribute("macroProcessi", mats);
+        }
         // Imposta nella request le chiavi di ricerca, se presenti
         if (params != null) {
             req.setAttribute("tokens", params);
@@ -243,5 +301,77 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
+    
+    
+    /* **************************************************************** *
+     *                  Metodi di recupero dei dati                     *                     
+     *                            (retrieve)                            *
+     * **************************************************************** */
+    
+    /**
+     * <p>Restituisce un ArrayList (albero, vista gerarchica) 
+     * di tutti macroprocessi censiti dall'anticorruzione 
+     * trovati in base a una rilevazione il cui identificativo 
+     * viene accettato come argomento; ogni macroprocesso contiene 
+     * internamente i suoi processi e questi gli indicatori di rischio.</p>
+     *
+     * @param codeSurvey    il codice della rilevazione
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param db            WebStorage per l'accesso ai dati
+     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi recuperati
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static ArrayList<ProcessBean> retrieveIndicatorsByMacroAt(ArrayList<ProcessBean> mats,
+                                                                     PersonBean user,
+                                                                     String codeSurvey,
+                                                                     DBWrapper db)
+                                                              throws CommandException {
+        // Fa una copia del parametro altrimenti lo si modificherebbe (malissimo!)
+        ArrayList<ProcessBean> macro = (ArrayList<ProcessBean>) mats.clone();
+        // Visibilità a livello di metodo
+        ArrayList<ProcessBean> processi = null;
+        try {
+            // Per ogni macroprocesso
+            for (int i = 0; i < mats.size(); i++) {
+                // Recupera il macroprocesso
+                ProcessBean mat = mats.get(i);
+                // Prepara la struttura
+                processi = new ArrayList<>();
+                // Recupera i suoi processi
+                for (int j = 0; j < mat.getProcessi().size(); j++) {
+                    // Processo corrente
+                    ProcessBean pat = mat.getProcessi().get(j);
+                    // Per ogni processo recupera le sue interviste complete di indicatori
+                    ArrayList<InterviewBean> listaInterviste = ProcessCommand.retrieveInterviews(user, pat.getId(), pat.getLivello(), codeSurvey, db);
+                    // Applica l'algoritmo decisionale in caso vi siano più valori per lo stesso indicatore
+                    HashMap<String, InterviewBean> indicators = AuditCommand.compare(listaInterviste);
+                    // Setta gli indicatori nel processo corrente
+                    pat.setIndicatori(indicators);
+                    // Aggiunge il processo completo di indicatori
+                    processi.add(pat);
+                }
+                // Aggiorna il macroprocesso
+                mat.setProcessi(processi);
+                // Aggiorna l'elenco
+                macro.set(i, mat);
+                // Tentativo di velocizzare la liberazione della memoria sull'ultimo ciclo
+                processi = null;
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di attributi obbligatori.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (CommandException ce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + ce.getMessage(), ce);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return macro;
+    }
+
 
 }
