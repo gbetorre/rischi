@@ -315,17 +315,18 @@ e fornirvi il relativo significato e la relativa motivazione.
 - Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
 - Implementata pagina di dettaglio soggetto contingente/interessato
 - Implementata pagina di dettaglio struttura
-- [1.5.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
-- [1.5.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
-- [1.5.7] Implementata estrazione risultati in formato CSV
-- [1.5.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
-- [1.5.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
-- [1.5.4] Implementata form di ricerca sui quesiti per chiave testuale
-- [1.4.7] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
-- [1.4.6] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista; prima bozza calcolo indicatori P1, P2, P3 nel contesto del singolo processo
+- [1.6.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
+- [1.6.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
+- [1.6.7] Implementata estrazione risultati in formato CSV
+- [1.6.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
+- [1.6.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
+- [1.6.4] Implementata form di ricerca sui quesiti per chiave testuale
+- [1.5.7] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
+- [1.5.6] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista; prima bozza calcolo indicatori P1, P2, P3 nel contesto del singolo processo
 
 ### Done
 -->
+- [1.4.6] (10/10/2023) Aggiunto attributo a oggetto processo anticorruttivo per contenere valori degli indicatori di rischio
 - [1.4.5] (02/10/2023) Mostrate interviste nella pagina di dettaglio del processo, con valori degli indicatori calcolati; implementato algoritmo di scelta in caso di valori di rischio divergenti tra interviste multiple sullo stesso processo. Rimosso codice legacy.
 - [1.4.4] (25/09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5 nel contesto della singola intervista; implementato metodo per effettuare i controlli lato server riguardo la validit&agrave; della risposta
 - [1.4.3] (18/09/2023) Prima bozza di implementazione degli indicatori P1, P2, P3 nel contesto della singola intervista
