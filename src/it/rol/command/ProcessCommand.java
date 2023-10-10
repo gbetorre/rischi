@@ -322,11 +322,6 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
                             // Recupera le interviste in cui il processo è stato esaminato
                             ArrayList<InterviewBean> listaInterviste = retrieveInterviews(user, idP, liv, codeSur, db);
-                            /* Se sul processo sono state effettuate interviste
-                            if (!listaInterviste.isEmpty()) {
-                                // Recupera gli indicatori con i valori finali di rischio ottenuti a partire dai dati grezzi delle interviste
-                                indicators = AuditCommand.compare(listaInterviste);
-                            }*/
                             // Recupera gli indicatori con i valori finali di rischio ottenuti a partire dai dati grezzi delle interviste
                             indicators = AuditCommand.compare(listaInterviste);
                             // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
@@ -529,8 +524,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      */
     public static ArrayList<ProcessBean> retrieveProcessAtBySurvey(PersonBean user,
                                                                    String codeSurvey,
-                                                                 DBWrapper db)
-                                                          throws CommandException {
+                                                                   DBWrapper db)
+                                                            throws CommandException {
         AbstractList<ProcessBean> mats = null;
         AbstractList<ProcessBean> pats = new ArrayList<>();
         try {
@@ -538,7 +533,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             mats = db.getMacroAtBySurvey(user, codeSurvey);
             // Destruttura l'albero (il ramo diventa tronco)
             for (ProcessBean mat : mats) {
-                ArrayList<ProcessBean> children = (ArrayList<ProcessBean>) mat.getProcessi();
+                Vector<ProcessBean> children = (Vector<ProcessBean>) mat.getProcessi();
                 for (ProcessBean pat : children) {
                     // Controllare se serve aggiungere il padre, o sta già "in pancia" del figlio
                     // TODO CONTROL
