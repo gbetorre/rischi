@@ -7,9 +7,6 @@
     <script src="<c:out value="${initParam.urlDirectoryScript}" />orgchart/1.0.5/d3.v5.min.js"></script>
     <!-- <script src='https://unpkg.com/d3-org-chart@1.0.5/index.js'></script> -->
     <script src="<c:out value="${initParam.urlDirectoryScript}" />orgchart/1.0.5/index.js"></script>
-    <a href="${stCSV}">
-      <i class="fas fa-download"></i> <span class="lead">Scarica tutti i dati</span>
-    </a>
     <div class="row" id="str-pro"></div>
     <script>
     // Ajax call per lista processi per struttura
