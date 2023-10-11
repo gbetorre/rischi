@@ -49,7 +49,7 @@
 <!-- Insert TOC here -->
 
 # Rischi
-Applicazione web per la mappatura dei rischi corruttivi cui sono esposti i processi organizzativi
+L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti, Pubbliche Amministrazioni e aziende partecipate a quantificare i rischi corruttivi cui i processi organizzativi sono esposti e ad indirizzare questi soggetti a mettere in atto le contromisure adeguate.<br><br>
 
 <!-- ABOUT THE PROJECT -->
 
@@ -60,7 +60,7 @@ Applicazione web per la mappatura dei rischi corruttivi cui sono esposti i proce
 <strong>*Fig.1 - L'obiettivo del software &egrave; ottenere in automatico il valore di rischio per ogni processo organizzativo considerato (dati fittizi&#770;)*</strong><br>
 
 <p>
-L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti e Pubbliche Amministrazioni ad individuare i rischi corruttivi cui i processi organizzativi sono esposti e ad indirizzare questi soggetti a mettere in atto le contromisure adeguate.<br><br>
+Attraverso la risposta ad una serie di quesiti posti a responsabili ed operatori presso specifici uffici amministrativi (intervista), l'applicazione permette di ottenere, automaticamente, una serie di indici relativi a specifici rischi corruttivi cui possono essere esposti i processi organizzativi presidiati dalle strutture stesse.<br>
 </p>
 
 [![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.40.png)
@@ -73,8 +73,6 @@ L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti 
 <strong>*Fig.3 - Pagina di landing, versione 1.40*</strong><br>
 
 <p>
-Attraverso la risposta ad una serie di quesiti posti a responsabili e operatori presso specifiche strutture amministrative (intervista), l'applicazione permette di ottenere una serie di indici relativi a specifici rischi corruttivi cui possono essere esposti i processi organizzativi presidiati dalle strutture stesse.<br>
-
 Ogni quesito, infatti, &egrave; collegato ad uno o pi&uacute; specifici rischi corruttivi; perci&ograve;, in funzione della risposta data dal personale intervistato, l'applicazione esprime specifici indici e punti di attenzione e, in sintesi, calcola il livello di rischio cui il processo esaminato risulta esposto. 
 <br><br>
 
@@ -323,9 +321,11 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.6.4] Implementata form di ricerca sui quesiti per chiave testuale
 - [1.5.7] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
 - [1.5.6] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista; prima bozza calcolo indicatori P1, P2, P3 nel contesto del singolo processo
+- [1.4.8] ( /10/2023) Implementato caching su disco dei valori degli indicatori calcolati
 
 ### Done
 -->
+- [1.4.7] (11/10/2023) Trasformata struttura contenente gli indicatori di rischio in mappa ordinata
 - [1.4.6] (10/10/2023) Aggiunto attributo a oggetto processo anticorruttivo per contenere valori degli indicatori di rischio
 - [1.4.5] (02/10/2023) Mostrate interviste nella pagina di dettaglio del processo, con valori degli indicatori calcolati; implementato algoritmo di scelta in caso di valori di rischio divergenti tra interviste multiple sullo stesso processo. Rimosso codice legacy.
 - [1.4.4] (25/09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5 nel contesto della singola intervista; implementato metodo per effettuare i controlli lato server riguardo la validit&agrave; della risposta
