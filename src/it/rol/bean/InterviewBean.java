@@ -37,6 +37,7 @@ import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import it.rol.exception.AttributoNonValorizzatoException;
 
@@ -90,9 +91,10 @@ public class InterviewBean extends CodeBean {
      */
     private ArrayList<QuestionBean> risposte;
     /**
-     * HashMap di indicatori ricavati in base alle risposte all'intervista indicizzati per codice
+     * HashMap con insertion order di indicatori ricavati in base 
+     * alle risposte all'intervista indicizzati per codice
      */
-    private HashMap<String, InterviewBean>  indicatori;
+    private LinkedHashMap<String, InterviewBean>  indicatori;
     
 	
     /**
@@ -346,18 +348,18 @@ public class InterviewBean extends CodeBean {
      *          Metodi getter e setter per indicatori            *
      * ********************************************************* */
     /**
-     * Restituisce la lista di indicatori calcolati per l'intervista corrente, indicizzati per codice
-     * @return <code>HashMap&lt;String&comma;&nbsp;InterviewBean&gt;</code> - indicatori calcolati sulle risposte dell'intervista corrente
+     * Restituisce la lista ordinata di indicatori calcolati per l'intervista corrente, indicizzati per codice
+     * @return <code>LjnkedHashMap&lt;String&comma;&nbsp;InterviewBean&gt;</code> - indicatori calcolati sulle risposte dell'intervista corrente
      */
-    public HashMap<String, InterviewBean> getIndicatori() {
+    public LinkedHashMap<String, InterviewBean> getIndicatori() {
         return indicatori;
     }
 
     /**
-     * Imposta la lista di indicatori calcolati per l'intervista corrente, indicizzati per codice
+     * Imposta la lista ordinata di indicatori calcolati per l'intervista corrente, indicizzati per codice
      * @param indicatori - tabella degli indicatori, indicizzati per codice, da settare
      */
-    public void setIndicatori(HashMap<String, InterviewBean> indicatori) {
+    public void setIndicatori(LinkedHashMap<String, InterviewBean> indicatori) {
         this.indicatori = indicatori;
     }
 

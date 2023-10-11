@@ -37,6 +37,7 @@ import java.sql.Time;
 import java.util.AbstractList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import it.rol.Constants;
 import it.rol.exception.AttributoNonValorizzatoException;
@@ -124,8 +125,8 @@ public class ProcessBean extends CodeBean {
     private ProcessBean padre;
     /** Livello gerarchico del processo in una gerarchia di tipi di processi */
     private int livello;
-    /** Tabella di indicatori contenenti i valori di rischio ottenuti dal processo corrente */
-    private HashMap<String, InterviewBean>  indicatori;
+    /** Dictionary con insertion order di indicatori contenenti i valori di rischio ottenuti dal processo corrente */
+    private LinkedHashMap<String, InterviewBean>  indicatori;
     /* ------------------------------------------------------------------------ *
      *                   Dati descrittivi dell'ultima modifica                  *
      * ------------------------------------------------------------------------ */
@@ -737,18 +738,18 @@ public class ProcessBean extends CodeBean {
      *          Metodi getter e setter per indicatori            *
      * ********************************************************* */
     /**
-     * Restituisce la lista di indicatori calcolati per il processo corrente, indicizzati per codice
-     * @return <code>HashMap&lt;String&comma;&nbsp;InterviewBean&gt;</code> - indicatori calcolati sulle risposte dell'intervista, o delle interviste, che hanno riguardato il processo
+     * Restituisce la lista ordinata di indicatori calcolati per il processo corrente, indicizzati per codice
+     * @return <code>LinkedHashMap&lt;String&comma;&nbsp;InterviewBean&gt;</code> - indicatori calcolati sulle risposte dell'intervista, o delle interviste, che hanno riguardato il processo
      */
-    public HashMap<String, InterviewBean> getIndicatori() {
+    public LinkedHashMap<String, InterviewBean> getIndicatori() {
         return indicatori;
     }
 
     /**
-     * Imposta la lista di indicatori calcolati per il processo corrente, indicizzati per codice
+     * Imposta la lista ordinata di indicatori calcolati per il processo corrente, indicizzati per codice
      * @param indicatori - tabella degli indicatori, indicizzati per codice, da settare
      */
-    public void setIndicatori(HashMap<String, InterviewBean> indicatori) {
+    public void setIndicatori(LinkedHashMap<String, InterviewBean> indicatori) {
         this.indicatori = indicatori;
     }
 

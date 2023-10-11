@@ -1161,14 +1161,14 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @return HashMap&lt;String&comma; InterviewBean&gt; - tabella contenente tutti i valori degli indicatori e anche quelli degli indici generali, indicizzati per nome
      * @throws CommandException se si verifica un problema nel calcolo di un indicatore, nel recupero di dati o in qualche tipo di puntamento
      */
-    public static HashMap<String, InterviewBean> compute(HashMap<String, LinkedList<Integer>> questByIndicator, 
-                                                         HashMap<Integer, QuestionBean> answerByQuestion,
-                                                         HashMap<String, CodeBean> indicatorByCode) 
-                                                  throws CommandException {
+    public static LinkedHashMap<String, InterviewBean> compute(HashMap<String, LinkedList<Integer>> questByIndicator, 
+                                                               HashMap<Integer, QuestionBean> answerByQuestion,
+                                                               HashMap<String, CodeBean> indicatorByCode) 
+                                                        throws CommandException {
         try {
 
             // Mappa destinata a contenere gli indicatori indicizzati per nome
-            HashMap<String, InterviewBean> indicatorsByKey = new HashMap<>();
+            LinkedHashMap<String, InterviewBean> indicatorsByKey = new LinkedHashMap<>();
             // Mappa contenente gli indicatori indicizzati per codice
             //HashMap<String, CodeBean> indicatorsByCode = this.decantIndicators(indicators);
             
@@ -1678,7 +1678,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
     /**
      * <p>Implementa l'algoritmo "In dubio pro peior" (nel dubbio si
      * consideri il caso peggiore, ovvero il rischio pi&uacute; alto)
-     * in caso esistano pi&uacute; valori per lo stesso indicatore,
+     * laddove esistano pi&uacute; valori per lo stesso indicatore,
      * in particolare valori diversi raccolti nel contesto di interviste diverse.<br />
      * Controlla se effettivamente vi possono essere più valori per lo stesso indicatore;
      * se vi sono pi&uacute; interviste, procede alla scelta.</p>
@@ -1698,18 +1698,18 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @return <code>HashMap&lt;String&comma; InterviewBean&gt;</code> - tabella contenente i valori scelti per gli indicatori, indicizzati per codice
      * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
      */
-    public static HashMap<String, InterviewBean> compare(ArrayList<InterviewBean> interviews) 
-                                    throws CommandException {
-        HashMap<String, InterviewBean> indicators = null;
+    public static LinkedHashMap<String, InterviewBean> compare(ArrayList<InterviewBean> interviews) 
+                                                        throws CommandException {
+        LinkedHashMap<String, InterviewBean> indicators = null;
         // Controllo sull'input
         if (interviews == null || interviews.isEmpty()) {
             return indicators;
         }
         try {
             // Recupera la tabella della prima intervista
-            HashMap<String, InterviewBean> indicatorsOrig = interviews.get(NOTHING).getIndicatori();
+            LinkedHashMap<String, InterviewBean> indicatorsOrig = interviews.get(NOTHING).getIndicatori();
             // La clona altrimenti, manipolandola, si manipolerebbe (malissimo) il valore del parametro 
-            indicators = (HashMap<String, InterviewBean>) indicatorsOrig.clone();
+            indicators = (LinkedHashMap<String, InterviewBean>) indicatorsOrig.clone();
             // Se il processo di dato id è stato sondato in solo 1 intervista i valori già li abbiamo
             if (interviews.size() > ELEMENT_LEV_1) {
                 // ...se invece c'è più di un'intervista ci sono tanti valori di indicatori quante sono le interviste

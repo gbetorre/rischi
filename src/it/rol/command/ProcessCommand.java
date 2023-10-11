@@ -773,7 +773,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Calcola gli identificativi dei quesiti corrispondenti a tutti gli indicatori
                             HashMap<String, LinkedList<Integer>> questionsByIndicator = AuditCommand.retrieveQuestionsByIndicators(user, answers, survey, db);
                             // Valorizza la tabella degli indicatori indicizzati per nome
-                            HashMap<String, InterviewBean> indicators = AuditCommand.compute(questionsByIndicator, answersByQuestions, AuditCommand.decantIndicators(indicatorsAsList));
+                            LinkedHashMap<String, InterviewBean> indicators = AuditCommand.compute(questionsByIndicator, answersByQuestions, AuditCommand.decantIndicators(indicatorsAsList));
                             // Aggiunge gli indicatori calcolati all'intervista in cui è coinvolto il processo
                             interview.setIndicatori(indicators);
                             // Aggiunge l'intervista con gli indicatori alla lista delle interviste che hanno riguardato il processo di dato id
