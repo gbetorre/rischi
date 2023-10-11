@@ -189,10 +189,10 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         PersonBean user = null;
         // Recupera o inizializza 'codice rilevazione' (Survey)
         String codeSur = parser.getStringParameter(PARAM_SURVEY, DASH);
-        // Recupera o inizializza 'id persona'
-        int idPe = parser.getIntParameter("idp", DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'
         String part = parser.getStringParameter("p", DASH);
+        // Recupera o inizializza eventuale parametro messaggio
+        String mess = parser.getStringParameter("msg", DASH);
         // Dichiara la pagina a cui reindirizzare
         String fileJspT = null;
         // Dichiara elenco di macroprocessi anticorruttivi collegati alla rilevazione
@@ -251,21 +251,12 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                  *  Viene richiesta la visualizzazione della pagina di report  *
                  * *********************************************************** */
                     ArrayList<ProcessBean> macro = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
-                    mats = retrieveIndicatorsByMacroAt(macro, user, codeSur, db);
-                    //pats = ProcessCommand.retrieveProcessAtBySurvey(user, codeSur, db);
-                    /*ArrayList<CodeBean> surveys = db.getSurveys(Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE);
-                    // Per ogni rilevazione
-                    for (CodeBean s : surveys) {
-                        // Calcola i macroprocessi della rilevazione corrente
-                        ArrayList<ProcessBean> macro = ProcessCommand.retrieveMacroAtBySurvey(user, s.getNome(), db);
-                        // Calcola i valori degli indicatori di rischio 
-                        ArrayList<ProcessBean> mats2 = retrieveIndicatorsByMacroAt(macro, user, s.getNome(), db);
-                        // Carica in un'unica tabella i macroprocessi indicizzati per codice rilevazione
-                        macroBySurvey.put(s.getNome(), mats2);
+                    // Controlla se deve forzare l'aggiornamento dei valori degli indicatori
+                    if (mess.equalsIgnoreCase("refresh_ce")) {
+                        mats = refreshIndicatorsByMacroAt(macro, user, codeSur, db);
+                    } else {
+                        mats = retrieveIndicatorsByMacroAt(macro, user, codeSur, db);
                     }
-                    
-                    mats = macroBySurvey.get(codeSur);
-                    */
                     fileJspT = nomeFileElenco;
                 }
             } else {    // manca il codice rilevazione
@@ -344,7 +335,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                     // Per ogni processo recupera le sue interviste complete di indicatori
                     ArrayList<InterviewBean> listaInterviste = ProcessCommand.retrieveInterviews(user, pat.getId(), pat.getLivello(), codeSurvey, db);
                     // Applica l'algoritmo decisionale in caso vi siano più valori per lo stesso indicatore
-                    HashMap<String, InterviewBean> indicators = AuditCommand.compare(listaInterviste);
+                    LinkedHashMap<String, InterviewBean> indicators = AuditCommand.compare(listaInterviste);
                     // Setta gli indicatori nel processo corrente
                     pat.setIndicatori(indicators);
                     // Aggiunge il processo completo di indicatori
@@ -373,5 +364,49 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         return macro;
     }
 
+    
+    /* **************************************************************** *
+     *                 Metodi di riscrittura dei dati                   *                     
+     *                            (refresh)                             *
+     * **************************************************************** */
+    
+    /**
+     * <p>Cancella tutti i valori degli indicatori di rischio
+     * relativi a tutti i processi censiti dall'anticorruzione eventualmente
+     * presenti nella tabella dei risultati, rigenera i valori
+     * e li inserisce in tabella.</p>
+     *
+     * @param codeSurvey    il codice della rilevazione
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param db            WebStorage per l'accesso ai dati
+     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi recuperati
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static ArrayList<ProcessBean> refreshIndicatorsByMacroAt(ArrayList<ProcessBean> mats,
+                                                                    PersonBean user,
+                                                                    String codeSurvey,
+                                                                    DBWrapper db)
+                                                             throws CommandException {
+        // Fa una copia del parametro altrimenti lo si modificherebbe (malissimo!)
+        ArrayList<ProcessBean> macro = (ArrayList<ProcessBean>) mats.clone();
+        try {
+            // Elimina i dati eventualmente già presenti in tabella
+            //db.deleteIndicatorProcessResults(user);
+            //db.insertIndicatorProcess(user, mats, ConfigManager.getSurvey(codeSurvey));
+        /*} catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'interazione col database.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);*/
+        } catch (RuntimeException re) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + re.getMessage(), re);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return macro;
+    }
 
 }
