@@ -940,6 +940,42 @@ public interface Query extends Serializable {
             "       AND FRAT.id_rischio_corruttivo = ?" +
             "       AND FRAT.id_fattore_abilitante = ?" +
             "       AND FRAT.id_rilevazione = ?";
+    
+    /**
+     * <p>Estrae i valori di tutti gli indicatori di rischio relativi
+     *  ai processi censiti a fini anticorruttivi ottenuti nel contesto
+     *  di una data rilevazione.<br />
+     *  Questi valori sono stati memorizzati in un'apposita relazione
+     *  in base a un pre-calcolo (caching).</p>
+     *  <p>Utilizza la clausola WITH per dare un nome a una subquery che
+     *  calcola quanti indicatori esistono per ogni identificativo di processo.</p>
+     */
+    public static final String GET_INDICATOR_PAT = 
+            "WITH num_indicatori AS (" +
+            "   SELECT " +
+            "           PAT.id" +
+            "        ,  count(INPAT.cod_indicatore)" +
+            "       FROM processo_at PAT" +
+            "           INNER JOIN indicatore_processo_at INPAT ON INPAT.id_processo_at = PAT.id" +
+            "        GROUP BY (PAT.id)" +
+            "        ORDER BY PAT.id " +
+            ")" +
+            "SELECT DISTINCT" +
+            "       INPAT.id_processo_at                AS \"cod1\"" +
+            "   ,   INPAT.cod_indicatore                AS \"codice\"" +
+            "   ,   INPAT.id_rilevazione                AS \"cod2\"" +
+            "   ,   INPAT.valore                        AS \"value1\"" +
+            "   ,   INPAT.descrizione                   AS \"extraInfo\"" +
+            "   ,   INPAT.note                          AS \"informativa\"" +
+            "   ,   INPAT.ordinale                      AS \"ordinale\"" +
+            "   ,   INPAT.data_ultima_modifica          AS \"extraInfo1\"" +
+            "   ,   INPAT.ora_ultima_modifica           AS \"extraInfo2\"" +
+            "   ,   INPAT.id_usr_ultima_modifica        AS \"extraInfo3\"" +
+            "   ,   N.count                             AS \"cod3\"" +
+            "   FROM indicatore_processo_at INPAT" +
+            "       JOIN num_indicatori N ON INPAT.id_processo_at = N.id" +
+            "   WHERE INPAT.id_rilevazione = ?" +
+            "   ORDER BY INPAT.id_processo_at, INPAT.cod_indicatore";
 
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
@@ -1221,6 +1257,36 @@ public interface Query extends Serializable {
             "   ,       ? " +       // id_usr_ultima_modifica
             "          )" ;
     
+    /**
+     * <p>Query per inserimento dei valori calcolati
+     * relativamente agli indicatori di rischio dei processi censiti
+     * a fini anticorruttivi.</p>
+     */
+    public static final String INSERT_INDICATOR_PROCESS =
+            "INSERT INTO indicatore_processo_at" +
+            "   (   id_processo_at" +
+            "   ,   cod_indicatore" +
+            "   ,   id_rilevazione" +
+            "   ,   valore" +
+            "   ,   descrizione" +
+            "   ,   note" +
+            "   ,   ordinale" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       // id_processo_at
+            "   ,       ? " +       // cod_indicatore
+            "   ,       ? " +       // id_rilevazione
+            "   ,       ? " +       // valore
+            "   ,       ? " +       // descrizione
+            "   ,       ? " +       // note
+            "   ,       ? " +       // ordinale
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "          )" ;
+    
     /* ********************************************************************** *
      *                         Query di aggiornamento                         *
      * ********************************************************************** */
@@ -1249,4 +1315,15 @@ public interface Query extends Serializable {
             "       AND data_ultima_modifica = ?" +
             "       AND ora_ultima_modifica = ?";
 
+    /* ********************************************************************** *
+     *                         Query di eliminazione                          *
+     * ********************************************************************** */
+    /**
+     * <p>Query per eliminazione di tutte le tuple della tabella contenente
+     * i risultati dell'elaborazione sugli indicatori (la DELETE senza
+     * parametri &egrave; sulla tabella!).</p>
+     */
+    public static final String DELETE_INDICATOR_PROCESS_RESULTS =
+            "DELETE FROM indicatore_processo_at";
+    
 }
