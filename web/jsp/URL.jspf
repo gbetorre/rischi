@@ -77,6 +77,11 @@
   <c:param name="q" value="mu" />
   <c:param name="r" value="${ril}" />
 </c:url>
+<c:url var="muce" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="mu" />
+  <c:param name="r" value="${ril}" />
+  <c:param name="msg" value="refresh_ce" />
+</c:url>
 <c:url var="ris" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="mu" />
   <c:param name="p" value="ris" />
