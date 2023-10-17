@@ -1,3 +1,192 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ include file="URL.jspf" %>
+<c:set var="mats" value="${requestScope.macroProcessi}" scope="page" />
+
+<style>
+.grid {
+  display: grid;
+  grid-template-columns: repeat(15,200px);
+  gap: 10px;
+  color: #fff;
+  height: 500px;
+}
+.entry {
+  background: #999;
+  padding: 1em 2em;
+}
+.entry.root {
+  background: #000; z-index: 10!important;
+}
+.entry.root, .entry.head {
+  position: sticky;
+  top: 0; left: 0;
+  background: #444;
+  z-index: 1;
+}
+</style>
+
+
+    <h3 class="mt-1 m-0 font-weight-bold float-left">Rischi e Processi</h3>    
+    <hr class="riga"/>
+    <div class="grid scrollX">
+      <!-- columns header -->
+      <div class="entry head text-center"><span>PROCESSO</span></div>
+      <div class="entry head text-center"><span>PxI</span></div>
+      <div class="entry head text-center"><span>P</span></div>
+      <div class="entry head text-center"><span>I</span></div>
+      <div class="entry head text-center">P1</div>
+      <div class="entry head text-center">P2</div>
+      <div class="entry head text-center">P3</div>
+      <div class="entry head text-center">P4</div>
+      <div class="entry head text-center">P5</div>
+      <div class="entry head text-center">P6</div>
+      <div class="entry head text-center">P7</div>
+      <div class="entry head text-center">I1</div>
+      <div class="entry head text-center">I2</div>
+      <div class="entry head text-center">I3</div>
+      <div class="entry head text-center">I4</div>
+      <!-- normal cells -->
+    <c:forEach var="mat" items="${mats}">
+      <div class="entry head bgAct4">
+        <a href="#">
+          <strong><c:out value="${mat.nome}" /></strong>
+        </a>
+      </div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <div class="entry bgAct4"></div>
+      <c:forEach var="pat" items="${mat.processi}" varStatus="status">
+      <div class="entry head bgAct4">           
+        <a href="${initParam.appName}/?q=pr&p=pro&pliv=${pat.id}&liv=${pat.livello}&r=${param['r']}">
+          <c:out value="${status.count}) ${pat.nome}" />
+        </a>
+      </div>
+      <div class="entry">
+        <c:out value="${pat.indicatori.get('PI').informativa}" />
+      </div>
+      <div class="entry"><c:out value="${pat.indicatori.get('P').informativa}" /></div>
+      <div class="entry"><c:out value="${pat.indicatori.get('I').informativa}" /></div>
+      <div class="text-center noHeader bgcolor-${fn:toLowerCase(pat.indicatori.get('P1').informativa)}">
+        <c:out value="${pat.indicatori.get('P1').informativa}" />
+      </div>
+      <div class="text-center noHeader bgcolor-${fn:toLowerCase(pat.indicatori.get('P2').informativa)}">
+        <c:out value="${pat.indicatori.get('P2').informativa}" />
+      </div>
+      <div class="text-center noHeader bgcolor-${fn:toLowerCase(pat.indicatori.get('P3').informativa)}">
+        <c:out value="${pat.indicatori.get('P3').informativa}" />
+      </div>
+      <div class="text-center noHeader bgcolor-${fn:toLowerCase(pat.indicatori.get('P4').informativa)}">
+        <c:out value="${pat.indicatori.get('P4').informativa}" />
+      </div>
+      <div class="text-center noHeader bgcolor-${fn:toLowerCase(pat.indicatori.get('P5').informativa)}">
+        <c:out value="${pat.indicatori.get('P5').informativa}" />
+      </div>
+      <div class="entry"></div>
+      <div class="entry"></div>
+      <div class="entry"></div>
+      <div class="entry"></div>
+      <div class="entry"></div>
+      <div class="entry"></div>
+      </c:forEach> 
+    </c:forEach>
+    </div>
+          &nbsp;
+          <a href="${muce}" type="button" class="btn btn-primary float-right" value="Update">
+            <i class="fa-solid fa-arrow-rotate-right"></i>
+            Ricalcola
+          </a>
+
+<%--
+    <h3 class="mt-1 m-0 font-weight-bold float-left">Rischi e Processi</h3>    
+    <hr class="riga"/>
+    <div class="row reportStateAct" id="headState">
+      <div class="col-sm-5"></div>
+      <div class="col-sm-1 bgSts21 text-center">P1</div>
+      <div class="col-sm-1 bgSts22 text-center">P2</div>
+      <div class="col-sm-1 bgSts23 text-center">P3</div>
+      <div class="col-sm-1 bgSts24 text-center">P4</div>
+      <div class="col-sm-1 bgSts25 text-center">P5</div>
+      <div class="col-sm-1 bgSts26 text-center">P6</div>
+      <div class="col-sm-1 bgSts26 text-center">P7</div>
+    </div>
+  <c:forEach var="mat" items="${mats}">
+    <div class="row reportWpRow">
+      <div class="col-5 reportWpHead">
+        <a href="#">
+          <strong><c:out value="${mat.nome}" /></strong>
+        </a>
+      </div>
+      <div class="col-1 bgSts21"></div>
+      <div class="col-1 bgSts23"></div>
+      <div class="col-1 bgSts25"></div>
+      <div class="col-1 bgSts21"></div>
+      <div class="col-1 bgSts23"></div>
+      <div class="col-1 bgSts25"></div>
+      <div class="col-1 bgSts21"></div>
+    </div>
+    <c:forEach var="pat" items="${mat.processi}" varStatus="status">
+          <div class="row">
+            <div class="col-1 reportWpRow"></div>
+            <div class="col-4 reportAct">
+            
+              <a href="${initParam.appName}/?q=pr&p=pro&pliv=${pat.id}&liv=${pat.livello}&r=${param['r']}">
+                <c:out value="${status.count}) ${pat.nome}" />
+              </a>
+            </div>
+            
+              
+              
+              <div class="col-1 text-center bgcolor-${fn:toLowerCase(pat.indicatori.get('P1').informativa)}"><c:out value="${pat.indicatori.get('P1').informativa}" /></div>
+            
+              
+              
+              <div class="col-1 bgSts22 " title="Dal 01/01/2021 al 31/12/2021"></div>
+            
+              
+              
+                
+              
+              <div class="col-1 bgSts23 bgAct23" title="Dal 01/01/2021 al 31/12/2021"></div>
+            
+              
+              
+              <div class="col-1 bgSts24 " title="Dal 01/01/2021 al 31/12/2021"></div>
+            
+              
+              
+              <div class="col-1 bgSts25 " title="Dal 01/01/2021 al 31/12/2021"></div>
+            
+              
+              
+              <div class="col-1 bgSts26 " title="Dal 01/01/2021 al 31/12/2021"></div>
+              <div class="col-1 bgSts26 " title="Dal 01/01/2021 al 31/12/2021"></div>
+          </div>
+      </c:forEach> 
+    </c:forEach>
+
+ --%>
+          
+
+            
+
+            
+    <hr class="separatore" />
+    <h3 class="mt-1 m-0 font-weight-bold float-left">Grafici di esempio</h3>    
+    <hr class="riga"/>
 
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
