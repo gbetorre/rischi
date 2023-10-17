@@ -49,7 +49,7 @@
 <!-- Insert TOC here -->
 
 # Rischi
-L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti, Pubbliche Amministrazioni e aziende partecipate a quantificare i rischi corruttivi cui i processi organizzativi sono esposti e ad indirizzare questi soggetti a mettere in atto le contromisure adeguate.<br><br>
+L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti, Pubbliche Amministrazioni e aziende partecipate a quantificare automaticamente i rischi corruttivi cui i loro processi organizzativi sono esposti e ad indirizzare questi soggetti a mettere in atto le contromisure adeguate.<br><br>
 
 <!-- ABOUT THE PROJECT -->
 
@@ -57,7 +57,7 @@ L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti,
 
 [![Goal Sample][indicator-sample01]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample01.png)
 <br>
-<strong>*Fig.1 - L'obiettivo del software &egrave; ottenere in automatico il valore di rischio per ogni processo organizzativo considerato (dati fittizi&#770;)*</strong><br>
+<strong>*Fig.1 - L'obiettivo del software &egrave; ottenere, in automatico, il valore di rischio per ogni processo organizzativo considerato (dati fittizi&#770;)*</strong><br>
 
 <p>
 Attraverso la risposta ad una serie di quesiti posti a responsabili ed operatori presso specifici uffici amministrativi (intervista), l'applicazione permette di ottenere, automaticamente, una serie di indici relativi a specifici rischi corruttivi cui possono essere esposti i processi organizzativi presidiati dalle strutture stesse.<br>
@@ -98,7 +98,7 @@ Incrociando i valori ottenuti negli indicatori di probabilit&agrave; (P) con que
 Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le azioni organizzative da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
 
 ## Come funziona il software
-Ovviamente l'applicazione Rischi On Line (ROL) si appoggia su un database, specificamente un database relazionale di tipo postgreSQL (versione 12 e successive).
+Ovviamente l'applicazione Rischi On Line (ROL) si appoggia su un database, specificamente un database relazionale di tipo PostgreSQL (versione 12 e successive), in cui sono popolati i quesiti che verranno sottoposti alle strutture nelle interviste.
 
 In una prima fase viene effettuato il caricamento delle strutture organizzative (organigramma) e quello dei processi organizzativi che vengono prodotti dalle strutture stesse.
 
@@ -126,7 +126,7 @@ Inoltre, per ogni processo viene fornita una pagina di dettaglio, contenente, ol
 
 Dopo aver popolato il database con le strutture, i macroprocessi e i loro sottolivelli, si pu&ograve; passare alla fase dell'intervista, che consiste nel rivolgere una serie di quesiti ad una serie di specifiche strutture che presiedono uno specifico processo. La batteria di quesiti &egrave; ampia (pi&uacute; di 150) ma la decisione circa quali quesiti somministrare pu&ograve; essere stabilita di volta in volta dall'intervistatore, nel senso che tutti i quesiti sono facoltativi e vi sono quesiti pi&uacute; generici, che probabilmente ha senso rivolgere in ogni intervista, e quesiti pi&uacute; specifici, che ha senso somministrare soltanto se si sta prendendo in esame processi molto peculiari. I quesiti sono raggruppati in ambiti di analisi e nel caso di alcune strutture potrebbe anche aver senso omettere i quesiti di interi ambiti di analisi.
 
-Le risposte vengono poi utilizzate per ottenere il valore di una serie di indicatori, come accennato sopra.<br>
+Le risposte vengono poi utilizzate per ottenere il valore di una serie di indicatori, come accennato in precedenza.<br>
 Tutti gli indicatori, tranne uno, dipendono dalle risposte ai quesiti, nel senso che il valore ottenuto nell'indicatore viene calcolato tramite un algoritmo che tiene conto delle risposte ottenute.
 Vi &egrave; soltanto un indicatore di impatto che non dipende dai quesiti ma dal numero e dalla tipologia di strutture coinvolte nel processo misurato.
 
@@ -321,10 +321,11 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.6.4] Implementata form di ricerca sui quesiti per chiave testuale
 - [1.5.7] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
 - [1.5.6] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista; prima bozza calcolo indicatori P1, P2, P3 nel contesto del singolo processo
-- [1.4.8] ( /10/2023) Implementato caching su disco dei valori degli indicatori calcolati
+- [1.4.9] ( /10/2023) Implementato calcolo indicatori di rischio...
 
 ### Done
 -->
+- [1.4.8] (17/10/2023) Implementato caching su disco dei valori degli indicatori di rischio
 - [1.4.7] (11/10/2023) Trasformata struttura contenente gli indicatori di rischio in mappa ordinata
 - [1.4.6] (10/10/2023) Aggiunto attributo a oggetto processo anticorruttivo per contenere valori degli indicatori di rischio
 - [1.4.5] (02/10/2023) Mostrate interviste nella pagina di dettaglio del processo, con valori degli indicatori calcolati; implementato algoritmo di scelta in caso di valori di rischio divergenti tra interviste multiple sullo stesso processo. Rimosso codice legacy.
