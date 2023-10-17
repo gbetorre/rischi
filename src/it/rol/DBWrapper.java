@@ -37,11 +37,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Types;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -3371,6 +3371,179 @@ public class DBWrapper implements Query, Constants {
         }
     }
     
+
+    /**
+     * <p>Restituisce tutti i valori gi&agrave; pre-calcolati per tutti gli 
+     * indicatori relativi a tutti i processi nel contesto di una data
+     * rilevazione.<br /> 
+     * Effettua diversi rimaneggiamenti sui dati estratti una sola
+     * volta nell'ottica di limitare al massimo il numero di accessi 
+     * al disco (ovvero delle letture da db).<br />
+     * I valori recuperati da database sono stati memorizzati 
+     * in base a un pre-calcolo (caching).</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param mats      struttura contenente tutti i macroprocessi - e processi figli - privi di indicatori di rischio 
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - struttura contenente tutti i macroprocessi con al loro interno i processi figli, ciascuno corredato dei propri indicatori di rischio 
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<ProcessBean> getIndicatorValues(PersonBean user, 
+                                                     final ArrayList<ProcessBean> mats,
+                                                     CodeBean survey)
+                                              throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            AbstractList<ProcessBean> macro = (ArrayList<ProcessBean>) mats.clone();
+            AbstractList<ProcessBean> processi = new ArrayList<>();
+            ArrayList<ItemBean> tuple = new ArrayList<>();
+            ArrayList<ItemBean> processIndicators = null;
+            LinkedHashMap<Integer, ArrayList<ItemBean>> tupleAsMap = new LinkedHashMap<>();
+            LinkedHashMap<String, InterviewBean> indicators = null;
+            int index = NOTHING;
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_INDICATOR_PAT);
+                pst.clearParameters();
+                pst.setInt(1, survey.getId());
+                rs = pst.executeQuery();
+                // Ottiene le tuple indicizzate per identificativo di processo
+                while (rs.next()) {
+                    // Prepara l'oggetto generico per contenere la tupla
+                    ItemBean row = new ItemBean();
+                    // Valorizza l'oggetto
+                    BeanUtil.populate(row, rs);
+                    // Lo aggiunge all'array
+                    tuple.add(row);
+                }
+                // Deve indicizzare gli indicatori recuperati per processo
+                while (index < tuple.size()) {
+                    // Recupera la riga
+                    ItemBean row = tuple.get(index);
+                    // Recupera l'identificativo del processo corrente e lo incapsula in un Wrapper
+                    Integer patIdAsInteger = new Integer(row.getCod1());
+                    // Prepara struttura vettoriale per contenere indicatori relativi a processo at
+                    processIndicators = new ArrayList<>();
+                    // Aggiunge il primo indicatore perché certamente va aggiunto
+                    processIndicators.add(row);
+                    // Incrementa conseguentemente l'indice
+                    index++;
+                    // Prepara un contatore che non vale 0 ma 1 perché uno è già stato aggiunto
+                    int added = ELEMENT_LEV_1;
+                    // Recupera numero indicatori per il processo corrente
+                    int totIndPat = row.getCod3();
+                    // Il numero di tuple associate al processo deve corrispondere al numero di indicatori
+                    while (added < totIndPat) {
+                        row = tuple.get(index);
+                        processIndicators.add(row);
+                        index++;
+                        added++;
+                    }
+                    // Indicizza ogni sottoinsieme di tuple per id di processo at
+                    tupleAsMap.put(patIdAsInteger, processIndicators);
+                }
+                // Deve trasformare le tuple destrutturate in oggetti con attributi valorizzati
+                for (int i = 0; i < mats.size(); i++) {
+                    // Recupera il macroprocesso
+                    ProcessBean mat = mats.get(i);
+                    // Prepara la struttura
+                    processi = new ArrayList<>();
+                    // Assume che non ci sia necessità di aggiornamento
+                    boolean update = false;
+                    // Recupera i suoi processi
+                    for (int j = 0; j < mat.getProcessi().size(); j++) {
+                        // Processo corrente
+                        ProcessBean pat = mat.getProcessi().get(j);
+                        // Explicit un/boxing
+                        Integer patIdAsInteger = Integer.valueOf(pat.getId());
+                        // Se per il processo corrente sono presenti indicatori
+                        if (tupleAsMap.containsKey(patIdAsInteger)) {
+                            // C'è necessità di aggiornamento
+                            update = true;
+                            // Prepara la lista di indicatori
+                            indicators = new LinkedHashMap<>();
+                            // Recupera le tuple contenenti gli indicatori per il processo 
+                            ArrayList<ItemBean> items = tupleAsMap.get(patIdAsInteger);
+                            // Cicla sulle tuple
+                            for (ItemBean item : items) {
+                                // Crea un oggetto per contenere l'indicatore
+                                InterviewBean value = new InterviewBean();
+                                // P.es.  nome = codice = 'P1'
+                                value.setNome(item.getCodice());
+                                // P.es.  descrizione = extraInfo = TABLE_NAME.indicatore.nome = 'Livello di interesse esterno'
+                                value.setDescrizione(item.getExtraInfo());
+                                // Controllo sul valore del rischio (non determinabile = -1)
+                                String result = (item.getValue1AsInt() < NOTHING) ? ERR : LIVELLI_RISCHIO[item.getValue1AsInt()];
+                                // P.es.  informativa = result = LIVELLI_RISCHIO[2] = 'MEDIO'
+                                value.setInformativa(result);
+                                // Campi di servizio
+                                value.setOrdinale(item.getOrdinale());
+                                value.setDataUltimaModifica(Utils.format(item.getExtraInfo1()));
+                                value.setOraUltimaModifica(Utils.format(item.getExtraInfo2(), TIME_SQL_PATTERN));
+                                // TODO: COMPLETARE aggiungendo il tipo indicatore al processo
+                                value.setProcesso(pat);
+                                // Indicizza l'indicatore per codice
+                                indicators.put(item.getCodice(), value);
+                            }
+                            // Setta gli indicatori nel processo corrente
+                            pat.setIndicatori(indicators);
+                        }
+                        // Aggiunge il processo completo di indicatori
+                        processi.add(pat);
+                    }
+                    // Se ci sono indicatori, aggiorna il macroprocesso
+                    if (update) {
+                        mat.setProcessi(processi);
+                    }
+                    // Aggiorna l'elenco
+                    macro.set(i, mat);
+                    // Tentativo di liberare memoria una volta finito
+                    processi = null;
+                }
+                /* 
+                 *                     // Prepara l'indicatore
+                    InterviewBean ind = new InterviewBean();
+                    // Trasforma i valori generici in attributi di oggetto
+                    ind.set
+                    // Aggiunge l'indicatore valorizzato alla lista
+                    indicators.add(ind);
+                 */
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<ProcessBean>) macro;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio non recuperabile.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (CommandException ce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di tipo.\n" + ce.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, ce);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nella query dei valori precalcolati degli indicatori di rischio.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
     /* ********************************************************** *
      *                    Metodi di INSERIMENTO                   *
      * ********************************************************** */
@@ -3827,6 +4000,141 @@ public class DBWrapper implements Query, Constants {
         }
     }
     
+    
+    /**
+     * <p>Metodo per fare l'inserimento dei valori degli indicatori di rischio
+     * calcolati per ogni singolo processo su cui sia stata effettuata almeno
+     * un'intervista.</p>
+     *
+     * @param user      utente loggato
+     * @param mats      struttura contenente tutti i macroprocessi - e processi figli - corredati ciascuno dei valori dei propri indicatori di rischio 
+     * @param survey    oggetto contenente i dati della rilevazione 
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    @SuppressWarnings("static-method")
+    public void insertIndicatorProcess(PersonBean user, 
+                                       final ArrayList<ProcessBean> mats,
+                                       CodeBean survey) 
+                                throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            try {
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                /* === Se siamo qui vuol dire che ok   === */ 
+                 // Prepara i parametri per l'inserimento
+                try {
+                    // Per ogni macroprocesso
+                    for (ProcessBean mat : mats) {
+                        // Recupera i suoi processi
+                        ArrayList<ProcessBean> processi = (ArrayList<ProcessBean>) mat.getProcessi();
+                        // Prepara un progressivo
+                        int index = NOTHING;
+                        // Per ogni processo
+                        for (ProcessBean pat : processi) {
+                            // Recupera i suoi indicatori
+                            LinkedHashMap<String, InterviewBean> indicators = pat.getIndicatori();
+                            if (indicators != null) {
+                                // Per ogni indicatore
+                                for (java.util.Map.Entry<String, InterviewBean> entry : indicators.entrySet()) {
+                                    String key = entry.getKey();
+                                    InterviewBean value = entry.getValue();
+                                    // Prepara la query
+                                    pst = con.prepareStatement(INSERT_INDICATOR_PROCESS);
+                                    // Prepara i parametri
+                                    pst.clearParameters();
+                                    // Definisce un indice per il numero di parametro da passare alla query
+                                    int nextParam = NOTHING;
+                                    /* === Id processo at === */
+                                    pst.setInt(++nextParam, pat.getId());
+                                    /* === Codice indicatore === */
+                                    pst.setString(++nextParam, key);
+                                    /* === Identificativo della rilevazione === */
+                                    pst.setInt(++nextParam, survey.getId());
+                                    /* === Valore === */
+                                    // Converte il livello di rischio in un valore numerico
+                                    int resultAsInt = Arrays.asList(LIVELLI_RISCHIO).indexOf(value.getInformativa());
+                                    pst.setInt(++nextParam, resultAsInt);
+                                    /* === Descrizione === */
+                                    if (value.getDescrizione() != null && !value.getDescrizione().equals(VOID_STRING)) {
+                                        pst.setString(++nextParam, value.getDescrizione());
+                                    } else {
+                                        // Dato facoltativo non inserito
+                                        pst.setNull(++nextParam, Types.NULL);
+                                    }
+                                    /* === Note === */
+                                    // TODO GESTIRE 
+                                    // Questo campo si usa per motivare il giudizio sintetico
+                                    // al momento lo impostiamo a null ma bisognerà salvaguardare
+                                    // eventuali motivazioni inserite in precedenza
+                                    if (false) {
+                                        pst.setString(++nextParam, VOID_STRING);
+                                    } else {
+                                        // Dato facoltativo non inserito
+                                        pst.setNull(++nextParam, Types.NULL);
+                                    }
+                                    /* === Ordinale === */
+                                    pst.setInt(++nextParam, index);
+                                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                                    pst.setInt(++nextParam, user.getUsrId());
+                                    // CR (Carriage Return) o 0DH
+                                    pst.executeUpdate();
+                                }
+                            }
+                        }
+                    }
+                } catch (AttributoNonValorizzatoException anve) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo.\n" + anve.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, anve);
+                } catch (ClassCastException cce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di tipo.\n" + cce.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, cce);
+                } catch (ArrayIndexOutOfBoundsException aiobe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, aiobe);
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, npe);
+                } catch (Exception e) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
+                // End: <==
+                con.commit();
+                if (pst != null) {
+                    pst.close();
+                    pst = null;
+                }
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
     /* ********************************************************** *
      *                  Metodi di AGGIORNAMENTO                   *
      * ********************************************************** */
@@ -3943,6 +4251,70 @@ public class DBWrapper implements Query, Constants {
         }
     }
     
+    /* ********************************************************** *
+     *                  Metodi di ELIMINAZIONE                    *
+     * ********************************************************** */
+    
+    /**
+     * <p>Metodo per eliminare tutti i valori calcolati sugli indicatori
+     * di rischio per i processi attraverso le interviste.</p> 
+     *
+     * @param user      utente loggato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public void deleteIndicatorProcessResults(PersonBean user) 
+                                       throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            try {
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                /* === Se siamo qui vuol dire che ok   === */ 
+                // Prepara la query
+                pst = con.prepareStatement(DELETE_INDICATOR_PROCESS_RESULTS);
+                // La query è senza parametri
+                pst.clearParameters();
+                // Esecuzione
+                pst.executeUpdate();
+                // End: <==
+                con.commit();
+                pst.close();
+                pst = null;
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella cancellazione dei valori degli indicatori di rischio.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (ArrayIndexOutOfBoundsException aiobe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, aiobe);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (RuntimeException re) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento.\n" + re.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, re);
+        } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+        }
+    }
     
     /* ********************************************************** *
      *                      Metodi "di servizio"                  *
