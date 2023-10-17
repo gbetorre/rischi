@@ -33,7 +33,6 @@
 
 package it.rol.command;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -50,8 +49,6 @@ import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Main;
-import it.rol.Query;
-import it.rol.bean.CodeBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
@@ -99,14 +96,6 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      * Struttura contenente le pagine a cui la Command fa riferimento
      */
     private static final HashMap<String, String> nomeFile = new HashMap<>();
-    /**
-     * DataBound.
-     *
-    private static DBWrapper db;
-    /**
-     *  Elenco di macroprocessi anticorruttivi collegati alla rilevazione
-     */
-    ConcurrentHashMap<String, ArrayList<ProcessBean>> macroBySurvey = new ConcurrentHashMap<>();
 
 
     /**
@@ -136,32 +125,6 @@ public class ReportCommand extends ItemBean implements Command, Constants {
           String msg = FOR_NAME + "La voce menu' " + this.getNome() + " non ha il campo paginaJsp. Impossibile visualizzare i risultati.\n";
           throw new CommandException(msg);
         }
-        /* Fa il caching in memoria degli indicatori
-        try {
-            // Genera un utente con privilegi assoluti
-            PersonBean user = new PersonBean();
-            // Attiva la connessione al database
-            db = new DBWrapper();
-            // Recupera tutte le rilevazioni
-            ArrayList<CodeBean> surveys = db.getSurveys(Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE);
-            // Per ogni rilevazione
-            for (CodeBean s : surveys) {
-                // Calcola i macroprocessi della rilevazione corrente
-                ArrayList<ProcessBean> macro = ProcessCommand.retrieveMacroAtBySurvey(user, s.getNome(), db);
-                // Calcola i valori degli indicatori di rischio 
-                ArrayList<ProcessBean> mats = retrieveIndicatorsByMacroAt(macro, user, s.getNome(), db);
-                // Carica in un'unica tabella i macroprocessi indicizzati per codice rilevazione
-                macroBySurvey.put(s.getNome(), mats);
-            }
-        }
-        catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Non e\' possibile avere una connessione al database.\n" + wse.getMessage();
-            throw new CommandException(msg, wse);
-        }
-        catch (Exception e) {
-            String msg = FOR_NAME + "Problemi nel caricare gli stati.\n" + e.getMessage();
-            throw new CommandException(msg, e);
-        }*/
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         nomeFile.put(PART_SEARCH,     nomeFileSearch);
     }
@@ -196,7 +159,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         // Dichiara la pagina a cui reindirizzare
         String fileJspT = null;
         // Dichiara elenco di macroprocessi anticorruttivi collegati alla rilevazione
-        AbstractList<ProcessBean> mats = null;
+        ArrayList<ProcessBean> matsWithIndicators = null;
         // Dichiara mappa di parametri di ricerca
         HashMap<String, LinkedHashMap<String, String>> params = null;
         // Preprara BreadCrumbs
@@ -250,16 +213,16 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                 /* *********************************************************** *
                  *  Viene richiesta la visualizzazione della pagina di report  *
                  * *********************************************************** */
-                    ArrayList<ProcessBean> macro = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
+                    ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
                     // Controlla se deve forzare l'aggiornamento dei valori degli indicatori
-                    if (mess.equalsIgnoreCase("refresh_ce")) {
-                        mats = refreshIndicatorsByMacroAt(macro, user, codeSur, db);
-                    } else {
-                        mats = retrieveIndicatorsByMacroAt(macro, user, codeSur, db);
+                    if (mess.equals("refresh_ce")) {
+                        ArrayList<ProcessBean> mats = computeIndicators(matsWithoutIndicators, user, codeSur, db);
+                        refreshIndicators(mats, user, codeSur, db);
                     }
+                    matsWithIndicators = retrieveIndicators(matsWithoutIndicators, user, codeSur, db);
                     fileJspT = nomeFileElenco;
                 }
-            } else {    // manca il codice rilevazione
+            } else {    // Manca il codice rilevazione
                 String msg = FOR_NAME + "Impossibile recuperare il codice della rilevazione.\n";
                 LOG.severe(msg + "Qualcuno ha probabilmente alterato il codice rilevazione nell\'URI della pagina.\n");
                 throw new CommandException(msg);
@@ -276,9 +239,9 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
-        // Imposta in request, se ci sono, lista di processi anticorruttivi
-        if (mats != null) {
-            req.setAttribute("macroProcessi", mats);
+        // Imposta in request, se ci sono, lista di macroprocessi con figli e indicatori
+        if (matsWithIndicators != null) {
+            req.setAttribute("macroProcessi", matsWithIndicators);
         }
         // Imposta nella request le chiavi di ricerca, se presenti
         if (params != null) {
@@ -295,29 +258,75 @@ public class ReportCommand extends ItemBean implements Command, Constants {
     
     
     /* **************************************************************** *
-     *                  Metodi di recupero dei dati                     *                     
-     *                            (retrieve)                            *
+     *               Metodi di recupero semplice dei dati               *                     
+     *   o di recupero e di calcolo effettuato in base ai dati stessi   *
      * **************************************************************** */
     
     /**
-     * <p>Restituisce un ArrayList (albero, vista gerarchica) 
+     * <p>Ricevuta una ArrayList (albero, vista gerarchica)
      * di tutti macroprocessi censiti dall'anticorruzione 
      * trovati in base a una rilevazione il cui identificativo 
-     * viene accettato come argomento; ogni macroprocesso contiene 
-     * internamente i suoi processi e questi gli indicatori di rischio.</p>
-     *
-     * @param codeSurvey    il codice della rilevazione
+     * viene accettato come argomento, ma i cui figli non contengono
+     * i valori degli indicatori di rischio totalizzati, 
+     * restituisce una ArrayList di macroprocessi dove ogni macroprocesso contiene 
+     * internamente i suoi processi e questi gli indicatori di rischio
+     * i cui valori vengono recuperati da database, ove sono stati memorizzati 
+     * in base a un pre-calcolo (caching).</p>
+     * 
+     * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - privi di indicatori di rischio 
      * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param codeSurvey    il codice della rilevazione
      * @param db            WebStorage per l'accesso ai dati
-     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi recuperati
+     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi contenenti i relativi figli e, questi, gli indicatori di rischio
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
      */
-    public static ArrayList<ProcessBean> retrieveIndicatorsByMacroAt(ArrayList<ProcessBean> mats,
-                                                                     PersonBean user,
-                                                                     String codeSurvey,
-                                                                     DBWrapper db)
-                                                              throws CommandException {
-        // Fa una copia del parametro altrimenti lo si modificherebbe (malissimo!)
+    public static ArrayList<ProcessBean> retrieveIndicators(final ArrayList<ProcessBean> mats,
+                                                            PersonBean user,
+                                                            String codeSurvey,
+                                                            DBWrapper db)
+                                                     throws CommandException {
+        try {
+            ArrayList<ProcessBean> macro = db.getIndicatorValues(user, mats, ConfigManager.getSurvey(codeSurvey));
+            return macro;
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'interazione col database (in metodi di lettura).\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (RuntimeException ce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + ce.getMessage(), ce);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+
+    
+    /**
+     * <p>Ricevuta una ArrayList (albero, vista gerarchica)
+     * di tutti macroprocessi censiti dall'anticorruzione 
+     * trovati in base a una rilevazione il cui identificativo 
+     * viene accettato come argomento, ma i cui figli non contengono
+     * i valori degli indicatori di rischio totalizzati, 
+     * restituisce una ArrayList di macroprocessi dove ogni macroprocesso contiene 
+     * internamente i suoi processi e questi gli indicatori di rischio,
+     * i cui valori vengono calcolati a runtime.</p>
+     *
+     * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - privi di indicatori di rischio 
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param codeSurvey    il codice della rilevazione
+     * @param db            WebStorage per l'accesso ai dati
+     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi contenenti i loro processi figli e, questi, i valori degli indicatori di rischio
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static ArrayList<ProcessBean> computeIndicators(final ArrayList<ProcessBean> mats,
+                                                           PersonBean user,
+                                                           String codeSurvey,
+                                                           DBWrapper db)
+                                                    throws CommandException {
+        // Pleonastica
         ArrayList<ProcessBean> macro = (ArrayList<ProcessBean>) mats.clone();
         // Visibilità a livello di metodo
         ArrayList<ProcessBean> processi = null;
@@ -366,37 +375,61 @@ public class ReportCommand extends ItemBean implements Command, Constants {
 
     
     /* **************************************************************** *
-     *                 Metodi di riscrittura dei dati                   *                     
+     *           Metodi di riscrittura (aggiornamento) dei dati         *                     
      *                            (refresh)                             *
      * **************************************************************** */
     
     /**
-     * <p>Cancella tutti i valori degli indicatori di rischio
+     * <p>Ricevuta una ArrayList (albero, vista gerarchica)
+     * di tutti macroprocessi censiti dall'anticorruzione 
+     * trovati in base a una rilevazione il cui identificativo 
+     * viene accettato come argomento ed i cui figli gi&agrave; contengono
+     * i valori degli indicatori di rischio calcolati, 
+     * cancella tutti i valori degli indicatori di rischio
      * relativi a tutti i processi censiti dall'anticorruzione eventualmente
-     * presenti nella tabella dei risultati, rigenera i valori
-     * e li inserisce in tabella.</p>
+     * presenti nella tabella dei risultati e inserisce nella stessa tabella
+     * i nuovi valori ricevuti tramite il parametro.</p>
+     * <p>Se si verifica un problema nell'inserimento, il risultato
+     * sar&agrave; una cancellazione, perch&eacute; le due operazioni 
+     * di scrittura non sono in transazione; ci&ograve; &egrave; voluto 
+     * in quanto, anche se si eliminano i valori e non se ne inseriscono 
+     * di nuovi, si stanno solo eliminando valori di caching pre-calcolati e, 
+     * by default, il software non effettua questa operazione di ricalcolo, 
+     * ma mostra i valori calcolati in precedenza.<br />
+     * Eventualmente, in futuro si potrebbe valutare di rendere atomiche
+     * la cancellazione e il successivo inserimento; ci&ograve; pu&ograve;
+     * essere fatto in diversi modi:<ol>
+     * <li>effettuare prima un test sul buon esito dell'inserimento 
+     * tramite un accodamento delle nuove tuple e poi di effettuare 
+     * la cancellazione totale e, infine, il nuovo inserimento;</li>
+     * <li>procedere tramite un aggiornamento delle righe modificate piuttosto
+     * che tramite una cancellazione non parametrica (la DELETE non parametrica,
+     * usata attualmente nel metodo di eliminazione, va sulla tabella, 
+     * non sulla riga);</li>
+     * <li>mettere nella stessa transazione (nel DBWrapper) prima 
+     * la cancellazione e poi l'inserimento</li></ol>
+     * Probabilmente la soluzione più efficiente e semplice &egrave; l'ultima.</p>
      *
-     * @param codeSurvey    il codice della rilevazione
+     * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - corredati di indicatori di rischio valorizzati
      * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param codeSurvey    il codice della rilevazione
      * @param db            WebStorage per l'accesso ai dati
-     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi recuperati
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
      */
-    public static ArrayList<ProcessBean> refreshIndicatorsByMacroAt(ArrayList<ProcessBean> mats,
-                                                                    PersonBean user,
-                                                                    String codeSurvey,
-                                                                    DBWrapper db)
-                                                             throws CommandException {
-        // Fa una copia del parametro altrimenti lo si modificherebbe (malissimo!)
-        ArrayList<ProcessBean> macro = (ArrayList<ProcessBean>) mats.clone();
+    public static void refreshIndicators(final ArrayList<ProcessBean> mats,
+                                         PersonBean user,
+                                         String codeSurvey,
+                                         DBWrapper db)
+                                  throws CommandException {
         try {
             // Elimina i dati eventualmente già presenti in tabella
-            //db.deleteIndicatorProcessResults(user);
-            //db.insertIndicatorProcess(user, mats, ConfigManager.getSurvey(codeSurvey));
-        /*} catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nell\'interazione col database.\n";
+            db.deleteIndicatorProcessResults(user);
+            // Inserisce i valori degli indicatori ricevuti tramite il parametro
+            db.insertIndicatorProcess(user, mats, ConfigManager.getSurvey(codeSurvey));
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'interazione col database (in metodi di scrittura).\n";
             LOG.severe(msg);
-            throw new CommandException(msg + wse.getMessage(), wse);*/
+            throw new CommandException(msg + wse.getMessage(), wse);
         } catch (RuntimeException re) {
             String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento.\n";
             LOG.severe(msg);
@@ -406,7 +439,6 @@ public class ReportCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg + e.getMessage(), e);
         }
-        return macro;
     }
 
 }
