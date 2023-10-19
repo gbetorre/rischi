@@ -36,11 +36,9 @@ package it.rol.command;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +74,8 @@ import it.rol.exception.WebStorageException;
  * Implementa la logica per la presentazione dei quesiti (interviste) 
  * e per la gestione dell'inserimento, dell'aggiornamento e della visualizzazione 
  * delle risposte, nel contesto della raccolta e dell'analisi dei dati
- * relativi alla mappatura e analisi dei rischi corruttivi in ateneo (ROL).</p>
+ * relativi alla mappatura e analisi dei rischi corruttivi in ateneo (ROL).
+ * Si occupa, inoltre, del calcolo dei valori degli indicatori di rischio.</p>
  * 
  * <p>Created on Tue 12 Apr 2022 09:46:04 AM CEST</p>
  * 
@@ -235,7 +234,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
         /* ******************************************************************** *
-         *                         Controllo Garden Gate                        *
+         *                       Controllo no Garden Gate                       *
          * ******************************************************************** */
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
@@ -267,7 +266,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             throw new CommandException(msg + e.getMessage(), e);
         }
         /* ******************************************************************** *
-         *                          Corpo del programma                         *
+         *                           Corpo del metodo                           *
          * ******************************************************************** */
         // Decide il valore della pagina
         try {
@@ -277,7 +276,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
                 loadParams(part, parser, params);
-                // @PostMapping
+                /* @PostMapping */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
@@ -384,7 +383,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                         // Azione di default
                         // do delete?
                     }
-                // @GetMapping
+                /* @GetMapping */
                 } else {
                     /* ************************************************ *
                      *                Manage Interview Part             *
@@ -541,7 +540,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
     
     
     /* **************************************************************** *
-     *              Metodi di caricamento dei parametri                 *                     
+     *  Metodi di caricamento dei parametri in strutture indicizzabili  *                     
      *                              (load)                              *
      * **************************************************************** */
     
@@ -626,7 +625,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * 
      * @param codeSur       codice rilevazione
      * @param interview     oggetto intervista, contenente tutti i parametri al proprio interno, da estrarre e inserire nella mappa restituita
-     * @return <code>HashMap&lt;String, LinkedHashMap&lt;String, String&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il valore del parametro p, e per valore una mappa contenente i relativi parametri
+     * @return <code>HashMap&lt;String, LinkedHashMap&lt;String, String&gt;&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il valore del parametro p, e per valore una mappa contenente i relativi parametri
      * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
      * @throws AttributoNonValorizzatoException se si fa riferimento a un attributo obbligatorio di bean che non viene trovato
      */
@@ -755,7 +754,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @param answers       lista delle risposte
      * @param survey        oggetto rilevazione
      * @param db            databound gia' istanziato
-     * @return <code>HashMap&lt;String&comma; LinkedList&lt;Integer&gt;&gt;</code> - Mappa degli identificativi dei quesiti corrispondenti a ciascun indicatore
+     * @return <code>HashMap&lt;String&comma; LinkedList&lt;Integer&gt;&gt;</code> - mappa degli identificativi dei quesiti corrispondenti a ciascun indicatore
      * @throws WebStorageException se si verifica un problema a livello di query o di estrazione
      * @throws CommandException se si verifica un problema nel recupero di valori o in qualche altro tipo di puntamento
      */
@@ -767,35 +766,12 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                                                                                      CommandException {
         // Recupera i quesiti per il calcolo degli indicatori
         return db.getQuestionsByIndicator(user, survey);
-        /*
-        // Imposta un ID fittizio (l'implementazione dell'ItemBean come chiave si basa sull'ID per i confronti)
-        int assignedId = NOTHING;
-        // Cicla sull'HashMap, sostituendo ogni chiave con un oggetto più complesso di una String
-        for (java.util.Map.Entry<String, LinkedList<Integer>> entry : questByIndicators.entrySet()) {
-            String key = entry.getKey();
-            LinkedList<Integer> value = entry.getValue();
-            ItemBean item = new ItemBean();
-            item.setId(++assignedId);
-            item.setCodice(key);
-            item.setNome(v);
-            //LinkedList<Integer> valueGet = questionsByIndicator.get(key);
-            
-            if (key.equals(P1)) {
-                indicator = computeP1(questionsByIndicator.get(P1), answersByQuestion);
-                indicatorsByName.put(P1, indicator);
-                break;
-            } else if (key.equals(P2)) {
-                indicator = computeP1(questionsByIndicator.get(P2), answersByQuestion);
-                indicatorsByName.put(P2, indicator);
-                break;
-            }
-        }*/
     }
     
     
     /* **************************************************************** *
      *                   Metodi di travaso dei dati                     *                     
-     *                             (decant)                             *
+     *                    (decant, filter, purge)                       *
      * **************************************************************** */
     
     /**
@@ -806,7 +782,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * 
      * @param objects struttura vettoriale contenente gli oggetti da travasare
      * @param part    parametro di navigazione identificante la tipologia di oggetti da considerare
-     * @return <code>HashMap&lt;?&comma; ?&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
+     * @return <code>HashMap&lt;?&comma; ?&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     private static HashMap<?,?> decant(ArrayList<?> objects, 
@@ -834,8 +810,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * di ogni struttura, evitando di dover ogni volta ciclare la struttura
      * matriciale fino al nodo di cui si vogliono ottenere le strutture figlie.</p>
      *
-     * @param structs Vector di DepartmentBean da travasare in HashMap
-     * @return <code>HashMap&lt;String&comma; Vector&lt;DepartmentBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
+     * @param structs   struttura vettoriale di DepartmentBean da travasare in HashMap
+     * @return <code>HashMap&lt;String&comma; Vector&lt;DepartmentBean&gt;&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     private static HashMap<String, Vector<DepartmentBean>> decantStructs(ArrayList<DepartmentBean> structs)
@@ -885,9 +861,9 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * in cui la chiave è costituita dall'ambito e il valore l'array
      * di quesiti associati.</p>
      *
-     * @param questions Vector di QuestionBean da indicizzare per ambito
-     * @param ambits    Vector di ambiti cui ricondurre i quesiti
-     * @return <code>HashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
+     * @param questions ArrayList di QuestionBean da indicizzare per ambito
+     * @param ambits    ArrayList di ambiti cui ricondurre i quesiti
+     * @return <code>HashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     private static HashMap<ItemBean, ArrayList<QuestionBean>> decantQuestions(ArrayList<QuestionBean> questions, 
@@ -930,8 +906,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * <p>Prende in input una struttura vettoriale di QuestionBean 
      * contenenti internamente le risposte e scarta le domande con risposte vuote.</p>
      *
-     * @param questions Vector di QuestionBean da indicizzare per ambito
-     * @return <code>HashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
+     * @param questions ArrayList di QuestionBean da indicizzare per ambito
+     * @return <code>HashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     private static ArrayList<QuestionBean> filter(ArrayList<QuestionBean> questions)
@@ -965,13 +941,14 @@ public class AuditCommand extends ItemBean implements Command, Constants {
     
     
     /**
-     * <p>Prende in input una struttura vettoriale di quesiti contenenti ciascuno
-     * internamente la relativa risposta e restituisce una mappa di risposte,
-     * ciascuna indicizzata per identificativo quesito.</p>
+     * <p>Prende in input una struttura vettoriale di quesiti, ciascuno
+     * contenente internamente la relativa risposta e restituisce 
+     * una mappa di risposte, ciascuna indicizzata per identificativo 
+     * quesito.</p>
      * 
      * @param questions ArrayList di QuestionBean rappresentanti ciascuno una domanda con risposta 
      * @param answers   ArrayList di QuestionBean rappresentanti ciascuno una risposta con domanda
-     * @return <code>HashMap&lt;Integer&comma; QuestionBean&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il quesito e per valore l'oggetto risposta
+     * @return <code>HashMap&lt;Integer&comma; QuestionBean&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il quesito e per valore l'oggetto risposta
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     public static HashMap<Integer, QuestionBean> decantAnswers(ArrayList<QuestionBean> questions, 
@@ -1011,10 +988,10 @@ public class AuditCommand extends ItemBean implements Command, Constants {
     
     /**
      * <p>Prende in input una struttura vettoriale di indicatori,
-     * li indicizza per codice e restituisce una tabella indicizzata.</p>
+     * li indicizza per codice e li restituisce in una tabella indicizzata.</p>
      * 
      * @param indicators ArrayList di CodeBean rappresentanti ciascuno un indicatore 
-     * @return <code>HashMap&lt;String&comma; CodeBean&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice indicatore e per valore l'oggetto indicatore
+     * @return <code>HashMap&lt;String&comma; CodeBean&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice indicatore e per valore l'oggetto indicatore
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     public static HashMap<String, CodeBean> decantIndicators(ArrayList<CodeBean> indicators)
@@ -1055,8 +1032,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * <p>Implementa il controllo lato server sulle risposte che sono necessarie
      * per il calcolo degli indicatori.</p> 
      * 
-     * @param algorythmIds      id quesiti che l'algoritmo di calcolo chiamante stabilisce necessari per effettuare il calcolo del suo valore
-     * @param allowedIds        id dei quesiti che da db risultano associati all'indicatore chiamante
+     * @param algorythmIds      lista id dei quesiti che l'algoritmo di calcolo chiamante stabilisce necessari per effettuare il calcolo del suo valore
+     * @param allowedIds        lista id dei quesiti che da db risultano associati all'indicatore chiamante
      * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
      * @param reason            motivo dell'errore
      * @return <code>boolean</code> - true se tutti i controlli sono andati a buon fine, false in caso almeno uno dei controlli sia vero
@@ -1084,46 +1061,49 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                     reason.append("Quesito ID " + idQ + " nullo ");
                     return false;
                 }
-                // III controllo: nessuna risposta puo' valere (null)
-                if (question.getNome() == null) {
-                    reason.append("Risposta al quesito " + question.getCodice() + " nulla ");
-                    return false;
-                }
-                // IV controllo: la risposta deve essere congruente con il tipo di quesito
-                if (question.getTipo().getId() == ELEMENT_LEV_1) {        // Se il quesito è di tipo Si/No
-                    // ...si applica il principio del terzo escluso
-                    if (!(question.getAnswer().getNome().equalsIgnoreCase("SI") || question.getAnswer().getNome().equalsIgnoreCase("NO"))) {
-                        // cioè la risposta dev'essere o "SI" o "NO", non c'è una terza possibilità, che pertanto resta esclusa
-                        reason.append("Risposta al quesito " + question.getCodice() + " non valida ");
+                // III controllo: se il quesito non è un "di cui"
+                if (question.getParentQuestion() == null) {
+                    // IV controllo: se non è un "di cui" nessuna risposta puo' valere (null)
+                    if (question.getNome() == null) {
+                        reason.append("Risposta al quesito " + question.getCodice() + " nulla ");
                         return false;
                     }
-                } else if (question.getTipo().getId() == ELEMENT_LEV_2) { // Se il quesito è di tipo numerico
-                    // ...la risposta deve essere convertibile in un numero
-                    try {
-                        Integer.parseInt(question.getAnswer().getNome());
-                        // Se la risposta non è numerica, e il tipo di quesito è numerico, non puo' calcolare il valore dell'indicatore
-                    } catch (NumberFormatException nfe) {
-                        reason.append("Risposta al quesito " + question.getCodice() + " non numerica ");
-                        return false;
-                    }
-                } else if (question.getTipo().getId() == ELEMENT_LEV_3) { // Se il quesito è di tipo percentuale, non solo deve essere convertibile ma amche compreso tra 0.00 e 100.00
-                    // ...la risposta deve essere convertibile in un numero
-                    try {
-                        float value = Float.parseFloat(question.getAnswer().getNome());
-                        // Non solo numerico, ma compreso tra 0 e 100
-                        if ((value < NOTHING) || (value > 100) ) {
-                            reason.append("Risposta al quesito " + question.getCodice() + " non compresa tra 0.00 e 100.00 ");
+                    // V controllo: la risposta deve essere congruente con il tipo di quesito
+                    if (question.getTipo().getId() == ELEMENT_LEV_1) {        // Se il quesito è di tipo Si/No
+                        // ...si applica il principio del terzo escluso
+                        if (!(question.getAnswer().getNome().equalsIgnoreCase("SI") || question.getAnswer().getNome().equalsIgnoreCase("NO"))) {
+                            // cioè la risposta dev'essere o "SI" o "NO", non c'è una terza possibilità, che pertanto resta esclusa
+                            reason.append("Risposta al quesito " + question.getCodice() + " non valida ");
                             return false;
                         }
-                    } catch (NumberFormatException nfe) {
-                        reason.append("Risposta al quesito " + question.getCodice() + " non percentuale ");
-                        return false;
-                    }
-                } else if (question.getTipo().getId() == ELEMENT_LEV_4) { // Se il quesito è di tipo descrittivo
-                    // ...non puo' essere stringa vuota
-                    if (question.getAnswer().getNome().equals(VOID_STRING)) {
-                        reason.append("Risposta al quesito " + question.getCodice() + " non valorizzata ");
-                        return false;
+                    } else if (question.getTipo().getId() == ELEMENT_LEV_2) { // Se il quesito è di tipo numerico
+                        // ...la risposta deve essere convertibile in un numero
+                        try {
+                            Integer.parseInt(question.getAnswer().getNome());
+                            // Se la risposta non è numerica, e il tipo di quesito è numerico, non puo' calcolare il valore dell'indicatore
+                        } catch (NumberFormatException nfe) {
+                            reason.append("Risposta al quesito " + question.getCodice() + " non numerica ");
+                            return false;
+                        }
+                    } else if (question.getTipo().getId() == ELEMENT_LEV_3) { // Se il quesito è di tipo percentuale, non solo deve essere convertibile ma amche compreso tra 0.00 e 100.00
+                        // ...la risposta deve essere convertibile in un numero
+                        try {
+                            float value = Float.parseFloat(question.getAnswer().getNome());
+                            // Non solo numerico, ma compreso tra 0 e 100
+                            if ((value < NOTHING) || (value > 100) ) {
+                                reason.append("Risposta al quesito " + question.getCodice() + " non compresa tra 0.00 e 100.00 ");
+                                return false;
+                            }
+                        } catch (NumberFormatException nfe) {
+                            reason.append("Risposta al quesito " + question.getCodice() + " non percentuale ");
+                            return false;
+                        }
+                    } else if (question.getTipo().getId() == ELEMENT_LEV_4) { // Se il quesito è di tipo descrittivo
+                        // ...non puo' essere stringa vuota
+                        if (question.getAnswer().getNome().equals(VOID_STRING)) {
+                            reason.append("Risposta al quesito " + question.getCodice() + " non valorizzata ");
+                            return false;
+                        }
                     }
                 }
             }
@@ -1166,7 +1146,6 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                                                                HashMap<String, CodeBean> indicatorByCode) 
                                                         throws CommandException {
         try {
-
             // Mappa destinata a contenere gli indicatori indicizzati per nome
             LinkedHashMap<String, InterviewBean> indicatorsByKey = new LinkedHashMap<>();
             // Mappa contenente gli indicatori indicizzati per codice
@@ -1679,23 +1658,26 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * <p>Implementa l'algoritmo "In dubio pro peior" (nel dubbio si
      * consideri il caso peggiore, ovvero il rischio pi&uacute; alto)
      * laddove esistano pi&uacute; valori per lo stesso indicatore,
-     * in particolare valori diversi raccolti nel contesto di interviste diverse.<br />
-     * Controlla se effettivamente vi possono essere più valori per lo stesso indicatore;
-     * se vi sono pi&uacute; interviste, procede alla scelta.</p>
+     * in particolare valori diversi raccolti nel contesto di interviste 
+     * diverse.<br />
+     * Controlla se effettivamente vi possono essere più valori per lo stesso 
+     * indicatore; se vi sono pi&uacute; interviste, procede alla scelta.</p>
      * <p>Effettua una ricerca lineare dal momento che il numero di interviste
      * in cui lo stesso processo pu&ograve; essere esaminato sar&agrave; sempre
-     * molto basso (in genere per ogni processo c'&egrave; al pi&uacute; un'intervista)
-     * per cui, essendo il presente metodo pi&uacute; implementato a fini precauzionali
-     * (pu&ograve; sempre verificarsi il caso in cui lo stesso processo sia
-     * esaminato nel contesto di due interviste rivolte a due differenti strutture)
-     * non pareva necessario implementare un algoritmo di ricerca binario (divide
-     * et impera). Al limite, per velocizzare i confronti, potrebbe essere utile
-     * effettuare un ordinamento prima del confronto, o meglio ancora utilizzare
-     * in partenza strutture con insertion order, come LinkedHashMap 
-     * piuttosto che HashMap.
+     * molto basso (in genere per ogni processo c'&egrave; al pi&uacute; 
+     * un'intervista) per cui, essendo il presente metodo pi&uacute; 
+     * implementato a fini precauzionali (pu&ograve; sempre verificarsi 
+     * il caso in cui lo stesso processo sia esaminato nel contesto di due 
+     * interviste rivolte a due differenti strutture) non si &egrave; ritenuto 
+     * necessario implementare un algoritmo di ricerca binario <cite>(divide
+     * et impera)</cite>.<br /> 
+     * Per velocizzare i confronti, piuttosto che effettuare un ordinamento 
+     * (sorting) prima del confronto, si utilizza
+     * in partenza strutture con insertion order (in questo caso, 
+     * LinkedHashMap piuttosto che HashMap, cfr. commit [ec57a9c]).
      * 
      * @param interviews    elenco di interviste sui cui indicatori applicare l'algoritmo
-     * @return <code>HashMap&lt;String&comma; InterviewBean&gt;</code> - tabella contenente i valori scelti per gli indicatori, indicizzati per codice
+     * @return <code>LindekHashMap&lt;String&comma; InterviewBean&gt;</code> - dictionary, con insertion order, contenente i valori scelti per gli indicatori, indicizzati per codice
      * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
      */
     public static LinkedHashMap<String, InterviewBean> compare(ArrayList<InterviewBean> interviews) 
@@ -1708,7 +1690,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         try {
             // Recupera la tabella della prima intervista
             LinkedHashMap<String, InterviewBean> indicatorsOrig = interviews.get(NOTHING).getIndicatori();
-            // La clona altrimenti, manipolandola, si manipolerebbe (malissimo) il valore del parametro 
+            // La clona altrimenti, manipolandola, si manipolerebbe (malissimo!) il valore del parametro 
             indicators = (LinkedHashMap<String, InterviewBean>) indicatorsOrig.clone();
             // Se il processo di dato id è stato sondato in solo 1 intervista i valori già li abbiamo
             if (interviews.size() > ELEMENT_LEV_1) {
@@ -1734,7 +1716,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                 }
             }
         } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio da un bean.\n";
             LOG.severe(msg);
             throw new CommandException(msg + anve.getMessage(), anve);
         } catch (Exception e) {
