@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -89,6 +88,14 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileElenco = "/jsp/muElenco.jsp";
     /**
+     * Pagina a cui la command fa riferimento per mostrare il report tabellare con processi e rischi
+     */
+    private static final String nomeFileProcessi = "/jsp/muProcessi.jsp";
+    /**
+    * Pagina a cui la command fa riferimento per mostrare il report tabellare con processi, strutture e giudizio sintetico
+     */
+    private static final String nomeFileStrutture = "/jsp/muStrutture.jsp";
+    /**
      * Pagina a cui la command fa riferimento per mostrare la form di ricerca
      */
     private static final String nomeFileSearch = "/jsp/muRicerca.jsp";
@@ -127,6 +134,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         nomeFile.put(PART_SEARCH,     nomeFileSearch);
+        nomeFile.put(PART_PROCESS,    nomeFileProcessi);
+        nomeFile.put(PART_SELECT_STR, nomeFileStrutture);
     }
 
 
@@ -205,21 +214,31 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         try {
             // Il parametro di navigazione 'rilevazione' è obbligatorio
             if (!codeSur.equals(DASH)) {
-                // Il parametro di navigazione 'p' permette di addentrarsi nelle funzioni
+                /* @GetMapping */
                 if (nomeFile.containsKey(part)) {
+                    if (part.equalsIgnoreCase(PART_PROCESS)) {
+                        /* ************************************************ *
+                         *           Generate report process-risks          *
+                         * ************************************************ */
+                        ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
+                        // Controlla se deve forzare l'aggiornamento dei valori degli indicatori
+                        if (mess.equals("refresh_ce")) {
+                            ArrayList<ProcessBean> mats = computeIndicators(matsWithoutIndicators, user, codeSur, db);
+                            refreshIndicators(mats, user, codeSur, db);
+                        }
+                        matsWithIndicators = retrieveIndicators(matsWithoutIndicators, user, codeSur, db);
+                    }
+                    else if (part.equalsIgnoreCase(PART_SELECT_STR)) {
+                        /* ************************************************ *
+                         *   Generate report structures-PxI (tabella MDM)   *
+                         * ************************************************ */
+                    }
                     // Imposta il valore della pagina di ricerca
                     fileJspT = nomeFile.get(part);
                 } else {
                 /* *********************************************************** *
                  *  Viene richiesta la visualizzazione della pagina di report  *
                  * *********************************************************** */
-                    ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
-                    // Controlla se deve forzare l'aggiornamento dei valori degli indicatori
-                    if (mess.equals("refresh_ce")) {
-                        ArrayList<ProcessBean> mats = computeIndicators(matsWithoutIndicators, user, codeSur, db);
-                        refreshIndicators(mats, user, codeSur, db);
-                    }
-                    matsWithIndicators = retrieveIndicators(matsWithoutIndicators, user, codeSur, db);
                     fileJspT = nomeFileElenco;
                 }
             } else {    // Manca il codice rilevazione
