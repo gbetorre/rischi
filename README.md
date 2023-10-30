@@ -321,10 +321,11 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.6.4] Implementata form di ricerca sui quesiti per chiave testuale
 - [1.5.7] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
 - [1.5.6] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista; prima bozza calcolo indicatori P1, P2, P3 nel contesto del singolo processo
-- [1.5.1] 
+- [1.5.2] (  /11/2023) Aggiunta tabella riepilogativa del PxI di tutti i processi, elencante il valore ottenuto in ogni indicatore per ogni processo
 
 ### Done
 -->
+- [1.5.1] (30/10/2023) Aggiunta tabella riepilogativa del PxI di tutti i processi, elencante rischi e strutture associate a ogni processo
 - [1.5.0] (23/10/2023) Aggiunte sottopagine in sezione report; migliorata presentazione ricerche predefinite
 - [1.4.9] (19/10/2023) Raffinato controllo formale sulla validita' della risposta: omessi alcuni controlli in caso la risposta sia relativa a un quesito figlio (quesiti di tipo "di cui")
 - [1.4.8] (17/10/2023) Implementato caching su disco dei valori degli indicatori di rischio
