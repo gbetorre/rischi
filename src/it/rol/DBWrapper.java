@@ -563,6 +563,7 @@ public class DBWrapper implements Query, Constants {
                 "   ,   D.prefisso  AS \"prefisso\"" +
                 "   ,   D.acronimo  AS \"acronimo\"" +
                 "   ,   D.ordinale  AS \"ordinale\"" +
+                "   ," + level +  " AS \"livello\"" + 
                 "   FROM " + table + " D" +
                 "   WHERE D.id = " + id +
                 "   ORDER BY D.ordinale";
@@ -782,6 +783,101 @@ public class DBWrapper implements Query, Constants {
                 throw new WebStorageException(msg + anve.getMessage(), anve);
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query del soggetto contingente.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+
+
+    /**
+     * <p>Dato in input un elenco vettoriale di macroprocessi censiti 
+     * dall'anticorruzione, contenenti al proprio interno i rispettivi 
+     * processi figli, estrae un elenco di strutture collegate 
+     * a ciascun processo figlio e lo inserisce in una mappa (Dictionary)
+     * in cui le chiavi sono costituite dagli identificativi dei processi
+     * figli e i valori dalle strutture rispettivamente collegate 
+     * ai processi stessi. Le strutture vengono recuperate in base
+     * al collegamento con le fasi in cui sono articolati i processi.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param mats      elenco contenente tutti i macroprocessi - e relativi processi figli - privi di strutture collegate
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>HashMap&lt;Integer, ArrayList&lt;DepartmentBean&gt;&gt;</code> - la tabella contenente le strutture indicizzate per identificativo di processo
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public HashMap<Integer, ArrayList<DepartmentBean>> getStructures(PersonBean user,
+                                                                     final ArrayList<ProcessBean> mats,
+                                                                     CodeBean survey)
+                                                              throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            ItemBean rawStructure = null;
+            ArrayList<DepartmentBean> depts = null;
+            HashMap<Integer, ArrayList<DepartmentBean>> structsByPat = new HashMap<>();
+            // TODO: Controllare se user è superuser
+            try {
+                // Per ogni macroprocesso
+                for (ProcessBean mat : mats) {
+                    // Recupera i suoi processi
+                    for (ProcessBean pat : mat.getProcessi()) {
+                        // (Ri)Crea una lista vuota di strutture
+                        depts = new ArrayList<>();
+                        // Recupera le strutture associate al processo corrente tramite le sue eventuali fasi
+                        int nextParam = NOTHING;
+                        pst = con.prepareStatement(GET_STRUCTS_BY_PROCESS_AT);
+                        pst.clearParameters();
+                        pst.setInt(++nextParam, pat.getId());                
+                        pst.setInt(++nextParam, survey.getId());
+                        rs = pst.executeQuery();
+                        while (rs.next()) {
+                            // Crea un oggetto per la struttura grezza
+                            rawStructure = new ItemBean();
+                            // Valorizza la struttura grezza col contenuto della query
+                            BeanUtil.populate(rawStructure, rs);
+                            // I rami sono alternativi perché c'è un solo id struttura per ogni tupla
+                            if (rawStructure.getCod4() > NOTHING) {
+                                depts.add(getStructure(user, rawStructure.getCod4(), ELEMENT_LEV_4, survey.getNome()));
+                            }
+                            else if (rawStructure.getCod3() > NOTHING) {
+                                depts.add(getStructure(user, rawStructure.getCod3(), ELEMENT_LEV_3, survey.getNome()));
+                            }      
+                            else if (rawStructure.getCod2() > NOTHING) {
+                                depts.add(getStructure(user, rawStructure.getCod2(), ELEMENT_LEV_2, survey.getNome()));
+                            }                            
+                            else if (rawStructure.getCod1() > NOTHING) {
+                                depts.add(getStructure(user, rawStructure.getCod1(), ELEMENT_LEV_1, survey.getNome()));
+                            }
+                        }
+                        // Setta nella mappa la lista di strutture appena calcolata
+                        structsByPat.put(new Integer(pat.getId()), depts);
+                    }
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get Out
+                return structsByPat;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean; verificare identificativo della rilevazione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query delle strutture in base all'id del processo at.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally {
