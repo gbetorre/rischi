@@ -48,10 +48,13 @@ import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Main;
+import it.rol.bean.CodeBean;
+import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
+import it.rol.bean.RiskBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
@@ -171,6 +174,10 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         ArrayList<ProcessBean> matsWithIndicators = null;
         // Dichiara mappa di parametri di ricerca
         HashMap<String, LinkedHashMap<String, String>> params = null;
+        // Dichiara mappa di strutture indicizzate per id processo_at
+        HashMap<Integer, ArrayList<DepartmentBean>> structs = null;
+        // Dichiara mappa di rischi indicizzati per id processo_at
+        HashMap<Integer, ArrayList<RiskBean>> risks = null;
         // Preprara BreadCrumbs
         LinkedList<ItemBean> bC = null;
         /* ******************************************************************** *
@@ -216,22 +223,33 @@ public class ReportCommand extends ItemBean implements Command, Constants {
             if (!codeSur.equals(DASH)) {
                 /* @GetMapping */
                 if (nomeFile.containsKey(part)) {
+                    // Qualunque report si voglia generare, bisogna recuperare processi e indicatori
+                    ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
+                    // Controlla se deve forzare l'aggiornamento dei valori degli indicatori
+                    if (mess.equals("refresh_ce")) {
+                        ArrayList<ProcessBean> mats = computeIndicators(matsWithoutIndicators, user, codeSur, db);
+                        refreshIndicators(mats, user, codeSur, db);
+                    }
+                    matsWithIndicators = retrieveIndicators(matsWithoutIndicators, user, codeSur, db);
                     if (part.equalsIgnoreCase(PART_PROCESS)) {
                         /* ************************************************ *
                          *           Generate report process-risks          *
                          * ************************************************ */
-                        ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
-                        // Controlla se deve forzare l'aggiornamento dei valori degli indicatori
-                        if (mess.equals("refresh_ce")) {
-                            ArrayList<ProcessBean> mats = computeIndicators(matsWithoutIndicators, user, codeSur, db);
-                            refreshIndicators(mats, user, codeSur, db);
-                        }
-                        matsWithIndicators = retrieveIndicators(matsWithoutIndicators, user, codeSur, db);
+                        // Ha bisogno di personalizzare le breadcrumbs
+                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report processi");
                     }
                     else if (part.equalsIgnoreCase(PART_SELECT_STR)) {
                         /* ************************************************ *
                          *   Generate report structures-PxI (tabella MDM)   *
                          * ************************************************ */
+                        // Recupera le strutture indicizzate per identificativo di processo
+                        structs = retrieveStructures(matsWithoutIndicators, user, codeSur, db);
+                        // Recupera i rischi indicizzati per identificativo di processo
+                        risks = retrieveRisks(matsWithoutIndicators, user, codeSur, db);
+                        // Ha bisogno di personalizzare le breadcrumbs
+                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report strutture");
                     }
                     // Imposta il valore della pagina di ricerca
                     fileJspT = nomeFile.get(part);
@@ -262,6 +280,14 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         if (matsWithIndicators != null) {
             req.setAttribute("macroProcessi", matsWithIndicators);
         }
+        // Imposta in request, se ci sono, lista di strutture indicizzate per id processo
+        if (structs != null) {
+            req.setAttribute("strutture", structs);
+        }
+        // Imposta in request, se ci sono, lista di rischi indicizzati per id processo
+        if (risks != null) {
+            req.setAttribute("rischi", risks);
+        }
         // Imposta nella request le chiavi di ricerca, se presenti
         if (params != null) {
             req.setAttribute("tokens", params);
@@ -282,6 +308,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      * **************************************************************** */
     
     /**
+     * <p>Seleziona da database i valori degli indicatori di rischio tramite una
+     * estrazione dati.</p>
      * <p>Ricevuta una ArrayList (albero, vista gerarchica)
      * di tutti macroprocessi censiti dall'anticorruzione 
      * trovati in base a una rilevazione il cui identificativo 
@@ -324,6 +352,10 @@ public class ReportCommand extends ItemBean implements Command, Constants {
 
     
     /**
+     * <p>Calcola a runtime i valori degli indicatori di rischio tramite 
+     * l'invocazione di un metodo che a sua volta richiama una serie 
+     * di altri metodi, ciascuno implementate l'algoritmo di un diverso 
+     * indicatore di rischio .</p>
      * <p>Ricevuta una ArrayList (albero, vista gerarchica)
      * di tutti macroprocessi censiti dall'anticorruzione 
      * trovati in base a una rilevazione il cui identificativo 
@@ -390,6 +422,98 @@ public class ReportCommand extends ItemBean implements Command, Constants {
             throw new CommandException(msg + e.getMessage(), e);
         }
         return macro;
+    }
+    
+    
+    /**
+     * <p>Ricevuta una ArrayList (albero, vista gerarchica)
+     * di tutti macroprocessi censiti dall'anticorruzione 
+     * nel contesto di una rilevazione, i cui figli non contengono
+     * al proprio interno le fasi (e tantomeno, queste, le strutture 
+     * che le erogano), restituisce una mappa di strutture associate a ciascun
+     * processo tramite le sue fasi, indicizzata per identificativo di processo,
+     * incapsulato in un Wrapper di tipo primitivo.</p>
+     * 
+     * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - privi di strutture associate
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param codeSurvey    il codice della rilevazione
+     * @param db            WebStorage per l'accesso ai dati
+     * @return <code>HashMap&lt;Integer, ArrayList&lt;DepartmentBean&gt;&gt;</code> - lista di strutture collegate al processo_at il cui identificativo e' incapsulato in chiave
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static HashMap<Integer, ArrayList<DepartmentBean>> retrieveStructures(final ArrayList<ProcessBean> mats,
+                                                                                 PersonBean user,
+                                                                                 String codeSurvey,
+                                                                                 DBWrapper db)
+                                                                          throws CommandException {
+        try {
+            return db.getStructures(user, mats, ConfigManager.getSurvey(codeSurvey));            
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'interazione col database (in metodi di lettura).\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (RuntimeException ce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + ce.getMessage(), ce);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+    
+   /**
+    * <p>Ricevuta una ArrayList (albero, vista gerarchica)
+    * di tutti macroprocessi censiti dall'anticorruzione 
+    * trovati in base a una rilevazione il cui identificativo 
+    * viene accettato come argomento, ma i cui figli non contengono
+    * al proprio interno i rischi, restituisce una mappa di rischi 
+    * associati a ciascun processo, indicizzata per identificativo di processo,
+    * incapsulato in un Wrapper di tipo primitivo.</p>
+    * 
+    * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - privi di strutture associate
+    * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+    * @param codeSurvey    il codice della rilevazione
+    * @param db            WebStorage per l'accesso ai dati
+    * @return <code>HashMap&lt;Integer, ArrayList&lt;DepartmentBean&gt;&gt;</code> - lista di strutture collegate al processo_at il cui identificativo e' incapsulato in chiave
+    * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+    */
+    public static HashMap<Integer, ArrayList<RiskBean>> retrieveRisks(final ArrayList<ProcessBean> mats,
+                                                                      PersonBean user,
+                                                                      String codeSurvey,
+                                                                      DBWrapper db)
+                                                               throws CommandException {
+        ArrayList<RiskBean> risks = null;
+        HashMap<Integer, ArrayList<RiskBean>> risksByPat = new HashMap<>();
+        try {
+            // Prepara l'oggetto rilevazione
+            CodeBean survey = ConfigManager.getSurvey(codeSurvey);
+            // Per ogni macroprocesso
+            for (ProcessBean mat : mats) {
+                // Recupera i suoi processi
+                for (ProcessBean pat : mat.getProcessi()) {
+                    // Estrae i rischi di un dato processo in una data rilevazione
+                    risks = db.getRisksByProcess(user, pat, survey);
+                    // Setta nella mappa la lista appena calcolata
+                    risksByPat.put(new Integer(pat.getId()), risks);
+                }
+            }
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei rischi.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return risksByPat;
     }
 
     
