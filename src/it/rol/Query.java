@@ -566,6 +566,45 @@ public interface Query extends Serializable {
             "   ORDER BY A.ordinale, A.codice";
     
     /**
+     * <p>Estrae un elenco di identificativi di sole strutture 
+     * (no soggetti contingenti) collegate, tramite le sue fasi, 
+     * ad uno specifico processo, di cui viene passato 
+     * l'identificativo come parametro.</p>
+     * <p>La query effettua una LEFT OUTER JOIN con le strutture, per&ograve;,
+     * tramite una clausola correlata, applica una restrizione, scartando 
+     * le possibili tuple in cui tutti gli identificativi delle strutture 
+     * sono pari a null (data la particolare articolazione delle strutture
+     * organizzative in entit&agrave; multiple legate da una relazione
+     * di composizione, non era pratico utilizzare direttamente una
+     * EQUI-JOIN).</p>  
+     */
+    public static final String GET_STRUCTS_BY_PROCESS_AT = 
+            "SELECT DISTINCT" +
+            "       SA.id_struttura_liv1        AS \"cod1\"" +
+            "   ,   SA.id_struttura_liv2        AS \"cod2\"" +
+            "   ,   SA.id_struttura_liv3        AS \"cod3\"" +
+            "   ,   SA.id_struttura_liv4        AS \"cod4\"" +
+            "   ,   SA.id_rilevazione           AS \"value3\"" +
+            "   ,   L1.nome                     AS \"extraInfo1\"" +
+            "   ,   L2.nome                     AS \"extraInfo2\"" +
+            "   ,   L3.nome                     AS \"extraInfo3\"" +
+            "   ,   L4.nome                     AS \"extraInfo4\"" +
+            "   FROM struttura_attivita SA" +
+            "       INNER JOIN attivita A ON SA.id_attivita = A.id" +
+            "       INNER JOIN processo_at PAT ON A.id_processo_at = PAT.id" +
+            "       LEFT JOIN struttura_liv1 L1 ON SA.id_struttura_liv1 = L1.id" +
+            "       LEFT JOIN struttura_liv2 L2 ON SA.id_struttura_liv2 = L2.id" +
+            "       LEFT JOIN struttura_liv3 L3 ON SA.id_struttura_liv3 = L3.id" +
+            "       LEFT JOIN struttura_liv4 L4 ON SA.id_struttura_liv4 = L4.id" +
+            "   WHERE PAT.id = ?" +
+            "       AND (SA.id_struttura_liv1 IS NOT NULL" +
+            "         OR SA.id_struttura_liv2 IS NOT NULL" +
+            "         OR SA.id_struttura_liv3 IS NOT NULL" +
+            "         OR SA.id_struttura_liv4 IS NOT NULL" +
+            "       )" + // La JOIN (SA,L*) è lasca ma un id struttura è richiesto
+            "       AND SA.id_rilevazione = ?";
+    
+    /**
      * <p>Estrae un elenco di identificativi di strutture e soggetti contingenti
      * collegati ad una specifica attivit&agrave;, di cui viene passato 
      * l'identificativo come parametro.</p>
