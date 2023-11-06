@@ -224,8 +224,10 @@ public interface Query extends Serializable {
             "   ,   (SELECT count(*) FROM input_processo_at INPAT WHERE INPAT.id_processo_at = PRAT.id AND INPAT.id_rilevazione = PRAT.id_rilevazione) AS \"vincoli\"" +
             "   ,   (SELECT count(*) FROM attivita A WHERE A.id_processo_at = PRAT.id AND A.id_rilevazione = PRAT.id_rilevazione) AS \"descrizioneStatoCorrente\"" +
             "   ,   (SELECT count(*) FROM output_processo_at OUTPAT WHERE OUTPAT.id_processo_at = PRAT.id AND OUTPAT.id_rilevazione = PRAT.id_rilevazione) AS \"obiettiviMisurabili\"" +
+            "   ,   AR.nome                 AS \"areaRischio\"" +
             "   FROM processo_at PRAT" +
             "       INNER JOIN macroprocesso_at MAT ON PRAT.id_macroprocesso_at = MAT.id" +
+            "       INNER JOIN area_rischio AR ON MAT.id_area_rischio = AR.id" +
             "       INNER JOIN rilevazione R ON PRAT.id_rilevazione = R.id" +
             "   WHERE PRAT.id_macroprocesso_at = ?" +
             "       AND R.codice ILIKE ?" +
@@ -604,6 +606,45 @@ public interface Query extends Serializable {
             "       )" + // La JOIN (SA,L*) è lasca ma un id struttura è richiesto
             "       AND SA.id_rilevazione = ?";
     
+    /**
+     * <p>Estrae un elenco di identificativi di soggetti contingenti
+     * collegati, tramite le sue fasi, 
+     * ad uno specifico processo, di cui viene passato 
+     * l'identificativo come parametro.</p>
+     * <p>Prestare attenzione al fatto che la query effettua una LEFT OUTER JOIN 
+     * con le strutture, per&ograve; quella che recupera non &egrave; 
+     * la struttura collegata alla fase ma quella eventualmente collegata 
+     * al soggetto contingente corrente (ovvero quella che coadiuva il soggetto
+     * stesso).</p>  
+     */
+    public static final String GET_SUBJECTS_BY_PROCESS_AT = 
+            "SELECT DISTINCT" +
+            "       SA.id_soggetto_contingente  AS \"id\"" +
+            "   ,   SC.nome                     AS \"nome\"" +
+            "   ,   SC.descrizione              AS \"informativa\"" +
+            "   ,   SC.ordinale                 AS \"ordinale\"" +
+            "   ,   SC.id_struttura_liv1        AS \"cod1\"" +
+            "   ,   SC.id_struttura_liv2        AS \"cod2\"" +
+            "   ,   SC.id_struttura_liv3        AS \"cod3\"" +
+            "   ,   SC.id_struttura_liv4        AS \"cod4\"" +
+            "   ,   SA.id_rilevazione           AS \"value1\"" +
+            /*
+            "   ,   L1.nome                     AS \"extraInfo1\"" +
+            "   ,   L2.nome                     AS \"extraInfo2\"" +
+            "   ,   L3.nome                     AS \"extraInfo3\"" +
+            "   ,   L4.nome                     AS \"extraInfo4\"" +
+            */
+            "   FROM struttura_attivita SA" +
+            "       INNER JOIN attivita A ON SA.id_attivita = A.id" +
+            "       INNER JOIN processo_at PAT ON A.id_processo_at = PAT.id" +
+            "       INNER JOIN soggetto_contingente SC ON SA.id_soggetto_contingente = SC.id" +
+            "       LEFT JOIN struttura_liv1 L1 ON SA.id_struttura_liv1 = L1.id" +
+            "       LEFT JOIN struttura_liv2 L2 ON SA.id_struttura_liv2 = L2.id" +
+            "       LEFT JOIN struttura_liv3 L3 ON SA.id_struttura_liv3 = L3.id" +
+            "       LEFT JOIN struttura_liv4 L4 ON SA.id_struttura_liv4 = L4.id" +
+            "   WHERE PAT.id = ?" +
+            "       AND SA.id_rilevazione = ?";
+
     /**
      * <p>Estrae un elenco di identificativi di strutture e soggetti contingenti
      * collegati ad una specifica attivit&agrave;, di cui viene passato 
