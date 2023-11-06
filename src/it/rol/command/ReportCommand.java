@@ -176,6 +176,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         HashMap<String, LinkedHashMap<String, String>> params = null;
         // Dichiara mappa di strutture indicizzate per id processo_at
         HashMap<Integer, ArrayList<DepartmentBean>> structs = null;
+        // Dichiara mappa di soggetti contingenti indicizzati per id processo_at
+        HashMap<Integer, ArrayList<DepartmentBean>> subjects = null;
         // Dichiara mappa di rischi indicizzati per id processo_at
         HashMap<Integer, ArrayList<RiskBean>> risks = null;
         // Preprara BreadCrumbs
@@ -245,6 +247,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                          * ************************************************ */
                         // Recupera le strutture indicizzate per identificativo di processo
                         structs = retrieveStructures(matsWithoutIndicators, user, codeSur, db);
+                        // Recupera i soggetti indicizzati per identificativo di processo
+                        subjects = retrieveSubjects(matsWithoutIndicators, user, codeSur, db);
                         // Recupera i rischi indicizzati per identificativo di processo
                         risks = retrieveRisks(matsWithoutIndicators, user, codeSur, db);
                         // Ha bisogno di personalizzare le breadcrumbs
@@ -283,6 +287,10 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         // Imposta in request, se ci sono, lista di strutture indicizzate per id processo
         if (structs != null) {
             req.setAttribute("strutture", structs);
+        }
+        // Imposta in request, se ci sono, lista di soggetti indicizzati per id processo
+        if (subjects != null) {
+            req.setAttribute("soggetti", subjects);
         }
         // Imposta in request, se ci sono, lista di rischi indicizzati per id processo
         if (risks != null) {
@@ -448,6 +456,47 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                                                                           throws CommandException {
         try {
             return db.getStructures(user, mats, ConfigManager.getSurvey(codeSurvey));            
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'interazione col database (in metodi di lettura).\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (RuntimeException ce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + ce.getMessage(), ce);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+
+
+    /**
+     * <p>Ricevuta una ArrayList (albero, vista gerarchica)
+     * di tutti macroprocessi censiti dall'anticorruzione 
+     * nel contesto di una rilevazione, i cui figli non contengono
+     * al proprio interno le fasi (e tantomeno, queste, i soggetti contingenti 
+     * che le sovrintendono), restituisce una mappa di soggetti associati 
+     * a ciascun processo figlio (quindi processo di livello 2, no macro no sub)
+     * tramite le sue fasi; la mappa (Dictionary) &egrave; indicizzata 
+     * per identificativo di processo at, incapsulato 
+     * in un Wrapper di tipo primitivo.</p>
+     * 
+     * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - privi di strutture associate
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param codeSurvey    il codice della rilevazione
+     * @param db            WebStorage per l'accesso ai dati
+     * @return <code>HashMap&lt;Integer, ArrayList&lt;DepartmentBean&gt;&gt;</code> - lista di soggetti collegati al processo_at il cui identificativo e' incapsulato in chiave
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static HashMap<Integer, ArrayList<DepartmentBean>> retrieveSubjects(final ArrayList<ProcessBean> mats,
+                                                                               PersonBean user,
+                                                                               String codeSurvey,
+                                                                               DBWrapper db)
+                                                                        throws CommandException {
+        try {
+            return db.getSubjects(user, mats, ConfigManager.getSurvey(codeSurvey));            
         } catch (WebStorageException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nell\'interazione col database (in metodi di lettura).\n";
             LOG.severe(msg);
