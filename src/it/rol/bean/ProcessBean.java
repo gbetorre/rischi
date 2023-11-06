@@ -36,7 +36,6 @@ package it.rol.bean;
 import java.sql.Time;
 import java.util.AbstractList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import it.rol.Constants;
@@ -87,10 +86,8 @@ public class ProcessBean extends CodeBean {
     /* ------------------------------------------------------------------------ *
      *                      Dati descrittivi del processo                       *
      * ------------------------------------------------------------------------ */
-    /** Quota parte */
-    private float quotaParte;
-    /** Full Time Equivalent */
-    private float fte;
+    /** Area di rischio */
+    private String areaRischio;
     /** Obiettivi misurabili del processo */
     private String obiettiviMisurabili;
     /** Erogabilit&agrave; in modalit&agrave; telelavoro */
@@ -155,7 +152,7 @@ public class ProcessBean extends CodeBean {
         autoreUltimaModifica = -2;
         descrizioneStatoCorrente = null;
         obiettiviMisurabili = null;
-        quotaParte = fte = BEAN_DEFAULT_FLOAT;
+        areaRischio = null;
         smartWorking = null;
         vincoli = null;
         tag = tipo = null;
@@ -339,44 +336,23 @@ public class ProcessBean extends CodeBean {
     }
 
 
-    /* **************************************************** *
-     *    Metodi getter e setter per full time equivalent   *
-     * **************************************************** */
-    /**
-     * <p>Restituisce indice full time equivalent del processo.</p>
-     *
-     * @return <code>float</code> - full time equivalent
-     */
-    public float getFte() {
-        return fte;
-    }
-
-    /**
-     * Imposta fte del processo
-     * @param fte - indice full time equivalent del processo da impostare
-     */
-    public void setFte(float fte) {
-        this.fte = fte;
-    }
-
-
     /* *************************************************** *
-     *       Metodi getter e setter per quota parte        *
+     *    Metodi getter e setter per area di rischio       *
      * *************************************************** */
     /**
-     * Restituisce la quotaparte totalizzata dal processo
-     * @return <code>quotaParte</code> - quota parte
+     * Restituisce l'area di rischio del processo
+     * @return <code>areaRischio</code> - area di rischio
      */
-    public float getQuotaParte() {
-        return quotaParte;
+    public String getAreaRischio() {
+        return areaRischio;
     }
 
     /**
-     * Imposta la quotaparte del processo
-     * @param quotaParte - quota parte da impostare
+     * Imposta l'area di rischio del processo
+     * @param areaRischio - area di rischio da impostare
      */
-    public void setQuotaParte(float quotaParte) {
-        this.quotaParte = quotaParte;
+    public void setAreaRischio(String areaRischio) {
+        this.areaRischio = areaRischio;
     }
 
 
