@@ -771,6 +771,7 @@ public class DBWrapper implements Query, Constants {
                     subject.setInformativa(rawSubj.getInformativa());
                     subject.setOrdinale(rawSubj.getOrdinale());
                     // TODO: è possibile recuperare qui il tipo inserendolo in extraInfo
+                    // TODO: valorizzare le strutture che coadiuvano il soggetto
                     subjects.add(subject);
                 }
                 // Just tries to engage the Garbage Collector
@@ -878,6 +879,116 @@ public class DBWrapper implements Query, Constants {
                 throw new WebStorageException(msg + anve.getMessage(), anve);
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query delle strutture in base all'id del processo at.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+
+
+    /**
+     * <p>Dato in input un elenco vettoriale di macroprocessi censiti 
+     * dall'anticorruzione, contenenti al proprio interno i rispettivi 
+     * processi figli, estrae un elenco di soggetti contingenti collegati 
+     * a ciascun processo figlio e lo inserisce in una mappa (Dictionary)
+     * in cui le chiavi sono costituite dagli identificativi dei processi
+     * figli e i valori dai soggetti rispettivamente collegati 
+     * ai processi stessi. Le strutture vengono recuperate in base
+     * al collegamento con le fasi in cui sono articolati i processi.</p>
+     * <p>I soggetti contingenti vengono anche detti &quot;soggetti terzi&quot;
+     * o &quot;soggetti interessati&quot;.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param mats      elenco contenente tutti i macroprocessi - e relativi processi figli - privi di soggetti contingenti
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>HashMap&lt;Integer, ArrayList&lt;DepartmentBean&gt;&gt;</code> - la tabella contenente i soggetti indicizzati per identificativo di processo
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public HashMap<Integer, ArrayList<DepartmentBean>> getSubjects(PersonBean user,
+                                                                   final ArrayList<ProcessBean> mats,
+                                                                   CodeBean survey)
+                                                            throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            ItemBean rawSubject = null;
+            DepartmentBean subject = null;
+            ArrayList<DepartmentBean> subjects = null;
+            Vector<DepartmentBean> supports = null;
+            HashMap<Integer, ArrayList<DepartmentBean>> subjectsAsMap = new HashMap<>();
+            // TODO: Controllare se user è superuser
+            try {
+                // Per ogni macroprocesso
+                for (ProcessBean mat : mats) {
+                    // Recupera i suoi processi
+                    for (ProcessBean pat : mat.getProcessi()) {
+                        // Crea una lista vuota di soggetti contingenti
+                        subjects = new ArrayList<>();
+                        // Crea una lista vuota di strutture di supporto
+                        supports = new Vector<>();
+                        // Recupera i soggetti associati al processo corrente tramite le sue eventuali fasi
+                        int nextParam = NOTHING;
+                        pst = con.prepareStatement(GET_SUBJECTS_BY_PROCESS_AT);
+                        pst.clearParameters();
+                        pst.setInt(++nextParam, pat.getId());                
+                        pst.setInt(++nextParam, survey.getId());
+                        rs = pst.executeQuery();
+                        while (rs.next()) {
+                            // Crea un oggetto per il soggetto grezzo
+                            rawSubject = new ItemBean();
+                            // Crea un oggetto per il soggetto "raffinato"
+                            subject = new DepartmentBean();
+                            // Valorizza la struttura grezza col contenuto della query
+                            BeanUtil.populate(rawSubject, rs);
+                            // I rami sono alternativi perché c'è, al più, un solo id struttura (di supporto) per ogni tupla
+                            if (rawSubject.getCod4() > NOTHING) {
+                                supports.add(getStructure(user, rawSubject.getCod4(), ELEMENT_LEV_4, survey.getNome()));
+                            }
+                            else if (rawSubject.getCod3() > NOTHING) {
+                                supports.add(getStructure(user, rawSubject.getCod3(), ELEMENT_LEV_3, survey.getNome()));
+                            }      
+                            else if (rawSubject.getCod2() > NOTHING) {
+                                supports.add(getStructure(user, rawSubject.getCod2(), ELEMENT_LEV_2, survey.getNome()));
+                            }                            
+                            else if (rawSubject.getCod1() > NOTHING) {
+                                supports.add(getStructure(user, rawSubject.getCod1(), ELEMENT_LEV_1, survey.getNome()));
+                            }
+                            // Travasa gli estremi del soggetto grezzo negli attributi del soggetto raffinato
+                            subject.setId(rawSubject.getId());
+                            subject.setNome(rawSubject.getNome());
+                            subject.setInformativa(rawSubject.getInformativa());
+                            subject.setOrdinale(rawSubject.getOrdinale());
+                            subject.setFiglie(supports);
+                            subjects.add(subject);
+                        }
+                        // Setta nella mappa la lista di strutture appena calcolata
+                        subjectsAsMap.put(new Integer(pat.getId()), subjects);
+                    }
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get Out
+                return subjectsAsMap;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean; verificare identificativo della rilevazione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query dei soggetti contingenti in base all'id del processo at.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally {
