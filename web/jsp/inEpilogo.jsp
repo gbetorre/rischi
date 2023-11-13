@@ -82,8 +82,8 @@
             background-color: rgba(0, 0, 0, .25);
         }
     </style>
-    <h4 class="btn-lightgray">Riepilogo struttura selezionata</h4>
     <div class="info">
+      <h4 class="heading">Riepilogo struttura selezionata</h4>
     <c:forEach var="strLiv1" items="${structs}">
       <c:if test="${fn:substring(strLiv1.extraInfo.codice, (fn:indexOf(strLiv1.extraInfo.codice, '.')+1), fn:length(strLiv1.extraInfo.codice)) eq codLiv1}">
         <c:out value="${strLiv1.nome}" />
@@ -117,8 +117,8 @@
     </c:forEach>
     </div>
     <hr class="separatore" />
-    <h4 class="btn-lightgray">Riepilogo processo selezionato</h4>
     <div class="successPwd">
+      <h4 class="heading">Riepilogo processo selezionato</h4>
     <c:forEach var="mac" items="${macros}">
       <c:set var="idPro1" value="${mac.id}.${mac.codice}" scope="page" />
       <c:if test="${idPro1 eq selPro.get('liv1')}">
@@ -130,7 +130,9 @@
               <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
               <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
             </svg>&nbsp;&nbsp;
-            <c:out value="${proc.codice}" /> <c:out value="${proc.nome}" />
+            <a href="${initParam.appName}/?q=pr&p=pro&pliv=${proc.id}&liv=2&r=${param['r']}">
+              <c:out value="${proc.codice}" /> <c:out value="${proc.nome}" />
+            </a>
             <c:forEach var="sub" items="${proc.processi}">
               <c:set var="idPro3" value="${sub.id}.${sub.codice}" scope="page" />
               <c:if test="${idPro3 eq selPro.get('liv3')}"><br />
@@ -144,12 +146,12 @@
     </div>
     <br>
     <div id="rischi">
-      <h4 class="btn-lightgray">Indicatori di rischio</h4>
+      <h4 class="bgAct13">Indicatori di rischio</h4>
       <table class="table table-bordered table-hover">
         <thead class="thead-light">
           <tr>
             <th>Indicatore</th>
-            <th>Quesiti connessi</th>
+            <th>Elementi connessi</th>
             <th>Tipologia</th>
             <th>Livello</th>
           </tr>
@@ -168,6 +170,7 @@
             </c:if>
               <a href="#${quesito.id}" title="ID${quesito.id} = ${quesito.formulazione} (RISPOSTA: &quot;${quesito.answer.nome}&quot;)"><c:out value="${quesito.codice}" /></a><c:out value="${comma}" />
           </c:forEach>
+              <c:out value="${ind.autoreUltimaModifica}" />
             </td>
             <td><c:out value="${ind.processo.tipo}" /></td>
             <c:set var="classSuffix" value="${fn:toLowerCase(ind.informativa)}" scope="page" />
