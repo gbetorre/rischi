@@ -89,7 +89,7 @@
         </ul>
       </div>
       <hr class="separatore" />
-      <h3 class="bordo">
+      <h3 class="bordo" id="fasi">
         Fasi del processo 
         <button type="button" class="btn btn-success float-right">
           <span class="badge badge-pill badge-light"><c:out value="${fasi.size()}" /></span>
@@ -265,8 +265,10 @@
             <c:set var="keys" value="${interview.indicatori.keySet()}" />
             <c:forEach var="key" items="${keys}">
               <c:set var="indicatore" value="${interview.indicatori.get(key)}" />
-              <dt class="col-sm-4"><c:out value="${indicatore.nome}" /> &ndash; <em><c:out value="${indicatore.descrizione}" />:</em></dt> 
-              <dd class="col-sm-8">Rischio <c:out value="${indicatore.informativa}" /></dd><br />
+              <dt class="col-sm-5">
+                <c:out value="${indicatore.nome}" /> &ndash; <em><c:out value="${indicatore.descrizione}" />:</em>
+              </dt> 
+              <dd class="col-sm-7">Rischio <c:out value="${indicatore.informativa}" /></dd>
             </c:forEach>
             </dl>
           </c:forEach>
@@ -298,6 +300,9 @@
                       </c:if>
                       <span title="ID${quesito.id} = ${quesito.formulazione}"><c:out value="${quesito.codice}" /></span><c:out value="${comma}" />
                     </c:forEach>
+                      <a href="#fasi" title="Vedi dettagli delle fasi e relative strutture/soggetti">
+                        <c:out value="${ind.autoreUltimaModifica}" />
+                      </a>
                     </td>
                     <td><c:out value="${ind.processo.tipo}" /></td>
                       <c:set var="classSuffix" value="${fn:toLowerCase(ind.informativa)}" scope="page" />
