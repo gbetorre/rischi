@@ -58,6 +58,7 @@ import it.rol.Query;
 import it.rol.Utils;
 import it.rol.bean.ActivityBean;
 import it.rol.bean.CodeBean;
+import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
@@ -75,6 +76,7 @@ import it.rol.exception.WebStorageException;
  * ai fini della valutazione del rischio corruttivo, on line (ROL).</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
+ * @version 1.53
  */
 public class ProcessCommand extends ItemBean implements Command, Constants {
 
@@ -772,8 +774,14 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             HashMap<Integer, QuestionBean> answersByQuestions = AuditCommand.decantAnswers(questions, answers);
                             // Calcola gli identificativi dei quesiti corrispondenti a tutti gli indicatori
                             HashMap<String, LinkedList<Integer>> questionsByIndicator = AuditCommand.retrieveQuestionsByIndicators(user, answers, survey, db);
-                            // Valorizza la tabella degli indicatori indicizzati per nome
-                            LinkedHashMap<String, InterviewBean> indicators = AuditCommand.compute(questionsByIndicator, answersByQuestions, AuditCommand.decantIndicators(indicatorsAsList));
+                            // Recupera i processi collegati alla rilevazione corrente
+                            ArrayList<ProcessBean> macrosat = retrieveMacroAtBySurvey(user, codeSurvey, db);
+                            // Recupera le strutture collegate a tutti i processi at (necessarie per calcolare il valore di I3)
+                            HashMap<Integer, ArrayList<DepartmentBean>> structsAsMap = ReportCommand.retrieveStructures(macrosat, user, codeSurvey, db);
+                            // Recupera i soggetti terzi collegati a tutti i processi at (necessari per calcolare il valore di I3)
+                            HashMap<Integer, ArrayList<DepartmentBean>> subjectsAsMap = ReportCommand.retrieveSubjects(macrosat, user, codeSurvey, db);
+                            // Calcola tutti i valori degli indicatori e li restituisce in una mappa, indicizzati per nome
+                            LinkedHashMap<String, InterviewBean> indicators = AuditCommand.compute(questionsByIndicator, answersByQuestions, AuditCommand.decantIndicators(indicatorsAsList), structsAsMap.get(new Integer(id)), subjectsAsMap.get(new Integer(id)));
                             // Aggiunge gli indicatori calcolati all'intervista in cui è coinvolto il processo
                             interview.setIndicatori(indicators);
                             // Aggiunge l'intervista con gli indicatori alla lista delle interviste che hanno riguardato il processo di dato id
