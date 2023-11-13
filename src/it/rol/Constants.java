@@ -48,6 +48,7 @@ import it.rol.bean.CodeBean;
  * insiemi di valori ammessi per parametri applicativi.</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
+ * @version 1.53
  */
 public interface Constants extends Serializable {
     /* ************************************************************************ *
@@ -312,15 +313,15 @@ public interface Constants extends Serializable {
     /**
      * <p>Indice sintetico di probabilit&agrave;.</p>
      */
-    static final String P = "Probabilità";
+    static final String P = "P";
     /**
      * <p>Indice sintetico di impatto.</p>
      */
-    static final String I = "Impatto";
+    static final String I = "I";
     /**
      * <p>Giudizio sintetico (P x I).</p>
      */
-    static final String PI = "Giudizio sintetico";
+    static final String PI = "PxI";
     /**
      * <p>Messaggio di errore sul calcolo degli indicatori.</p>
      */
