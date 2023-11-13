@@ -2,7 +2,7 @@
 Style.css - Global Stylesheet for /rischi application 
 =====================================================*/
 html, body {
-    font-family: Verdana, sans-serif;
+    font-family: 'Poppins', 'Manjari', Verdana, sans-serif;
     font-size: smaller;
     line-height: 1.5;
 }
@@ -362,7 +362,6 @@ img.profile {
 	height: 25px;
 }
 
-/* ----------------- Tables ---------------- */
 table.google-visualization-orgchart-table {
     border-collapse: separate;
 }
@@ -576,6 +575,22 @@ select:disabled.bgcolor3 {
 .bgcolor-non {
   color: #333300;
   background-image: linear-gradient(to right, #ffccba, #cc33ff);
+}
+
+.border-basso {
+  border: 1px solid green;
+}
+
+.border-medio {
+  border: 1px solid #ffcc66;
+}
+
+.border-alto {
+  border: 1px solid red;
+}
+
+.border-non {
+  border: none;
 }
 
 /* ----------------- Panes ---------------- */
@@ -939,7 +954,7 @@ hr.riga       {
 }
 
 .verticalCenter{
-  vertical-align: middle;
+  vertical-align: middle !important;
 }
 
 .rowBottomLine{
