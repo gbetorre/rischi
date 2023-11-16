@@ -1487,6 +1487,155 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * Ogni indicatore ha un proprio algoritmo di calcolo, pertanto 
      * il valore di ogni indicatore viene calcolato in un metodo dedicato.<br />
      * I casi mappati per l’indicatore P4 devono essere generati dall'algoritmo
+     * implementato dal presente metodo e derivano dalla seguente tabella.<br />
+     * <strong>(Nuova tabella di decisione 23.11 v. 1.54 e superiori)</strong>
+     * <pre>
+     *                       P4
+     * (grado di discrezionalità del decisore interno alla PA)
+     * RIGA     ID1     ID2     ID13    ID14   RISCHIO
+     * --------------------------------------------------
+     * 1a       SI      SI      SI|NO   >2      BASSO
+     * 2a       NO      SI      NO      >2      BASSO
+     * 3a       SI      NO      NO      >2      BASSO
+     * 4a       SI      NO      SI      >=2     BASSO
+     * 5a       SI|NO   SI      SI      >=2     BASSO
+     * 6a       SI      SI|NO   NO      <=2     MEDIO
+     * 7a       NO      SI      NO      <=2     MEDIO
+     * 8a       NO      SI      SI      <2      MEDIO
+     * 9a       NO      NO      SI      *       MEDIO
+     * 10a      SI      SI|NO   SI      <2      MEDIO
+     * 11a      NO      NO      NO      *       ALTO
+     * </pre>
+     * <p>Recuerda: n ∈ {N | n<3 ∧ n>=2} means {2}</p>
+     * Espandendo i possibili valori si ottengono le disposizioni di valori 
+     * (un sottoinsieme di D'(n,k) = n<sup>k</sup>) riportate nella tabella seguente:
+     * <pre>
+     * ID1 ID2 ID13 ID14    RESULT
+     * ------------------------------
+     * NO   NO   NO   *      ALTO
+     * NO   NO   SI   *      MEDIO
+     * NO   SI   SI   >=2    BASSO
+     * NO   SI   SI   <2     MEDIO
+     * NO   SI   NO   <=2    MEDIO
+     * NO   SI   NO   >2     BASSO
+     * SI   SI   SI   >=2    BASSO
+     * SI   NO   SI   >=2    BASSO
+     * SI   SI   SI   <2     MEDIO
+     * SI   NO   SI   <2     MEDIO
+     * SI   SI   NO   <=2    MEDIO
+     * SI   NO   NO   <=2    MEDIO
+     * SI   SI   NO   >2     BASSO
+     * SI   NO   NO   >2     BASSO    
+     * ------------------------------
+     * </pre> 
+     * L'implementazione del metodo deve essere in grado di generare
+     * un risultato consistente per ognuna delle disposizioni classificate.<br /> 
+     * L'architettura e l'implementazione dell'algoritmo fanno s&iacute; che
+     * possano esistere solo valori computati o, eventualmente, valori erronei 
+     * (p.es. una risposta non numerica ad un quesito numerico, oppure 
+     * una risposta diversa da {SI,NO} ad un quesito di tipo On/Off) 
+     * ma non disposizioni indecidibili.</p> 
+     * 
+     * @param allowedIds        elenco degli identificativi dei quesiti associati all'indicatore considerato
+     * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
+     * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
+     * @return <code>InterviewBean</code> - oggetto contenente il livello di rischio nell'indicatore, calcolato dall'algoritmo in base alle risposte date ai quesiti associati, e informazioni attinenti 
+     * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
+     */
+    private static InterviewBean computeP4(LinkedList<Integer> allowedIds, 
+                                           HashMap<Integer, QuestionBean> answerByQuestion,
+                                           HashMap<String, CodeBean> indicatorByCode) 
+                                    throws CommandException {
+        try {
+            InterviewBean p4 = new InterviewBean();
+            ArrayList<QuestionBean> quesiti = new ArrayList<>();
+            ProcessBean extraInfo = new ProcessBean();
+            String result = null;
+            StringBuffer reason = new StringBuffer(VOID_STRING);
+            // Oggetti id quesiti necessari per il calcolo dell'indicatore
+            Integer id1 = new Integer(1);
+            Integer id2 = new Integer(2);
+            Integer id13 = new Integer(13);
+            Integer id14 = new Integer(14);
+            LinkedList<Integer> algorythmIds = new LinkedList<>();
+            algorythmIds.add(id1);
+            algorythmIds.add(id2);
+            algorythmIds.add(id13);
+            algorythmIds.add(id14);
+            // Prepara la lista di quesiti che permettono di calcolare l'indicatore
+            quesiti.add(answerByQuestion.get(id1));
+            quesiti.add(answerByQuestion.get(id2));
+            quesiti.add(answerByQuestion.get(id13));
+            quesiti.add(answerByQuestion.get(id14));
+            // Memorizza il tipo dell'indicatore corrente
+            extraInfo.setTipo(P);
+            // Controlli lato server sulla validità delle risposte
+            if (!validateAnswers(algorythmIds, allowedIds, answerByQuestion, reason)) {
+                extraInfo.setDescrizioneStatoCorrente(String.valueOf(reason));
+                result = ERR;
+            } else {
+                if (answerByQuestion.get(id1).getAnswer().getNome().equalsIgnoreCase("NO")) {
+                    if (answerByQuestion.get(id2).getAnswer().getNome().equalsIgnoreCase("NO")) {
+                        if (answerByQuestion.get(id13).getAnswer().getNome().equalsIgnoreCase("NO")) {
+                            result = LIVELLI_RISCHIO[3];
+                        } else {
+                            result = LIVELLI_RISCHIO[2];
+                        }
+                    } else {
+                        if (answerByQuestion.get(id13).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                            if (Integer.parseInt(answerByQuestion.get(id14).getAnswer().getNome()) >= ELEMENT_LEV_2) {
+                                result = LIVELLI_RISCHIO[1];
+                            } else {
+                                result = LIVELLI_RISCHIO[2];
+                            }
+                        } else {
+                            if (Integer.parseInt(answerByQuestion.get(id14).getAnswer().getNome()) <= ELEMENT_LEV_2) {
+                                result = LIVELLI_RISCHIO[2];
+                            } else {
+                                result = LIVELLI_RISCHIO[1];
+                            }
+                        }
+                    }
+                } else {
+                    if (answerByQuestion.get(id13).getAnswer().getNome().equalsIgnoreCase("SI")) {
+                        if (Integer.parseInt(answerByQuestion.get(id14).getAnswer().getNome()) >= ELEMENT_LEV_2) {
+                            result = LIVELLI_RISCHIO[1];
+                        } else {
+                            result = LIVELLI_RISCHIO[2];
+                        }
+                    } else {
+                        if (Integer.parseInt(answerByQuestion.get(id14).getAnswer().getNome()) <= ELEMENT_LEV_2) {
+                            result = LIVELLI_RISCHIO[2];
+                        } else {
+                            result = LIVELLI_RISCHIO[1];
+                        }
+                    }
+                }
+            }
+            // Valorizza e restituisce l'oggetto per l'indicatore
+            p4.setNome(P4);
+            p4.setInformativa(result);
+            p4.setDescrizione(indicatorByCode.get(P4).getInformativa());
+            p4.setRisposte(quesiti);
+            p4.setProcesso(extraInfo);
+            return p4;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+
+    
+    /**
+     * <p>Restituisce il valore dell'indicatore di probabilit&agrave; P4.<br />
+     * Ogni indicatore ha un proprio algoritmo di calcolo, pertanto 
+     * il valore di ogni indicatore viene calcolato in un metodo dedicato.<br />
+     * I casi mappati per l’indicatore P4 devono essere generati dall'algoritmo
      * implementato dal presente metodo e derivano dalla seguente tabella:
      * <pre>
      *                       P4
@@ -1541,14 +1690,17 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @param allowedIds        elenco degli identificativi dei quesiti associati all'indicatore considerato
      * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
      * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
+     * @param deprecated        parametro fittizio che ha lo scopo di cambiare la firma del metodo, in quanto deprecato
      * @return <code>InterviewBean</code> - oggetto contenente il livello di rischio nell'indicatore, calcolato dall'algoritmo in base alle risposte date ai quesiti associati, e informazioni attinenti 
      * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
      * @deprecated l'algoritmo di calcolo implementato non e' valido perche' non gestisce la granularita' di 3 operatori dell'ufficio; e' necessario raffinarlo facendo riferimento a questo criterio.
      */
+    @SuppressWarnings("unused")
     @Deprecated
     private static InterviewBean computeP4(LinkedList<Integer> allowedIds, 
                                            HashMap<Integer, QuestionBean> answerByQuestion,
-                                           HashMap<String, CodeBean> indicatorByCode) 
+                                           HashMap<String, CodeBean> indicatorByCode,
+                                           boolean deprecated) 
                                     throws CommandException {
         try {
             InterviewBean p4 = new InterviewBean();
