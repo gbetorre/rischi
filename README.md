@@ -319,13 +319,14 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.6.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
 - [1.6.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [1.6.4] Implementata form di ricerca sui quesiti per chiave testuale
-- [1.5.7] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
-- [1.5.6] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista; prima bozza calcolo indicatori P1, P2, P3 nel contesto del singolo processo
-- [1.5.5] (  /11/2023) Aggiunta tabella riepilogativa del PxI di tutti i processi, elencante il valore ottenuto in ogni dimensione di rischio (P e I) e nella loro combinazione (giudizio sintetico PxI)
-- [1.5.4] (  /11/2023) Aggiunta tabella riepilogativa del PxI di tutte le strutture, elencante il valore ottenuto in ogni indicatore per ogni processo e relative strutture
+- [1.5.8] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4 nel contesto del singolo processo
+- [1.5.7] (  /09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5, P6, P7, I1, I2, I3, I4, P, I, PxI nel contesto della singola intervista; prima bozza calcolo indicatori P1, P2, P3 nel contesto del singolo processo
+- [1.5.6] (  /11/2023) Aggiunta tabella riepilogativa del PxI di tutti i processi, elencante il valore ottenuto in ogni dimensione di rischio (P e I) e nella loro combinazione (giudizio sintetico PxI)
+- [1.5.5] (  /11/2023) Aggiunta tabella riepilogativa del PxI di tutte le strutture, elencante il valore ottenuto in ogni indicatore per ogni processo e relative strutture
 
 ### Done
 -->
+- [1.5.4] (16/11/2023) Revisionato algoritmo di calcolo dell'indicatore di probabilit&agrave; P4; revisioni screenshot
 - [1.5.3] (13/11/2023) Aggiunta tabella riepilogativa del PxI di tutti i processi, elencante il valore ottenuto in ogni indicatore per ogni processo
 - [1.5.2] (06/11/2023) Aggiunti in tabella riepilogativa del PxI di tutti i processi e strutture, i macroprocessi, le aree di rischio ed i soggetti interessati a ogni processo
 - [1.5.1] (30/10/2023) Aggiunta tabella riepilogativa del PxI di tutti i processi, elencante rischi e strutture associate a ogni processo
