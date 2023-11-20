@@ -80,7 +80,7 @@ import it.rol.exception.WebStorageException;
  * <p>Created on Tue 12 Apr 2022 09:46:04 AM CEST</p>
  * 
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
- * @version 1.53
+ * @version 1.55
  */
 public class AuditCommand extends ItemBean implements Command, Constants {
     
@@ -1184,16 +1184,23 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * di ogni altro indicatore, il presente metodo richiama lo specifico metodo 
      * di calcolo di ciascun indicatore di probabilit&agrave; e di ciascun 
      * indicatore di impatto.<br />
-     * Acquisite queste informazioni, effettua in autonomia il calcolo degli 
+     * Acquisite queste informazioni, richiama i metodi di calcolo degli 
      * indici sintetici P ed I e infine, sulla base di questi, calcola il valore 
      * del giudizio sintetico P x I, che memorizza in un oggetto 
      * associato alla chiave PI.</p>
+     * <p>Il metodo &egrave; pensato per essere richiamato nel contesto di 
+     * uno specifico progetto organizzativo censito a fini anticorruttivi
+     * (processo_at); l'hoverhead legato al richiamo ciclico, laddove &ndash;
+     * come nei report aggregati &ndash; sia necessario calcolare gli indicatori 
+     * di ogni processo, viene gestito attraverso un apposito meccanismo
+     * di caching su disco (db).</p> 
      * 
      * @param questByIndicator  tabella degli identificativi dei quesiti che, da db, risultano associati a ogni specifico codice indicatore, usato come chiave
      * @param answerByQuestion  tabella in cui ogni id quesito permette di ottenere la relativa risposta
      * @param indicatorByCode   tabella in cui ogni oggetto contenente i dati di un indicatore e' ricavabile utilizzando come chiave il codice dell'indicatore stesso
-     * @param TODO commenti            albero completo processi collegati alla rilevazione
-     * @return HashMap&lt;String&comma; InterviewBean&gt; - tabella contenente tutti i valori degli indicatori e anche quelli degli indici generali, indicizzati per nome
+     * @param structs           lista di strutture coinvolte nell'elaborazione del processo di cui si vogliono calcolare gli indicatori
+     * @param subjects          lista di soggetti interessati nell'elaborazione del processo di cui si vogliono calcolare gli indicatori
+     * @return HashMap&lt;String&comma; InterviewBean&gt; - tabella contenente tutti i valori degli indicatori e delle dimensioni di rischio, indicizzati per nome
      * @throws CommandException se si verifica un problema nel calcolo di un indicatore, nel recupero di dati o in qualche tipo di puntamento
      */
     public static LinkedHashMap<String, InterviewBean> compute(HashMap<String, LinkedList<Integer>> questByIndicator, 
@@ -1225,7 +1232,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             pLev = count(indicators, P);
             iLev = count(indicators, I);
             // In base ai totali parziali, calcola P ed I
-            //indicators.put(P, computeP(pLev, indicatorByCode));
+            indicators.put(P, computeP(pLev, indicatorByCode));
             //indicators.put(I, computeI(pLev, indicatorByCode));
             // In base a P ed I calcola PxI
             // to be continued...
@@ -1632,6 +1639,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
 
     
     /**
+     * @deprecated
      * <p>Restituisce il valore dell'indicatore di probabilit&agrave; P4.<br />
      * Ogni indicatore ha un proprio algoritmo di calcolo, pertanto 
      * il valore di ogni indicatore viene calcolato in un metodo dedicato.<br />
@@ -1687,6 +1695,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * per eventuali altre non determinate (e che rientrano nelle disposizioni
      * indecidibili).</p> 
      * 
+     * @see AuditCommand#computeP4(LinkedList, HashMap, HashMap)
      * @param allowedIds        elenco degli identificativi dei quesiti associati all'indicatore considerato
      * @param answerByQuestion  tabella delle risposte indicizzate per identificativo quesito
      * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
@@ -2082,7 +2091,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                 extraInfo.setDescrizioneStatoCorrente(String.valueOf(reason));
                 result = ERR;
             } else {
-                // test
+                // Test
                 if (answerByQuestion.get(id22).getAnswer().getNome().equalsIgnoreCase("SI")) {
                     result = LIVELLI_RISCHIO[3];
                 } else {
@@ -2268,7 +2277,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                 extraInfo.setDescrizioneStatoCorrente(String.valueOf(reason));
                 result = ERR;
             } else {
-                // test
+                // Test
                 if (answerByQuestion.get(id12).getAnswer().getNome().equalsIgnoreCase("SI")) {
                     result = LIVELLI_RISCHIO[3];
                 } else {
