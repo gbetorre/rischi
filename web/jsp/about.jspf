@@ -19,9 +19,9 @@
         </button>
       </div>
       <div class="toast-body">
-        Versione: 1.54
+        Versione: 1.55
         <fmt:setLocale value="it_IT"/>
-        <c:set var="deployDate" value="16-11-2023" scope="page" />
+        <c:set var="deployDate" value="20-11-2023" scope="page" />
         <fmt:parseDate var="releaseDate" value="${deployDate}" pattern="dd-MM-yyyy" scope="page" />
         <fmt:formatDate var="dataRilascio" value="${releaseDate}" pattern="dd MMMMM, yyyy" />
         <span class="float-right">
