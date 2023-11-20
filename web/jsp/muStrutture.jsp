@@ -7,11 +7,40 @@
 <c:set var="structs" value="${requestScope.strutture}" scope="page" />
 <c:set var="subjs" value="${requestScope.soggetti}" scope="page" />
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
-    <h3 class="mt-1 m-0 font-weight-bold float-left">Report strutture e rischi</h3>    
+    <script type="text/javascript">
+      function openPrint(){
+        myWindow = window.open('','','width=200,height=100');
+        myWindow.document.write("<p>This is 'myWindow'</p>");
+        myWindow.focus();
+        print(myWindow);
+      }
+
+      function openWin() {
+        var token = "?q=mu" ; // -> Command token
+        var url = token + "&p=str" + "&r=${param['r']}" + "&out=pop";
+        // e.g.: /data?q=pr&p=pro&pliv=#&liv=#&r=$
+        myWindow = window.open(url, "_blank", "toolbar=no,scrollbars=yes,resizable=no,top=400,left=500,width=1024,height=768");
+      }
+      
+      function openWin(url) {
+        myWindow = window.open(url, "_blank", "toolbar=no,scrollbars=yes,resizable=no,top=400,left=500,width=1024,height=768");
+      }
+
+      function closeWin() {
+        myWindow.close();
+      }
+      
+      let myWindow;
+    </script>
+
+    <h3 class="mt-1 m-0 font-weight-bold float-left">Report strutture e rischi</h3>
+    <a href="javascript:openWin('?q=mu&p=str&r=AT2022&out=pop')" class="float-right badge badge-pill lightTable bgAct18" title="Apri in una finestra separata per la stampa">
+      <i class="fa-solid fa-arrow-up-right-from-square"></i> Apri in una nuova finestra
+    </a>
     <hr class="riga"/>
+    
     <div class="col-md-offset-1">
-      <div class="panel-heading">
-        <div class="panel-body table-responsive">
+        <div class="table-responsive">
           <table class="table table-striped table-bordered table-hover" id="listStr">
             <thead class="thead-light">
               <tr class="thin">
@@ -114,7 +143,7 @@
             </tbody>
           </table>
         </div>
-      </div>
+
     </div>
 
     &nbsp;
