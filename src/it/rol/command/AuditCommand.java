@@ -1216,6 +1216,12 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             LinkedHashMap<String, Integer> pLev = new LinkedHashMap<>();
             // Totali di ciascun livello di rischio ottenuti in base agli indicatori di impatto
             LinkedHashMap<String, Integer> iLev = new LinkedHashMap<>();
+            // Dimensione P
+            InterviewBean p = null;
+            // Dimensione I
+            InterviewBean i = null;
+            // Giudizio Sintetico
+            InterviewBean pi = null;
             // Ogni indicatore viene calcolato con un diverso algoritmo, implementato in un metodo ad hoc
             indicators.put(P1, computeP1(questByIndicator.get(P1), answerByQuestion, indicatorByCode));
             indicators.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
@@ -1232,10 +1238,14 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             pLev = count(indicators, P);
             iLev = count(indicators, I);
             // In base ai totali parziali, calcola P ed I
-            indicators.put(P, computeP(pLev, indicatorByCode));
-            //indicators.put(I, computeI(pLev, indicatorByCode));
+            p = computeP(pLev, indicatorByCode);
+            i = computeI(iLev, indicatorByCode);
             // In base a P ed I calcola PxI
-            // to be continued...
+            pi = computePI(p, i);
+            // Imposta i valori calcolati nella mappa
+            indicators.put(P, p);
+            indicators.put(I, i);
+            indicators.put(PI, pi);
             return indicators;
         } catch (CommandException ce) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori o attributi.\n";
@@ -2367,6 +2377,179 @@ public class AuditCommand extends ItemBean implements Command, Constants {
     }
     
 
+    /**
+     * <p>Restituisce il valore della dimensione di impatto I.<br />
+     * Riceve in input una mappa in cui ad ogni valore di rischio &egrave;
+     * associato un valore numerico che deriva dal conteggio dei valori di tutti 
+     * gli indicatori afferenti alla dimensione I (ovvero all'impatto
+     * che l'evento corruttivo ha sull'organizzazione, nel caso in cui 
+     * si verifichi) ripartiti per valore.</p>
+     * <p>Ogni dimensione ha un proprio algoritmo di calcolo, pertanto 
+     * il valore di ogni dimensione viene calcolato in un metodo dedicato.</p> 
+     * 
+     * @param weights           tabella delle frequenze di ogni valore di rischio
+     * @param indicatorByCode   tabella degli indicatori indicizzati per codice indicatore
+     * @return <code>InterviewBean</code> - oggetto contenente il livello di rischio dell'indicatore, calcolato dall'algoritmo in base alle frequenze dei valori di rischio riscontrati
+     * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
+     */
+    private static InterviewBean computeI(LinkedHashMap<String, Integer> weights,
+                                          final HashMap<String, CodeBean> indicatorByCode) 
+                                   throws CommandException {
+        try {
+            InterviewBean i = new InterviewBean();
+            ProcessBean extraInfo = new ProcessBean();
+            String result = null;
+            // Memorizza il tipo dell'indicatore corrente
+            extraInfo.setTipo(I);
+            // Almeno 1 degli I* è ALTO ?
+            if (weights.get(LIVELLI_RISCHIO[3]).intValue() >= ELEMENT_LEV_1) {
+                // E' uno soltanto ?
+                if (weights.get(LIVELLI_RISCHIO[3]).intValue() == ELEMENT_LEV_1) {
+                    // Ci sono 2 o più MEDI ?
+                    if (weights.get(LIVELLI_RISCHIO[2]).intValue() >= ELEMENT_LEV_2) {
+                        result = LIVELLI_RISCHIO[3];
+                    } else { // C'è un solo ALTO e ci sono meno di 2 MEDI !
+                        result = LIVELLI_RISCHIO[2];
+                    }
+                } else { // E' più di uno: non stiamo a fare altri controlli
+                    result = LIVELLI_RISCHIO[3];
+                }
+            } else {    // Non c'è nessun I* = ALTO
+                // Ci sono 2 o più MEDI ?
+                if (weights.get(LIVELLI_RISCHIO[2]).intValue() >= ELEMENT_LEV_2) {
+                    result = LIVELLI_RISCHIO[2];
+                } else {    
+                    result = LIVELLI_RISCHIO[1];
+                }
+            }
+            // Valorizza e restituisce l'oggetto per l'indicatore
+            i.setNome(I);
+            i.setInformativa(result);
+            i.setDescrizione(indicatorByCode.get(I).getInformativa());
+            i.setAutoreUltimaModifica("I1 I2 I3 I4");
+            i.setProcesso(extraInfo);
+            return i;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce il valore del giudizio sintetico, o PxI, che incrocia 
+     * la dimensione di probabilit&agrave; P con la dimensione di impatto I.<br />
+     * Riceve in input i valori di P ed I e computa il risultato
+     * in base alla combinazione dei due.
+     * Considerando che P ed I hanno ciascuno 3 valori possibili, 
+     * matematicamente il calcolo degli incroci 
+     * dei valori di P e dei valori di I &egrave; il calcolo 
+     * delle disposizioni (con ripetizione) di 3 elementi presi a 2 a 2.
+     * Nel nostro caso abbiamo 3 elementi (ALTO, MEDIO, BASSO) presi a 2 a 2, 
+     * da cui:<pre>
+     * D’(3,2) = 3<sup>2</sup> = 9</pre>
+     * Di seguito viene riportata la tabella di decisione dell’algoritmo 
+     * per il calcolo del PxI, con i 9 valori possibili derivanti 
+     * dalle disposizioni con ripetizione dei 3 valori possibili del P 
+     * e dei 3 valori possibili di I.<pre>
+     * --------------------------
+     *  P        I       P x I
+     * --------------------------
+     *  ALTO     ALTO    ALTISSIMO
+     *  ALTO     MEDIO   ALTO
+     *  ALTO     BASSO   MEDIO
+     *  MEDIO    ALTO    ALTO
+     *  MEDIO    MEDIO   MEDIO
+     *  MEDIO    BASSO   BASSO
+     *  BASSO    ALTO    MEDIO
+     *  BASSO    MEDIO   BASSO
+     *  BASSO    BASSO   MINIMO
+     * --------------------------
+     * </pre></p>
+     * <p>Ogni indicatore ed ogni dimensione hanno un proprio algoritmo di 
+     * calcolo, pertanto il valore di ogni indicatore e di ogni dimensione 
+     * viene calcolato in un metodo dedicato; il giudizio sintetico 
+     * non fa eccezione.</p> 
+     * 
+     * @param p il valore della dimensione di probabilita' per il processo contestuale
+     * @param i il valore della dimensione di impatto per il processo contestuale
+     * @return <code>InterviewBean</code> - oggetto contenente il livello di rischio dell'indice PxI, calcolato dall'algoritmo in base ai valori delle dimensioni di rischio ricevute
+     * @throws CommandException se un attributo obbligatorio non risulta valorizzato o se si verifica un problema in qualche tipo di puntamento
+     */
+    private static InterviewBean computePI(final InterviewBean p,
+                                           final InterviewBean i) 
+                                    throws CommandException {
+        try {
+            InterviewBean pi = new InterviewBean();
+            ProcessBean extraInfo = new ProcessBean();
+            String result = null;
+            // Memorizza il tipo dell'indicatore corrente
+            extraInfo.setTipo(PI);
+            // P è ALTO ?
+            if (p.getInformativa().equals(LIVELLI_RISCHIO[3])) {
+                // I è ALTO ?
+                if (i.getInformativa().equals(LIVELLI_RISCHIO[3])) {
+                    // Il rischio è ALTISSIMO !
+                    result = LIVELLI_RISCHIO[4];
+                } else {
+                    // I è MEDIO ?
+                    if (i.getInformativa().equals(LIVELLI_RISCHIO[2])) {
+                        // Il rischio è ALTO
+                        result = LIVELLI_RISCHIO[3];
+                    } else {
+                        result = LIVELLI_RISCHIO[2];
+                    }
+                }
+            // P è MEDIO ?    
+            } else if (p.getInformativa().equals(LIVELLI_RISCHIO[2])) {
+                // I è ALTO ?
+                if (i.getInformativa().equals(LIVELLI_RISCHIO[3])) {
+                    // Il rischio è ALTO
+                    result = LIVELLI_RISCHIO[3];
+                } else {
+                    // I è MEDIO ?
+                    if (i.getInformativa().equals(LIVELLI_RISCHIO[2])) {
+                        // Il rischio è MEDIO
+                        result = LIVELLI_RISCHIO[2];
+                    } else {
+                        // Il rischio è BASSO
+                        result = LIVELLI_RISCHIO[1];
+                    }
+                }
+            } else {    // Se non è alto, e non è medio, P dev'essere BASSO
+                // I è ALTO ?
+                if (i.getInformativa().equals(LIVELLI_RISCHIO[3])) {
+                    result = LIVELLI_RISCHIO[2];
+                } else if (i.getInformativa().equals(LIVELLI_RISCHIO[2])) {
+                    result = LIVELLI_RISCHIO[1];
+                } else {
+                    result = LIVELLI_RISCHIO[0];
+                }
+            }
+            // Valorizza e restituisce l'oggetto per l'indicatore
+            pi.setNome(PI);
+            pi.setInformativa(result);
+            pi.setDescrizione("Giudizio Sintetico");
+            pi.setAutoreUltimaModifica("P I");
+            pi.setProcesso(extraInfo);
+            return pi;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+    
     /**
      * <p>Implementa l'algoritmo "In dubio pro peior" (nel dubbio si
      * consideri il caso peggiore, ovvero, in questo caso, il rischio 
