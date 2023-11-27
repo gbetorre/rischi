@@ -7,35 +7,9 @@
 <c:set var="structs" value="${requestScope.strutture}" scope="page" />
 <c:set var="subjs" value="${requestScope.soggetti}" scope="page" />
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
-    <script type="text/javascript">
-      function openPrint(){
-        myWindow = window.open('','','width=200,height=100');
-        myWindow.document.write("<p>This is 'myWindow'</p>");
-        myWindow.focus();
-        print(myWindow);
-      }
-
-      function openWin() {
-        var token = "?q=mu" ; // -> Command token
-        var url = token + "&p=str" + "&r=${param['r']}" + "&out=pop";
-        // e.g.: /data?q=pr&p=pro&pliv=#&liv=#&r=$
-        myWindow = window.open(url, "_blank", "toolbar=no,scrollbars=yes,resizable=no,top=400,left=500,width=1024,height=768");
-      }
-      
-      function openWin(url) {
-        myWindow = window.open(url, "_blank", "toolbar=no,scrollbars=yes,resizable=no,top=400,left=500,width=1024,height=768");
-      }
-
-      function closeWin() {
-        myWindow.close();
-      }
-      
-      let myWindow;
-    </script>
-
     <h3 class="mt-1 m-0 font-weight-bold float-left">Report strutture e rischi</h3>
-    <a href="javascript:openWin('?q=mu&p=str&r=AT2022&out=pop')" class="float-right badge badge-pill lightTable bgAct18" title="Apri in una finestra separata per la stampa">
-      <i class="fa-solid fa-arrow-up-right-from-square"></i> Apri in una nuova finestra
+    <a href="javascript:openWin('?q=mu&p=str&r=AT2022&out=pop')" class="float-right badge badge-pill lightTable bgAct18" title="Scarica il report in formato RTF">
+      <i class="fas fa-download"></i>Scarica tutti i dati
     </a>
     <hr class="riga"/>
     
@@ -134,8 +108,8 @@
                     </c:forEach>
                     </ul>
                 </td>
-                <td width="15%">
-
+                <td width="15%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)}">
+                  <c:out value="${pat.indicatori.get('PxI').informativa}" />
                 </td>
               </tr>
             </c:forEach>
