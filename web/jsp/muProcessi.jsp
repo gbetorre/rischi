@@ -12,6 +12,8 @@
       gap: 8px;
       color: #fff;
       height: 600px;
+      resize: both;
+      overflow: auto;
     }
     .entry {
       background: #999;
@@ -35,7 +37,7 @@
       width:210px;
     }
     </style>
-    <h3 class="mt-1 m-0 font-weight-bold float-left">Report processi e rischi</h3>    
+    <h3 class="mt-1 m-0 font-weight-bold float-left">Report probabilit&agrave; x impatto</h3>    
     <hr class="riga"/>
     <div class="grid scrollX">
       <!-- columns header -->
@@ -66,8 +68,10 @@
         </a>
       </div>
       <div class="entry"></div>
-      <div class="entry">
-        <c:out value="${pat.indicatori.get('PI').informativa}" />
+      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)} border-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)}">
+        <p class="text-center" title="${pat.indicatori.get('PxI').informativa}">
+          <c:out value="${pat.indicatori.get('PxI').informativa}" />
+        </p>
       </div>
       <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('P').informativa)} border-${fn:toLowerCase(pat.indicatori.get('P').informativa)}">
         <p class="text-center" title="${pat.indicatori.get('P').informativa}">
@@ -90,40 +94,6 @@
         </p>
       </div>
       </c:forTokens>
-      <%--
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('P1').informativa)} border-${fn:toLowerCase(pat.indicatori.get('P1').informativa)}">
-        <p class="text-center"><c:out value="${pat.indicatori.get('P1').informativa}" /></p>
-      </div>
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('P2').informativa)} border-${fn:toLowerCase(pat.indicatori.get('P2').informativa)}">
-        <p class="text-center"><c:out value="${pat.indicatori.get('P2').informativa}" /></p>
-      </div>
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('P3').informativa)} border-${fn:toLowerCase(pat.indicatori.get('P3').informativa)}">
-        <p class="text-center"><c:out value="${pat.indicatori.get('P3').informativa}" /></p>
-      </div>
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('P4').informativa)} border-${fn:toLowerCase(pat.indicatori.get('P4').informativa)}">
-        <p class="text-center"><c:out value="${pat.indicatori.get('P4').informativa}" /></p>
-      </div>
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('P5').informativa)} border-${fn:toLowerCase(pat.indicatori.get('P5').informativa)}">
-        <p class="text-center"><c:out value="${pat.indicatori.get('P5').informativa}" /></p>
-      </div>
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('P6').informativa)} border-${fn:toLowerCase(pat.indicatori.get('P6').informativa)}">
-        <p class="text-center"><c:out value="${pat.indicatori.get('P6').informativa}" /></p>
-      </div>
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('P7').informativa)} border-${fn:toLowerCase(pat.indicatori.get('P7').informativa)}">
-        <p class="text-center"><c:out value="${pat.indicatori.get('P7').informativa}" /></p>
-      </div>
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('I1').informativa)} border-${fn:toLowerCase(pat.indicatori.get('I1').informativa)}">
-        <p class="text-center"><c:out value="${pat.indicatori.get('I1').informativa}" /></p>
-      </div>
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('I2').informativa)} border-${fn:toLowerCase(pat.indicatori.get('I2').informativa)}">
-        <p class="text-center"><c:out value="${pat.indicatori.get('I2').informativa}" /></p>
-      </div>
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('I3').informativa)} border-${fn:toLowerCase(pat.indicatori.get('I3').informativa)}">
-        <p class="text-center"><c:out value="${pat.indicatori.get('I3').informativa}" /></p>
-      </div>
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('I4').informativa)} border-${fn:toLowerCase(pat.indicatori.get('I4').informativa)}">
-        <p class="text-center"><c:out value="${pat.indicatori.get('I4').informativa}" /></p>
-      </div>--%>
       </c:forEach> 
     </c:forEach>
     </div>
@@ -132,6 +102,5 @@
             <i class="fa-solid fa-arrow-rotate-right"></i>
             Ricalcola
           </a>
-
 
     
