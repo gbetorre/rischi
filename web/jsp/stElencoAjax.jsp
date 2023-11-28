@@ -1,10 +1,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ include file="URL.jspf" %>
+<c:set var="listaProcessi" value="${requestScope.lista}" scope="page" />
 <c:catch var="exception">
       <hr class="separatore" />
   <c:choose>
-    <c:when test="${requestScope.listaProcessi.size() gt zero}">
-      <c:set var="first" value="${requestScope.listaProcessi.get(zero)}" />
+    <c:when test="${pageScope.listaProcessi.size() gt zero}">
+      <c:set var="first" value="${pageScope.listaProcessi.get(zero)}" />
       <c:set var="uo" value="${first.dipart}" />
       <h4 id="tab-per" class="col-12">
         Processi collegati a ${uo.prefisso} ${uo.nome}
@@ -12,7 +13,7 @@
       <hr class="riga"/>
       <div class="lightTable sezioneElenco overflow-auto" style="height: 620px;">
         <ul class="list-group list-group-flush">
-          <c:forEach var="m" items="${requestScope.listaProcessi}">
+          <c:forEach var="m" items="${pageScope.listaProcessi}">
             <li class="list-group-item macroprocesso ${m.codice}">
               <b><c:out value="${m.codice}"/>: </b>
               <c:out value="${m.nome}"/><br/>
