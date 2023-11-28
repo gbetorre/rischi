@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -79,12 +80,16 @@ import it.rol.exception.CommandException;
  * 'text/html'</li>
  * <li>su una richiesta asincrona: per ottenere tuple da mostrare asincronamente
  * nelle pagine</li></ol></p>
- * <p>Nel primo caso, questa servlet fa a meno, legittimamente, del design (View),
- * in quanto l'output prodotto consiste in pure tuple prive di presentazione
- * (potenzialmente: fileset CSV, formati XML, dati con o senza metadati, RDF,
- * JSON, <cite>and so on</cite>).<br />
- * <p>
- * Questa servlet estrae l'azione dall'URL, ne verifica la
+ * <p><ul><li>Nel primo caso, questa servlet fa a meno, legittimamente, 
+ * del design (View), in quanto l'output prodotto consiste in pure tuple 
+ * prive di presentazione (potenzialmente: fileset CSV, formati XML, dati 
+ * con o senza metadati, serialization formats, JSON, <em>and so on</em>), 
+ * oppure in output gi&agrave; autoformattati (p.es. testo formattato 
+ * Rich Text Format).</li>
+ * <li>Nel secondo caso, la servlet specifica una pagina di output, contenente
+ * la formattazione, che per&ograve; verr&agrave; invocata asincronamente.</li>
+ * </ul></p>
+ * <p>Questa servlet estrae l'azione dall'URL, ne verifica la
  * correttezza, quindi in base al valore del parametro <code>'entToken'</code> ricevuto
  * (qui chiamato 'qToken' per motivi storici, ma non importa)
  * richiama le varie Command che devono eseguire i comandi specifici.
@@ -122,7 +127,8 @@ import it.rol.exception.CommandException;
  * Altre modalit&agrave; di generazione di output differenti da 'text/html'
  * (chiamate a pagine .jsp che incorporano la logica di preparazione del CSV,
  * chiamate a pagina .jsp che si occupano di presentare il metadato...)
- * vanno assolutamente evitate in favore dell'uso di questa servlet.
+ * sono deprecate da tempo e vanno assolutamente evitate 
+ * in favore dell'uso di questa servlet.
  * </p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
@@ -202,56 +208,38 @@ public class Data extends HttpServlet implements Constants {
         format = req.getParameter(ConfigManager.getOutToken());
         // Recupera o inizializza parametro per identificare la pagina
         String part = req.getParameter("p");
+        // Dictonary contenente i soli valori di entToken abilitati a generare CSV
+        LinkedList<String> csvCommands = new LinkedList<>();
         // Struttura da restituire in Request
         AbstractList<?> lista = null;
         // Message
         log.info("===> Log su servlet Data. <===");
         // Decodifica la richiesta
         try {
-            // Gestione estrazione interviste ("data?q=in")
-            if (qToken.equalsIgnoreCase(COMMAND_AUDIT)) {
-                // Verifica se deve servire un output csv
-                if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
+            // Lista delle Command abilitate a servire un output csv
+            csvCommands.add(COMMAND_PROCESS);   //Estrazione processi   ("data?q=pr")
+            csvCommands.add(COMMAND_STRUCTURES);//Estrazione strutture  ("data?q=st")
+            csvCommands.add(COMMAND_AUDIT);     //Estrazione interviste ("data?q=in")
+            csvCommands.add(COMMAND_RISK);      //Estrazione rischi     ("data?q=ri")
+            // Verifica se deve servire un output csv
+            if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
+                // Verifica che la Command invocata sia abilitata a gestire output csv
+                if (csvCommands.contains(qToken)) {
                     // Recupero elementi in base alla richiesta
-                    lista = retrieve(req, COMMAND_AUDIT);
+                    lista = retrieve(req, qToken);
                     // Passaggio in request per uso delle lista
                     req.setAttribute("lista", lista);
                     // Assegnazione di un valore di default se il parametro 'p' è nullo
-                    String key = (part == null ? COMMAND_AUDIT : part);
+                    String key = (part == null ? qToken : part);
                     // Genera il file CSV
                     makeCSV(req, res, key);
                     // Ha finito
                     return;
                 }
-            // Gestione estrazione rischi ("data?q=ri")
-            } else if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
-                // Verifica se deve servire un output csv
-                if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
-                    // Recupero elementi in base alla richiesta
-                    lista = retrieve(req, COMMAND_RISK);
-                    // Passaggio in request per uso delle lista
-                    req.setAttribute("lista", lista);
-                    // Assegnazione di un valore di default se il parametro 'p' è nullo
-                    String key = (part == null ? COMMAND_RISK : part);
-                    // Genera il file CSV
-                    makeCSV(req, res, key);
-                    // Ha finito
-                    return;
-                }
-            // Gestione estrazione processi ("data?q=pr")
-            } else if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
-                // Verifica se deve servire un output csv
-                if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
-                    // Macro/Sotto/Processi estratti in base alla rilevazione
-                    lista = retrieve(req, COMMAND_PROCESS);
-                    // Passaggio in request per uso delle lista
-                    req.setAttribute("listaProcessi", lista);
-                    // Genera il file CSV
-                    makeCSV(req, res, COMMAND_PROCESS);
-                    // Esce
-                    return;
-                } // Gestione dettaglio processo via XHR
-                // Se non è uscito, vuol dire che deve servire una richiesta asincrona ("data?q=pr&p=pro&pliv=#&liv=#&r=$")
+            }
+            // Se non è uscito, vuol dire che deve servire una richiesta asincrona
+            if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
+                // Nello specifico, dettaglio processo via XHR ("data?q=pr&p=pro&pliv=#&liv=#&r=$")
                 HashMap<String, ArrayList<?>> processElements = retrieve(req, COMMAND_PROCESS, PART_PROCESS);
                 // Imposta nella request liste di elementi collegati a processo
                 req.setAttribute("listaInput", processElements.get(TIPI_LISTE[0]));
@@ -262,28 +250,6 @@ public class Data extends HttpServlet implements Constants {
                 req.setAttribute("listaIndicatori", AuditCommand.compare((ArrayList<InterviewBean>) processElements.get(TIPI_LISTE[4])));
                 // Output in formato di default
                 fileJsp = nomeFileProcessoAjax;
-            // Gestione estrazione strutture ("data?q=st")
-            } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
-                // Verifica se deve servire un output csv
-                if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
-                    // Strutture estratte in base alla rilevazione
-                    lista = retrieve(req, COMMAND_STRUCTURES);
-                    // Passaggio in request per uso delle lista
-                    req.setAttribute("listaOrganigramma", lista);
-                    // Genera il file CSV
-                    makeCSV(req, res, COMMAND_STRUCTURES);
-                    // Esce
-                    return;
-                }/* inserire qui il codice invocato sulla richiesta asincrona
-                // Processi estratti in base alla struttura
-                lista = retrieve(req, COMMAND_STRUCTURES);
-                req.setAttribute("listaProcessi", lista);
-                // Persone estratte in base al processo
-                //lista = retrieve(req, Query.COMMAND_PERSON);
-                //req.setAttribute("listaPersone", lista);
-                // Output in formato di default
-                fileJsp = nomeFileProcessiStruttureAjax;
-                 */
             } else {
                 String msg = FOR_NAME + "Valore del parametro \'q\' (" + qToken + ") non consentito. Impossibile visualizzare i risultati.\n";
                 log.severe(msg);
@@ -292,9 +258,7 @@ public class Data extends HttpServlet implements Constants {
         } catch (CommandException ce) {
             throw new ServletException(FOR_NAME + "Problema nel recupero dei dati richiesti.\n" + ce.getMessage(), ce);
         }
-        /*
-         * Forworda la richiesta, esito finale di tutto
-         */
+        // Forworda la richiesta, esito finale di tutto
         RequestDispatcher dispatcher = servletContext.getRequestDispatcher(fileJsp);
         dispatcher.forward(req, res);
     }
@@ -793,7 +757,7 @@ public class Data extends HttpServlet implements Constants {
              * ************************************************************ */
             try {
                 // Recupera i macro at da Request
-                ArrayList<ItemBean> list = (ArrayList<ItemBean>) req.getAttribute("listaProcessi");
+                ArrayList<ItemBean> list = (ArrayList<ItemBean>) req.getAttribute("lista");
                 // Scrittura file CSV
                 StringBuffer headers = new StringBuffer("N." + SEPARATOR)
                         .append("Codice Area Rischio").append(SEPARATOR)
@@ -850,7 +814,7 @@ public class Data extends HttpServlet implements Constants {
          * **************************************************************** */
         else if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_STRUCTURES)) {
             try {
-                ArrayList<ItemBean> l = (ArrayList<ItemBean>) req.getAttribute("listaOrganigramma");
+                ArrayList<ItemBean> l = (ArrayList<ItemBean>) req.getAttribute("lista");
                 // Scrittura file CSV
                 out.println("N." + SEPARATOR +
                             "Struttura liv.1" + SEPARATOR +
