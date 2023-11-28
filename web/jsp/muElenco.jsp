@@ -13,7 +13,7 @@
               <i class="fa-solid fa-table fa-4x"></i>&nbsp;&nbsp;
               <i class="fas fa-cogs fa-4x"></i>&nbsp;&nbsp;
               <!-- <i class="fa-solid fa-triangle-exclamation fa-4x"></i>&nbsp;&nbsp;  -->
-              Report processi e rischi
+              Report P x I
             </div>
             <div class="card-footer d-flex align-items-center justify-content-between">
               <a class="small stretched-link" href="${mro}">Vai</a>
