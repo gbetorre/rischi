@@ -239,7 +239,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                          * ************************************************ */
                         // Ha bisogno di personalizzare le breadcrumbs
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report processi");
+                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report PxI");
                     }
                     else if (part.equalsIgnoreCase(PART_SELECT_STR)) {
                         /* ************************************************ *
@@ -319,7 +319,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      * <p>Seleziona da database i valori degli indicatori di rischio tramite una
      * estrazione dati.</p>
      * <p>Ricevuta una ArrayList (albero, vista gerarchica)
-     * di tutti macroprocessi censiti dall'anticorruzione 
+     * di tutti macroprocessi censiti a fini anticorruttivi
      * trovati in base a una rilevazione il cui identificativo 
      * viene accettato come argomento, ma i cui figli non contengono
      * i valori degli indicatori di rischio totalizzati, 
@@ -435,7 +435,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
     
     /**
      * <p>Ricevuta una ArrayList (albero, vista gerarchica)
-     * di tutti macroprocessi censiti dall'anticorruzione 
+     * di tutti macroprocessi censiti a fini anticorruttivi
      * nel contesto di una rilevazione, i cui figli non contengono
      * al proprio interno le fasi (e tantomeno, queste, le strutture 
      * che le erogano), restituisce una mappa di strutture associate a ciascun
@@ -474,7 +474,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
 
     /**
      * <p>Ricevuta una ArrayList (albero, vista gerarchica)
-     * di tutti macroprocessi censiti dall'anticorruzione 
+     * di tutti macroprocessi censiti a fini anticorruttivi 
      * nel contesto di una rilevazione, i cui figli non contengono
      * al proprio interno le fasi (e tantomeno, queste, i soggetti contingenti 
      * che le sovrintendono), restituisce una mappa di soggetti associati 
@@ -515,7 +515,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
     
    /**
     * <p>Ricevuta una ArrayList (albero, vista gerarchica)
-    * di tutti macroprocessi censiti dall'anticorruzione 
+    * di tutti macroprocessi censiti a fini anticorruttivi
     * trovati in base a una rilevazione il cui identificativo 
     * viene accettato come argomento, ma i cui figli non contengono
     * al proprio interno i rischi, restituisce una mappa di rischi 
