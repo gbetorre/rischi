@@ -8,7 +8,7 @@
 <c:set var="subjs" value="${requestScope.soggetti}" scope="page" />
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
     <h3 class="mt-1 m-0 font-weight-bold float-left">Report strutture e rischi</h3>
-    <a href="javascript:openWin('?q=mu&p=str&r=AT2022&out=pop')" class="float-right badge badge-pill lightTable bgAct18" title="Scarica il report in formato RTF">
+    <a href="${mtrRTF}" class="float-right badge badge-pill lightTable bgAct18" title="Scarica il report in formato RTF">
       <i class="fas fa-download"></i>Scarica tutti i dati
     </a>
     <hr class="riga"/>
