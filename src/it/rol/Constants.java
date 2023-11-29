@@ -166,6 +166,10 @@ public interface Constants extends Serializable {
      */
     public static final String COMMAND_AUDIT            = "in";
     /**
+     * <p>Costante per il parametro identificante la Command della reportistica.</p>
+     */
+    public static final String COMMAND_REPORT           = "mu";
+    /**
      * <p>Costante per il parametro identificante la parte dei macroprocessi.</p>
      */
     public static final String PART_MACROPROCESS        = "mac";
@@ -261,7 +265,7 @@ public interface Constants extends Serializable {
      * <dd>Lista Interviste</dd></dl>
      * </p>
      */
-    static final String[] TIPI_LISTE = {"I", "F", "O", "R", "V"};
+    static final String[] TIPI_LISTE = {"I", "F", "O", "R", "V", "M", "S", "T"};
     /**
      * <p>Valori possibili degli attributi probabilita, impatto, livello di rischio.</p>
      */
@@ -442,6 +446,10 @@ public interface Constants extends Serializable {
      */
     public static final String CSV = "csv";
     /**
+     * Costante per il formato di file "Rich Text Format"
+     */
+    public static final String RTF = "rtf";
+    /**
      * Costante per il formato di file "JavaScript Object Notation"
      */
     public static final String JSON = "json";
@@ -477,6 +485,10 @@ public interface Constants extends Serializable {
      * Costante per i nomi di estrazioni dati registro rischi corruttivi
      */
     public static final String RISKS = "registrorischi";
+    /**
+     * Costante per i nomi di estrazioni dati "tabella MDM"
+     */
+    public static final String REPORT_MDM = "report_mdm";
     /* ************************************************************************ *
      * Costanti di tempo (p.es. formati di data, date significative, etc.) *
      * ************************************************************************ */
