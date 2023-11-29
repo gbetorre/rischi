@@ -383,6 +383,7 @@ public class ConfigManager extends HttpServlet {
         labels.put(Constants.COMMAND_STRUCTURES, Constants.STRUCTURES);
         labels.put(Constants.COMMAND_PROCESS, Constants.PROCESS);
         labels.put(Constants.COMMAND_RISK, Constants.RISKS);
+        labels.put(Constants.COMMAND_REPORT, Constants.REPORT_MDM);
     }
 
 
