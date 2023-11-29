@@ -38,11 +38,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Time;
 import java.util.AbstractList;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -58,6 +61,7 @@ import javax.servlet.http.HttpSession;
 import com.oreilly.servlet.ParameterParser;
 
 import it.rol.bean.ActivityBean;
+import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
@@ -68,6 +72,7 @@ import it.rol.bean.RiskBean;
 import it.rol.command.AuditCommand;
 import it.rol.command.DepartmentCommand;
 import it.rol.command.ProcessCommand;
+import it.rol.command.ReportCommand;
 import it.rol.command.RiskCommand;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
@@ -212,6 +217,8 @@ public class Data extends HttpServlet implements Constants {
         LinkedList<String> csvCommands = new LinkedList<>();
         // Struttura da restituire in Request
         AbstractList<?> lista = null;
+        // Mappa da restituire in Request
+        AbstractMap<?,?> mappa = null;
         // Message
         log.info("===> Log su servlet Data. <===");
         // Decodifica la richiesta
@@ -221,20 +228,45 @@ public class Data extends HttpServlet implements Constants {
             csvCommands.add(COMMAND_STRUCTURES);//Estrazione strutture  ("data?q=st")
             csvCommands.add(COMMAND_AUDIT);     //Estrazione interviste ("data?q=in")
             csvCommands.add(COMMAND_RISK);      //Estrazione rischi     ("data?q=ri")
-            // Verifica se deve servire un output csv
-            if (format != null && !format.isEmpty() && format.equalsIgnoreCase(CSV)) {
-                // Verifica che la Command invocata sia abilitata a gestire output csv
-                if (csvCommands.contains(qToken)) {
-                    // Recupero elementi in base alla richiesta
-                    lista = retrieve(req, qToken);
-                    // Passaggio in request per uso delle lista
-                    req.setAttribute("lista", lista);
-                    // Assegnazione di un valore di default se il parametro 'p' è nullo
-                    String key = (part == null ? qToken : part);
-                    // Genera il file CSV
-                    makeCSV(req, res, key);
-                    // Ha finito
-                    return;
+            // Verifica se deve servire un output su file
+            if (format != null && !format.isEmpty()) {
+                // Output è Comma Separated Values
+                if (format.equalsIgnoreCase(CSV)) {
+                    // Verifica che la Command invocata sia abilitata a gestire output csv
+                    if (csvCommands.contains(qToken)) {
+                        // Recupero elementi in base alla richiesta
+                        lista = retrieve(req, qToken);
+                        // Passaggio in request per uso delle lista
+                        req.setAttribute("lista", lista);
+                        // Assegnazione di un valore di default se il parametro 'p' è nullo
+                        String key = (part == null ? qToken : part);
+                        // Genera il file CSV
+                        makeCSV(req, res, key);
+                        // Ha finito
+                        return;
+                    }
+                }
+                // Output è Rich Text Format
+                else if (format.equalsIgnoreCase(RTF)) {
+                    // Al momento l'unica Command abilitata a gestire output rtf
+                    if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
+                        // Recupero elementi in base alla richiesta
+                        mappa = retrieve(req, qToken, part, format);
+                        // Passaggio in request per uso delle lista
+                        req.setAttribute("lista", mappa);
+                        // Assegnazione di un valore di default se il parametro 'p' è nullo
+                        String key = (part == null ? qToken : part);
+                        // Genera il file RTF
+                        makeRTF(req, res, key);
+                        // Ha finito
+                        return;
+                    }
+                }
+                // Valore del parametro 'out' non ammesso
+                else {
+                    String msg = FOR_NAME + "Valore del parametro \'out\' (" + format + ") non consentito. Impossibile visualizzare i risultati.\n";
+                    log.severe(msg);
+                    throw new ServletException(msg);
                 }
             }
             // Se non è uscito, vuol dire che deve servire una richiesta asincrona
@@ -468,6 +500,80 @@ public class Data extends HttpServlet implements Constants {
         return list;
     }
     
+    
+    /**
+     * <p>Restituisce una mappa contenente elenchi di elementi generici 
+     * (macroprocessi, rischi, strutture...) estratti in base alla richiesta
+     * e indicizzati per una chiave convenzionale, definita nelle costanti.</p>
+     *
+     * @param req HttpServletRequest contenente i parametri per contestualizzare l'estrazione
+     * @param qToken il token della commmand in base al quale bisogna preparare la lista di elementi
+     * @param pToken il token relativo alla parte di gestione da effettuare
+     * @return <code>HashMap&lt;String,ArrayList&lt;?&gt;&gt; - dictionary contenente le liste di elementi desiderati, indicizzati per una chiave convenzionale
+     * @throws CommandException se si verifica un problema nella WebStorage (DBWrapper), nella Command interpellata, o in qualche puntamento
+     */
+    private static HashMap<String, HashMap<Integer, ?>> retrieve(HttpServletRequest req,
+                                                          String qToken,
+                                                          String pToken,
+                                                          String out)
+                                                   throws CommandException {
+        // Dichiara generico elenco di elementi da restituire
+        HashMap<String, HashMap<Integer, ?>> list = null;
+        // Ottiene i parametri della richiesta
+        ParameterParser parser = new ParameterParser(req);
+        // Recupera o inizializza parametro per identificare la pagina
+        String part = parser.getStringParameter("p", VOID_STRING);
+        // Recupera o inizializza parametro per identificare la rilevazione
+        String codeSurvey = parser.getStringParameter("r", VOID_STRING);
+        // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
+        HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
+        PersonBean user = (PersonBean) ses.getAttribute("usr");
+        if (user == null) {
+            throw new CommandException(FOR_NAME + "Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+        }
+        // Gestisce la richiesta
+        try {
+            // Istanzia nuovo Databound
+            DBWrapper db = new DBWrapper();
+            // "data?q=mu"
+            if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
+                // "&p=str"
+                if (part.equalsIgnoreCase(PART_SELECT_STR)) {
+                    // Bisogna recuperare processi...
+                    ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSurvey, db);
+                    // ...e indicatori
+                    ArrayList<ProcessBean> matsWithIndicators = ReportCommand.retrieveIndicators(matsWithoutIndicators, user, codeSurvey, db);
+                    // Trasforma processi e indicatori in una HashMap per rispettare il tipo
+                    HashMap<Integer, ArrayList<ProcessBean>> listaMacroAt = new HashMap<>();
+                    // Carica processi e indicatori
+                    listaMacroAt.put(new Integer(NOTHING), matsWithIndicators);
+                    // Recupera le strutture indicizzate per identificativo di processo
+                    HashMap<Integer, ArrayList<DepartmentBean>> listaStrutture = ReportCommand.retrieveStructures(matsWithoutIndicators, user, codeSurvey, db);
+                    // Recupera i soggetti indicizzati per identificativo di processo
+                    HashMap<Integer, ArrayList<DepartmentBean>> listaSoggetti = ReportCommand.retrieveSubjects(matsWithoutIndicators, user, codeSurvey, db);
+                    // Recupera i rischi indicizzati per identificativo di processo
+                    HashMap<Integer, ArrayList<RiskBean>> listaRischi = ReportCommand.retrieveRisks(matsWithoutIndicators, user, codeSurvey, db);
+                    // Istanzia la mappa in cui devono essere settate le liste
+                    list = new HashMap<>();
+                    // Imposta nella mappa le liste trovate
+                    list.put(TIPI_LISTE[3], listaRischi);
+                    list.put(TIPI_LISTE[5], listaMacroAt);
+                    list.put(TIPI_LISTE[6], listaStrutture);
+                    list.put(TIPI_LISTE[7], listaSoggetti);
+                }
+            }
+        } catch (CommandException ce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + ce.getLocalizedMessage();
+            log.severe(msg);
+            throw new CommandException(msg);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getLocalizedMessage();
+            log.severe(msg);
+            throw new CommandException(msg);
+        }
+        return list;
+    }
+    
 
     /**
      * <p>Gestisce la generazione dell&apos;output in formato di uno stream CSV 
@@ -512,6 +618,34 @@ public class Data extends HttpServlet implements Constants {
         res.setCharacterEncoding("ISO-8859-1");
         // Configura l'header
         res.setHeader("Content-Disposition","attachment;filename=" + fileName + DOT + CSV);
+        // Stampa il file sullo standard output
+        fprintf(req, res);
+    }
+    
+    
+    /**
+     * <p>Gestisce la generazione dell&apos;output in formato di uno stream RTF 
+     * che sar&agrave; recepito come tale dal browser e trattato di conseguenza 
+     * (normalmente, ma non necessariamente, con il download).</p>
+     * <p>Usa altri metodi, interni, per ottenere il nome del file, che dev&apos;essere un
+     * nome univoco, e per la stampa vera e propria nel PrintWriter.</p>
+     *
+     * @param req HttpServletRequest da passare al metodo di stampa
+     * @param res HttpServletResponse per impostarvi i valori che la predispongono a servire csv anziche' html
+     * @param qToken token della commmand in base al quale bisogna preparare la lista di elementi
+     * @throws ServletException eccezione eventualmente proveniente dalla fprinf, da propagare
+     * @throws IOException  eccezione eventualmente proveniente dalla fprinf, da propagare
+     */
+    private static void makeRTF(HttpServletRequest req, HttpServletResponse res, String qToken)
+                         throws ServletException, IOException {
+        // Genera un nome univoco per il file che verrà servito
+        String fileName = makeFilename(COMMAND_REPORT);
+        // Configura il response per il browser
+        res.setContentType("application/rtf");
+        // Configura il characterEncoding (v. commento)
+        res.setCharacterEncoding("ISO-8859-1");
+        // Configura l'header
+        res.setHeader("Content-Disposition","attachment;filename=" + fileName + DOT + RTF);
         // Stampa il file sullo standard output
         fprintf(req, res);
     }
@@ -846,6 +980,65 @@ public class Data extends HttpServlet implements Constants {
                     } while (itCounts < l.size());
                     success = itCounts;
                 }
+            } catch (RuntimeException re) {
+                log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco delle strutture in organigramma.\n" + re.getMessage());
+                out.println(re.getMessage());
+            } catch (Exception e) {
+                log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
+                out.println(e.getMessage());
+            }
+        }
+        /* **************************************************************** *
+         *          Contenuto files RTF per processi e indicatori           *
+         * **************************************************************** */
+        else if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_REPORT)) {
+            try {
+                HashMap<String, HashMap<Integer, ArrayList<?>>> m = (HashMap<String, HashMap<Integer, ArrayList<?>>>) req.getAttribute("mappa");
+                // Preprazione file RTF
+                String header = "{\\rtf1 \\ansi \\ansicpg1252\\deff0\\nouicompat\\deflang1040{\\fonttbl{\\f0\\froman\\fprq2\\fcharset0 Times New Roman;}{\\f1\\fswiss\\fprq2\\fcharset0 Calibri;}{\\f2\\fnil\\fcharset0 Calibri;}}" +
+                                "{\\colortbl ;\\red255\\green255\\blue0;\\red255\\green0\\blue0;}" +
+                                    "{\\*\\generator Riched20 10.0.19041}\\viewkind4\\uc1\\trowd\\trgaph70\\trleft5\\trqc\\trbrdrl\\brdrs\\brdrw10 \\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n"
+                                    + "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx10186 \n"
+                                    + "\\pard\\intbl\\widctlpar\\qc\\b\\f1\\fs22 Area di rischio\\cell Macroprocesso\\cell Processo\\cell Rischi Potenziali\\cell Strutture\\cell Soggetti\\cell Giudizio sintetico\\cell\\row\\trowd\\trgaph70\\trleft5\\trqc\\trrh5103\\trbrdrl\\brdrs\\brdrw10 \\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n"
+                                    + "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx10186 \n"
+                                    + "\\pard\\intbl\\widctlpar\\qc\\b0 CONTRATTI PUBBLICI\\cell AFFIDAMENTO DI LAVORI, SERVIZI E FORNITURE SOTTOSOGLIA\\cell Affidamento e stipula del contratto\\cell \n"
+                                    + "\\pard\\intbl\\widctlpar\\sl240\\slmult1{\\pict{\\*\\picprop}\\wmetafile8\\picw847\\pich847\\picwgoal288\\pichgoal288 " +
+                                    "} Assenza di rotazione degli operatori economici consultati o chiamati\\par\n"
+                                    + "\n"
+                                    + "\\pard\\intbl\\widctlpar\\par\n"
+                                    + "- Verifica incompleta o non sufficientemente approfondita al fine di favorire un aggiudicatario privo dei requisiti richiesti dalla legge e dal bando\\par\n"
+                                    + "\\par\n"
+                                    + "- n rischi\\'85\\cell - Direzione TECNICA, GARE-ACQUISTI E LOGISTICA\\par\n"
+                                    + "\n"
+                                    + "\\pard\\intbl\\widctlpar\\qc\\par\n"
+                                    + "\n"
+                                    + "\\pard\\intbl\\widctlpar - Area Acquisti\\par\n"
+                                    + "\\par\n"
+                                    + "-n. strutture..\\cell - Rettore (con il supporto dell\\rquote UO Dottorati e Assegni di Ricerca)\\par\n"
+                                    + "\n"
+                                    + "\\pard\\intbl\\widctlpar\\qc\\par\n"
+                                    + "\n"
+                                    + "\\pard\\intbl\\widctlpar - Ufficiale Rogante (con il supporto dell\\rquote UO competente per materia)\\par\n"
+                                    + "\\par\n"
+                                    + "-n. soggetti\\'85\\cell \n"
+                                    + "\\pard\\intbl\\widctlpar\\qc\\highlight1 MEDIO\\cell\\row\\trowd\\trgaph70\\trleft5\\trqc\\trbrdrl\\brdrs\\brdrw10 \\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n"
+                                    + "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx10186 \n"
+                                    + "\\pard\\intbl\\widctlpar\\qc\\highlight0 INCARICHI, NOMINE E COLLABORAZIONI\\cell SOVVENZIONI, CONTRIBUTI E AGEVOLAZIONI\\cell Erogazione benefici socio-assistenziali\\cell Verifiche o istruttorie carenti\\cell Direzione OFFERTA FORMATIVA, SERVIZI E SEGRETERIE STUDENTI\\cell\\cell\\highlight2 ALTO\\highlight0\\cell\\row\\trowd\\trgaph70\\trleft5\\trqc\\trbrdrl\\brdrs\\brdrw10 \\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n"
+                                    + "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx10186 \n"
+                                    + "\\pard\\intbl\\widctlpar\\qc Etc..\\cell\\cell\\cell\\cell\\cell\\cell\\cell\\row \n"
+                                    + "\\pard\\sa200\\sl276\\slmult1\\f2\\lang16\\par\n"
+                                    + "}\n"
+                                    + "";
+                StringBuffer content = new StringBuffer(header);
+
+                    content.append("\\par}");
+                    content.append("\\qj \\f0 \\fs26 ");
+                    content.append("\\par}");
+                content.append("}");
+                // Stampa il contenuto del file
+                out.println(String.valueOf(content));
+
+
             } catch (RuntimeException re) {
                 log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco delle strutture in organigramma.\n" + re.getMessage());
                 out.println(re.getMessage());
