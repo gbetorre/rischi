@@ -324,7 +324,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
-- [1.5.8] (29/12/2023) Predisposizione alla generazione di output su file RTF; correzioni nelle transcodifiche dei fine riga
+- [1.5.8] (29/11/2023) Predisposizione alla generazione di output su file RTF; correzioni nelle transcodifiche dei fine riga
 - [1.5.7] (28/11/2023) Riscritto codice per la produzione di output diversi da html sincrono; revisione di etichette
 - [1.5.6] (27/11/2023) Implementato calcolo dimensione I (impatto del rischio) e della combinazione di P ed I (indice PxI)
 - [1.5.5] (20/11/2023) Aggiunto calcolo dimensione P (probabilit&agrave; del rischio)
