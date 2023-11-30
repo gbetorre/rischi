@@ -320,10 +320,10 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.6.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [1.6.4] Implementata form di ricerca sui quesiti per chiave testuale
 - [1.6.0] (  /12/2023) 
-- [1.5.9] (  /12/2023) 
 
 ### Done
 -->
+- [1.5.9] (30/11/2023) Raffinato algoritmo di calcolo indicatore I3 tenendo conto dell'interessamento di categorie globali di strutture e considerando non determinabili i casi in cui non risultano n&eacute; strutture n&eacute; soggetti associati alle fasi del processo (un processo &egrave; sempre funzione dell'attivit&agrave; di almeno una struttura o un soggetto contingente) 
 - [1.5.8] (29/11/2023) Predisposizione alla generazione di output su file RTF; correzioni nelle transcodifiche dei fine riga
 - [1.5.7] (28/11/2023) Riscritto codice per la produzione di output diversi da html sincrono; revisione di etichette
 - [1.5.6] (27/11/2023) Implementato calcolo dimensione I (impatto del rischio) e della combinazione di P ed I (indice PxI)
