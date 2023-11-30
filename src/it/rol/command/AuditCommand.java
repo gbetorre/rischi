@@ -2203,6 +2203,11 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * il valore di ogni indicatore viene calcolato in un metodo dedicato.
      * Questo &egrave; l'unico indicatore che non dipende dai quesiti
      * ma si basa solo sul numero di strutture e soggetti terzi coinvolti.</p>
+     * <p>Se risultano esserci zero strutture E zero soggetti terzi coinvolti,
+     * restituisce errore (indicatore non determinabile) in quanto non &egrave; 
+     * possibile che nessuna struttura e nessun soggetto siano interessati da un
+     * processo, un processo &egrave; sempre erogato dall'attività di una struttura 
+     * o almeno di un soggetto terzo.</p>
      * 
      * @param structsByProcess  lista vettoriale di strutture collegate a un determinato processo tramite le sue fasi
      * @param subjectsByProcess lista vettoriale di soggetti (terzi aka contingenti aka interessati), collegati a un determinato processo tramite le sue fasi
@@ -2220,17 +2225,45 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             String result = null;
             // Memorizza il tipo dell'indicatore corrente
             extraInfo.setTipo(I);
-            // Calcolo del valore dell'indicatore
-            if (structsByProcess.size() >= ELEMENT_LEV_3) {
-                result = LIVELLI_RISCHIO[3];
+            // Flag di "tutte le direzioni..."
+            boolean allDirections = false;
+            // Controlla prima se c'è un soggetto pari a "tutte le strutture..."
+            for (DepartmentBean s : subjectsByProcess) {
+                switch(s.getId()) {
+                    case 13: 
+                        allDirections = true;
+                        break;
+                    case 14:
+                        allDirections = true;
+                        break;
+                    case 15:
+                        allDirections = true;
+                        break;
+                    default:
+                        allDirections = false;
+                }
+            }
+            // Non è possibile che ci siano 0 strutture AND 0 soggetti coinvolti
+            if (structsByProcess.size() == NOTHING && subjectsByProcess.size() == NOTHING) {
+                result = ERR;
+                extraInfo.setDescrizioneStatoCorrente("Non &egrave; possibile che non ci siano n&eacute; strutture n&eacute; soggetti coinvolti nelle fasi del processo");
             } else {
-                if (structsByProcess.size() == ELEMENT_LEV_2) {
-                    result = LIVELLI_RISCHIO[2];
+                // Calcolo del valore dell'indicatore
+                if (allDirections) {
+                    result = LIVELLI_RISCHIO[3];
                 } else {
-                    if (subjectsByProcess.size() >= ELEMENT_LEV_3) {
-                        result = LIVELLI_RISCHIO[2];
+                    if (structsByProcess.size() >= ELEMENT_LEV_3) {
+                        result = LIVELLI_RISCHIO[3];
                     } else {
-                        result = LIVELLI_RISCHIO[1];
+                        if (structsByProcess.size() == ELEMENT_LEV_2) {
+                            result = LIVELLI_RISCHIO[2];
+                        } else {
+                            if (subjectsByProcess.size() >= ELEMENT_LEV_3) {
+                                result = LIVELLI_RISCHIO[2];
+                            } else {
+                                result = LIVELLI_RISCHIO[1];
+                            }
+                        }
                     }
                 }
             }
