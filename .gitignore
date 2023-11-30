@@ -32,3 +32,15 @@ hs_err_pid*
 
 # Scripts
 /Script
+copiaRol.sh
+rol_compile.bat
+
+# Classes
+/classes/
+/classes/it
+
+# Settings
+/.settings
+
+
+
