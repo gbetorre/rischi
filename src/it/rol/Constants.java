@@ -260,9 +260,16 @@ public interface Constants extends Serializable {
      * <dt>O</dt>
      * <dd>Lista Output</dd>
      * <dt>R</dt>
-     * <dd>Lista Rischi</dd></dl>
+     * <dd>Lista Rischi</dd>
      * <dt>V</dt>
-     * <dd>Lista Interviste</dd></dl>
+     * <dd>Lista Interviste (V = View)</dd>
+     * <dt>M</dt>
+     * <dd>Lista Macroprocessi AT</dd>
+     * <dt>S</dt>
+     * <dd>Lista Strutture</dd>
+     * <dt>T</dt>
+     * <dd>Lista Soggetti Interessati (o Terzi = T)</dd>
+     * </dl>
      * </p>
      */
     static final String[] TIPI_LISTE = {"I", "F", "O", "R", "V", "M", "S", "T"};
@@ -331,11 +338,11 @@ public interface Constants extends Serializable {
      */
     static final String ERR = "Non determinabile";
     /**
-     * <p>Lista contenente i possibili valori dell'attributo stato della classe RiskBean.</p>
+     * <p>Lista contenente i possibili valori dell'attributo stato di struttura.</p>
      */
     public static final LinkedList<String> STATI_STRUTTURA_AS_LIST = new LinkedList<>(Arrays.asList(STATI_STRUTTURA));
     /**
-     * <p>Lista contenente i possibili valori degli attributi probabilita, impatto, livello della classe RiskBean.</p>
+     * <p>Lista contenente i possibili valori degli attributi probabilita, impatto, livello di rischio.</p>
      */
     public static final LinkedList<String> LIVELLI_RISCHIO_AS_LIST = new LinkedList<>(Arrays.asList(LIVELLI_RISCHIO));
     /* ************************************************************************ *
@@ -343,7 +350,7 @@ public interface Constants extends Serializable {
      * ************************************************************************ */
     /**
      * <p>Costante da utilizzare quando serve uno spazio (l'equivalente,
-     * in java, dell'html &quot;&nbsp;&quot;), generalmente usato
+     * in Java, dell'html &quot;&nbsp;&quot;), generalmente usato
      * per separare pi&uacute; sottostostringhe in una stringa
      * da restituire come valore oppure messaggio.</p>
      */
@@ -381,6 +388,10 @@ public interface Constants extends Serializable {
      */
     public static final char APOSTROPHE = '\'';
     /**
+     * Costante per far riferimento al carattere di virgoletta doppia
+     */
+    public static final char QUOTE = '\"';
+    /**
      * Costante per far riferimento al carattere di percentuale
      */
     public static final char PER_CENT = '%';
@@ -388,6 +399,14 @@ public interface Constants extends Serializable {
      * Costante per far riferimento al carattere tipografico di virgoletta inglese
      */
     public static final char ENGLISH_SINGLE_QUOTE = '’';
+    /**
+     * Costante per il carattere tipografico di doppie virgolette inglesi aperte
+     */
+    public static final char ENGLISH_DOUBLE_QUOTE_OPEN = '“';
+    /**
+     * Costante per il carattere tipografico di doppie virgolette inglesi chiuse
+     */   
+    public static final char ENGLISH_DOUBLE_QUOTE_CLOSE = '”';
     /**
      * <p>Costante da utilizzare quando serve un valore per inizializzazione,
      * o da utilizzare come argomento, per effettuare test, etc.</p>
@@ -545,7 +564,7 @@ public interface Constants extends Serializable {
      * a 32 bit, &egrave; il massimo computabile. Per sistemi del genere,
      * il successivo secondo sar&agrave; interpretato come:
      * 00:00:00 1 January 1970 UTC
-     * (quindi, in pratica, gli orologi verranno resettati a UNIX EPOCH).
+     * (quindi, in pratica, gli orologi dei sistemi a 32 bit verranno resettati a UNIX EPOCH).
      */
     public static final String THE_END_OF_TIME = "2106-02-07";
 
