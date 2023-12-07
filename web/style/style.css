@@ -560,6 +560,10 @@ select:disabled.bgcolor3 {
   background-color: #ffc;
 }
 
+.bgcolor-minimo {
+  background-image: linear-gradient(to right, #ffffff, #99ccff);
+}
+
 .bgcolor-basso {
   background-image: linear-gradient(to right, #ffffff, #99ff66);
 }
