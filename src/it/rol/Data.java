@@ -42,10 +42,8 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -61,7 +59,6 @@ import javax.servlet.http.HttpSession;
 import com.oreilly.servlet.ParameterParser;
 
 import it.rol.bean.ActivityBean;
-import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
@@ -151,7 +148,7 @@ public class Data extends HttpServlet implements Constants {
      * Nome di questa classe
      * (viene utilizzato per contestualizzare i messaggi di errore)
      */
-    private static final String FOR_NAME = "\n" + Logger.getLogger(Data.class.getName()) + ": ";
+    private static final String FOR_NAME = "\n" + Logger.getLogger(Data.class.getName()) + COLON + BLANK_SPACE;
     /**
      * Logger della classe per scrivere i messaggi di errore.
      * All logging goes through this logger.
@@ -174,9 +171,66 @@ public class Data extends HttpServlet implements Constants {
      */
     private static final String nomeFileProcessoAjax = "/jsp/prProcessoAjax.jsp";
     /**
-     * Pagina a cui la command reindirizza per mostrare i processi nel contesto di una struttura
+     * Codifica esadecimale di un'immagine di corredo
      */
-    //private static final String nomeFileProcessiStruttureAjax = "/jsp/stElencoAjax.jsp";
+    private static final String CAUTION_EXCLAMATION_MARK_SIGN_TRIANGLE = 
+        "0100090000034a04000000002104000000000400000003010800050000000b0200000000050000\n" + 
+        "000c0220002000030000001e000400000007010400040000000701040021040000410b2000cc00\n" + 
+        "200020000000000020002000000000002800000020000000200000000100080000000000000000\n" + 
+        "000000000000000000000000000000000000000000ffffff00fcfbfb00eae9e900e7e6e5007c77\n" + 
+        "7200403a3300f6f6f6006e696300201810002e261f002d261e00b1aeac00261e17003f393200c8\n" + 
+        "c6c400c5c3c100b6b3b000efefee0058524c0099959100989490005b554f00f0f0ef00a4a19e00\n" + 
+        "211911004e484200e8e7e7004d464000221a1200a9a6a3004a433d00aaa7a4004b443e0094908d\n" + 
+        "005b56500057514b00dddcda00271f1700bab7b500f2f1f100f3f2f200b3b0ad00fefefe008682\n" + 
+        "7e006b666100f7f7f7006a656000f5f5f500645f5900d0cecc00352e2600e5e4e30038312a00c0\n" + 
+        "bebc002b241c00d1cfcd0075706b0078736f00fbfafa00726d680079747000fbfbfb00c3c0be00\n" + 
+        "37302800d3d2d000cecccb00332c250089858000fdfdfd00807c770069635e00d9d8d7003c352e\n" + 
+        "00b7b5b20059534d008d898500a6a39f004d474100e3e2e100463f3800e7e7e6004c453f009c99\n" + 
+        "950095918e006c676200f4f3f300ecebea00524c4500dedddb00413a3400b9b7b400231b130069\n" + 
+        "645f00eeedec00eeeeed005d57520087837f00362f2700c4c2c000b0adab0048423b0049433c00\n" + 
+        "28201800d2d0ce0077736e00edeceb00f8f8f8007a7571002f272000c7c5c300fafaf9006d6862\n" + 
+        "0088848000b6b4b10076716c00716c6700e4e3e20030282100d5d4d200cbc9c70029211900adaa\n" + 
+        "a700e6e5e400231c14002a221a009a96920096928f0047413a0000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000\n" + 
+        "000000000000000000000000000000000000000000000000000000010101010101010101010101\n" + 
+        "010101010101010101010101010101010101010101012b5e343434343434343434343434343434\n" + 
+        "3434343434343434345f2b010101567f8035353535353535353535353535353535353535353535\n" + 
+        "35356614560101225c7d353535353535353535353535353535353535353535353535265c7e0157\n" + 
+        "21797a04343434343434343434347b7b343434343434343434347b537c5257750e767701010101\n" + 
+        "0101010101012b5f122b0101010101010101010178370e756f7009712b0101010101010101012a\n" + 
+        "661f72010101010101010101027309746f01630a626801010101010101015e210909215e010101\n" + 
+        "0101010101106d0a6e01010239096902010101010101016a1f09091f6a010101010101016b2d09\n" + 
+        "6c0201010138620b6301010101010101016465662a010101010101010127676268010101012b2c\n" + 
+        "095d07010101010101012b5e5f2b01010101010101286009612b0101010101595a265b01010101\n" + 
+        "0101010156560101010101010101205c5a590101010101010154091617010101010101292d5556\n" + 
+        "01010101010157580914010101010101010151521d1e0101010101013435353401010101010153\n" + 
+        "091c510101010101010101014d1d4e1b01010101013435353401010101014f501d200101010101\n" + 
+        "0101010101174b091401010101013435353401010101014c09231701010101010101010101012a\n" + 
+        "0d06250101010134353534010101014849264a0101010101010101010101010731094401010101\n" + 
+        "343535340101014546094707010101010101010101010101013f0b404101010134353534010101\n" + 
+        "42430a1001010101010101010101010101010239093a0201013435353401013b3c093d3e010101\n" + 
+        "01010101010101010101010132330b100101343535340101363733380101010101010101010101\n" + 
+        "01010101012b2c092d2e01292f2d29013031092c2b010101010101010101010101010101010125\n" + 
+        "0626270101282901012a0d06250101010101010101010101010101010101010122092317010101\n" + 
+        "01122409140101010101010101010101010101010101010101041f1d2001010101181921040101\n" + 
+        "0101010101010101010101010101010101010118191a1b01011b1c1d1e01010101010101010101\n" + 
+        "010101010101010101010101121309140101150916170101010101010101010101010101010101\n" + 
+        "0101010101010c0d0e0f100e0d1101010101010101010101010101010101010101010101010107\n" + 
+        "08090a0b0908070101010101010101010101010101010101010101010101010104050606050401\n" + 
+        "010101010101010101010101010101010101010101010101010102030302010101010101010101\n" + 
+        "010101010101010101010101010101010101010101010101010101010101010101010101010400\n" + 
+        "00002701ffff030000000000\n";
 
 
     /**
@@ -262,11 +316,15 @@ public class Data extends HttpServlet implements Constants {
                         return;
                     }
                 }
-                // Valore del parametro 'out' non ammesso
+                // Output è in finestra di popup
                 else {
-                    String msg = FOR_NAME + "Valore del parametro \'out\' (" + format + ") non consentito. Impossibile visualizzare i risultati.\n";
-                    log.severe(msg);
-                    throw new ServletException(msg);
+                    // Ultimo valore ammesso: pop
+                    if (!format.equalsIgnoreCase("pop")) { 
+                        // Valore del parametro 'out' non ammesso
+                        String msg = FOR_NAME + "Valore del parametro \'out\' (" + format + ") non consentito. Impossibile visualizzare i risultati.\n";
+                        log.severe(msg);
+                        throw new ServletException(msg);
+                    }
                 }
             }
             // Se non è uscito, vuol dire che deve servire una richiesta asincrona
@@ -509,14 +567,15 @@ public class Data extends HttpServlet implements Constants {
      * @param req HttpServletRequest contenente i parametri per contestualizzare l'estrazione
      * @param qToken il token della commmand in base al quale bisogna preparare la lista di elementi
      * @param pToken il token relativo alla parte di gestione da effettuare
+     * @param out    parametro fittizio per consentire il polimorfismo
      * @return <code>HashMap&lt;String,ArrayList&lt;?&gt;&gt; - dictionary contenente le liste di elementi desiderati, indicizzati per una chiave convenzionale
      * @throws CommandException se si verifica un problema nella WebStorage (DBWrapper), nella Command interpellata, o in qualche puntamento
      */
     private static HashMap<String, HashMap<Integer, ?>> retrieve(HttpServletRequest req,
-                                                          String qToken,
-                                                          String pToken,
-                                                          String out)
-                                                   throws CommandException {
+                                                                 String qToken,
+                                                                 String pToken,
+                                                                 String out)
+                                                          throws CommandException {
         // Dichiara generico elenco di elementi da restituire
         HashMap<String, HashMap<Integer, ?>> list = null;
         // Ottiene i parametri della richiesta
@@ -944,103 +1003,153 @@ public class Data extends HttpServlet implements Constants {
             }
         }
         /* **************************************************************** *
-         *        Contenuto files CSV per strutture in organigramma         *
-         * **************************************************************** */
-        else if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_STRUCTURES)) {
-            try {
-                ArrayList<ItemBean> l = (ArrayList<ItemBean>) req.getAttribute("lista");
-                // Scrittura file CSV
-                out.println("N." + SEPARATOR +
-                            "Struttura liv.1" + SEPARATOR +
-                            "Struttura liv.2" + SEPARATOR +
-                            "Struttura liv.3" + SEPARATOR +
-                            "Struttura liv.4"
-                            );
-                if (l.size() > NOTHING) {
-                    int itCounts = NOTHING, record = NOTHING;
-                    do {
-                        ItemBean tupla = l.get(itCounts);
-                        String label_l2, label_l3, label_l4 = null;
-                        String uo_l2 = tupla.getExtraInfo();
-                        String uo_l3 = tupla.getLabelWeb();
-                        String uo_l4 = tupla.getPaginaJsp();
-                        if (uo_l4.equals(uo_l3)) {
-                            label_l4 = VOID_STRING;
-                        } else {
-                            label_l4 = uo_l4.replace(';', ' ');
-                        }
-                        out.println(
-                                    ++record + SEPARATOR +
-                                    tupla.getInformativa() + " " + SEPARATOR +
-                                    uo_l2.replace(';', ' ') + " " + SEPARATOR +
-                                    uo_l3.replace(';', ' ') + " " + SEPARATOR +
-                                    label_l4
-                                   );
-                        itCounts++;
-                    } while (itCounts < l.size());
-                    success = itCounts;
-                }
-            } catch (RuntimeException re) {
-                log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco delle strutture in organigramma.\n" + re.getMessage());
-                out.println(re.getMessage());
-            } catch (Exception e) {
-                log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
-                out.println(e.getMessage());
-            }
-        }
-        /* **************************************************************** *
          *          Contenuto files RTF per processi e indicatori           *
          * **************************************************************** */
         else if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_REPORT)) {
             try {
-                HashMap<String, HashMap<Integer, ArrayList<?>>> m = (HashMap<String, HashMap<Integer, ArrayList<?>>>) req.getAttribute("mappa");
+                Calendar now = Calendar.getInstance();
+                // Recupera mappa completa da Request
+                HashMap<String, HashMap<Integer, ArrayList<?>>> map = (HashMap<String, HashMap<Integer, ArrayList<?>>>) req.getAttribute("lista");
+                // Macroprocessi
+                ArrayList<ProcessBean> mats = (ArrayList<ProcessBean>) map.get(TIPI_LISTE[5]).get(Integer.valueOf(NOTHING));
+                // Rischi indicizzati per id processo_at
+                HashMap<Integer, ArrayList<?>> risks = map.get(TIPI_LISTE[3]);
+                // Strutture indicizzate per id processo_at
+                HashMap<Integer, ArrayList<?>> structs = map.get(TIPI_LISTE[6]);
+                // Soggetti contingenti indicizzati per id processo_at
+                HashMap<Integer, ArrayList<?>> subjects = map.get(TIPI_LISTE[7]);
                 // Preprazione file RTF
-                String header = "{\\rtf1 \\ansi \\ansicpg1252\\deff0\\nouicompat\\deflang1040{\\fonttbl{\\f0\\froman\\fprq2\\fcharset0 Times New Roman;}{\\f1\\fswiss\\fprq2\\fcharset0 Calibri;}{\\f2\\fnil\\fcharset0 Calibri;}}" +
-                                "{\\colortbl ;\\red255\\green255\\blue0;\\red255\\green0\\blue0;}" +
-                                    "{\\*\\generator Riched20 10.0.19041}\\viewkind4\\uc1\\trowd\\trgaph70\\trleft5\\trqc\\trbrdrl\\brdrs\\brdrw10 \\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n"
-                                    + "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx10186 \n"
-                                    + "\\pard\\intbl\\widctlpar\\qc\\b\\f1\\fs22 Area di rischio\\cell Macroprocesso\\cell Processo\\cell Rischi Potenziali\\cell Strutture\\cell Soggetti\\cell Giudizio sintetico\\cell\\row\\trowd\\trgaph70\\trleft5\\trqc\\trrh5103\\trbrdrl\\brdrs\\brdrw10 \\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n"
-                                    + "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx10186 \n"
-                                    + "\\pard\\intbl\\widctlpar\\qc\\b0 CONTRATTI PUBBLICI\\cell AFFIDAMENTO DI LAVORI, SERVIZI E FORNITURE SOTTOSOGLIA\\cell Affidamento e stipula del contratto\\cell \n"
-                                    + "\\pard\\intbl\\widctlpar\\sl240\\slmult1{\\pict{\\*\\picprop}\\wmetafile8\\picw847\\pich847\\picwgoal288\\pichgoal288 " +
-                                    "} Assenza di rotazione degli operatori economici consultati o chiamati\\par\n"
-                                    + "\n"
-                                    + "\\pard\\intbl\\widctlpar\\par\n"
-                                    + "- Verifica incompleta o non sufficientemente approfondita al fine di favorire un aggiudicatario privo dei requisiti richiesti dalla legge e dal bando\\par\n"
-                                    + "\\par\n"
-                                    + "- n rischi\\'85\\cell - Direzione TECNICA, GARE-ACQUISTI E LOGISTICA\\par\n"
-                                    + "\n"
-                                    + "\\pard\\intbl\\widctlpar\\qc\\par\n"
-                                    + "\n"
-                                    + "\\pard\\intbl\\widctlpar - Area Acquisti\\par\n"
-                                    + "\\par\n"
-                                    + "-n. strutture..\\cell - Rettore (con il supporto dell\\rquote UO Dottorati e Assegni di Ricerca)\\par\n"
-                                    + "\n"
-                                    + "\\pard\\intbl\\widctlpar\\qc\\par\n"
-                                    + "\n"
-                                    + "\\pard\\intbl\\widctlpar - Ufficiale Rogante (con il supporto dell\\rquote UO competente per materia)\\par\n"
-                                    + "\\par\n"
-                                    + "-n. soggetti\\'85\\cell \n"
-                                    + "\\pard\\intbl\\widctlpar\\qc\\highlight1 MEDIO\\cell\\row\\trowd\\trgaph70\\trleft5\\trqc\\trbrdrl\\brdrs\\brdrw10 \\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n"
-                                    + "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx10186 \n"
-                                    + "\\pard\\intbl\\widctlpar\\qc\\highlight0 INCARICHI, NOMINE E COLLABORAZIONI\\cell SOVVENZIONI, CONTRIBUTI E AGEVOLAZIONI\\cell Erogazione benefici socio-assistenziali\\cell Verifiche o istruttorie carenti\\cell Direzione OFFERTA FORMATIVA, SERVIZI E SEGRETERIE STUDENTI\\cell\\cell\\highlight2 ALTO\\highlight0\\cell\\row\\trowd\\trgaph70\\trleft5\\trqc\\trbrdrl\\brdrs\\brdrw10 \\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n"
-                                    + "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \\cellx10186 \n"
-                                    + "\\pard\\intbl\\widctlpar\\qc Etc..\\cell\\cell\\cell\\cell\\cell\\cell\\cell\\row \n"
-                                    + "\\pard\\sa200\\sl276\\slmult1\\f2\\lang16\\par\n"
-                                    + "}\n"
-                                    + "";
-                StringBuffer content = new StringBuffer(header);
-
-                    content.append("\\par}");
-                    content.append("\\qj \\f0 \\fs26 ");
-                    content.append("\\par}");
-                content.append("}");
+                String prolog = "{\\rtf1 \\ansi \\ansicpg1252\\deff0\\nouicompat\\deflang1040 \n";
+                String header = 
+                    "{\\fonttbl\n" + 
+                      "\t{\\f0\\froman\\fprq2\\fcharset0 Times New Roman;}\n" + 
+                      "\t{\\f1\\fswiss\\fprq2\\fcharset0 Calibri;}\n" +
+                      "\t{\\f2\\fnil\\fcharset0 Calibri;}\n" + 
+                    "}\n" +
+                    "{\\info\n" +
+                      "\t{\\title Report Strutture e Rischi}\n" +
+                      "\t{\\author Giovanroberto Torre}\n" +
+                      //"\t{\\company Athenaeum}\n" +
+                      "\t{\\creatim\\yr" + new Integer(now.get(Calendar.YEAR)).toString() +  
+                      "\\mo" + new Integer(now.get(Calendar.MONTH) + 1) + 
+                      "\\dy" + String.format("%02d", new Integer(now.get(Calendar.DAY_OF_MONTH))) +
+                      "\\hr" + String.format("%02d", new Integer(now.get(Calendar.HOUR_OF_DAY))) + 
+                      "\\min" + String.format("%02d", new Integer(now.get(Calendar.MINUTE))) + 
+                      "}\n" +
+                      "\t{\\doccomm https://at.univr.it/rischi/}\n" +
+                    "}\n" +
+                    "{\\colortbl ;\\red255\\green255\\blue0;\\red255\\green0\\blue0;}\n" +
+                    "{\\*\\generator Riched20 10.0.19041}\n";
+                String thead =
+                    "\\viewkind4\\uc1\n" +
+                    "\\trowd\\trgaph70\\trleft5\\trqc\\trbrdrl\\brdrs\\brdrw10 \n" +
+                    "\\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \n" + 
+                    "\\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n" +
+                    "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" + 
+                    "\\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx10186 \n" +
+                    "\\pard\\intbl\\widctlpar\\qc\\b\\f1\\fs22 \n" +
+                    "Area di rischio \\cell \n" +
+                    "Macroprocesso \\cell \n" + 
+                    "Processo \\cell \n" +
+                    "Rischi Potenziali \\cell \n" +
+                    "Strutture \\cell \n" + 
+                    "Soggetti \\cell \n" + 
+                    "Giudizio sintetico \\cell \n" +
+                    "\\row \n";
+                String tr = 
+                    "\\trowd\\trgaph70\\trleft5\\trqc\\trrh5103\\trbrdrl\\brdrs\\brdrw10 \n" + 
+                    "\\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \n" + 
+                    "\\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n" +
+                    "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                    "\\cellx10186 \n" +
+                    "\\pard\\intbl\\widctlpar\\qc\\b0\\highlight0 \n";
+            StringBuffer content = new StringBuffer();
+                content.append(prolog);         // RFT file starts
+                content.append(header);         // RTF header
+                content.append(thead);          // Table header
+                for (ProcessBean m : mats) {
+                    for (ProcessBean p : m.getProcessi()) {
+                        ArrayList<RiskBean> processRisks = (ArrayList<RiskBean>) risks.get(Integer.valueOf(p.getId()));
+                        ArrayList<DepartmentBean> processStructs = (ArrayList<DepartmentBean>) structs.get(Integer.valueOf(p.getId()));
+                        ArrayList<DepartmentBean> processSubjs = (ArrayList<DepartmentBean>) subjects.get(Integer.valueOf(p.getId()));
+                        // <tr>
+                        content.append(tr);
+                        content.append(p.getAreaRischio());
+                        content.append("\\cell ");
+                        content.append(m.getNome()
+                                        .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
+                                        .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
+                                        .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
+                        content.append("\\cell ");
+                        content.append(p.getNome()
+                                        .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
+                                        .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
+                                        .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
+                        content.append("\\cell \n");
+                        content.append("\\pard\\intbl\\widctlpar\\sl240\\slmult1");
+                        for (RiskBean r : processRisks) {
+                            content.append("{\\pict{\\*\\picprop}\\wmetafile8\\picw847\\pich847\\picwgoal288\\pichgoal288 \n");
+                            content.append(CAUTION_EXCLAMATION_MARK_SIGN_TRIANGLE);
+                            content.append("} ");
+                            content.append(r.getNome()
+                                            .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
+                                            .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
+                                            .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
+                            content.append(BLANK_SPACE);
+                            content.append("\\par\n");
+                            content.append("\\pard\\intbl\\widctlpar\\par\n");
+                        }
+                        content.append("\\cell \n");
+                        for (DepartmentBean s : processStructs) {
+                            content.append(s.getPrefisso()).append(BLANK_SPACE);
+                            content.append(s.getNome()
+                                            .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
+                                            .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
+                                            .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
+                            content.append("\\par\n");
+                            content.append("\\pard\\intbl\\widctlpar\\par\n");
+                        }
+                        content.append("\\cell \n");
+                        for (DepartmentBean t : processSubjs) {
+                            content.append(t.getNome()
+                                            .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
+                                            .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
+                                            .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
+                            content.append("\\par\n");
+                            content.append("\\pard\\intbl\\widctlpar\\par\n");
+                        }
+                        content.append("\\cell \n");
+                        if (p.getIndicatori() != null && !p.getIndicatori().isEmpty()) {
+                            content.append("\\qc");
+                            content.append(getHighlight(p.getIndicatori().get("PxI").getInformativa()));
+                            content.append(BLANK_SPACE);
+                            content.append(p.getIndicatori().get("PxI").getInformativa());
+                            content.append(BLANK_SPACE).append("\\highlight0").append(BLANK_SPACE);
+                        }
+                        content.append("\\cell");
+                        content.append("\\row \n");
+                        // </tr>
+                    }
+                }
+                content.append("\\pard\\sa200\\sl276\\slmult1\\f2\\lang16\\par");
+                content.append(BLANK_SPACE);
+                content.append("}");                // RTF file ends 
                 // Stampa il contenuto del file
                 out.println(String.valueOf(content));
-
-
             } catch (RuntimeException re) {
-                log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco delle strutture in organigramma.\n" + re.getMessage());
+                log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene la tabella MDM.\n" + re.getMessage());
                 out.println(re.getMessage());
             } catch (Exception e) {
                 log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
@@ -1055,6 +1164,44 @@ public class Data extends HttpServlet implements Constants {
         return success;
     }
 
+    
+    /**
+     * <p>Calcola il colore di highlight in Rich Text Format.</p>
+     * <p>Purtroppo, questo formato, sviluppato da Microsoft, non 
+     * implementa in modo efficace tutti gli attributi di formattazione
+     * ed &egrave; molto dipendente dall'editor utilizzato per la visualizzazione
+     * e dal sistema operativo che lo ospita, per cui le codifiche degli highlight,
+     * che, almeno sulla carta, dovevano essere ben definite 
+     * (<a href="https://www.biblioscape.com/rtf15_spec.htm#Heading45">v. p.es.</a>), 
+     * non si comportano come atteso (oppure, l'implementazione richiederebbe 
+     * maggiore approfondimento).<br>
+     * In ogni caso, questo formato, che pure sembrava un ottimo compromesso
+     * fra human readibility, formattazione ricca (appunto) e ampia fruibilit&egrave; 
+     * e portabilit&agrave;, si rivela in realt&agrave; rigido, tutt'altro che "ricco",
+     * ormai obsoleto e poco profittevole in termini di investimento di tempo di sviluppo.<br>
+     * Preferibile, pertanto, puntare oggi direttamente su un formato estremamente
+     * preciso, come PDF, oppure direttamente su librerie per la generazione in formati
+     * pi&uacute; attuali, proprietari (e.g. .docx) o aperti (e.g. ODF).</p> 
+     * 
+     * @param riskLevel livello di rischio da evidenziare 
+     * @return valore di highlight da stampare nel documento
+     */
+    public static String getHighlight(String riskLevel) {
+        if (riskLevel.equals(LIVELLI_RISCHIO[0])) {
+            return "\\highlight4";
+        } else if (riskLevel.equals(LIVELLI_RISCHIO[1])) {
+            return "\\highlight0";
+        } else if (riskLevel.equals(LIVELLI_RISCHIO[2])) {
+            return "\\highlight1";
+        } else if (riskLevel.equals(LIVELLI_RISCHIO[3])) {
+            return "\\highlight2";
+        } else if (riskLevel.equals(LIVELLI_RISCHIO[4])) {
+            return "\\highlight13";
+        } else {
+            return "\\highlight0";
+        }
+    }
+    
     
     /**
      * <p>Genera il nodo JSON</p>
