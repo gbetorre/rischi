@@ -43,9 +43,9 @@
       <!-- columns header -->
       <div class="entry root text-center wide"><span style="width:190px;">PROCESSO</span></div>
       <div class="entry head text-center"></div>
-      <div class="entry head text-center"><span>PxI</span></div>
-      <div class="entry head text-center"><span>P</span></div>
-      <div class="entry head text-center"><span>I</span></div>
+      <div class="entry head text-center textcolorred panel"><span>PxI</span></div>
+      <div class="entry head text-center panel"><span>P</span></div>
+      <div class="entry head text-center panel"><span>I</span></div>
       <c:forTokens var="iname" items="${names}" delims=",">
       <div class="entry head text-center"><c:out value="${iname}" /></div>
       </c:forTokens>
