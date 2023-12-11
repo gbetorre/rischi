@@ -1,5 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-    <form id="adr-form" class="panel subfields errorPwd" action="" method="post">
+    <form accept-charset="ISO-8859-1" id="adr-form" class="panel subfields errorPwd" action="" method="post">
       <div class="panel-heading bgAct24">
         <div class="noHeader">
           <i class="fa-solid fa-file-circle-plus"></i>
