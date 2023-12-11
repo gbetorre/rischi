@@ -281,7 +281,7 @@
                 <thead class="thead-light">
                   <tr>
                     <th>Indicatore</th>
-                    <th>Quesiti connessi</th>
+                    <th>Elementi connessi</th>
                     <th>Tipologia</th>
                     <th>Livello</th>
                   </tr>
