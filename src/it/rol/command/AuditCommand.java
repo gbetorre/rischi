@@ -2222,26 +2222,30 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         try {
             InterviewBean i3 = new InterviewBean();
             ProcessBean extraInfo = new ProcessBean();
-            String result = null;
+            String result = null;           
             // Memorizza il tipo dell'indicatore corrente
             extraInfo.setTipo(I);
+            // Totale strutture associate al processo contestuale (invisibile ma sottinteso)
+            int strAmount = structsByProcess.size();
+            // Vettore dei soli id dei soggetti contingenti
+            Vector<Integer> subjIds = new Vector<>();
             // Flag di "tutte le direzioni..."
             boolean allDirections = false;
-            // Controlla prima se c'è un soggetto pari a "tutte le strutture..."
+            // Travasa gli id dei soggetti contingenti in un vector
             for (DepartmentBean s : subjectsByProcess) {
-                switch(s.getId()) {
-                    case 13: 
-                        allDirections = true;
-                        break;
-                    case 14:
-                        allDirections = true;
-                        break;
-                    case 15:
-                        allDirections = true;
-                        break;
-                    default:
-                        allDirections = false;
-                }
+                subjIds.add(new Integer(s.getId()));
+            }
+            // Verifica se c'è un soggetto pari a "tutte le strutture..."
+            if (subjIds.contains(Integer.valueOf(13)) || 
+                subjIds.contains(Integer.valueOf(14)) ||
+                subjIds.contains(Integer.valueOf(15))) {
+                allDirections = true;
+            }
+            // Verifica se aggiungere al computo delle strutture eventuali strutture "mascherate" da soggetti
+            if (subjIds.contains(Integer.valueOf(29)) || 
+                subjIds.contains(Integer.valueOf(41)) ||
+                subjIds.contains(Integer.valueOf(42))) {
+                strAmount++;
             }
             // Non è possibile che ci siano 0 strutture AND 0 soggetti coinvolti
             if (structsByProcess.size() == NOTHING && subjectsByProcess.size() == NOTHING) {
@@ -2252,10 +2256,10 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                 if (allDirections) {
                     result = LIVELLI_RISCHIO[3];
                 } else {
-                    if (structsByProcess.size() >= ELEMENT_LEV_3) {
+                    if (strAmount >= ELEMENT_LEV_3) {
                         result = LIVELLI_RISCHIO[3];
                     } else {
-                        if (structsByProcess.size() == ELEMENT_LEV_2) {
+                        if (strAmount == ELEMENT_LEV_2) {
                             result = LIVELLI_RISCHIO[2];
                         } else {
                             if (subjectsByProcess.size() >= ELEMENT_LEV_3) {
@@ -2271,7 +2275,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             i3.setNome(I3);
             i3.setInformativa(result);
             i3.setDescrizione(indicatorByCode.get(I3).getInformativa());
-            i3.setAutoreUltimaModifica("Strutture " + structsByProcess.size() + "; Soggetti "  + subjectsByProcess.size());
+            i3.setAutoreUltimaModifica("Strutture " + strAmount + "; Soggetti "  + subjectsByProcess.size());
             i3.setProcesso(extraInfo);
             return i3;
         } catch (AttributoNonValorizzatoException anve) {
