@@ -323,6 +323,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [1.6.2] (15/12/2023) Revisionato algoritmo di calcolo della dimensione di probabilit&agrave; P; aggiunto stile per evidenziare valore di rischio altissimo
 - [1.6.1] (11/12/2023) Revisionato algoritmo di calcolo dell'indicatore di impatto I3; correzione di bug
 - [1.6.0] (07/12/2023) Implementato output su file RTF del report tabellare riepilogante rischi e strutture; correzione di bug
 - [1.5.9] (30/11/2023) Raffinato algoritmo di calcolo indicatore I3 tenendo conto dell'interessamento di categorie globali di strutture e considerando non determinabili i casi in cui non risultano n&eacute; strutture n&eacute; soggetti associati alle fasi del processo (un processo &egrave; sempre funzione dell'attivit&agrave; di almeno una struttura o un soggetto contingente) 
