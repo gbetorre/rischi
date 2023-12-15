@@ -2388,9 +2388,12 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                     result = LIVELLI_RISCHIO[3];
                 }
             } else {    // Non c'è nessun P* = ALTO
-                // Ci sono 5 o più BASSI ?
-                if (weights.get(LIVELLI_RISCHIO[1]).intValue() >= 5) {
+                // Ci sono 6 o più BASSI ?
+                if (weights.get(LIVELLI_RISCHIO[1]).intValue() >= 6) {
                     result = LIVELLI_RISCHIO[1];
+                // Ci sono 5 o più MEDI ?
+                } else if (weights.get(LIVELLI_RISCHIO[2]).intValue() >= 5) {
+                    result = LIVELLI_RISCHIO[3];
                 } else {    // Qua finiscono tutti gli altri casi
                     result = LIVELLI_RISCHIO[2];
                 }
