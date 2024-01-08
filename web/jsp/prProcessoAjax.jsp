@@ -253,13 +253,29 @@
         <section>
           <div class="errorPwd">
           <c:forEach var="interview" items="${interviews}" varStatus="status">
+            <fmt:formatDate var="iviewsqldate" value="${interview.dataUltimaModifica}" pattern="yyyy-MM-dd" scope="page" />
+            <fmt:formatDate var="iviewsqltime" value="${interview.oraUltimaModifica}" pattern="HH_mm_ss" scope="page" />
+            <c:url var="rqsInstance" context="${initParam.appName}" value="/" scope="page">
+              <c:param name="q" value="in" />
+              <c:param name="p" value="rqs" />
+              <c:param name="sliv1" value="${interview.struttura.informativa}" />
+              <c:param name="sliv2" value="${interview.struttura.figlie.get(zero).informativa}" />
+              <c:param name="sliv3" value="${interview.struttura.figlie.get(zero).figlie.get(zero).informativa}" />
+              <c:param name="sliv4" value="${interview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).informativa}" />
+              <c:param name="pliv1" value="${interview.processo.informativa}" />
+              <c:param name="pliv2" value="${interview.processo.processi.get(zero).informativa}" />
+              <c:param name="pliv3" value="${interview.processo.processi.get(zero).processi.get(zero).informativa}" />
+              <c:param name="d" value="${iviewsqldate}" />
+              <c:param name="t" value="${iviewsqltime}" />
+              <c:param name="r" value="${ril}" />
+            </c:url>
             <fmt:formatDate var="iviewitadate" value="${interview.dataUltimaModifica}" pattern="dd/MM/yyyy" /> 
             <fmt:formatDate var="iviewsqltime" value="${interview.oraUltimaModifica}" pattern="HH:mm" scope="page" />
             <c:if test="${status.index gt zero}">
             <hr class="riga" />
             </c:if>
             <ol class="breadcrumb mb-3">
-              <li><a href="${in}">Intervista del <c:out value="${iviewitadate}" /> <c:out value="${iviewsqltime}" /></a></li>
+              <li><a href="${rqsInstance}">Intervista del <c:out value="${iviewitadate}" /> <c:out value="${iviewsqltime}" /></a></li>
             </ol>
             <dl class="row">
             <c:set var="keys" value="${interview.indicatori.keySet()}" />
