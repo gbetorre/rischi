@@ -424,6 +424,8 @@ public class Data extends HttpServlet implements Constants {
                     ArrayList<QuestionBean> answers = null;
                     // Recupera dal Databound elenco di risposte in base a intervista
                     answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSurvey));
+                    // Scarta le domande con risposte vuote
+                    answers = AuditCommand.filter(answers);
                     // Imposta le risposte nell'intervista
                     interview.setRisposte(answers);
                     // Aggiunge l'intervista alla lista (di una)
