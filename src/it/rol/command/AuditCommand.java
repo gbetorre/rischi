@@ -919,8 +919,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @return <code>HashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
-    private static ArrayList<QuestionBean> filter(ArrayList<QuestionBean> questions)
-                                           throws CommandException {
+    public static ArrayList<QuestionBean> filter(ArrayList<QuestionBean> questions)
+                                          throws CommandException {
         ArrayList<QuestionBean> questionsWithAnswers = new ArrayList<>();
         try {
             for (QuestionBean q : questions) {
