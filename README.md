@@ -319,10 +319,10 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.6.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
 - [1.6.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [1.6.4] Implementata form di ricerca sui quesiti per chiave testuale
-- [1.6.3] 
 
 ### Done
 -->
+- [1.6.3] (08/01/2024) Raffinata estrazione CSV relativa a intervista singola; aggiunto ordinamento per nome a nodi albero processi; migliorata presentazione report PxI dei processi
 - [1.6.2] (15/12/2023) Revisionato algoritmo di calcolo della dimensione di probabilit&agrave; P; aggiunto stile per evidenziare valore di rischio altissimo
 - [1.6.1] (11/12/2023) Revisionato algoritmo di calcolo dell'indicatore di impatto I3; correzione di bug
 - [1.6.0] (07/12/2023) Implementato output su file RTF del report tabellare riepilogante rischi e strutture; correzione di bug
