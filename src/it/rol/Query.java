@@ -206,7 +206,7 @@ public interface Query extends Serializable {
             "   FROM macroprocesso_at MAT" +
             "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
             "   WHERE R.codice ILIKE ?" +
-            "   ORDER BY MAT.codice";
+            "   ORDER BY MAT.nome, MAT.codice";
     
     /**
      * <p>Estrae tutti i processi anticorruzione appartenenti a un macroprocesso
@@ -231,7 +231,7 @@ public interface Query extends Serializable {
             "       INNER JOIN rilevazione R ON PRAT.id_rilevazione = R.id" +
             "   WHERE PRAT.id_macroprocesso_at = ?" +
             "       AND R.codice ILIKE ?" +
-            "   ORDER BY PRAT.codice";
+            "   ORDER BY PRAT.nome, PRAT.codice";
 
     /**
      * <p>Estrae tutti i sottoprocessi anticorruzione appartenenti a un processo
