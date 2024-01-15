@@ -42,7 +42,7 @@ rol_compile.bat
 # Settings
 /.settings
 
-
+.gitattributes
 
 .classpath
 /bin/
