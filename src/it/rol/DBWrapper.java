@@ -338,7 +338,7 @@ public class DBWrapper implements Query, Constants {
                 "   WHERE D.id_rilevazione = " + idR +
                 "       AND " + tableWhere +
                 "       AND id_stato = 1" + // Prende solo le strutture attive
-                "   ORDER BY D.ordinale, D.nome";
+                "   ORDER BY D.nome, D.ordinale";
         return GET_STRUCTURE_BY_STRUCTURE;
     }
 
