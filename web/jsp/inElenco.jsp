@@ -42,13 +42,13 @@
         <c:param name="t" value="${iviewsqltime}" />
         <c:param name="r" value="${ril}" />
       </c:url>
-     <fmt:formatDate var="iviewitadate" value="${iview.dataUltimaModifica}" pattern="dd/MM/yyyy" /> 
-     <fmt:formatDate var="iviewitatime" value="${iview.oraUltimaModifica}" pattern="HH:mm" />
+      <fmt:setLocale value="it_IT"/>
+      <fmt:formatDate var="iviewitadate" value="${iview.dataUltimaModifica}" pattern="yyyy/MM/dd" /> 
+      <fmt:formatDate var="iviewitatime" value="${iview.oraUltimaModifica}" pattern="HH:mm" />
       <c:set var="rqsInstanceCSV" value="${rqsInstance}&out=csv" scope="page" />
       <c:set var="rqsCSV" value="${fn:replace(rqsInstanceCSV, '/rischi/?q=', '/rischi/data?q=')}" scope="page" />
         <tr class="active">
           <td class="bgcolor1" width="5%">
-            <%--a href="${initParam.appName}/?q=ri&p=rqs&sliv1=${iview.struttura.informativa}&sliv2=${iview.struttura.figlie.get(zero).informativa}&sliv3=${iview.struttura.figlie.get(zero).figlie.get(zero).informativa}&sliv4=${iview.struttura.figlie.get(zero).figlie.get(zero).figlie.get(zero).informativa}&r=${param['r']}"--%>
             <a href="${rqsInstance}">
               <c:out value="${iviewitadate}" />
               <c:out value="${iviewitatime}" />
