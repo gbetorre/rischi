@@ -70,7 +70,7 @@
       </c:if>
     </c:forEach>
     </div><br />
-    <form id="select_ent_form" class="form-horizontal" action="" method="post">
+    <form accept-charset="ISO-8859-1" id="select_ent_form" class="form-horizontal" action="" method="post">
       <input type="hidden" name="r" value="${param['r']}" />
       <input type="hidden" name="sliv1" value="${codLiv1}" />
       <input type="hidden" name="sliv2" value="${codLiv2}" />
