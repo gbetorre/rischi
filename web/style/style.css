@@ -576,8 +576,8 @@ select:disabled.bgcolor3 {
   background-image: linear-gradient(to right, #ffffff, #ff5232);
 }
 
-.bgcolor-altissimo {
-	color: #ffff33;
+.bgcolor-molto {
+	/* color: #ffff33; */
   background-image: linear-gradient(to right, #ff0099, #ff0033);
 }
 
@@ -596,6 +596,10 @@ select:disabled.bgcolor3 {
 
 .border-alto {
   border: 1px solid red;
+}
+
+.border-molto {
+  border: 1px solid yellow;
 }
 
 .border-non {
