@@ -276,7 +276,7 @@ public interface Constants extends Serializable {
     /**
      * <p>Valori possibili degli attributi probabilita, impatto, livello di rischio.</p>
      */
-    static final String[] LIVELLI_RISCHIO = {"MINIMO", "BASSO", "MEDIO", "ALTO", "ALTISSIMO"};
+    static final String[] LIVELLI_RISCHIO = {"MINIMO", "BASSO", "MEDIO", "ALTO", "MOLTO ALTO"};
     /**
      * <p>Indicatore di probabiit&agrave; 1.</p>
      */
