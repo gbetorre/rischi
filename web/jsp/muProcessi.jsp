@@ -71,7 +71,11 @@
         </a>
       </div>
       <div class="entry"></div>
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)} border-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)}">
+      <c:set var="classSuffix" value="${fn:toLowerCase(pat.indicatori.get('PxI').informativa)}" scope="page" />
+      <c:if test="${fn:indexOf(classSuffix, ' ') gt -1}">
+        <c:set var="classSuffix" value="${fn:substring(classSuffix, zero, fn:indexOf(classSuffix, ' '))}" scope="page" />
+      </c:if>
+      <div class="value bgcolor-${classSuffix} border-${classSuffix}">
         <p class="text-center" title="${pat.indicatori.get('PxI').informativa}">
           <c:out value="${pat.indicatori.get('PxI').informativa}" />
         </p>
@@ -100,10 +104,10 @@
       </c:forEach> 
     </c:forEach>
     </div>
-          &nbsp;
-          <a href="${mro}&msg=refresh_ce" type="button" class="btn btn-primary float-right" value="Update">
-            <i class="fa-solid fa-arrow-rotate-right"></i>
-            Ricalcola
-          </a>
+    &nbsp;
+    <a href="${mro}&msg=refresh_ce" type="button" class="btn btn-primary float-right" value="Update">
+      <i class="fa-solid fa-arrow-rotate-right"></i>
+      Ricalcola
+    </a>
 
     
