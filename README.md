@@ -313,15 +313,16 @@ e fornirvi il relativo significato e la relativa motivazione.
 - Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
 - Implementata pagina di dettaglio soggetto contingente/interessato
 - Implementata pagina di dettaglio struttura
-- [1.6.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
-- [1.6.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
-- [1.6.7] Implementata estrazione risultati in formato CSV
-- [1.6.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
-- [1.6.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
-- [1.6.4] Implementata form di ricerca sui quesiti per chiave testuale
+- [1.7.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
+- [1.7.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
+- [1.7.7] Implementata estrazione risultati in formato CSV
+- [1.7.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
+- [1.7.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
+- [1.7.4] Implementata form di ricerca sui quesiti per chiave testuale
 
 ### Done
 -->
+- [1.6.4] (15/01/2024) Modificato ordinamento strutture; cambiata presentazione valore di rischio altissimo; correzione di bug
 - [1.6.3] (08/01/2024) Raffinata estrazione CSV relativa a intervista singola; aggiunto ordinamento per nome a nodi albero processi; migliorata presentazione report PxI dei processi
 - [1.6.2] (15/12/2023) Revisionato algoritmo di calcolo della dimensione di probabilit&agrave; P; aggiunto stile per evidenziare valore di rischio altissimo
 - [1.6.1] (11/12/2023) Revisionato algoritmo di calcolo dell'indicatore di impatto I3; correzione di bug
