@@ -1,14 +1,15 @@
 /*
- *   Risk Mapping Software: Applicazione web per la gestione di 
+ *   Rischi On Line (ROL): Applicazione web per la gestione di 
  *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   dell'ateneo possono essere esposti e per la gestione di reportistica
- *   e mappature per la gestione dei "rischi on line" (rol).
+ *   di una PA possono essere esposti e per la produzione di mappature
+ *   e reportistica finalizzate alla valutazione del rischio corruttivo
+ *   nella pubblica amministrazione.
  *
- *   Risk Mapping Software (rms)
- *   web applications to make survey about the amount and kind of risk
+ *   Risk Mapping Software (ROL)
+ *   web applications to assess the amount, and kind, of risk
  *   which each process is exposed, and to publish, and manage,
  *   report and risk information.
- *   Copyright (C) 2022 renewed 2023 Giovanroberto Torre
+ *   Copyright (C) 2022-2024 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -36,7 +37,6 @@ package it.rol.bean;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import it.rol.exception.AttributoNonValorizzatoException;

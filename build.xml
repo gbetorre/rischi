@@ -51,7 +51,7 @@
                 author="true" 
                 windowtitle="Documentazione di ROL"
                 doctitle="&lt;h1&gt;Rischi On Line (Rol)&lt;/h1&gt;"  
-                bottom="&lt;i&gt;Copyright (c) 2022 by Giovanroberto Torre, Universita' degli Studi di Verona. Verona (I). All Rights Reserved.&lt;/i&gt;"
+                bottom="&lt;i&gt;Copyright (c) 2022 - 2024 by Giovanroberto Torre. All Rights Reserved.&lt;/i&gt;"
                 classpath="/home/outer-root/Programs/apache-tomcat-8.5.60/lib/jsp-api.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/ext-lib/commons-text.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/ext-lib/cos.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/lib/el-api.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/ext-lib/jstl-1.2.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/lib/servlet-api.jar"
                 nodeprecated="false" 
                 nodeprecatedlist="false" 
