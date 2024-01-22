@@ -5,38 +5,6 @@
 <%@ include file="URL.jspf" %>
 <c:set var="mats" value="${requestScope.macroProcessi}" scope="page" />
 <c:set var="names" value="P1,P2,P3,P4,P5,P6,P7,I1,I2,I3,I4" scope="page" />
-    <style>
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(16,100px);
-      gap: 8px;
-      color: #fff;
-      height: 600px;
-      resize: both;
-      overflow: auto;
-    }
-    .entry {
-      background: #999;
-      padding: 1em 2em;
-    }
-    .entry.root {
-      background: #000; z-index: 10!important;
-    }
-    .entry.root, .entry.head {
-      position: sticky;
-      top: 0; left: 0;
-      background: #444;
-      z-index: 1;
-    }
-    .value {
-      height: 5em;
-      line-height: 5em;
-      color: #000;
-    }
-    .wide {
-      width:210px;
-    }
-    </style>
     <h3 class="mt-1 m-0 font-weight-bold float-left">Report probabilit&agrave; x impatto</h3>    
     <hr class="riga"/>
     <div class="grid scrollX">
