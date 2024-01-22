@@ -321,15 +321,22 @@
                       </a>
                     </td>
                     <td><c:out value="${ind.processo.tipo}" /></td>
-                      <c:set var="classSuffix" value="${fn:toLowerCase(ind.informativa)}" scope="page" />
-                      <c:if test="${fn:indexOf(classSuffix, ' ') gt -1}">
-                        <c:set var="classSuffix" value="${fn:substring(classSuffix, zero, fn:indexOf(classSuffix, ' '))}" scope="page" />
-                      </c:if>
+                    <c:set var="classSuffix" value="${fn:toLowerCase(ind.informativa)}" scope="page" />
+                    <c:if test="${fn:indexOf(classSuffix, ' ') gt -1}">
+                      <c:set var="classSuffix" value="${fn:substring(classSuffix, zero, fn:indexOf(classSuffix, ' '))}" scope="page" />
+                    </c:if>
                     <td class="text-center bgcolor-${classSuffix}" title="${ind.processo.descrizioneStatoCorrente}">
                       <c:out value="${ind.informativa}" />
                     </td>
                   </tr>
                 </c:forEach>
+                  <tr>
+                    <td colspan="4" class="center text-center" align="center" title="Aggiungi nota">
+                      <a href="${initParam.appName}/?q=pr&p=pin&pliv=${param['pliv']}&liv=2&pxi=${indics.get('PxI').informativa}&r=${param['r']}&ref=pro" class="btn btn-primary" title="Aggiungi o aggiorna una nota al PxI nel contesto del processo &quot;${processo}&quot;">
+                        <small><i class="fa-solid fa-circle-plus"></i> Nota</small>
+                      </a>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
