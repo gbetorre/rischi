@@ -187,6 +187,11 @@ public interface Constants extends Serializable {
      */
     public static final String PART_FACTORS             = "fat";
     /**
+     * <p>Costante per il parametro identificante la parte di 
+     * aggiunta/aggiornamento nota PxI (giudizio sintetico).</p>
+     */
+    public static final String PART_PI_NOTE             = "pin";
+    /**
      * <p>Costante per il parametro identificante la form di ricerca.</p>
      */
     public static final String PART_SEARCH              = "ris";
@@ -242,7 +247,19 @@ public interface Constants extends Serializable {
     /**
      * <p>Costante per il parametro identificante un messaggio (conferma, codice di errore, etc.).</p>
      */
-    public static final String MESSAGE                  = "msg";    
+    public static final String MESSAGE                  = "msg";
+    /**
+     * <p>Costante per il parametro identificante un referral (riferimento).
+     * Una stessa funzionalit&agrave; (callee) pu&ograve; essere invocata 
+     * da diversi chiamanti (caller) e non &egrave; detto che il risultato esatto
+     * della callee debba essere lo stesso per tutti i caller. 
+     * Questo parametro permette di identificare tra i diversi caller 
+     * qual &egrave; quello che ha fatto la callee.
+     * Se si dovesse mantenere traccia della coppia caller-callee potrebbero 
+     * essere creati due parametri, p.es. CLR E CLE; per il momento &egrave;
+     * sufficiente mantenere l'identificazione del chiamante (caller).</p>
+     */
+    public static final String REFERRAL                 = "ref";
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
