@@ -83,6 +83,8 @@ public class InterviewBean extends CodeBean {
     private Time oraUltimaModifica;
     /** Autore ultima modifica */
     private String autoreUltimaModifica;
+    /** Note alla misurazione */
+    private String note;
     /* *******************************************************  *
      *                         Allegati                         *
      * ******************************************************** */
@@ -102,7 +104,7 @@ public class InterviewBean extends CodeBean {
      */
 	public InterviewBean() {
 	    super();
-		descrizione = null;
+		descrizione = note = null;
 		data = new Date(0);
 		ultimo = false;
 		struttura = null;
@@ -133,6 +135,7 @@ public class InterviewBean extends CodeBean {
         super.setInformativa(informativa);
         super.setOrdinale(BEAN_DEFAULT_ID);
         descrizione = null;
+        note = null;
         this.data = data;
         ultimo = false;
         struttura = null;
@@ -163,6 +166,26 @@ public class InterviewBean extends CodeBean {
 	public void setDescrizione(String descrizione) {
 		this.descrizione = descrizione;
 	}
+
+
+    /* ********************************************************* *
+     *              Metodi getter e setter per note              *
+     * ********************************************************* */
+    /**
+     * Restituisce le note aggiuntive  
+     * @return <code>note</code> - note descrittive dell'oggetto
+     */
+    public String getNote() {
+        return note;
+    }
+
+    /**
+     * Imposta le note aggiuntive
+     * @param note - note da settare
+     */
+    public void setNote(String note) {
+        this.note = note;
+    }
     
     
     /* ***************************************************************** *
