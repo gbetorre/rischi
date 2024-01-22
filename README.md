@@ -322,6 +322,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [1.6.6] (22/01/2024) Implementata visualizzazione delle note al PxI con confronto valore PxI in memoria (a runtime) e valore PxI su disco (in cache)
 - [1.6.5] (16/01/2024) Aggiornamento annuale licenza
 - [1.6.4] (15/01/2024) Modificato ordinamento strutture; cambiata presentazione valore di rischio altissimo; correzione di bug
 - [1.6.3] (08/01/2024) Raffinata estrazione CSV relativa a intervista singola; aggiunto ordinamento per nome a nodi albero processi; migliorata presentazione report PxI dei processi
