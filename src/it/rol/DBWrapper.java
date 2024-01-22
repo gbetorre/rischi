@@ -3664,7 +3664,7 @@ public class DBWrapper implements Query, Constants {
                     for (int j = 0; j < mat.getProcessi().size(); j++) {
                         // Processo corrente
                         ProcessBean pat = mat.getProcessi().get(j);
-                        // Explicit un/boxing
+                        // I like the Explicit un/boxing
                         Integer patIdAsInteger = Integer.valueOf(pat.getId());
                         // Se per il processo corrente sono presenti indicatori
                         if (tupleAsMap.containsKey(patIdAsInteger)) {
@@ -3686,6 +3686,8 @@ public class DBWrapper implements Query, Constants {
                                 String result = (item.getValue1AsInt() < NOTHING) ? ERR : LIVELLI_RISCHIO[item.getValue1AsInt()];
                                 // P.es.  informativa = result = LIVELLI_RISCHIO[2] = 'MEDIO'
                                 value.setInformativa(result);
+                                // P.es.  note = informativa = "Il processo è mediamente esposto a rischio corruttivo in quanto coinvolge molteplici soggetti, anche esterni all’ateneo."
+                                value.setNote(item.getInformativa());
                                 // Campi di servizio
                                 value.setOrdinale(item.getOrdinale());
                                 value.setDataUltimaModifica(Utils.format(item.getExtraInfo1()));
@@ -3732,6 +3734,71 @@ public class DBWrapper implements Query, Constants {
                 throw new WebStorageException(msg, ce);
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Problema nella query dei valori precalcolati degli indicatori di rischio.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    /**
+     * <p>Restituisce gli estremi del PxI di un processo di dato id,
+     * il cui identificativo viene passato come parametro e di una data
+     * rilevazione, il cui identificativo viene passato come parametro.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param idP       identificativo di processo censito a fini anticorruttivi
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>InterviewBean</code> - oggetto contenente gli estremi dell'indicatore cercato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ItemBean getIndicatorPI(PersonBean user,
+                                        int idP,
+                                        CodeBean survey)
+                                 throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            ItemBean indicator = null;
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_INDICATOR_PXI_BY_PROCESS);
+                pst.clearParameters();
+                pst.setInt(1, idP);
+                pst.setInt(2, survey.getId());
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    // Prepara l'oggetto per l'indicatore
+                    indicator = new ItemBean();
+                    // Valorizza l'indicatore
+                    BeanUtil.populate(indicator, rs);
+                    // Ottiene il valore nominale (p.es. "ALTO" non 3)
+                    indicator.setLabelWeb(LIVELLI_RISCHIO[indicator.getLivello()]);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return indicator;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio non recuperabile.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Indicatore non valorizzato; problema nella query.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally {
@@ -4413,6 +4480,105 @@ public class DBWrapper implements Query, Constants {
                     /* === Data originale === */
                     pst.setDate(++nextParam, Utils.convert(questDate)); // non accetta una String né una data java.util.Date, ma java.sql.Date
                     /* === Ora originale === */
+                    pst.setTime(++nextParam, questTime);   // non accetta una String, ma un oggetto java.sql.Time
+                    // Esecuzione
+                    pst.executeUpdate();
+                }
+                // End: <==
+                con.commit();
+                pst.close();
+                pst = null;
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (ArrayIndexOutOfBoundsException aiobe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, aiobe);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (CommandException ce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di tipo.\n" + ce.getMessage();
+            LOG.severe(msg);
+            throw new WebStorageException(msg, ce);
+        } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, npe);
+        } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+        }
+    }
+    
+    
+    /* *
+     * <p>Metodo per fare l'aggiornamento di una nota al giudizio sintetico.</p> 
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     *  TODO: NON È ANCORA PRONTO
+    @SuppressWarnings({ "null", "static-method" })
+    public void updateNote(PersonBean user, 
+                             HashMap<String, LinkedHashMap<String, String>> params) 
+                      throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri della risposta da aggiornare
+            LinkedHashMap<String, String> quest = params.get(PART_RESUME_QST);
+            try {
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                // === Se siamo qui vuol dire che ok   === //
+                // Recupera l'identificativo del quesito
+                int idQ = new Integer(quest.get("quid")).intValue();
+                // Recupera la data originale della risposta
+                Date questDate = Utils.format(survey.get("d"));
+                // Recupera l'ora originale della risposta
+                String questTimeAsString = params.get(PARAM_SURVEY).get("t").replaceAll("_", ":");
+                Time questTime = Utils.format(questTimeAsString, TIME_SQL_PATTERN);
+                // Controllo sull'input
+                if (idQ > NOTHING) {
+                    // Prepara la query
+                    pst = con.prepareStatement(UPDATE_ANSWER);
+                    // Prepara i parametri per l'inserimento
+                    pst.clearParameters();
+                    // Definisce l'indice del parametro da passare
+                    int nextParam = NOTHING;
+                    // === Valore === //
+                    pst.setString(++nextParam, quest.get("risp"));
+                    // === Note === //
+                    pst.setString(++nextParam, quest.get("note"));
+                    // === Campi automatici: id utente, ora ultima modifica, data ultima modifica === *
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());
+                    // === Riferimento a quesito === //
+                    pst.setInt(++nextParam, idQ);
+                    // === Collegamento a rilevazione === //
+                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    // === Data originale === //
+                    pst.setDate(++nextParam, Utils.convert(questDate)); // non accetta una String né una data java.util.Date, ma java.sql.Date
+                    // === Ora originale === //
                     pst.setTime(++nextParam, questTime);   // non accetta una String, ma un oggetto java.sql.Time
                     // Esecuzione
                     pst.executeUpdate();
