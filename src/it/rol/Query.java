@@ -1057,6 +1057,23 @@ public interface Query extends Serializable {
             "       JOIN num_indicatori N ON INPAT.id_processo_at = N.id" +
             "   WHERE INPAT.id_rilevazione = ?" +
             "   ORDER BY INPAT.id_processo_at, INPAT.cod_indicatore";
+    
+    /**
+     * <p>Seleziona  i valori del PxI di un processo anticorruttivo di dato id
+     *  nel contesto di una data rilevazione.</p>
+     */
+    public static final String GET_INDICATOR_PXI_BY_PROCESS = 
+            "SELECT" +
+            "       INPAT.valore                        AS \"livello\"" +
+            "   ,   INPAT.descrizione                   AS \"extraInfo\"" +
+            "   ,   INPAT.note                          AS \"informativa\"" +
+            "   ,   INPAT.data_ultima_modifica          AS \"extraInfo1\"" +
+            "   ,   INPAT.ora_ultima_modifica           AS \"extraInfo2\"" +
+            "   ,   INPAT.id_usr_ultima_modifica        AS \"extraInfo3\"" +
+            "   FROM indicatore_processo_at INPAT" +
+            "   WHERE INPAT.cod_indicatore = 'PxI'" +
+            "       AND INPAT.id_processo_at = ?" +
+            "       AND INPAT.id_rilevazione = ?";
 
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
@@ -1395,6 +1412,19 @@ public interface Query extends Serializable {
             "       AND id_rilevazione      = ?" +
             "       AND data_ultima_modifica = ?" +
             "       AND ora_ultima_modifica = ?";
+    
+    /**
+     * <p>Query per aggiornamento di una nota di un giudizio sintetico.</p>
+     */
+    public static final String UPDATE_NOTE_BY_PROCESS =
+            "UPDATE indicatore_processo_at" +
+            "   SET note  = ?" +
+            "   ,  data_ultima_modifica =   ?" +
+            "   ,  ora_ultima_modifica =    ?" +
+            "   ,  id_usr_ultima_modifica = ?" +
+            "   WHERE cod_indicatore = 'PxI" +
+            "       AND id_processo_at = ?" +
+            "       AND id_rilevazione = ?";
 
     /* ********************************************************************** *
      *                         Query di eliminazione                          *
