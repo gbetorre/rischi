@@ -123,6 +123,11 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileAddFactor = "/jsp/prFattoreForm.jsp";
     /**
+     * Pagina a cui la command inoltra per mostrare la form di aggiunta/modifica 
+     * di una nota (giudizio sintetico) ad un indice PxI
+     */
+    private static final String nomeFileNote = "/jsp/prNotaForm.jsp";
+    /**
      * Nome del file json della Command (dipende dalla pagina di default)
      */
     private String nomeFileJson = nomeFileElenco.substring(nomeFileElenco.lastIndexOf(SLASH), nomeFileElenco.indexOf(DOT));
@@ -164,6 +169,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_OUTPUT,       nomeFileOutputs);
         nomeFile.put(PART_FACTORS,      nomeFileFattori);
         nomeFile.put(PART_INSERT_F_R_P, nomeFileAddFactor);
+        nomeFile.put(PART_PI_NOTE,      nomeFileNote);
     }
 
 
@@ -221,6 +227,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         HashMap<String, LinkedHashMap<String, String>> params = null;
         // Tabella degli indicatori con i valori elaborati relativi a un processo
         HashMap<String, InterviewBean> indicators = null;
+        // Eventuale indicatore pxi di uno specifico processo
+        ItemBean pxi = null;
         // Flag di scrittura
         Boolean writeAsObject = (Boolean) req.getAttribute("w");
         boolean write = writeAsObject.booleanValue();
@@ -304,6 +312,19 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "newRel#rischi";
                             }
+                        } else if (part.equalsIgnoreCase(PART_PI_NOTE)) {
+                            /* ************************************************ *
+                             *                UPDATE a note to PxI              *
+                             * ************************************************ */
+                            // Aggiorna la nota
+                            //db.insertFactorRiskProcess(user, params);
+                            /* Prepara la redirect 
+                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
+                                       AMPERSAND + "p" + EQ + PART_PROCESS +
+                                       AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
+                                       AMPERSAND + "liv" + EQ + "2" +
+                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur +
+                                       AMPERSAND + MESSAGE + EQ + "newRel#rischi";*/
                         }
                     }
                 // @GetMapping
@@ -313,7 +334,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                         // Viene richiesta la visualizzazione del dettaglio di un processo
                         if (part.equalsIgnoreCase(PART_PROCESS)) {
                             /* ************************************************ *
-                             *               SELECT Process Part                *
+                             *                  SELECT Process                  *
                              * ************************************************ */
                             // Recupera Input estratti in base al processo
                             ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
@@ -342,7 +363,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             fileJspT = nomeFile.get(part);
                         } else if (part.equalsIgnoreCase(PART_OUTPUT)) {
                             /* ************************************************ *
-                             *                SELECT Output Part                *
+                             *                  SELECT Output                   *
                              * ************************************************ */
                             if (idO > DEFAULT_ID) {
                                 // Recupera un output specifico
@@ -357,7 +378,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             }
                         } else if (part.equalsIgnoreCase(PART_FACTORS)) {
                             /* ************************************************ *
-                             *                SELECT Factors Part               *
+                             *                  SELECT Factors                  *
                              * ************************************************ */
                             // Deve recuperare l'elenco dei fattori abilitanti
                             factors = db.getFactors(user, survey);
@@ -381,6 +402,17 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-F");
+                            // Imposta la jsp
+                            fileJspT = nomeFile.get(part);
+                        } else if (part.equalsIgnoreCase(PART_PI_NOTE)) {
+                            /* **************************************************** *
+                             *   SHOWS Form to INSERT or UPDATE a note about PxI    *
+                             * **************************************************** */
+                            // Deve recuperare e mostrare la nota al giudizio sintetico PxI
+                            pxi = db.getIndicatorPI(user, idP, survey);
+                            // Ha bisogno di personalizzare le breadcrumbs
+                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nota");
                             // Imposta la jsp
                             fileJspT = nomeFile.get(part);
                         }
@@ -453,6 +485,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Imposta in request specifico rischio cui aggiungere fattore abilitante
         if (risk != null) {
             req.setAttribute("rischio", risk);
+        }
+        // Imposta in request specifico pxi di uno specifico processo at
+        if (pxi != null) {
+            req.setAttribute("pxi", pxi);
         }
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
