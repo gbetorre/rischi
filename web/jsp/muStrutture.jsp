@@ -108,6 +108,16 @@
               </td>
               <td width="15%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)}">
                 <c:out value="${pat.indicatori.get('PxI').informativa}" />
+                <hr class="riga" />
+                <div class="lightTable subfields">
+                  Nota:<br />
+                  <span class="file-data">
+                    <c:out value="${pat.indicatori.get('PxI').note}" />
+                    <a href="${initParam.appName}/?q=pr&p=pin&pliv=${pat.id}&liv=2&pxi=${pat.indicatori.get('PxI').informativa}&r=${param['r']}&ref=str" class="" title="Modifica nota PxI">
+                      <i class="fa-regular fa-pen-to-square"></i>
+                    </a>
+                  </span>
+                </div>
               </td>
             </tr>
             </c:forEach>
