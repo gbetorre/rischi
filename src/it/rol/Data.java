@@ -1140,6 +1140,12 @@ public class Data extends HttpServlet implements Constants {
                             content.append(BLANK_SPACE);
                             content.append(p.getIndicatori().get("PxI").getInformativa());
                             content.append(BLANK_SPACE).append("\\highlight0").append(BLANK_SPACE);
+                            content.append(BLANK_SPACE);
+                            content.append(p.getIndicatori().get("PxI").getNote()
+                                            .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
+                                            .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
+                                            .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
+                            content.append(BLANK_SPACE).append(BLANK_SPACE);
                         }
                         content.append("\\cell");
                         content.append("\\row \n");
