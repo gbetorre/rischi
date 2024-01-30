@@ -21,7 +21,7 @@
           <a href="${initParam.appName}/?q=pr&p=out&idO=${output.id}&r=${param['r']}">
           <c:out value="${output.nome}" />
           <span class="float-right">
-            (<fmt:formatNumber value="${output.fte}" minFractionDigits="0" />)
+            (<fmt:formatNumber value="${output.livello}" minFractionDigits="0" />)
           </span>
           </a>
         </li>
