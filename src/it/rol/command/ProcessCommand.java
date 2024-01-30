@@ -197,6 +197,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         String codeSur = parser.getStringParameter("r", DASH);
         // Recupera o inizializza 'tipo pagina'
         String part = parser.getStringParameter("p", DASH);
+        // Recupera o inizializza eventuale parametro referral
+        String ref = parser.getStringParameter("ref", DASH);
         // Recupera o inizializza 'id processo'
         int idP = parser.getIntParameter("pliv", DEFAULT_ID);
         // Recupera o inizializza livello di granularità del processo anticorruttivo
@@ -317,14 +319,19 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                              *                UPDATE a note to PxI              *
                              * ************************************************ */
                             // Aggiorna la nota
-                            //db.insertFactorRiskProcess(user, params);
-                            /* Prepara la redirect 
-                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
-                                       AMPERSAND + "p" + EQ + PART_PROCESS +
-                                       AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
-                                       AMPERSAND + "liv" + EQ + "2" +
-                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur +
-                                       AMPERSAND + MESSAGE + EQ + "newRel#rischi";*/
+                            db.updateNote(user, params);
+                            // Prepara la redirect 
+                            if (ref.equalsIgnoreCase(PART_PROCESS)) {
+                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
+                                           AMPERSAND + "p" + EQ + PART_PROCESS +
+                                           AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
+                                           AMPERSAND + "liv" + EQ + "2" +
+                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur;     
+                            } else if (ref.equalsIgnoreCase(PART_SELECT_STR)) {
+                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_REPORT + 
+                                           AMPERSAND + "p" + EQ + PART_SELECT_STR +
+                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur;  
+                            }
                         }
                     }
                 // @GetMapping
@@ -336,26 +343,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *                  SELECT Process                  *
                              * ************************************************ */
-                            // Recupera Input estratti in base al processo
-                            ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
-                            // Recupera Fasi estratte in base al processo
-                            ArrayList<ActivityBean> listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
-                            // Recupera Output estratti in base al processo
-                            ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
-                            // Recupera Rischi estratti in base al processo
-                            ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
-                            // Recupera le interviste in cui il processo è stato esaminato
-                            ArrayList<InterviewBean> listaInterviste = retrieveInterviews(user, idP, liv, codeSur, db);
-                            // Recupera gli indicatori con i valori finali di rischio ottenuti a partire dai dati grezzi delle interviste
-                            indicators = AuditCommand.compare(listaInterviste);
                             // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                             processElements = new HashMap<>();
-                            // Imposta nella tabella le liste trovate
-                            processElements.put(TIPI_LISTE[0], listaInput);
-                            processElements.put(TIPI_LISTE[1], listaFasi);
-                            processElements.put(TIPI_LISTE[2], listaOutput);
-                            processElements.put(TIPI_LISTE[3], listaRischi);
-                            processElements.put(TIPI_LISTE[4], listaInterviste);
+                            // Valorizza tali liste necessarie a visualizzare  i dettagli di un processo, restituendo gli indicatori corredati con le note al PxI
+                            indicators = retrieveProcess(user, idP, liv, processElements, codeSur, db);
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
@@ -845,44 +836,52 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
     
     
     /**
-     * <p>Restituisce un HashMap di tutti gli indicatori, con i valori
+     * <p>Prende in input un HashMap di tutti gli indicatori, con i valori
      * calcolati in riferimento al processo censito dall'anticorruzione 
      * di cui viene passato l'identificativo ed il livello, 
-     * nel contesto di una data rilevazione.<br />
-     * Nel caso in cui il processo di dato id sia stato esaminato 
-     * nel contesto di pi&uacute; di un'intervista, producendo quindi
-     * valori molteplici, ricava un valore unico tramite 
-     * l'applicazione dell'algoritmo "In dubio pro peior", 
-     * che sceglie sempre il valore peggiore
-     * (ovvero il rischio pi&uacute; alto) per ogni serie di valori
-     * contrastanti.</p>
+     * nel contesto di una data rilevazione, recupera le note al giudizio
+     * sintetico del PxI e le aggiunge al relativo indicatore, aggiornando
+     * poi la mappa.<br />
+     * Il valore del PxI &egrave; uno solo anche nel caso in cui il processo 
+     * di dato id sia stato esaminato nel contesto di pi&uacute; di un'intervista, 
+     * producendo quindi valori molteplici, perch&eacute; la mappa che accetta 
+     * come argomento contiene gi&agrave; il valore individuato tramite 
+     * l'applicazione dell'algoritmo "In dubio pro peior", che sceglie sempre 
+     * il valore peggiore (ovvero il rischio pi&uacute; alto) 
+     * per ogni serie di valori contrastanti.</p>
      *
      * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param indicators    mappa di indicatori calcolati a runtime
      * @param id            identificativo del processo o del sottoprocesso (si capisce dal livello)
      * @param level         valore specificante la tabella in cui cercare l'identificativo (2 = processo_at | 3 = sottoprocesso_at)
      * @param codeSurvey    il codice della rilevazione
      * @param db            istanza di WebStorage per l'accesso ai dati
-     * @return <code>ArrayList&lt;InterviewBean&gt;</code> - lista di interviste recuperate
+     * @return <code>HashMap&lt;String, InterviewBean&gt;</code> - lista di indicatori recuperati per il processo, con il PxI corredato di note
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
      */
     public static HashMap<String, InterviewBean> retrieveIndicators(PersonBean user,
-                                                              int id,
-                                                              int level,
-                                                              String codeSurvey,
-                                                              DBWrapper db)
-                                                       throws CommandException {
-        ArrayList<InterviewBean> interviews = null;
-        HashMap<String, InterviewBean> patIndicators = new HashMap<>();
+                                                                    final HashMap<String, InterviewBean> indicators,
+                                                                    int id,
+                                                                    int level,
+                                                                    String codeSurvey,
+                                                                    DBWrapper db)
+                                                             throws CommandException {
+        HashMap<String, InterviewBean> richIndicators = indicators;
         try {
+            // Recupera il PxI
+            InterviewBean pi = indicators.get(PI);
             // Prepara l'oggetto rilevazione
             CodeBean survey = ConfigManager.getSurvey(codeSurvey);
-            // Recupera le interviste che, in una data rilevazione, hanno riguardato il processo di dato id
-            interviews = retrieveInterviews(user, id, level, codeSurvey, db);
-/*
+            // Recupera la nota al giudizio sintetico
+            ItemBean piNote = db.getIndicatorPI(user, id, survey);
+            // Aggiunge le note al PxI
+            pi.setNote(piNote.getInformativa());
+            // Aggiunge il PxI "arricchito" agli indicatori precalcolati
+            richIndicators.put(PI, pi);
         } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero delle interviste.\n";
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero della nota PxI.\n";
             LOG.severe(msg);
-            throw new CommandException(msg + wse.getMessage(), wse);*/
+            throw new CommandException(msg + wse.getMessage(), wse);
         } catch (NullPointerException npe) {
             String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
             LOG.severe(msg);
@@ -892,9 +891,68 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg + e.getMessage(), e);
         }
-        return patIndicators;
+        return richIndicators;
     }
     
+    
+    /**
+     * <p>In ossequio al paradigma DRY (Don't Repeat Yourself), centralizza 
+     * il codice che effettua il recupero di tutte le liste e le informazioni 
+     * necessarie per costruire la pagina dei dettagli di un processo.</p>
+     * 
+     * @param user              utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param idP               identificativo del processo o del sottoprocesso (si capisce dal livello)
+     * @param liv               valore specificante la tabella in cui cercare l'identificativo (2 = processo_at | 3 = sottoprocesso_at)
+     * @param processElements   generica mappa in cui devono essere valorizzate, per riferimento, le liste di items afferenti al processo
+     * @param codeSur           il codice della rilevazione
+     * @param db                istanza di WebStorage per l'accesso ai dati
+     * @return <code>HashMap&lt;String, InterviewBean&gt;</code> - lista di indicatori recuperati per il processo, con il PxI corredato di note
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento 
+     */
+    public static HashMap<String, InterviewBean> retrieveProcess(PersonBean user, 
+                                                                 int idP, 
+                                                                 int liv, 
+                                                                 HashMap<String, ArrayList<?>> processElements, 
+                                                                 String codeSur, 
+                                                                 DBWrapper db) 
+                                                                 throws CommandException {
+        HashMap<String, InterviewBean> indicators = null;
+        try {
+            // Recupera Input estratti in base al processo
+            ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
+            // Recupera Fasi estratte in base al processo
+            ArrayList<ActivityBean> listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
+            // Recupera Output estratti in base al processo
+            ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
+            // Recupera Rischi estratti in base al processo
+            ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
+            // Recupera le interviste in cui il processo è stato esaminato
+            ArrayList<InterviewBean> listaInterviste = retrieveInterviews(user, idP, liv, codeSur, db);
+            // Recupera gli indicatori corretti (calcolati a runtime e privi solo delle note)
+            HashMap<String, InterviewBean> listaIndicatori = AuditCommand.compare(listaInterviste);
+            // Recupera le note e le aggiunge al PxI
+            indicators = retrieveIndicators(user, listaIndicatori, idP, liv, codeSur, db);
+            // Imposta nella tabella le liste trovate
+            processElements.put(TIPI_LISTE[0], listaInput);
+            processElements.put(TIPI_LISTE[1], listaFasi);
+            processElements.put(TIPI_LISTE[2], listaOutput);
+            processElements.put(TIPI_LISTE[3], listaRischi);
+            processElements.put(TIPI_LISTE[4], listaInterviste);
+        } catch (CommandException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di dati da metodi retrieve che invocano metodi di db.get.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return indicators;
+    }
     
     /* **************************************************************** *
      *                   Metodi di travaso dei dati                     *                     
