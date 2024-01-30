@@ -19,21 +19,16 @@
         </button>
       </div>
       <div class="toast-body">
-        Versione: 1.66
+        Versione: 1.67
         <fmt:setLocale value="it_IT"/>
-        <c:set var="deployDate" value="19-01-2024" scope="page" />
+        <c:set var="deployDate" value="30-01-2024" scope="page" />
         <fmt:parseDate var="releaseDate" value="${deployDate}" pattern="dd-MM-yyyy" scope="page" />
         <fmt:formatDate var="dataRilascio" value="${releaseDate}" pattern="dd MMMMM, yyyy" />
         <span class="float-right">
           <em>(data di rilascio: <c:out value="${dataRilascio}" />)</em>
         </span>
         <hr class="riga" />
-          &copy; 2022 &mdash; <c:out value="${requestScope.theCurrentYear}" />&nbsp;<%-- 
-          &nbsp;&nbsp;Universit&agrave; degli studi di Verona&nbsp;<br />&nbsp;
-          &nbsp;Via dell'Artigliere 8, 37129 Verona &nbsp;<br />&nbsp; 
-          &nbsp;Partita IVA IT01541040232 &nbsp;<br />&nbsp; 
-          &nbsp;Codice Fiscale 93009870234 
-          --%>
+          &copy; 2022 &mdash; <c:out value="${requestScope.theCurrentYear}" />&nbsp;
       </div>
     </div>
   </div>
