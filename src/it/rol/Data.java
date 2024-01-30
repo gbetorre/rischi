@@ -306,7 +306,7 @@ public class Data extends HttpServlet implements Constants {
                     // Al momento l'unica Command abilitata a gestire output rtf
                     if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
                         // Recupero elementi in base alla richiesta
-                        mappa = retrieve(req, qToken, part, format);
+                        mappa = retrieve(req, qToken, part);
                         // Passaggio in request per uso delle lista
                         req.setAttribute("lista", mappa);
                         // Assegnazione di un valore di default se il parametro 'p' è nullo
@@ -317,6 +317,24 @@ public class Data extends HttpServlet implements Constants {
                         return;
                     }
                 }
+                
+                // Output è HyperText Markup Language
+                else if (format.equalsIgnoreCase(HTML)) {
+                    // Al momento l'unica Command abilitata a gestire output html
+                    if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
+                        // Recupero elementi in base alla richiesta
+                        //mappa = retrieve(req, qToken, part, format);
+                        // Passaggio in request per uso delle lista
+                        //req.setAttribute("lista", mappa);
+                        // Assegnazione di un valore di default se il parametro 'p' è nullo
+                        //String key = (part == null ? qToken : part);
+                        // Genera il file RTF
+                        makeHTML(req, res, "test");
+                        // Ha finito
+                        //return;
+                    }
+                }
+                
                 // Output è in finestra di popup
                 else {
                     // Ultimo valore ammesso: pop
@@ -329,18 +347,22 @@ public class Data extends HttpServlet implements Constants {
                 }
             }
             // Se non è uscito, vuol dire che deve servire una richiesta asincrona
-            if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
-                // Nello specifico, dettaglio processo via XHR ("data?q=pr&p=pro&pliv=#&liv=#&r=$")
-                HashMap<String, ArrayList<?>> processElements = retrieve(req, COMMAND_PROCESS, PART_PROCESS);
+            if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) { //dettaglio processo via XHR ("data?q=pr&p=pro&pliv=#&liv=#&r=$")
+                // Recupera le liste di elementi collegati al processo 
+                HashMap<String, ArrayList<?>> processElements = new HashMap<>();            
+                // Recupera gli indicatori corredati di note e valorizza per riferimento le altre liste
+                HashMap<String, InterviewBean> indicators = retrieve(req, COMMAND_PROCESS, PART_PROCESS, processElements);
                 // Imposta nella request liste di elementi collegati a processo
                 req.setAttribute("listaInput", processElements.get(TIPI_LISTE[0]));
                 req.setAttribute("listaFasi", processElements.get(TIPI_LISTE[1]));
                 req.setAttribute("listaOutput", processElements.get(TIPI_LISTE[2]));
                 req.setAttribute("listaRischi", processElements.get(TIPI_LISTE[3]));
                 req.setAttribute("listaInterviste", processElements.get(TIPI_LISTE[4]));
-                req.setAttribute("listaIndicatori", AuditCommand.compare((ArrayList<InterviewBean>) processElements.get(TIPI_LISTE[4])));
+                req.setAttribute("listaIndicatori", indicators);
                 // Output in formato di default
                 fileJsp = nomeFileProcessoAjax;
+            } else if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
+                fileJsp = "/jsp/landing.jsp";
             } else {
                 String msg = FOR_NAME + "Valore del parametro \'q\' (" + qToken + ") non consentito. Impossibile visualizzare i risultati.\n";
                 log.severe(msg);
@@ -358,7 +380,10 @@ public class Data extends HttpServlet implements Constants {
     /**
      * <p>Restituisce un elenco generico di elementi 
      * (interviste, macroprocessi, strutture...)
-     * relativi a una richiesta specifica.</p>
+     * relativi a una richiesta specifica. 
+     * I dati ottenuti tramite questo metodo sono generalmente pensati 
+     * per essere forniti in output sotto forma di tuple con ridotta presentazione
+     * (elenchi csv, log html).</p>
      *
      * @param req HttpServletRequest contenente i parametri per contestualizzare l'estrazione
      * @param qToken il token della commmand in base al quale bisogna preparare la lista di elementi
@@ -483,22 +508,27 @@ public class Data extends HttpServlet implements Constants {
 
 
     /**
-     * <p>Restituisce una mappa contenente elenchi di elementi generici 
+     * <p>Restituisce una mappa contenente elenchi di indicatori contenenti 
+     * anche le note al PxI e valorizza per riferimento liste di elementi generici 
      * (input, fasi, output...) estratti in base alla richiesta ricevuta
-     * e indicizzati per una chiave convenzionale, definita nelle costanti.</p>
-     *
-     * @param req HttpServletRequest contenente i parametri per contestualizzare l'estrazione
-     * @param qToken il token della commmand in base al quale bisogna preparare la lista di elementi
-     * @param pToken il token relativo alla parte di gestione da effettuare
-     * @return <code>HashMap&lt;String,ArrayList&lt;?&gt;&gt; - dictionary contenente le liste di elementi desiderati, indicizzati per una chiave convenzionale
+     * e indicizzati per una chiave convenzionale, definita nelle costanti.
+     * I dati ottenuti tramite questo metodo sono generalmente pensati 
+     * per servire una richiesta asincrona (XHR).</p>
+     * 
+     * @param req       HttpServletRequest contenente i parametri per contestualizzare l'estrazione
+     * @param qToken    il token della commmand in base al quale bisogna preparare la lista di elementi
+     * @param pToken    il token relativo alla parte di gestione da effettuare
+     * @param elements  generica mappa in cui devono essere valorizzate, per riferimento, le liste di items afferenti al processo
+     * @return <code>HashMap&lt;String,InterviewBean&gt; - dictionary contenente gli indicatori cached, contenenti anche le note
      * @throws CommandException se si verifica un problema nella WebStorage (DBWrapper), nella Command interpellata, o in qualche puntamento
      */
-    private static HashMap<String, ArrayList<?>> retrieve(HttpServletRequest req,
-                                                          String qToken,
-                                                          String pToken)
-                                                   throws CommandException {
+    private static HashMap<String, InterviewBean> retrieve(HttpServletRequest req,
+                                                           String qToken,
+                                                           String pToken,
+                                                           HashMap<String, ArrayList<?>> elements)
+                                                    throws CommandException {
         // Dichiara generico elenco di elementi da restituire
-        HashMap<String,ArrayList<?>> list = null;
+        HashMap<String, InterviewBean> indicators = null;
         // Ottiene i parametri della richiesta
         ParameterParser parser = new ParameterParser(req);
         // Recupera o inizializza parametro per identificare la pagina
@@ -523,24 +553,8 @@ public class Data extends HttpServlet implements Constants {
                     int idP = parser.getIntParameter("pliv", DEFAULT_ID);
                     // Cerca la granularità del processo anticorruttivo
                     int liv = parser.getIntParameter("liv", DEFAULT_ID);
-                    // Recupera Input estratti in base al processo
-                    ArrayList<ItemBean> listaInput = ProcessCommand.retrieveInputs(user, idP, liv, codeSurvey, db);
-                    // Recupera Fasi estratte in base al processo
-                    ArrayList<ActivityBean> listaFasi = ProcessCommand.retrieveActivities(user, idP, liv, codeSurvey, db);
-                    // Recupera Output estratti in base al processo
-                    ArrayList<ItemBean> listaOutput = ProcessCommand.retrieveOutputs(user, idP, liv, codeSurvey, db);
-                    // Recupera Rischi estratti in base al processo
-                    ArrayList<RiskBean> listaRischi = ProcessCommand.retrieveRisks(user, idP, liv, codeSurvey, db);
-                    // Recupera Interviste estratte in base al processo
-                    ArrayList<InterviewBean> listaInterviste = ProcessCommand.retrieveInterviews(user, idP, liv, codeSurvey, db);
-                    // Istanzia la tabella in cui devono essere settate le liste
-                    list = new HashMap<>();
-                    // Imposta nella tabella le liste trovate
-                    list.put(TIPI_LISTE[0], listaInput);
-                    list.put(TIPI_LISTE[1], listaFasi);
-                    list.put(TIPI_LISTE[2], listaOutput);
-                    list.put(TIPI_LISTE[3], listaRischi);
-                    list.put(TIPI_LISTE[4], listaInterviste);
+                    // Valorizza liste necessarie a visualizzare  i dettagli di un processo, restituendo gli indicatori corredati con le note al PxI
+                    indicators = ProcessCommand.retrieveProcess(user, idP, liv, elements, codeSurvey, db);
                 }
             // "data?q=st"
             } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
@@ -558,26 +572,26 @@ public class Data extends HttpServlet implements Constants {
             log.severe(msg);
             throw new CommandException(msg);
         }
-        return list;
+        return indicators;
     }
     
     
     /**
      * <p>Restituisce una mappa contenente elenchi di elementi generici 
      * (macroprocessi, rischi, strutture...) estratti in base alla richiesta
-     * e indicizzati per una chiave convenzionale, definita nelle costanti.</p>
+     * e indicizzati per una chiave convenzionale, definita nelle costanti.
+     * I dati ottenuti tramite questo metodo sono generalmente pensati 
+     * per alimentare un report formattato (RTF).</p>
      *
-     * @param req HttpServletRequest contenente i parametri per contestualizzare l'estrazione
-     * @param qToken il token della commmand in base al quale bisogna preparare la lista di elementi
-     * @param pToken il token relativo alla parte di gestione da effettuare
-     * @param out    parametro fittizio per consentire il polimorfismo
-     * @return <code>HashMap&lt;String,ArrayList&lt;?&gt;&gt; - dictionary contenente le liste di elementi desiderati, indicizzati per una chiave convenzionale
+     * @param req       HttpServletRequest contenente i parametri per contestualizzare l'estrazione
+     * @param qToken    il token della commmand in base al quale bisogna preparare la lista di elementi
+     * @param pToken    il token relativo alla parte di gestione da effettuare
+     * @return <code>HashMap&lt;String, HashMap&lt;Integer, ?&gt;&gt; - dictionary contenente le liste di elementi desiderati, indicizzati per una chiave convenzionale
      * @throws CommandException se si verifica un problema nella WebStorage (DBWrapper), nella Command interpellata, o in qualche puntamento
      */
     private static HashMap<String, HashMap<Integer, ?>> retrieve(HttpServletRequest req,
                                                                  String qToken,
-                                                                 String pToken,
-                                                                 String out)
+                                                                 String pToken)
                                                           throws CommandException {
         // Dichiara generico elenco di elementi da restituire
         HashMap<String, HashMap<Integer, ?>> list = null;
@@ -708,6 +722,34 @@ public class Data extends HttpServlet implements Constants {
         res.setCharacterEncoding("ISO-8859-1");
         // Configura l'header
         res.setHeader("Content-Disposition","attachment;filename=" + fileName + DOT + RTF);
+        // Stampa il file sullo standard output
+        fprintf(req, res);
+    }
+    
+    
+    /**
+     * <p>Gestisce la generazione dell&apos;output in formato di un log formattato 
+     * che sar&agrave; recepito come tale dal browser e trattato di conseguenza 
+     * (normalmente, ma non necessariamente, con il download).</p>
+     * <p>Usa altri metodi, interni, per ottenere il nome del file, che dev&apos;essere un
+     * nome univoco, e per la stampa vera e propria nel PrintWriter.</p>
+     *
+     * @param req HttpServletRequest da passare al metodo di stampa
+     * @param res HttpServletResponse per impostarvi i valori che la predispongono a servire csv anziche' html
+     * @param qToken token della commmand in base al quale bisogna preparare la lista di elementi
+     * @throws ServletException eccezione eventualmente proveniente dalla fprinf, da propagare
+     * @throws IOException  eccezione eventualmente proveniente dalla fprinf, da propagare
+     */
+    private static void makeHTML(HttpServletRequest req, HttpServletResponse res, String qToken)
+                         throws ServletException, IOException {
+        // Genera un nome univoco per il file che verrà servito
+        String fileName = makeFilename(COMMAND_REPORT);
+        // Configura il response per il browser
+        res.setContentType("text/html");
+        // Configura il characterEncoding (v. commento)
+        res.setCharacterEncoding("ISO-8859-1");
+        // Configura l'header
+        res.setHeader("Content-Disposition","attachment;filename=" + fileName + DOT + HTML);
         // Stampa il file sullo standard output
         fprintf(req, res);
     }
