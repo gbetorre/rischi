@@ -780,7 +780,7 @@ public interface Query extends Serializable {
             "   ,   OUT.data_ultima_modifica    AS \"dataUltimaModifica\"" +
             "   ,   OUT.ora_ultima_modifica     AS \"oraUltimaModifica\"" +
             "   ,   OUT.id_rilevazione          AS \"idRilevazione\"" +
-            "   ,   count(INPAT.id_processo_at) AS \"fte\"" +
+            "   ,   count(INPAT.id_processo_at) AS \"livello\"" +
             "   FROM output OUT" +
             "       INNER JOIN rilevazione S ON OUT.id_rilevazione = S.id" +
             "       LEFT JOIN input INP ON INP.id_output = OUT.id" + 
@@ -1060,11 +1060,28 @@ public interface Query extends Serializable {
     
     /**
      * <p>Seleziona  i valori del PxI di un processo anticorruttivo di dato id
-     *  nel contesto di una data rilevazione.</p>
+     *  nel contesto di una data rilevazione.
+     *  Li unisce con i valori del P perch&eacute; ci interessa la data
+     *  di un indicatore non soggetto ad aggiornamento singolo.
+     *  Quando infatti l'utente aggiorna la nota del giudizio sintetico,
+     *  la data di ultima modifica del PxI viene aggiornata; se ci basassimo
+     *  su di essa per stabilire quando &egrave; stato calcolato il valore
+     *  del PxI (p.es. "ALTO") saremmo fuori strada; recuperiamo quindi
+     *  anche la data di ultima modifica di un altro indicatore (ho preso P
+     *  ma avrei potuto prendere qualunque altro) e poi la aggiungiamo
+     *  all'oggetto che incapsuler&agrave; il PxI, sotto forma di 
+     *  informazione aggiuntiva.</p>
+     *  <p>Nota che, come sempre, c'erano anche altri modi di scrivere 
+     *  la query, senza ricorrere alla UNION, p.es. modificando la
+     *  clausola come segue:
+     *  <pre>WHERE INPAT.cod_indicatore ILIKE 'P%'</pre>
+     *  Tuttavia ho scelto di fare la UNION 
+     *  per maggiore chiarezza (auto)esplicativa.</p>
      */
     public static final String GET_INDICATOR_PXI_BY_PROCESS = 
-            "SELECT" +
-            "       INPAT.valore                        AS \"livello\"" +
+            "(SELECT" +
+            "       INPAT.cod_indicatore                AS \"nome\"" +
+            "   ,   INPAT.valore                        AS \"livello\"" +
             "   ,   INPAT.descrizione                   AS \"extraInfo\"" +
             "   ,   INPAT.note                          AS \"informativa\"" +
             "   ,   INPAT.data_ultima_modifica          AS \"extraInfo1\"" +
@@ -1073,7 +1090,44 @@ public interface Query extends Serializable {
             "   FROM indicatore_processo_at INPAT" +
             "   WHERE INPAT.cod_indicatore = 'PxI'" +
             "       AND INPAT.id_processo_at = ?" +
-            "       AND INPAT.id_rilevazione = ?";
+            "       AND INPAT.id_rilevazione = ?)" +
+            " UNION " +
+            "(SELECT" +
+            "       INPAT.cod_indicatore                AS \"nome\"" +
+            "   ,   INPAT.valore                        " +
+            "   ,   INPAT.descrizione                   " +
+            "   ,   INPAT.note                          " +
+            "   ,   INPAT.data_ultima_modifica          AS \"extraInfo1\"" +
+            "   ,   INPAT.ora_ultima_modifica           " +
+            "   ,   INPAT.id_usr_ultima_modifica        " +
+            "   FROM indicatore_processo_at INPAT" +
+            "   WHERE INPAT.cod_indicatore = 'P'" +
+            "       AND INPAT.id_processo_at = ?" +
+            "       AND INPAT.id_rilevazione = ?)";
+    
+    /**
+     * <p>Estrae i valori di tutte le note al giudizio sintetico di tutti
+     *  i processi censiti a fini anticorruttivi ottenuti nel contesto
+     *  di una data rilevazione.</p>
+     */
+    public static final String GET_NOTES_PXI = 
+            "SELECT DISTINCT" +
+            "       INPAT.id_processo_at                AS \"cod1\"" +
+            "   ,   INPAT.cod_indicatore                AS \"codice\"" +
+            "   ,   INPAT.id_rilevazione                AS \"cod2\"" +
+            "   ,   INPAT.valore                        AS \"value1\"" +
+            "   ,   INPAT.descrizione                   AS \"extraInfo\"" +
+            "   ,   INPAT.note                          AS \"informativa\"" +
+            "   ,   INPAT.ordinale                      AS \"ordinale\"" +
+            "   ,   INPAT.data_ultima_modifica          AS \"extraInfo1\"" +
+            "   ,   INPAT.ora_ultima_modifica           AS \"extraInfo2\"" +
+            "   ,   INPAT.id_usr_ultima_modifica        AS \"extraInfo3\"" +
+            "   ,   N.count                             AS \"cod3\"" +
+            "   FROM indicatore_processo_at INPAT" +
+            "       JOIN num_indicatori N ON INPAT.id_processo_at = N.id" +
+            "   WHERE INPAT.cod_indicatore = 'PxI'" +
+            "       AND INPAT.id_rilevazione = ?" +
+            "   ORDER BY INPAT.id_processo_at";
 
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
@@ -1422,7 +1476,7 @@ public interface Query extends Serializable {
             "   ,  data_ultima_modifica =   ?" +
             "   ,  ora_ultima_modifica =    ?" +
             "   ,  id_usr_ultima_modifica = ?" +
-            "   WHERE cod_indicatore = 'PxI" +
+            "   WHERE cod_indicatore = 'PxI'" +
             "       AND id_processo_at = ?" +
             "       AND id_rilevazione = ?";
 
