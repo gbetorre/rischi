@@ -240,7 +240,7 @@
       </c:otherwise>
     </c:choose>
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples bgAct13">
-        <div class="fs-2 mb-3">Indicatori di rischio:</div>
+        <div class="fs-2 mb-3">Valutazione del rischio:</div>
         <ol class="breadcrumb mb-4">
           <li class="breadcrumb-item active">
             Il processo &egrave; stato esaminato in&nbsp;
@@ -306,7 +306,12 @@
                 <c:set var="keys" value="${indics.keySet()}" />
                 <c:forEach var="key" items="${keys}">
                   <c:set var="ind" value="${indics.get(key)}" />
+                  <c:if test="${(ind.nome eq 'I1') or (ind.nome eq 'P') or (ind.nome eq 'PxI')}">
                   <tr>
+                    <td colspan="4"><hr class="riga" /></td>
+                  </tr>
+                  </c:if>
+                  <tr class="selected">
                     <td><c:out value="${ind.nome}" />: <c:out value="${ind.descrizione}" /></td>
                     <td>
                     <c:set var="comma" value="," scope="page" />
@@ -330,11 +335,15 @@
                     </td>
                   </tr>
                 </c:forEach>
-                  <tr>
-                    <td colspan="4" class="center text-center" align="center" title="Aggiungi nota">
-                      <a href="${initParam.appName}/?q=pr&p=pin&pliv=${param['pliv']}&liv=2&pxi=${indics.get('PxI').informativa}&r=${param['r']}&ref=pro" class="btn btn-primary" title="Aggiungi o aggiorna una nota al PxI nel contesto del processo &quot;${processo}&quot;">
-                        <small><i class="fa-solid fa-circle-plus"></i> Nota</small>
-                      </a>
+                  <tr class="selected">
+                    <td colspan="4" class="center text-center verticalCenter reportRow" align="center" title="Aggiungi/modifica motivazione">
+                      <div class="lightTable subfields">
+                        Motivazione:<br /><span class="textcolormaroon"><c:out value="${ind.note}" escapeXml="false" />
+                          <a href="${initParam.appName}/?q=pr&p=pin&pliv=${param['pliv']}&liv=2&pxi=${indics.get('PxI').informativa}&r=${param['r']}&ref=pro" class="" title="Modifica motivazione PxI">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                          </a>
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
