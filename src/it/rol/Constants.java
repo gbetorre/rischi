@@ -471,13 +471,17 @@ public interface Constants extends Serializable {
      * Formati di files, naming di files, tipi MIME etc.
      * ************************************************************************ */
     /**
+     * Costante per il tipo MIME testo semplice
+     */
+    public static final String MIME_TYPE_TEXT = "text/plain";   
+    /**
      * Costante per il tipo MIME html
      */
     public static final String MIME_TYPE_HTML = "text/html";
     /**
-     * Costante per il tipo MIME testo semplice
+     * Costante per il formato di file "Hyper Text Markup Language"
      */
-    public static final String MIME_TYPE_TEXT = "text/plain";
+    public static final String HTML = "html";
     /**
      * Costante per il formato di file "Comma Separated Values"
      */
