@@ -573,14 +573,14 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             // Recupera gli estremi del rischio da inserire
             risk.put("risk",    parser.getStringParameter("r-name", VOID_STRING));
             risk.put("desc",    parser.getStringParameter("r-descr", VOID_STRING));
-            formParams.put(PART_INSERT_RISK, risk);
+            formParams.put(part, risk);
         /* **************************************************** *
          *  Caricamento parametri Associazione Processo-Rischio *
          * **************************************************** */
         } else if (part.equals(PART_INSERT_RISK_PROCESS)) {
             // Recupera gli estremi del rischio da inserire
             risk.put("risk",    parser.getStringParameter("r-id", VOID_STRING));
-            formParams.put(PART_INSERT_RISK_PROCESS, risk);
+            formParams.put(part, risk);
         /* **************************************************** *
          *     Caricamento parametri Fattore-Processo-Rischio   *
          * **************************************************** */
@@ -589,7 +589,15 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             risk.put("risk",    parser.getStringParameter("r-id", VOID_STRING));
             risk.put("fact",    parser.getStringParameter("fliv1", VOID_STRING));
             risk.put("proc",    parser.getStringParameter("pliv", VOID_STRING));
-            formParams.put(PART_INSERT_F_R_P, risk);
+            formParams.put(part, risk);
+        /* **************************************************** *
+         *    Caricamento parametri Aggiornamento Nota al PxI   *
+         * **************************************************** */
+        } else if (part.equals(PART_PI_NOTE)) {
+            // Recupera gli estremi della nota da aggiornare
+            //String note = parser.getStringParameter("pi-note", VOID_STRING);
+            risk.put("note",    parser.getStringParameter("pi-note", VOID_STRING));
+            formParams.put(part, risk);
         }
     }
     
