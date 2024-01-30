@@ -236,7 +236,7 @@
           </c:otherwise>
         </c:choose>
           </td>
-          <td class="text-justify" width="*%"><span id="note${answer.id}"><c:out value="${answer.answer.informativa}" /></span></td>
+          <td class="text-justify" width="*%"><span id="note${answer.id}"><c:out value="${answer.answer.informativa}" escapeXml="false" /></span></td>
           <td class="text-center" width="10%">
             <a href="#upd-form" rel="modal:open" onclick="change('${answer.answer.nome}',${answer.id},'${answer.tipo.informativa}','${fn:replace(answer.formulazione, singleQuote, singleQuoteEsc)}');">
               <img src="${initParam.urlDirectoryImmagini}ico-save.png" class="ico-home" alt="Modifica Risposta" title="Modifica" />
