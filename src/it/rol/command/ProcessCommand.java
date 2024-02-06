@@ -77,7 +77,6 @@ import it.rol.exception.WebStorageException;
  * ai fini della valutazione del rischio corruttivo, on line (ROL).</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
- * @version 1.53
  */
 public class ProcessCommand extends ItemBean implements Command, Constants {
 
@@ -540,8 +539,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
     
     /**
      * <p>Restituisce un ArrayList (albero, vista gerarchica) 
-     * di tutti processi censiti dall'anticorruzione nel contesto
-     * di una data rilevazione il cui identificativo 
+     * di tutti processi figli di macroprocessi censiti dall'anticorruzione 
+     * nel contesto di una data rilevazione il cui identificativo 
      * viene accettato come argomento; ogni processo contiene 
      * internamente gli estremi del padre, dei figli e degli indicatori
      * di rischio, se &egrave; stato oggetto di indagine (intervista).</p>
@@ -566,7 +565,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 Vector<ProcessBean> children = (Vector<ProcessBean>) mat.getProcessi();
                 for (ProcessBean pat : children) {
                     // Controllare se serve aggiungere il padre, o sta già "in pancia" del figlio
-                    // TODO CONTROL
+                    // TODO CHECK
                     // Calcola i valori degli indicatori di rischio per il processo corrente
                     pats.add(pat);
                 }
@@ -589,6 +588,58 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         return (ArrayList<ProcessBean>) pats;
     }
 
+    
+    /**
+     * <p>Interfaccia alternativa (semplificata) del il metodo che restituisce 
+     * di tutti processi figli di macroprocessi censiti dall'anticorruzione 
+     * nel contesto di una data rilevazione senza necessit&agrave; 
+     * che il chiamante passi un'istanza di WebStorage.
+     * Aggiunge anche gli indicatori (recuperati da cache) ad ogni processo recuperato.</p>
+     *
+     * @param codeSurvey    il codice della rilevazione
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi recuperati
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    private static ArrayList<ProcessBean> retrieveProcessAtBySurvey(PersonBean user,
+                                                                    String codeSurvey)
+                                                             throws CommandException {
+        ArrayList<ProcessBean> patsWithoutIndicators = null;
+        ArrayList<ProcessBean> patsWithIndicators = new ArrayList<>();
+        try {
+            // Crea una istanza di WebStorage
+            DBWrapper db = new DBWrapper();
+            // Usa il metodo apposito
+            patsWithoutIndicators = retrieveProcessAtBySurvey(user, codeSurvey, db);
+            // Cicla sui processi
+            for (ProcessBean pat : patsWithoutIndicators) {
+                // Recupera le interviste in cui il processo è stato esaminato
+                ArrayList<InterviewBean> listaInterviste = retrieveInterviews(user, pat.getId(), ELEMENT_LEV_2, codeSurvey, db);
+                // Recupera gli indicatori corretti (calcolati a runtime e privi solo delle note)
+                LinkedHashMap<String, InterviewBean> listaIndicatori = AuditCommand.compare(listaInterviste);
+                // Recupera le note e le aggiunge al PxI
+                LinkedHashMap<String, InterviewBean> indicators = (LinkedHashMap<String, InterviewBean>) retrieveIndicators(user, listaIndicatori, pat.getId(), ELEMENT_LEV_2, codeSurvey, db);
+                // Aggiunge gli indicatori al processo corrente
+                pat.setIndicatori(indicators);
+                // Aggiunge il processo corrente alla lista dei processi corredati di indicatori
+                patsWithIndicators.add(pat);
+            }
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'istanziare una WebStorage.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return patsWithIndicators;
+    }
+    
 
     /**
      * <p>Restituisce un ArrayList di tutti gli input trovati in base all' 
