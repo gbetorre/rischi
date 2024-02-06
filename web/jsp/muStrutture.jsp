@@ -8,7 +8,10 @@
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
     <h3 class="mt-1 m-0 font-weight-bold float-left">Report strutture e rischi</h3>
     <a href="${mtrRTF}" class="float-right badge badge-pill lightTable" title="Scarica il report in formato RTF">
-      <i class="fas fa-download"></i>Scarica in documento
+      <i class="fas fa-download"></i>Scarica report
+    </a>
+    <a href="${mtrHTM}" class="float-right badge badge-pill lightTable bgAct19" title="Scarica il log delle differenze sopravvenute nei valori degli indicatori rispetto all'ultimo ricalcolo">
+      <i class="fa-solid fa-book"></i> Log ricalcolo
     </a>
     <hr class="riga"/>
     <div class="col-md-offset-1">
@@ -110,9 +113,9 @@
                 <c:out value="${pat.indicatori.get('PxI').informativa}" />
                 <hr class="riga" />
                 <div class="lightTable subfields">
-                  Nota:<br />
+                  Motivazione:<br />
                   <span class="file-data">
-                    <c:out value="${pat.indicatori.get('PxI').note}" />
+                    <c:out value="${pat.indicatori.get('PxI').note}" escapeXml="false" />
                     <a href="${initParam.appName}/?q=pr&p=pin&pliv=${pat.id}&liv=2&pxi=${pat.indicatori.get('PxI').informativa}&r=${param['r']}&ref=str" class="" title="Modifica nota PxI">
                       <i class="fa-regular fa-pen-to-square"></i>
                     </a>
@@ -126,6 +129,7 @@
         </table>
       </div>
     </div>
+<!--     <a href="javascript:DoPost()">test</a> -->
     &nbsp;
     <a href="${mtr}&msg=refresh_ce" type="button" class="btn btn-primary float-right" value="Update">
       <i class="fa-solid fa-arrow-rotate-right"></i>
@@ -146,5 +150,13 @@
           "aaSorting": [[ 1, "asc" ]]
         });
       });
+    </script>
+    <script>
+    
+
+        function DoPost(){
+            alert('ok');
+            $.get("http://localhost:8080/rischi/data?q=mu&p=str&r=AT2022&out=html");  // Values must be in JSON format
+          }
     </script>
     
