@@ -45,6 +45,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -59,7 +60,6 @@ import javax.servlet.http.HttpSession;
 
 import com.oreilly.servlet.ParameterParser;
 
-import it.rol.bean.ActivityBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
@@ -168,9 +168,13 @@ public class Data extends HttpServlet implements Constants {
      */
     private String format;
     /**
-     * Pagina a cui la command reindirizza per mostrare le fasi nel contesto dei processi
+     * Pagina a cui la classe inoltra per mostrare le fasi nel contesto dei processi
      */
     private static final String nomeFileProcessoAjax = "/jsp/prProcessoAjax.jsp";
+    /**
+     * Pagina a cui la classe inoltra per mostrare le fasi nel contesto dei processi
+     */
+    private static final String nomeFileLog = "/jsp/diff.jsp";
     /**
      * Codifica esadecimale di un'immagine di corredo
      */
@@ -303,38 +307,31 @@ public class Data extends HttpServlet implements Constants {
                 }
                 // Output è Rich Text Format
                 else if (format.equalsIgnoreCase(RTF)) {
-                    // Al momento l'unica Command abilitata a gestire output rtf
+                    // Controlla che la command su cui si invoca la funzione sia quella abilitata
                     if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
                         // Recupero elementi in base alla richiesta
-                        mappa = retrieve(req, qToken, part);
+                        mappa = retrieve(req, qToken, part, format);
                         // Passaggio in request per uso delle lista
                         req.setAttribute("lista", mappa);
-                        // Assegnazione di un valore di default se il parametro 'p' è nullo
-                        String key = (part == null ? qToken : part);
                         // Genera il file RTF
-                        makeRTF(req, res, key);
+                        makeRTF(req, res, qToken);
                         // Ha finito
                         return;
                     }
                 }
-                
                 // Output è HyperText Markup Language
                 else if (format.equalsIgnoreCase(HTML)) {
                     // Al momento l'unica Command abilitata a gestire output html
                     if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
                         // Recupero elementi in base alla richiesta
-                        //mappa = retrieve(req, qToken, part, format);
+                        mappa = retrieve(req, qToken, part, format);
                         // Passaggio in request per uso delle lista
-                        //req.setAttribute("lista", mappa);
-                        // Assegnazione di un valore di default se il parametro 'p' è nullo
-                        //String key = (part == null ? qToken : part);
+                        req.setAttribute("lista", mappa);
                         // Genera il file RTF
-                        makeHTML(req, res, "test");
-                        // Ha finito
-                        //return;
+                        makeHTML(req, res, part);
+                        // Non ha finito (deve invocare la pagina dinamica)
                     }
                 }
-                
                 // Output è in finestra di popup
                 else {
                     // Ultimo valore ammesso: pop
@@ -362,7 +359,7 @@ public class Data extends HttpServlet implements Constants {
                 // Output in formato di default
                 fileJsp = nomeFileProcessoAjax;
             } else if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
-                fileJsp = "/jsp/landing.jsp";
+                fileJsp = nomeFileLog;
             } else {
                 String msg = FOR_NAME + "Valore del parametro \'q\' (" + qToken + ") non consentito. Impossibile visualizzare i risultati.\n";
                 log.severe(msg);
@@ -376,7 +373,10 @@ public class Data extends HttpServlet implements Constants {
         dispatcher.forward(req, res);
     }
 
-
+    /* **************************************************************** *
+     *       Metodi per generare tuple prive di presentazione (CSV)     *
+     * **************************************************************** */
+    
     /**
      * <p>Restituisce un elenco generico di elementi 
      * (interviste, macroprocessi, strutture...)
@@ -505,8 +505,152 @@ public class Data extends HttpServlet implements Constants {
         }
         return list;
     }
+    
+    /* **************************************************************** *
+     *  Metodi per generare tuple con qualche presentazione (RTF, HTML) *
+     * **************************************************************** */
+    
+    /**
+     * <p>Restituisce una mappa contenente elenchi di elementi generici 
+     * (macroprocessi, rischi, strutture...) estratti in base alla richiesta
+     * e indicizzati per una chiave convenzionale, definita nelle costanti.
+     * I dati ottenuti tramite questo metodo sono generalmente pensati 
+     * per alimentare un report formattato (RTF o HTML).</p>
+     *
+     * @param req       HttpServletRequest contenente i parametri per contestualizzare l'estrazione
+     * @param qToken    il token della commmand in base al quale bisogna preparare la lista di elementi
+     * @param pToken    il token relativo alla parte di gestione da effettuare
+     * @param out       parametro specificante il tipo di output richiesto
+     * @return <code>HashMap&lt;String, HashMap&lt;Integer, ?&gt;&gt; - dictionary contenente le liste di elementi desiderati, indicizzati per una chiave convenzionale
+     * @throws CommandException se si verifica un problema nella WebStorage (DBWrapper), nella Command interpellata, o in qualche puntamento
+     */
+    private static HashMap<String, HashMap<Integer, ?>> retrieve(HttpServletRequest req,
+                                                                 String qToken,
+                                                                 String pToken,
+                                                                 String out)
+                                                          throws CommandException {
+        // Dichiara generico elenco di elementi da restituire
+        HashMap<String, HashMap<Integer, ?>> list = null;
+        // Ottiene i parametri della richiesta
+        ParameterParser parser = new ParameterParser(req);
+        // Recupera o inizializza parametro per identificare la rilevazione
+        String codeSurvey = parser.getStringParameter("r", VOID_STRING);
+        // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
+        HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
+        PersonBean user = (PersonBean) ses.getAttribute("usr");
+        if (user == null) {
+            throw new CommandException(FOR_NAME + "Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+        }
+        // Gestisce la richiesta
+        try {
+            // Istanzia nuovo Databound
+            DBWrapper db = new DBWrapper();
+            // "data?q=mu"
+            if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
+                // "&p=str"
+                if (pToken.equalsIgnoreCase(PART_SELECT_STR)) {
+                    // "&out=rtf"
+                    if (out.equalsIgnoreCase(RTF)) {
+                        // Bisogna recuperare processi...
+                        ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSurvey, db);
+                        // ...e indicatori
+                        ArrayList<ProcessBean> matsWithIndicators = ReportCommand.retrieveIndicators(matsWithoutIndicators, user, codeSurvey, NOTHING, db);
+                        // Trasforma processi e indicatori in una HashMap per rispettare il tipo
+                        HashMap<Integer, ArrayList<ProcessBean>> listaMacroAt = new HashMap<>();
+                        // Carica processi e indicatori
+                        listaMacroAt.put(new Integer(NOTHING), matsWithIndicators);
+                        // Recupera le strutture indicizzate per identificativo di processo
+                        HashMap<Integer, ArrayList<DepartmentBean>> listaStrutture = ReportCommand.retrieveStructures(matsWithoutIndicators, user, codeSurvey, db);
+                        // Recupera i soggetti indicizzati per identificativo di processo
+                        HashMap<Integer, ArrayList<DepartmentBean>> listaSoggetti = ReportCommand.retrieveSubjects(matsWithoutIndicators, user, codeSurvey, db);
+                        // Recupera i rischi indicizzati per identificativo di processo
+                        HashMap<Integer, ArrayList<RiskBean>> listaRischi = ReportCommand.retrieveRisks(matsWithoutIndicators, user, codeSurvey, db);
+                        // Istanzia la mappa in cui devono essere settate le liste
+                        list = new HashMap<>();
+                        // Imposta nella mappa le liste trovate
+                        list.put(TIPI_LISTE[3], listaRischi);
+                        list.put(TIPI_LISTE[5], listaMacroAt);
+                        list.put(TIPI_LISTE[6], listaStrutture);
+                        list.put(TIPI_LISTE[7], listaSoggetti);
+                    // "&out=html"
+                    } else if (out.equalsIgnoreCase(HTML)) {
+                        // Bisogna recuperare processi...
+                        ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSurvey, db);
+                        // Per avere due oggetti realmente distinti deve per forza rifare la query
+                        ArrayList<ProcessBean> matsWithoutIndicators2 = ProcessCommand.retrieveMacroAtBySurvey(user, codeSurvey, db);
+                        // ...e indicatori cached
+                        ArrayList<ProcessBean> matsCached = ReportCommand.retrieveIndicators(matsWithoutIndicators, user, codeSurvey, NOTHING, db);
+                        // Bisogna anche calcolare gli indicatori a runtime
+                        ArrayList<ProcessBean> matsRuntime = ReportCommand.computeIndicators(matsWithoutIndicators2, user, codeSurvey, db);
+                        //ArrayList<ProcessBean> matsRuntime = ReportCommand.retrieveIndicators(matsWithoutIndicators2, user, codeSurvey, ELEMENT_LEV_1, db);
+                        list = new HashMap<>(); // Mappa in cui devono essere settate le liste
+                        HashMap<Integer, LinkedHashMap<String, InterviewBean>> listaVecchi = new HashMap<>();
+                        HashMap<Integer, LinkedHashMap<String, InterviewBean>> listaNuovi = new HashMap<>();
+                        ArrayList<ProcessBean> pats = new ArrayList<>();
+                        // Macro che vengono dalla query (disco)
+                        for (ProcessBean cachedMat : matsCached) {
+                            // Processi che vengono dalla query
+                            for (ProcessBean cachedPat : cachedMat.getProcessi()) {
+                                // Carica il processo da cache nella lista piatta dei processi
+                                pats.add(cachedPat);
+                                // Per ogni processo recupera i suoi indicatori
+                                LinkedHashMap<String, InterviewBean> cachedIndicators = cachedPat.getIndicatori();
+                                // Macro che vengono dai calcoli (memoria)
+                                for (ProcessBean runtimeMat : matsRuntime) {
+                                    // Processi che vengono dai calcoli
+                                    for (ProcessBean runtimePat : runtimeMat.getProcessi()) {
+                                        LinkedHashMap<String, InterviewBean> previousIndicators = new LinkedHashMap<>();
+                                        LinkedHashMap<String, InterviewBean> changedIndicators = new LinkedHashMap<>();
+                                        // Ha senso confrontare gli indicatori solo sullo stesso processo
+                                        if (runtimePat.getId() == cachedPat.getId()) {
 
-
+                                            LinkedHashMap<String, InterviewBean> runtimeIndicators = runtimePat.getIndicatori();
+                                            
+                                            for (Map.Entry<String, InterviewBean> entry : runtimeIndicators.entrySet()) {
+                                                String key = entry.getKey();
+                                                InterviewBean value = entry.getValue();
+                                                // Preleva il valore dell'indicatore cachato
+                                                InterviewBean cachedIndicator = cachedIndicators.get(key);
+                                                // Se NON è vero che i valori sono uguali (cioè se i valori sono diversi)
+                                                if (!value.getInformativa().equals(cachedIndicator.getInformativa())) {
+                                                    previousIndicators.put(key, cachedIndicator);
+                                                    changedIndicators.put(key, value);
+                                                }
+                                            }
+                                            listaVecchi.put(new Integer(runtimePat.getId()), previousIndicators);
+                                            listaNuovi.put(new Integer(runtimePat.getId()), changedIndicators);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        // Trasforma Arraylist processi in una HashMap per rispettare il tipo
+                        HashMap<Integer, ArrayList<ProcessBean>> listaPat = new HashMap<>();
+                        // Carica processi nella mappa
+                        listaPat.put(new Integer(NOTHING), pats);
+                        // Imposta nella mappa le liste trovate
+                        list.put(TIPI_LISTE[8], listaPat);
+                        list.put(TIPI_LISTE[9], listaVecchi);
+                        list.put(TIPI_LISTE[10], listaNuovi);
+                    }
+                }
+            }
+        } catch (CommandException ce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + ce.getLocalizedMessage();
+            log.severe(msg);
+            throw new CommandException(msg);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getLocalizedMessage();
+            log.severe(msg);
+            throw new CommandException(msg);
+        }
+        return list;
+    }   
+    
+    /* **************************************************************** *
+     *      Metodi utilizzati per servire richieste asincrone (XHR)     *
+     * **************************************************************** */
+    
     /**
      * <p>Restituisce una mappa contenente elenchi di indicatori contenenti 
      * anche le note al PxI e valorizza per riferimento liste di elementi generici 
@@ -531,8 +675,6 @@ public class Data extends HttpServlet implements Constants {
         HashMap<String, InterviewBean> indicators = null;
         // Ottiene i parametri della richiesta
         ParameterParser parser = new ParameterParser(req);
-        // Recupera o inizializza parametro per identificare la pagina
-        String part = parser.getStringParameter("p", VOID_STRING);
         // Recupera o inizializza parametro per identificare la rilevazione
         String codeSurvey = parser.getStringParameter("r", VOID_STRING);
         // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
@@ -548,7 +690,7 @@ public class Data extends HttpServlet implements Constants {
             // "data?q=pr"
             if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
                 // "&p=pro"
-                if (part.equalsIgnoreCase(PART_PROCESS)) {
+                if (pToken.equalsIgnoreCase(PART_PROCESS)) {
                     // Cerca l'identificativo del processo anticorruttivo
                     int idP = parser.getIntParameter("pliv", DEFAULT_ID);
                     // Cerca la granularità del processo anticorruttivo
@@ -574,82 +716,10 @@ public class Data extends HttpServlet implements Constants {
         }
         return indicators;
     }
-    
-    
-    /**
-     * <p>Restituisce una mappa contenente elenchi di elementi generici 
-     * (macroprocessi, rischi, strutture...) estratti in base alla richiesta
-     * e indicizzati per una chiave convenzionale, definita nelle costanti.
-     * I dati ottenuti tramite questo metodo sono generalmente pensati 
-     * per alimentare un report formattato (RTF).</p>
-     *
-     * @param req       HttpServletRequest contenente i parametri per contestualizzare l'estrazione
-     * @param qToken    il token della commmand in base al quale bisogna preparare la lista di elementi
-     * @param pToken    il token relativo alla parte di gestione da effettuare
-     * @return <code>HashMap&lt;String, HashMap&lt;Integer, ?&gt;&gt; - dictionary contenente le liste di elementi desiderati, indicizzati per una chiave convenzionale
-     * @throws CommandException se si verifica un problema nella WebStorage (DBWrapper), nella Command interpellata, o in qualche puntamento
-     */
-    private static HashMap<String, HashMap<Integer, ?>> retrieve(HttpServletRequest req,
-                                                                 String qToken,
-                                                                 String pToken)
-                                                          throws CommandException {
-        // Dichiara generico elenco di elementi da restituire
-        HashMap<String, HashMap<Integer, ?>> list = null;
-        // Ottiene i parametri della richiesta
-        ParameterParser parser = new ParameterParser(req);
-        // Recupera o inizializza parametro per identificare la pagina
-        String part = parser.getStringParameter("p", VOID_STRING);
-        // Recupera o inizializza parametro per identificare la rilevazione
-        String codeSurvey = parser.getStringParameter("r", VOID_STRING);
-        // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-        HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
-        PersonBean user = (PersonBean) ses.getAttribute("usr");
-        if (user == null) {
-            throw new CommandException(FOR_NAME + "Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-        }
-        // Gestisce la richiesta
-        try {
-            // Istanzia nuovo Databound
-            DBWrapper db = new DBWrapper();
-            // "data?q=mu"
-            if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
-                // "&p=str"
-                if (part.equalsIgnoreCase(PART_SELECT_STR)) {
-                    // Bisogna recuperare processi...
-                    ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSurvey, db);
-                    // ...e indicatori
-                    ArrayList<ProcessBean> matsWithIndicators = ReportCommand.retrieveIndicators(matsWithoutIndicators, user, codeSurvey, db);
-                    // Trasforma processi e indicatori in una HashMap per rispettare il tipo
-                    HashMap<Integer, ArrayList<ProcessBean>> listaMacroAt = new HashMap<>();
-                    // Carica processi e indicatori
-                    listaMacroAt.put(new Integer(NOTHING), matsWithIndicators);
-                    // Recupera le strutture indicizzate per identificativo di processo
-                    HashMap<Integer, ArrayList<DepartmentBean>> listaStrutture = ReportCommand.retrieveStructures(matsWithoutIndicators, user, codeSurvey, db);
-                    // Recupera i soggetti indicizzati per identificativo di processo
-                    HashMap<Integer, ArrayList<DepartmentBean>> listaSoggetti = ReportCommand.retrieveSubjects(matsWithoutIndicators, user, codeSurvey, db);
-                    // Recupera i rischi indicizzati per identificativo di processo
-                    HashMap<Integer, ArrayList<RiskBean>> listaRischi = ReportCommand.retrieveRisks(matsWithoutIndicators, user, codeSurvey, db);
-                    // Istanzia la mappa in cui devono essere settate le liste
-                    list = new HashMap<>();
-                    // Imposta nella mappa le liste trovate
-                    list.put(TIPI_LISTE[3], listaRischi);
-                    list.put(TIPI_LISTE[5], listaMacroAt);
-                    list.put(TIPI_LISTE[6], listaStrutture);
-                    list.put(TIPI_LISTE[7], listaSoggetti);
-                }
-            }
-        } catch (CommandException ce) {
-            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + ce.getLocalizedMessage();
-            log.severe(msg);
-            throw new CommandException(msg);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getLocalizedMessage();
-            log.severe(msg);
-            throw new CommandException(msg);
-        }
-        return list;
-    }
-    
+
+    /* **************************************************************** *
+     *   Metodi per la preparazione e la generazione dei files di dati  *
+     * **************************************************************** */
 
     /**
      * <p>Gestisce la generazione dell&apos;output in formato di uno stream CSV 
@@ -715,7 +785,7 @@ public class Data extends HttpServlet implements Constants {
     private static void makeRTF(HttpServletRequest req, HttpServletResponse res, String qToken)
                          throws ServletException, IOException {
         // Genera un nome univoco per il file che verrà servito
-        String fileName = makeFilename(COMMAND_REPORT);
+        String fileName = makeFilename(qToken);
         // Configura il response per il browser
         res.setContentType("application/rtf");
         // Configura il characterEncoding (v. commento)
@@ -729,29 +799,35 @@ public class Data extends HttpServlet implements Constants {
     
     /**
      * <p>Gestisce la generazione dell&apos;output in formato di un log formattato 
-     * che sar&agrave; recepito come tale dal browser e trattato di conseguenza 
-     * (normalmente, ma non necessariamente, con il download).</p>
+     * che sar&agrave; recepito come tale dal browser e trattato di conseguenza.</p>
      * <p>Usa altri metodi, interni, per ottenere il nome del file, che dev&apos;essere un
-     * nome univoco, e per la stampa vera e propria nel PrintWriter.</p>
+     * nome univoco; a differenza dei metodi che preparano un file che dovr&agrave;
+     * poi essere prodotto tramite lo standard output, questo metodo non ha 
+     * bisogno di invocare il metodo di stampa, perch&eacute; l'output viene
+     * preso in carico, a valle, da una pagina dinamica jsp attraverso 
+     * la quale si genera a sua volta il contenuto di un file html corrispondente
+     * all'output della jsp; l'output della pagina dinamica viene trasferito
+     * in un file html grazie alla preparazione delle intestazioni della
+     * HttpServletResponse effettuata al presente metodo, che evita 
+     * quindi di scomodare il PrintWriter ottenendo per&ograve; 
+     * un flusso &egrave; analogo.</p>
      *
-     * @param req HttpServletRequest da passare al metodo di stampa
-     * @param res HttpServletResponse per impostarvi i valori che la predispongono a servire csv anziche' html
-     * @param qToken token della commmand in base al quale bisogna preparare la lista di elementi
-     * @throws ServletException eccezione eventualmente proveniente dalla fprinf, da propagare
-     * @throws IOException  eccezione eventualmente proveniente dalla fprinf, da propagare
+     * @param req HttpServletRequest 
+     * @param res HttpServletResponse per impostarvi i valori che la predispongono a servire html anziche' jsp
+     * @param key String associata a un'etichetta che verra' usata come nome del file html
+     * @throws ServletException eventuale eccezione da propagare
+     * @throws IOException  eventuale eccezione da propagare
      */
-    private static void makeHTML(HttpServletRequest req, HttpServletResponse res, String qToken)
+    private static void makeHTML(HttpServletRequest req, HttpServletResponse res, String key)
                          throws ServletException, IOException {
         // Genera un nome univoco per il file che verrà servito
-        String fileName = makeFilename(COMMAND_REPORT);
+        String fileName = makeFilename(key);
         // Configura il response per il browser
         res.setContentType("text/html");
         // Configura il characterEncoding (v. commento)
         res.setCharacterEncoding("ISO-8859-1");
         // Configura l'header
         res.setHeader("Content-Disposition","attachment;filename=" + fileName + DOT + HTML);
-        // Stampa il file sullo standard output
-        fprintf(req, res);
     }
 
 
