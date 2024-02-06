@@ -82,6 +82,11 @@
   <c:param name="p" value="ris" />
   <c:param name="r" value="${ril}" />
 </c:url>
+<c:url var="gra" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="mu" />
+  <c:param name="p" value="gra" />
+  <c:param name="r" value="${ril}" />
+</c:url>
 <c:url var="mro" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="mu" />
   <c:param name="p" value="pro" />
@@ -97,6 +102,12 @@
   <c:param name="p" value="str" />
   <c:param name="r" value="${ril}" />
    <c:param name="out" value="rtf" />
+</c:url>
+<c:url var="mtrHTM" context="${initParam.appName}" value="/data" scope="page">
+  <c:param name="q" value="mu" />
+  <c:param name="p" value="str" />
+  <c:param name="r" value="${ril}" />
+  <c:param name="out" value="html" />
 </c:url>
 
 <c:url var="usr" context="${initParam.appName}" value="/" scope="page">
