@@ -104,6 +104,10 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileSearch = "/jsp/muRicerca.jsp";
     /**
+     * Pagina a cui la command fa riferimento per mostrare la  home dei grafici
+     */
+    private static final String nomeFileGraphics = "/jsp/muGrafici.jsp";
+    /**
      * Struttura contenente le pagine a cui la Command fa riferimento
      */
     private static final HashMap<String, String> nomeFile = new HashMap<>();
@@ -137,9 +141,10 @@ public class ReportCommand extends ItemBean implements Command, Constants {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        nomeFile.put(PART_SEARCH,     nomeFileSearch);
-        nomeFile.put(PART_PROCESS,    nomeFileProcessi);
-        nomeFile.put(PART_SELECT_STR, nomeFileStrutture);
+        nomeFile.put(PART_SEARCH,       nomeFileSearch);
+        nomeFile.put(PART_PROCESS,      nomeFileProcessi);
+        nomeFile.put(PART_SELECT_STR,   nomeFileStrutture);
+        nomeFile.put(PART_GRAPHICS,     nomeFileGraphics);
     }
 
 
@@ -233,7 +238,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                         ArrayList<ProcessBean> mats = computeIndicators(matsWithoutIndicators, user, codeSur, db);
                         refreshIndicators(mats, user, codeSur, db);
                     }
-                    matsWithIndicators = retrieveIndicators(matsWithoutIndicators, user, codeSur, db);
+                    matsWithIndicators = retrieveIndicators(matsWithoutIndicators, user, codeSur, NOTHING, db);
                     if (part.equalsIgnoreCase(PART_PROCESS)) {
                         /* ************************************************ *
                          *           Generate report process-risks          *
@@ -256,7 +261,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                         bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report strutture");
                     }
-                    // Imposta il valore della pagina di ricerca
+                    // Imposta il valore della pagina abbinata al parametro 
                     fileJspT = nomeFile.get(part);
                 } else {
                 /* *********************************************************** *
@@ -332,6 +337,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - privi di indicatori di rischio 
      * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
      * @param codeSurvey    il codice della rilevazione
+     * @param muffler       un intero da sottrarre ai valori effettivi degli indicatori (per non alterare i valori, impostare questo parametro pari a 0)
      * @param db            WebStorage per l'accesso ai dati
      * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi contenenti i relativi figli e, questi, gli indicatori di rischio
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
@@ -339,10 +345,11 @@ public class ReportCommand extends ItemBean implements Command, Constants {
     public static ArrayList<ProcessBean> retrieveIndicators(final ArrayList<ProcessBean> mats,
                                                             PersonBean user,
                                                             String codeSurvey,
+                                                            int muffler,
                                                             DBWrapper db)
                                                      throws CommandException {
         try {
-            ArrayList<ProcessBean> macro = db.getIndicatorValues(user, mats, ConfigManager.getSurvey(codeSurvey));
+            ArrayList<ProcessBean> macro = db.getIndicatorValues(user, mats, ConfigManager.getSurvey(codeSurvey), muffler);
             return macro;
         } catch (WebStorageException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nell\'interazione col database (in metodi di lettura).\n";
@@ -615,10 +622,14 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                                          DBWrapper db)
                                   throws CommandException {
         try {
+            // Seleziona tutte le note dei giudizi sintetici e le conserva in memoria
+            LinkedHashMap<Integer, ItemBean> notes = db.getIndicatorNotes(user, ConfigManager.getSurvey(codeSurvey));
             // Elimina i dati eventualmente già presenti in tabella
             db.deleteIndicatorProcessResults(user);
             // Inserisce i valori degli indicatori ricevuti tramite il parametro
-            db.insertIndicatorProcess(user, mats, ConfigManager.getSurvey(codeSurvey));
+            db.insertIndicatorProcess(user, mats, notes, ConfigManager.getSurvey(codeSurvey));
+            // Aggiorna gli indicatori appena inseriti aggiungendovi la nota al PxI, se presente
+            // TODO
         } catch (WebStorageException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nell\'interazione col database (in metodi di scrittura).\n";
             LOG.severe(msg);
