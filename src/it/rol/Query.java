@@ -1027,7 +1027,14 @@ public interface Query extends Serializable {
      *  ai processi censiti a fini anticorruttivi ottenuti nel contesto
      *  di una data rilevazione.<br />
      *  Questi valori sono stati memorizzati in un'apposita relazione
-     *  in base a un pre-calcolo (caching).</p>
+     *  in base a un pre-calcolo (caching).<br />
+     *  Inoltre, d&agrave; la possibilit&agrave; di sottrarre un ammontare
+     *  passato come parametro dai valori effettivi degli indicatori
+     *  (se non si desidera alterare questi valori, &egrave; sufficiente 
+     *  impostare il valore dell'ammontare a zero)
+     *  Se, effettuando un'operazione utilizzando questo ammontare, si ottiene
+     *  un risultato inferiore a zero (0 = rischio MINIMO) la query mantiene
+     *  il valore 0.</p>
      *  <p>Utilizza la clausola WITH per dare un nome a una subquery che
      *  calcola quanti indicatori esistono per ogni identificativo di processo.</p>
      */
@@ -1045,7 +1052,11 @@ public interface Query extends Serializable {
             "       INPAT.id_processo_at                AS \"cod1\"" +
             "   ,   INPAT.cod_indicatore                AS \"codice\"" +
             "   ,   INPAT.id_rilevazione                AS \"cod2\"" +
-            "   ,   INPAT.valore                        AS \"value1\"" +
+            "   ,   CASE" +
+            "           WHEN (INPAT.valore - ?) < 0 THEN 0" +
+            "           ELSE (INPAT.valore - ?)" +
+            "       END AS \"value1\"" +
+            //"   ,   INPAT.valore - ?                    AS \"value1\"" +
             "   ,   INPAT.descrizione                   AS \"extraInfo\"" +
             "   ,   INPAT.note                          AS \"informativa\"" +
             "   ,   INPAT.ordinale                      AS \"ordinale\"" +
