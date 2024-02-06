@@ -3593,13 +3593,15 @@ public class DBWrapper implements Query, Constants {
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param mats      struttura contenente tutti i macroprocessi - e processi figli - privi di indicatori di rischio 
      * @param survey    oggetto contenente i dati della rilevazione
+     * @param muffler   un intero da sottrarre ai valori effettivi degli indicatori (per non alterare i valori, passare il valore 0)
      * @return <code>ArrayList&lt;ProcessBean&gt;</code> - struttura contenente tutti i macroprocessi con al loro interno i processi figli, ciascuno corredato dei propri indicatori di rischio 
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "static-method" })
     public ArrayList<ProcessBean> getIndicatorValues(PersonBean user, 
                                                      final ArrayList<ProcessBean> mats,
-                                                     CodeBean survey)
+                                                     CodeBean survey,
+                                                     int muffler)
                                               throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
@@ -3610,12 +3612,15 @@ public class DBWrapper implements Query, Constants {
             ArrayList<ItemBean> processIndicators = null;
             LinkedHashMap<Integer, ArrayList<ItemBean>> tupleAsMap = new LinkedHashMap<>();
             LinkedHashMap<String, InterviewBean> indicators = null;
+            int nextParam = NOTHING;
             int index = NOTHING;
             try {
                 // TODO: Controllare se user è superuser
                 pst = con.prepareStatement(GET_INDICATOR_PAT);
                 pst.clearParameters();
-                pst.setInt(1, survey.getId());
+                pst.setInt(++nextParam, muffler);
+                pst.setInt(++nextParam, muffler);
+                pst.setInt(++nextParam, survey.getId());
                 rs = pst.executeQuery();
                 // Ottiene le tuple indicizzate per identificativo di processo
                 while (rs.next()) {
