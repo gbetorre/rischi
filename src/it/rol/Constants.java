@@ -49,7 +49,6 @@ import it.rol.bean.CodeBean;
  * insiemi di valori ammessi per parametri applicativi.</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
- * @version 1.53
  */
 public interface Constants extends Serializable {
     /* ************************************************************************ *
@@ -196,6 +195,10 @@ public interface Constants extends Serializable {
      */
     public static final String PART_SEARCH              = "ris";
     /**
+     * <p>Costante per il parametro identificante le infografiche.</p>
+     */
+    public static final String PART_GRAPHICS            = "gra";
+    /**
      * <p>Costante per il parametro identificante la parte di selezione strutture.</p>
      */
     public static final String PART_SELECT_STR          = "str";
@@ -287,10 +290,16 @@ public interface Constants extends Serializable {
      * <dd>Lista Strutture</dd>
      * <dt>T</dt>
      * <dd>Lista Soggetti Interessati (o Terzi = T)</dd>
+     * <dt>P</dt>
+     * <dd>Lista Processi AT</dd>
+     * <dt>C</dt>
+     * <dd>Lista Valori Indicatori precedenti (o valori in cache = C)</dd>
+     * <dt>A</dt>
+     * <dd>Lista Valori Indicatori in memoria (o valori Attuali = A)</dd>
      * </dl>
      * </p>
      */
-    static final String[] TIPI_LISTE = {"I", "F", "O", "R", "V", "M", "S", "T"};
+    static final String[] TIPI_LISTE = {"I", "F", "O", "R", "V", "M", "S", "T", "P", "C", "A"};
     /**
      * <p>Valori possibili degli attributi probabilita, impatto, livello di rischio.</p>
      */
@@ -529,7 +538,11 @@ public interface Constants extends Serializable {
     /**
      * Costante per i nomi di estrazioni dati "tabella MDM"
      */
-    public static final String REPORT_MDM = "report_mdm";
+    public static final String REPORT_MDM = "tabella_mdm";
+    /**
+     * Costante per il log delle differenze tra i valori indicatori in cache e quelli in memoria
+     */
+    public static final String LOG_IND = "log_indicatori";
     /* ************************************************************************ *
      * Costanti di tempo (p.es. formati di data, date significative, etc.) *
      * ************************************************************************ */
