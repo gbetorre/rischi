@@ -57,11 +57,11 @@
       <div class="col-xl-5 col-md-6 mx-auto">
       <c:choose>
       <c:when test="${empty param['out']}">
-        <a href="javascript:openWin('data?q=pr&p=pro&pliv=${input.get(0).value2AsInt}&liv=2&r=AT2022&out=pop')" class="badge badge-pill lightTable bgAct18" title="Apri in una finestra separata per la stampa">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i> Apri in una nuova finestra
-        </a>
         <a href="data?q=pr&p=pro&pliv=${input.get(0).value2AsInt}&liv=${param['liv']}&r=${param['r']}&out=csv" class="float-right badge badge-pill lightTable bgAct20" title="Scarica i dati del processo '${processo}'">
-          <i class="fas fa-download"></i>Scarica i dati di questo processo
+          <i class="fas fa-download"></i>Scarica i dati 
+        </a>
+        <a href="javascript:openWin('data?q=pr&p=pro&pliv=${input.get(0).value2AsInt}&liv=2&r=AT2022&out=pop')" class="float-right badge badge-pill lightTable bgAct23" title="Apri in una finestra separata per la stampa">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Apri in finestra
         </a>
       </c:when>
       <c:when test="${not empty param['out'] and (param['out'] eq 'pop')}">
@@ -74,7 +74,7 @@
     </div>
     <div class="subfields errorPwd">
       Area di rischio: 
-      <span class="badge heading bgcolor3"><c:out value="${arearischio}" /></span>
+      <span class="badge lightTable bgAct25"><c:out value="${arearischio}" /></span>
       <hr class="separatore" />
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples info">
         <div class="fs-2 mb-3">Input:</div>
