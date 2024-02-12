@@ -179,7 +179,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         // Dichiara elenco di macroprocessi anticorruttivi collegati alla rilevazione
         ArrayList<ProcessBean> matsWithIndicators = null;
         // Dichiara mappa di parametri di ricerca
-        HashMap<String, LinkedHashMap<String, String>> params = null;
+        //HashMap<String, LinkedHashMap<String, String>> params = null;
         // Dichiara mappa di strutture indicizzate per id processo_at
         HashMap<Integer, ArrayList<DepartmentBean>> structs = null;
         // Dichiara mappa di soggetti contingenti indicizzati per id processo_at
@@ -301,10 +301,6 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         // Imposta in request, se ci sono, lista di rischi indicizzati per id processo
         if (risks != null) {
             req.setAttribute("rischi", risks);
-        }
-        // Imposta nella request le chiavi di ricerca, se presenti
-        if (params != null) {
-            req.setAttribute("tokens", params);
         }
         // Imposta nella request breadcrumbs in caso siano state personalizzate
         if (bC != null) {
@@ -625,11 +621,9 @@ public class ReportCommand extends ItemBean implements Command, Constants {
             // Seleziona tutte le note dei giudizi sintetici e le conserva in memoria
             LinkedHashMap<Integer, ItemBean> notes = db.getIndicatorNotes(user, ConfigManager.getSurvey(codeSurvey));
             // Elimina i dati eventualmente già presenti in tabella
-            db.deleteIndicatorProcessResults(user);
+            db.deleteIndicatorProcessResults(user, notes);
             // Inserisce i valori degli indicatori ricevuti tramite il parametro
             db.insertIndicatorProcess(user, mats, notes, ConfigManager.getSurvey(codeSurvey));
-            // Aggiorna gli indicatori appena inseriti aggiungendovi la nota al PxI, se presente
-            // TODO
         } catch (WebStorageException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nell\'interazione col database (in metodi di scrittura).\n";
             LOG.severe(msg);
