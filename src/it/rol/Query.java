@@ -1133,9 +1133,7 @@ public interface Query extends Serializable {
             "   ,   INPAT.data_ultima_modifica          AS \"extraInfo1\"" +
             "   ,   INPAT.ora_ultima_modifica           AS \"extraInfo2\"" +
             "   ,   INPAT.id_usr_ultima_modifica        AS \"extraInfo3\"" +
-            "   ,   N.count                             AS \"cod3\"" +
             "   FROM indicatore_processo_at INPAT" +
-            "       JOIN num_indicatori N ON INPAT.id_processo_at = N.id" +
             "   WHERE INPAT.cod_indicatore = 'PxI'" +
             "       AND INPAT.id_rilevazione = ?" +
             "   ORDER BY INPAT.id_processo_at";
