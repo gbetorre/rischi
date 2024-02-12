@@ -582,7 +582,7 @@ public class Data extends HttpServlet implements Constants {
                         ArrayList<ProcessBean> matsCached = ReportCommand.retrieveIndicators(matsWithoutIndicators, user, codeSurvey, NOTHING, db);
                         // Bisogna anche calcolare gli indicatori a runtime
                         ArrayList<ProcessBean> matsRuntime = ReportCommand.computeIndicators(matsWithoutIndicators2, user, codeSurvey, db);
-                        //ArrayList<ProcessBean> matsRuntime = ReportCommand.retrieveIndicators(matsWithoutIndicators2, user, codeSurvey, ELEMENT_LEV_1, db);
+                        //ArrayList<ProcessBean> matsRuntime = ReportCommand.retrieveIndicators(matsWithoutIndicators2, user, codeSurvey, ELEMENT_LEV_1, db);   // to test
                         list = new HashMap<>(); // Mappa in cui devono essere settate le liste
                         HashMap<Integer, LinkedHashMap<String, InterviewBean>> listaVecchi = new HashMap<>();
                         HashMap<Integer, LinkedHashMap<String, InterviewBean>> listaNuovi = new HashMap<>();
@@ -828,6 +828,10 @@ public class Data extends HttpServlet implements Constants {
         res.setCharacterEncoding("ISO-8859-1");
         // Configura l'header
         res.setHeader("Content-Disposition","attachment;filename=" + fileName + DOT + HTML);
+        // Configura il basehref per i link assoluti
+        String baseHref = ConfigManager.getBaseHref(req);
+        // Setta nella request il valore del <base href... />
+        req.setAttribute("baseHref", baseHref);
     }
 
 
