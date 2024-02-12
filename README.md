@@ -322,6 +322,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [1.6.9] (12/02/2024) Implementato nel ricalcolo indicatori il salvataggio delle motivazioni gi&agrave; inserite; correzione di bug
 - [1.6.8] (06/02/2024) Prima bozza di implementazione del log delle variazioni tra l'ultimo caching dei valori degli indicatori e gli stessi calcolati a runtime
 - [1.6.7] (29/01/2024) Implementata funzione di modifica/aggiunta nota al PxI; revisione di etichette; correzione di bug
 - [1.6.6] (22/01/2024) Implementata visualizzazione delle note al PxI con confronto valore PxI in memoria (a runtime) e valore PxI su disco (in cache)
