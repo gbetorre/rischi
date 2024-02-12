@@ -1,6 +1,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> 
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <html>
   <head>
+    <link rel="stylesheet" href="<c:out value="${requestScope.baseHref}${initParam.urlDirectoryStili}" />style.css" type="text/css" />
     <style>
       table {
         border-spacing: 1;
@@ -8,8 +10,8 @@
         background: white;
         border-radius: 6px;
         overflow: hidden;
-        max-width: 800px;
-        width: 100%;
+        /*max-width: 900px;*/
+        width: 90%;
         margin: 0 auto;
         position: relative;
       }
@@ -32,7 +34,7 @@
         border: 0;
       }
       table td, table th {
-        text-align: left;
+        text-align: center;
       }
       table td.l, table th.l {
         text-align: right;
@@ -104,21 +106,22 @@
     <table>
       <thead>
         <tr>
-          <th>PROCESSO</th>
-          <th>I</th>
-          <th>I1</th>
-          <th>I2</th>
-          <th>I3</th>
-          <th>I4</th>
-          <th>P</th>
-          <th>P1</th>
-          <th>P2</th>
-          <th>P3</th>
-          <th>P4</th>
-          <th>P5</th>
-          <th>P6</th>
-          <th>P7</th>
-          <th>PxI</th>
+          <th width="*">PROCESSO</th>
+          <th width="6%">I</th>
+          <th width="6%">I1</th>
+          <th width="6%">I2</th>
+          <th width="6%">I3</th>
+          <th width="6%">I4</th>
+          <th width="6%">P</th>
+          <th width="6%">P1</th>
+          <th width="6%">P2</th>
+          <th width="6%">P3</th>
+          <th width="6%">P4</th>
+          <th width="6%">P5</th>
+          <th width="6%">P6</th>
+          <th width="6%">P7</th>
+          <th width="6%">PxI</th>
+          <th width="6%"></th>
         </tr>
       <thead>
       <tbody>
@@ -130,11 +133,21 @@
   <c:forEach var="entry" items ="${patsMap}">
     <c:forEach var="pat" items="${entry.value}">
     <tr>
-      <td rowspan="2"><c:out value="${pat.nome} (${pat.id })" /></td>
+      <td rowspan="2">
+        <a href="${requestScope.baseHref}?q=pr&p=pro&pliv=${pat.id}&liv=2&r=${param['r']}">
+          <c:out value="${pat.nome}" />
+        </a>
+      </td>
       <c:set var="patInd" value="${pat.indicatori}" />
       <c:forEach var="ind" items="${patInd}">
         <td><c:out value="${ind.value.informativa}" /></td>
       </c:forEach>
+      <td>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+        </svg>
+        <em>Valori precedenti</em>
+      </td>
     </tr>
     <tr>
       <c:forEach var="newEntry" items="${newValues}">
@@ -142,13 +155,19 @@
           <c:forEach var="newIndMap" items="${newEntry.value}">
           <c:choose>
             <c:when test="${oldValues.get(newEntry.key).value.informativa ne newIndMap.value.informativa}">
-              <td><c:out value="${newIndMap.value.informativa}" /></td>
+              <td class="bgcolor-${fn:toLowerCase(newIndMap.value.informativa)}"><c:out value="${newIndMap.value.informativa}" /></td>
             </c:when>
           </c:choose>
           
           </c:forEach>
         </c:if>
       </c:forEach>
+      <td>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+        </svg>
+        <em>Valori aggiornati</em>
+      </td>
     </tr>
     </c:forEach>
   </c:forEach>  
