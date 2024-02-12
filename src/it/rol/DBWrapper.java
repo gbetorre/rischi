@@ -4358,10 +4358,13 @@ public class DBWrapper implements Query, Constants {
     /**
      * <p>Metodo per fare l'inserimento dei valori degli indicatori di rischio
      * calcolati per ogni singolo processo su cui sia stata effettuata almeno
-     * un'intervista.</p>
+     * un'intervista.<br>
+     * Assume che siano state gi&agrave; inserite (almeno una delle) 
+     * motivazioni del giudizio sintetico.</p>
      *
      * @param user      utente loggato
      * @param mats      struttura contenente tutti i macroprocessi - e processi figli - corredati ciascuno dei valori dei propri indicatori di rischio 
+     * @param notes     struttura contenente le motivazioni al giudizio sintetico gia' inserite
      * @param survey    oggetto contenente i dati della rilevazione 
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
@@ -4371,6 +4374,10 @@ public class DBWrapper implements Query, Constants {
                                        final LinkedHashMap<Integer, ItemBean> notes,
                                        CodeBean survey) 
                                 throws WebStorageException {
+        // Controllo sull'input
+        if (notes.isEmpty() || notes.size() == NOTHING) {
+            return;
+        }
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
             try {
@@ -4699,14 +4706,24 @@ public class DBWrapper implements Query, Constants {
     
     /**
      * <p>Metodo per eliminare tutti i valori calcolati sugli indicatori
-     * di rischio per i processi attraverso le interviste.</p> 
+     * di rischio per i processi attraverso le interviste.<br>
+     * Assume che siano state gi&agrave; inserite (almeno una delle) 
+     * motivazioni del giudizio sintetico e quindi non effettua la cancellazione
+     * se non trova tali note, che devono quindi essere state precedentemente
+     * selezionate e inserite in una struttura di memoria.</p>
      *
      * @param user      utente loggato
+     * @param notes     struttura contenente le motivazioni al giudizio sintetico gia' selezionate in precedenza
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
     @SuppressWarnings({ "static-method" })
-    public void deleteIndicatorProcessResults(PersonBean user) 
+    public void deleteIndicatorProcessResults(PersonBean user,
+                                              final LinkedHashMap<Integer, ItemBean> notes) 
                                        throws WebStorageException {
+        // Controllo sull'input
+        if (notes.isEmpty() || notes.size() == NOTHING) {
+            return;
+        }
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
             try {
