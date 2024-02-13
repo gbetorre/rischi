@@ -329,7 +329,8 @@ public class Data extends HttpServlet implements Constants {
                         req.setAttribute("lista", mappa);
                         // Genera il file RTF
                         makeHTML(req, res, part);
-                        // Non ha finito (deve invocare la pagina dinamica)
+                        // Non ha finito: deve invocare la pagina dinamica 
+                        // (che a sua volta fornirà l'output per l'html statico scaricato)
                     }
                 }
                 // Output è in finestra di popup
@@ -605,15 +606,16 @@ public class Data extends HttpServlet implements Constants {
                                         if (runtimePat.getId() == cachedPat.getId()) {
 
                                             LinkedHashMap<String, InterviewBean> runtimeIndicators = runtimePat.getIndicatori();
-                                            
+
                                             for (Map.Entry<String, InterviewBean> entry : runtimeIndicators.entrySet()) {
                                                 String key = entry.getKey();
                                                 InterviewBean value = entry.getValue();
                                                 // Preleva il valore dell'indicatore cachato
                                                 InterviewBean cachedIndicator = cachedIndicators.get(key);
+                                                
+                                                previousIndicators.put(key, cachedIndicator);
                                                 // Se NON è vero che i valori sono uguali (cioè se i valori sono diversi)
                                                 if (!value.getInformativa().equals(cachedIndicator.getInformativa())) {
-                                                    previousIndicators.put(key, cachedIndicator);
                                                     changedIndicators.put(key, value);
                                                 }
                                             }
@@ -832,6 +834,8 @@ public class Data extends HttpServlet implements Constants {
         String baseHref = ConfigManager.getBaseHref(req);
         // Setta nella request il valore del <base href... />
         req.setAttribute("baseHref", baseHref);
+        // Setta nella request gli estremi temporali
+        req.setAttribute("now", Utils.format(Utils.convert(Utils.getCurrentDate())) );
     }
 
 
