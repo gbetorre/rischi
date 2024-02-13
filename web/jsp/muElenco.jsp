@@ -26,7 +26,7 @@
             <div class="card-body">
               <i class="fa-solid fa-table fa-4x"></i>&nbsp;&nbsp;
               <i class="fas fa-sitemap fa-4x"></i>&nbsp;&nbsp;
-              Report strutture e rischi
+              Tabella dei rischi
             </div>
             <div class="card-footer d-flex align-items-center justify-content-between">
               <a class="small stretched-link" href="${mtr}">Vai</a>
@@ -44,7 +44,7 @@
           <div class="card bg-primary text-white mb-4">
             <div class="card-body">Grafici</div>
             <div class="card-footer d-flex align-items-center justify-content-between">
-              <a class="small stretched-link" href="#">Vedi dettagli</a>
+              <a class="small stretched-link" href="${gra}">Vedi dettagli</a>
               <div class="small text-white"><i class="fas fa-angle-right"></i></div>
             </div>
           </div>
