@@ -6,6 +6,16 @@
 <c:set var="structs" value="${requestScope.strutture}" scope="page" />
 <c:set var="subjs" value="${requestScope.soggetti}" scope="page" />
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
+    <script>
+    $(document).ready(function() {
+        $('.refresh').on('click', function(event) {
+          if (confirm("Ricorda di scaricare e consultare il log delle variazioni (\"Log ricalcolo\") PRIMA di effettuare un ricalcolo per verificare se le motivazioni del giudizio sintetico devono essere aggiornate. \n Vuoi ricalcolare ora gli indicatori?")) {
+              window.location.replace("${mtr}&msg=refresh_ce");
+          } 
+          event.preventDefault(); // This will prevent the default behavior of the link
+      });
+    });
+    </script>
     <h3 class="mt-1 m-0 font-weight-bold float-left">Report strutture e rischi</h3>
     <a href="${mtrRTF}" class="float-right badge badge-pill lightTable" title="Scarica il report in formato RTF">
       <i class="fas fa-download"></i>Scarica report
@@ -13,6 +23,12 @@
     <a href="${mtrHTM}" class="float-right badge badge-pill lightTable bgAct19" title="Scarica il log delle differenze sopravvenute nei valori degli indicatori rispetto all'ultimo ricalcolo">
       <i class="fa-solid fa-book"></i> Log ricalcolo
     </a>
+    <span class="float-right">
+      <a href="${mtr}&msg=refresh_ce" type="button" class="btn btn-primary float-right refresh" id="refresh" title="Effettua un ricalcolo dei valori di rischio di tutti i processi e li memorizza come nuovi valori cache">
+        <i class="fa-solid fa-arrow-rotate-right"></i>
+        Ricalcola
+      </a>&nbsp;&nbsp;
+    </span>
     <hr class="riga"/>
     <div class="col-md-offset-1">
       <div class="table-responsive">
@@ -131,7 +147,7 @@
     </div>
 <!--     <a href="javascript:DoPost()">test</a> -->
     &nbsp;
-    <a href="${mtr}&msg=refresh_ce" type="button" class="btn btn-primary float-right" value="Update">
+    <a href="${mtr}&msg=refresh_ce" type="button" class="btn btn-primary float-right refresh" id="refresh2" title="Effettua un ricalcolo dei valori di rischio di tutti i processi e li memorizza come nuovi valori cache">
       <i class="fa-solid fa-arrow-rotate-right"></i>
       Ricalcola
     </a>
@@ -151,12 +167,14 @@
         });
       });
     </script>
-    <script>
-    
-
-        function DoPost(){
-            alert('ok');
-            $.get("http://localhost:8080/rischi/data?q=mu&p=str&r=AT2022&out=html");  // Values must be in JSON format
-          }
+    <script type="text/javascript">
+      function doGet(){
+          if (confirm("Ricorda di consultare il log delle variazioni per verificare se le motivazioni del giudizio sintetico devono essere aggiornate. \n Vuoi ricalcolare gli indicatori?")) {
+              //window.open("${mtr}");  //&msg=refresh_ce
+              window.open("http://localhost:8080/rischi/data?q=mu&p=str&r=AT2022&out=html");  // Values must be in JSON format
+              window.location.replace("${mtr}&msg=refresh_ce");
+          } 
+          return false;
+        }
     </script>
     
