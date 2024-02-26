@@ -538,7 +538,7 @@ public interface Constants extends Serializable {
     /**
      * Costante per i nomi di estrazioni dati "tabella MDM"
      */
-    public static final String REPORT_MDM = "tabella_mdm";
+    public static final String REPORT_MDM = "tabella_rischi";
     /**
      * Costante per il log delle differenze tra i valori indicatori in cache e quelli in memoria
      */
