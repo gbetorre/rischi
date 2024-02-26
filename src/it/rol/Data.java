@@ -582,8 +582,8 @@ public class Data extends HttpServlet implements Constants {
                         // ...e indicatori cached
                         ArrayList<ProcessBean> matsCached = ReportCommand.retrieveIndicators(matsWithoutIndicators, user, codeSurvey, NOTHING, db);
                         // Bisogna anche calcolare gli indicatori a runtime
-                        ArrayList<ProcessBean> matsRuntime = ReportCommand.computeIndicators(matsWithoutIndicators2, user, codeSurvey, db);
-                        //ArrayList<ProcessBean> matsRuntime = ReportCommand.retrieveIndicators(matsWithoutIndicators2, user, codeSurvey, ELEMENT_LEV_1, db);   // to test
+                        ArrayList<ProcessBean> matsRuntime = ReportCommand.computeIndicators(matsWithoutIndicators2, user, codeSurvey, db);                     // <- to prod
+                        //ArrayList<ProcessBean> matsRuntime = ReportCommand.retrieveIndicators(matsWithoutIndicators2, user, codeSurvey, ELEMENT_LEV_1, db);   // <- to test
                         list = new HashMap<>(); // Mappa in cui devono essere settate le liste
                         HashMap<Integer, LinkedHashMap<String, InterviewBean>> listaVecchi = new HashMap<>();
                         HashMap<Integer, LinkedHashMap<String, InterviewBean>> listaNuovi = new HashMap<>();
@@ -604,15 +604,15 @@ public class Data extends HttpServlet implements Constants {
                                         LinkedHashMap<String, InterviewBean> changedIndicators = new LinkedHashMap<>();
                                         // Ha senso confrontare gli indicatori solo sullo stesso processo
                                         if (runtimePat.getId() == cachedPat.getId()) {
-
+                                            // Ottiene gli indicatori del processo corrente calcolati a runtime
                                             LinkedHashMap<String, InterviewBean> runtimeIndicators = runtimePat.getIndicatori();
-
+                                            // Esamina le differenze tra gli indicatori del processo a runtime e quelli da cache
                                             for (Map.Entry<String, InterviewBean> entry : runtimeIndicators.entrySet()) {
                                                 String key = entry.getKey();
                                                 InterviewBean value = entry.getValue();
-                                                // Preleva il valore dell'indicatore cachato
+                                                // Preleva il valore dell'indicatore da cache
                                                 InterviewBean cachedIndicator = cachedIndicators.get(key);
-                                                
+                                                // Lo memorizza nella lista degli indicatori prelevati da cache
                                                 previousIndicators.put(key, cachedIndicator);
                                                 // Se NON è vero che i valori sono uguali (cioè se i valori sono diversi)
                                                 if (!value.getInformativa().equals(cachedIndicator.getInformativa())) {
