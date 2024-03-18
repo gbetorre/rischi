@@ -556,6 +556,10 @@ select:disabled.bgcolor3 {
   background-color: #ff3333  !important;
 }
 
+.bgAct26 {
+  background-color: #4679bd  !important;
+}
+
 .bgFade {
   background-image: linear-gradient(to right, transparent, white) !important;
 }
@@ -800,10 +804,19 @@ textarea {
   border-color: #929aa0;
 }
 
-.mandatory:after {
+.mandatory-thin {
+  color: maroon;
+  background-color: #99ccff;
+  font-size: 12px;
+  height: 31px;
+  padding-top: 3px;
+  /*margin: 5px;*/
+}
+
+.mandatory:after, .mandatory-thin:after {
 	font-weight: bold;
 	font-size: 15pt;
-	content: '*';
+	content: ' *';
 }
 
 .btn-del {
