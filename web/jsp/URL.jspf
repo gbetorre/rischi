@@ -109,12 +109,12 @@
   <c:param name="r" value="${ril}" />
   <c:param name="out" value="html" />
 </c:url>
-
-<c:url var="usr" context="${initParam.appName}" value="/" scope="page">
-  <c:param name="q" value="ho" />
-  <c:param name="p" value="usr" />
+<c:url var="ms" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ms" />
+  <c:param name="r" value="${ril}" />
 </c:url>
-<c:url var="credits" context="${initParam.appName}" value="/" scope="page">
-  <c:param name="q" value="pr" />
-  <c:param name="p" value="credits" />
+<c:url var="mnm" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ms" />
+  <c:param name="p" value="inm" />
+  <c:param name="r" value="${ril}" />
 </c:url>
