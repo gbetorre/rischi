@@ -824,8 +824,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @return <code>HashMap&lt;String&comma; Vector&lt;DepartmentBean&gt;&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il codice del nodo, e per valore il Vector delle sue figlie
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
-    private static HashMap<String, Vector<DepartmentBean>> decantStructs(ArrayList<DepartmentBean> structs)
-                                                                  throws CommandException {
+    public static HashMap<String, Vector<DepartmentBean>> decantStructs(ArrayList<DepartmentBean> structs)
+                                                                 throws CommandException {
         HashMap<String, Vector<DepartmentBean>> flatStructs = new HashMap<>();
         try {
             for (DepartmentBean l1 : structs) {
