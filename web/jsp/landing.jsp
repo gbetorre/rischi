@@ -43,6 +43,15 @@
               <a class="small text-white stretched-link" href="${ri}"></a>
             </div>
           </div>
+          <div class="col-xl-3 col-md-6">
+            <div class="card bgAct26 mb-4">
+              <div class="card-body landing-card-body d-flex align-items-center">
+                <i class="fa-solid fa-umbrella fa-5x"></i>&nbsp;&nbsp;
+                <span class="h4 text-white landing-card-title">&nbsp; Misure di mitigazione</span>
+              </div>
+              <a class="small text-white stretched-link" href="${ms}"></a>
+            </div>
+          </div>
         </div>
         <br><hr class="separatore" />
         <ol class="breadcrumb mb-4">
@@ -62,7 +71,7 @@
             <div class="card bgAct12 mb-4">
               <div class="card-body landing-card-body d-flex align-items-center">
                 <i class="fa-solid fa-magnifying-glass-chart fa-5x"></i>&nbsp;&nbsp;
-                <span class="h4 landing-card-title">Ricerca Libera</span>
+                <span class="h4 landing-card-title">Ricerche</span>
               </div>
                <a class="small text-white stretched-link" href="${ris}"></a>
             </div>
