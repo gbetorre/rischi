@@ -3898,6 +3898,115 @@ public class DBWrapper implements Query, Constants {
         }
     }
     
+    
+    /**
+     * <p>Restituisce un ArrayList contenente tutte le tipologie di misura.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @return <code>ArrayList&lt;CodeBean&gt;</code> - un vettore ordinato di CodeBean, che rappresentano le tipologie di misura trovate
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<CodeBean> getMeasureTypes(PersonBean user)
+                                        throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            AbstractList<CodeBean> measureTypes = new ArrayList<>();
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_MEASURE_TYPES);
+                pst.clearParameters();
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Prepara il tipo
+                    CodeBean type = new CodeBean();
+                    // Valorizza il tipo
+                    BeanUtil.populate(type, rs);
+                    // Aggiunge il tipo alla lista
+                    measureTypes.add(type);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<CodeBean>) measureTypes;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un ArrayList contenente i possibili caratteri delle misure
+     * di prevenzione o calmierazione del rischio corruttivo.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @return <code>ArrayList&lt;CodeBean&gt;</code> - un vettore ordinato di CodeBean, che rappresentano i caratteri di misura trovati
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<CodeBean> getMeasureCharacters(PersonBean user)
+                                             throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            AbstractList<CodeBean> measureCharacters = new ArrayList<>();
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_MEASURE_CHARACTERS);
+                pst.clearParameters();
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Prepara il bean
+                    CodeBean type = new CodeBean();
+                    // Valorizza il bean
+                    BeanUtil.populate(type, rs);
+                    // Aggiunge il bean alla lista
+                    measureCharacters.add(type);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<CodeBean>) measureCharacters;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
     /* ********************************************************** *
      *                    Metodi di INSERIMENTO                   *
      * ********************************************************** */
