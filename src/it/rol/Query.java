@@ -1137,6 +1137,29 @@ public interface Query extends Serializable {
             "   WHERE INPAT.cod_indicatore = 'PxI'" +
             "       AND INPAT.id_rilevazione = ?" +
             "   ORDER BY INPAT.id_processo_at";
+    
+    /**
+     * <p>Estrae i valori di tutte le tipologie di misure.</p>
+     */
+    public static final String GET_MEASURE_TYPES = 
+            "SELECT" +
+            "       TM.id                               AS \"id\"" +
+            "   ,   TM.prefisso                         AS \"informativa\"" +
+            "   ,   TM.nome                             AS \"nome\"" +
+            "   ,   TM.ordinale                         AS \"ordinale\"" +
+            "   FROM tipo_misura TM" +
+            "   ORDER BY TM.id";
+    
+    /**
+     * <p>Estrae i valori dei caratteri delle misure.</p>
+     */
+    public static final String GET_MEASURE_CHARACTERS = 
+            "SELECT" +
+            "       TC.codice                           AS \"informativa\"" +
+            "   ,   TC.nome                             AS \"nome\"" +
+            "   ,   TC.ordinale                         AS \"ordinale\"" +
+            "   FROM tipo_carattere TC" +
+            "   ORDER BY TC.codice";
 
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
