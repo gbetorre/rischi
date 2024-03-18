@@ -313,15 +313,16 @@ e fornirvi il relativo significato e la relativa motivazione.
 - Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
 - Implementata pagina di dettaglio soggetto contingente/interessato
 - Implementata pagina di dettaglio struttura
-- [1.7.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
-- [1.7.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
-- [1.7.7] Implementata estrazione risultati in formato CSV
-- [1.7.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
-- [1.7.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
-- [1.7.4] Implementata form di ricerca sui quesiti per chiave testuale
+- [1.8.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
+- [1.8.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
+- [1.8.7] Implementata estrazione risultati in formato CSV
+- [1.8.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
+- [1.8.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
+- [1.8.4] Implementata form di ricerca sui quesiti per chiave testuale
 
 ### Done
 -->
+- [1.7.2] (18/03/2024) Prima bozza di implementazione misure di prevenzione del rischio corruttivo
 - [1.7.1] (26/02/2024) Implementato blocco prima riga tabella del log delle variazioni; migliorie pagina report tabella dei rischi
 - [1.7.0] (13/02/2024) Completata prima versione del log delle variazioni tra l'ultimo caching dei valori degli indicatori e gli stessi calcolati a runtime; revisione di etichette
 - [1.6.9] (12/02/2024) Implementato nel ricalcolo indicatori il salvataggio delle motivazioni gi&agrave; inserite; correzione di bug
