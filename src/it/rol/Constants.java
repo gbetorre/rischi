@@ -170,6 +170,10 @@ public interface Constants extends Serializable {
      */
     public static final String COMMAND_REPORT           = "mu";
     /**
+     * <p>Costante per il parametro identificante la Command delle misure di mitigazione.</p>
+     */
+    public static final String COMMAND_MEASURE          = "ms";
+    /**
      * <p>Costante per il parametro identificante la parte dei macroprocessi.</p>
      */
     public static final String PART_MACROPROCESS        = "mac";
@@ -231,6 +235,10 @@ public interface Constants extends Serializable {
      */
     public static final String PART_INSERT_RISK         = "adr";
     /**
+     * <p>Costante per il parametro identificante la funzione di aggiunta di una nuova misura.</p>
+     */
+    public static final String PART_INSERT_MEASURE      = "inm";
+    /**
      * <p>Costante per il parametro identificante la funzione di associazione tra un rischio e un processo.</p>
      */
     public static final String PART_INSERT_RISK_PROCESS = "adp";
@@ -239,6 +247,11 @@ public interface Constants extends Serializable {
      * un rischio e un fattore abilitante nel contesto di un processo.</p>
      */
     public static final String PART_INSERT_F_R_P        = "adf";
+    /**
+     * <p>Costante per il parametro identificante la funzione di associazione tra 
+     * un rischio e una misura di mitigazione nel contesto di un processo.</p>
+     */
+    public static final String PART_INSERT_M_R_P        = "adm";
     /**
      * <p>Costante per il parametro identificante la funzione di aggiornamento di una entit&agrave;.</p>
      */
