@@ -55,6 +55,7 @@ import it.rol.Main;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.ItemBean;
+import it.rol.bean.MeasureBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.RiskBean;
 import it.rol.exception.AttributoNonValorizzatoException;
@@ -115,7 +116,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
     /** 
      * Lista delle tipologie delle misure
      */
-    private static ArrayList<CodeBean> types = null;
+    private static ArrayList<CodeBean> types;
 
   
     /* ******************************************************************** *
@@ -186,7 +187,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         // Misura di prevenzione specifica
         //RiskBean risk = null;
         // Elenco delle misure di prevenzione dei rischi legate alla rilevazione
-        ArrayList<ItemBean> measures = null;
+        ArrayList<MeasureBean> measures = null;
         // Elenco strutture collegate alla rilevazione
         ArrayList<DepartmentBean> structs = null;
         // Elenco tipologie delle misure
@@ -259,7 +260,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         // Decide il valore della pagina
         try {
             // Recupera le tipologie delle misure
-            types = db.getMeasureTypes(user);
+            types = ConfigManager.getMeasureTypes();
             // Controllo sull'input
             if (!codeSur.equals(DASH)) {
                 // Creazione della tabella che conterrà i valori dei parametri passati dalle form
@@ -269,7 +270,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                 /* @PostMapping */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
-                    if (nomeFile.containsKey(part)) {
+                    if (nomeFile.containsKey(part)) {/*
                         // Stringa dinamica per contenere i parametri di scelta strutture
                         StringBuffer paramsStruct = new StringBuffer();
                         // Dizionario dei parametri delle strutture scelte dall'utente
@@ -279,16 +280,15 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             // Printing all elements of a Map
                             paramsStruct.append(AMPERSAND);
                             paramsStruct.append("s" + set.getKey() + EQ + set.getValue());
-                        }
+                        }*/
                         // Controlla quale richiesta deve gestire
                         if (part.equalsIgnoreCase(PART_INSERT_MEASURE)) {
                             /* ************************************************ *
                              *        PROCESS Form to INSERT new Measure        *
                              * ************************************************ */
-                            String[] fieldValues = req.getParameterValues("first-name");
-                            int size = fieldValues.length;
+                            db.insertMeasure(user, params);
                             // Prepara la redirect 
-                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_PROCESS + paramsStruct.toString() + "&r=" + codeSur;
+                            redirect = "q=" + COMMAND_MEASURE + "&r=" + codeSur;
                         } else if (part.equalsIgnoreCase(PART_PROCESS)) {
                             /* ************************************************ *
                              *               CHOOSING Process Part              *
@@ -302,7 +302,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                                 paramsProc.append(AMPERSAND);
                                 paramsProc.append("p" + set.getKey() + EQ + set.getValue());
                             }
-                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_SELECT_QST + paramsStruct.toString() + paramsProc.toString() + "&r=" + codeSur;
+                            //redirect = "q=" + COMMAND_RISK + "&p=" + PART_SELECT_QST + paramsStruct.toString() + paramsProc.toString() + "&r=" + codeSur;
                         } else if (part.equalsIgnoreCase(PART_INSERT_RISK)) {
                             /* ************************************************ *
                              *               INSERT new Risk Part               *
@@ -341,16 +341,16 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                 /* @GetMapping */
                 } else {
                     /* ************************************************ *
-                     *                  Manage Risk Part                *
+                     *                Manage Measure Part               *
                      * ************************************************ */
                     if (nomeFile.containsKey(part)) {
                         //macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
                         if (part.equalsIgnoreCase(PART_INSERT_MEASURE)) {
                             /* ************************************************ *
-                             *        BUILD UP Form to insert new Measure       *
+                             *            BUILD UP Form for new Measure         *
                              * ************************************************ */
                             // Recupera i caratteri
-                            characters = db.getMeasureCharacters(user);
+                            characters = db.getMeasureCharacters();
                             // Recupera le strutture della rilevazione corrente
                             structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
                             // Travasa le strutture in una mappa piatta indicizzata per codice
@@ -388,7 +388,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *              SELECT List of Measures             *
                              * ************************************************ */
-                            //measures = db.getRisks(user, ConfigManager.getSurvey(codeSur).getId(), ConfigManager.getSurvey(codeSur));
+                            measures = db.getMeasures(user, ConfigManager.getSurvey(codeSur));
                             fileJspT = nomeFileElenco;                            
                         }
                     }
@@ -414,7 +414,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg + ise.getMessage(), ise);
         } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            String msg = FOR_NAME + "Si e\' verificato un puntamento a null.\n";
             LOG.severe(msg);
             throw new CommandException(msg + npe.getMessage(), npe);
         } catch (Exception e) {
@@ -425,6 +425,14 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
+        // Imposta nella request elenco tipologie di misure
+        if (types != null) {
+            req.setAttribute("tipiMisure", types);
+        }
+        // Imposta nella request elenco caratteri delle misure
+        if (characters != null) {
+            req.setAttribute("caratteriMisure", characters);
+        }
         // Imposta nella request elenco completo misure di prevenzione dei rischi
         if (measures != null) {
             req.setAttribute("misure", measures);
@@ -436,14 +444,6 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         // Imposta nella request elenco completo strutture sotto forma di dictionary
         if (flatStructs != null) {
             req.setAttribute("elencoStrutture", flatStructs);
-        }
-        // Imposta nella request elenco tipologie di misure
-        if (types != null) {
-            req.setAttribute("tipiMisure", types);
-        }
-        // Imposta nella request elenco caratteri delle misure
-        if (characters != null) {
-            req.setAttribute("caratteriMisure", characters);
         }
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
@@ -475,7 +475,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
      * parametrici riscontrati sulla richiesta.</p>
      * 
      * @param part          la sezione del sito corrente
-     * @param parser        oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
+     * @param req           la HttpServletRequest contenente la richiesta del client
      * @param formParams    mappa da valorizzare per riferimento (ByRef)
      * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
      * @throws AttributoNonValorizzatoException se si fa riferimento a un attributo obbligatorio di bean che non viene trovato
