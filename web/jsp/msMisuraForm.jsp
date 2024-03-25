@@ -67,7 +67,6 @@
           <div class="col-sm-4 mandatory-thin"><strong>Nome Misura</strong></div>
           <div class="col-sm-6">
             <input type="text" class="form-control" id="ms-name" name="ms-name" placeholder="Inserisci nome della nuova misura">
-            <div class="charNum"></div> 
           </div>
         </div>
         <br />
@@ -85,7 +84,7 @@
           <div class="col-sm-4 mandatory-thin"><strong>Carattere misura</strong></div>
           <div class="col-sm-6">
             <select id="ms-char" name="ms-char" class="custom-label">
-              <option value="0">-- scelta carattere della misura -- </option>
+              <option value="">-- scelta carattere della misura -- </option>
             <c:forEach var="character" items="${characters}" varStatus="status">
               <option value="${character.informativa}"><c:out value="${character.nome}" /></option>
             </c:forEach>
@@ -98,7 +97,7 @@
           <div class="col-sm-4 mandatory-thin"><strong>Sostenibilit&agrave; economica</strong></div>
           <div class="col-sm-6">
             <select id="ms-eco" name="ms-eco" class="custom-label">
-              <option value="0">--&nbsp; la misura comporta spese? &nbsp;-- </option>
+              <option value="">--&nbsp; la misura comporta spese? &nbsp;-- </option>
               <option value="SI">SI</option>
               <option value="SI">NO</option>
               <option value="ND">Non Determinabile (al momento)</option>
@@ -110,6 +109,7 @@
         <div class="content-holder col-sm-10">
           <div class="column">
             <div class="mandatory-thin"><strong> &nbsp;Tipologia Misura</strong></div>
+            <div class="text-center"><div id="custom-error-location"></div></div>
           </div>
           <div class="row">
             <div class="text-center">
@@ -127,11 +127,12 @@
         <div class="content-holder col-sm-10">
           <div class="column">
             <div class="mandatory-thin"><strong> &nbsp;Struttura Capofila</strong></div>
+            <div class="text-center"><div id="custom-error-location-2"></div></div>
           </div>
           <div class="row">
             <div class="text-center lastMenuContent">
               <select id="str-liv1" name="sliv1">
-                <option value="0">-- scelta tipologia struttura -- </option>
+                <option value="">-- scelta tipologia struttura -- </option>
                 <option value="${dir.extraInfo.codice}"><c:out value="${dir.nome}" /></option>
                 <option value="${cen.extraInfo.codice}"><c:out value="${cen.nome}" /></option>
                 <option value="${dip.extraInfo.codice}"><c:out value="${dip.nome}" /></option>
@@ -259,7 +260,7 @@
         <br />
         &nbsp;
         <div class="centerlayout">
-          <button type="submit" class="btn btn-success" value="Save">
+          <button type="submit" class="btn btn-success" id="btn-save" value="Save">
             <i class="far fa-save"></i> Salva
           </button>
         </div>
@@ -559,6 +560,66 @@ $(document).ready(function() {
         </c:forEach>
         }
     });
+    $('#btn-save').click(function (e){
+        e.preventDefault;
+      });
+
+    $('#inm-form').validate ({
+        rules: {
+          'ms-name': {
+            required: true
+          },
+          'ms-char': {
+            required: true
+          },
+          'ms-eco': {
+            required: true
+          },
+          "ms-type1": {
+            checkAtLeastOneChecked: true
+          },
+          "sliv1": {
+            required: true
+          }
+        }, 
+        messages: {
+          'ms-name': "Inserire il nome della misura",
+          'ms-char': "Specificare il carattere della misura",
+          'ms-eco': "Specificare se la misura comporta spese",
+          'sliv1': "Specificare almeno una struttura capofila",
+        },
+        errorPlacement: function(error, element) {
+            if (element.attr("name") == "ms-type1") {
+                error.insertAfter("#custom-error-location"); // Place error message after a specific element
+            } else if (element.attr("name") == "sliv1") {
+                error.insertAfter("#custom-error-location-2"); // Place error message after another specific element
+            } else {
+                error.insertAfter(element); // Default placement for other elements
+            }
+        },
+        submitHandler: function (form) {
+          return true;
+        }
+      });
+    
+      $('#ms-desc').keyup(function (e) {
+          var chars = $(this).val().length;
+          $(this).next('div').text(chars + ' caratteri inseriti');
+      });
+      
+      $.validator.addMethod("checkAtLeastOneChecked", function(value, element) {
+        if (
+        <c:set var="separator" value="||" scope="page" />
+        <c:forEach var="type" items="${types}" varStatus="status">
+             $('input[name="ms-type${type.id}"]:checked').length > 0
+          <c:if test="${status.count eq types.size()}">
+            <c:set var="separator" value=")" scope="page" />
+          </c:if>
+          <c:out value="${separator}" />
+        </c:forEach>
+          return true;
+        return false;
+      }, "Specificare almeno una tipologia");
     
 });
 </script>
