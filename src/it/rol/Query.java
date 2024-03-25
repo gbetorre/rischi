@@ -116,6 +116,14 @@ public interface Query extends Serializable {
             "   WHERE codice ILIKE ?";
     
     /**
+     * <p>Estrae il numero di record di una tabella definita nel chiamante</p>
+     */
+    public static final String SELECT_COUNT =
+            "SELECT " +
+            "       count(*)             AS \"n\"" +
+            "   FROM ";
+    
+    /**
      * <p>Estrae l'utente con username e password passati come parametri.</p>
      */
     public static final String GET_USR =
@@ -1148,7 +1156,7 @@ public interface Query extends Serializable {
             "   ,   TM.nome                             AS \"nome\"" +
             "   ,   TM.ordinale                         AS \"ordinale\"" +
             "   FROM tipo_misura TM" +
-            "   ORDER BY TM.id";
+            "   ORDER BY TM.ordinale";
     
     /**
      * <p>Estrae i valori dei caratteri delle misure.</p>
@@ -1160,7 +1168,44 @@ public interface Query extends Serializable {
             "   ,   TC.ordinale                         AS \"ordinale\"" +
             "   FROM tipo_carattere TC" +
             "   ORDER BY TC.codice";
+    
+    /**
+     * <p>Estrae le tipologie di una misura.</p>
+     */
+    public static final String GET_MEASURE_TYPE = 
+            "SELECT" +
+            "       TM.id                               AS \"id\"" +
+            "   ,   TM.prefisso                         AS \"informativa\"" +
+            "   ,   TM.nome                             AS \"nome\"" +
+            "   ,   TM.ordinale                         AS \"ordinale\"" +
+            "   FROM tipo_misura TM" +
+            "       INNER JOIN misura_tipologia MST ON MST.id_tipo_misura = TM.id" +
+            "       INNER JOIN misura MS ON MST.cod_misura = MS.codice" +
+            "   WHERE (MS.codice = ? AND MS.id_rilevazione = ?)" +
+            "   ORDER BY TM.id";
 
+    /**
+     * <p>Estrae l'elenco di tutte le misure di mitigazione trovate per una data
+     * rilevazione, oppure indipendentemente dalla rilevazione (in funzione
+     * dei parametri), selezionando le tuple atte a comporre il registro 
+     * delle misure di prevenzione e mitigazione dei rischi corruttivi.</p>
+     * <p>Ogni riga, quindi, corrisponder&agrave; ad una distinta misura.</p>
+     */
+    public static final String GET_MEASURES = 
+            "SELECT DISTINCT" +
+            "       MS.codice                           AS \"codice\"" +
+            "   ,   MS.nome                             AS \"nome\"" +
+            "   ,   MS.descrizione                      AS \"stato\"" +
+            "   ,   MS.onerosa                          AS \"comportaSpese\"" +
+            "   ,   MS.ordinale                         AS \"ordinale\"" +
+            "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   ,   MS.id_rilevazione                   AS \"idRilevazione\"" +
+            "   FROM misura MS" +
+            "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
+            "   WHERE (MS.id_rilevazione = ? OR -1 = ?)" +
+            "   ORDER BY MS.ordinale";
+    
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
      *    (in taluni casi non si riesce a prestabilire la query ma questa va    *
@@ -1466,6 +1511,103 @@ public interface Query extends Serializable {
             "   ,       ? " +       // descrizione
             "   ,       ? " +       // note
             "   ,       ? " +       // ordinale
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di una misura di mitigazione del rischio.</p>
+     */
+    public static final String INSERT_MEASURE =
+            "INSERT INTO misura" +
+            "   (   codice" +
+            "   ,   nome" +
+            "   ,   descrizione" +
+            "   ,   onerosa" +
+            "   ,   ordinale" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // codice
+            "   ,       ? " +       // nome
+            "   ,       ? " +       // descrizione
+            "   ,       ? " +       // onerosa
+            "   ,       ? " +       // ordinale
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id rilevazione
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di una tupla nella relazione tra misura e carattere.</p>
+     */
+    public static final String INSERT_MEASURE_CHARACTER =
+            "INSERT INTO misura_carattere" +
+            "   (   cod_misura" +
+            "   ,   cod_carattere" +
+            "   ,   id_rilevazione" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       // codice misura
+            "   ,       ? " +       // codice carattere
+            "   ,       ? " +       // id rilevazione
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di una tupla nella relazione 
+     * tra misura e tipo di misura.</p>
+     */
+    public static final String INSERT_MEASURE_TYPE =
+            "INSERT INTO misura_tipologia" +
+            "   (   cod_misura" +
+            "   ,   id_tipo_misura" +
+            "   ,   id_rilevazione" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       // codice misura
+            "   ,       ? " +       // id tipo misura
+            "   ,       ? " +       // id rilevazione
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di una struttura collegata a una misura.</p>
+     */
+    public static final String INSERT_MEASURE_STRUCT =
+            "INSERT INTO misura_struttura" +
+            "   (   id" +
+            "   ,   ruolo" +
+            "   ,   id_struttura_liv1" +
+            "   ,   id_struttura_liv2" +
+            "   ,   id_struttura_liv3" +
+            "   ,   id_struttura_liv4" +
+            "   ,   cod_misura" +
+            "   ,   id_rilevazione" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // ruolo
+            "   ,       ? " +       // id_struttura_liv1
+            "   ,       ? " +       // id_struttura_liv2
+            "   ,       ? " +       // id_struttura_liv3
+            "   ,       ? " +       // id_struttura_liv4
+            "   ,       ? " +       // codice misura
+            "   ,       ? " +       // id rilevazione
             "   ,       ? " +       // data ultima modifica
             "   ,       ? " +       // ora ultima modifica
             "   ,       ? " +       // autore ultima modifica
