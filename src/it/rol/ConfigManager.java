@@ -36,6 +36,7 @@ package it.rol;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -150,6 +151,16 @@ public class ConfigManager extends HttpServlet {
      * poi nella costruzione dei nomi dei files generati dall'applicazione
      */
     private static ConcurrentHashMap<String, String> labels;
+    /** 
+     * Lista delle tipologie delle misure di prevenzione/mitigazione
+     * del rischio corruttivo
+     */
+    private static ArrayList<CodeBean> measureTypes;
+    /** 
+     * Lista dei caratteri delle misure di prevenzione/mitigazione
+     * del rischio corruttivo
+     */
+    private static HashMap<String, CodeBean> measureCharacters;
     /**
      * <p>Nome del parametro di inizializzazione, valorizzato nel
      * descrittore di deploy, che identifica il nome della web application.</p>
@@ -361,7 +372,7 @@ public class ConfigManager extends HttpServlet {
                 // Valorizza il dizionario delle rilevazioni
                 surveys.put(key.toUpperCase(), rilevazione);                
                 // Valorizza il dizionario del numero di quesiti
-                questionAmount.put(key, amount); 
+                questionAmount.put(key, amount);
             }
         }
         catch (NullPointerException npe) {
@@ -369,6 +380,39 @@ public class ConfigManager extends HttpServlet {
         }
         catch (Exception e) {
             throw new ServletException(FOR_NAME + "Problemi nel caricare la struttura contenente le rilevazioni.\n" + e.getMessage(), e);
+        }
+        /*
+         * Carica una lista, che esporra' staticamente, contenente
+         * tutti i tipi di misura (informazione pubblica, non storicizzata e
+         * necessaria in vari punti dell'applicazione perche' le liste che
+         * dipendono dai tipi sono scorse dinamicamente).
+         */
+        measureTypes = null;
+        try {
+            measureTypes = db.getMeasureTypes();
+        }
+        catch (WebStorageException wse) {
+            throw new ServletException(FOR_NAME + "Problemi nel metodo che estrae i tipi di misura.\n" + wse.getMessage(), wse);
+        }
+        catch (Exception e) {
+            throw new ServletException(FOR_NAME + "Problemi nel caricare i tipi di misura.\n" + e.getMessage(), e);
+        }
+        /*
+         * Carica una lista, che esporra' staticamente, contenente
+         * tutti i tipi di carattere delle misure
+         */
+        measureCharacters = new HashMap<>();
+        try {
+            ArrayList<CodeBean> characters = db.getMeasureCharacters();
+            for (CodeBean character : characters) {
+                measureCharacters.put(character.getInformativa(), character);
+            }
+        }
+        catch (WebStorageException wse) {
+            throw new ServletException(FOR_NAME + "Problemi nel metodo che estrae i caratteri delle misure.\n" + wse.getMessage(), wse);
+        }
+        catch (Exception e) {
+            throw new ServletException(FOR_NAME + "Problemi nel caricare i caratteri di misura.\n" + e.getMessage(), e);
         }
         /*
          * Carica una struttura dati, che esporra' staticamente, contenente tutte 
@@ -620,6 +664,30 @@ public class ConfigManager extends HttpServlet {
      */
     public static ConcurrentHashMap<String, String> getLabels() {
         return labels;
+    }
+    
+    
+    /**
+     * <p>Restituisce una struttura di tipo vettoriale,
+     * contenente le tipologie di misura di prevenzione/mitigazione.
+     * del rischio corruttivo.</p>
+     *
+     * @return <code>ArrayList&lt;CodeBean&gt;</code> - lista tipi di misure
+     */
+    public static ArrayList<CodeBean> getMeasureTypes() {
+        return measureTypes;
+    }
+    
+    
+    /**
+     * <p>Restituisce una struttura di tipo dictionary,
+     * contenente i caratteri delle misure di prevenzione/mitigazione.
+     * del rischio corruttivo indicizzati per codice carattere.</p>
+     *
+     * @return <code>ArrayList&lt;CodeBean&gt;</code> - lista tipi di misure
+     */
+    public static HashMap<String, CodeBean> getMeasureCharacters() {
+        return measureCharacters;
     }
     
 }
