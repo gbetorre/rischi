@@ -62,6 +62,7 @@ import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
+import it.rol.bean.MeasureBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
@@ -3900,21 +3901,27 @@ public class DBWrapper implements Query, Constants {
     
     
     /**
-     * <p>Restituisce un ArrayList contenente tutte le tipologie di misura.</p>
+     * <p>Restituisce un ArrayList contenente tutte le tipologie di misura
+     * di prevenzione/mitigazione del rischio corruttivo.<br />
+     * Non si considera l'utente loggato in quanto questa informazione
+     * pu&ograve; essere considerata visibile a tutte le tipologie di utenti.
+     * Inoltre, baipassando l'utente loggato, questi dati possono essere
+     * acquisiti ancor prima che l'utente si logghi, quindi a livello di
+     * applicazione (quando il server viene caricato) &ndash; cosa utile
+     * per poter caricare staticamente in memoria le tuple corrispondenti, quindi 
+     * evitare di dover rifare da pi&uacute; punti la stessa query.</p>
      *
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @return <code>ArrayList&lt;CodeBean&gt;</code> - un vettore ordinato di CodeBean, che rappresentano le tipologie di misura trovate
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "static-method" })
-    public ArrayList<CodeBean> getMeasureTypes(PersonBean user)
+    public ArrayList<CodeBean> getMeasureTypes()
                                         throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             AbstractList<CodeBean> measureTypes = new ArrayList<>();
             try {
-                // TODO: Controllare se user è superuser
                 pst = con.prepareStatement(GET_MEASURE_TYPES);
                 pst.clearParameters();
                 rs = pst.executeQuery();
@@ -3955,21 +3962,24 @@ public class DBWrapper implements Query, Constants {
     
     /**
      * <p>Restituisce un ArrayList contenente i possibili caratteri delle misure
-     * di prevenzione o calmierazione del rischio corruttivo.</p>
+     * di prevenzione/mitigazione del rischio corruttivo.<br />
+     * Non si prende in considerazione l'utente loggato in quanto 
+     * questa informazione pu&ograve; essere considerata visibile 
+     * a tutte le tipologie di utenti (anche perch&eacute; anche se
+     * sai quali sono i caratteri delle misure ma non sai quali sono
+     * le misure, a che serve questa informazione?).</p>
      *
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @return <code>ArrayList&lt;CodeBean&gt;</code> - un vettore ordinato di CodeBean, che rappresentano i caratteri di misura trovati
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "static-method" })
-    public ArrayList<CodeBean> getMeasureCharacters(PersonBean user)
+    public ArrayList<CodeBean> getMeasureCharacters()
                                              throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             AbstractList<CodeBean> measureCharacters = new ArrayList<>();
             try {
-                // TODO: Controllare se user è superuser
                 pst = con.prepareStatement(GET_MEASURE_CHARACTERS);
                 pst.clearParameters();
                 rs = pst.executeQuery();
@@ -4005,6 +4015,118 @@ public class DBWrapper implements Query, Constants {
             LOG.severe(msg);
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         }
+    }
+    
+    
+    /**
+     * <p>Data una rilevazione, restituisce un elenco di misure trovate.</p>
+     * // TODO COMMENTO
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param id        identificativo dell'output che si vuol recuperare
+     * @param survey    oggetto contenente gli estremi della rilevazione
+     * @return <code>ProcessBean</code> - l'output desiderato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings("static-method")
+    public ArrayList<MeasureBean> getMeasures(PersonBean user,
+                                              CodeBean survey)
+                                       throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs, rs1, rs2 = null;
+            int nextParam = NOTHING;
+            MeasureBean measure = null;
+            AbstractList<MeasureBean> measures = new ArrayList<>(); 
+            ArrayList<CodeBean> types = null; 
+            // TODO: Controllare se user è superuser
+            try {
+                pst = con.prepareStatement(GET_MEASURES);
+                pst.clearParameters();
+                pst.setInt(++nextParam, survey.getId());
+                pst.setInt(++nextParam, survey.getId());
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    measure = new MeasureBean();
+                    types = new ArrayList<>();
+                    BeanUtil.populate(measure, rs);
+                    // Il carattere si puo' ricavare dal codice:
+                    String measureCode = measure.getCodice();
+                    String charCode = measureCode.substring(measureCode.indexOf(DOT) + 1, measureCode.lastIndexOf(DOT));
+                    ArrayList<CodeBean> test0 = ConfigManager.getMeasureTypes();
+                    HashMap<String, CodeBean> test = ConfigManager.getMeasureCharacters();
+                    CodeBean character = ConfigManager.getMeasureCharacters().get(charCode);
+                    measure.setCarattere(character);
+                    // Le tipologie invece si devono ricavare tramite una query
+                    nextParam = NOTHING;
+                    pst = null;
+                    pst = con.prepareStatement(GET_MEASURE_TYPE);
+                    pst.clearParameters();
+                    pst.setString(++nextParam, measure.getCodice());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs1 = pst.executeQuery();
+                    while (rs1.next()) {
+                        // Crea una tipologia vuota
+                        CodeBean type = new CodeBean();
+                        // Lo valorizza col risultato della query
+                        BeanUtil.populate(type, rs1);
+                        // La aggiunge alla lista delle tipologie della misura corrente
+                        types.add(type);
+                        
+                        /* == Ne recupera il macroprocesso_at padre == *
+                        pst = null;
+                        pst = con.prepareStatement(GET_MACRO_AT_BY_CHILD);
+                        pst.clearParameters();
+                        pst.setInt(1, pat.getId());
+                        pst.setInt(2,survey.getId());
+                        rs2 = pst.executeQuery();
+                        // Punta al padre (se c'è, è solo uno!)
+                        if (rs2.next()) {
+                            // Prepara il padre
+                            ProcessBean mat = new ProcessBean();
+                            // Valorizza il padre
+                            BeanUtil.populate(mat, rs2);
+                            // Aggiunge il padre al figlio
+                            pat.setPadre(mat);
+                        }*/
+                        // Aggiunge il processo alla lista di processi per l'output trovato
+                        //measure.setTipologie(types);
+                    }
+                    measure.setTipologie(types);
+                    measures.add(measure);
+                }
+                
+                // Just to engage the Garbage Collector
+                pst = null;
+                // Get_out(put)
+                return (ArrayList<MeasureBean>) measures;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nel metodo di recupero misure.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in una conversione in numero.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + nfe.getMessage(), nfe);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }        
     }
     
     /* ********************************************************** *
@@ -4608,6 +4730,188 @@ public class DBWrapper implements Query, Constants {
         }
     }
     
+    
+    /**
+     * <p>Metodo per fare l'inserimento di una nuova misura di prevenzione
+     * o mitigazione del rischio corruttivo.</p>
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    public void insertMeasure(PersonBean user, 
+                              HashMap<String, LinkedHashMap<String, String>> params) 
+                       throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement ps, pst, ps1, ps2, ps3 = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri della misura inserita dall'utente
+            LinkedHashMap<String, String> measure = params.get(PART_INSERT_MEASURE);
+            // Lista dei tipi di misura di prevenzione/calmierazione del rischio
+            ArrayList<CodeBean> types = ConfigManager.getMeasureTypes();
+            // Prepara data e ora (potrebbero cambiare da una query all'altra se calcolate in itinere)
+            java.sql.Date lastModifiedDate = Utils.convert(Utils.convert(Utils.getCurrentDate()));
+            // Inoltre, la memorizzazione è più efficiente del ricalcolo
+            Time lastModifiedTime = Utils.getCurrentTime();
+            // Definisce un indice per il numero di parametro da passare alla query
+            int nextParam = NOTHING;
+            try {
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                try {
+                    /* === 1. QUERY inserimento misura   === */ 
+                    pst = con.prepareStatement(INSERT_MEASURE);
+                    pst.clearParameters();
+                    /* === Carattere === */
+                    String c = measure.get("char");
+                    /* === Codice === */
+                    int suffix = getCount("misura") + ELEMENT_LEV_1;
+                    String code = "MP" + DOT + c + DOT + suffix;
+                    pst.setString(++nextParam, code);
+                    /* === Nome === */
+                    pst.setString(++nextParam, measure.get("nome"));
+                    /* === Descrizione === */
+                    String descr = null;
+                    if (!measure.get("desc").equals(VOID_STRING)) {
+                        descr = new String(measure.get("desc"));
+                        pst.setString(++nextParam, descr);
+                    } else {
+                        // Dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    /* === Misura onerosa === */
+                    pst.setString(++nextParam, measure.get("econ"));
+                    /* === Ordinale === */
+                    pst.setInt(++nextParam, suffix*10);
+                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                    pst.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                    pst.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());
+                    /* === Collegamento a rilevazione === */
+                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    pst.executeUpdate();
+                    /* === 2. QUERY inserimento relazione misura_carattere   === */ 
+                    ps1 = con.prepareStatement(INSERT_MEASURE_CHARACTER);
+                    ps1.clearParameters();
+                    // Resetta il contatore parametri
+                    nextParam = NOTHING;
+                    /* === Codice misura === */
+                    ps1.setString(++nextParam, code);
+                    /* === Codice carattere === */
+                    ps1.setString(++nextParam, c);
+                    /* === Identificativo rilevazione === */
+                    ps1.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    /* === Campi automatici === */
+                    ps1.setDate(++nextParam, lastModifiedDate); // deve essere uguale a sopra
+                    ps1.setTime(++nextParam, lastModifiedTime); // deve essere uguale a sopra
+                    ps1.setInt(++nextParam, user.getUsrId());
+                    ps1.executeUpdate();
+                    /* === 3. QUERY contestuale di inserimento in misura_tipologia === */
+                    ps = con.prepareStatement(INSERT_MEASURE_TYPE);
+                    //ps.clearParameters();
+                    for (CodeBean type : types) {
+                        StringBuffer keyType = new StringBuffer("tip" + DASH + type.getId()); 
+                        if (!measure.get(String.valueOf(keyType)).equals(VOID_STRING)) {
+                            nextParam = NOTHING;
+                            /* === Codice misura === */
+                            ps.setString(++nextParam, code);
+                            /* === Identificativo tipologia === */
+                            ps.setInt(++nextParam, Integer.parseInt(measure.get(String.valueOf(keyType))));
+                            /* === Identificativo rilevazione === */
+                            ps.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                            /* === Campi automatici === */
+                            ps.setDate(++nextParam, lastModifiedDate); // deve essere uguale a sopra
+                            ps.setTime(++nextParam, lastModifiedTime); // deve essere uguale a sopra
+                            ps.setInt(++nextParam, user.getUsrId());
+                            ps.addBatch();
+                        }
+                        keyType = null;
+                    }
+                    // Execute the batch updates
+                    int[] updateCounts = ps.executeBatch();
+                    LOG.info(updateCounts.length + " tuple di relazione con i tipi inserite.\n");
+                    /* === 4. QUERY contestuale di inserimento in misura_struttura (capofila) === *
+                    // === Collegamento a struttura_liv1 ===
+                    if (!struct.get("liv1").equals(VOID_STRING)) {
+                        String idAsString = struct.get("liv1").substring(struct.get("liv1").indexOf('.') + 1,struct.get("liv1").indexOf('-'));
+                        int id_struttura_liv1 = Integer.parseInt(idAsString);
+                        pst.setInt(++nextParam, id_struttura_liv1);
+                    } else {
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    // === Collegamento a struttura_liv2 === 
+                    if (!struct.get("liv2").equals(VOID_STRING)) {
+                        String idAsString = struct.get("liv2").substring(struct.get("liv2").indexOf('.') + 1,struct.get("liv2").indexOf('-'));
+                        int id_struttura_liv2 = Integer.parseInt(idAsString);
+                        pst.setInt(++nextParam, id_struttura_liv2);
+                    } else {
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    // === Collegamento a struttura_liv3 === 
+                    if (!struct.get("liv3").equals(VOID_STRING)) {
+                        String idAsString = struct.get("liv3").substring(struct.get("liv3").indexOf('.') + 1,struct.get("liv3").indexOf('-'));
+                        int id_struttura_liv3 = Integer.parseInt(idAsString);
+                        pst.setInt(++nextParam, id_struttura_liv3);
+                    } else {
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    // === Collegamento a struttura_liv4 === 
+                    if (!struct.get("liv4").equals(VOID_STRING)) {
+                        String idAsString = struct.get("liv4").substring(struct.get("liv4").indexOf('.') + 1,struct.get("liv4").indexOf('-'));
+                        int id_struttura_liv4 = Integer.parseInt(idAsString);
+                        pst.setInt(++nextParam, id_struttura_liv4);
+                    } else {
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    
+                    /* === 5. QUERY contestuale di inserimento in misura_struttura (gregarie) === */ 
+
+                } catch (SQLException sqle) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella query di inserimento misura.\n" + sqle.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, sqle);
+                } catch (NumberFormatException nfe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, nfe);
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, npe);
+                } catch (Exception e) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
+
+                // End: <==
+                con.commit();
+                pst.close();
+                pst = null;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
     /* ********************************************************** *
      *                  Metodi di AGGIORNAMENTO                   *
      * ********************************************************** */
@@ -5105,6 +5409,53 @@ public class DBWrapper implements Query, Constants {
         }
     }
     
+    
+    /**
+     * <p>Restituisce
+     * <ul>
+     * <li>il numero di record di una
+     * tabella il cui nome viene passato come argomento</li>
+     * <li>oppure zero se nella tabella non sono presenti record.</li>
+     * </ul></p>
+     *
+     * @param table nome della tabella di cui si vuol recuperare il numero di tuple
+     * @return <code>int</code> - un intero che rappresenta il numero di tuple trovato, oppure zero se non sono stati trovati record
+     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method", "null" })
+    public int getCount(String table)
+               throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        try {
+            int count = NOTHING;
+            String query = SELECT_COUNT + table;
+            con = prol_manager.getConnection();
+            pst = con.prepareStatement(query);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+            return count;
+        }  catch (SQLException sqle) {
+            String msg = FOR_NAME + "Impossibile recuperare il numero di tuple di " + table + ".\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+
 
     /**
      * <p>Restituisce il primo valore trovato data una query 
