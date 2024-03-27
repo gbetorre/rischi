@@ -288,7 +288,9 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                              * ************************************************ */
                             db.insertMeasure(user, params);
                             // Prepara la redirect 
-                            redirect = "q=" + COMMAND_MEASURE + "&r=" + codeSur;
+                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + 
+                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur +
+                                       AMPERSAND + MESSAGE + EQ + "newMes";
                         } else if (part.equalsIgnoreCase(PART_PROCESS)) {
                             /* ************************************************ *
                              *               CHOOSING Process Part              *
@@ -355,22 +357,9 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
                             // Travasa le strutture in una mappa piatta indicizzata per codice
                             flatStructs = AuditCommand.decantStructs(structs);
-
-                        } else if (part.equalsIgnoreCase(PART_INSERT_RISK)) {
-                            /* ************************************************ *
-                             *          SHOWS Form to INSERT new Risk           *
-                             * ************************************************ */
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuovo Rischio");
-                        } else if (part.equalsIgnoreCase(PART_INSERT_RISK_PROCESS)) {
-                            /* ************************************************ *
-                             *       SHOWS Form to LINK A PROCESS TO A Risk     *
-                             * ************************************************ */
-                            //risk = db.getRisk(user, idMs, ConfigManager.getSurvey(codeSur));
-                            // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuovo legame R-P");
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuova Misura");
                         }
                         fileJspT = nomeFile.get(part);//
                     } else {
