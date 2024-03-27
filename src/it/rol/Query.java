@@ -1206,6 +1206,39 @@ public interface Query extends Serializable {
             "   WHERE (MS.id_rilevazione = ? OR -1 = ?)" +
             "   ORDER BY MS.ordinale";
     
+    /**
+     * <p>Estrae gli estremi delle strutture di una misura.</p>
+     */
+    public static final String GET_STRUCTS_BY_MEASURE = 
+            "SELECT DISTINCT" +
+            "       MST.id_struttura_liv1       AS \"cod1\"" +
+            "   ,   MST.id_struttura_liv2       AS \"cod2\"" +
+            "   ,   MST.id_struttura_liv3       AS \"cod3\"" +
+            "   ,   MST.id_struttura_liv4       AS \"cod4\"" +
+            "   ,   MST.id_rilevazione          AS \"value3\"" +
+            "   ,   MST.ruolo                   AS \"extraInfo\"" +
+            "   ,   L1.prefisso                 AS \"nome\"" +
+            "   ,   L2.prefisso                 AS \"nomeReale\"" +
+            "   ,   L3.prefisso                 AS \"nomeClasse\"" +
+            "   ,   L4.prefisso                 AS \"labelWeb\"" +
+            "   ,   L1.nome                     AS \"extraInfo1\"" +
+            "   ,   L2.nome                     AS \"extraInfo2\"" +
+            "   ,   L3.nome                     AS \"extraInfo3\"" +
+            "   ,   L4.nome                     AS \"extraInfo4\"" +
+            "   FROM misura_struttura MST" +
+            "       LEFT JOIN struttura_liv1 L1 ON MST.id_struttura_liv1 = L1.id" +
+            "       LEFT JOIN struttura_liv2 L2 ON MST.id_struttura_liv2 = L2.id" +
+            "       LEFT JOIN struttura_liv3 L3 ON MST.id_struttura_liv3 = L3.id" +
+            "       LEFT JOIN struttura_liv4 L4 ON MST.id_struttura_liv4 = L4.id" +
+            "   WHERE   MST.cod_misura = ?" +
+            "       AND MST.ruolo ILIKE '?%'" + 
+            "       AND MST.id_rilevazione = ?" +
+            "   ORDER BY MST.ruolo " +
+            "   ,       MST.id_struttura_liv1" +
+            "   ,       MST.id_struttura_liv2" +
+            "   ,       MST.id_struttura_liv3" +
+            "   ,       MST.id_struttura_liv4"; 
+    
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
      *    (in taluni casi non si riesce a prestabilire la query ma questa va    *
@@ -1588,8 +1621,8 @@ public interface Query extends Serializable {
      */
     public static final String INSERT_MEASURE_STRUCT =
             "INSERT INTO misura_struttura" +
-            "   (   id" +
-            "   ,   ruolo" +
+            //"   (   id" +
+            "   (   ruolo" +
             "   ,   id_struttura_liv1" +
             "   ,   id_struttura_liv2" +
             "   ,   id_struttura_liv3" +
@@ -1600,8 +1633,8 @@ public interface Query extends Serializable {
             "   ,   ora_ultima_modifica " +
             "   ,   id_usr_ultima_modifica" +
             "   )" +
-            "   VALUES (? " +       // id
-            "   ,       ? " +       // ruolo
+            //"   VALUES (? " +       // id
+            "   VALUES (? " +       // ruolo
             "   ,       ? " +       // id_struttura_liv1
             "   ,       ? " +       // id_struttura_liv2
             "   ,       ? " +       // id_struttura_liv3
