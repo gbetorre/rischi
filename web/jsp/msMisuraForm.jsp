@@ -19,7 +19,8 @@
           padding: 0 10px 10px 10px;
       }
       .large-4 {
-          width: 240px
+          width: 220px;
+          min-width: 160px;
       }
       .content-holder {
           padding: 10px;
@@ -99,7 +100,7 @@
             <select id="ms-eco" name="ms-eco" class="custom-label">
               <option value="">--&nbsp; la misura comporta spese? &nbsp;-- </option>
               <option value="SI">SI</option>
-              <option value="SI">NO</option>
+              <option value="NO">NO</option>
               <option value="ND">Non Determinabile (al momento)</option>
             </select>
           </div>
@@ -165,7 +166,7 @@
             <div class="row">
               <div class="text-center lastMenuContent">
                 <select id="str-liv5" name="sliv5">
-                  <option value="0">-- scelta tipologia struttura -- </option>
+                  <option value="">-- scelta tipologia struttura -- </option>
                   <option value="${dir.extraInfo.codice}"><c:out value="${dir.nome}" /></option>
                   <option value="${cen.extraInfo.codice}"><c:out value="${cen.nome}" /></option>
                   <option value="${dip.extraInfo.codice}"><c:out value="${dip.nome}" /></option>
@@ -199,7 +200,7 @@
             <div class="row">
               <div class="text-center lastMenuContent">
                 <select id="str-liv9" name="sliv9">
-                  <option value="0">-- scelta tipologia struttura -- </option>
+                  <option value="">-- scelta tipologia struttura -- </option>
                   <option value="${dir.extraInfo.codice}"><c:out value="${dir.nome}" /></option>
                   <option value="${cen.extraInfo.codice}"><c:out value="${cen.nome}" /></option>
                   <option value="${dip.extraInfo.codice}"><c:out value="${dip.nome}" /></option>
@@ -231,16 +232,16 @@
             </div>
             <div id="callable-row">
               <div class="row">
-                <div class="large-4 ui-widget">
+                <div class="col-3 large-4 ui-widget">
                   <input class="sLiv1" name="sgliv1" type="text" placeholder="Struttura I livello">
                 </div>
-                <div class="large-4 ui-widget">
+                <div class="col-3 large-4 ui-widget">
                   <input class="sLiv2" name="sgliv2" type="text" placeholder="Struttura II livello">
                 </div>
-                <div class="large-4 ui-widget">
+                <div class="col-3 large-4 ui-widget">
                   <input class="sLiv3" name="sgliv3" type="text" placeholder="Struttura III livello">
                 </div>
-                <div class="large-4 ui-widget">
+                <div class="col-3 large-4 ui-widget">
                   <input class="sLiv4" name="sgliv4" type="text" placeholder="Struttura IV livello">
                 </div>
                 <hr class="separatore" />
