@@ -385,6 +385,22 @@ public interface Constants extends Serializable {
      * <p>Lista contenente i possibili valori degli attributi probabilita, impatto, livello di rischio.</p>
      */
     public static final LinkedList<String> LIVELLI_RISCHIO_AS_LIST = new LinkedList<>(Arrays.asList(LIVELLI_RISCHIO));
+    /**
+     * <p>Etichetta per struttura capofila 1</p>
+     */
+    public static final String CP1 = "capofila 1";
+    /**
+     * <p>Etichetta per struttura capofila 2</p>
+     */
+    public static final String CP2 = "capofila 2";
+    /**
+     * <p>Etichetta per struttura capofila 3</p>
+     */
+    public static final String CP3 = "capofila 3";
+    /**
+     * <p>Etichetta per struttura capofila 1</p>
+     */
+    public static final String GR = "gregaria";
     /* ************************************************************************ *
      *   Costanti tipografiche per la generazione di output (p.es. csv) e URL   *
      * ************************************************************************ */
