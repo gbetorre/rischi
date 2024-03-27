@@ -43,10 +43,14 @@ import java.sql.Types;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -4052,8 +4056,6 @@ public class DBWrapper implements Query, Constants {
                     // Il carattere si puo' ricavare dal codice:
                     String measureCode = measure.getCodice();
                     String charCode = measureCode.substring(measureCode.indexOf(DOT) + 1, measureCode.lastIndexOf(DOT));
-                    ArrayList<CodeBean> test0 = ConfigManager.getMeasureTypes();
-                    HashMap<String, CodeBean> test = ConfigManager.getMeasureCharacters();
                     CodeBean character = ConfigManager.getMeasureCharacters().get(charCode);
                     measure.setCarattere(character);
                     // Le tipologie invece si devono ricavare tramite una query
@@ -4071,33 +4073,28 @@ public class DBWrapper implements Query, Constants {
                         BeanUtil.populate(type, rs1);
                         // La aggiunge alla lista delle tipologie della misura corrente
                         types.add(type);
-                        
-                        /* == Ne recupera il macroprocesso_at padre == *
-                        pst = null;
-                        pst = con.prepareStatement(GET_MACRO_AT_BY_CHILD);
-                        pst.clearParameters();
-                        pst.setInt(1, pat.getId());
-                        pst.setInt(2,survey.getId());
-                        rs2 = pst.executeQuery();
-                        // Punta al padre (se c'è, è solo uno!)
-                        if (rs2.next()) {
-                            // Prepara il padre
-                            ProcessBean mat = new ProcessBean();
-                            // Valorizza il padre
-                            BeanUtil.populate(mat, rs2);
-                            // Aggiunge il padre al figlio
-                            pat.setPadre(mat);
-                        }*/
-                        // Aggiunge il processo alla lista di processi per l'output trovato
-                        //measure.setTipologie(types);
                     }
                     measure.setTipologie(types);
+                    // Struttura Capofila
+                    nextParam = NOTHING;
+                    pst = null;
+                    
+                    /*
+                    StringBuffer query = new StringBuffer(getQueryStructures(survey.getId(), NOTHING, NOTHING, NOTHING, DEFAULT_ID));
+
+                    pst = con.prepareStatement(String.valueOf(query));
+                    pst.clearParameters();
+                    rs2 = pst.executeQuery();
+                    while (rs2.next()) {
+                        
+                    }
+                    */
                     measures.add(measure);
                 }
                 
                 // Just to engage the Garbage Collector
                 pst = null;
-                // Get_out(put)
+                // Get out
                 return (ArrayList<MeasureBean>) measures;
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Oggetto non valorizzato; problema nel metodo di recupero misure.\n";
@@ -4734,6 +4731,20 @@ public class DBWrapper implements Query, Constants {
     /**
      * <p>Metodo per fare l'inserimento di una nuova misura di prevenzione
      * o mitigazione del rischio corruttivo.</p>
+     * <p>About reusing the same PrepraredStatement across multiple updates 
+     * (into the same transaction), Perplexity.ai said:<br /> 
+     * <cite>&quot;There is a discussion about reusing a single 
+     * PreparedStatement for multiple queries. The key point highlighted 
+     * is that while it is possible to reuse a PreparedStatement 
+     * for multiple executions of the same query efficiently, 
+     * using it for different queries may lead to unexpected behavior 
+     * or errors.<br />
+     * Therefore, it is recommended to create separate PreparedStatement objects 
+     * for different queries to ensure proper execution and avoid 
+     * unexpected behavior. 
+     * This approach helps maintain clarity, prevent errors, and ensure 
+     * the intended behavior of each query execution.&quot;</cite><br />
+     * And so did I.</p>
      *
      * @param user      utente loggato
      * @param params    mappa contenente i parametri di navigazione
@@ -4743,7 +4754,7 @@ public class DBWrapper implements Query, Constants {
                               HashMap<String, LinkedHashMap<String, String>> params) 
                        throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
-            PreparedStatement ps, pst, ps1, ps2, ps3 = null;
+            PreparedStatement ps, pst, pst1, ps1, ps2, ps3, pstm = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
             // Dizionario dei parametri della misura inserita dall'utente
@@ -4761,7 +4772,8 @@ public class DBWrapper implements Query, Constants {
                 con.setAutoCommit(false);
                 // TODO: Controllare se user è superuser
                 try {
-                    /* === 1. QUERY inserimento misura   === */ 
+                    /* ***************************************
+                    ** === 1. QUERY inserimento misura   === */ 
                     pst = con.prepareStatement(INSERT_MEASURE);
                     pst.clearParameters();
                     /* === Carattere === */
@@ -4792,22 +4804,24 @@ public class DBWrapper implements Query, Constants {
                     /* === Collegamento a rilevazione === */
                     pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
                     pst.executeUpdate();
-                    /* === 2. QUERY inserimento relazione misura_carattere   === */ 
-                    ps1 = con.prepareStatement(INSERT_MEASURE_CHARACTER);
-                    ps1.clearParameters();
+                    /* ***********************************************************
+                    ** === 2. QUERY inserimento relazione misura_carattere   === */ 
+                    pst1 = con.prepareStatement(INSERT_MEASURE_CHARACTER);
+                    pst1.clearParameters();
                     // Resetta il contatore parametri
                     nextParam = NOTHING;
                     /* === Codice misura === */
-                    ps1.setString(++nextParam, code);
+                    pst1.setString(++nextParam, code);
                     /* === Codice carattere === */
-                    ps1.setString(++nextParam, c);
+                    pst1.setString(++nextParam, c);
                     /* === Identificativo rilevazione === */
-                    ps1.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    pst1.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
                     /* === Campi automatici === */
-                    ps1.setDate(++nextParam, lastModifiedDate); // deve essere uguale a sopra
-                    ps1.setTime(++nextParam, lastModifiedTime); // deve essere uguale a sopra
-                    ps1.setInt(++nextParam, user.getUsrId());
-                    ps1.executeUpdate();
+                    pst1.setDate(++nextParam, lastModifiedDate); // deve essere uguale a sopra
+                    pst1.setTime(++nextParam, lastModifiedTime); // deve essere uguale a sopra
+                    pst1.setInt(++nextParam, user.getUsrId());
+                    pst1.executeUpdate();
+                    /* *****************************************************************
                     /* === 3. QUERY contestuale di inserimento in misura_tipologia === */
                     ps = con.prepareStatement(INSERT_MEASURE_TYPE);
                     //ps.clearParameters();
@@ -4831,43 +4845,279 @@ public class DBWrapper implements Query, Constants {
                     }
                     // Execute the batch updates
                     int[] updateCounts = ps.executeBatch();
-                    LOG.info(updateCounts.length + " tuple di relazione con i tipi inserite.\n");
-                    /* === 4. QUERY contestuale di inserimento in misura_struttura (capofila) === *
+                    LOG.info(updateCounts.length + " tipologie di misura in transazione attiva.\n");
+                    /* ******************************************************************************
+                    ** === 4. QUERY contestuale di inserimento in misura_struttura (capofila 1) === */
+                    nextParam = NOTHING;
+                    ps1 = con.prepareStatement(INSERT_MEASURE_STRUCT);
+                    ps1.setString(++nextParam, CP1);
                     // === Collegamento a struttura_liv1 ===
-                    if (!struct.get("liv1").equals(VOID_STRING)) {
-                        String idAsString = struct.get("liv1").substring(struct.get("liv1").indexOf('.') + 1,struct.get("liv1").indexOf('-'));
-                        int id_struttura_liv1 = Integer.parseInt(idAsString);
-                        pst.setInt(++nextParam, id_struttura_liv1);
+                    String sc1L1 = measure.get("sc1-1");
+                    if (!sc1L1.equals(VOID_STRING)) {
+                        String idAsString = sc1L1.substring(sc1L1.indexOf(DOT) + 1, sc1L1.indexOf('-'));
+                        int id = Integer.parseInt(idAsString);
+                        ps1.setInt(++nextParam, id);
                     } else {
-                        pst.setNull(++nextParam, Types.NULL);
+                        ps1.setNull(++nextParam, Types.NULL);
                     }
                     // === Collegamento a struttura_liv2 === 
-                    if (!struct.get("liv2").equals(VOID_STRING)) {
-                        String idAsString = struct.get("liv2").substring(struct.get("liv2").indexOf('.') + 1,struct.get("liv2").indexOf('-'));
-                        int id_struttura_liv2 = Integer.parseInt(idAsString);
-                        pst.setInt(++nextParam, id_struttura_liv2);
+                    String sc1L2 = measure.get("sc1-2");
+                    if (!sc1L2.equals(VOID_STRING)) {
+                        String idAsString = sc1L2.substring(sc1L2.indexOf(DOT) + 1, sc1L2.indexOf('-'));
+                        int id = Integer.parseInt(idAsString);
+                        ps1.setInt(++nextParam, id);
                     } else {
-                        pst.setNull(++nextParam, Types.NULL);
+                        ps1.setNull(++nextParam, Types.NULL);
                     }
                     // === Collegamento a struttura_liv3 === 
-                    if (!struct.get("liv3").equals(VOID_STRING)) {
-                        String idAsString = struct.get("liv3").substring(struct.get("liv3").indexOf('.') + 1,struct.get("liv3").indexOf('-'));
-                        int id_struttura_liv3 = Integer.parseInt(idAsString);
-                        pst.setInt(++nextParam, id_struttura_liv3);
+                    String sc1L3 = measure.get("sc1-3");
+                    if (!sc1L3.equals(VOID_STRING)) {
+                        String idAsString = sc1L3.substring(sc1L3.indexOf(DOT) + 1, sc1L3.indexOf('-'));
+                        int id = Integer.parseInt(idAsString);
+                        ps1.setInt(++nextParam, id);
                     } else {
-                        pst.setNull(++nextParam, Types.NULL);
+                        ps1.setNull(++nextParam, Types.NULL);
                     }
                     // === Collegamento a struttura_liv4 === 
-                    if (!struct.get("liv4").equals(VOID_STRING)) {
-                        String idAsString = struct.get("liv4").substring(struct.get("liv4").indexOf('.') + 1,struct.get("liv4").indexOf('-'));
-                        int id_struttura_liv4 = Integer.parseInt(idAsString);
-                        pst.setInt(++nextParam, id_struttura_liv4);
+                    String sc1L4 = measure.get("sc1-4");
+                    if (!sc1L4.equals(VOID_STRING)) {
+                        String idAsString = sc1L4.substring(sc1L4.indexOf(DOT) + 1, sc1L4.indexOf('-'));
+                        int id = Integer.parseInt(idAsString);
+                        ps1.setInt(++nextParam, id);
                     } else {
-                        pst.setNull(++nextParam, Types.NULL);
+                        ps1.setNull(++nextParam, Types.NULL);
                     }
-                    
-                    /* === 5. QUERY contestuale di inserimento in misura_struttura (gregarie) === */ 
-
+                    ps1.setString(++nextParam, code);
+                    /* === Collegamento a rilevazione === */
+                    ps1.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                    ps1.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                    ps1.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                    ps1.setInt(++nextParam, user.getUsrId());
+                    // INVIO
+                    ps1.executeUpdate();
+                    /* ******************************************************************************
+                    ** === 5. QUERY contestuale di inserimento in misura_struttura (capofila 2) === */
+                    nextParam = NOTHING;
+                    // Recupera i valori dell'eventuale struttura capofila 2
+                    String sc2L1 = measure.get("sc2-1");
+                    String sc2L2 = measure.get("sc2-2");
+                    String sc2L3 = measure.get("sc2-3");
+                    String sc2L4 = measure.get("sc2-4");
+                    // Se non è vero che tutti questi valori sono vuoti
+                    if (!(sc2L1.equals(VOID_STRING) && sc2L2.equals(VOID_STRING) && sc2L3.equals(VOID_STRING) && sc2L4.equals(VOID_STRING))) {
+                        // Fa la query
+                        ps2 = con.prepareStatement(INSERT_MEASURE_STRUCT);
+                        // Le passa i parametri
+                        ps2.setString(++nextParam, CP2);
+                        // === Collegamento a struttura_liv1 ===
+                        if (!sc2L1.equals(VOID_STRING) && !sc2L1.equals(String.valueOf(NOTHING))) {
+                            String idAsString = sc2L1.substring(sc2L1.indexOf(DOT) + 1, sc2L1.indexOf('-'));
+                            int id = Integer.parseInt(idAsString);
+                            ps2.setInt(++nextParam, id);
+                        } else {
+                            ps2.setNull(++nextParam, Types.NULL);
+                        }
+                        // === Collegamento a struttura_liv2 === 
+                        if (!sc2L2.equals(VOID_STRING)) {
+                            String idAsString = sc2L2.substring(sc2L2.indexOf(DOT) + 1, sc2L2.indexOf('-'));
+                            int id = Integer.parseInt(idAsString);
+                            ps2.setInt(++nextParam, id);
+                        } else {
+                            ps2.setNull(++nextParam, Types.NULL);
+                        }
+                        // === Collegamento a struttura_liv3 === 
+                        if (!sc2L3.equals(VOID_STRING)) {
+                            String idAsString = sc2L3.substring(sc2L3.indexOf(DOT) + 1, sc2L3.indexOf('-'));
+                            int id = Integer.parseInt(idAsString);
+                            ps2.setInt(++nextParam, id);
+                        } else {
+                            ps2.setNull(++nextParam, Types.NULL);
+                        }
+                        // === Collegamento a struttura_liv4 === 
+                        if (!sc2L4.equals(VOID_STRING)) {
+                            String idAsString = sc2L4.substring(sc2L4.indexOf(DOT) + 1, sc2L4.indexOf('-'));
+                            int id = Integer.parseInt(idAsString);
+                            ps2.setInt(++nextParam, id);
+                        } else {
+                            ps2.setNull(++nextParam, Types.NULL);
+                        }
+                        ps2.setString(++nextParam, code);
+                        /* === Collegamento a rilevazione === */
+                        ps2.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                        /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                        ps2.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                        ps2.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                        ps2.setInt(++nextParam, user.getUsrId());
+                        // INVIO
+                        ps2.executeUpdate();
+                    }
+                    /* ******************************************************************************
+                    ** === 6. QUERY contestuale di inserimento in misura_struttura (capofila 3) === */
+                    nextParam = NOTHING;
+                    // Recupera i valori dell'eventuale struttura capofila 2
+                    String sc3L1 = measure.get("sc3-1");
+                    String sc3L2 = measure.get("sc3-2");
+                    String sc3L3 = measure.get("sc3-3");
+                    String sc3L4 = measure.get("sc3-4");
+                    // Se non è vero che tutti questi valori sono vuoti
+                    if (!(sc2L1.equals(VOID_STRING) && sc2L2.equals(VOID_STRING) && sc2L3.equals(VOID_STRING) && sc2L4.equals(VOID_STRING))) {
+                        // Fa la query
+                        ps3 = con.prepareStatement(INSERT_MEASURE_STRUCT);
+                        ps3.setString(++nextParam, CP3);
+                        // === Collegamento a struttura_liv1 ===
+                            if (!sc3L1.equals(VOID_STRING) && !sc3L1.equals(String.valueOf(NOTHING))) {
+                            String idAsString = sc3L1.substring(sc3L1.indexOf(DOT) + 1, sc3L1.indexOf('-'));
+                            int id = Integer.parseInt(idAsString);
+                            ps3.setInt(++nextParam, id);
+                        } else {
+                            ps3.setNull(++nextParam, Types.NULL);
+                        }
+                        // === Collegamento a struttura_liv2 === 
+                        if (!sc3L2.equals(VOID_STRING)) {
+                            String idAsString = sc3L2.substring(sc3L2.indexOf(DOT) + 1, sc3L2.indexOf('-'));
+                            int id = Integer.parseInt(idAsString);
+                            ps3.setInt(++nextParam, id);
+                        } else {
+                            ps3.setNull(++nextParam, Types.NULL);
+                        }
+                        // === Collegamento a struttura_liv3 === 
+                        if (!sc3L3.equals(VOID_STRING)) {
+                            String idAsString = sc3L3.substring(sc3L3.indexOf(DOT) + 1, sc3L3.indexOf('-'));
+                            int id = Integer.parseInt(idAsString);
+                            ps3.setInt(++nextParam, id);
+                        } else {
+                            ps3.setNull(++nextParam, Types.NULL);
+                        }
+                        // === Collegamento a struttura_liv4 === 
+                        if (!sc3L4.equals(VOID_STRING)) {
+                            String idAsString = sc3L4.substring(sc3L4.indexOf(DOT) + 1, sc3L4.indexOf('-'));
+                            int id = Integer.parseInt(idAsString);
+                            ps3.setInt(++nextParam, id);
+                        } else {
+                            ps3.setNull(++nextParam, Types.NULL);
+                        }
+                        ps3.setString(++nextParam, code);
+                        /* === Collegamento a rilevazione === */
+                        ps3.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                        /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                        ps3.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                        ps3.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                        ps3.setInt(++nextParam, user.getUsrId());
+                        // INVIO
+                        ps3.executeUpdate();
+                    }
+                    /* ****************************************************************************
+                    ** === 7. QUERY contestuali di inserimento in misura_struttura (gregarie) === */
+                    pstm = con.prepareStatement(INSERT_MEASURE_STRUCT);
+                    Set<String> keys = measure.keySet();
+                    // Convert the Set to a List for reordering
+                    //List<String> keysList = new ArrayList<>(keys);
+                    // Reverse the List
+                    //Collections.reverse(keysList); 
+                    for (String key : keys) {
+                        if (key.startsWith("sg")) {
+                            String value = measure.get(key);
+                            if (!value.equals(VOID_STRING)) {
+                                if (key.endsWith(DASH + ELEMENT_LEV_1)) {
+                                    nextParam = NOTHING;
+                                    // === Ruolo struttura (gregaria) ===
+                                    pstm.setString(++nextParam, GR);
+                                    // === Collegamento a struttura_liv1 ===
+                                    String idAsString = value.substring(value.indexOf('(') + 1, value.indexOf(')'));
+                                    int id = Integer.parseInt(idAsString);
+                                    pstm.setInt(++nextParam, id);
+                                    // === Collegamento a struttura_liv2 === 
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Collegamento a struttura_liv3 === 
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Collegamento a struttura_liv4 === 
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Codice misura ===
+                                    pstm.setString(++nextParam, code);
+                                    /* === Collegamento a rilevazione === */
+                                    pstm.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                                    pstm.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                                    pstm.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                                    pstm.setInt(++nextParam, user.getUsrId());
+                                    pstm.addBatch();
+                                } else if (key.endsWith(DASH + ELEMENT_LEV_2)) {
+                                    nextParam = NOTHING;
+                                    // === Ruolo struttura (gregaria) ===
+                                    pstm.setString(++nextParam, GR);
+                                    // === Collegamento a struttura_liv1 ===
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Collegamento a struttura_liv2 === 
+                                    String idAsString = value.substring(value.indexOf('(') + 1, value.indexOf(')'));
+                                    int id = Integer.parseInt(idAsString);
+                                    pstm.setInt(++nextParam, id);
+                                    // === Collegamento a struttura_liv3 === 
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Collegamento a struttura_liv4 === 
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Codice misura ===
+                                    pstm.setString(++nextParam, code);
+                                    /* === Collegamento a rilevazione === */
+                                    pstm.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                                    pstm.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                                    pstm.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                                    pstm.setInt(++nextParam, user.getUsrId());
+                                    pstm.addBatch();
+                                } else if (key.endsWith(DASH + ELEMENT_LEV_3)) {
+                                    nextParam = NOTHING;
+                                    // === Ruolo struttura (gregaria) ===
+                                    pstm.setString(++nextParam, GR);
+                                    // === Collegamento a struttura_liv1 ===
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Collegamento a struttura_liv2 === 
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Collegamento a struttura_liv3 === 
+                                    String idAsString = value.substring(value.indexOf('(') + 1, value.indexOf(')'));
+                                    int id = Integer.parseInt(idAsString);
+                                    pstm.setInt(++nextParam, id);
+                                    // === Collegamento a struttura_liv4 === 
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Codice misura ===
+                                    pstm.setString(++nextParam, code);
+                                    /* === Collegamento a rilevazione === */
+                                    pstm.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                                    pstm.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                                    pstm.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                                    pstm.setInt(++nextParam, user.getUsrId());
+                                    pstm.addBatch();
+                                } else if (key.endsWith(DASH + ELEMENT_LEV_4)) {
+                                    nextParam = NOTHING;
+                                    // === Ruolo struttura (gregaria) ===
+                                    pstm.setString(++nextParam, GR);
+                                    // === Collegamento a struttura_liv1 ===
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Collegamento a struttura_liv2 === 
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Collegamento a struttura_liv3 === 
+                                    pstm.setNull(++nextParam, Types.NULL);
+                                    // === Collegamento a struttura_liv4 === 
+                                    String idAsString = value.substring(value.indexOf('(') + 1, value.indexOf(')'));
+                                    int id = Integer.parseInt(idAsString);
+                                    pstm.setInt(++nextParam, id);
+                                    // === Codice misura ===
+                                    pstm.setString(++nextParam, code);
+                                    /* === Collegamento a rilevazione === */
+                                    pstm.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                                    pstm.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                                    pstm.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                                    pstm.setInt(++nextParam, user.getUsrId());
+                                    pstm.addBatch();
+                                } 
+                            }
+                        }
+                    }
+                    // Execute the batch updates
+                    updateCounts = pstm.executeBatch();
+                    LOG.info(updateCounts.length + " strutture gregarie in transazione attiva.\n");
                 } catch (SQLException sqle) {
                     String msg = FOR_NAME + "Si e\' verificato un problema nella query di inserimento misura.\n" + sqle.getMessage();
                     LOG.severe(msg);
@@ -4890,6 +5140,7 @@ public class DBWrapper implements Query, Constants {
                 con.commit();
                 pst.close();
                 pst = null;
+                LOG.info("Transazione committata.\n");
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
                 LOG.severe(msg); 
