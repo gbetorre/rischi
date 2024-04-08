@@ -4078,20 +4078,40 @@ public class DBWrapper implements Query, Constants {
                     // Struttura Capofila
                     nextParam = NOTHING;
                     pst = null;
-                    
-                    /*
-                    StringBuffer query = new StringBuffer(getQueryStructures(survey.getId(), NOTHING, NOTHING, NOTHING, DEFAULT_ID));
-
-                    pst = con.prepareStatement(String.valueOf(query));
+                    ArrayList<DepartmentBean> capofila1 = new ArrayList<>();
+                    ArrayList<DepartmentBean> capofila2 = new ArrayList<>();
+                    ArrayList<DepartmentBean> capofila3 = new ArrayList<>();
+                    ArrayList<DepartmentBean> gregarie = new ArrayList<>();
+                    pst = con.prepareStatement(GET_STRUCTS_BY_MEASURE);
                     pst.clearParameters();
+                    pst.setString(++nextParam, measure.getCodice());
+                    pst.setString(++nextParam, String.valueOf(PER_CENT));
+                    pst.setInt(++nextParam, survey.getId());
                     rs2 = pst.executeQuery();
                     while (rs2.next()) {
-                        
+                        // Crea una struttura generica
+                        ItemBean st = new ItemBean();
+                        // La valorizza col risultato della query
+                        BeanUtil.populate(st, rs2);
+                        // Smista le strutture trovate
+                        if (st.getExtraInfo().equals(CP1)) {
+                            capofila1.add(measure.getCapofila(st));
+                        } else if (st.getExtraInfo().equals(CP2)) {
+                            capofila2.add(measure.getCapofila(st));
+                        } else if (st.getExtraInfo().equals(CP3)) {
+                            capofila3.add(measure.getCapofila(st));
+                        } else if (st.getExtraInfo().equals(GR)) {
+                            //gregarie.add(st);
+                        } else {
+                            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del ruolo di una struttura.\n";
+                            LOG.severe(msg);
+                            throw new WebStorageException(msg);
+                        }
                     }
-                    */
+                    measure.setCapofila(capofila1);
+                    //measure.setCapofila(capofila1);
                     measures.add(measure);
                 }
-                
                 // Just to engage the Garbage Collector
                 pst = null;
                 // Get out
