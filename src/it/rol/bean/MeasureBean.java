@@ -37,7 +37,9 @@ package it.rol.bean;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Vector;
 
+import it.rol.Constants;
 import it.rol.exception.AttributoNonValorizzatoException;
 
 /**
@@ -325,6 +327,50 @@ public class MeasureBean extends CodeBean {
      */
     public void setCapofila(ArrayList<DepartmentBean> capofila) {
         this.capofila = capofila;
+    }
+    
+    
+    public DepartmentBean getCapofila(ItemBean capofila) {
+        DepartmentBean liv1 = new DepartmentBean();
+        DepartmentBean liv2 = new DepartmentBean();
+        DepartmentBean liv3 = new DepartmentBean();
+        DepartmentBean liv4 = new DepartmentBean();
+        Vector<DepartmentBean> figlie2 = new Vector<>();
+        Vector<DepartmentBean> figlie3 = new Vector<>();
+        Vector<DepartmentBean> figlie4 = new Vector<>();
+        liv1.setId(capofila.getCod1());
+        liv1.setPrefisso(capofila.getNome());
+        liv1.setNome(capofila.getExtraInfo1());
+        liv1.setLivello(Constants.ELEMENT_LEV_1);
+        liv1.setInformativa(capofila.getExtraInfo());
+        if (capofila.getCod2() > Constants.NOTHING) {
+            liv2.setId(capofila.getCod2());
+            liv2.setPrefisso(capofila.getNomeReale());
+            liv2.setNome(capofila.getExtraInfo2());
+            liv2.setLivello(Constants.ELEMENT_LEV_2);
+            liv2.setInformativa(capofila.getExtraInfo());
+            if (capofila.getCod3() > Constants.NOTHING) {
+                liv3.setId(capofila.getCod3());
+                liv3.setPrefisso(capofila.getCodice());
+                liv3.setNome(capofila.getExtraInfo3());
+                liv3.setLivello(Constants.ELEMENT_LEV_3);
+                liv3.setInformativa(capofila.getExtraInfo());
+                if (capofila.getCod4() > Constants.NOTHING) {
+                    liv4.setId(capofila.getCod4());
+                    liv4.setPrefisso(capofila.getLabelWeb());
+                    liv4.setNome(capofila.getExtraInfo4());
+                    liv4.setLivello(Constants.ELEMENT_LEV_4);
+                    liv4.setInformativa(capofila.getExtraInfo());
+                    figlie4.add(liv4);
+                }
+                liv3.setFiglie(figlie4);
+                figlie3.add(liv3);
+            }
+            liv2.setFiglie(figlie3);
+            figlie2.add(liv2);
+        }
+        liv1.setFiglie(figlie2);
+        return liv1;
     }
     
     
