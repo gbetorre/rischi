@@ -322,6 +322,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [1.7.5] (08/04/2024) Miglioramenti visualizzazione del registro delle misure di prevenzione: mostrata struttura capofila della misura
 - [1.7.4] (27/03/2024) Completamento implementazione funzione di inserimento delle misure di prevenzione
 - [1.7.3] (25/03/2024) Proseguimento implementazione inserimento e recupero delle misure di prevenzione
 - [1.7.2] (18/03/2024) Prima bozza di implementazione misure di prevenzione del rischio corruttivo
