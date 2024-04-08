@@ -1219,7 +1219,7 @@ public interface Query extends Serializable {
             "   ,   MST.ruolo                   AS \"extraInfo\"" +
             "   ,   L1.prefisso                 AS \"nome\"" +
             "   ,   L2.prefisso                 AS \"nomeReale\"" +
-            "   ,   L3.prefisso                 AS \"nomeClasse\"" +
+            "   ,   L3.prefisso                 AS \"codice\"" +
             "   ,   L4.prefisso                 AS \"labelWeb\"" +
             "   ,   L1.nome                     AS \"extraInfo1\"" +
             "   ,   L2.nome                     AS \"extraInfo2\"" +
@@ -1231,7 +1231,7 @@ public interface Query extends Serializable {
             "       LEFT JOIN struttura_liv3 L3 ON MST.id_struttura_liv3 = L3.id" +
             "       LEFT JOIN struttura_liv4 L4 ON MST.id_struttura_liv4 = L4.id" +
             "   WHERE   MST.cod_misura = ?" +
-            "       AND MST.ruolo ILIKE '?%'" + 
+            "       AND MST.ruolo ILIKE ?" + 
             "       AND MST.id_rilevazione = ?" +
             "   ORDER BY MST.ruolo " +
             "   ,       MST.id_struttura_liv1" +
