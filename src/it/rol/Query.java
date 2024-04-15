@@ -1196,7 +1196,7 @@ public interface Query extends Serializable {
             "       MS.codice                           AS \"codice\"" +
             "   ,   MS.nome                             AS \"nome\"" +
             "   ,   MS.descrizione                      AS \"stato\"" +
-            "   ,   MS.onerosa                          AS \"comportaSpese\"" +
+            "   ,   MS.onerosa                          AS \"onerosa\"" +
             "   ,   MS.ordinale                         AS \"ordinale\"" +
             "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
             "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
