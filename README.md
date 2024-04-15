@@ -322,6 +322,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [1.7.6] (15/04/2024) Miglioramenti visualizzazione del registro delle misure di prevenzione: mostrata sostenibilit&agrave; economica della misura e strutture coinvolte
 - [1.7.5] (08/04/2024) Miglioramenti visualizzazione del registro delle misure di prevenzione: mostrata struttura capofila della misura
 - [1.7.4] (27/03/2024) Completamento implementazione funzione di inserimento delle misure di prevenzione
 - [1.7.3] (25/03/2024) Proseguimento implementazione inserimento e recupero delle misure di prevenzione
