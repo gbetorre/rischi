@@ -63,8 +63,8 @@ public class MeasureBean extends CodeBean {
     private final String FOR_NAME = "\n" + this.getClass().getName() + ": "; //$NON-NLS-1$
     /** Codice; ha la struttura <pre>MP.&lt;carattere&gt;.&lt;progressivo&gt;</pre> */
     private String codice;
-    /** Risponde alla domanda: &quot;La misura &egrave, onerosa?&quot; */
-    private String comportaSpese;
+    /** Risponde alla domanda: &quot;La misura comporta spese?&quot; */
+    private String onerosa;
     /** Data ultima modifica */
     private Date dataUltimaModifica;
     /** Ora ultima modifica */
@@ -98,7 +98,7 @@ public class MeasureBean extends CodeBean {
     public MeasureBean() {
         super();
         codice = null;
-        comportaSpese = null;
+        onerosa = null;
         dataUltimaModifica = new Date(0);
         oraUltimaModifica = null;
         autoreUltimaModifica = BEAN_DEFAULT_ID;
@@ -147,12 +147,12 @@ public class MeasureBean extends CodeBean {
      * ********************************************************* */
     
     /**
-     * Risponde alla domanda: Comporta spese?
+     * Risponde alla domanda: "Comporta spese?"
      * 
      * @return <code>comportaSpese</code> - risposta alla sostenibilit&agrave; economica
      */
-    public String getComportaSpese() {
-        return comportaSpese;
+    public String getOnerosa() {
+        return onerosa;
     }
 
     /**
@@ -160,8 +160,16 @@ public class MeasureBean extends CodeBean {
      *
      * @param comportaSpese risposta in merito all'onerosit&agrave; della misura
      */
-    public void setComportaSpese(String comportaSpese) {
-        this.comportaSpese = comportaSpese;
+    public void setOnerosa(String comportaSpese) {
+        onerosa = comportaSpese;
+    }
+    
+    
+    public String getOnerosa(String comportaSpese) {
+        if (!comportaSpese.equals("ND")) {
+            return comportaSpese;
+        }
+        return Constants.ND;
     }
     
 
@@ -330,47 +338,104 @@ public class MeasureBean extends CodeBean {
     }
     
     
-    public DepartmentBean getCapofila(ItemBean capofila) {
-        DepartmentBean liv1 = new DepartmentBean();
-        DepartmentBean liv2 = new DepartmentBean();
-        DepartmentBean liv3 = new DepartmentBean();
-        DepartmentBean liv4 = new DepartmentBean();
-        Vector<DepartmentBean> figlie2 = new Vector<>();
-        Vector<DepartmentBean> figlie3 = new Vector<>();
-        Vector<DepartmentBean> figlie4 = new Vector<>();
-        liv1.setId(capofila.getCod1());
-        liv1.setPrefisso(capofila.getNome());
-        liv1.setNome(capofila.getExtraInfo1());
-        liv1.setLivello(Constants.ELEMENT_LEV_1);
-        liv1.setInformativa(capofila.getExtraInfo());
-        if (capofila.getCod2() > Constants.NOTHING) {
-            liv2.setId(capofila.getCod2());
-            liv2.setPrefisso(capofila.getNomeReale());
-            liv2.setNome(capofila.getExtraInfo2());
-            liv2.setLivello(Constants.ELEMENT_LEV_2);
-            liv2.setInformativa(capofila.getExtraInfo());
-            if (capofila.getCod3() > Constants.NOTHING) {
-                liv3.setId(capofila.getCod3());
-                liv3.setPrefisso(capofila.getCodice());
-                liv3.setNome(capofila.getExtraInfo3());
-                liv3.setLivello(Constants.ELEMENT_LEV_3);
-                liv3.setInformativa(capofila.getExtraInfo());
-                if (capofila.getCod4() > Constants.NOTHING) {
-                    liv4.setId(capofila.getCod4());
-                    liv4.setPrefisso(capofila.getLabelWeb());
-                    liv4.setNome(capofila.getExtraInfo4());
-                    liv4.setLivello(Constants.ELEMENT_LEV_4);
-                    liv4.setInformativa(capofila.getExtraInfo());
-                    figlie4.add(liv4);
+    public DepartmentBean getStruttura(ItemBean struttura) {
+        DepartmentBean liv = null;
+        if (!struttura.getExtraInfo().equals(Constants.GR)) {   // Non è gregaria
+            DepartmentBean liv1 = new DepartmentBean();
+            DepartmentBean liv2 = new DepartmentBean();
+            DepartmentBean liv3 = new DepartmentBean();
+            DepartmentBean liv4 = new DepartmentBean();
+            Vector<DepartmentBean> figlie2 = null;
+            Vector<DepartmentBean> figlie3 = null;
+            Vector<DepartmentBean> figlie4 = null;
+            liv1.setId(struttura.getCod1());
+            liv1.setPrefisso(struttura.getNome());
+            liv1.setNome(struttura.getExtraInfo1());
+            liv1.setLivello(Constants.ELEMENT_LEV_1);
+            liv1.setInformativa(struttura.getExtraInfo());
+            if (struttura.getCod2() > Constants.NOTHING) {
+                figlie2 = new Vector<>();
+                liv2.setId(struttura.getCod2());
+                liv2.setPrefisso(struttura.getNomeReale());
+                liv2.setNome(struttura.getExtraInfo2());
+                liv2.setLivello(Constants.ELEMENT_LEV_2);
+                liv2.setInformativa(struttura.getExtraInfo());
+                if (struttura.getCod3() > Constants.NOTHING) {
+                    figlie3 = new Vector<>();
+                    liv3.setId(struttura.getCod3());
+                    liv3.setPrefisso(struttura.getCodice());
+                    liv3.setNome(struttura.getExtraInfo3());
+                    liv3.setLivello(Constants.ELEMENT_LEV_3);
+                    liv3.setInformativa(struttura.getExtraInfo());
+                    if (struttura.getCod4() > Constants.NOTHING) {
+                        figlie4 = new Vector<>();
+                        liv4.setId(struttura.getCod4());
+                        liv4.setPrefisso(struttura.getLabelWeb());
+                        liv4.setNome(struttura.getExtraInfo4());
+                        liv4.setLivello(Constants.ELEMENT_LEV_4);
+                        liv4.setInformativa(struttura.getExtraInfo());
+                        figlie4.add(liv4);
+                    }
+                    liv3.setFiglie(figlie4);
+                    figlie3.add(liv3);
                 }
-                liv3.setFiglie(figlie4);
-                figlie3.add(liv3);
+                liv2.setFiglie(figlie3);
+                figlie2.add(liv2);
             }
-            liv2.setFiglie(figlie3);
-            figlie2.add(liv2);
+            liv1.setFiglie(figlie2);
+            liv = liv1;
+        } else {                                    // Non è capofila ma gregaria
+            liv = new DepartmentBean();
+            if (struttura.getCod1() > Constants.NOTHING) {
+                liv.setId(struttura.getCod1());
+                liv.setPrefisso(struttura.getNome());
+                liv.setNome(struttura.getExtraInfo1());
+                liv.setLivello(Constants.ELEMENT_LEV_1);
+                liv.setInformativa(struttura.getExtraInfo());
+            } else if (struttura.getCod2() > Constants.NOTHING) {
+                liv.setId(struttura.getCod2());
+                liv.setPrefisso(struttura.getNomeReale());
+                liv.setNome(struttura.getExtraInfo2());
+                liv.setLivello(Constants.ELEMENT_LEV_2);
+                liv.setInformativa(struttura.getExtraInfo());
+            } else if (struttura.getCod3() > Constants.NOTHING) {
+                liv.setId(struttura.getCod3());
+                liv.setPrefisso(struttura.getCodice());
+                liv.setNome(struttura.getExtraInfo3());
+                liv.setLivello(Constants.ELEMENT_LEV_3);
+                liv.setInformativa(struttura.getExtraInfo());
+            } else if (struttura.getCod4() > Constants.NOTHING) {
+                liv.setId(struttura.getCod4());
+                liv.setPrefisso(struttura.getLabelWeb());
+                liv.setNome(struttura.getExtraInfo4());
+                liv.setLivello(Constants.ELEMENT_LEV_4);
+                liv.setInformativa(struttura.getExtraInfo());
+            }
         }
-        liv1.setFiglie(figlie2);
-        return liv1;
+        return liv;
+    }
+    
+    
+    public ArrayList<DepartmentBean> getCapofila(DepartmentBean capofila) {
+        ArrayList<DepartmentBean> capofilaAsList = new ArrayList<>();
+        // La aggiunge alla lista delle capofila
+        capofilaAsList.add(capofila);
+        // Controlla se ha figlie
+        if (capofila.getFiglie() != null) {
+            // Se ha una figlia aggiunge la figlia
+            capofilaAsList.add(capofila.getFiglie().firstElement());
+            // Controlla se ha nipoti
+            if (capofila.getFiglie().firstElement().getFiglie() != null) {
+                // Se ha una nipote aggiunge la nipote
+                capofilaAsList.add(capofila.getFiglie().firstElement().getFiglie().firstElement());
+                // Controlla se ha pronipoti
+                if (capofila.getFiglie().firstElement().getFiglie().firstElement().getFiglie() != null) {
+                    // Se ha una pronipote aggiunge la pronipote
+                    capofilaAsList.add(capofila.getFiglie().firstElement().getFiglie().firstElement().getFiglie().firstElement());
+                }
+            }
+        }
+        return capofilaAsList;
     }
     
     
@@ -379,16 +444,16 @@ public class MeasureBean extends CodeBean {
      * ********************************************************* */
     
     /**
-     * Restituisce il vettore contenente le strutture capofila
+     * Restituisce il vettore contenente le strutture capofila aggiuntive
      * 
-     * @return <code>strutture</code> - ArrayList contenente le strutture capofila
+     * @return <code>strutture</code> - ArrayList contenente le strutture capofila aggiuntive
      */
     public ArrayList<DepartmentBean> getCapofila2() {
         return capofila2;
     }
 
     /**
-     * Imposta le strutture che capofila
+     * Imposta le strutture che sono capofila aggiuntive
      * 
      * @param capofila2 - ArrayList da impostare
      */
@@ -402,16 +467,16 @@ public class MeasureBean extends CodeBean {
      * ********************************************************* */
     
     /**
-     * Restituisce il vettore contenente le strutture capofila
+     * Restituisce il vettore contenente le strutture capofila opzionali
      * 
-     * @return <code>strutture</code> - ArrayList contenente le strutture capofila
+     * @return <code>strutture</code> - ArrayList contenente le strutture capofila opzionali
      */
     public ArrayList<DepartmentBean> getCapofila3() {
         return capofila3;
     }
 
     /**
-     * Imposta le strutture che capofila
+     * Imposta le strutture che sono capofila opzionali
      * 
      * @param capofila3 - ArrayList da impostare
      */
@@ -438,7 +503,7 @@ public class MeasureBean extends CodeBean {
      * 
      * @param gregarie - ArrayList da impostare
      */
-    public void setStrutture(ArrayList<DepartmentBean> gregarie) {
+    public void setGregarie(ArrayList<DepartmentBean> gregarie) {
         this.gregarie = gregarie;
     }
     
