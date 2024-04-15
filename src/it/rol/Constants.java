@@ -401,6 +401,10 @@ public interface Constants extends Serializable {
      * <p>Etichetta per struttura capofila 1</p>
      */
     public static final String GR = "gregaria";
+    /**
+     * <p>Etichetta per "Non determinabile"</p>
+     */
+    public static final String ND = "Non determinabile";
     /* ************************************************************************ *
      *   Costanti tipografiche per la generazione di output (p.es. csv) e URL   *
      * ************************************************************************ */
