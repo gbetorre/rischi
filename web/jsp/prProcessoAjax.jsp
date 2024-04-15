@@ -24,7 +24,9 @@
     <c:set var="processo" value="${input.get(0).labelWeb}" scope="page" />
     <c:set var="arearischio" value="${input.get(0).nomeReale}" scope="page" />
     <script type="text/javascript">
-      function openPrint(){
+      let myWindow;
+    
+      function openPrint() {
         myWindow = window.open('','','width=200,height=100');
         myWindow.document.write("<p>This is 'myWindow'</p>");
         myWindow.focus();
@@ -47,8 +49,6 @@
       function closeWin() {
         myWindow.close();
       }
-      
-      let myWindow;
     </script>
     <div class="row">
       <div class="col-xl-7 col-md-6 mx-auto">
@@ -271,12 +271,21 @@
             </c:url>
             <fmt:formatDate var="iviewitadate" value="${interview.dataUltimaModifica}" pattern="dd/MM/yyyy" /> 
             <fmt:formatDate var="iviewsqltime" value="${interview.oraUltimaModifica}" pattern="HH:mm" scope="page" />
+            <div class="accordion content-holder col-sm-12" id="accordion1">
+              <div data-toggle="collapse" data-target="#collapse1" aria-expanded="false" aria-controls="collapse1" id="heading1">
             <c:if test="${status.index gt zero}">
             <hr class="riga" />
             </c:if>
             <ol class="breadcrumb mb-3">
-              <li><a href="${rqsInstance}">Intervista del <c:out value="${iviewitadate}" /> <c:out value="${iviewsqltime}" /></a></li>
+              <li>
+                <button type="button" class="btn btn-primary">
+                  <i class="fa-regular fa-square-caret-down"></i>
+                </button>&nbsp;&nbsp;&nbsp;
+                <a href="${rqsInstance}">Intervista del <c:out value="${iviewitadate}" /> <c:out value="${iviewsqltime}" /></a>
+              </li>
             </ol>
+            </div>
+             <div class="collapse" id="collapse1" aria-labelledby="heading1" data-parent="#accordion1">
             <dl class="row">
             <c:set var="keys" value="${interview.indicatori.keySet()}" />
             <c:forEach var="key" items="${keys}">
@@ -287,6 +296,8 @@
               <dd class="col-sm-7">Rischio <c:out value="${indicatore.informativa}" /></dd>
             </c:forEach>
             </dl>
+            </div>
+            </div>
           </c:forEach>
           <c:choose>
             <c:when test="${not empty interviews}">
