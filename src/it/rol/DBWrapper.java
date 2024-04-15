@@ -4093,15 +4093,18 @@ public class DBWrapper implements Query, Constants {
                         ItemBean st = new ItemBean();
                         // La valorizza col risultato della query
                         BeanUtil.populate(st, rs2);
+                        // Trasforma la capofila/gregaria da ItemBean a DepartmentBean
+                        DepartmentBean struttura = measure.getStruttura(st);
                         // Smista le strutture trovate
                         if (st.getExtraInfo().equals(CP1)) {
-                            capofila1.add(measure.getCapofila(st));
+                            // Trasforma la capofila da DepartmentBean a ArrayList
+                            capofila1 = measure.getCapofila(struttura);
                         } else if (st.getExtraInfo().equals(CP2)) {
-                            capofila2.add(measure.getCapofila(st));
+                            capofila2 = measure.getCapofila(struttura);
                         } else if (st.getExtraInfo().equals(CP3)) {
-                            capofila3.add(measure.getCapofila(st));
+                            capofila3 = measure.getCapofila(struttura);
                         } else if (st.getExtraInfo().equals(GR)) {
-                            //gregarie.add(st);
+                            gregarie.add(struttura);
                         } else {
                             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del ruolo di una struttura.\n";
                             LOG.severe(msg);
@@ -4109,7 +4112,9 @@ public class DBWrapper implements Query, Constants {
                         }
                     }
                     measure.setCapofila(capofila1);
-                    //measure.setCapofila(capofila1);
+                    measure.setCapofila2(capofila2);
+                    measure.setCapofila3(capofila3);
+                    measure.setGregarie(gregarie);
                     measures.add(measure);
                 }
                 // Just to engage the Garbage Collector
@@ -4145,6 +4150,8 @@ public class DBWrapper implements Query, Constants {
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         }        
     }
+    
+    
     
     /* ********************************************************** *
      *                    Metodi di INSERIMENTO                   *
