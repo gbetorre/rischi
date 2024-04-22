@@ -1066,9 +1066,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * @return <code>RiskBean</code> - Rischio cercato, oppure null (se non e' stato trovato)
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
-    private static RiskBean decant(AbstractList<RiskBean> risks,
-                                   int riskId)
-                            throws CommandException {
+    public static RiskBean decant(AbstractList<RiskBean> risks,
+                                  int riskId)
+                           throws CommandException {
         try {
             for (RiskBean risk : risks) {
                 if (risk.getId() == riskId) {
