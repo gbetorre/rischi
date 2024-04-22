@@ -319,9 +319,14 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.8.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
 - [1.8.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [1.8.4] Implementata form di ricerca sui quesiti per chiave testuale
+- ...
+- [1.8.0]   implementato algoritmo di mitigazione del rischio in funzione delle misure applicate
+- [1.7.9]   implementata pagina dei dettagli di una misura di prevenzione/mitigazione del rischio
+- [1.7.8]   completamento implementazione funzione di applicazione delle misure di mitigazione al rischio
 
 ### Done
 -->
+- [1.7.7] (22/04/2024) Aggiunta pagina contenente form per applicare misure di mitigazione a un rischio, elencante anche le misure suggerite sulla base dei fattori abilitanti trovati associati al rischio entro il contesto del processo
 - [1.7.6] (15/04/2024) Miglioramenti visualizzazione del registro delle misure di prevenzione: mostrata sostenibilit&agrave; economica della misura e strutture coinvolte
 - [1.7.5] (08/04/2024) Miglioramenti visualizzazione del registro delle misure di prevenzione: mostrata struttura capofila della misura
 - [1.7.4] (27/03/2024) Completamento implementazione funzione di inserimento delle misure di prevenzione
