@@ -188,14 +188,15 @@
         <table class="table table-striped risultati" id="foundRisk">
           <thead>
             <tr>
-              <th width="45%">Rischio </th>
-              <th width="40%">Fattori abilitanti</th>
-              <th width="15%" class="text-center">Funzioni</th>
+              <th width="30%">Rischio </th>
+              <th width="25%">Fattori abilitanti</th>
+              <th width="25%">Misure</th>
+              <th width="20%" class="text-center">Funzioni</th>
             </tr>
           </thead>
           <c:forEach var="risk" items="${risks}" varStatus="status">
           <tr class="bgAct20">
-            <td width="45%">
+            <td width="30%">
               <a href="${initParam.appName}/?q=ri&idR=${risk.id}&r=${param['r']}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="maroon" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
                   <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
@@ -204,7 +205,7 @@
                 <c:out value="${risk.nome}" />
               </a>
             </td>
-            <td width="40%">
+            <td width="25%">
               <ul class="list-group">
             <c:forEach var="fat" items="${risk.fattori}">
               <li class="list-group-item textcolormaroon">
@@ -217,9 +218,20 @@
             </c:forEach>
               </ul>
             </td>
-            <td width="15%" class="text-center">
+            <td width="25%">
+              <ul class="processo">
+            <c:forEach var="mes" items="${risk.misure}">
+              <li class="list-group-item">&nbsp;<c:out value="${mes.codice}" />
+              </li>
+            </c:forEach>
+              </ul>
+            </td>
+            <td width="20%" class="text-center">
               <a href="${initParam.appName}/?q=pr&p=adf&idR=${risk.id}&pliv=${param['pliv']}&liv=2&r=${param['r']}" class="btn btn-primary" title="Aggiungi un fattore abilitante al rischio &quot;${fn:substring(risk.nome, 0, 22)}...&quot; nel contesto del processo &quot;${processo}&quot;">
                 <small><i class="fa-solid fa-circle-plus"></i> Fattore</small>
+              </a>&nbsp;
+              <a href="${initParam.appName}/?q=ms&p=adm&idR=${risk.id}&pliv=${param['pliv']}&liv=2&r=${param['r']}" class="btn btn-success" title="Aggiungi una misura di prevenzione al rischio &quot;${fn:substring(risk.nome, 0, 22)}...&quot; nel contesto del processo &quot;${processo}&quot;">
+                <small><i class="fa-solid fa-square-plus"></i> Misura</small>
               </a>
             </td>
           </tr>
