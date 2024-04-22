@@ -3139,9 +3139,10 @@ public class DBWrapper implements Query, Constants {
                                           throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
-            ResultSet rs, rs1 = null;
+            ResultSet rs, rs1, rs2 = null;
             AbstractList<RiskBean> risks = new ArrayList<>();
             AbstractList<CodeBean> factors = null;
+            AbstractList<MeasureBean> measures = null;
             int nextParam = NOTHING;
             try {
                 // TODO: Controllare se user è superuser
@@ -3157,7 +3158,7 @@ public class DBWrapper implements Query, Constants {
                     RiskBean risk = new RiskBean();
                     // Valorizza il rischio
                     BeanUtil.populate(risk, rs);
-                    // Recupera i fattori abilitanti collegati al rischio corrente
+                    /* Recupera i fattori abilitanti collegati al rischio corrente */
                     nextParam = NOTHING;
                     pst = null;
                     // TODO: Gestire il caso dei sottoprocessi (al momento non ci sono)
@@ -3180,7 +3181,30 @@ public class DBWrapper implements Query, Constants {
                     }
                     // Aggiunge la lista di fattori al rischio
                     risk.setFattori(factors);
-                    // Aggiunge il rischio alla lista dei rischi
+                    /* Recupera le misure preventive collegate al rischio corrente */
+                    nextParam = NOTHING;
+                    pst = null;
+                    // TODO: Gestire il caso dei sottoprocessi (nel caso in cui ci saranno)
+                    pst = con.prepareStatement(GET_MEASURES_BY_RISK_AND_PROCESS);
+                    pst.clearParameters();
+                    pst.setInt(++nextParam, process.getId());
+                    pst.setInt(++nextParam, risk.getId());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs2 = pst.executeQuery();
+                    // Prepara lista di misure per il rischio corrente
+                    measures = new ArrayList<>();
+                    // Carica la lista
+                    while (rs2.next()) {
+                        // Prepara la misura di calmierazione del rischio
+                        MeasureBean mes = new MeasureBean();
+                        // Valorizza la misura
+                        BeanUtil.populate(mes, rs2);
+                        // Aggiunge la misura alla lista
+                        measures.add(mes);
+                    }
+                    // Aggiunge la lista di misure al rischio
+                    risk.setMisure(measures);
+                    /* Finalmente, aggiunge il rischio alla lista dei rischi */
                     risks.add(risk);
                 }
                 // Just tries to engage the Garbage Collector
@@ -4026,8 +4050,8 @@ public class DBWrapper implements Query, Constants {
      * <p>Data una rilevazione, restituisce un elenco di misure trovate.</p>
      * // TODO COMMENTO
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param id        identificativo dell'output che si vuol recuperare
      * @param survey    oggetto contenente gli estremi della rilevazione
+     * 
      * @return <code>ProcessBean</code> - l'output desiderato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
@@ -4152,6 +4176,74 @@ public class DBWrapper implements Query, Constants {
     }
     
     
+    /**
+     * <p>Restituisce un ArrayList contenente tutte le misure collegate,
+     * tramite la propria tipologia, ad uno o pi&uacute; fattori abilitanti
+     * i cui identificativi vengono passati come parametro.</p>
+     * // TODO COMMENTO
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param risk      oggetto contenente i dati del rischio corruttivo
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ArrayList&lt;MeasureBean&gt;</code> - un vettore ordinato di misure, che rappresentano le misure suggerite per un rischio collegato ad alcuni fattori abilitanti
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<MeasureBean> getMeasuresByFactors(PersonBean user, 
+                                                       RiskBean risk, 
+                                                       CodeBean survey)
+                                                throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            AbstractList<MeasureBean> advicedMeasures = new ArrayList<>();
+            try {
+                // TODO: Controllare se user è superuser
+                ArrayList<CodeBean> fattori = (ArrayList<CodeBean>) risk.getFattori();
+                for (CodeBean fat : fattori) {
+                    int nextParam = NOTHING;
+                    pst = con.prepareStatement(GET_MEASURES_BY_FACTOR);
+                    pst.clearParameters();
+                    pst.setInt(++nextParam, fat.getId());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs = pst.executeQuery();
+                    // Punta alla riga
+                    while (rs.next()) {
+                        // Prepara la misura
+                        MeasureBean ms = new MeasureBean();
+                        // Valorizza la misura
+                        BeanUtil.populate(ms, rs);
+                        // Aggiunge la misura alla lista delle misure suggerite
+                        advicedMeasures.add(ms);
+                    }
+                    pst = null;
+                }
+                // Get out
+                return (ArrayList<MeasureBean>) advicedMeasures;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio non recuperabile; problema nel metodo di estrazione delle misure suggerite.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "ProcessBean non valorizzato; problema nella query delle misure suggerite.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
     
     /* ********************************************************** *
      *                    Metodi di INSERIMENTO                   *
