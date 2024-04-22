@@ -1185,8 +1185,8 @@ public interface Query extends Serializable {
             "   ORDER BY TM.id";
 
     /**
-     * <p>Estrae l'elenco di tutte le misure di mitigazione trovate per una data
-     * rilevazione, oppure indipendentemente dalla rilevazione (in funzione
+     * <p>Seleziona l'elenco di tutte le misure di mitigazione trovate per una 
+     * data rilevazione, oppure indipendentemente dalla rilevazione (in funzione
      * dei parametri), selezionando le tuple atte a comporre il registro 
      * delle misure di prevenzione e mitigazione dei rischi corruttivi.</p>
      * <p>Ogni riga, quindi, corrisponder&agrave; ad una distinta misura.</p>
@@ -1195,7 +1195,7 @@ public interface Query extends Serializable {
             "SELECT DISTINCT" +
             "       MS.codice                           AS \"codice\"" +
             "   ,   MS.nome                             AS \"nome\"" +
-            "   ,   MS.descrizione                      AS \"stato\"" +
+            "   ,   MS.descrizione                      AS \"informativa\"" +
             "   ,   MS.onerosa                          AS \"onerosa\"" +
             "   ,   MS.ordinale                         AS \"ordinale\"" +
             "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
@@ -1237,7 +1237,52 @@ public interface Query extends Serializable {
             "   ,       MST.id_struttura_liv1" +
             "   ,       MST.id_struttura_liv2" +
             "   ,       MST.id_struttura_liv3" +
-            "   ,       MST.id_struttura_liv4"; 
+            "   ,       MST.id_struttura_liv4";
+    
+    /**
+     * <p>Seleziona l'elenco di tutte le misure di mitigazione trovate per un dato
+     * rischio, nel contesto di un dato processo, e in riferimento a una data
+     * rilevazione, i cui identificativi vengono passati come parametri
+     * (relazione 4-aria).</p>
+     * <p>Ogni riga, quindi, corrisponder&agrave; ad una distinta misura.</p>
+     */
+    public static final String GET_MEASURES_BY_RISK_AND_PROCESS = 
+            "SELECT DISTINCT" +
+            "       MS.codice                           AS \"codice\"" +
+            "   ,   MS.nome                             AS \"nome\"" +
+            "   ,   MS.descrizione                      AS \"stato\"" +
+            "   ,   MS.onerosa                          AS \"onerosa\"" +
+            "   ,   MS.ordinale                         AS \"ordinale\"" +
+            "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   ,   MS.id_rilevazione                   AS \"idRilevazione\"" +
+            "   FROM misura_rischio_processo_at MRP" +
+            "       INNER JOIN misura MS ON (MRP.cod_misura = MS.codice AND MRP.id_rilevazione = MS.id_rilevazione)" +
+            "   WHERE MRP.id_processo_at = ?" +
+            "       AND MRP.id_rischio_corruttivo = ?" +
+            "       AND MRP.id_rilevazione = ?" +
+            "   ORDER BY MS.codice";
+    
+    /**
+     * <p>Seleziona le misure che, tramite la loro tipologia, sono collegate 
+     * a un fattore abilitante, il cui identificativo viene passato
+     * come parametro.</p>
+     */
+    public static final String GET_MEASURES_BY_FACTOR = 
+            "SELECT DISTINCT" +
+            "       MS.codice                           AS \"codice\"" +
+            "   ,   MS.nome                             AS \"nome\"" +
+            "   ,   MS.descrizione                      AS \"stato\"" +
+            "   ,   MS.onerosa                          AS \"onerosa\"" +
+            "   ,   MS.ordinale                         AS \"ordinale\"" +
+            "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   FROM fattore_tipologia FATTY" +
+            "       INNER JOIN misura_tipologia MISTY ON MISTY.id_tipo_misura = FATTY.id_tipo_misura" +
+            "       INNER JOIN misura MS ON (MISTY.cod_misura = MS.codice AND MISTY.id_rilevazione = MS.id_rilevazione)" +
+            "   WHERE FATTY.id_fattore_abilitante = ?" +
+            "       AND FATTY.id_rilevazione = ?" +
+            "   ORDER BY MS.nome";
     
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
