@@ -861,12 +861,61 @@ textarea {
   border-left-color: #990000;
   padding-left: 15px;
   line-height: 1.45em;
-  }
+}
 
 .file-data {
 	color: #999;  
 	font-style: italic;
-	}	
+}	
+	
+.lblca {
+    overflow: hidden;
+}
+
+.column {
+    width: 100%;
+    float: left;
+    padding: 0 10px 10px 10px;
+}
+
+.large-4 {
+    width: 220px;
+    min-width: 160px;
+}
+
+.content-holder {
+    padding: 10px;
+    border: solid 1px #ccc;
+    border-radius: 5px;
+    /*max-width: 680px;*/
+    margin: 0 auto;
+}
+
+.content-holder input{
+    border: solid 1px #ccc;
+    border-radius: 3px;
+    font: normal 14px/1.5rem "Trebuchet Ms",Arial;
+    width: 100%;
+    padding: 2px 8px;
+}
+
+.btn-small {
+    height: 20px;
+    font-size: 8px;
+    font-weight: bold;
+}
+
+.custom-label {
+    background-color: white;
+    border: 1px solid black;
+    color: navy;
+    padding: 2px 2px;
+    text-align: center;
+    display: inline-block;
+    /*font-size: 20px;*/
+    margin: 6px 10px;
+    cursor: pointer;
+}
 
 /*---------------------- Righe Orizzontali ------------------------*/
 hr  {
@@ -1044,6 +1093,10 @@ hr.riga       {
 
 .wide {
   width:210px;
+}
+
+.extra-wide {
+  width:310px;
 }
     
 /*---------------------- POP-UP ------------------------*/
