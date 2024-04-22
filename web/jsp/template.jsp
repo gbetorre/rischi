@@ -64,7 +64,7 @@
     <!-- End Cookie Consent plugin -->
     <%--base href="${requestScope.baseHref}" /--%>
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <!-- Latest compiled CSS, just in case -->
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap/bootstrap.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-ui.css" type="text/css" />
@@ -112,12 +112,5 @@
   <c:out value="${exception}" />
     <script src="<c:out value="${initParam.urlDirectoryScript}" />rol.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />menu.js"></script>
-    <script>
-      $(document).ready(function(){
-        $("#btnMod").click(function(e) {
-              e.preventDefault();
-        });
-      });
-    </script>
   </body>
 </html>
