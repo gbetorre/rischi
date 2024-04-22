@@ -8,51 +8,7 @@
 <c:set var="dip" value="${structs.get(zero+2)}" />
 <c:set var="types" value="${requestScope.tipiMisure}" scope="page" />
 <c:set var="characters" value="${requestScope.caratteriMisure}" scope="page" />
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <style>
-      .lblca {
-          overflow: hidden;
-      }
-      .column {
-          width: 100%;
-          float: left;
-          padding: 0 10px 10px 10px;
-      }
-      .large-4 {
-          width: 220px;
-          min-width: 160px;
-      }
-      .content-holder {
-          padding: 10px;
-          border: solid 1px #ccc;
-          border-radius: 5px;
-          /*max-width: 680px;*/
-          margin: 0 auto;
-      }
-      .content-holder input{
-          border: solid 1px #ccc;
-          border-radius: 3px;
-          font: normal 14px/1.5rem "Trebuchet Ms",Arial;
-          width: 100%;
-          padding: 2px 8px;
-      }
-      .btn-small {
-          height: 20px;
-          font-size: 8px;
-          font-weight: bold;
-      }
-      .custom-label {
-          background-color: white;
-          border: 1px solid black;
-          color: navy;
-          padding: 2px 2px;
-          text-align: center;
-          display: inline-block;
-          /*font-size: 20px;*/
-          margin: 6px 10px;
-          cursor: pointer;
-      }
-    </style>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <form accept-charset="ISO-8859-1" id="inm-form" class="panel subfields errorPwd" action="" method="post">
       <div class="panel-heading bgAct26">
         <div class="noHeader text-white">
