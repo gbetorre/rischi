@@ -118,6 +118,104 @@ public class MeasureBean extends CodeBean {
         super(o);
     }
 
+    /* **************************************************************** *
+     *      Metodi per ordinare oggetti di questo tipo nelle liste      *
+     * **************************************************************** */
+    
+    /*
+     * <p>Compara due oggetti basandosi sulla loro chiave</p>
+     * <p>
+     * Questo permette di effettuare comparazioni direttamente 
+     * tra oggetti, funzionali anche ad ordinamenti in collezioni, 
+     * come nell'esempio:
+     * <pre>
+     * // Dichiara le voci del tempo
+     * List&lt;MeasureBean&gt; theVoicesOfTime = db.getTheVoicesOfTime();
+     * // Fa l'ordinamento per id voce, come specificato nel metodo compareTo()
+     * Collections.sort(theVoicesOfTime);
+     * </pre></p>
+     */
+    /* (non-Javadoc)
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    @SuppressWarnings("javadoc")
+    public int compareTo(MeasureBean o) {
+        int ordinale = super.getOrdinale();
+        if ((ordinale == o.getOrdinale())) 
+            return 0;
+        else if (ordinale < o.getOrdinale()) 
+            return -1;
+        else 
+            return 1;
+    }
+    
+    /* **************************************************************** *
+     *  Metodi Ovverride per usare l'oggetto come key di un dictionary  *
+     *  e/o per poter capire se è quello da rimuovere da una Collection *
+     * **************************************************************** */
+    
+    /* The primary key of these types are both code AND id_rilevazione */
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @SuppressWarnings({ "javadoc", "unused" })
+    @Override
+    public boolean equals(Object o) {
+        // If they are the same object, they are equals for sure!
+        if (this == o)
+            return true;
+        // If the other isn't real, they are different for sure!
+        if (o == null)
+            return false;
+        // It their types aren't equals, they are different for sure!
+        if (getClass() != o.getClass())
+            return false;
+        MeasureBean other = (MeasureBean) o;
+        try {
+            if (
+                (this.codice.equals(other.getCodice())) && 
+                (this.rilevazione.getId() == other.getRilevazione().getId())
+               ) 
+            return true;
+        } catch (AttributoNonValorizzatoException anve) {
+            // If they aren't comparable, we assume they are different! 
+            return false;
+        }
+        return false;
+    }
+    
+    
+    /* Depends only on item id */
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        String code = this.codice;
+        String progressive = code.substring(code.lastIndexOf(Constants.DOT) + Constants.ELEMENT_LEV_1, code.length());
+        result = prime * result + Integer.parseInt(progressive); 
+        return result;
+    }
+    
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String toString() {
+        int idRilevazione = BEAN_DEFAULT_ID;
+        try {
+            idRilevazione = this.getRilevazione().getId();
+        } catch (AttributoNonValorizzatoException anve) {
+            return null;
+        }
+        return FOR_NAME + "@" + this.codice + Constants.UNDERSCORE + idRilevazione;
+    }
+        
     
     /* ********************************************************* *
      *              Metodi getter e setter per codice            *
