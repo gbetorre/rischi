@@ -51,6 +51,7 @@ import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Main;
+import it.rol.Query;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.ItemBean;
@@ -117,6 +118,10 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
      * Lista delle tipologie delle misure
      */
     private static ArrayList<CodeBean> types;
+    /** 
+     * Lista di tutte le misure inserite
+     */
+    private static ArrayList<MeasureBean> allMeasures;
 
   
     /* ******************************************************************** *
@@ -188,11 +193,13 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         ProcessBean process = null;
         // Rischio a cui si deve applicare la misura (nel contesto del processo)
         RiskBean risk = null;
-        // Elenco completo delle misure di prevenzione (legate alla rilevazione)
+        // Elenco di misure di prevenzione
         ArrayList<MeasureBean> measures = null;
         // Elenco parziale delle misure sulla base di alcuni fattori abilitanti
+        ArrayList<MeasureBean> suggestedMeasures = null;
+        // Elenco di misure depurate di altre liste (suggerite, già applicate...)
         ArrayList<MeasureBean> lessMeasures = null;
-         // Elenco dei caratteri delle misure
+        // Elenco dei caratteri delle misure
         ArrayList<CodeBean> characters = null;
         // Elenco strutture collegate alla rilevazione
         ArrayList<DepartmentBean> structs = null;
@@ -269,6 +276,8 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             CodeBean survey = ConfigManager.getSurvey(codeSur);
             // Recupera le tipologie delle misure
             types = ConfigManager.getMeasureTypes();
+            // Recupera l'elenco completo delle misure di prevenzione
+            allMeasures = db.getMeasures(user, survey);
             // Controllo sull'input
             if (!codeSur.equals(DASH)) {
                 // Creazione della tabella che conterrà i valori dei parametri passati dalle form
@@ -304,19 +313,22 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                              *   INSERT new relation between Risk and Measure   *
                              * ************************************************ */
                             // Controlla che non sia già presente l'associazione 
-                            int check = db.getRiskProcess(user, params);
-                            if (check > NOTHING) {  // Genera un errore
+                            boolean check = db.isMeasureRiskProcess(user, params, allMeasures);
+                            if (check) {  // Genera un errore
                                 // Duplicate key value violates unique constraint 
-                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
-                                           AMPERSAND + "p" + EQ + PART_INSERT_RISK_PROCESS +
+                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + 
+                                           AMPERSAND + "p" + EQ + PART_INSERT_M_R_P +
                                            AMPERSAND + "idR" + EQ + parser.getStringParameter("r-id", VOID_STRING) + 
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "dupKey";
                             } else {
                                 // Inserisce nel DB nuova associazione tra rischio e processo
-                                db.insertRiskProcess(user, params);
+                                db.insertMeasureRiskProcess(user, params);
                                 // Prepara la redirect 
-                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
+                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
+                                           AMPERSAND + "p" + EQ + PART_PROCESS +
+                                           AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
+                                           AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "newRel";
                             }
@@ -349,16 +361,22 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             /* ***************************************************** *
                              * SHOWS Form to LINK A Measure TO A Risk INTO A Process *
                              * ***************************************************** */
-                            // Deve recuperare l'elenco completo delle misure di prevenzione
-                            measures = db.getMeasures(user, survey);
                             // Prepara un ProcessBean di cui recuperare tutti i rischi
                             process = db.getProcessById(user, idP, survey);
                             // Recupera tutti i rischi del processo; tra questi ci sarà quello cui si vuole applicare la misura
                             ArrayList<RiskBean> risks = db.getRisksByProcess(user, process, survey);
                             // Individua il rischio specifico a cui si vuole applicare la misura
                             risk = ProcessCommand.decant(risks, idR);
-                            // Recupera le misure suggerite
-                            lessMeasures = db.getMeasuresByFactors(user, risk, survey);
+                            // 
+                            suggestedMeasures = db.getMeasuresByFactors(user, risk, Query.GET_ALL, survey);
+                            // Recupera le misure suggerite, tolte quelle già applicate al rischio e al processo correnti
+                            lessMeasures = db.getMeasuresByFactors(user, risk, !Query.GET_ALL, survey);
+                            // Toglie dall'elenco totale delle misure tutte quelle suggerite e quelle già applicate
+                            measures = purge(allMeasures, suggestedMeasures, risk);
+                            //measures.removeAll(suggestedMeasures);
+                            //measures.removeAll(risk.getMisure());
+                            //measures = allMeasures;
+                            //, risk);
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-M");
@@ -426,9 +444,25 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         if (characters != null) {
             req.setAttribute("caratteriMisure", characters);
         }
-        // Imposta nella request elenco completo misure di prevenzione dei rischi
+        // Imposta nella request elenco misure di prevenzione dei rischi
         if (measures != null) {
             req.setAttribute("misure", measures);
+        }
+        // Imposta in request processo anticorruttivo
+        if (process != null) {
+            req.setAttribute("processo", process);
+        }
+        // Imposta in request specifico rischio cui aggiungere misure di prevenzione
+        if (risk != null) {
+            req.setAttribute("rischio", risk);
+        }        
+        // Imposta in request elenco delle misure suggerite in base ai fattori abilitanti, meno le misure già applicate
+        if (suggestedMeasures != null) {
+            req.setAttribute("suggerimenti", lessMeasures);
+        }
+        // Imposta in request elenco completo delle misure suggerite in base ai fattori abilitanti
+        if (suggestedMeasures != null) {
+            req.setAttribute("misureDaFattori", suggestedMeasures);
         }
         // Imposta nella request elenco completo strutture
         if (structs != null) {
@@ -445,18 +479,6 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         // Imposta struttura contenente tutti i parametri di navigazione già estratti
         if (!params.isEmpty()) {
             req.setAttribute("params", params);
-        }
-        // Imposta in request processo anticorruttivo
-        if (process != null) {
-            req.setAttribute("processo", process);
-        }
-        // Imposta in request elenco delle misure suggerite in base ai fattori abilitanti
-        if (lessMeasures != null) {
-            req.setAttribute("suggerimenti", lessMeasures);
-        }
-        // Imposta in request specifico rischio cui aggiungere misure di prevenzione
-        if (risk != null) {
-            req.setAttribute("rischio", risk);
         }
         /* Imposta nella request oggetto misura di prevenzione specifica
         if (measure != null) {
@@ -475,6 +497,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
     /* ******************************************************************** *
      *                                Metodi                                *
      * ******************************************************************** */
+    
     /**
      * <p>Valorizza per riferimento una mappa contenente tutti i valori 
      * parametrici riscontrati sulla richiesta.</p>
@@ -553,23 +576,34 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             decantStructures(ELEMENT_LEV_4, deputyLiv4, measure);
             formParams.put(part, measure);
             
-            
         /* **************************************************** *
          *  Caricamento parametri Associazione Processo-Rischio *
          * **************************************************** *
         } else if (part.equals(PART_INSERT_RISK_PROCESS)) {
             // Recupera gli estremi del rischio da inserire
             risk.put("risk",    parser.getStringParameter("r-id", VOID_STRING));
-            formParams.put(part, risk);
+            formParams.put(part, risk);*/
         /* **************************************************** *
          *     Caricamento parametri Fattore-Processo-Rischio   *
-         * **************************************************** *
-        } else if (part.equals(PART_INSERT_F_R_P)) {
+         * **************************************************** */
+        } else if (part.equals(PART_INSERT_M_R_P)) {
             // Recupera gli estremi del rischio da inserire
-            risk.put("risk",    parser.getStringParameter("r-id", VOID_STRING));
-            risk.put("fact",    parser.getStringParameter("fliv1", VOID_STRING));
-            risk.put("proc",    parser.getStringParameter("pliv", VOID_STRING));
-            formParams.put(part, risk);
+            measure.put("risk",    parser.getStringParameter("r-id", VOID_STRING));
+            measure.put("proc",    parser.getStringParameter("pliv2", VOID_STRING));
+            // Misure suggerite (se le trova ne setta il valore, void string altrimenti)
+            int count = NOTHING;
+            int index = NOTHING;
+            while (index < allMeasures.size()) {
+                MeasureBean ms = allMeasures.get(index);
+                ++count;
+                measure.put("adv-" + count, parser.getStringParameter("ms-adv" + ms.getCodice(), VOID_STRING));
+                ++index;
+            }
+            // Misura richiesta (o aggiuntiva)
+            measure.put("meas",    parser.getStringParameter("mrp", VOID_STRING));
+            // Ammontare complessivo misure per la rilevazione corrente
+            measure.put("size",    String.valueOf(allMeasures.size()));
+            formParams.put(part, measure);
         /* **************************************************** *
          *    Caricamento parametri Aggiornamento Nota al PxI   *
          * **************************************************** *
@@ -594,6 +628,28 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                 index++;
             }
         }        
+    }
+    
+    
+    // TODO COMMENTO
+    private static ArrayList<MeasureBean> purge(ArrayList<MeasureBean> fullList, 
+                                                ArrayList<MeasureBean> partList,
+                                                RiskBean risk) {
+        ArrayList<MeasureBean> results = (ArrayList<MeasureBean>) fullList.clone();
+        /* Implementazione "ingenua"
+        for (MeasureBean full : fullList) {
+            for (MeasureBean part : partList) {
+                if (full.equals(part)) {
+                    results.remove(full);
+                }
+            }
+        }*/
+        for (MeasureBean part : partList) {
+            if (results.contains(part)) {
+                results.remove(part);
+            }
+        }
+        return results;
     }
     
 }
