@@ -2,10 +2,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
+<c:set var="pat" value="${requestScope.processo}" scope="page" />
+<c:set var="risk" value="${requestScope.rischio}" scope="page" />
 <c:set var="measures" value="${requestScope.misure}" scope="page" />
 <c:set var="advMeasures" value="${requestScope.suggerimenti}" scope="page" />
-<c:set var="risk" value="${requestScope.rischio}" scope="page" />
-<c:set var="pat" value="${requestScope.processo}" scope="page" />
+<c:set var="fatMeasures" value="${requestScope.misureDaFattori}" scope="page" />
     <h3 class="mt-1 m-0 font-weight-bold">Applicazione di misura a rischio</h3>
     <hr class="riga"/>
     <div class="form-custom">
@@ -76,7 +77,11 @@
             <c:set var="bgAct" value="bgAct20" scope="page" />
           </c:if>
           <li class="list-group-item ${bgAct}">
-            <span class="textcolormaroon">
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bag-plus" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 7.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0v-1.5H6a.5.5 0 0 1 0-1h1.5V8a.5.5 0 0 1 .5-.5"/>
+                <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
+              </svg>
               <c:out value="${mis.nome}" />
             </span>
           </li>
@@ -121,14 +126,15 @@
           </span> 
         </div>
         <c:if test="${advMeasures.size() gt 1}">
-        <label class="my-auto me-auto custom-label">
+        <label class="my-auto me-auto custom-label" title="Il numero totale di misure suggerite è ${fatMeasures.size()} di cui risultano ${fatMeasures.size() - advMeasures.size()} misure già applicate" >
           <strong><input type="checkbox" id="select-all"> Seleziona tutte</strong>
+          (<c:out value="${advMeasures.size()}" /> &#47; <c:out value="${fatMeasures.size()}" />)
         </label>
         </c:if>    
         <div class="text-center">
           <c:forEach var="adv" items="${advMeasures}" varStatus="status">
             <label class="custom-label">
-              <input type="checkbox" id="ms-type${adv.codice}" name="ms-type${adv.codice}" value="${adv.codice}" class="checkbox-item">
+              <input type="checkbox" id="ms-${adv.codice}" name="ms-adv${adv.codice}" value="${adv.codice}" class="checkbox-item">
               <c:out value="${adv.nome}" />
             </label>
           </c:forEach>
@@ -146,7 +152,7 @@
             </div>
             <div class="col-sm-9 bgAct4">
               <select id="ms-mrp" name="mrp" class="custom-label extra-wide">
-                <option value="0">-- misura di mitigazione -- </option>
+                <option value="">-- misura di mitigazione -- </option>
               <c:forEach var="mis" items="${measures}">
                 <option value="${mis.codice}"><c:out value="${mis.nome}" /></option>
               </c:forEach>
