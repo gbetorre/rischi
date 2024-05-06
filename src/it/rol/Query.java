@@ -1238,51 +1238,10 @@ public interface Query extends Serializable {
             "   ,       MST.id_struttura_liv2" +
             "   ,       MST.id_struttura_liv3" +
             "   ,       MST.id_struttura_liv4";
-    
+        
     /**
-     * <p>Seleziona l'elenco di tutte le misure di mitigazione trovate per un dato
-     * rischio, nel contesto di un dato processo, e in riferimento a una data
-     * rilevazione, i cui identificativi vengono passati come parametri
-     * (relazione 4-aria).</p>
-     * <p>Ogni riga, quindi, corrisponder&agrave; ad una distinta misura.</p>
+
      */
-    public static final String GET_MEASURES_BY_RISK_AND_PROCESS = 
-            "SELECT DISTINCT" +
-            "       MS.codice                           AS \"codice\"" +
-            "   ,   MS.nome                             AS \"nome\"" +
-            "   ,   MS.descrizione                      AS \"stato\"" +
-            "   ,   MS.onerosa                          AS \"onerosa\"" +
-            "   ,   MS.ordinale                         AS \"ordinale\"" +
-            "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
-            "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
-            "   ,   MS.id_rilevazione                   AS \"idRilevazione\"" +
-            "   FROM misura_rischio_processo_at MRP" +
-            "       INNER JOIN misura MS ON (MRP.cod_misura = MS.codice AND MRP.id_rilevazione = MS.id_rilevazione)" +
-            "   WHERE MRP.id_processo_at = ?" +
-            "       AND MRP.id_rischio_corruttivo = ?" +
-            "       AND MRP.id_rilevazione = ?" +
-            "   ORDER BY MS.codice";
-    
-    /**
-     * <p>Seleziona le misure che, tramite la loro tipologia, sono collegate 
-     * a un fattore abilitante, il cui identificativo viene passato
-     * come parametro.</p>
-     */
-    public static final String GET_MEASURES_BY_FACTOR = 
-            "SELECT DISTINCT" +
-            "       MS.codice                           AS \"codice\"" +
-            "   ,   MS.nome                             AS \"nome\"" +
-            "   ,   MS.descrizione                      AS \"stato\"" +
-            "   ,   MS.onerosa                          AS \"onerosa\"" +
-            "   ,   MS.ordinale                         AS \"ordinale\"" +
-            "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
-            "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
-            "   FROM fattore_tipologia FATTY" +
-            "       INNER JOIN misura_tipologia MISTY ON MISTY.id_tipo_misura = FATTY.id_tipo_misura" +
-            "       INNER JOIN misura MS ON (MISTY.cod_misura = MS.codice AND MISTY.id_rilevazione = MS.id_rilevazione)" +
-            "   WHERE FATTY.id_fattore_abilitante = ?" +
-            "       AND FATTY.id_rilevazione = ?" +
-            "   ORDER BY MS.nome";
     
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
@@ -1407,6 +1366,35 @@ public interface Query extends Serializable {
      * @return <code>String</code> - la query che seleziona il processo anticorruttivo cercato oppure &lsquo;&ndash;&rsquo; se nessun parametro id e' stato trovato significativo
      */
     public String getQueryProcessBySurvey(int idR, int idS, int idP, int idM);
+    
+    /**
+     * <p>Seleziona l'elenco di tutte le misure di mitigazione trovate per un dato
+     * rischio, nel contesto di un dato processo, e in riferimento a una data
+     * rilevazione, i cui identificativi vengono passati come parametri
+     * (relazione 4-aria).</p>
+     * <p>Ogni riga, quindi, corrisponder&agrave; ad una distinta misura.</p>
+     * 
+     * @param idR   identificativo del rischio corruttivo
+     * @param idP   identificativo processo anticorruzione
+     * @param idS   identificativo della rilevazione ("survey")
+     * @param codeM codici delle misure
+     * @param getAll valore convenzionale che permette di ottenere tutte le misure collegate al rischio e al processo considerati
+     * @return <code>String</code> - la query che seleziona le misure cercate
+     */
+    public String getMeasureByRiskAndProcess(String idR, String idP, String idS, String codeM, int getAll);
+    
+    /**
+     * <p>Seleziona le misure che, tramite la loro tipologia, sono collegate 
+     * a un fattore abilitante, il cui identificativo viene passato
+     * come parametro, escludendo alcune misure i cui codici, facoltativamente,
+     * vengono passati come parametro.</p>
+     * 
+     * @param idF   identificativo del fattore abilitante
+     * @param idS   identificativo della rilevazione
+     * @param codeM codici delle misure cercate
+     * @return <code>String</code> - la query che seleziona le misure cercate
+     */
+    public String getMeasuresByFactors(int idF, int idS, String codeM);
     
     /* ********************************************************************** *
      *                         Query di inserimento                           *
@@ -1689,6 +1677,34 @@ public interface Query extends Serializable {
             "   ,       ? " +       // data ultima modifica
             "   ,       ? " +       // ora ultima modifica
             "   ,       ? " +       // autore ultima modifica
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di un'associazione tra:<ul>
+     * <li>un rischio corruttivo</li>
+     * <li>una misura di prevenzione</li>
+     * <li>un processo censito dall'anticorruzione</li>
+     * <li>nel contesto di una data rilevazione</li>
+     * </ul>
+     * (entità debole associativa 4-aria PxRxMxS).</p>
+     */
+    public static final String INSERT_MEASURE_RISK_PROCESS =
+            "INSERT INTO misura_rischio_processo_at" +
+            "   (   cod_misura" +
+            "   ,   id_rischio_corruttivo" +
+            "   ,   id_processo_at" +
+            "   ,   id_rilevazione" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       // cod_misura
+            "   ,       ? " +       // id_rischio_corruttivo
+            "   ,       ? " +       // id_processo_at
+            "   ,       ? " +       // id_rilevazione
+            "   ,       ? " +       // data_ultima_modifica
+            "   ,       ? " +       // ora_ultima_modifica
+            "   ,       ? " +       // id_usr_ultima_modifica
             "          )" ;
     
     /* ********************************************************************** *
