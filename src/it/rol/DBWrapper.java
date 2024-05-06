@@ -3185,11 +3185,9 @@ public class DBWrapper implements Query, Constants {
                     nextParam = NOTHING;
                     pst = null;
                     // TODO: Gestire il caso dei sottoprocessi (nel caso in cui ci saranno)
-                    pst = con.prepareStatement(GET_MEASURES_BY_RISK_AND_PROCESS);
+                    String getAll = "''";
+                    pst = con.prepareStatement(getMeasureByRiskAndProcess(String.valueOf(risk.getId()), String.valueOf(process.getId()), String.valueOf(survey.getId()), getAll, GET_ALL_BY_CLAUSE));
                     pst.clearParameters();
-                    pst.setInt(++nextParam, process.getId());
-                    pst.setInt(++nextParam, risk.getId());
-                    pst.setInt(++nextParam, survey.getId());
                     rs2 = pst.executeQuery();
                     // Prepara lista di misure per il rischio corrente
                     measures = new ArrayList<>();
@@ -4139,6 +4137,7 @@ public class DBWrapper implements Query, Constants {
                     measure.setCapofila2(capofila2);
                     measure.setCapofila3(capofila3);
                     measure.setGregarie(gregarie);
+                    measure.setRilevazione(survey);
                     measures.add(measure);
                 }
                 // Just to engage the Garbage Collector
@@ -4176,6 +4175,32 @@ public class DBWrapper implements Query, Constants {
     }
     
     
+    /* (non-Javadoc)
+     * @see it.rol.Query#getMeasuresByFactors(int, int, String)
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String getMeasuresByFactors(int idF, int idS, String codeM) {
+        final String GET_MEASURES_BY_FACTOR = 
+                "SELECT DISTINCT" +
+                "       MS.codice                           AS \"codice\"" +
+                "   ,   MS.nome                             AS \"nome\"" +
+                "   ,   MS.descrizione                      AS \"stato\"" +
+                "   ,   MS.onerosa                          AS \"onerosa\"" +
+                "   ,   MS.ordinale                         AS \"ordinale\"" +
+                "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+                "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+                "   FROM fattore_tipologia FATTY" +
+                "       INNER JOIN misura_tipologia MISTY ON MISTY.id_tipo_misura = FATTY.id_tipo_misura" +
+                "       INNER JOIN misura MS ON (MISTY.cod_misura = MS.codice AND MISTY.id_rilevazione = MS.id_rilevazione)" +
+                "   WHERE FATTY.id_fattore_abilitante = " + idF +
+                "       AND FATTY.id_rilevazione = " + idS +
+                "       AND MS.codice NOT IN (" + codeM + ")" +
+                "   ORDER BY MS.nome";
+        return GET_MEASURES_BY_FACTOR;
+    }
+    
+    
     /**
      * <p>Restituisce un ArrayList contenente tutte le misure collegate,
      * tramite la propria tipologia, ad uno o pi&uacute; fattori abilitanti
@@ -4187,24 +4212,42 @@ public class DBWrapper implements Query, Constants {
      * @return <code>ArrayList&lt;MeasureBean&gt;</code> - un vettore ordinato di misure, che rappresentano le misure suggerite per un rischio collegato ad alcuni fattori abilitanti
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings({ "static-method" })
     public ArrayList<MeasureBean> getMeasuresByFactors(PersonBean user, 
-                                                       RiskBean risk, 
+                                                       RiskBean risk,
+                                                       boolean getAll,
                                                        CodeBean survey)
                                                 throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             AbstractList<MeasureBean> advicedMeasures = new ArrayList<>();
+            StringBuffer mesCodes = new StringBuffer();
+            String filterCodes = null;
             try {
                 // TODO: Controllare se user è superuser
                 ArrayList<CodeBean> fattori = (ArrayList<CodeBean>) risk.getFattori();
+                ArrayList<MeasureBean> riskMeasures = (ArrayList<MeasureBean>) risk.getMisure();
+                int count = NOTHING;
+                int boundary = riskMeasures.size() - ELEMENT_LEV_1;
+                while (count < riskMeasures.size()) {
+                    MeasureBean riskMeasure = riskMeasures.get(count);
+                    mesCodes.append("'");
+                    mesCodes.append(riskMeasure.getCodice());
+                    mesCodes.append("'");
+                    if (count < boundary) {
+                        mesCodes.append(",");
+                    }
+                    count++;
+                }
+                if (getAll || risk.getMisure().isEmpty()) {
+                    filterCodes =  "''";
+                } else {
+                    filterCodes = String.valueOf(mesCodes);
+                }
                 for (CodeBean fat : fattori) {
-                    int nextParam = NOTHING;
-                    pst = con.prepareStatement(GET_MEASURES_BY_FACTOR);
+                    String query = getMeasuresByFactors(fat.getId(), survey.getId(), filterCodes);
+                    pst = con.prepareStatement(query);
                     pst.clearParameters();
-                    pst.setInt(++nextParam, fat.getId());
-                    pst.setInt(++nextParam, survey.getId());
                     rs = pst.executeQuery();
                     // Punta alla riga
                     while (rs.next()) {
@@ -4212,6 +4255,8 @@ public class DBWrapper implements Query, Constants {
                         MeasureBean ms = new MeasureBean();
                         // Valorizza la misura
                         BeanUtil.populate(ms, rs);
+                        // Aggiunge la rilevazione
+                        ms.setRilevazione(survey);
                         // Aggiunge la misura alla lista delle misure suggerite
                         advicedMeasures.add(ms);
                     }
@@ -4225,6 +4270,135 @@ public class DBWrapper implements Query, Constants {
                 throw new WebStorageException(msg + anve.getMessage(), anve);
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "ProcessBean non valorizzato; problema nella query delle misure suggerite.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /* (non-Javadoc)
+     * @see it.rol.Query#getMeasureByRiskAndProcess(String, String, String, String, int)
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String getMeasureByRiskAndProcess(String idR, String idP, String idS, String codeM, int getAll) {
+        final String GET_MEASURES_BY_RISK_AND_PROCESS = 
+                "SELECT DISTINCT" +
+                        "       MS.codice                           AS \"codice\"" +
+                        "   ,   MS.nome                             AS \"nome\"" +
+                        "   ,   MS.descrizione                      AS \"stato\"" +
+                        "   ,   MS.onerosa                          AS \"onerosa\"" +
+                        "   ,   MS.ordinale                         AS \"ordinale\"" +
+                        "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+                        "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+                        "   ,   MS.id_rilevazione                   AS \"idRilevazione\"" +
+                        "   FROM misura_rischio_processo_at MRP" +
+                        "       INNER JOIN misura MS ON (MRP.cod_misura = MS.codice AND MRP.id_rilevazione = MS.id_rilevazione)" +
+                        "   WHERE MRP.id_processo_at = " + idP +
+                        "       AND MRP.id_rischio_corruttivo = " + idR +
+                        "       AND MRP.id_rilevazione = " + idS +
+                        "       AND (" +
+                        "           MS.codice IN (" + codeM + ")" +
+                        "           OR -1 = " + getAll +
+                        "           )" +
+                        "   ORDER BY MS.codice";
+        return GET_MEASURES_BY_RISK_AND_PROCESS;
+    }
+    
+    
+    /**
+     * <p>Restituisce <code>vero</code> se una misura in una lista di misure
+     * risulta gi&agrave; associata ad un dato rischio nel contesto di un
+     * dato processo.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param params    mappa contenente i parametri di navigazione
+     * @param list      elenco di misure in cui si vuol controllare l'esistenza di una misura corrente 
+     * @return <code>boolean</code> - true se la misura corrente e' presente nell'elendo di misure in argomento, false in caso contrario
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public boolean isMeasureRiskProcess(PersonBean user, 
+                                        HashMap<String, LinkedHashMap<String, String>> params,
+                                        ArrayList<MeasureBean> list)
+                                 throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            // Variabili per l'accesso ai dati
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            int nextParam = NOTHING;
+            boolean exists = false;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // 
+            StringBuffer mesCodes = new StringBuffer();
+            // Dizionario dei parametri contenente l'identificativo del rischio da associare
+            LinkedHashMap<String, String> meas = params.get(PART_INSERT_M_R_P);
+            try {
+                // TODO: Controllare se user è superuser
+                // Prepara i parametri
+                String procId = meas.get("proc");
+                String riskId = meas.get("risk");
+                // Indice vettoriale
+                int index = NOTHING;
+                // Valore per recuperare i parametri
+                int count = ELEMENT_LEV_1;
+                // Valore di controllo per aggiunta della virgola tra gli elementi 
+                int boundary = list.size() - count;
+                // Recupera le misure suggerite
+                while (index < list.size()) {
+                    //MeasureBean riskMeasure = list.get(count);
+                    String key = "adv-" + count;
+                    String mesCode = meas.get(key);
+                    if (!mesCode.equals(VOID_STRING)) {
+                        mesCodes.append("'");
+                        mesCodes.append(mesCode);
+                        mesCodes.append("'");
+                        if (count < boundary) {
+                            mesCodes.append(",");
+                        }
+                    }
+                    index++;
+                    count++;
+                }
+                // Recupera la eventuale misura aggiuntiva
+                String mesCodeAdd = meas.get("meas");
+                if (!mesCodeAdd.equals(VOID_STRING)) {
+                    mesCodes.append(",");
+                    mesCodes.append(mesCodeAdd);
+                }
+                // Recupera i dati
+                String query = getMeasureByRiskAndProcess(riskId, procId, survey.get(PARAM_SURVEY), String.valueOf(mesCodes), NOTHING);
+                pst = con.prepareStatement(query);
+                pst.clearParameters();
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                   exists = true;
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return exists;
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "ProcessBean non valorizzato; problema nella query.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally {
@@ -5254,12 +5428,140 @@ public class DBWrapper implements Query, Constants {
                     LOG.severe(msg);
                     throw new WebStorageException(msg, e);
                 }
-
                 // End: <==
                 con.commit();
                 pst.close();
                 pst = null;
                 LOG.info("Transazione committata.\n");
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Metodo per fare l'inserimento di una nuova tupla identificante
+     * la relazione ternaria tra un rischio ed un fattore abilitante,
+     * nel contesto di un dato processo e di una data rilevazione.</p>
+     * // TODO COMMENTO ^ v 
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    @SuppressWarnings("static-method")
+    public void insertMeasureRiskProcess(PersonBean user, 
+                                         HashMap<String, LinkedHashMap<String, String>> params) 
+                                  throws WebStorageException {
+        try (Connection con = prol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri contenente l'identificativo del rischio da associare
+            LinkedHashMap<String, String> measure = params.get(PART_INSERT_M_R_P);
+            // Indice di parametro
+            int index = ELEMENT_LEV_1;
+            try {
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                // Al momento (rilevazione AT2022 = triennio 2022-25) i sottoprocessi non sono gestiti
+                pst = con.prepareStatement(INSERT_MEASURE_RISK_PROCESS);
+                pst.clearParameters();                
+                try {
+                    // Prepara i parametri per l'inserimento
+                    int idRisk = Integer.parseInt(measure.get("risk"));
+                    int idProc = Integer.parseInt(measure.get("proc"));
+                    int totMes = Integer.parseInt(measure.get("size"));
+                    // Recupera le misure suggerite
+                    while (index < totMes) {
+                        // Numero di parametro da passare alla query
+                        int nextParam = NOTHING;
+                        String key = "adv-" + index;
+                        String mesCode = measure.get(key);
+                        // Per ogni misura suggerita trovata deve inserire 1 tupla
+                        if (!mesCode.equals(VOID_STRING)) {
+                            /* === Codice Misura === */
+                            pst.setString(++nextParam, mesCode);
+                            /* === Id Rischio === */
+                            pst.setInt(++nextParam, idRisk);
+                            /* === Id Processo === */
+                            pst.setInt(++nextParam, idProc);
+                            /* === Collegamento a rilevazione === */
+                            pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                            /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                            pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                            pst.setInt(++nextParam, user.getUsrId());
+                            // CR (Carriage Return) o 0DH
+                            pst.addBatch();
+                        }
+                        index++;
+                    }
+                    // Recupera la eventuale misura aggiuntiva
+                    String mesCodeAdd = measure.get("meas");
+                    // Inserisce la misura aggiuntiva
+                    if (!mesCodeAdd.equals(VOID_STRING)) {
+                        int nextParam = NOTHING;
+                        /* === Codice Misura === */
+                        pst.setString(++nextParam, mesCodeAdd);
+                        /* === Id Rischio === */
+                        pst.setInt(++nextParam, idRisk);
+                        /* === Id Processo === */
+                        pst.setInt(++nextParam, idProc);
+                        /* === Collegamento a rilevazione === */
+                        pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                        /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                        pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                        pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                        pst.setInt(++nextParam, user.getUsrId());
+                        // CR (Carriage Return) o 0DH
+                        pst.addBatch();
+                    }
+                    // Execute the batch updates
+                    int[] updateCounts = pst.executeBatch();
+                    LOG.info(updateCounts.length + " misure in transazione attiva.\n");
+                } catch (NumberFormatException nfe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, nfe);
+                } catch (ClassCastException cce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di tipo.\n" + cce.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, cce);
+                } catch (ArrayIndexOutOfBoundsException aiobe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, aiobe);
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, npe);
+                } catch (Exception e) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
+                // End: <==
+                con.commit();
+                pst.close();
+                pst = null;
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
                 LOG.severe(msg); 
