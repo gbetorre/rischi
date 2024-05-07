@@ -169,7 +169,7 @@
       <section id="rischi">
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples errorPwd">
         <h3 class="bordo">
-          Rischi e fattori abilitanti 
+          Rischi, fattori abilitanti, misure 
           <button type="button" class="btn btn-danger float-right">
             <span class="badge badge-pill badge-light"><c:out value="${risks.size()}" /></span>
           </button>
@@ -190,7 +190,7 @@
             <tr>
               <th width="30%">Rischio </th>
               <th width="25%">Fattori abilitanti</th>
-              <th width="25%">Misure</th>
+              <th width="25%">Misure di prevenzione</th>
               <th width="20%" class="text-center">Funzioni</th>
             </tr>
           </thead>
@@ -225,8 +225,8 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-capsule" viewBox="0 0 16 16">
                   <path d="M1.828 8.9 8.9 1.827a4 4 0 1 1 5.657 5.657l-7.07 7.071A4 4 0 1 1 1.827 8.9Zm9.128.771 2.893-2.893a3 3 0 1 0-4.243-4.242L6.713 5.429z"/>
                 </svg>
-                <a href="${initParam.appName}/?q=ms&mliv=${mis.codice}&r=${param['r']}" title="${mis.nome}">
-                  &nbsp;<c:out value="${mis.codice}" />
+                <a href="${initParam.appName}/?q=ms&mliv=${mis.codice}&r=${param['r']}" title="${mis.codice}">
+                  &nbsp;<c:out value="${mis.nome}" />
                 </a>
               </li>
             </c:forEach>
