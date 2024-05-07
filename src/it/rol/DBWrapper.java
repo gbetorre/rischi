@@ -4045,12 +4045,11 @@ public class DBWrapper implements Query, Constants {
     
     
     /**
-     * <p>Data una rilevazione, restituisce un elenco di misure trovate.</p>
-     * // TODO COMMENTO
+     * <p>Data una rilevazione, restituisce un elenco di misure di prevenzione trovate.</p>
+     * 
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param survey    oggetto contenente gli estremi della rilevazione
-     * 
-     * @return <code>ProcessBean</code> - l'output desiderato
+     * @return <code>ArrayList&lt;MeasureBean&gt;</code> - l'elenco di misure cercate
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     @SuppressWarnings("static-method")
@@ -4204,11 +4203,14 @@ public class DBWrapper implements Query, Constants {
     /**
      * <p>Restituisce un ArrayList contenente tutte le misure collegate,
      * tramite la propria tipologia, ad uno o pi&uacute; fattori abilitanti
-     * i cui identificativi vengono passati come parametro.</p>
-     * // TODO COMMENTO
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param risk      oggetto contenente i dati del rischio corruttivo
-     * @param survey    oggetto contenente i dati della rilevazione
+     * i cui identificativi vengono passati come parametro.
+     * Tali fattori abilitanti sono presenti nel rischio corruttivo
+     * che il metodo accetta come argomento.</p>
+     * 
+     * @param user   oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param risk   oggetto contenente i dati del rischio corruttivo
+     * @param getAll flag specificante se devono essere recuperate solo le misure non ancora applicate al rischio in argomento (false), oppure tutte quelle collegate ai fattori abilitanti del rischio stesso (true)
+     * @param survey oggetto contenente i dati della rilevazione
      * @return <code>ArrayList&lt;MeasureBean&gt;</code> - un vettore ordinato di misure, che rappresentano le misure suggerite per un rischio collegato ad alcuni fattori abilitanti
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
@@ -4324,7 +4326,7 @@ public class DBWrapper implements Query, Constants {
     /**
      * <p>Restituisce <code>vero</code> se una misura in una lista di misure
      * risulta gi&agrave; associata ad un dato rischio nel contesto di un
-     * dato processo.</p>
+     * dato processo, <code>falso</code> altrimenti.</p>
      *
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param params    mappa contenente i parametri di navigazione
@@ -4340,7 +4342,6 @@ public class DBWrapper implements Query, Constants {
             // Variabili per l'accesso ai dati
             PreparedStatement pst = null;
             ResultSet rs = null;
-            int nextParam = NOTHING;
             boolean exists = false;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
@@ -4358,19 +4359,20 @@ public class DBWrapper implements Query, Constants {
                 // Valore per recuperare i parametri
                 int count = ELEMENT_LEV_1;
                 // Valore di controllo per aggiunta della virgola tra gli elementi 
-                int boundary = list.size() - count;
+                boolean previousExists = false;
                 // Recupera le misure suggerite
                 while (index < list.size()) {
                     //MeasureBean riskMeasure = list.get(count);
                     String key = "adv-" + count;
                     String mesCode = meas.get(key);
                     if (!mesCode.equals(VOID_STRING)) {
+                        if (previousExists) {
+                            mesCodes.append(",");
+                        }
                         mesCodes.append("'");
                         mesCodes.append(mesCode);
                         mesCodes.append("'");
-                        if (count < boundary) {
-                            mesCodes.append(",");
-                        }
+                        previousExists = true;
                     }
                     index++;
                     count++;
@@ -5458,9 +5460,9 @@ public class DBWrapper implements Query, Constants {
     
     /**
      * <p>Metodo per fare l'inserimento di una nuova tupla identificante
-     * la relazione ternaria tra un rischio ed un fattore abilitante,
-     * nel contesto di un dato processo e di una data rilevazione.</p>
-     * // TODO COMMENTO ^ v 
+     * la relazione ternaria tra un rischio ed una misura di prevenzione del
+     * rischio stesso nel contesto di un dato processo e di una data rilevazione.</p>
+     *  
      * @param user      utente loggato
      * @param params    mappa contenente i parametri di navigazione
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
