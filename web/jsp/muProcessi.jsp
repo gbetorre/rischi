@@ -44,17 +44,17 @@
         <c:set var="classSuffix" value="${fn:substring(classSuffix, zero, fn:indexOf(classSuffix, ' '))}" scope="page" />
       </c:if>
       <div class="value bgcolor-${classSuffix} border-${classSuffix}">
-        <p class="text-center" title="${pat.indicatori.get('PxI').informativa}">
+        <p class="text-center" title="${pat.indicatori.get('PxI').descrizione}">
           <c:out value="${pat.indicatori.get('PxI').informativa}" />
         </p>
       </div>
       <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('P').informativa)} border-${fn:toLowerCase(pat.indicatori.get('P').informativa)}">
-        <p class="text-center" title="${pat.indicatori.get('P').informativa}">
+        <p class="text-center" title="${pat.indicatori.get('P').descrizione}">
           <c:out value="${pat.indicatori.get('P').informativa}" />
         </p>
       </div>
       <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('I').informativa)} border-${fn:toLowerCase(pat.indicatori.get('I').informativa)}">
-        <p class="text-center" title="${pat.indicatori.get('I').informativa}">
+        <p class="text-center" title="${pat.indicatori.get('I').descrizione}">
           <c:out value="${pat.indicatori.get('I').informativa}" />
         </p>
       </div>
@@ -64,7 +64,7 @@
         <c:set var="idesc" value="N/D" scope="page" />
       </c:if>
       <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get(iname).informativa)} border-${fn:toLowerCase(pat.indicatori.get(iname).informativa)}">
-        <p class="text-center" title="${pat.indicatori.get(iname).informativa}">
+        <p class="text-center" title="${pat.indicatori.get(iname).descrizione}">
           <c:out value="${idesc}" />
         </p>
       </div>
