@@ -402,7 +402,7 @@ public interface Constants extends Serializable {
      */
     public static final String GR = "gregaria";
     /**
-     * <p>Etichetta per "Non determinabile"</p>
+     * <p>Etichetta per valore indecidibile</p>
      */
     public static final String ND = "Non determinabile";
     /* ************************************************************************ *
@@ -478,9 +478,19 @@ public interface Constants extends Serializable {
      * il richiamo del costruttore &nbsp;<code>new String("");</code><br />
      * (si veda, ad esempio:
      * <a href="http://www.precisejava.com/javaperf/j2se/StringAndStringBuffer.htm">
-     * questa discussione</a>).
+     * questa discussione</a>)</p>.
      */
     public static final String VOID_STRING = "";
+    /**
+     * <p>Costante da utilizzare quando serve un valore che, come dice il nome, 
+     * funga da stringa vuota in linguaggio SQL, tipicamente da passare 
+     * come parametro, specialmente nelle clausole di tipo ILIKE ().</p>
+     * <p>Utile soprattutto perch&eacute; graficamente maggiormente visibile 
+     * e chiara della stringa vuota SQL, che corrisponde a due apici singoli 
+     * consecutivi, che per poter essere trattati da Java come stringa, 
+     * devono a loro volta essere circondati da doppi apici.</p>
+     */
+    public static final String VOID_SQL_STRING = "''";
     /**
      * <p>Costante da utilizzare quando serve un valore per inizializzazione
      * di default di un parametro mancante sulla querystring.</p>
