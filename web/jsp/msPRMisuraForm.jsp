@@ -7,6 +7,7 @@
 <c:set var="measures" value="${requestScope.misure}" scope="page" />
 <c:set var="advMeasures" value="${requestScope.suggerimenti}" scope="page" />
 <c:set var="fatMeasures" value="${requestScope.misureDaFattori}" scope="page" />
+<c:set var="types" value="${requestScope.misureTipo.keySet()}" scope="page" />
     <h3 class="mt-1 m-0 font-weight-bold">Applicazione di misura a rischio</h3>
     <hr class="riga"/>
     <div class="form-custom">
@@ -130,16 +131,25 @@
           <strong><input type="checkbox" id="select-all"> Seleziona tutte</strong>
           (<c:out value="${advMeasures.size()}" /> &#47; <c:out value="${fatMeasures.size()}" />)
         </label>
-        </c:if>    
-        <div class="text-center">
-          <c:forEach var="adv" items="${advMeasures}" varStatus="status">
+        </c:if>
+        
+        <c:forEach var="type" items="${pageScope.types}">
+        <c:if test="${not empty requestScope.misureTipo.get(type)}">
+        <hr class="riga" />
+        <section class="section">
+          <h4><c:out value="${type}" /></h4>
+          <p class="text-center">
+          <c:forEach var="adv" items="${requestScope.misureTipo.get(type)}" varStatus="status">
             <label class="custom-label">
               <input type="checkbox" id="ms-${adv.codice}" name="ms-adv${adv.codice}" value="${adv.codice}" class="checkbox-item">
               <c:out value="${adv.nome}" />
             </label>
           </c:forEach>
-        </div>
-
+          </p>
+        </section>
+        
+        </c:if>
+        </c:forEach>
       </div>
       
       <hr class="separapoco" />
