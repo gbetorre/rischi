@@ -96,7 +96,11 @@
         <tbody>
         <c:forEach var="ms" items="${measures}" varStatus="status">
           <tr>
-            <td><c:out value="${ms.nome}" /></td>
+            <td>
+              <a href="${initParam.appName}/?q=ms&mliv=${ms.codice}&r=${param['r']}" title="${ms.codice}">
+                <c:out value="${ms.nome}" />
+              </a>
+            </td>
             <td><c:out value="${ms.carattere.nome}" /></td>
             <td><c:out value="${fn:toUpperCase(ms.getOnerosa(ms.onerosa))}" /></td>
             <td><ul class="list-group">
