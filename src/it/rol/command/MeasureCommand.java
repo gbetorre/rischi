@@ -193,12 +193,16 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         ProcessBean process = null;
         // Rischio a cui si deve applicare la misura (nel contesto del processo)
         RiskBean risk = null;
+        // Misura di prevenzione specifica
+        MeasureBean measure = null;
         // Elenco di misure di prevenzione
         ArrayList<MeasureBean> measures = null;
         // Elenco parziale delle misure sulla base di alcuni fattori abilitanti
         ArrayList<MeasureBean> suggestedMeasures = null;
         // Elenco di misure depurate di altre liste (suggerite, già applicate...)
         ArrayList<MeasureBean> lessMeasures = null;
+        // Tabella che conterrà le misure suggerite raggruppate per tipo
+        LinkedHashMap<String, ArrayList<MeasureBean>> measuresByType = null;
         // Elenco dei caratteri delle misure
         ArrayList<CodeBean> characters = null;
         // Elenco strutture collegate alla rilevazione
@@ -223,7 +227,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         // Explicit Unboxing
         boolean write = writeAsObject.booleanValue();
         // Recupera o inizializza 'id misura'
-        int idMs = parser.getIntParameter("idM", DEFAULT_ID);
+        String codeMis = parser.getStringParameter("mliv", DASH);
         // Recupera o inizializza 'id processo' (nel cui contesto si applica la misura)
         int idP = parser.getIntParameter("pliv", DEFAULT_ID);
         // Recupera o inizializza 'id rischio' (cui si deve applicare una misura)
@@ -288,17 +292,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                 /* @PostMapping */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
-                    if (nomeFile.containsKey(part)) {/*
-                        // Stringa dinamica per contenere i parametri di scelta strutture
-                        StringBuffer paramsStruct = new StringBuffer();
-                        // Dizionario dei parametri delle strutture scelte dall'utente
-                        LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
-                        // Cicla sul dizionario dei parametri per ricostruire l'URL
-                        for (Map.Entry<String, String> set : struct.entrySet()) {
-                            // Printing all elements of a Map
-                            paramsStruct.append(AMPERSAND);
-                            paramsStruct.append("s" + set.getKey() + EQ + set.getValue());
-                        }*/
+                    if (nomeFile.containsKey(part)) {
                         // Controlla quale richiesta deve gestire
                         if (part.equalsIgnoreCase(PART_INSERT_MEASURE)) {
                             /* ************************************************ *
@@ -374,6 +368,8 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             lessMeasures = db.getMeasuresByFactors(user, risk, !Query.GET_ALL, survey);
                             // Toglie dall'elenco totale delle misure tutte quelle suggerite e quelle già applicate
                             measures = purge(allMeasures, suggestedMeasures, risk);
+                            // Raggruppa le misure suggerite per tipologia
+                            measuresByType = decantMeasures(types, lessMeasures);
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-M");
@@ -384,12 +380,11 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                         /* ************************************************ *
                          *             SELECT a Specific Measure            *
                          * ************************************************ */
-                        if (idMs > DEFAULT_ID) {
-                            // TODO IMPLEMENTARE
+                        if (!codeMis.equals(DASH)) {
                             // Recupera la misura di prevenzione/mitigazione
-                            //risk = db.getRisk(user, idMs, ConfigManager.getSurvey(codeSur));
+                            measure = db.getMeasure(user, codeMis, survey);
                             // Ha bisogno di personalizzare le breadcrumbs perché sull'indirizzo non c'è il parametro 'p'
-                            bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), "Rischio");
+                            bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), "Misura");
                             fileJspT = nomeFileDettaglio;
                         } else {
                             /* ************************************************ *
@@ -456,6 +451,10 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         if (lessMeasures != null) {
             req.setAttribute("suggerimenti", lessMeasures);
         }
+        // Imposta in request elenco delle misure suggerite in base ai fattori abilitanti, raggruppate per nome del tipo
+        if (measuresByType != null) {
+            req.setAttribute("misureTipo", measuresByType);
+        }
         // Imposta in request elenco completo delle misure suggerite in base ai fattori abilitanti
         if (suggestedMeasures != null) {
             req.setAttribute("misureDaFattori", suggestedMeasures);
@@ -468,6 +467,10 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         if (flatStructs != null) {
             req.setAttribute("elencoStrutture", flatStructs);
         }
+        // Imposta nella request oggetto misura di prevenzione specifica
+        if (measure != null) {
+            req.setAttribute("misura", measure);
+        }
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
@@ -476,10 +479,6 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         if (!params.isEmpty()) {
             req.setAttribute("params", params);
         }
-        /* Imposta nella request oggetto misura di prevenzione specifica
-        if (measure != null) {
-            req.setAttribute("misura", misura);
-        }*/
         // Imposta nella request le breadcrumbs in caso siano state personalizzate
         if (bC != null) {
             req.removeAttribute("breadCrumbs");
@@ -615,6 +614,51 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                 index++;
             }
         }        
+    }
+    
+    
+    /**
+     * Dati in input un array di misure di prevenzione e l'elenco completo
+     * delle tipologie di misura, suddivide le misure dell'array in base alla loro
+     * tipologia e le restituisce partizionate per tipologia in una tabella, 
+     * appunto, indicizzata per nome di tipologia di misura.<br />
+     * NOTA: siccome la relazione tra la misura e la tipologia e' molti a molti,
+     * la stessa misura potrebbe saltare fuori in pi&uacute; sottoliste e 
+     * il metodo dovrebbe gestire, o quanto meno segnalare, questo aspetto.
+     * 
+     * @param measureTypes elenco delle tipologie di misure di prevenzione
+     * @param measures  elenco delle misure di prevenzione
+     * @return <code>LinkedHashMap&lt;String, ArrayList&lt;MeasureBean&gt;&gt;</code> - tabella contenente le stesse misure ottenute in argomento ma raggruppate in sottoliste indicizzate per nome tipologia
+     * @throws CommandException se si verifica un problema nel recupero di un valore obbligatorio di un bean o in qualche puntamento
+     * @deprecated  il metodo non effettua controlli riguardo le ridondanze nelle sottoliste
+     */
+    @Deprecated
+    private static LinkedHashMap<String, ArrayList<MeasureBean>> decantMeasures(ArrayList<CodeBean> measureTypes,
+                                                                                ArrayList<MeasureBean> measures) 
+                                                                         throws CommandException {
+        LinkedHashMap<String, ArrayList<MeasureBean>> measuresByTypes = new LinkedHashMap<>();
+        try {
+            for (CodeBean type : measureTypes) {
+                ArrayList<MeasureBean> measuresByType = new ArrayList<>();
+                for (MeasureBean meas : measures) {
+                    ArrayList<CodeBean> typologies = meas.getTipologie();
+                    CodeBean typology = typologies.get(NOTHING);
+                    if (type.getId() == typology.getId()) {
+                        measuresByType.add(meas);
+                    }
+                }
+                measuresByTypes.put(type.getNome(), measuresByType);
+            }
+            return measuresByTypes;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Attributo obbligatorio non recuperabile.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        } 
     }
     
     
