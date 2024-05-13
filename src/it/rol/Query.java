@@ -1186,7 +1186,7 @@ public interface Query extends Serializable {
 
     /**
      * <p>Seleziona l'elenco di tutte le misure di mitigazione trovate per una 
-     * data rilevazione, oppure indipendentemente dalla rilevazione (in funzione
+     * data rilevazione, oppure seleziona una specifica misura (in funzione
      * dei parametri), selezionando le tuple atte a comporre il registro 
      * delle misure di prevenzione e mitigazione dei rischi corruttivi.</p>
      * <p>Ogni riga, quindi, corrisponder&agrave; ad una distinta misura.</p>
@@ -1203,7 +1203,8 @@ public interface Query extends Serializable {
             "   ,   MS.id_rilevazione                   AS \"idRilevazione\"" +
             "   FROM misura MS" +
             "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
-            "   WHERE (MS.id_rilevazione = ? OR -1 = ?)" +
+            "   WHERE MS.id_rilevazione = ?" +
+            "       AND (MS.codice = ? OR -1 = ?)" +
             "   ORDER BY MS.ordinale";
     
     /**
