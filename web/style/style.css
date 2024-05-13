@@ -84,6 +84,17 @@ ul.list-group > li {
 	background: none;
 }
 
+ul.line {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+li.line {
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+}
+
 /*=====================================================
 =            		< 768px     MOBILE         =
 =====================================================*/
@@ -636,6 +647,13 @@ select:disabled.bgcolor3 {
 	padding-top: 20px;
 }
 
+.section {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f1f1f1;
+  border-radius: 10px;
+}
+
 /* ------------- Report Format ------------- */
 .reportHead {
 	background-color: #bfbfbf;
@@ -739,6 +757,15 @@ textarea {
 	max-width: 250px; 
 	min-height: 300px;
 	border-radius: 10px 10px 10px 10px;
+}
+
+.container-large {
+	background-color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	margin: 50px auto;
+  max-width: 800px;
+  padding: 20px;
+  border-radius: 10px;
 }
 
 .noDisplay {
