@@ -84,7 +84,7 @@ import it.rol.exception.WebStorageException;
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
-public class DBWrapper implements Query, Constants {
+public class DBWrapper extends QueryImpl implements Query, Constants {
 
     /**
      * <p>La serializzazione necessita di dichiarare una costante di tipo long
@@ -4045,15 +4045,26 @@ public class DBWrapper implements Query, Constants {
     
     
     /**
-     * <p>Data una rilevazione, restituisce un elenco di misure di prevenzione trovate.</p>
+     * <p>Data una rilevazione, restituisce un elenco di misure di prevenzione 
+     * trovate, oppure una specifica misura, in funzione dei parametri ricevuti.<br />
+     * In particolare: <dl>
+     * <dt>se si passa il codice della misura sul II parametro e 0 sul III parametro </dt>
+     * <dd>restituisce una lista vettoriale contenente la misura avente il codice ricevuto (se esiste), oppure una lista vuota (se non esiste)</dd>
+     * <dt>se si passa una stringa SQL vuota sul II parametro e -1 sul III parametro</dt>
+     * <dd>restituisce l'elenco completo delle misure di prevenzione trovate nella rilevazione passata sul IV parametro</dd>
+     * </dl></p>
      * 
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param code      il codice di una misura cercata oppure una stringa vuota in linguaggio SQL
+     * @param getAll    0 oppure -1 a seconda se si voglia rispettivamente ottenere una singola misura oppure tutte
      * @param survey    oggetto contenente gli estremi della rilevazione
      * @return <code>ArrayList&lt;MeasureBean&gt;</code> - l'elenco di misure cercate
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     @SuppressWarnings("static-method")
     public ArrayList<MeasureBean> getMeasures(PersonBean user,
+                                              String code,
+                                              int getAll,
                                               CodeBean survey)
                                        throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
@@ -4068,8 +4079,8 @@ public class DBWrapper implements Query, Constants {
                 pst = con.prepareStatement(GET_MEASURES);
                 pst.clearParameters();
                 pst.setInt(++nextParam, survey.getId());
-                pst.setString(++nextParam, VOID_SQL_STRING);
-                pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                pst.setString(++nextParam, code);
+                pst.setInt(++nextParam, getAll);
                 rs = pst.executeQuery();
                 while (rs.next()) {
                     measure = new MeasureBean();
@@ -4175,14 +4186,14 @@ public class DBWrapper implements Query, Constants {
     }
     
     
-    /**
+    /*
      * <p>Data un codice e una rilevazione, restituisce una corrispondente misura.</p>
      * // TODO COMMENTO v ^ [aggiungere specifica su gestione II e III parametro]
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param survey    oggetto contenente gli estremi della rilevazione
      * @return <code>ArrayList&lt;MeasureBean&gt;</code> - l'elenco di misure cercate
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
+     *
     @SuppressWarnings("static-method")
     public MeasureBean getMeasure(PersonBean user,
                                   String code,
@@ -4302,7 +4313,7 @@ public class DBWrapper implements Query, Constants {
             LOG.severe(msg);
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         }        
-    }
+    }*/
     
     
     /* (non-Javadoc)
@@ -4449,37 +4460,7 @@ public class DBWrapper implements Query, Constants {
         }
     }
     
-    
-    /* (non-Javadoc)
-     * @see it.rol.Query#getMeasureByRiskAndProcess(String, String, String, String, int)
-     */
-    @SuppressWarnings("javadoc")
-    @Override
-    public String getMeasureByRiskAndProcess(String idR, String idP, String idS, String codeM, int getAll) {
-        final String GET_MEASURES_BY_RISK_AND_PROCESS = 
-                "SELECT DISTINCT" +
-                        "       MS.codice                           AS \"codice\"" +
-                        "   ,   MS.nome                             AS \"nome\"" +
-                        "   ,   MS.descrizione                      AS \"stato\"" +
-                        "   ,   MS.onerosa                          AS \"onerosa\"" +
-                        "   ,   MS.ordinale                         AS \"ordinale\"" +
-                        "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
-                        "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
-                        "   ,   MS.id_rilevazione                   AS \"idRilevazione\"" +
-                        "   FROM misura_rischio_processo_at MRP" +
-                        "       INNER JOIN misura MS ON (MRP.cod_misura = MS.codice AND MRP.id_rilevazione = MS.id_rilevazione)" +
-                        "   WHERE MRP.id_processo_at = " + idP +
-                        "       AND MRP.id_rischio_corruttivo = " + idR +
-                        "       AND MRP.id_rilevazione = " + idS +
-                        "       AND (" +
-                        "           MS.codice IN (" + codeM + ")" +
-                        "           OR -1 = " + getAll +
-                        "           )" +
-                        "   ORDER BY MS.codice";
-        return GET_MEASURES_BY_RISK_AND_PROCESS;
-    }
-    
-    
+   
     /**
      * <p>Restituisce <code>vero</code> se una misura in una lista di misure
      * risulta gi&agrave; associata ad un dato rischio nel contesto di un
