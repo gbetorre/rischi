@@ -5,8 +5,6 @@
 <c:set var="pat" value="${requestScope.processo}" scope="page" />
 <c:set var="risk" value="${requestScope.rischio}" scope="page" />
 <c:set var="measures" value="${requestScope.misure}" scope="page" />
-<c:set var="advMeasures" value="${requestScope.suggerimenti}" scope="page" />
-<c:set var="fatMeasures" value="${requestScope.misureDaFattori}" scope="page" />
 <c:set var="types" value="${requestScope.misureTipo.keySet()}" scope="page" />
     <h3 class="mt-1 m-0 font-weight-bold">Applicazione di misura a rischio</h3>
     <hr class="riga"/>
@@ -126,12 +124,11 @@
             <i class="fa-regular fa-circle-question"></i>
           </span> 
         </div>
-        <c:if test="${advMeasures.size() gt 1}">
-        <label class="my-auto me-auto custom-label" title="Il numero totale di misure suggerite è ${fatMeasures.size()} di cui risultano ${fatMeasures.size() - advMeasures.size()} misure già applicate" >
+
+        <label class="my-auto me-auto custom-label">
           <strong><input type="checkbox" id="select-all"> Seleziona tutte</strong>
-          (<c:out value="${advMeasures.size()}" /> &#47; <c:out value="${fatMeasures.size()}" />)
         </label>
-        </c:if>
+
         
         <c:forEach var="type" items="${pageScope.types}">
         <c:if test="${not empty requestScope.misureTipo.get(type)}">
