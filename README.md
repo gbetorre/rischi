@@ -313,18 +313,20 @@ e fornirvi il relativo significato e la relativa motivazione.
 - Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
 - Implementata pagina di dettaglio soggetto contingente/interessato
 - Implementata pagina di dettaglio struttura
-- [1.8.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
-- [1.8.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
-- [1.8.7] Implementata estrazione risultati in formato CSV
-- [1.8.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
-- [1.8.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
-- [1.8.4] Implementata form di ricerca sui quesiti per chiave testuale
+- [1.9.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
+- [1.9.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
+- [1.9.7] Implementata estrazione risultati in formato CSV
+- [1.9.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
+- [1.9.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
+- [1.9.4] Implementata form di ricerca sui quesiti per chiave testuale
+- [1.9.3]   implementato algoritmo di mitigazione del rischio in funzione delle misure applicate
 - ...
-- [1.8.1]   implementato algoritmo di mitigazione del rischio in funzione delle misure applicate
+
 
 
 ### Done
 -->
+- [1.8.1] (14/05/2024) Implementazione parallela calcolo elementi (indicatori di tipo P, input di processi). Miglioramenti nella presentazione delle misure suggerite (eliminati doppioni).
 - [1.8.0] (13/05/2024) Prima bozza implementazione pagina dei dettagli di una misura di prevenzione/mitigazione del rischio. Miglioramenti nella presentazione delle misure suggerite (raggruppamento delle misure suggerite per tipologia di misura).
 - [1.7.9] (07/05/2024) Miglioramenti nella presentazione delle misure applicate. Correzione di bug.
 - [1.7.8] (06/05/2024) Implementazione funzione di assegnazione delle misure di mitigazione a specifico rischio nel contesto di un processo
