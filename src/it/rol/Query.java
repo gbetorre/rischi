@@ -1212,20 +1212,20 @@ public interface Query extends Serializable {
      */
     public static final String GET_STRUCTS_BY_MEASURE = 
             "SELECT DISTINCT" +
-            "       MST.id_struttura_liv1       AS \"cod1\"" +
-            "   ,   MST.id_struttura_liv2       AS \"cod2\"" +
-            "   ,   MST.id_struttura_liv3       AS \"cod3\"" +
-            "   ,   MST.id_struttura_liv4       AS \"cod4\"" +
-            "   ,   MST.id_rilevazione          AS \"value3\"" +
-            "   ,   MST.ruolo                   AS \"extraInfo\"" +
-            "   ,   L1.prefisso                 AS \"nome\"" +
-            "   ,   L2.prefisso                 AS \"nomeReale\"" +
-            "   ,   L3.prefisso                 AS \"codice\"" +
-            "   ,   L4.prefisso                 AS \"labelWeb\"" +
-            "   ,   L1.nome                     AS \"extraInfo1\"" +
-            "   ,   L2.nome                     AS \"extraInfo2\"" +
-            "   ,   L3.nome                     AS \"extraInfo3\"" +
-            "   ,   L4.nome                     AS \"extraInfo4\"" +
+            "       MST.id_struttura_liv1               AS \"cod1\"" +
+            "   ,   MST.id_struttura_liv2               AS \"cod2\"" +
+            "   ,   MST.id_struttura_liv3               AS \"cod3\"" +
+            "   ,   MST.id_struttura_liv4               AS \"cod4\"" +
+            "   ,   MST.id_rilevazione                  AS \"value3\"" +
+            "   ,   MST.ruolo                           AS \"extraInfo\"" +
+            "   ,   L1.prefisso                         AS \"nome\"" +
+            "   ,   L2.prefisso                         AS \"nomeReale\"" +
+            "   ,   L3.prefisso                         AS \"codice\"" +
+            "   ,   L4.prefisso                         AS \"labelWeb\"" +
+            "   ,   L1.nome                             AS \"extraInfo1\"" +
+            "   ,   L2.nome                             AS \"extraInfo2\"" +
+            "   ,   L3.nome                             AS \"extraInfo3\"" +
+            "   ,   L4.nome                             AS \"extraInfo4\"" +
             "   FROM misura_struttura MST" +
             "       LEFT JOIN struttura_liv1 L1 ON MST.id_struttura_liv1 = L1.id" +
             "       LEFT JOIN struttura_liv2 L2 ON MST.id_struttura_liv2 = L2.id" +
@@ -1241,8 +1241,23 @@ public interface Query extends Serializable {
             "   ,       MST.id_struttura_liv4";
         
     /**
-
+     * <p>Estrae i rischi corruttivi a cui &egrave; stata applicata 
+     * una specifica misura di prevenzione, il cui codice viene 
+     * passato come parametro, nel contesto di una specifica rilevazione, 
+     * il cui identificativo viene passato come parametro.</p>
      */
+    public static final String GET_RISKS_AND_PROCESS_BY_MEASURE = 
+            "SELECT DISTINCT" +
+            "       RC.id                               AS \"id\"" +
+            "   ,   RC.nome                             AS \"nome\"" +
+            "   ,   PAT.id                              AS \"cod1\"" +
+            "   ,   PAT.nome                            AS \"extraInfo1\"" +
+            "   FROM rischio_corruttivo RC" +
+            "       INNER JOIN misura_rischio_processo_at MRPAT ON MRPAT.id_rischio_corruttivo = RC.id" +
+            "       INNER JOIN processo_at PAT ON MRPAT.id_processo_at = PAT.id" +
+            "   WHERE MRPAT.cod_misura = ?" +
+            "       AND MRPAT.id_rilevazione = ?" +
+            "   ORDER BY RC.nome";
     
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
@@ -1369,6 +1384,19 @@ public interface Query extends Serializable {
     public String getQueryProcessBySurvey(int idR, int idS, int idP, int idM);
     
     /**
+     * <p>Seleziona le misure che, tramite la loro tipologia, sono collegate 
+     * a un fattore abilitante, il cui identificativo viene passato
+     * come parametro, escludendo alcune misure i cui codici, facoltativamente,
+     * vengono passati come parametro.</p>
+     * 
+     * @param idF   identificativo del fattore abilitante
+     * @param idS   identificativo della rilevazione
+     * @param codeM codici delle misure cercate
+     * @return <code>String</code> - la query che seleziona le misure cercate
+     */
+    public String getMeasuresByFactors(int idF, int idS, String codeM);
+    
+    /**
      * <p>Seleziona l'elenco di tutte le misure di mitigazione trovate per un dato
      * rischio, nel contesto di un dato processo, e in riferimento a una data
      * rilevazione, i cui identificativi vengono passati come parametri
@@ -1383,19 +1411,6 @@ public interface Query extends Serializable {
      * @return <code>String</code> - la query che seleziona le misure cercate
      */
     public String getMeasureByRiskAndProcess(String idR, String idP, String idS, String codeM, int getAll);
-    
-    /**
-     * <p>Seleziona le misure che, tramite la loro tipologia, sono collegate 
-     * a un fattore abilitante, il cui identificativo viene passato
-     * come parametro, escludendo alcune misure i cui codici, facoltativamente,
-     * vengono passati come parametro.</p>
-     * 
-     * @param idF   identificativo del fattore abilitante
-     * @param idS   identificativo della rilevazione
-     * @param codeM codici delle misure cercate
-     * @return <code>String</code> - la query che seleziona le misure cercate
-     */
-    public String getMeasuresByFactors(int idF, int idS, String codeM);
     
     /* ********************************************************************** *
      *                         Query di inserimento                           *
