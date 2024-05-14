@@ -282,7 +282,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             // Recupera le tipologie delle misure
             types = ConfigManager.getMeasureTypes();
             // Recupera l'elenco completo delle misure di prevenzione
-            allMeasures = db.getMeasures(user, survey);
+            allMeasures = db.getMeasures(user, VOID_SQL_STRING, Query.GET_ALL_BY_CLAUSE, survey);
             // Controllo sull'input
             if (!codeSur.equals(DASH)) {
                 // Creazione della tabella che conterrà i valori dei parametri passati dalle form
@@ -382,7 +382,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                          * ************************************************ */
                         if (!codeMis.equals(DASH)) {
                             // Recupera la misura di prevenzione/mitigazione
-                            measure = db.getMeasure(user, codeMis, survey);
+                            measure = db.getMeasures(user, codeMis, NOTHING, survey).get(NOTHING);
                             // Ha bisogno di personalizzare le breadcrumbs perché sull'indirizzo non c'è il parametro 'p'
                             bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), "Misura");
                             fileJspT = nomeFileDettaglio;
@@ -390,7 +390,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *              SELECT List of Measures             *
                              * ************************************************ */
-                            measures = db.getMeasures(user, survey);
+                            measures = allMeasures;
                             fileJspT = nomeFileElenco;                            
                         }
                     }
@@ -447,18 +447,18 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         if (risk != null) {
             req.setAttribute("rischio", risk);
         }        
-        // Imposta in request elenco delle misure suggerite in base ai fattori abilitanti, meno le misure già applicate
+        /* Imposta in request elenco delle misure suggerite in base ai fattori abilitanti, meno le misure già applicate
         if (lessMeasures != null) {
             req.setAttribute("suggerimenti", lessMeasures);
-        }
+        }*/
         // Imposta in request elenco delle misure suggerite in base ai fattori abilitanti, raggruppate per nome del tipo
         if (measuresByType != null) {
             req.setAttribute("misureTipo", measuresByType);
-        }
+        }/*
         // Imposta in request elenco completo delle misure suggerite in base ai fattori abilitanti
         if (suggestedMeasures != null) {
             req.setAttribute("misureDaFattori", suggestedMeasures);
-        }
+        }*/
         // Imposta nella request elenco completo strutture
         if (structs != null) {
             req.setAttribute("strutture", structs);
@@ -643,7 +643,8 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                 for (MeasureBean meas : measures) {
                     ArrayList<CodeBean> typologies = meas.getTipologie();
                     CodeBean typology = typologies.get(NOTHING);
-                    if (type.getId() == typology.getId()) {
+                    if ( (type.getId() == typology.getId()) &&
+                         (!measuresByType.contains(meas)) ) {
                         measuresByType.add(meas);
                     }
                 }
