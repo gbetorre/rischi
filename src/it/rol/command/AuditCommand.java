@@ -1223,14 +1223,103 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             InterviewBean i = null;
             // Giudizio Sintetico
             InterviewBean pi = null;
+            
+            // Create threads for each computation
+            Thread threadP1 = new Thread(() -> {
+                try {
+                    indicators.put(P1, computeP1(questByIndicator.get(P1), answerByQuestion, indicatorByCode));
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 1° thread.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+            });
+            Thread threadP2 = new Thread(() -> {
+                try {
+                    indicators.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 2° thread.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+            });
+            Thread threadP3 = new Thread(() -> {
+                try {
+                    indicators.put(P3, computeP3(questByIndicator.get(P3), answerByQuestion, indicatorByCode));
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 3° thread.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+            });
+            Thread threadP4 = new Thread(() -> {
+                try {
+                    indicators.put(P4, computeP4(questByIndicator.get(P4), answerByQuestion, indicatorByCode));
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 4° thread.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+            });
+            Thread threadP5 = new Thread(() -> {
+                try {
+                    indicators.put(P5, computeP5(questByIndicator.get(P5), answerByQuestion, indicatorByCode));
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 5° thread.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+            });
+            Thread threadP6 = new Thread(() -> {
+                try {
+                    indicators.put(P6, computeP6(questByIndicator.get(P6), answerByQuestion, indicatorByCode));
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 6° thread.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+            });
+            Thread threadP7 = new Thread(() -> {
+                try {
+                    indicators.put(P7, computeP7(questByIndicator.get(P7), answerByQuestion, indicatorByCode));
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 7° thread.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+            });
+            
+            /* Repeat for I1 to I4 */
+            
+            // Start all threads
+            threadP1.start();
+            threadP2.start();
+            threadP3.start();
+            threadP4.start();
+            threadP5.start();
+            threadP6.start();
+            threadP7.start();
+            /* Start threads for I1 to I4 */
+            
+            // Wait for all threads to finish
+            try {
+                threadP1.join();
+                threadP2.join();
+                threadP3.join();
+                threadP4.join();
+                threadP5.join();
+                threadP6.join();
+                threadP7.join();
+                /* Join threads for I1 to I4 */
+            } catch (InterruptedException ie) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella join dei threads.\n";
+                LOG.severe(msg + ie.getLocalizedMessage());
+                Thread.currentThread().interrupt();
+            }
+
+            /* At this point, all computations are done and stored in the 'indicators' map */
+
             // Ogni indicatore viene calcolato con un diverso algoritmo, implementato in un metodo ad hoc
-            indicators.put(P1, computeP1(questByIndicator.get(P1), answerByQuestion, indicatorByCode));
-            indicators.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
-            indicators.put(P3, computeP3(questByIndicator.get(P3), answerByQuestion, indicatorByCode));
-            indicators.put(P4, computeP4(questByIndicator.get(P4), answerByQuestion, indicatorByCode));
-            indicators.put(P5, computeP5(questByIndicator.get(P5), answerByQuestion, indicatorByCode));
-            indicators.put(P6, computeP6(questByIndicator.get(P6), answerByQuestion, indicatorByCode));
-            indicators.put(P7, computeP7(questByIndicator.get(P7), answerByQuestion, indicatorByCode));
+            //indicators.put(P1, computeP1(questByIndicator.get(P1), answerByQuestion, indicatorByCode));
+            //indicators.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
+            //indicators.put(P3, computeP3(questByIndicator.get(P3), answerByQuestion, indicatorByCode));
+            //indicators.put(P4, computeP4(questByIndicator.get(P4), answerByQuestion, indicatorByCode));
+            //indicators.put(P5, computeP5(questByIndicator.get(P5), answerByQuestion, indicatorByCode));
+            //indicators.put(P6, computeP6(questByIndicator.get(P6), answerByQuestion, indicatorByCode));
+            //indicators.put(P7, computeP7(questByIndicator.get(P7), answerByQuestion, indicatorByCode));
             indicators.put(I1, computeI1(questByIndicator.get(I1), answerByQuestion, indicatorByCode));
             indicators.put(I2, computeI2(questByIndicator.get(I2), answerByQuestion, indicatorByCode));            
             indicators.put(I3, computeI3(structs, subjects, indicatorByCode));
