@@ -969,8 +969,32 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                                                  throws CommandException {
         HashMap<String, InterviewBean> indicators = null;
         try {
+            // Create threads for each computation
+            Thread threadInput = new Thread(() -> {
+                LOG.info("Thread del recupero degli Input partito...");
+                ArrayList<ItemBean> listaInput = null;
+                try {
+                    listaInput = retrieveInputs(user, idP, liv, codeSur, db);
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del thread degli Input.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+                processElements.put(TIPI_LISTE[0], listaInput);
+                LOG.info("Thread del recupero degli Input terminato...");
+            });
+            // Start all threads which are different from the mainthread
+            threadInput.start();
+            // Wait for all threads to finish
+            try {
+                threadInput.join();
+            } catch (InterruptedException ie) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella join dei threads sul mainthread.\n";
+                LOG.severe(msg + ie.getLocalizedMessage());
+                Thread.currentThread().interrupt();
+            }
+            
             // Recupera Input estratti in base al processo
-            ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
+            //ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
             // Recupera Fasi estratte in base al processo
             ArrayList<ActivityBean> listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
             // Recupera Output estratti in base al processo
@@ -984,7 +1008,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             // Recupera le note e le aggiunge al PxI
             indicators = retrieveIndicators(user, listaIndicatori, idP, liv, codeSur, db);
             // Imposta nella tabella le liste trovate
-            processElements.put(TIPI_LISTE[0], listaInput);
+            //processElements.put(TIPI_LISTE[0], listaInput);
             processElements.put(TIPI_LISTE[1], listaFasi);
             processElements.put(TIPI_LISTE[2], listaOutput);
             processElements.put(TIPI_LISTE[3], listaRischi);
