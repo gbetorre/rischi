@@ -344,10 +344,10 @@ public class Data extends HttpServlet implements Constants {
                     }
                 }
             }
-            // Se non è uscito, vuol dire che deve servire una richiesta asincrona
+            // Se non è uscito, vuol dire che deve servire una richiesta asincrona...
             if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) { //dettaglio processo via XHR ("data?q=pr&p=pro&pliv=#&liv=#&r=$")
                 // Recupera le liste di elementi collegati al processo 
-                HashMap<String, ArrayList<?>> processElements = new HashMap<>();            
+                ConcurrentHashMap<String, ArrayList<?>> processElements = new ConcurrentHashMap<>();            
                 // Recupera gli indicatori corredati di note e valorizza per riferimento le altre liste
                 HashMap<String, InterviewBean> indicators = retrieve(req, COMMAND_PROCESS, PART_PROCESS, processElements);
                 // Imposta nella request liste di elementi collegati a processo
@@ -359,6 +359,14 @@ public class Data extends HttpServlet implements Constants {
                 req.setAttribute("listaIndicatori", indicators);
                 // Output in formato di default
                 fileJsp = nomeFileProcessoAjax;
+            } else if (qToken.equalsIgnoreCase(COMMAND_MEASURE)) {
+                //req.setAttribute("XHRResp", "test");
+                //fileJsp = "/jsp/msMisuraForm.jsp";
+                
+                //res.setContentType("text/plain");
+                //res.getWriter().write("test test");
+                //return;
+            // ...oppure deve invocare direttamente una pagina che genererà l'output per un file
             } else if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
                 fileJsp = nomeFileLog;
             } else {
@@ -671,7 +679,7 @@ public class Data extends HttpServlet implements Constants {
     private static HashMap<String, InterviewBean> retrieve(HttpServletRequest req,
                                                            String qToken,
                                                            String pToken,
-                                                           HashMap<String, ArrayList<?>> elements)
+                                                           ConcurrentHashMap<String, ArrayList<?>> elements)
                                                     throws CommandException {
         // Dichiara generico elenco di elementi da restituire
         HashMap<String, InterviewBean> indicators = null;
