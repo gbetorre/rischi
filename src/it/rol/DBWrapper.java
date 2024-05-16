@@ -4086,11 +4086,13 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                     measure = new MeasureBean();
                     types = new ArrayList<>();
                     BeanUtil.populate(measure, rs);
+                    /* === Carattere === */
                     // Il carattere si puo' ricavare dal codice:
                     String measureCode = measure.getCodice();
                     String charCode = measureCode.substring(measureCode.indexOf(DOT) + 1, measureCode.lastIndexOf(DOT));
                     CodeBean character = ConfigManager.getMeasureCharacters().get(charCode);
                     measure.setCarattere(character);
+                    /* === Tipologie === */
                     // Le tipologie invece si devono ricavare tramite una query
                     nextParam = NOTHING;
                     pst = null;
@@ -4108,7 +4110,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                         types.add(type);
                     }
                     measure.setTipologie(types);
-                    // Struttura Capofila
+                    /* === Strutture === */
                     nextParam = NOTHING;
                     pst = null;
                     ArrayList<DepartmentBean> capofila1 = new ArrayList<>();
@@ -4184,119 +4186,56 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         }        
     }
+     
     
-    
-    /*
-     * <p>Data un codice e una rilevazione, restituisce una corrispondente misura.</p>
-     * // TODO COMMENTO v ^ [aggiungere specifica su gestione II e III parametro]
+    /**
+     * <p>Restituisce un elenco di rischi, sotto forma di oggetti generici,
+     * cui una data misura di prevenzione del rischio corruttivo &egrave;
+     * applicata.</p>
+     * 
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param code      il codice di una misura cercata 
      * @param survey    oggetto contenente gli estremi della rilevazione
-     * @return <code>ArrayList&lt;MeasureBean&gt;</code> - l'elenco di misure cercate
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - un vettore ordinato di ItemBean, che rappresentano i rischi trovati
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     *
-    @SuppressWarnings("static-method")
-    public MeasureBean getMeasure(PersonBean user,
-                                  String code,
-                                  CodeBean survey)
-                           throws WebStorageException {
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<ItemBean> getRisksByMeasure(PersonBean user,
+                                                 String code,
+                                                 CodeBean survey)
+                                          throws WebStorageException {
         try (Connection con = prol_manager.getConnection()) {
             PreparedStatement pst = null;
-            ResultSet rs, rs1, rs2 = null;
-            int nextParam = NOTHING;
-            MeasureBean measure = null;
-            ArrayList<CodeBean> types = null; 
+            ResultSet rs = null;
+            AbstractList<ItemBean> risks = new ArrayList<>();
             // TODO: Controllare se user è superuser
             try {
-                pst = con.prepareStatement(GET_MEASURES);
+                int nextParam = NOTHING;
+                pst = con.prepareStatement(GET_RISKS_AND_PROCESS_BY_MEASURE);
                 pst.clearParameters();
-                pst.setInt(++nextParam, survey.getId());
                 pst.setString(++nextParam, code);
-                pst.setInt(++nextParam, NOTHING);
+                pst.setInt(++nextParam, survey.getId());
                 rs = pst.executeQuery();
-                if (rs.next()) {
-                    measure = new MeasureBean();
-                    types = new ArrayList<>();
-                    BeanUtil.populate(measure, rs);
-                    // Il carattere si puo' ricavare dal codice:
-                    String measureCode = measure.getCodice();
-                    String charCode = measureCode.substring(measureCode.indexOf(DOT) + 1, measureCode.lastIndexOf(DOT));
-                    CodeBean character = ConfigManager.getMeasureCharacters().get(charCode);
-                    measure.setCarattere(character);
-                    // Le tipologie invece si devono ricavare tramite una query
-                    nextParam = NOTHING;
-                    pst = null;
-                    pst = con.prepareStatement(GET_MEASURE_TYPE);
-                    pst.clearParameters();
-                    pst.setString(++nextParam, measure.getCodice());
-                    pst.setInt(++nextParam, survey.getId());
-                    rs1 = pst.executeQuery();
-                    while (rs1.next()) {
-                        // Crea una tipologia vuota
-                        CodeBean type = new CodeBean();
-                        // Lo valorizza col risultato della query
-                        BeanUtil.populate(type, rs1);
-                        // La aggiunge alla lista delle tipologie della misura corrente
-                        types.add(type);
-                    }
-                    measure.setTipologie(types);
-                    // Struttura Capofila
-                    nextParam = NOTHING;
-                    pst = null;
-                    ArrayList<DepartmentBean> capofila1 = new ArrayList<>();
-                    ArrayList<DepartmentBean> capofila2 = new ArrayList<>();
-                    ArrayList<DepartmentBean> capofila3 = new ArrayList<>();
-                    ArrayList<DepartmentBean> gregarie = new ArrayList<>();
-                    pst = con.prepareStatement(GET_STRUCTS_BY_MEASURE);
-                    pst.clearParameters();
-                    pst.setString(++nextParam, measure.getCodice());
-                    pst.setString(++nextParam, String.valueOf(PER_CENT));
-                    pst.setInt(++nextParam, survey.getId());
-                    rs2 = pst.executeQuery();
-                    while (rs2.next()) {
-                        // Crea una struttura generica
-                        ItemBean st = new ItemBean();
-                        // La valorizza col risultato della query
-                        BeanUtil.populate(st, rs2);
-                        // Trasforma la capofila/gregaria da ItemBean a DepartmentBean
-                        DepartmentBean struttura = measure.getStruttura(st);
-                        // Smista le strutture trovate
-                        if (st.getExtraInfo().equals(CP1)) {
-                            // Trasforma la capofila da DepartmentBean a ArrayList
-                            capofila1 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(CP2)) {
-                            capofila2 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(CP3)) {
-                            capofila3 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(GR)) {
-                            gregarie.add(struttura);
-                        } else {
-                            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del ruolo di una struttura.\n";
-                            LOG.severe(msg);
-                            throw new WebStorageException(msg);
-                        }
-                    }
-                    measure.setCapofila(capofila1);
-                    measure.setCapofila2(capofila2);
-                    measure.setCapofila3(capofila3);
-                    measure.setGregarie(gregarie);
-                    measure.setRilevazione(survey);
+                while (rs.next()) {
+                    // Prepara il bean
+                    ItemBean risk = new ItemBean();
+                    // Valorizza il bean
+                    BeanUtil.populate(risk, rs);
+                    // Aggiunge il bean alla lista
+                    risks.add(risk);
                 }
-                // Just to engage the Garbage Collector
+                // Just tries to engage the Garbage Collector
                 pst = null;
                 // Get out
-                return measure;
+                return (ArrayList<ItemBean>) risks;
             } catch (SQLException sqle) {
-                String msg = FOR_NAME + "Oggetto non valorizzato; problema nel metodo di recupero misura.\n";
+                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } catch (AttributoNonValorizzatoException anve) {
-                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di bean.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + anve.getMessage(), anve);
-            } catch (NumberFormatException nfe) {
-                String msg = FOR_NAME + "Si e\' verificato un problema in una conversione in numero.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + nfe.getMessage(), nfe);
             } finally {
                 try {
                     con.close();
@@ -4312,8 +4251,8 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
             String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
             LOG.severe(msg);
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        }        
-    }*/
+        }
+    }
     
     
     /* (non-Javadoc)
