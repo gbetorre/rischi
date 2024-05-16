@@ -1194,7 +1194,27 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * (processo_at); l'hoverhead legato al richiamo ciclico, laddove &ndash;
      * come nei report aggregati &ndash; sia necessario calcolare gli indicatori 
      * di ogni processo, viene gestito attraverso un apposito meccanismo
-     * di caching su disco (db).</p> 
+     * di caching su disco (db).</p>
+     * <p>Di pi&uacute;, al fine di velocizzare i tempi di computazione, viene 
+     * implementato il calcolo parallelo per i singoli indicatori, 
+     * eseguendo la computazione di ogni indicatore in un thread separato.<br />
+     * La tipologia di struttura usata per contenere i valori di tutti 
+     * gli indicatori durante l'esecuzione in parallelo dei singoli  
+     * threads &egrave; sincronizzata anche se l'uso di una 
+     * struttura non sincronizzata (p.es. una LinkedHashMap anzich&eacute;
+     * la ConcurrentHashMap adottata) non dovrebbe rappresentare
+     * un problema perch&eacute; i vari threads n&eacute; 
+     * modificano la struttura di tale mappa, n&eacute; aggiungono 
+     * o cancellano elementi indicizzati da una stessa chiave (v. p.es.
+     * <a href="https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashMap.html">
+     * <cite>Note that this implementation is not synchronized.</cite></a>).<br />
+     * Tuttavia, se si usa direttamente la struttura non sincronizzata, 
+     * l'ordine di inserimento delle chiavi dipende dal tempo impiegato da 
+     * ciascun thread a finire la propria esecuzione, e questo non &egrave;
+     * certo un buon criterio di ordinamento! I valori caricati dai vari threads
+     * nella mappa sincronizzata senza <cite>order insertion</cite> vengono
+     * quindi alla fine, dopo aver riunificato tutti i threads, caricati 
+     * in una mappa ordinata, che viene passata come valore restituito.</p> 
      * 
      * @param questByIndicator  tabella degli identificativi dei quesiti che, da db, risultano associati a ogni specifico codice indicatore, usato come chiave
      * @param answerByQuestion  tabella in cui ogni id quesito permette di ottenere la relativa risposta
@@ -1203,6 +1223,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @param subjects          lista di soggetti interessati nell'elaborazione del processo di cui si vogliono calcolare gli indicatori
      * @return HashMap&lt;String&comma; InterviewBean&gt; - tabella contenente tutti i valori degli indicatori e delle dimensioni di rischio, indicizzati per nome
      * @throws CommandException se si verifica un problema nel calcolo di un indicatore, nel recupero di dati o in qualche tipo di puntamento
+     * @see java.util.LinkedHashMap
+     * @see java.util.concurrent.ConcurrentHashMap
      */
     public static LinkedHashMap<String, InterviewBean> compute(HashMap<String, LinkedList<Integer>> questByIndicator, 
                                                                HashMap<Integer, QuestionBean> answerByQuestion,
@@ -1211,7 +1233,9 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                                                                ArrayList<DepartmentBean> subjects) 
                                                         throws CommandException {
         try {
-            // Mappa contenente tutti gli indicatori indicizzati per nome
+            // Mappa sincronizzata
+            ConcurrentHashMap<String, InterviewBean> syncIndicators = new ConcurrentHashMap<>();
+            // Mappa per contenere tutti gli indicatori indicizzati per nome
             LinkedHashMap<String, InterviewBean> indicators = new LinkedHashMap<>();
             // Totali di ciascun livello di rischio ottenuti in base agli indicatori di probabilità
             LinkedHashMap<String, Integer> pLev = new LinkedHashMap<>();
@@ -1224,10 +1248,11 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             // Giudizio Sintetico
             InterviewBean pi = null;
             
-            // Create threads for each computation
+            // Create threads for each computation: each indicator is computated with a specific algorithm, implemented in a specific method
             Thread threadP1 = new Thread(() -> {
                 try {
-                    indicators.put(P1, computeP1(questByIndicator.get(P1), answerByQuestion, indicatorByCode));
+                    syncIndicators.put(P1, computeP1(questByIndicator.get(P1), answerByQuestion, indicatorByCode));
+                    LOG.info(FOR_NAME + "P1 thread ha finito.\n");
                 } catch (CommandException ce) {
                     String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 1° thread.\n";
                     LOG.severe(msg + ce.getLocalizedMessage());
@@ -1235,7 +1260,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             });
             Thread threadP2 = new Thread(() -> {
                 try {
-                    indicators.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
+                    syncIndicators.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
+                    LOG.info(FOR_NAME + "P2 thread ha finito.\n");
                 } catch (CommandException ce) {
                     String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 2° thread.\n";
                     LOG.severe(msg + ce.getLocalizedMessage());
@@ -1243,7 +1269,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             });
             Thread threadP3 = new Thread(() -> {
                 try {
-                    indicators.put(P3, computeP3(questByIndicator.get(P3), answerByQuestion, indicatorByCode));
+                    syncIndicators.put(P3, computeP3(questByIndicator.get(P3), answerByQuestion, indicatorByCode));
+                    LOG.info(FOR_NAME + "P3 thread ha finito.\n");
                 } catch (CommandException ce) {
                     String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 3° thread.\n";
                     LOG.severe(msg + ce.getLocalizedMessage());
@@ -1251,7 +1278,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             });
             Thread threadP4 = new Thread(() -> {
                 try {
-                    indicators.put(P4, computeP4(questByIndicator.get(P4), answerByQuestion, indicatorByCode));
+                    syncIndicators.put(P4, computeP4(questByIndicator.get(P4), answerByQuestion, indicatorByCode));
+                    LOG.info(FOR_NAME + "P4 thread ha finito.\n");
                 } catch (CommandException ce) {
                     String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 4° thread.\n";
                     LOG.severe(msg + ce.getLocalizedMessage());
@@ -1259,7 +1287,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             });
             Thread threadP5 = new Thread(() -> {
                 try {
-                    indicators.put(P5, computeP5(questByIndicator.get(P5), answerByQuestion, indicatorByCode));
+                    syncIndicators.put(P5, computeP5(questByIndicator.get(P5), answerByQuestion, indicatorByCode));
+                    LOG.info(FOR_NAME + "P5 thread ha finito.\n");
                 } catch (CommandException ce) {
                     String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 5° thread.\n";
                     LOG.severe(msg + ce.getLocalizedMessage());
@@ -1267,7 +1296,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             });
             Thread threadP6 = new Thread(() -> {
                 try {
-                    indicators.put(P6, computeP6(questByIndicator.get(P6), answerByQuestion, indicatorByCode));
+                    syncIndicators.put(P6, computeP6(questByIndicator.get(P6), answerByQuestion, indicatorByCode));
+                    LOG.info(FOR_NAME + "P6 thread ha finito.\n");
                 } catch (CommandException ce) {
                     String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 6° thread.\n";
                     LOG.severe(msg + ce.getLocalizedMessage());
@@ -1275,7 +1305,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             });
             Thread threadP7 = new Thread(() -> {
                 try {
-                    indicators.put(P7, computeP7(questByIndicator.get(P7), answerByQuestion, indicatorByCode));
+                    syncIndicators.put(P7, computeP7(questByIndicator.get(P7), answerByQuestion, indicatorByCode));
+                    LOG.info(FOR_NAME + "P7 thread ha finito.\n");
                 } catch (CommandException ce) {
                     String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del 7° thread.\n";
                     LOG.severe(msg + ce.getLocalizedMessage());
@@ -1310,10 +1341,15 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                 Thread.currentThread().interrupt();
             }
 
-            /* At this point, all computations are done and stored in the 'indicators' map */
-
-            // Ogni indicatore viene calcolato con un diverso algoritmo, implementato in un metodo ad hoc
-            //indicators.put(P1, computeP1(questByIndicator.get(P1), answerByQuestion, indicatorByCode));
+            /* At this point, all computations are done and stored in the 'sincIndicators' map */
+            // Decant syncMap into a map not synchronized but having insertion order
+            indicators.put(P1, syncIndicators.get(P1));
+            indicators.put(P2, syncIndicators.get(P2));
+            indicators.put(P3, syncIndicators.get(P3));
+            indicators.put(P4, syncIndicators.get(P4));
+            indicators.put(P5, syncIndicators.get(P5));
+            indicators.put(P6, syncIndicators.get(P6));
+            indicators.put(P7, syncIndicators.get(P7));
             //indicators.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
             //indicators.put(P3, computeP3(questByIndicator.get(P3), answerByQuestion, indicatorByCode));
             //indicators.put(P4, computeP4(questByIndicator.get(P4), answerByQuestion, indicatorByCode));
