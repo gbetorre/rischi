@@ -201,6 +201,8 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         ArrayList<MeasureBean> suggestedMeasures = null;
         // Elenco di misure depurate di altre liste (suggerite, già applicate...)
         ArrayList<MeasureBean> lessMeasures = null;
+        // Elenco di rischi associati a una misura
+        ArrayList<ItemBean> risksByMeasure = null;
         // Tabella che conterrà le misure suggerite raggruppate per tipo
         LinkedHashMap<String, ArrayList<MeasureBean>> measuresByType = null;
         // Elenco dei caratteri delle misure
@@ -383,6 +385,8 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                         if (!codeMis.equals(DASH)) {
                             // Recupera la misura di prevenzione/mitigazione
                             measure = db.getMeasures(user, codeMis, NOTHING, survey).get(NOTHING);
+                            // Recupera i rischi cui è associata
+                            risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
                             // Ha bisogno di personalizzare le breadcrumbs perché sull'indirizzo non c'è il parametro 'p'
                             bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), "Misura");
                             fileJspT = nomeFileDettaglio;
@@ -454,11 +458,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         // Imposta in request elenco delle misure suggerite in base ai fattori abilitanti, raggruppate per nome del tipo
         if (measuresByType != null) {
             req.setAttribute("misureTipo", measuresByType);
-        }/*
-        // Imposta in request elenco completo delle misure suggerite in base ai fattori abilitanti
-        if (suggestedMeasures != null) {
-            req.setAttribute("misureDaFattori", suggestedMeasures);
-        }*/
+        }
         // Imposta nella request elenco completo strutture
         if (structs != null) {
             req.setAttribute("strutture", structs);
@@ -470,6 +470,10 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         // Imposta nella request oggetto misura di prevenzione specifica
         if (measure != null) {
             req.setAttribute("misura", measure);
+        }
+        // Imposta in request elenco dei rischi cui una misura è applicata
+        if (risksByMeasure != null) {
+            req.setAttribute("rischi", risksByMeasure);
         }
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
