@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />style.css" type="text/css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" integrity="sha384-/frq1SRXYH/bSyou/HUp/hib7RVN1TawQYja658FEOodR/FQBKVqT9Ol+Oz3Olq5" crossorigin="anonymous">
   </c:if>
-</c:if> 
+</c:if>
 <c:set var="input" value="${requestScope.listaInput}" scope="page" />
 <c:set var="fasi" value="${requestScope.listaFasi}" scope="page" />
 <c:set var="output" value="${requestScope.listaOutput}" scope="page" />
@@ -117,25 +117,18 @@
           <td width="40%">
           <c:forEach var="struttura" items="${fase.strutture}">
             <a href="#" title="Struttura di organigramma">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-diagram-2-fill" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H11a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 5 7h2.5V6A1.5 1.5 0 0 1 6 4.5v-1zm-3 8A1.5 1.5 0 0 1 4.5 10h1A1.5 1.5 0 0 1 7 11.5v1A1.5 1.5 0 0 1 5.5 14h-1A1.5 1.5 0 0 1 3 12.5v-1zm6 0a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1A1.5 1.5 0 0 1 9 12.5v-1z"/>
-              </svg>
+              <img src="${initParam.urlDirectoryImmagini}str-l${struttura.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${struttura.livello}" /> 
               <c:out value="${struttura.prefisso}" /> <c:out value="${struttura.nome}" />
             </a><br />
           </c:forEach>
           <c:forEach var="soggetto" items="${fase.soggetti}">
+          <img src="${initParam.urlDirectoryImmagini}person-fill.png" class="ico-small" alt="icona" title="Soggetto contingente" /> 
           <c:choose>
-          <c:when test="${empty soggetto.informativa}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16" title="Soggetto non rappresentato in organigramma">
-              <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-            </svg>
-            <c:out value="${soggetto.nome}" />
+          <c:when test="${not empty soggetto.informativa}">
+            <c:out value="${soggetto.informativa}" />
           </c:when>
           <c:otherwise>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16" title="Soggetto non rappresentato in organigramma">
-              <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-            </svg>
-            <c:out value="${soggetto.informativa}" />
+            <c:out value="${soggetto.nome}" />
           </c:otherwise>
           </c:choose>
             <br />
@@ -166,7 +159,7 @@
         </ul>
       </div>
       <hr class="separatore" />
-      <section id="rischi">
+      <section id="rischi-fattori-misure">
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples errorPwd">
         <h3 class="bordo">
           Rischi, fattori abilitanti, misure 
@@ -268,7 +261,7 @@
           </c:if>
           </li>
         </ol>
-        <section>
+        <section id="indicatori">
           <div class="errorPwd">
           <c:forEach var="interview" items="${interviews}" varStatus="status">
             <fmt:formatDate var="iviewsqldate" value="${interview.dataUltimaModifica}" pattern="yyyy-MM-dd" scope="page" />
