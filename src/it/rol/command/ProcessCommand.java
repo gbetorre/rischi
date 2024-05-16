@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -211,7 +212,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Dichiara elenco di processi
         AbstractList<ProcessBean> macrosat = new ArrayList<>();
         // Dichiara generico elenco di elementi afferenti a un processo
-        HashMap<String, ArrayList<?>> processElements = null;
+        ConcurrentHashMap<String, ArrayList<?>> processElements = null;
         // Prepara un oggetto contenente i parametri opzionali per i nodi
         ItemBean options = new ItemBean("#009966",  VOID_STRING,  VOID_STRING, VOID_STRING, PRO_PFX, NOTHING);
         // Prepara un output di rischio corruttivo
@@ -343,7 +344,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                              *                  SELECT Process                  *
                              * ************************************************ */
                             // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
-                            processElements = new HashMap<>();
+                            processElements = new ConcurrentHashMap<>();
                             // Valorizza tali liste necessarie a visualizzare  i dettagli di un processo, restituendo gli indicatori corredati con le note al PxI
                             indicators = retrieveProcess(user, idP, liv, processElements, codeSur, db);
                             // Ha bisogno di personalizzare le breadcrumbs
@@ -963,13 +964,16 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
     public static HashMap<String, InterviewBean> retrieveProcess(PersonBean user, 
                                                                  int idP, 
                                                                  int liv, 
-                                                                 HashMap<String, ArrayList<?>> processElements, 
+                                                                 ConcurrentHashMap<String, ArrayList<?>> processElements, 
                                                                  String codeSur, 
                                                                  DBWrapper db) 
                                                                  throws CommandException {
         HashMap<String, InterviewBean> indicators = null;
         try {
-            // Create threads for each computation
+            /* ************************************************ *
+             *        Create threads for each computation       *
+             * ************************************************ */
+            // Inputs
             Thread threadInput = new Thread(() -> {
                 LOG.info("Thread del recupero degli Input partito...");
                 ArrayList<ItemBean> listaInput = null;
@@ -979,14 +983,33 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                     String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del thread degli Input.\n";
                     LOG.severe(msg + ce.getLocalizedMessage());
                 }
-                processElements.put(TIPI_LISTE[0], listaInput);
+                processElements.put(TIPI_LISTE[NOTHING], listaInput);
                 LOG.info("Thread del recupero degli Input terminato...");
             });
-            // Start all threads which are different from the mainthread
+            // Fasi
+            Thread threadActivities = new Thread(() -> {
+                LOG.info("Thread del recupero delle Fasi partito...");
+                ArrayList<ActivityBean> listaFasi = null;
+                try {
+                    listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del thread delle Fasi.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+                processElements.put(TIPI_LISTE[ELEMENT_LEV_1], listaFasi);
+                LOG.info("Thread del recupero delle Fasi terminato...");
+            });
+            /* ************************************************************ *
+             *  Start all threads which are different from the mainthread   *
+             * ************************************************************ */
             threadInput.start();
-            // Wait for all threads to finish
+            threadActivities.start();
+            /* ************************************************ *
+             *           Wait for all threads to finish         *
+             * ************************************************ */
             try {
                 threadInput.join();
+                threadActivities.join();
             } catch (InterruptedException ie) {
                 String msg = FOR_NAME + "Si e\' verificato un problema nella join dei threads sul mainthread.\n";
                 LOG.severe(msg + ie.getLocalizedMessage());
@@ -996,7 +1019,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             // Recupera Input estratti in base al processo
             //ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
             // Recupera Fasi estratte in base al processo
-            ArrayList<ActivityBean> listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
+            //ArrayList<ActivityBean> listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
             // Recupera Output estratti in base al processo
             ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
             // Recupera Rischi estratti in base al processo
@@ -1009,7 +1032,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             indicators = retrieveIndicators(user, listaIndicatori, idP, liv, codeSur, db);
             // Imposta nella tabella le liste trovate
             //processElements.put(TIPI_LISTE[0], listaInput);
-            processElements.put(TIPI_LISTE[1], listaFasi);
+            //processElements.put(TIPI_LISTE[1], listaFasi);
             processElements.put(TIPI_LISTE[2], listaOutput);
             processElements.put(TIPI_LISTE[3], listaRischi);
             processElements.put(TIPI_LISTE[4], listaInterviste);
