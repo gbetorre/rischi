@@ -75,26 +75,6 @@ body {
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)
 }
 
-ul.processo {
-	display: none;
-	margin-left: 4em;
-}
-
-ul.list-group > li {
-	background: none;
-}
-
-ul.line {
-    list-style-type: none;
-    padding: 0;
-    margin-bottom: 20px;
-}
-
-li.line {
-    padding: 10px 0;
-    border-bottom: 1px solid #ccc;
-}
-
 /*=====================================================
 =            		< 768px     MOBILE         =
 =====================================================*/
@@ -847,7 +827,7 @@ textarea {
 }
 
 .btn-del {
-    width: 30px;
+  width: 30px;
 }
 
 .ico-home {
@@ -856,6 +836,10 @@ textarea {
 
 .ico-func {
 	height: 50px;
+}
+
+.ico-small {
+  width: 16px;
 }
 
 .ico-save {
@@ -896,56 +880,56 @@ textarea {
 }	
 	
 .lblca {
-    overflow: hidden;
+  overflow: hidden;
 }
 
 .column {
-    width: 100%;
-    float: left;
-    padding: 0 10px 10px 10px;
+  width: 100%;
+  float: left;
+  padding: 0 10px 10px 10px;
 }
 
 .large-4 {
-    width: 220px;
-    min-width: 160px;
+  width: 220px;
+  min-width: 160px;
 }
 
 .content-holder {
-    padding: 10px;
-    border: solid 1px #ccc;
-    border-radius: 5px;
-    /*max-width: 680px;*/
-    margin: 0 auto;
+  padding: 10px;
+  border: solid 1px #ccc;
+  border-radius: 5px;
+  /*max-width: 680px;*/
+  margin: 0 auto;
 }
 
 .content-holder input{
-    border: solid 1px #ccc;
-    border-radius: 3px;
-    font: normal 14px/1.5rem "Trebuchet Ms",Arial;
-    width: 100%;
-    padding: 2px 8px;
+  border: solid 1px #ccc;
+  border-radius: 3px;
+  font: normal 14px/1.5rem "Trebuchet Ms",Arial;
+  width: 100%;
+  padding: 2px 8px;
 }
 
 .btn-small {
-    height: 20px;
-    font-size: 8px;
-    font-weight: bold;
+  height: 20px;
+  font-size: 8px;
+  font-weight: bold;
 }
 
 .custom-label {
-    background-color: white;
-    border: 1px solid black;
-    color: navy;
-    padding: 2px 2px;
-    text-align: center;
-    display: inline-block;
-    /*font-size: 20px;*/
-    margin: 6px 10px;
-    cursor: pointer;
+  background-color: white;
+  border: 1px solid black;
+  color: navy;
+  padding: 2px 2px;
+  text-align: center;
+  display: inline-block;
+  /*font-size: 20px;*/
+  margin: 6px 10px;
+  cursor: pointer;
 }
 
 /*---------------------- Righe Orizzontali ------------------------*/
-hr  {
+hr {
   clear: both; height: 1px;
   border-top: 1px solid transparent;
   border-right: 0 solid #FFFFFF;
@@ -1006,6 +990,26 @@ hr.riga       {
 }
 
 /*---------------------- Lists ------------------------*/
+ul.processo {
+  display: none;
+  margin-left: 4em;
+}
+
+ul.list-group > li {
+  background: none;
+}
+
+ul.line {
+  list-style-type: none;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+li.line {
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+}
+
 .sezioneElenco {
   padding: 0;
   margin: 0 0 40px 0;
@@ -1040,6 +1044,16 @@ hr.riga       {
 .sezioneElenco dd {
 	color: #333;
   padding-left: 180px;
+}
+
+.custom-dl dt {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: 0.5em;
+}
+
+.custom-dl dd {
+  margin-bottom: 1em;
 }
 
 /*---------------------- AMBITI DI ANALISI ------------------------*/
