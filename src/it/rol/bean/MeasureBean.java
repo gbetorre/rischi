@@ -263,6 +263,14 @@ public class MeasureBean extends CodeBean {
     }
     
     
+    /**
+     * Trasforma il valore convenzionale "ND" ricevuto in un'etichetta
+     * pi&uacute; esplicita, lasciando inalterati gli altri valori.
+     * 
+     * @param comportaSpese la risposta alla domanda "Comporta spese?" memorizzata nel db 
+     * @return <code>String</code> - stringa ben formattata in caso il valore sia una sigla convenzionale
+     */
+    @SuppressWarnings("static-method")
     public String getOnerosa(String comportaSpese) {
         if (!comportaSpese.equals("ND")) {
             return comportaSpese;
@@ -436,6 +444,25 @@ public class MeasureBean extends CodeBean {
     }
     
     
+    /**
+     * Trasforma una struttura, che pu&ograve; essere o di tipo capofila 
+     * o di tipo gregaria (cio&egrave; pu&ograve; essere stata associata
+     * alla misura come sua struttura capofila o sua struttura gregaria), 
+     * da ItemBean a DepartmentBean.<ol>
+     * <li>Se la struttura ricevuta in argomento sotto forma di ItemBean 
+     * &egrave; una capofila, allora la struttura di tipo DepartmentBean
+     * restituita conterr&agrave; internamente tutta la gerarchia sottostante.
+     * La gerarchia viene ricostruita a partire dagli attributi valorizzati
+     * opportunamente dell'ItemBean ricevuto.</li>
+     * <li>Se invece la struttura ricevuta &egrave; gregaria (anche detta 
+     * "struttura coinvolta" o "struttura associata"), allora la struttura 
+     * restituita corrisponder&agrave; ad una semplice conversione di tipo, 
+     * con relativo travaso semplice dei valori degli attributi.</li> 
+     * 
+     * @param struttura - struttura destrutturata da travasare
+     * @return <code>DepartmentBean</code> - struttura travasata, contenente anche la gerarchia delle strutture figlie se capofila
+     */
+    @SuppressWarnings("static-method")
     public DepartmentBean getStruttura(ItemBean struttura) {
         DepartmentBean liv = null;
         if (!struttura.getExtraInfo().equals(Constants.GR)) {   // Non è gregaria
@@ -514,22 +541,32 @@ public class MeasureBean extends CodeBean {
     }
     
     
-    public ArrayList<DepartmentBean> getCapofila(DepartmentBean capofila) {
+    /**
+     * Trasforma una struttura capofila contenente al proprio interno
+     * la gerarchia delle strutture figlie, in una lista ordinata
+     * di tipo vettoriale, in cui ogni nodo viene collocato 
+     * allo stesso livello.
+     * 
+     * @param capofilaTree - la struttura gerarchica di struttura capofila  
+     * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - la struttura capofila in cui i nodi sono stati trasformati in elementi di una lista
+     */
+    @SuppressWarnings("static-method")
+    public ArrayList<DepartmentBean> getCapofila(DepartmentBean capofilaTree) {
         ArrayList<DepartmentBean> capofilaAsList = new ArrayList<>();
         // La aggiunge alla lista delle capofila
-        capofilaAsList.add(capofila);
+        capofilaAsList.add(capofilaTree);
         // Controlla se ha figlie
-        if (capofila.getFiglie() != null) {
+        if (capofilaTree.getFiglie() != null) {
             // Se ha una figlia aggiunge la figlia
-            capofilaAsList.add(capofila.getFiglie().firstElement());
+            capofilaAsList.add(capofilaTree.getFiglie().firstElement());
             // Controlla se ha nipoti
-            if (capofila.getFiglie().firstElement().getFiglie() != null) {
+            if (capofilaTree.getFiglie().firstElement().getFiglie() != null) {
                 // Se ha una nipote aggiunge la nipote
-                capofilaAsList.add(capofila.getFiglie().firstElement().getFiglie().firstElement());
+                capofilaAsList.add(capofilaTree.getFiglie().firstElement().getFiglie().firstElement());
                 // Controlla se ha pronipoti
-                if (capofila.getFiglie().firstElement().getFiglie().firstElement().getFiglie() != null) {
+                if (capofilaTree.getFiglie().firstElement().getFiglie().firstElement().getFiglie() != null) {
                     // Se ha una pronipote aggiunge la pronipote
-                    capofilaAsList.add(capofila.getFiglie().firstElement().getFiglie().firstElement().getFiglie().firstElement());
+                    capofilaAsList.add(capofilaTree.getFiglie().firstElement().getFiglie().firstElement().getFiglie().firstElement());
                 }
             }
         }
