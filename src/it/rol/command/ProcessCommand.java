@@ -974,7 +974,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
              *        Create threads for each computation       *
              * ************************************************ */
             // Inputs
-            Thread threadInput = new Thread(() -> {
+            Thread threadInputs = new Thread(() -> {
                 LOG.info("Thread del recupero degli Input partito...");
                 ArrayList<ItemBean> listaInput = null;
                 try {
@@ -999,17 +999,32 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 processElements.put(TIPI_LISTE[ELEMENT_LEV_1], listaFasi);
                 LOG.info("Thread del recupero delle Fasi terminato...");
             });
+            // Outputs
+            Thread threadOutputs = new Thread(() -> {
+                LOG.info("Thread del recupero degli Output partito...");
+                ArrayList<ItemBean> listaOutput = null;
+                try {
+                    listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del thread degli Output.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+                processElements.put(TIPI_LISTE[ELEMENT_LEV_2], listaOutput);
+                LOG.info("Thread del recupero degli Output terminato...");
+            });
             /* ************************************************************ *
              *  Start all threads which are different from the mainthread   *
              * ************************************************************ */
-            threadInput.start();
+            threadInputs.start();
             threadActivities.start();
+            threadOutputs.start();
             /* ************************************************ *
              *           Wait for all threads to finish         *
              * ************************************************ */
             try {
-                threadInput.join();
+                threadInputs.join();
                 threadActivities.join();
+                threadOutputs.join();
             } catch (InterruptedException ie) {
                 String msg = FOR_NAME + "Si e\' verificato un problema nella join dei threads sul mainthread.\n";
                 LOG.severe(msg + ie.getLocalizedMessage());
@@ -1021,7 +1036,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             // Recupera Fasi estratte in base al processo
             //ArrayList<ActivityBean> listaFasi = retrieveActivities(user, idP, liv, codeSur, db);
             // Recupera Output estratti in base al processo
-            ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
+            //ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
             // Recupera Rischi estratti in base al processo
             ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
             // Recupera le interviste in cui il processo è stato esaminato
@@ -1033,7 +1048,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             // Imposta nella tabella le liste trovate
             //processElements.put(TIPI_LISTE[0], listaInput);
             //processElements.put(TIPI_LISTE[1], listaFasi);
-            processElements.put(TIPI_LISTE[2], listaOutput);
+            //processElements.put(TIPI_LISTE[2], listaOutput);
             processElements.put(TIPI_LISTE[3], listaRischi);
             processElements.put(TIPI_LISTE[4], listaInterviste);
         } catch (CommandException wse) {
