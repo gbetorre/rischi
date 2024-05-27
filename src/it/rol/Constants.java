@@ -195,9 +195,13 @@ public interface Constants extends Serializable {
      */
     public static final String PART_PI_NOTE             = "pin";
     /**
+     * <p>Costante per il parametro identificante reportistica rischi.</p>
+     */
+    public static final String PART_RISKS               = "ris";
+    /**
      * <p>Costante per il parametro identificante la form di ricerca.</p>
      */
-    public static final String PART_SEARCH              = "ris";
+    public static final String PART_SEARCH              = "ric";
     /**
      * <p>Costante per il parametro identificante le infografiche.</p>
      */
