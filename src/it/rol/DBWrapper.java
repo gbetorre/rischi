@@ -3132,7 +3132,6 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
      * @return <code>ArrayList&lt;RiskBean&gt;</code> - un vettore ordinato di RiskBean, che rappresentano i rischi corruttivi trovati per il sotto/processo dato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings({ "static-method" })
     public ArrayList<RiskBean> getRisksByProcess(PersonBean user, 
                                                  ProcessBean process, 
                                                  CodeBean survey)
@@ -3197,6 +3196,13 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                         MeasureBean mes = new MeasureBean();
                         // Valorizza la misura
                         BeanUtil.populate(mes, rs2);
+                        // Il carattere si puo' ricavare dal codice:
+                        String measureCode = mes.getCodice();
+                        String charCode = measureCode.substring(measureCode.indexOf(DOT) + ELEMENT_LEV_1, measureCode.lastIndexOf(DOT));
+                        // Prepara il contenitore per il carattere della misura
+                        CodeBean character = ConfigManager.getMeasureCharacters().get(charCode);
+                        // Imposta il carattere
+                        mes.setCarattere(character);
                         // Aggiunge la misura alla lista
                         measures.add(mes);
                     }
