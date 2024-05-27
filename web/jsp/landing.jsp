@@ -73,7 +73,7 @@
                 <i class="fa-solid fa-magnifying-glass-chart fa-5x"></i>&nbsp;&nbsp;
                 <span class="h4 landing-card-title">Ricerche</span>
               </div>
-               <a class="small text-white stretched-link" href="${ris}"></a>
+               <a class="small text-white stretched-link" href="${mic}"></a>
             </div>
           </div>
           <div class="col-xl-3 col-md-6">
