@@ -92,13 +92,17 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileElenco = "/jsp/muElenco.jsp";
     /**
-     * Pagina a cui la command fa riferimento per mostrare il report tabellare con processi e rischi
+     * Pagina a cui la command fa riferimento per mostrare il report con processi e PxI
      */
     private static final String nomeFileProcessi = "/jsp/muProcessi.jsp";
     /**
     * Pagina a cui la command fa riferimento per mostrare il report tabellare con processi, strutture e giudizio sintetico
      */
     private static final String nomeFileStrutture = "/jsp/muStrutture.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per mostrare il report tabellare con rischi e misure
+     */
+    private static final String nomeFileRischi = "/jsp/muRischi.jsp";
     /**
      * Pagina a cui la command fa riferimento per mostrare la form di ricerca
      */
@@ -144,6 +148,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_SEARCH,       nomeFileSearch);
         nomeFile.put(PART_PROCESS,      nomeFileProcessi);
         nomeFile.put(PART_SELECT_STR,   nomeFileStrutture);
+        nomeFile.put(PART_RISKS,        nomeFileRischi);
         nomeFile.put(PART_GRAPHICS,     nomeFileGraphics);
     }
 
@@ -184,8 +189,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         HashMap<Integer, ArrayList<DepartmentBean>> structs = null;
         // Dichiara mappa di soggetti contingenti indicizzati per id processo_at
         HashMap<Integer, ArrayList<DepartmentBean>> subjects = null;
-        // Dichiara mappa di rischi indicizzati per id processo_at
-        HashMap<Integer, ArrayList<RiskBean>> risks = null;
+        // Dichiara mappa ordinata di rischi indicizzati per processo_at
+        LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risks = null;
         // Preprara BreadCrumbs
         LinkedList<ItemBean> bC = null;
         /* ******************************************************************** *
@@ -256,10 +261,19 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                         // Recupera i soggetti indicizzati per identificativo di processo
                         subjects = retrieveSubjects(matsWithoutIndicators, user, codeSur, db);
                         // Recupera i rischi indicizzati per identificativo di processo
-                        risks = retrieveRisks(matsWithoutIndicators, user, codeSur, db);
+                        risks = retrieveRisksByProcess(matsWithoutIndicators, user, codeSur, db);
                         // Ha bisogno di personalizzare le breadcrumbs
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                         bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report strutture");
+                    } else if (part.equalsIgnoreCase(PART_RISKS)) {
+                        /* ************************************************ *
+                         *           Generate report risks-measure          *
+                         * ************************************************ */
+                        // Recupera i rischi indicizzati per identificativo di processo
+                        risks = retrieveRisksByProcess(matsWithoutIndicators, user, codeSur, db);
+                        // Ha bisogno di personalizzare le breadcrumbs
+                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report misure");
                     }
                     // Imposta il valore della pagina abbinata al parametro 
                     fileJspT = nomeFile.get(part);
@@ -298,7 +312,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         if (subjects != null) {
             req.setAttribute("soggetti", subjects);
         }
-        // Imposta in request, se ci sono, lista di rischi indicizzati per id processo
+        // Imposta in request, se ci sono, lista di rischi indicizzati per processo
         if (risks != null) {
             req.setAttribute("rischi", risks);
         }
@@ -568,6 +582,71 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         }
         return risksByPat;
     }
+    
+    
+    /**
+     * <p>Ricevuta una ArrayList (albero, vista gerarchica)
+     * di tutti macroprocessi censiti a fini anticorruttivi
+     * trovati in base a una rilevazione il cui identificativo 
+     * viene accettato come argomento, ma i cui figli non contengono
+     * al proprio interno i rischi, restituisce una mappa di rischi 
+     * associati a ciascun processo, indicizzata per il processo stesso.</p>
+     * <p><strong>Attenzione:</strong> nel momento dell'implementazione
+     * di questo metodo, non risultano processi con nomi duplicati, 
+     * per&ograve; in realt&agrave; i processi potrebbero avere nomi uguali 
+     * persino all'interno della stessa rilevazione (non c'&egrave;
+     * nessun vincolo sull'unicit&agrave; del nome del processo nella relativa
+     * tabella del db), per cui si &egrave; ritenuto opportuno gestire 
+     * questa potenziale collisione effettuando l'override 
+     * dei metodi di comparazione nel bean del processo e poi utilizzare 
+     * direttamente il processo stesso come chiave. 
+     * Si pu&ograve; valutare, in seguito, di sostituire completamente 
+     * con il presente metodo con l'altro analogo, che imposta come 
+     * chiave l'identificativo del processo 
+     * (quello s&iacute; certamente univoco).</p>
+     * 
+     * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - privi di strutture associate
+     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param codeSurvey    il codice della rilevazione
+     * @param db            WebStorage per l'accesso ai dati
+     * @return <code>HashMap&lt;ProcessBean, ArrayList&lt;RiskBean&gt;&gt;</code> - lista di rischi collegati al processo_at incapsulato in chiave
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+     public static LinkedHashMap<ProcessBean, ArrayList<RiskBean>> retrieveRisksByProcess(final ArrayList<ProcessBean> mats,
+                                                                                          PersonBean user,
+                                                                                          String codeSurvey,
+                                                                                          DBWrapper db)
+                                                                                   throws CommandException {
+         ArrayList<RiskBean> risks, mitigatingRisks = null;
+         LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risksByPat = new LinkedHashMap<>();
+         try {
+             // Prepara l'oggetto rilevazione
+             CodeBean survey = ConfigManager.getSurvey(codeSurvey);
+             // Per ogni macroprocesso
+             for (ProcessBean mat : mats) {
+                 // Recupera i suoi processi
+                 for (ProcessBean pat : mat.getProcessi()) {
+                     // Estrae i rischi di un dato processo in una data rilevazione
+                     risks = db.getRisksByProcess(user, pat, survey);
+                     // Setta nella mappa la lista appena calcolata
+                     risksByPat.put(pat, risks);
+                 }
+             }
+         } catch (WebStorageException wse) {
+             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei rischi.\n";
+             LOG.severe(msg);
+             throw new CommandException(msg + wse.getMessage(), wse);
+         } catch (NullPointerException npe) {
+             String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+             LOG.severe(msg);
+             throw new CommandException(msg + npe.getMessage(), npe);
+         } catch (Exception e) {
+             String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+             LOG.severe(msg);
+             throw new CommandException(msg + e.getMessage(), e);
+         }
+         return risksByPat;
+     }
 
     
     /* **************************************************************** *
