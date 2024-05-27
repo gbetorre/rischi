@@ -77,9 +77,9 @@
   <c:param name="q" value="mu" />
   <c:param name="r" value="${ril}" />
 </c:url>
-<c:url var="ris" context="${initParam.appName}" value="/" scope="page">
+<c:url var="mic" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="mu" />
-  <c:param name="p" value="ris" />
+  <c:param name="p" value="ric" />
   <c:param name="r" value="${ril}" />
 </c:url>
 <c:url var="gra" context="${initParam.appName}" value="/" scope="page">
@@ -108,6 +108,11 @@
   <c:param name="p" value="str" />
   <c:param name="r" value="${ril}" />
   <c:param name="out" value="html" />
+</c:url>
+<c:url var="mis" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="mu" />
+  <c:param name="p" value="ris" />
+  <c:param name="r" value="${ril}" />
 </c:url>
 <c:url var="ms" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="ms" />
