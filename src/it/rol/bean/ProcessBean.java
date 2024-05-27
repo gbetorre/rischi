@@ -187,6 +187,100 @@ public class ProcessBean extends CodeBean {
         this.livello = livello;
         this.idRilevazione = idRilevazione;
     }
+    
+    /* **************************************************************** *
+     *      Metodi per ordinare oggetti di questo tipo nelle liste      *
+     * **************************************************************** */
+    
+    /*
+     * Compara due oggetti basandosi sulla loro chiave
+     * 
+     * Questo permette di effettuare comparazioni direttamente 
+     * tra oggetti, funzionali anche ad ordinamenti in collezioni.
+     *
+     * (non-Javadoc)
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    @SuppressWarnings("javadoc")
+    public int compareTo(ProcessBean o) {
+        int ordinale = super.getOrdinale();
+        if ((ordinale == o.getOrdinale())) 
+            return 0;
+        else if (ordinale < o.getOrdinale()) 
+            return -1;
+        else 
+            return 1;
+    }
+    
+    /* **************************************************************** *
+     *  Metodi Ovverride per usare l'oggetto come key di un dictionary  *
+     *  e/o per poter capire se è quello da rimuovere da una Collection *
+     * **************************************************************** */
+    
+    /* The primary key of this type is the id 
+     * but the logical key are both code AND id_rilevazione
+     * (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @SuppressWarnings({ "javadoc", "unused" })
+    @Override
+    public boolean equals(Object o) {
+        // If they are the same object, they are equals for sure!
+        if (this == o)
+            return true;
+        // If the other isn't real, they are different for sure!
+        if (o == null)
+            return false;
+        // It their types aren't equals, they are different for sure!
+        if (getClass() != o.getClass())
+            return false;
+        ProcessBean other = (ProcessBean) o;
+        try {
+            if (this.getId() == other.getId())
+                return true;
+        } catch (AttributoNonValorizzatoException anve) {
+            // If they aren't comparable, we assume they are different! 
+            return false;
+        }
+        // If the flow isn't exit, they are different!
+        return false;
+    }
+    
+    
+    /* Depends only on value of the id */
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @SuppressWarnings({ "javadoc", "unused" })
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        try {
+            result = prime * result + this.getId();
+        } catch (AttributoNonValorizzatoException anve) {
+            // Houston, we have a problem!
+            return -1;
+        } 
+        return result;
+    }
+    
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @SuppressWarnings({ "javadoc", "unused" })
+    @Override
+    public String toString() {
+        int idSurvey = BEAN_DEFAULT_ID;
+        try {
+            idSurvey = this.getRilevazione().getId();
+        } catch (AttributoNonValorizzatoException anve) {
+            return null;
+        }
+        return FOR_NAME + "@" + this.codice + Constants.UNDERSCORE + idSurvey;
+    }
+        
 
     /* **************************************************** *
      *           Metodi getter e setter per codice          *
