@@ -321,10 +321,12 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.9.4] Implementata form di ricerca sui quesiti per chiave testuale
 - [1.9.3]   implementato algoritmo di mitigazione del rischio in funzione delle misure applicate
 - ...
-- [1.8.4]  Prima bozza implementazione report PxI dei rischi.  Implementazione parallela calcolo indicatori di impatto e rischi associati a processi.
+- [1.8.5]     . Implementazione parallela calcolo indicatori di impatto e rischi associati a processi.
+
 
 ### Done
 -->
+- [1.8.4] (27/05/2024) Prima bozza di implementazione report variazioni PxI dei rischi in funzione dell'applicazione (stimata) delle misure
 - [1.8.3] (17/05/2024) Completamento implementazione pagina dei dettagli di una misura. Implementazione parallela calcolo output di processi.
 - [1.8.2] (16/05/2024) Implementazione parallela calcolo fasi di processo. Miglioramenti nella presentazione dei dettagli di una misura. Trasformazione di icone vettoriali in raster.
 - [1.8.1] (14/05/2024) Implementazione parallela calcolo elementi (indicatori di tipo P, input di processi). Miglioramenti nella presentazione delle misure suggerite (eliminati doppioni).
