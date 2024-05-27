@@ -64,7 +64,7 @@
               </td>
               <td width="25%">
                 <ul class="list-group list-group-flush">
-                  <c:set var="rsks" value="${risks.get(pat.id)}" scope="page" />
+                  <c:set var="rsks" value="${risks.get(pat)}" scope="page" />
                   <c:forEach var="rsk" items="${rsks}">
                   <li class="list-group-item list-group-item-danger">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle" viewBox="0 0 16 16">
