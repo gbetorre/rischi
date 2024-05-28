@@ -1012,12 +1012,40 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 processElements.put(TIPI_LISTE[ELEMENT_LEV_2], listaOutput);
                 LOG.info("Thread del recupero degli Output terminato...");
             });
+            // Rischi
+            Thread threadRisks = new Thread(() -> {
+                LOG.info("Thread del recupero dei Rischi partito...");
+                ArrayList<RiskBean> listaRischi = null;
+                try {
+                    listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del thread dei Rischi.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+                processElements.put(TIPI_LISTE[ELEMENT_LEV_3], listaRischi);
+                LOG.info("Thread del recupero dei Rischi terminato...");
+            });
+            // Interviste
+            Thread threadInterviews = new Thread(() -> {
+                LOG.info("Thread del recupero Interviste partito...");
+                ArrayList<InterviewBean> listaInterviste = null;
+                try {
+                    listaInterviste = retrieveInterviews(user, idP, liv, codeSur, db);
+                } catch (CommandException ce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nell\'esecuzione del thread delle Interviste.\n";
+                    LOG.severe(msg + ce.getLocalizedMessage());
+                }
+                processElements.put(TIPI_LISTE[ELEMENT_LEV_4], listaInterviste);
+                LOG.info("Thread del recupero delle Interviste terminato...");
+            });
             /* ************************************************************ *
              *  Start all threads which are different from the mainthread   *
              * ************************************************************ */
+            threadInterviews.start();            
             threadInputs.start();
             threadActivities.start();
             threadOutputs.start();
+            threadRisks.start();
             /* ************************************************ *
              *           Wait for all threads to finish         *
              * ************************************************ */
@@ -1025,12 +1053,13 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 threadInputs.join();
                 threadActivities.join();
                 threadOutputs.join();
+                threadRisks.join();
+                threadInterviews.join();
             } catch (InterruptedException ie) {
                 String msg = FOR_NAME + "Si e\' verificato un problema nella join dei threads sul mainthread.\n";
                 LOG.severe(msg + ie.getLocalizedMessage());
                 Thread.currentThread().interrupt();
             }
-            
             // Recupera Input estratti in base al processo
             //ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
             // Recupera Fasi estratte in base al processo
@@ -1038,9 +1067,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             // Recupera Output estratti in base al processo
             //ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
             // Recupera Rischi estratti in base al processo
-            ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
+            //ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
             // Recupera le interviste in cui il processo è stato esaminato
-            ArrayList<InterviewBean> listaInterviste = retrieveInterviews(user, idP, liv, codeSur, db);
+            ArrayList<InterviewBean> listaInterviste = (ArrayList<InterviewBean>) processElements.get(TIPI_LISTE[ELEMENT_LEV_4]);
             // Recupera gli indicatori corretti (calcolati a runtime e privi solo delle note)
             HashMap<String, InterviewBean> listaIndicatori = AuditCommand.compare(listaInterviste);
             // Recupera le note e le aggiunge al PxI
@@ -1049,8 +1078,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             //processElements.put(TIPI_LISTE[0], listaInput);
             //processElements.put(TIPI_LISTE[1], listaFasi);
             //processElements.put(TIPI_LISTE[2], listaOutput);
-            processElements.put(TIPI_LISTE[3], listaRischi);
-            processElements.put(TIPI_LISTE[4], listaInterviste);
+            //processElements.put(TIPI_LISTE[3], listaRischi);
+            //processElements.put(TIPI_LISTE[4], listaInterviste);
         } catch (CommandException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di dati da metodi retrieve che invocano metodi di db.get.\n";
             LOG.severe(msg);
