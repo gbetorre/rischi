@@ -43,13 +43,10 @@ import java.sql.Types;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,7 +81,7 @@ import it.rol.exception.WebStorageException;
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
-public class DBWrapper extends QueryImpl implements Query, Constants {
+public class DBWrapper extends QueryImpl {
 
     /**
      * <p>La serializzazione necessita di dichiarare una costante di tipo long
@@ -121,7 +118,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     /**
      * <p>Connessione db postgres di pol.</p>
      */
-    protected static DataSource prol_manager = null;
+    protected static DataSource rol_manager = null;
     /**
      * <p>Recupera da Servlet la stringa opportuna per il puntamento del DataSource.</p>
      */
@@ -140,10 +137,10 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
      * @see DataSource
      */
     public DBWrapper() throws WebStorageException {
-        if (prol_manager == null) {
+        if (rol_manager == null) {
             try {
-                prol_manager = (DataSource) ((Context) new InitialContext()).lookup(contextDbName);
-                if (prol_manager == null)
+                rol_manager = (DataSource) ((Context) new InitialContext()).lookup(contextDbName);
+                if (rol_manager == null)
                     throw new WebStorageException(FOR_NAME + "La risorsa " + contextDbName + "non e\' disponibile. Verificare configurazione e collegamenti.\n");
             } catch (NamingException ne) {
                 throw new WebStorageException(FOR_NAME + "Problema nel recuperare la risorsa jdbc/prol per problemi di naming: " + ne.getMessage());
@@ -184,7 +181,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         ResultSet rs = null;
         CodeBean survey = null;
         try {
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             pst = con.prepareStatement(GET_SURVEY);
             pst.clearParameters();
             pst.setInt(1, idSurvey);
@@ -247,7 +244,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         CodeBean survey = null;
         ArrayList<CodeBean> surveys = new ArrayList<>();
         try {
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             pst = con.prepareStatement(GET_SURVEY);
             pst.clearParameters();
             pst.setInt(1, idSurvey);
@@ -281,71 +278,6 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                 throw new WebStorageException(FOR_NAME + sqle.getMessage());
             }
         }
-    }
-
-
-    /* (non-Javadoc)
-     * @see it.rol.Query#getQueryStructures(int, int, int, int, int)
-     */
-    @SuppressWarnings("javadoc")
-    @Override
-    public String getQueryStructures(int idR, int idl4, int idl3, int idl2, int idl1) {
-        String tableFrom = null;
-        String tableWhere = null;
-        byte level = (byte) DEFAULT_ID;
-        // Se passa -1 su questo parametro vuol recuperare tutte le strutture di livello 1
-        if (idl1 == DEFAULT_ID) {
-            level = (byte) 1;
-            tableFrom = "struttura_liv1";
-            tableWhere = DEFAULT_ID + " = " + idl1 ;
-        // Altrimenti, se passa un id, vuol recuperare tutte le strutture di livello 2 che afferiscono alla struttura di livello 1 di tale id
-        } else if (idl1 > NOTHING) {
-            level = (byte) 2;
-            tableFrom = "struttura_liv2";
-            tableWhere = "id_struttura_liv1 = " + idl1;
-        }
-        // Liv 2
-        if (idl2 == DEFAULT_ID) {       // Tutte le Liv 2
-            level = (byte) 2;
-            tableFrom = "struttura_liv2";
-            tableWhere = DEFAULT_ID + " = " + idl2 ;
-        } else if (idl2 > NOTHING) {    // Solo le Liv 3 afferenti a una specifica Liv 2
-            level = (byte) 3;
-            tableFrom = "struttura_liv3";
-            tableWhere = "id_struttura_liv2 = " + idl2;
-        }
-        // Liv 3
-        if (idl3 == DEFAULT_ID) {       // Tutte le Liv 3
-            level = (byte) 3;
-            tableFrom = "struttura_liv3";
-            tableWhere = DEFAULT_ID + " = " + idl3 ;
-        } else if (idl3 > NOTHING) {    // Solo le Liv 4 afferenti a una specifica Liv 3
-            level = (byte) 4;
-            tableFrom = "struttura_liv4";
-            tableWhere = "id_struttura_liv3 = " + idl3;
-        }
-        // Liv 4
-        if (idl4 == DEFAULT_ID) {       // Tutte le Liv 4
-            level = (byte) 4;
-            tableFrom = "struttura_liv4";
-            tableWhere = DEFAULT_ID + " = " + idl4 ;
-        }
-        final String GET_STRUCTURE_BY_STRUCTURE =
-                "SELECT " +
-                "       D.id                 AS \"id\"" +
-                "   ,   D.nome               AS \"nome\"" +
-                "   ,   D.codice             AS \"informativa\"" +
-                "   ,   D.ordinale           AS \"ordinale\"" +
-                "   ,   D.prefisso           AS \"prefisso\"" +
-                "   ,   D.acronimo           AS \"acronimo\"" +
-                "   ,   D.indirizzo_sede     AS \"indirizzo\"" +
-                "   ," + level + "::SMALLINT AS \"livello\"" +
-                "   FROM " + tableFrom + " D" +
-                "   WHERE D.id_rilevazione = " + idR +
-                "       AND " + tableWhere +
-                "       AND id_stato = 1" + // Prende solo le strutture attive
-                "   ORDER BY D.nome, D.ordinale";
-        return GET_STRUCTURE_BY_STRUCTURE;
     }
 
 
@@ -387,7 +319,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
             // TODO: Controllare se user è superuser
             // Chiama il metodo che costruisce la query
             StringBuffer query = new StringBuffer(getQueryStructures(survey.getId(), NOTHING, NOTHING, NOTHING, DEFAULT_ID));
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             pst = con.prepareStatement(String.valueOf(query));
             pst.clearParameters();
             rs = pst.executeQuery();
@@ -539,44 +471,6 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     }
 
 
-    /* (non-Javadoc)
-     * @see it.rol.Query#getQueryStructure(int, byte)
-     */
-    @SuppressWarnings("javadoc")
-    @Override
-    public String getQueryStructure(int id,
-                                    byte level) {
-        String table = null;
-        switch(level) {
-            case 1:
-                table = "struttura_liv1";
-                break;
-            case 2:
-                table = "struttura_liv2";
-                break;
-            case 3:
-                table = "struttura_liv3";
-                break;
-            case 4:
-                table = "struttura_liv4";
-                break;
-        }
-        final String GET_STRUCTURE_BY_ID =
-                "SELECT " +
-                "       D.id        AS \"id\"" +
-                "   ,   D.nome      AS \"nome\"" +
-                "   ,   D.codice    AS \"informativa\"" +
-                "   ,   D.prefisso  AS \"prefisso\"" +
-                "   ,   D.acronimo  AS \"acronimo\"" +
-                "   ,   D.ordinale  AS \"ordinale\"" +
-                "   ," + level +  " AS \"livello\"" + 
-                "   FROM " + table + " D" +
-                "   WHERE D.id = " + id +
-                "   ORDER BY D.ordinale";
-        return GET_STRUCTURE_BY_ID;
-    }
-
-
     /**
      * <p>Dato un id e un livello, restituisce una struttura selezionata 
      * in base a quell'id nella tabella identificata in base al livello.</p>
@@ -588,47 +482,50 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
      * @return <code>DepartmentBean</code> - la struttura cercata
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings({ "null" })
     public DepartmentBean getStructure(PersonBean user,
                                        int id,
                                        byte level,
                                        String codeSurvey)
                                 throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        DepartmentBean uo = null;
-        // TODO: Controllare se user è superuser
-        try {
-            con = prol_manager.getConnection();
-            String query = getQueryStructure(id, level);
-            pst = con.prepareStatement(query);
-            pst.clearParameters();
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                // Crea una struttura vuota
-                uo = new DepartmentBean();
-                // La valorizza col contenuto della query
-                BeanUtil.populate(uo, rs);
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            DepartmentBean uo = null;
+            // TODO: Controllare se user è superuser
+            try {
+                String query = getQueryStructure(id, level);
+                pst = con.prepareStatement(query);
+                pst.clearParameters();
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Crea una struttura vuota
+                    uo = new DepartmentBean();
+                    // La valorizza col contenuto della query
+                    BeanUtil.populate(uo, rs);
+                }
+                // Tries (just tries) to engage the Garbage Collector
+                pst = null;
+                // Let's go away
+                return uo;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query della struttura in base all'id.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
             }
-            // Tries (just tries) to engage the Garbage Collector
-            pst = null;
-            // Let's go away
-            return uo;
         } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query della struttura in base all'id.\n";
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
             LOG.severe(msg);
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
         }
     }
 
@@ -647,7 +544,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                      int idSubject,
                                      CodeBean survey)
                                      throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             int nextParam = NOTHING;
@@ -735,7 +632,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                               int idActivity,
                                               CodeBean survey)
                                        throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             int nextParam = NOTHING;
@@ -831,7 +728,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                                                      final ArrayList<ProcessBean> mats,
                                                                      CodeBean survey)
                                                               throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             ItemBean rawStructure = null;
@@ -928,7 +825,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                                                    final ArrayList<ProcessBean> mats,
                                                                    CodeBean survey)
                                                             throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             ItemBean rawSubject = null;
@@ -1033,7 +930,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                          int level,
                                          CodeBean survey)
                                   throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             int nextParam = NOTHING;
@@ -1113,7 +1010,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                                  int level,
                                                  CodeBean survey)
                                           throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs, rs1 = null;
             int nextParam = NOTHING;
@@ -1233,7 +1130,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                           int level,
                                           CodeBean survey)
                                    throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             int nextParam = NOTHING;
@@ -1300,7 +1197,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public ArrayList<ProcessBean> getOutputs(PersonBean user,
                                              CodeBean survey)
                                       throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             int nextParam = NOTHING;
@@ -1366,7 +1263,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                  int id,
                                  CodeBean survey)
                           throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs, rs1, rs2 = null;
             int nextParam = NOTHING;
@@ -1467,7 +1364,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     @SuppressWarnings({ "static-method" })
     public Integer getQuestionsAmountBySurvey(int idSurvey)
                                        throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             Integer tot = null;
@@ -1548,7 +1445,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public Integer getQuestionsAmountWithAnswerByInterview(HashMap<String, LinkedHashMap<String, String>> params,
                                                            CodeBean survey)
                                                     throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             Integer tot = null;
@@ -1645,7 +1542,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         int idThru = NOTHING;   // id globale
         try {
             // TODO: Controllare se user è superuser
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             pst = con.prepareStatement(GET_MACRO_AT_BY_SURVEY);
             pst.clearParameters();
             pst.setString(1, codeSurvey);
@@ -1826,7 +1723,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                                             byte level,
                                                             CodeBean survey)
                                                      throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             ItemBean item = null;
@@ -1886,7 +1783,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     @SuppressWarnings({ "static-method" })
     public ArrayList<ItemBean> getAmbits(PersonBean user)
                                   throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             AbstractList<ItemBean> ambits = new ArrayList<>();
@@ -1976,7 +1873,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                                 int idQuestion,
                                                 int getAll)
                                          throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs, rs1, rs2, rs3, rs4 = null;
             QuestionBean question = null;
@@ -2223,7 +2120,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                               CodeBean survey)
                                        throws WebStorageException { 
         // Resource 'con' should be managed by try-with-resource
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             QuestionBean question = null;
@@ -2409,7 +2306,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                               CodeBean survey)
                                        throws WebStorageException { 
         // Resource 'con' should be managed by try-with-resource
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             QuestionBean question = null;
@@ -2483,7 +2380,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public ArrayList<CodeBean> getIndicators(PersonBean user,
                                              CodeBean survey)
                                       throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             int nextParam = NOTHING;
@@ -2549,7 +2446,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public HashMap<String, LinkedList<Integer>> getQuestionsByIndicator(PersonBean user,
                                                                         CodeBean survey)
                                                                  throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             AbstractList<CodeBean> couples = new ArrayList<>();
@@ -2788,7 +2685,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         AbstractList<ProcessBean> vMchild = null;
         AbstractList<ProcessBean> vPchild = null;
         // Resource 'con' implements AutoCloseable interface, so we can use try-with-resource...
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             // TODO: Controllare se user è superuser
             try {
                 // Prepara l'estrazione delle interviste, da arricchire in dettagli
@@ -3002,7 +2899,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                         int getAll, 
                                         CodeBean survey)
                                  throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             AbstractList<RiskBean> risks = new ArrayList<>();
@@ -3069,7 +2966,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                             int idRisk, 
                             CodeBean survey)
                      throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             RiskBean risk = null;
@@ -3136,7 +3033,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                                  ProcessBean process, 
                                                  CodeBean survey)
                                           throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs, rs1, rs2 = null;
             AbstractList<RiskBean> risks = new ArrayList<>();
@@ -3258,7 +3155,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                                    RiskBean risk, 
                                                    CodeBean survey)
                                             throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs, rs1 = null;
             AbstractList<ProcessBean> pats = new ArrayList<>();
@@ -3341,7 +3238,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public int getRiskProcess(PersonBean user, 
                               HashMap<String, LinkedHashMap<String, String>> params)
                        throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             // Variabili per l'accesso ai dati
             PreparedStatement pst = null;
             ResultSet rs = null;
@@ -3413,7 +3310,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                       int idP, 
                                       CodeBean survey)
                                throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs, rs1 = null;
             ProcessBean pat = null;
@@ -3495,7 +3392,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public ArrayList<CodeBean> getFactors(PersonBean user, 
                                           CodeBean survey)
                                    throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             AbstractList<CodeBean> factors = new ArrayList<>();
@@ -3557,7 +3454,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public int getFactorRiskProcess(PersonBean user, 
                                     HashMap<String, LinkedHashMap<String, String>> params)
                              throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             // Variabili per l'accesso ai dati
             PreparedStatement pst = null;
             ResultSet rs = null;
@@ -3636,7 +3533,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                                      CodeBean survey,
                                                      int muffler)
                                               throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             AbstractList<ProcessBean> macro = (ArrayList<ProcessBean>) mats.clone();
@@ -3811,7 +3708,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                    int idP,
                                    CodeBean survey)
                             throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             int nextParam = NOTHING;
@@ -3882,7 +3779,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public LinkedHashMap<Integer, ItemBean> getIndicatorNotes(PersonBean user,
                                                               CodeBean survey)
                                                        throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             ItemBean indicator = null;
@@ -3949,7 +3846,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     @SuppressWarnings({ "static-method" })
     public ArrayList<CodeBean> getMeasureTypes()
                                         throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             AbstractList<CodeBean> measureTypes = new ArrayList<>();
@@ -4007,7 +3904,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     @SuppressWarnings({ "static-method" })
     public ArrayList<CodeBean> getMeasureCharacters()
                                              throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             AbstractList<CodeBean> measureCharacters = new ArrayList<>();
@@ -4073,7 +3970,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                               int getAll,
                                               CodeBean survey)
                                        throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs, rs1, rs2 = null;
             int nextParam = NOTHING;
@@ -4210,7 +4107,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                                  String code,
                                                  CodeBean survey)
                                           throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             AbstractList<ItemBean> risks = new ArrayList<>();
@@ -4306,7 +4203,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                                        boolean getAll,
                                                        CodeBean survey)
                                                 throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs, rs1 = null;
             AbstractList<MeasureBean> advicedMeasures = new ArrayList<>();
@@ -4421,7 +4318,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
                                         HashMap<String, LinkedHashMap<String, String>> params,
                                         ArrayList<MeasureBean> list)
                                  throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             // Variabili per l'accesso ai dati
             PreparedStatement pst = null;
             ResultSet rs = null;
@@ -4533,7 +4430,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         LinkedHashMap<String, String> quest = params.get(PART_SELECT_QST);
         try {
             // Effettua la connessione
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             // Begin: ==>
             con.setAutoCommit(false);
             // TODO: Controllare se user è superuser
@@ -4681,7 +4578,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public void insertRisk(PersonBean user, 
                            HashMap<String, LinkedHashMap<String, String>> params) 
                     throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
@@ -4787,7 +4684,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public void insertRiskProcess(PersonBean user, 
                                   HashMap<String, LinkedHashMap<String, String>> params) 
                            throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
@@ -4882,7 +4779,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public void insertFactorRiskProcess(PersonBean user, 
                                         HashMap<String, LinkedHashMap<String, String>> params) 
                                  throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
@@ -4984,7 +4881,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         if (notes.isEmpty() || notes.size() == NOTHING) {
             return;
         }
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             try {
                 // Begin: ==>
@@ -5131,7 +5028,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public void insertMeasure(PersonBean user, 
                               HashMap<String, LinkedHashMap<String, String>> params) 
                        throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement ps, pst, pst1, ps1, ps2, ps3, pstm = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
@@ -5554,7 +5451,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public void insertMeasureRiskProcess(PersonBean user, 
                                          HashMap<String, LinkedHashMap<String, String>> params) 
                                   throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
@@ -5698,7 +5595,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public void updateAnswer(PersonBean user, 
                              HashMap<String, LinkedHashMap<String, String>> params) 
                       throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
@@ -5797,7 +5694,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     public void updateNote(PersonBean user, 
                            HashMap<String, LinkedHashMap<String, String>> params) 
                     throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
@@ -5894,7 +5791,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         if (notes.isEmpty() || notes.size() == NOTHING) {
             return;
         }
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             try {
                 // Begin: ==>
@@ -5964,7 +5861,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         ItemBean cmd = null;
         Vector<ItemBean> commands = new Vector<>();
         try {
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             pst = con.prepareStatement(LOOKUP_COMMAND);
             pst.clearParameters();
             rs = pst.executeQuery();
@@ -6011,7 +5908,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         try {
             int count = 0;
             String query = SELECT_MAX_ID + table;
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             pst = con.prepareStatement(query);
             pst.clearParameters();
             rs = pst.executeQuery();
@@ -6058,7 +5955,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         try {
             int count = 0;
             String query = SELECT_MIN_ID + table;
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             pst = con.prepareStatement(query);
             pst.clearParameters();
             rs = pst.executeQuery();
@@ -6100,7 +5997,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
     @SuppressWarnings({ "static-method" })
     public String getMaxRiskCode(String code)
                           throws WebStorageException {
-        try (Connection con = prol_manager.getConnection()) {
+        try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             CodeBean prevCode = null;
@@ -6188,7 +6085,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         try {
             int count = NOTHING;
             String query = SELECT_COUNT + table;
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             pst = con.prepareStatement(query);
             pst.clearParameters();
             rs = pst.executeQuery();
@@ -6230,7 +6127,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         ResultSet rs = null;
         String value = null;
         try {
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             pst = con.prepareStatement(query);
             pst.clearParameters();
             rs = pst.executeQuery();
@@ -6273,7 +6170,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         CodeBean password = null;
         int nextInt = 0;
         try {
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             pst = con.prepareStatement(GET_ENCRYPTEDPASSWORD);
             pst.clearParameters();
             pst.setString(++nextInt, username);
@@ -6321,7 +6218,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         int nextInt = 0;
         Vector<CodeBean> vRuoli = new Vector<>();
         try {
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             pst = con.prepareStatement(GET_USR);
             pst.clearParameters();
             pst.setString(++nextInt, username);
@@ -6393,7 +6290,7 @@ public class DBWrapper extends QueryImpl implements Query, Constants {
         int nextParam = NOTHING;
         try {
             // Ottiene la connessione
-            con = prol_manager.getConnection();
+            con = rol_manager.getConnection();
             // Verifica se la login abbia già fatto un accesso
             pst = con.prepareStatement(GET_ACCESSLOG_BY_LOGIN);
             pst.clearParameters();
