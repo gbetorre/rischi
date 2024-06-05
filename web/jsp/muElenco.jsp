@@ -26,7 +26,7 @@
             <div class="card-body">
               <i class="fa-solid fa-table fa-4x"></i>&nbsp;&nbsp;
               <i class="fas fa-sitemap fa-4x"></i>&nbsp;&nbsp;
-              P x I &nbsp; Strutture
+              P x I &nbsp; Dettagli
             </div>
             <div class="card-footer d-flex align-items-center justify-content-between">
               <a class="small stretched-link" href="${mtr}">Vai</a>
