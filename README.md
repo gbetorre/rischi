@@ -7,6 +7,9 @@
 *** Thanks again! Now go create something AMAZING! :D
 -->
 
+# Multilanguage README Pattern
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/gbetorre/rischi/blob/master/README.md)
+[![it](https://img.shields.io/badge/lang-it-yellow.svg)](https://github.com/gbetorre/rischi/blob/master/README.it.md)
 
 
 <!-- PROJECT SHIELDS -->
@@ -39,7 +42,7 @@
     <br />
     <a href="https://github.com/gbetorre/rischi/issues">Report Bug</a>
     ·
-    <a href="https://github.com/pulls">Request Feature</a>
+    <a href="https://github.com/gbetorre/rischi/pulls">Request Feature</a>
   </p>
 </div>
 
@@ -54,7 +57,7 @@ L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti,
 [![Product Landing Page][product-landing2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png)
 <br>
 <strong>*Pagina di landing, versione 2.0*</strong><br>
-<br><br>
+<br>
 <!-- ABOUT THE PROJECT -->
 
 ## About The Project
