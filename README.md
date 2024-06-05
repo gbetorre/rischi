@@ -49,8 +49,12 @@
 <!-- Insert TOC here -->
 
 # Rischi
-L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti, Pubbliche Amministrazioni e aziende partecipate <strong>a quantificare automaticamente i rischi corruttivi</strong> cui i loro processi organizzativi sono esposti e ad indirizzare questi soggetti a mettere in atto le contromisure adeguate.<br><br>
+L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti, Pubbliche Amministrazioni e aziende partecipate <strong>a quantificare automaticamente i rischi corruttivi</strong> cui i loro processi organizzativi sono esposti e ad indirizzare questi soggetti a mettere in atto le contromisure adeguate.
 
+[![Product Landing Page][product-landing2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png)
+<br>
+<strong>*Pagina di landing, versione 2.0*</strong><br>
+<br><br>
 <!-- ABOUT THE PROJECT -->
 
 ## About The Project
@@ -421,6 +425,7 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [product-screenshot]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/product-screenshot.png
 [product-login]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.40.png
 [product-landing]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing1.40.png
+[product-landing2]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png
 [product-interview]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/interview-sample.png
 [product-algorithm]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png
 [product-orgchart]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png
