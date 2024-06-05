@@ -119,7 +119,7 @@
         <dl class="sezioneElenco custom-dl">
           <dt class="text-primary">Carattere</dt>
           <dd><c:out value="${meas.carattere.nome}" /></dd>
-          <dt class="text-primary">Sostenibilit&agrave; economica</dt>
+          <dt class="text-primary">Comporta Spese?</dt>
           <dd><c:out value="${fn:toUpperCase(meas.getOnerosa(meas.onerosa))}" /></dd>
         </dl>
       </section>
