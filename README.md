@@ -1,6 +1,6 @@
 <a name="readme-top"></a>
 
-## 2 languages
+### 2 languages found
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/gbetorre/rischi/blob/master/README.md)
 [![it](https://img.shields.io/badge/lang-it-yellow.svg)](https://github.com/gbetorre/rischi/blob/master/README.it.md)
 
@@ -17,10 +17,10 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
   -->
-  <h3 align="center">ROL [Risks OnLine]</h3>
+  <h3 align="center">ROL [Risk OnLine]</h3>
 
   <p align="center">
-    Web application for mapping corrupt risks to which organizational processes may be exposed
+    Web application for mapping corrupt risk to which organizational processes may be exposed
     <br><br>
     <a href="https://github.com/gbetorre/rischi"><strong>Explore files »</strong></a>
     <br>
@@ -34,7 +34,7 @@
 <!-- TABLE OF CONTENTS -->
 
 # Risk Mapping Software
-The web application for <cite>corruption risk mapping</cite> is intended to help Entities, Public Administrations and investee companies to <strong>automatically quantify the corruption risks</strong> to which their organizational processes are exposed and direct them to implement appropriate countermeasures.
+The web application for <cite>corruption risk mapping</cite> is intended to help Entities, Public Administrations and investee companies to <strong>automatically quantify the corruption risk</strong> to which their organizational processes are exposed and direct them to implement appropriate countermeasures.
 
 [![Product Landing Page][product-landing2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png)
 <br>
@@ -45,10 +45,10 @@ The web application for <cite>corruption risk mapping</cite> is intended to help
 
 [![Goal Sample][indicator-sample01]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample01.png)
 <br>
-<strong>*Fig.1 - The goal of the software is to obtain, automatically, the risk value for each organizational process considered (dummy data&#770;)*</strong><br>
+<strong>*Fig.1 - The goal of the software is to obtain, automatically, the risk value for each organizational process considered (dummy data)*</strong><br>
 
 <p>
-Through the response to a series of questions submitted to managers and operators at specific administrative offices (interview), the application makes it possible to obtain, automatically, a series of indices related to specific corruption risks to which the organizational processes may be exposed.<br>
+Through the response to a series of questions submitted to managers and operators at specific administrative offices (interview), the application makes it possible to obtain, automatically, a series of indices related to specific corruption risk to which the organizational processes may be exposed.<br>
 </p>
 
 [![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.40.png)
@@ -81,9 +81,9 @@ Specifically, for each process probed through the interview, we obtain the value
 <strong>*Fig.6 - In such cases, the software reports the reason for non-calculation; if there are multiple reasons, they are shown one at a time until the problem is corrected (dummy data)*</strong>
 <br><br>
 
-Crossing the values obtained in the indicators of probability (P) with those obtained in the indicators of impact (I) we obtain, for each organizational process surveyed, a synthetic index <code>P x I</code>, which expresses the final level of risk to which &egrave; the process itself is exposed.
+Crossing the values obtained in the indicators of probability (P) with those obtained in the indicators of impact (I) we obtain, for each organizational process surveyed, a synthetic index <code>P x I</code>, which expresses the final level of risk to which the process itself is exposed.
 
-By linking the risks to the (counter)measures, it is also possible to obtain a number of suggestions about the organizational actions to be implemented in order to reduce the specific corruption risks identified.
+By linking the risk to the (counter)measures, it is also possible to obtain a number of suggestions about the organizational actions to be implemented in order to reduce the specific corruption risk identified.
 
 ## How the software works
 Obviously, the Risk Mapping Software (ROL) application relies on a database, specifically a PostgreSQL-type relational database (version 12 and later), in which the questions that will be submitted to the facilities in the interviews are populated.
@@ -92,7 +92,7 @@ In the first stage, the loading of organizational structures (organizational cha
 
 These uploads to the database can be done by automatically generated entry queries or by ETL but, under study, there is a mode of bulk uploading by uploading appropriately formatted files.
 
-Structures are organized in a tree with various levels while processes are structured in 3 main levels (macro-process, process and sub-process &mbsp; the latter not used in the 2022-2025 survey in favor of process phases aka steps). 
+Structures are organized in a tree with various levels while processes are structured in 3 main levels (macro-process, process and sub-process - the latter not used in the 2022-2025 survey in favor of process phases aka steps). 
 
 [![Product Sample OrgChart][product-orgchart]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png)
 <br>
@@ -106,17 +106,17 @@ Each process or subprocess (but not the macroprocess) can itself be divided into
 
 The software provides special features for navigating the macroprocess tree and the organizational chart tree (see <a href=“https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png”>figure</a> and <a href=“https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png”>figure</a>), so you can quickly verify that the mapping matches what is actually in the organization.
 
-Furthermore, a detail page is provided for each process that contains not only the level of risk to which the process is exposed (information that is the focus of the entire application), but also all other aggregate information related to the process itself, including: inputs, steps (aka activities), outputs, risks, and enabling factors.
+Furthermore, a detail page is provided for each process that contains not only the level of risk to which the process is exposed (information that is the focus of the entire application), but also all other aggregate information related to the process itself, including: inputs, steps (aka activities), outputs, risk, and enabling factors.
 
 [![Product Sample Process][process-29]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-29.png)
 <br>
 <strong>*Fig.9 - Example of a detail page of a process surveyed for anti-corruption purposes*</strong>
 
-After populating the database with the structures, macro-processes and their sub-levels, we move on to the interview phase, which consists of addressing a series of questions to a set of specific structures that oversee a specific process. The battery of questions is large (more than 150) but the decision about which questions to administer can be determined by the interviewer; in fact, all questions are optional, and there are more general questions, which probably make sense to address in every interview, and more specific questions, which only make sense to administer if you are looking at very specific processes. The questions are grouped into areas of analysis and, in the case of some structures, it might even make sense to omit questions from entire areas of analysis.
+After populating the database with the structures, macro-processes and their sub-levels, we move on to the interview phase, which consists of addressing a series of questions to a set of specific structures that oversee a specific process. The battery of questions is large (more than 150) but the decision about which questions to administer can be determined by the interviewer; in fact, all questions are optional, and <strong>there are more general questions</strong>, which probably make sense to address in every interview, <strong>and more specific questions</strong>, which only make sense to administer if you are looking at very specific processes. The questions are grouped into areas of analysis and, in the case of some structures, it might even make sense to omit questions from entire areas of analysis.
 
 The answers are then used to obtain the value of a series of indicators, as mentioned earlier.<br>
-All but one among the indicators depend on the responses to the questions, so that the value obtained in every indicator, but one, is calculated through an algorithm that takes into account the responses obtained.
-There is only one impact indicator that does not depend on the questions instead on the number and type of facilities involved in the measured process.
+All - but one - among the indicators depend on the responses to the questions, so that the value obtained in every indicator (but one) is calculated through an algorithm that takes into account the responses obtained.<br>
+There is only one impact indicator that does not depend on the questions instead depends on the number and type of facilities involved in the measured process.
 
 The algorithms for calculating the indicators are all different from each other.
 <br><br>
@@ -126,26 +126,24 @@ The algorithms for calculating the indicators are all different from each other.
 
 As mentioned in the previous paragraph, through additional algorithms all values obtained in the probability indicators (global probability index P) and all values obtained in the impact indicators (global impact index I) are crossed.
 
-Finally, through a classic Quantitative Risk Analysis table, the <code>P x I</code> index, or summary judgment, obtained for each process surveyed and investigated through the interviews is calculated.<br>
+Finally, through a classic Quantitative Risk Analysis table, the <code>P x I</code> index, or summary judgment, obtained for each process surveyed and investigated through the interviews, is eventually calculated.<br>
 
 [![PxI][pxi]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/PxI.png)
 <br>
 <strong>*Fig.11 - Decision table of the algorithm for calculating PxI, with the 9 possible values derived from the arrangements with repetition D'(3,2) = 3<sup>2</sup> of the 3 possible values of P and the 3 possible values of I.*</strong>
 
 ## Future developments
-At present, the software is ready to be adapted
-&nbsp; with minimal adaptation &nbsp; to any organizational reality that wants to
-carry out a detailed analysis of the corruptive risks to which the processes provided
-by the organization itself are exposed.
+At the present, the software is ready to be taylored,
+with minimal adaptation, to any organization that would carry out a detailed analysis of the corruptive risk to which the processes provided by the organization itself are exposed.
 <br>
 
-It is also possible to estimate, with relative accuracy, how much time is needed to customize the software to suit a specific organizational reality.
+It is also possible to estimate, with relative accuracy, how much time is needed to customize the software to suit a specific organization.<br>
 In fact, acquired:
 * the size of the organization (in particular, the number of levels of the organizational chart and the absolute number of structures to be mapped)
 * the number of levels and the number of processes produced by the organization itself,
   
 it becomes possible to make a relatively accurate estimate of the time required 
-for the interview campaign to begin and &nbsp; consequently &nbsp; to obtain the results of the various risk indicators and the P x I summary judgment.
+for the interview campaign and - consequently - to obtain the results of the various risk indicators and the P x I summary judgment.
 <br><br>
 
 ---
@@ -156,7 +154,7 @@ There are, in addition, some possible developments, which could be implemented i
 * Preparation of appropriate research tools to enable the transparency office to obtain analytical queries on the interviews conducted.
 
 <br>
-Of course, no IT tool alone can achieve results such as lowering corruption risks; therefore, 
+Of course, event though it can be such a big help, no IT tool by itself can achieve results such as lowering corruption risk; therefore, 
 any analytical insights allowed by the software will have to be examined and interpreted by anti-corruption experts.
 
 Everyone can feel free to propose improvements and evolutions.
@@ -224,11 +222,10 @@ Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/r
 ## History
 
 This section illustrates the evolution of the ROL software in the context of the various releases.<br>
-In corrispondenza di ogni numero di versione non vengono descritte tutte le modifiche 
-made but only the releases of the most significant features.<br />
+Not all changes are described under each version number
+but only the releases of the most significant features.<br>
 
-Each version number &egrave; per&ograve; accompanied by the date of the commit 
-of the sources, so by consulting the History of the repository it will be&agrave; easy to
+Each version number is paired with the date of the commit, so by consulting the History of the repository it will be easy to
 to go into all the changes made at the subversion: 
 moreover, each version corresponds to a commit, but not each commit generates a version.<br>
 
@@ -239,11 +236,11 @@ it does not identify whether the version is stable or not (an aspect usually ide
 nor does it have relevant jumps according to high-impact changes (e.g., moving from version 6.1.38 to version 7.0.1 of VirtualBox, which marked a fairly big change); 
 in the case of the current application, in fact, version numbers have only the signficance of keeping track of releases and deploys 
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)</p>
-
+<cite>(The realease date is in Italian format)</cite>
 
 - [1.8.6] (05/06/2024) Graphic revision landing page; revision of labels.
 - [1.8.5] (28/05/2024) Parallel implementation impact indicator calculation; parallel implementation process risk calculation and related interviews.
-- [1.8.4] (5/27/2024) First draft implementation report PxI changes in risks as a function of (estimated) application of measures.
+- [1.8.4] (05/27/2024) First draft implementation report PxI changes in risk as a function of (estimated) application of measures.
 - [1.8.3] (17/05/2024) Completed implementation measure details page. Parallel implementation output calculation of processes.
 - [1.8.2] (16/05/2024) Parallel implementation process step calculation. Improvements in presentation of details of a measure. Transformation of vector icons to raster.
 - [1.8.1] (14/05/2024) Parallel implementation element calculation (P-type indicators, process inputs). Improvements in presentation of suggested measures (eliminated duplicates).
@@ -267,18 +264,18 @@ in the case of the current application, in fact, version numbers have only the s
 - [1.6.3] (08/01/2024) Refined CSV extraction relative to single interview; added sorting by name to process tree nodes; improved PxI report presentation of processes
 - [1.6.2] (15/12/2023) Revised algorithm for calculating probability size; P; added style to highlight very high risk value
 - [1.6.1] (11/12/2023) Revised algorithm for calculating impact indicator I3; fixed bugs
-- [1.6.0] (07/12/2023) Implemented output to RTF file of tabular report summarizing risks and facilities; bug fixes
-- [1.5.9] (30/11/2023) Refined algorithm for calculating I3 indicator by taking into account the involvement of global categories of facilities and considering non-determinable cases in which there are no n&eacute; facilities n&eacute; subjects associated with process steps (a process &egrave; always a function of the activity of at least one facility or a contingent subject) 
-- [1.5.8] (29/11/2023) Preparation for generating output to RTF files; corrections in end-of-line transcoding
+- [1.6.0] (07/12/2023) Implemented output to Rich Text Format file of tabular report summarizing risk and facilities; bug fixes
+- [1.5.9] (30/11/2023) Refined algorithm for calculating I3 indicator by taking into account the involvement of global categories of facilities and considering non-determinable cases in which there are no facilities subjects associated with process steps (a process is always a function of the activity about at least one facility or a contingent subject) 
+- [1.5.8] (29/11/2023) Preparation for generating output to Rich Text Format files; corrections in end-of-line transcoding
 - [1.5.7] (28/11/2023) Rewrote code for producing output other than synchronous html; revised labels
 - [1.5.6] (27/11/2023) Implemented calculation of dimension I (risk impact) and combination of P and I (PxI index)
 - [1.5.5] (20/11/2023) Added P (probability of risk) dimension calculation.
 - [1.5.4] (16/11/2023) Revised probability indicator calculation algorithm P4; screenshot revisions
 - [1.5.3] (13/11/2023) Added PxI summary table of all processes, listing the value obtained in each indicator for each process
 - [1.5.2] (06/11/2023) Added in summary table of the PxI of all processes and structures, the macroprocesses, risk areas and stakeholders in each process
-- [1.5.1] (30/10/2023) Added PxI summary table of all processes, listing risks and structures associated with each process
+- [1.5.1] (30/10/2023) Added PxI summary table of all processes, listing risk and structures associated with each process
 - [1.5.0] (23/10/2023) Added subpages in report section; improved presentation of default searches
-- [1.4.9] (19/10/2023) Refined formal check on the validity of the answer: omitted some checks in case the answer is related to a child question (“of which” type questions)
+- [1.4.9] (19/10/2023) Refined formal check on the validity of the answer: omitted some checks in case the answer is related to a child question (“subordinate” type questions)
 - [1.4.8] (17/10/2023) Implemented on-disk caching of risk indicator values
 - [1.4.7] (11/10/2023) Transformed structure containing risk indicators into ordered map
 - [1.4.6] (10/10/2023) Added attribute to anticorruptive process object to contain values of risk indicators
@@ -288,7 +285,7 @@ in the case of the current application, in fact, version numbers have only the s
 - [1.4.2] (12/09/2023) Corrected charset handling in response edit form; showed stage id as title in process detail page
 - [1.4.1] (11/09/2023) Added handling in interview of question type that has percentage as answer; added svg images as tree markers; revised landing page; moved some predefined searches from landing page to free search page; expanded visible application width. 
 - [1.4.0] (04/09/2023) Corrected label, typography; added screenshots.
-- [1.3.9] (29/08/2023) Implemented interview consultation page to hide/show unanswered questions. Graphical improvements to presentation of process details; revised login page graphics, link to download csv, labels and other ornaments.
+- [1.3.9] (29/08/2023) Implemented interview consultation page to hide/show unanswered questions. Graphical improvements to presentation of process details; revised login page graphics, link to download Comma Separated Values files, labels and other ornaments.
 - [1.3.8] (24/08/2023) Implemented facility in interview consultation to hide/show unanswered questions.
 - [1.3.7] (01/08/2023) Implemented facility to enter ternary relationship between corrupt risk and enabling factor, in the context of a process. Bug fix.
 - [1.3.6] (24/07/2023) Implemented register of risk enablers; shown risk-related enablers in the context of a process.
@@ -296,10 +293,10 @@ in the case of the current application, in fact, version numbers have only the s
 - [1.3.4] (27/03/2023) Delegated interview management (viewing, entering, updating responses) to a new sofware component twinned from Risk Command
 - [1.3.3] (06/03/2023) Implemented function of adding a corruption risk to the risk register
 - [1.3.2] (02/28/2023) Added output details page, listing processes generated from current output where it acted as process input. Implemented output list page. Bug fixes.
-- [1.3.1] (15/02/2023) Added functionality to download risk register in CSV format (extracts only risks with associated processes, as per business rules)
+- [1.3.1] (15/02/2023) Added functionality to download risk register in CSV format (extracts only risk with associated processes, as per business rules)
 - [1.3.0] (13/02/2023) Added corrupt risk details page, listing processes exposed to selected risk. Implemented stand-alone process details page. Reorganized landing page.
 - [1.2.9] (08/02/2023) Minor presentation improvements in process details: highlighted risk area, showed contingent subject detail.
-- [1.2.8] (06/02/2023) Expanded anti-corruption process detail: showed risks to which the process &egrave; exposed
+- [1.2.8] (06/02/2023) Expanded anti-corruption process detail: showed risk to which the process is exposed
 - [1.2.7] (30/01/2023) Implemented corrupt risk register; bug fixes
 - [1.2.6] (12/21/2022) Added functionality to download specific process details in CSV format
 - [1.2.5] (13/12/2022) Added input, phase, output details in general process extraction CSV
