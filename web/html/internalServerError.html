@@ -2,22 +2,15 @@
 <html>
   <head>
     <title>
-      Informazioni sul sito
+      Accesso negato
     </title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.css">
     <!-- Latest compiled CSS, just in case -->
     <link rel="stylesheet" href="web/style/bootstrap/bootstrap.css" type="text/css" />
-    <style type="text/css">
-    body,
-    html {
-        padding: 0;
-        margin: 0;
-        font-family: 'Quicksand', sans-serif;
-        font-weight: 400;
-        overflow: hidden;
-    }
-    
+    <style type="text/css">   
     .writing {
         width: 320px;
         height: 200px;
@@ -250,14 +243,63 @@
                     transform: scale(.6);
           }
       }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      
+      .error-card {
+        background-color: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      
+      .error-card h1 {
+        color: #333;
+        font-size: 36px;
+        margin-bottom: 20px;
+      }
+      
+      .error-card p {
+        color: #666;
+        font-size: 18px;
+        margin-bottom: 30px;
+      }
+      
+      .error-card a {
+        display: inline-block;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+      
+      .error-card a:hover {
+        background-color: #0056b3;
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <div class="error">
-        <h2>Errore</h2>
-        <h1>500</h1>
-        <p>Il server non &egrave; stato in grado di rispondere alla richiesta effettuata.</p>
+      <div class="error-card">
+        <h2>Ritenta</h2>
+        <h1>Credenziali non valide</h1>
+        <p><span class="bg-warning">o errore interno</span></p>
       </div>
       <div class="stack-container">
         <div class="card-container">
@@ -367,11 +409,11 @@
     <div class="alert alert-danger">
       <strong>Attenzione!</strong>
       <p>
-        L'errore potrebbe essere stato causato da un inserimento errato delle credenziali. &Egrave; possibile ritentare l'accesso <a href="/rischi/">cliccando qui</a>
-        (vi verrai diretto automaticamente tra: <span class="text-primary" id="countdown">10</span>)
+        &Egrave; possibile che il problema riguardi l'autenticazione. &Egrave; possibile ritentare l'accesso <a href="/rischi/">cliccando qui</a>
+        (vi verrai diretto automaticamente tra: <span class="text-primary" id="countdown">2</span>)
       </p>
       <script type="text/javascript">
-        var ss = 10;
+        var ss = 2;
         function countdown() {
           ss = ss-1;
           if (ss < 0) {
