@@ -207,17 +207,17 @@
           <hr class="separatore" />
           <div class="row lblca">
             <div class="large-4 column ">
-              <a href="javascript:void(0);" type="button" class="js-add-row btn btn-primary btn-small badge-pill">+ Strutture</a>
+              <a href="javascript:void(0);" type="button" class="js-add-row btn btn-primary bgAct14 badge-pill">+ Strutture</a>
             </div>
             <div class="large-4 column">
-              <a href="javascript:void(0);" type="button" class="js-remove-row btn btn-danger btn-small badge-pill">- Elimina</a>
+              <a href="javascript:void(0);" type="button" class="js-remove-row btn btn-danger bgAct25 badge-pill">- Elimina</a>
             </div>
           </div>
         </div>
         <br />
         &nbsp;
         <div class="centerlayout">
-          <button type="submit" class="btn btn-success" id="btn-save" value="Save">
+          <button type="submit" class="btn btn-success bgAct18" id="btn-save" value="Save">
             <i class="far fa-save"></i> Salva
           </button>
         </div>
