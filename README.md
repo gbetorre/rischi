@@ -238,6 +238,7 @@ in the case of the current application, in fact, version numbers have only the s
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)</p>
 <cite>(The realease date is in Italian format)</cite>
 
+- [1.8.7] (19/06/2024) Testing dark theme; mitigation algorithm first draft
 - [1.8.6] (05/06/2024) Graphic revision landing page; revision of labels.
 - [1.8.5] (28/05/2024) Parallel implementation impact indicator calculation; parallel implementation process risk calculation and related interviews.
 - [1.8.4] (05/27/2024) First draft implementation report PxI changes in risk as a function of (estimated) application of measures.
