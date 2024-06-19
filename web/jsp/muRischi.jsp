@@ -69,7 +69,7 @@
           <c:out value="${pat.indicatori.get('PxI').informativa}" />
         </p>
       </div>
-      <div class="value text-center">
+      <div class="value text-center text-white border">
       <c:set var="generali" value="${zero}" scope="page" />
       <c:set var="specifiche" value="${zero}" scope="page" />
       <c:forEach var="mis" items="${risk.misure}">
@@ -91,7 +91,7 @@
       </c:if>
       </div>
       <div class="value bgcolor-${classSuffix}">
-        <p class="text-center" title="${pat.indicatori.get('PxI').descrizione}">
+        <p class="text-center" title="senza misure: ${pat.indicatori.get('PxI').descrizione}">
           <c:out value="${pat.indicatori.get('PxI').informativa}" />
         </p>
       </div>
