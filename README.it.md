@@ -7,7 +7,7 @@
 *** Thanks again! Now go create something AMAZING! :D
 -->
 
-### Altre lingue
+### Lingue
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/gbetorre/rischi/blob/master/README.md)
 [![it](https://img.shields.io/badge/lang-it-yellow.svg)](https://github.com/gbetorre/rischi/blob/master/README.it.md)
 
@@ -39,7 +39,7 @@
     Applicazione web per la mappatura dei rischi corruttivi cui sono esposti i processi organizzativi
     <br><br>
     <a href="https://github.com/gbetorre/rischi"><strong>Esplora i files »</strong></a>
-    <br>
+    <br><br>
     <a href="https://github.com/gbetorre/rischi/issues">Report Bug</a>
     ·
     <a href="https://github.com/gbetorre/rischi/pulls">Request Feature</a>
@@ -328,19 +328,20 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.9.4] Implementata form di ricerca sui quesiti per chiave testuale
 - [1.9.3]   implementato algoritmo di mitigazione del rischio in funzione delle misure applicate
 - ...
-- [1.8.7] (  /06/2024)   
+- [1.8.8] (  24/06/2024)   
 
 
 ### Done
 -->
+- [1.8.7] (19/06/2024) Prova tema scuro; prima bozza di implementazione algoritmo di mitigazione
 - [1.8.6] (05/06/2024) Revisione grafica pagina di landing; revisione di etichette
-- [1.8.5] (28/05/2024) Implementazione parallela calcolo indicatori di impatto; implementazione parallela calcolo rischi di processi e interviste collegate.
+- [1.8.5] (28/05/2024) Implementazione parallela calcolo indicatori di impatto; implementazione parallela calcolo rischi di processi e interviste collegate
 - [1.8.4] (27/05/2024) Prima bozza di implementazione report variazioni PxI dei rischi in funzione dell'applicazione (stimata) delle misure
-- [1.8.3] (17/05/2024) Completamento implementazione pagina dei dettagli di una misura. Implementazione parallela calcolo output di processi.
-- [1.8.2] (16/05/2024) Implementazione parallela calcolo fasi di processo. Miglioramenti nella presentazione dei dettagli di una misura. Trasformazione di icone vettoriali in raster.
-- [1.8.1] (14/05/2024) Implementazione parallela calcolo elementi (indicatori di tipo P, input di processi). Miglioramenti nella presentazione delle misure suggerite (eliminati doppioni).
-- [1.8.0] (13/05/2024) Prima bozza implementazione pagina dei dettagli di una misura di prevenzione/mitigazione del rischio. Miglioramenti nella presentazione delle misure suggerite (raggruppamento delle misure suggerite per tipologia di misura).
-- [1.7.9] (07/05/2024) Miglioramenti nella presentazione delle misure applicate. Correzione di bug.
+- [1.8.3] (17/05/2024) Completamento implementazione pagina dei dettagli di una misura. Implementazione parallela calcolo output di processi
+- [1.8.2] (16/05/2024) Implementazione parallela calcolo fasi di processo. Miglioramenti nella presentazione dei dettagli di una misura. Trasformazione di icone vettoriali in raster
+- [1.8.1] (14/05/2024) Implementazione parallela calcolo elementi (indicatori di tipo P, input di processi). Miglioramenti nella presentazione delle misure suggerite (eliminati doppioni)
+- [1.8.0] (13/05/2024) Prima bozza implementazione pagina dei dettagli di una misura di prevenzione/mitigazione del rischio. Miglioramenti nella presentazione delle misure suggerite (raggruppamento delle misure suggerite per tipologia di misura)
+- [1.7.9] (07/05/2024) Miglioramenti nella presentazione delle misure applicate; correzione di bug
 - [1.7.8] (06/05/2024) Implementazione funzione di assegnazione delle misure di mitigazione a specifico rischio nel contesto di un processo
 - [1.7.7] (22/04/2024) Aggiunta pagina contenente form per applicare misure di mitigazione a un rischio, elencante anche le misure suggerite sulla base dei fattori abilitanti trovati associati al rischio entro il contesto del processo
 - [1.7.6] (15/04/2024) Miglioramenti visualizzazione del registro delle misure di prevenzione: mostrata sostenibilit&agrave; economica della misura e strutture coinvolte
