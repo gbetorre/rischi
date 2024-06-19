@@ -35,10 +35,10 @@
 package it.rol.command;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -54,6 +54,7 @@ import it.rol.Main;
 import it.rol.Query;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
+import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.MeasureBean;
 import it.rol.bean.PersonBean;
@@ -493,9 +494,10 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
     }
     
     
-    /* ******************************************************************** *
-     *                                Metodi                                *
-     * ******************************************************************** */
+    /* **************************************************************** *
+     *  Metodi di caricamento dei parametri in strutture indicizzabili  *                     
+     *                              (load)                              *
+     * **************************************************************** */
     
     /**
      * Valorizza per riferimento una mappa contenente tutti i valori 
@@ -596,6 +598,11 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
     }
     
     
+    /* **************************************************************** *
+     *                   Metodi di travaso dei dati                     *                     
+     *                    (decant, filter, purge)                       *
+     * **************************************************************** */
+    
     /**
      * Dati in input un array di valori e un livello numerico, distribuisce
      * tali valori in una struttura dictionary, passata come parametro, 
@@ -689,6 +696,59 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             }
         }
         return results;
+    }
+    
+    
+    /* **************************************************************** *
+     *     Metodi di implementazione degli algoritmi di mitigazione     *                     
+     * **************************************************************** */
+    
+    // TODO COMMENTO
+    public static InterviewBean mitigate(final InterviewBean indicator,
+                                         final ArrayList<MeasureBean> measures)
+                                  throws CommandException {
+        try {
+            InterviewBean mIndicator = new InterviewBean(); // Mitigated Indicator
+            float reduction = NOTHING;
+            int weight = Arrays.binarySearch(LIVELLI_RISCHIO, indicator.getInformativa());
+            int index;
+            for (MeasureBean measure : measures) {
+                if (measure.getCarattere().getInformativa().equals("G")) {
+                    reduction += 0.5;
+                } else if (measure.getCarattere().getInformativa().equals("S")) {
+                    reduction += 1.0;
+                } else {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del carattere della misura.\n";
+                    LOG.severe(msg);
+                    throw new CommandException(msg);
+                }
+            }
+            // Applica la riduzione (indice = peso dell'indicatore - riduzione)
+            float f = weight - reduction;
+            // Se l'indice calcolato è intero se lo tiene così
+            if (f % 1 == 0) {
+                index = (int) f;
+            } else {
+                // Se no tiene la parte intera e la incrementa di 1
+                index = ((int) f) + 1; 
+            }
+            String result = LIVELLI_RISCHIO[index];
+            // Valorizza e restituisce l'indicatore mitigato
+            mIndicator.setNome(indicator.getNome());
+            mIndicator.setInformativa(result);
+            //mIndicator.setDescrizione(indicatorByCode.get(indicator.getNome()).getInformativa());
+            mIndicator.setRisposte(indicator.getRisposte());
+            mIndicator.setProcesso(indicator.getProcesso());
+            return mIndicator;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
     }
     
 }
