@@ -72,10 +72,10 @@
               </strong>
             </div>
           </td>
-          <td class="bgcolor1" width="23%">
+          <td class="bgcolor1 bgAct2" width="23%">
             <strong><c:out value="${iview.processo.nome}" /></strong>
           </td>
-          <td class="bgcolor1" width="12%">
+          <td class="bgcolor1 bgAct4" width="12%">
             <a href="${initParam.appName}/?q=pr&p=pro&pliv=${iview.processo.processi.get(zero).id}&liv=2&r=${param['r']}">
               <c:out value="${iview.processo.processi.get(zero).nome}" />
             </a>
