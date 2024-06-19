@@ -607,7 +607,8 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
                 tokenSurvey = PARAM_SURVEY + tokensAsMap.get(PARAM_SURVEY);
             }
             // Il link alla home è fisso
-            final String homeLnk = appName + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_HOME + AMPERSAND + tokenSurvey;
+            //final String homeLnk = appName + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_HOME + AMPERSAND + tokenSurvey;
+            final String homeLnk = "/rol";
             // Crea un oggetto per incapsulare il link della root
             ItemBean root = new ItemBean(appName, homeLbl, homeLnk, MAIN_MENU);
             // Aggiunge la root alle breadcrumbs
