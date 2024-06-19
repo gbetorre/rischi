@@ -7,16 +7,17 @@
   <c:set var="bgbody" value="masthead" scope="page" />
 </c:if>
 <!DOCTYPE html>
-<html>
+<html lang="it">
   <head>
     <title><c:out value="${requestScope.tP}" escapeXml="false" /></title>
     <meta charset="utf-8" />
     <meta name="language" content="Italian" />
+    <meta name="keywords" content="pa,software pa,analisi del rischio,gestione del rischio corruttivo,mappatura dei processi organizzativi">
     <meta name="description" content="${requestScope.advice}" />
     <meta name="viewport" content="width=device-width, user-scalable=no,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
     <meta name="creator" content="Giovanroberto Torre" />
-    <meta name="author" content="Giovanroberto Torre, giovanroberto.torre@univr.it" />
-    <link rev="made" href="giovanroberto.torre@univr.it" />
+    <meta name="author" content="Giovanroberto Torre, giovanroberto.torre@univr.eu" />
+    <link rel="author" href="giovanroberto.torre@gmail.com" />
     <meta http-equiv='cache-control' content='no-cache'>
     <!-- Include jQuery from CDN or from local hosted copy -->
     <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
@@ -78,6 +79,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-bootstrap-datatables.css" type="text/css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" integrity="sha384-/frq1SRXYH/bSyou/HUp/hib7RVN1TawQYja658FEOodR/FQBKVqT9Ol+Oz3Olq5" crossorigin="anonymous">
+    <!-- google web font css -->
+    <link href="http://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
   </head>
   <body class="${pageScope.bgbody}">
   <c:catch var="exception">
