@@ -53,6 +53,7 @@ import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
+import it.rol.bean.MeasureBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.RiskBean;
@@ -270,6 +271,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                          *           Generate report risks-measure          *
                          * ************************************************ */
                         // Recupera i rischi indicizzati per identificativo di processo
+                        //risks = retrieveMitigatedRisksByProcess(matsWithoutIndicators, user, codeSur, db);
                         risks = retrieveRisksByProcess(matsWithoutIndicators, user, codeSur, db);
                         // Ha bisogno di personalizzare le breadcrumbs
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
@@ -647,6 +649,65 @@ public class ReportCommand extends ItemBean implements Command, Constants {
          }
          return risksByPat;
      }
+     
+     
+     /**
+      * // TODO COMMENTO ^v
+      * 
+      * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - privi di strutture associate
+      * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+      * @param codeSurvey    il codice della rilevazione
+      * @param db            WebStorage per l'accesso ai dati
+      * @return <code>HashMap&lt;ProcessBean, ArrayList&lt;RiskBean&gt;&gt;</code> - lista di rischi collegati al processo_at incapsulato in chiave
+      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+      */
+      public static LinkedHashMap<ProcessBean, ArrayList<RiskBean>> retrieveMitigatedRisksByProcess(final ArrayList<ProcessBean> mats,
+                                                                                           PersonBean user,
+                                                                                           String codeSurvey,
+                                                                                           DBWrapper db)
+                                                                                    throws CommandException {
+          ArrayList<RiskBean> risks, mitigatingRisks = null;
+          LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risksByPat = new LinkedHashMap<>();
+          try {
+              // Prepara l'oggetto rilevazione
+              CodeBean survey = ConfigManager.getSurvey(codeSurvey);
+              // Per ogni macroprocesso
+              for (ProcessBean mat : mats) {
+                  // Recupera i suoi processi
+                  for (ProcessBean pat : mat.getProcessi()) {
+                      // Estrae i rischi di un dato processo in una data rilevazione
+                      risks = db.getRisksByProcess(user, pat, survey);
+                      // Resetta il vettore dei rischi mitigati
+                      mitigatingRisks = new ArrayList<RiskBean>();
+                      // Per ogni rischio
+                      for (RiskBean risk : risks) {
+                          if (risk.getMisure() != null) {
+                              InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), (ArrayList<MeasureBean>) risk.getMisure());
+                              risk.setLivello(mitigatedPI.getInformativa());
+                          } else {
+                              risk.setLivello(pat.getIndicatori().get(PI).getInformativa());
+                          }
+                          mitigatingRisks.add(risk);
+                      }
+                      // Setta nella mappa la lista appena calcolata
+                      risksByPat.put(pat, mitigatingRisks);
+                  }
+              }
+          } catch (WebStorageException wse) {
+              String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei rischi calmierati.\n";
+              LOG.severe(msg);
+              throw new CommandException(msg + wse.getMessage(), wse);
+          } catch (NullPointerException npe) {
+              String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+              LOG.severe(msg);
+              throw new CommandException(msg + npe.getMessage(), npe);
+          } catch (Exception e) {
+              String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+              LOG.severe(msg);
+              throw new CommandException(msg + e.getMessage(), e);
+          }
+          return risksByPat;
+      }
 
     
     /* **************************************************************** *
