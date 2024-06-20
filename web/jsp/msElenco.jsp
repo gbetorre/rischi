@@ -4,22 +4,6 @@
 <%@ include file="URL.jspf" %>
 <c:set var="measures" value="${requestScope.misure}" scope="page" />
     <style>
-       .custom-button {
-            padding: 10px 20px;
-            background-color: #2ecc71;
-            /*color: white;*/
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            text-align: center;
-            text-decoration: none;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Adding depth with box-shadow */
-        }
-        .custom-button:hover {
-            background-color: #2980b9;
-            color: black !important;
-        }
         table {
             border-collapse: collapse;
             width: 100%;
@@ -74,7 +58,7 @@
     <div class="p-3 p-md-4 border rounded-3 icon-demo-examples bgAct26">
       <div class="fs-2 mb-3 text-white">
         Misure &nbsp;
-        <a href="${mnm}" class="custom-button text-white" title="Aggiungi una nuova misura di contenimento o prevenzione al registro delle misure">
+        <a href="${mnm}" class="btn btn-success btn-lg" title="Aggiungi una nuova misura di contenimento o prevenzione al registro delle misure">
           <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Misura
         </a>
         <%-- 
@@ -161,6 +145,6 @@
         <i class="fas fa-download"></i> <span class="sezioneElenco">Scarica tutti i dati&nbsp;</span>
       </a>  --%>
     </h4>
-    <a href="${mnm}" class="custom-button btn-lg btn-block" title="Aggiungi una nuova misura di contenimento o prevenzione al registro delle misure">
+    <a href="${mnm}" class="btn btn-success btn-lg btn-block" title="Aggiungi una nuova misura di contenimento o prevenzione al registro delle misure">
       <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Misura
     </a>

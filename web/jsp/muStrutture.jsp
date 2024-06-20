@@ -24,7 +24,7 @@
       <i class="fa-solid fa-book"></i> Log ricalcolo
     </a>
     <span class="float-right">
-      <a href="${mtr}&msg=refresh_ce" type="button" class="btn btn-primary float-right refresh" id="refresh" title="Effettua un ricalcolo dei valori di rischio di tutti i processi e li memorizza come nuovi valori cache">
+      <a href="${mtr}&msg=refresh_ce" type="button" class="btn btn-primary float-right refresh" style="padding-top:5px;height:30px" id="refresh" title="Effettua un ricalcolo dei valori di rischio di tutti i processi e li memorizza come nuovi valori cache">
         <i class="fa-solid fa-arrow-rotate-right"></i>
         Ricalcola
       </a>&nbsp;&nbsp;

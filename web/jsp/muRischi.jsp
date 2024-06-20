@@ -69,7 +69,7 @@
           <c:out value="${pat.indicatori.get('PxI').informativa}" />
         </p>
       </div>
-      <div class="value text-center text-white border">
+      <div class="value text-center border">
       <c:set var="generali" value="${zero}" scope="page" />
       <c:set var="specifiche" value="${zero}" scope="page" />
       <c:forEach var="mis" items="${risk.misure}">
@@ -82,6 +82,7 @@
         </c:when>
         </c:choose>
       </c:forEach>
+        <p class="profileInfo" title="Generali: ${generali}; Specifiche: ${specifiche}">
       <c:if test="${generali gt zero}">
         <c:out value="${generali}G" />
         <c:if test="${specifiche gt zero}"> + </c:if>
@@ -89,6 +90,7 @@
       <c:if test="${specifiche gt zero}">
         <c:out value="${specifiche}S" />
       </c:if>
+        </p>
       </div>
       <div class="value bgcolor-${classSuffix}">
         <p class="text-center" title="senza misure: ${pat.indicatori.get('PxI').descrizione}">
