@@ -236,8 +236,9 @@ it does not identify whether the version is stable or not (an aspect usually ide
 nor does it have relevant jumps according to high-impact changes (e.g., moving from version 6.1.38 to version 7.0.1 of VirtualBox, which marked a fairly big change); 
 in the case of the current application, in fact, version numbers have only the signficance of keeping track of releases and deploys 
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)</p>
-<cite>(The realease date is in Italian format)</cite>
+<cite>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</cite>
 
+- [1.8.8] (20/06/2024) Restoring the light theme, keeping the dark theme only for the header and landing pages
 - [1.8.7] (19/06/2024) Testing dark theme; mitigation algorithm first draft
 - [1.8.6] (05/06/2024) Graphic revision landing page; revision of labels.
 - [1.8.5] (28/05/2024) Parallel implementation impact indicator calculation; parallel implementation process risk calculation and related interviews.
