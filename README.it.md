@@ -328,11 +328,12 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.9.4] Implementata form di ricerca sui quesiti per chiave testuale
 - [1.9.3]   implementato algoritmo di mitigazione del rischio in funzione delle misure applicate
 - ...
-- [1.8.9] (  24/06/2024)   
+- [1.9.2] (  /08/2024)   
 
 
 ### Done
 -->
+- [1.8.9] (25/06/2024) Uniformazione versione, descrizioni e commenti
 - [1.8.8] (20/06/2024) Ripristino del tema chiaro, mantenendo il tema scuro solo per l'header e le pagine di landing
 - [1.8.7] (19/06/2024) Prova tema scuro; prima bozza di implementazione algoritmo di mitigazione
 - [1.8.6] (05/06/2024) Revisione grafica pagina di landing; revisione di etichette
