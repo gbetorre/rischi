@@ -148,43 +148,37 @@
     </context-param>
 
     <context-param>
-        <description></description>
+        <description>Parametro che identifica la Command per gestire la richiesta</description>
         <param-name>entToken</param-name>
         <param-value>q</param-value>
     </context-param>
 
     <context-param>
-        <description></description>
+        <description>Parametro che identifica il formato di output richiesto</description>
         <param-name>outToken</param-name>
         <param-value>out</param-value>
     </context-param>
 
     <context-param>
-        <description>URL della directory che contiene i documenti
-            allegati. Se inizia per 'http://' la directory è remota, se
-            inizia per '/' la directory è relativa alla DocumentRoot
-            del server web, se inizia con una stringa diversa dalle
-            precedenti, la directory è relativa alla jsp in cui viene
-            invocata.
-        </description>        
+        <description>URL della directory che contiene i documenti</description>        
         <param-name>urlDirectoryDocumenti</param-name>
         <param-value>documenti</param-value>
     </context-param>
     
     <context-param>
-        <description>Directory fogli stile di PrOL   ../web/style/</description>
+        <description>Directory fogli stile</description>
         <param-name>urlDirectoryStili</param-name>
         <param-value>web/style/</param-value>
     </context-param>
     
     <context-param>
-        <description>Directory script client di PrOL   ../web/js/</description>
+        <description>Directory script client</description>
         <param-name>urlDirectoryScript</param-name>
         <param-value>web/js/</param-value>
     </context-param>
     
     <context-param>
-        <description>Directory immagini di PrOL   ../web/img/</description>
+        <description>Directory immagini</description>
         <param-name>urlDirectoryImmagini</param-name>
         <param-value>web/img/</param-value>
     </context-param>
