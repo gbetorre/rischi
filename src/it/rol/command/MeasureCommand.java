@@ -328,7 +328,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                                            AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
                                            AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
-                                           AMPERSAND + MESSAGE + EQ + "newRel#rischi";
+                                           AMPERSAND + MESSAGE + EQ + "newRel#rischi-fattori-misure";
                             }
                         }
                     } else {
@@ -699,6 +699,17 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
     }
     
     
+    // TODO COMMENTO
+    private static int getIndex(String[] array, String element) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].equalsIgnoreCase(element)) {
+               return i;
+            }
+         }
+         return -1; // Element not found
+    }
+    
+    
     /* **************************************************************** *
      *     Metodi di implementazione degli algoritmi di mitigazione     *                     
      * **************************************************************** */
@@ -708,30 +719,51 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                                          final ArrayList<MeasureBean> measures)
                                   throws CommandException {
         try {
-            InterviewBean mIndicator = new InterviewBean(); // Mitigated Indicator
+            // Controllo sull'input
+            if (measures == null || measures.isEmpty()) {
+                // Se non sono state applicate misure, inutile continuare
+                return indicator;
+            }
+            // Mitigated Indicator
+            InterviewBean mIndicator = new InterviewBean();
+            // Initialize reduction to zero
             float reduction = NOTHING;
-            int weight = Arrays.binarySearch(LIVELLI_RISCHIO, indicator.getInformativa());
-            int index;
+            // Recupera il valore indice corrispondente al valore PxI corrente
+            //int weight = Arrays.binarySearch(LIVELLI_RISCHIO, indicator.getInformativa());
+            int weight = getIndex(LIVELLI_RISCHIO, indicator.getInformativa());
+            // Nuovo indice da considerare ai fini del calcolo del PxI mitigato
+            int index = weight;
+            // Cicla sulle misure applicate 
             for (MeasureBean measure : measures) {
+                // Per ogni misura generica toglie uno 0,5
                 if (measure.getCarattere().getInformativa().equals("G")) {
                     reduction += 0.5;
+                // Per ogni misura specifica toglie un 1    
                 } else if (measure.getCarattere().getInformativa().equals("S")) {
                     reduction += 1.0;
+                // Una misura puo' solo essere o generica o specifica
                 } else {
                     String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del carattere della misura.\n";
                     LOG.severe(msg);
                     throw new CommandException(msg);
                 }
             }
-            // Applica la riduzione (indice = peso dell'indicatore - riduzione)
+            // Applica la riduzione (nuovo indice = [peso indicatore - riduzione])
             float f = weight - reduction;
-            // Se l'indice calcolato è intero se lo tiene così
-            if (f % 1 == 0) {
-                index = (int) f;
+            // Controllo che l'indice non sia sceso al di sotto del minimo
+            if (f < NOTHING) {
+                // Se le misure porterebbero al di sotto del minimo, vale il minimo
+                index = NOTHING;
             } else {
-                // Se no tiene la parte intera e la incrementa di 1
-                index = ((int) f) + 1; 
+                // Se l'indice calcolato è intero se lo tiene così
+                if (f % 1 == 0) {
+                    index = (int) f;
+                } else {
+                    // Altrimenti tiene la parte intera e la incrementa di 1
+                    index = ((int) f) + 1; 
+                }
             }
+            // Converte l'indice calcolato in valore nominale applicando la funzione di corrispondenza
             String result = LIVELLI_RISCHIO[index];
             // Valorizza e restituisce l'indicatore mitigato
             mIndicator.setNome(indicator.getNome());
