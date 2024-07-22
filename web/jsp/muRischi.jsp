@@ -59,7 +59,7 @@
       <div class="entry bgAct4"></div>
       <c:forEach var="risk" items= "${risks.get(pat)}" varStatus="status">
       <div class="entry head bgAct4 extra-wide">           
-        <a href="${initParam.appName}/?q=pr&p=pro&pliv=${pat.id}&liv=${pat.livello}&r=${param['r']}">
+        <a href="${initParam.appName}/?q=pr&p=pro&pliv=${pat.id}&liv=${pat.livello}&r=${param['r']}#rischi-fattori-misure">
           <c:out value="${status.count}) ${risk.nome}" />
         </a>
       </div>
@@ -92,9 +92,9 @@
       </c:if>
         </p>
       </div>
-      <div class="value bgcolor-${classSuffix}">
-        <p class="text-center" title="senza misure: ${pat.indicatori.get('PxI').descrizione}">
-          <c:out value="${pat.indicatori.get('PxI').informativa}" />
+      <div class="value bgcolor-${fn:toLowerCase(risk.livello)}">
+        <p class="text-center" title="${pat.indicatori.get('PxI').informativa} &ndash; (${generali*0.5} + ${specifiche*1.0}) = ${risk.livello}">
+          <c:out value="${risk.livello}" />
         </p>
       </div>
 
