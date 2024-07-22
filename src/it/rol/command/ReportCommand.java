@@ -271,8 +271,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                          *           Generate report risks-measure          *
                          * ************************************************ */
                         // Recupera i rischi indicizzati per identificativo di processo
-                        //risks = retrieveMitigatedRisksByProcess(matsWithoutIndicators, user, codeSur, db);
-                        risks = retrieveRisksByProcess(matsWithoutIndicators, user, codeSur, db);
+                        //risks = retrieveRisksByProcess(matsWithoutIndicators, user, codeSur, db);
+                        risks = retrieveMitigatedRisksByProcess(matsWithoutIndicators, user, codeSur, db);
                         // Ha bisogno di personalizzare le breadcrumbs
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                         bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report misure");
