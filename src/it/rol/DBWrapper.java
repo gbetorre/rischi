@@ -4359,9 +4359,14 @@ public class DBWrapper extends QueryImpl {
                 }
                 // Recupera la eventuale misura aggiuntiva
                 String mesCodeAdd = meas.get("meas");
+                // Se ci sono misure aggiuntive
                 if (!mesCodeAdd.equals(VOID_STRING)) {
-                    mesCodes.append(",");
+                    if (mesCodes.length() > NOTHING) {
+                        mesCodes.append(",");
+                    }
+                    mesCodes.append("'");
                     mesCodes.append(mesCodeAdd);
+                    mesCodes.append("'");
                 }
                 // Recupera i dati
                 String query = getMeasureByRiskAndProcess(riskId, procId, survey.get(PARAM_SURVEY), String.valueOf(mesCodes), NOTHING);
