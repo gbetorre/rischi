@@ -65,6 +65,8 @@ public class MeasureBean extends CodeBean {
     private String codice;
     /** Risponde alla domanda: &quot;La misura comporta spese?&quot; */
     private String onerosa;
+    /** Numero di volte che la misura e' stata usata */
+    private int uso;
     /** Data ultima modifica */
     private Date dataUltimaModifica;
     /** Ora ultima modifica */
@@ -99,6 +101,7 @@ public class MeasureBean extends CodeBean {
         super();
         codice = null;
         onerosa = null;
+        uso = BEAN_DEFAULT_ID;
         dataUltimaModifica = new Date(0);
         oraUltimaModifica = null;
         autoreUltimaModifica = BEAN_DEFAULT_ID;
@@ -122,7 +125,7 @@ public class MeasureBean extends CodeBean {
      *      Metodi per ordinare oggetti di questo tipo nelle liste      *
      * **************************************************************** */
     
-    /*
+    /* Careful: depends only on Ordinale!
      * <p>Compara due oggetti basandosi sulla loro chiave</p>
      * <p>
      * Questo permette di effettuare comparazioni direttamente 
@@ -211,7 +214,7 @@ public class MeasureBean extends CodeBean {
         try {
             idRilevazione = this.getRilevazione().getId();
         } catch (AttributoNonValorizzatoException anve) {
-            return null;
+            return anve.getLocalizedMessage();
         }
         return FOR_NAME + "@" + this.codice + Constants.UNDERSCORE + idRilevazione;
     }
@@ -280,9 +283,35 @@ public class MeasureBean extends CodeBean {
     
 
     /* *********************************************************** *
-     *       Metodi getter e setter per data ultima modifica       *
+     *    Metodi getter e setter per numero di usi della misura    *
      * *********************************************************** */
     
+    /**
+     * Restituisce il numero di volte in cui la misura &egrave; stata
+     * applicata ai rischi nel contesto dei rispettivi processi (nella rilevazione
+     * corrente).
+     * 
+     * @return <code>int</code> - byte castato a int rappresentante la "popolarit&agrave;" della misura
+     */
+    public int getUso() {
+        return uso;
+    }
+
+
+    /**
+     * Imposta il numero di volte che la misura corrente &egrave; stata applicata a rischi nella rilevazione corrente
+     * 
+     * @param uso la "popolarit&agrave;" della misura
+     */
+    public void setUso(int uso) {
+        this.uso = uso;
+    }
+
+    
+    /* *********************************************************** *
+     *       Metodi getter e setter per data ultima modifica       *
+     * *********************************************************** */
+
     /**
      * Restituisce la data dell'ultima modifica della misura
      *
