@@ -333,6 +333,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [1.9.1] (29/07/2024) Miglioramenti nella presentazione (header, bottoni, messaggi); aggiunto attributo a oggetto misura per contenere un valore di popolarit&agrave; della misura stessa
 - [1.9.0] (22/07/2024) Implementato algoritmo di mitigazione a livello del PxI del singolo rischio in funzione delle misure applicate
 - [1.8.9] (25/06/2024) Uniformazione versione, descrizioni e commenti
 - [1.8.8] (20/06/2024) Ripristino del tema chiaro, mantenendo il tema scuro solo per l'header e le pagine di landing
