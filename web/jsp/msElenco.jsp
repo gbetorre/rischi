@@ -70,11 +70,12 @@
         <thead>
           <tr>
             <th width="20%">Misura</th>
-            <th width="10%">Carattere</th>
+            <th width="6%">Carattere</th>
             <th width="5%">Comporta spese?</th>
             <th width="25%">Tipologie</th>
             <th width="20%">Struttura Capofila</th>
             <th width="20%">Strutture Coinvolte</th>
+            <th width="4%">Usi</th>
           </tr>
         </thead>
         <tbody>
@@ -128,9 +129,9 @@
                   <c:out value="${gr.prefisso}" /> <c:out value="${gr.nome}" />
                 </li>
             </c:forEach>
-
               </ul>
             </td>
+            <td class="text-center"><c:out value="${ms.uso}" /></td>
           </tr>
         </c:forEach>
         </tbody>
