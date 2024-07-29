@@ -7,33 +7,31 @@
 </c:if>
 <c:if test="${not empty sessionScope.usr.id}">
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />css/templatemo-clear.css">
-    <div class="header navbar navbar-default" role="navigation" style="height:80px;">
-      <div class="row justify-content-center">
-        <div class="col-3">
-          <a href="/rol" class="navbar-brand">
-            <img class="logoHeader" src="/rol/images/logo.png" class="img-responsive" alt="logo" title="ROL [Risk On Line] :: Risk Mapping Software">
-          </a>
-        </div>
-        <div class="col-9">
-          <p class="pHeader">
-            <span class="right">
-            <c:set var="benve" value="BENVENUTO" scope="page" />
-            <c:if test="${sessionScope.usr.sesso eq 'F'}">
-              <c:set var="benve" value="BENVENUTA" scope="page" />
-            </c:if>
-              <label class="hidden-xs"><c:out value="${benve}" /></label>
-              <a href="${utente}" class="linkHeader" title="Clicca per dettagli e cambio password">
-                <c:out value="${sessionScope.usr.nome}" />
-                <c:out value="${sessionScope.usr.cognome}" />
-              </a>&nbsp;
-              <a class="btn ${bg}" href="${initParam.appName}/auth?q=logout" ><i class="fas fa-sign-out-alt"></i> Esci</a>
-            </span>
-          </p>
-          <c:set var="strToSubst" value="${fn:substring(applicationScope.db, fn:length(applicationScope.db)-3, fn:length(applicationScope.db))}" scope="page" />
-          <!-- Questo commento viene stampato nel sorgente della pagina
-            <c:out value="${fn:replace(applicationScope.db, strToSubst, 'los')}" />
-          -->
-        </div>
+    <div class="row header navbar navbar-default" role="navigation" style="height:80px;">
+      <div class="col-1">
+        <a href="/rol" class="navbar-brand">
+          <img class="logoHeader" src="/rol/images/logo.png" class="img-responsive" alt="logo" title="ROL [Risk On Line] :: Risk Mapping Software">
+        </a>
       </div>
+      <div class="col-9">
+        <p class="pHeader btn-lightgray">
+          <span class="right">
+          <c:set var="benve" value="BENVENUTO" scope="page" />
+          <c:if test="${sessionScope.usr.sesso eq 'F'}">
+            <c:set var="benve" value="BENVENUTA" scope="page" />
+          </c:if>
+            <label class="hidden-xs"><c:out value="${benve}" /></label>
+            <a href="${utente}" class="cc-link" title="Clicca per dettagli e cambio password">
+              <c:out value="${sessionScope.usr.nome}" />
+              <c:out value="${sessionScope.usr.cognome}" />
+            </a>&nbsp;
+            <a class="btn ${bg}" href="${initParam.appName}/auth?q=logout" ><i class="fas fa-sign-out-alt"></i> Esci</a>
+          </span>
+        </p>
+        <c:set var="strToSubst" value="${fn:substring(applicationScope.db, fn:length(applicationScope.db)-3, fn:length(applicationScope.db))}" scope="page" />
+        <!-- Questo commento viene stampato nel sorgente della pagina
+          <c:out value="${fn:replace(applicationScope.db, strToSubst, 'los')}" />
+        -->
+      </div>     
     </div>
 </c:if>
