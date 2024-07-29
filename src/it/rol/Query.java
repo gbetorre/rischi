@@ -1201,11 +1201,14 @@ public interface Query extends Serializable {
             "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
             "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
             "   ,   MS.id_rilevazione                   AS \"idRilevazione\"" +
+            "   ,   count(MRPAT.id_rischio_corruttivo)::SMALLINT  AS \"uso\"" +
             "   FROM misura MS" +
             "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
+            "       LEFT JOIN misura_rischio_processo_at MRPAT ON (MRPAT.cod_misura = MS.codice AND MRPAT.id_rilevazione = MS.id_rilevazione)" +
             "   WHERE MS.id_rilevazione = ?" +
             "       AND (MS.codice = ? OR -1 = ?)" +
-            "   ORDER BY MS.ordinale";
+            "   GROUP BY (MS.codice, MS.nome, MS.descrizione, MS.onerosa, MS.ordinale, MS.data_ultima_modifica, MS.ora_ultima_modifica, MS.id_rilevazione)" +
+            "   ORDER BY MS.nome";
     
     /**
      * <p>Estrae gli estremi delle strutture di una misura.</p>
