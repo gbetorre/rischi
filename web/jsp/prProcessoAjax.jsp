@@ -175,16 +175,16 @@
           });
         </script>
         <div id="mainAlertMessage" class="alert alert-success alert-dismissible" role="alert">
-          Un nuovo fattore abilitante &egrave; stato aggiunto ai rischi!
+          Un nuovo collegamento &egrave; stato aggiunto ai rischi!
         </div>
         </c:if>
         <table class="table table-striped risultati" id="foundRisk">
           <thead>
             <tr>
               <th width="30%">Rischio </th>
-              <th width="25%">Fattori abilitanti</th>
+              <th width="20%">Fattori abilitanti</th>
               <th width="25%">Misure di prevenzione</th>
-              <th width="20%" class="text-center">Funzioni</th>
+              <th width="25%" class="text-center">Funzioni</th>
             </tr>
           </thead>
           <c:forEach var="risk" items="${risks}" varStatus="status">
@@ -198,7 +198,7 @@
                 <c:out value="${risk.nome}" />
               </a>
             </td>
-            <td width="25%">
+            <td width="20%">
               <ul class="list-group">
             <c:forEach var="fat" items="${risk.fattori}">
               <li class="list-group-item textcolormaroon">
@@ -225,13 +225,15 @@
             </c:forEach>
               </ul>
             </td>
-            <td width="20%" class="text-center">
-              <a href="${initParam.appName}/?q=pr&p=adf&idR=${risk.id}&pliv=${param['pliv']}&liv=2&r=${param['r']}" class="btn btn-primary" title="Aggiungi un fattore abilitante al rischio &quot;${fn:substring(risk.nome, 0, 22)}...&quot; nel contesto del processo &quot;${processo}&quot;">
-                <small><i class="fa-solid fa-circle-plus"></i> Fattore</small>
-              </a>&nbsp;
-              <a href="${initParam.appName}/?q=ms&p=adm&idR=${risk.id}&pliv=${param['pliv']}&liv=2&r=${param['r']}" class="btn btn-success" title="Aggiungi una misura di prevenzione al rischio &quot;${fn:substring(risk.nome, 0, 22)}...&quot; nel contesto del processo &quot;${processo}&quot;">
-                <small><i class="fa-solid fa-square-plus"></i> Misura</small>
-              </a>
+            <td width="25%" class="text-center">
+              <div class="btn-group">
+                <a href="${initParam.appName}/?q=pr&p=adf&idR=${risk.id}&pliv=${param['pliv']}&liv=2&r=${param['r']}" class="btn btn-primary" title="Aggiungi un fattore abilitante al rischio &quot;${fn:substring(risk.nome, 0, 22)}...&quot; nel contesto del processo &quot;${processo}&quot;">
+                  <small><i class="fa-solid fa-circle-plus"></i> Fattore</small>
+                </a>&nbsp;
+                <a href="${initParam.appName}/?q=ms&p=adm&idR=${risk.id}&pliv=${param['pliv']}&liv=2&r=${param['r']}" class="btn btn-success" title="Aggiungi una misura di prevenzione al rischio &quot;${fn:substring(risk.nome, 0, 22)}...&quot; nel contesto del processo &quot;${processo}&quot;">
+                  <small><i class="fa-solid fa-square-plus"></i> Misura</small>
+                </a>
+              </div>
             </td>
           </tr>
           </c:forEach>
