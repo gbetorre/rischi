@@ -294,7 +294,7 @@ effettuate ma solo i rilasci delle funzionalit&agrave; pi&uacute; significative.
 Ogni numero di versione &egrave; per&ograve; corredato della data del commit 
 dei sorgenti, per cui consultando la History del repository sar&agrave; facile
 entrare nel merito di tutte le modifiche effettuate in corrispondenza della
-sottoversione: inoltre, ogni versione corrisponde ad un commit, ma non ogni commit
+sottoversione: inoltre, ogni versione corrisponde ad un commit (a meno di errori), ma non ogni commit
 genera una versione.<br />
 
 <p style="font-size:small">
@@ -326,13 +326,14 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.9.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
 - [1.9.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [1.9.4] Implementata form di ricerca sui quesiti per chiave testuale
-- [1.9.3]   implementato algoritmo di mitigazione del rischio in funzione delle misure applicate
 - ...
-- [1.9.2] (  /08/2024)   
+
 
 
 ### Done
 -->
+- [1.9.3] (04/09/2024) Implementato report tabella dei PxI calmierati in base alle misure stimate
+- [1.9.2] (rilascio 02/08/2024 - commit 04/09/2024) Implementato algoritmo di ricalcolo PxI del processo in base alle misure applicate ai suoi rischi
 - [1.9.1] (29/07/2024) Miglioramenti nella presentazione (header, bottoni, messaggi); aggiunto attributo a oggetto misura per contenere un valore di popolarit&agrave; della misura stessa
 - [1.9.0] (22/07/2024) Implementato algoritmo di mitigazione a livello del PxI del singolo rischio in funzione delle misure applicate
 - [1.8.9] (25/06/2024) Uniformazione versione, descrizioni e commenti
