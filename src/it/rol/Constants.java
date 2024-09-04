@@ -131,6 +131,14 @@ public interface Constants extends Serializable {
      * che hanno un solo livello superiore (padre di livello 0)</p>
      */
     public static final int SUB_MENU = 1;
+    /**
+     * <p>Costante parlante per la mitigazione apportata da una misura generica</p>
+     */
+    public static final float WEIGHT_GENERIC = 0.5f;
+    /**
+     * <p>Costante parlante per la mitigazione apportata da una misura generica</p>
+     */
+    public static final float WEIGHT_SPECIFIC = 1.0f;
     /* ************************************************************************ *
      *              Costanti parlanti per valori boolean di flags               *
      * ************************************************************************ */
@@ -198,6 +206,10 @@ public interface Constants extends Serializable {
      * <p>Costante per il parametro identificante reportistica rischi.</p>
      */
     public static final String PART_RISKS               = "ris";
+    /**
+     * <p>Costante per il parametro identificante reportistica misure.</p>
+     */
+    public static final String PART_MEASURES            = "mes";
     /**
      * <p>Costante per il parametro identificante la form di ricerca.</p>
      */
@@ -377,6 +389,14 @@ public interface Constants extends Serializable {
      * <p>Giudizio sintetico (P x I).</p>
      */
     static final String PI = "PxI";
+    /**
+     * <p>P x I mitigato (stima).</p>
+     */
+    static final String PIM = "PxI (stima)";
+    /**
+     * <p>P x I mitigato (monitoraggio).</p>
+     */
+    static final String PIR = "PxI (reale)";
     /**
      * <p>Messaggio di errore sul calcolo degli indicatori.</p>
      */
