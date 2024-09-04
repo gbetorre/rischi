@@ -53,7 +53,11 @@
       </div>
       <div class="entry bgAct4"></div>
       <div class="entry bgAct4"></div>
-      <div class="entry bgAct4"></div>
+      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (stima)').informativa)} border-${fn:toLowerCase(pat.indicatori.get('PxI (stima)').informativa)}">
+        <p class="text-center" title="${pat.indicatori.get('PxI (stima)').descrizione}">
+          <c:out value="${pat.indicatori.get('PxI (stima)').informativa}" />
+        </p>
+      </div>
       <div class="entry bgAct4"></div>
       <div class="entry bgAct4"></div>
       <div class="entry bgAct4"></div>
@@ -98,9 +102,9 @@
         </p>
       </div>
 
-      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get(iname).informativa)} border-${fn:toLowerCase(pat.indicatori.get(iname).informativa)}">
-        <p class="text-center" title="${pat.indicatori.get(iname).descrizione}">
-          <c:out value="${idesc}" />
+      <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (stima)').informativa)}">
+        <p class="text-center" title="${pat.indicatori.get('PxI (stima)').descrizione}">
+          <c:out value="${pat.indicatori.get('PxI (stima)').informativa}" />
         </p>
       </div>
       <div class="entry bgAct4"></div>
