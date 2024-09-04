@@ -238,6 +238,8 @@ in the case of the current application, in fact, version numbers have only the s
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)</p>
 <cite>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</cite>
 
+- [1.9.3] (04/09/2024) Implemented PxI tabular report regarding mitigated process risks based on the measures estimated to be applied to the risks themselves
+- [1.9.2] (04/09/2024) Implemented process PxI recalculation algorithm based on the measures applied to its risks
 - [1.9.1] (29/07/2024) Presentation improvements (header, buttons, messages); new measure attribute to hold a popularity value of the measure itself
 - [1.9.0] (22/07/2024) Implemented mitigation algorithm at the PxI level of the individual risk
 - [1.8.9] (25/06/2024) Revised version, descriptions and comments
