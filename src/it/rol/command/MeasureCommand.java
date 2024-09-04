@@ -35,7 +35,6 @@
 package it.rol.command;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -320,7 +319,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "dupKey";
                             } else {
-                                // Inserisce nel DB nuova associazione tra rischio e processo
+                                // Inserisce nel DB nuova associazione tra rischio e misura
                                 db.insertMeasureRiskProcess(user, params);
                                 // Prepara la redirect 
                                 redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
@@ -699,7 +698,30 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
     }
     
     
-    // TODO COMMENTO
+    /**
+     * Dato un array ed un suo elemento, restituisce il valore dell'indice
+     * corrispondente all'elemento indicato.
+     * NOTA: esistono vari modi pi&uacute; efficienti per effettuare questa
+     * ricerca. Ad esempio, si pu&ograve; utilizzare il metodo:
+     * //int weight = Arrays.binarySearch(LIVELLI_RISCHIO, indicator.getInformativa());
+     * Putroppo per&ograve; questo metodo non funziona bene se l'array &egrave;
+     * un array di Stringhe, probabilmente perch&eacute; effettua il controllo
+     * sul valore dell'elemento tramite il puntamento diretto 
+     * (String == anotherString) e non tramite il controllo del contenuto 
+     * (String.equals(anotherString)). A me trovava sistematicamente la 
+     * corrispondenza con il primo valore, restituendo l'indice corrispondente,
+     * ma non con gli altri valori, che pure erano elementi dell'array.
+     * Rinunciando alla ricerca binaria, esistono altri metodi di confronto
+     * pi&ucute; raffinati di questo, come ArrayUtils.indexOf della libreria
+     * Commons Lang di Apache; tuttavia, essendo il contenuto dell'array 
+     * formato da oggetti e non da tipi primitivi, per maggior sicurezza
+     * implemento questo metodo in cui ho il controllo direttamente 
+     * del criterio di confronto.
+     * 
+     * @param array     l'array in cui trovare l'elemento specificato
+     * @param element   elemento dell'array di cui individuare la posizione
+     * @return <code>int</code> - l'indice in cui si trova l'elemento cercato
+     */
     private static int getIndex(String[] array, String element) {
         for (int i = 0; i < array.length; i++) {
             if (array[i].equalsIgnoreCase(element)) {
@@ -714,7 +736,34 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
      *     Metodi di implementazione degli algoritmi di mitigazione     *                     
      * **************************************************************** */
     
-    // TODO COMMENTO
+    /**
+     * Implementa l'algoritmo di mitigazione in funzione delle misure
+     * applicate.
+     * Ricevuto un indicatore contenente il valore del PxI di un rischio
+     * ed una lista di misure applicate al rischio stesso, ricalcola
+     * il valore del PxI sottraendo una quantit&agrave; predefinita per
+     * ogni misura trovata, in funzione del carattere della misura stessa.
+     * L'operazione &egrave; possibile data una funzione di trasformazione
+     * che associa ad ogni possibile valore del PxI un numero intero.
+     * La differenza tra il valore numerico del PxI trasformato e la somma 
+     * delle misure pu&ograve; essere sufficiente a determinare un decremento
+     * del valore del PxI originario, oppure no. Ci&ograve; dipende dal fatto
+     * che sia stato raggiunto o meno l'intero inferiore rispetto a quello
+     * del PxI originale trasformato in numero.
+     * Esempio: se il PxI originale &egrave; MEDIO, esso in base alla
+     * funzione di trasformazione vale 2; se a seguito dell'applicazione
+     * delle misure si ottiene una somma algebrica di 1.5 o 1.0 allora 
+     * il rischio &egrave; stato ridotto, passando a MEDIO a BASSO; 
+     * altrimenti, se la parte intera non &egrave; strettamente minore 
+     * di 2, il rischio resta MEDIO.
+     * Sulla base di questo esempio si evince che l'algoritmo considera
+     * sempre la parte intera, mai la parte decimale.
+     * 
+     * @param indicator oggetto contenente il valore del PxI assegnato al rischio
+     * @param measures  lista di misure applicate al rischio
+     * @return <code>InterviewBean</code> - oggetto contenente il valore del PxI del rischio, eventualmente mitigato
+     * @throws CommandException se si verifica un problema nel recupero di un attributo del bean o in qualche operazione o puntamento
+     */
     public static InterviewBean mitigate(final InterviewBean indicator,
                                          final ArrayList<MeasureBean> measures)
                                   throws CommandException {
@@ -729,7 +778,6 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             // Initialize reduction to zero
             float reduction = NOTHING;
             // Recupera il valore indice corrispondente al valore PxI corrente
-            //int weight = Arrays.binarySearch(LIVELLI_RISCHIO, indicator.getInformativa());
             int weight = getIndex(LIVELLI_RISCHIO, indicator.getInformativa());
             // Nuovo indice da considerare ai fini del calcolo del PxI mitigato
             int index = weight;
@@ -737,10 +785,10 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             for (MeasureBean measure : measures) {
                 // Per ogni misura generica toglie uno 0,5
                 if (measure.getCarattere().getInformativa().equals("G")) {
-                    reduction += 0.5;
+                    reduction += WEIGHT_GENERIC;
                 // Per ogni misura specifica toglie un 1    
                 } else if (measure.getCarattere().getInformativa().equals("S")) {
-                    reduction += 1.0;
+                    reduction += WEIGHT_SPECIFIC;
                 // Una misura puo' solo essere o generica o specifica
                 } else {
                     String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del carattere della misura.\n";
@@ -772,6 +820,61 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             mIndicator.setRisposte(indicator.getRisposte());
             mIndicator.setProcesso(indicator.getProcesso());
             return mIndicator;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+
+    /**
+     * Implementa l'algoritmo di ricalcolo del PxI complessivo a partire
+     * dai valori dei PxI dei rischi, calmierati e arrotondati.
+     * Dato in input un elenco di rischi, ciascuno che deve contenere
+     * un valore di PxI del rischio mitigato in funzione delle misure
+     * applicate, ottiene un valore unico del PxI per il processo
+     * cui i rischi calmierati sono collegati; il metodo pu&ograve;
+     * essere applicato alla fase della stima o a quella del monitoraggio,
+     * in quanto l'algoritmo di ricalcolo resta il medesimo e il nome
+     * del PxI (stima o monitoraggio) viene passato come parametro.
+     * 
+     * @param PIN il nome dell'indicatore (PxI stima o PxI effettivo)
+     * @param mitigatingRisks   elenco di rischi cui sono state applicate le misure di mitigazione
+     * @return <code>InterviewBean</code> - oggetto contenente il livello di rischio dell'indice PxI, calcolato dall'algoritmo in base ai valori dei PxI calmierati ricevuti
+     * @throws CommandException se si verifica un problema nel recupero di un attributo di un bean o un puntamento erroneo
+     */
+    public static InterviewBean computePIMitigated(final String PIN,
+                                                   final ArrayList<RiskBean> mitigatingRisks)
+                                            throws CommandException {
+        InterviewBean mitigatedPI = new InterviewBean();
+        String result = null;
+        int sum = NOTHING;
+        try {
+            // Cicla sui rischi mitigati
+            for (RiskBean risk : mitigatingRisks) {
+                // Recupera il valore indice corrispondente al valore PxI corrente
+                int weight = getIndex(LIVELLI_RISCHIO, risk.getLivello());
+                // Lo somma agli altri
+                sum += weight;
+            }
+            // Divide i pesi dei PxI mitigati per il numero di rischi trovati
+            float average = (float) sum / (float) mitigatingRisks.size();
+            // Arrotonda le medie ottenute all'intero più prossimo
+            int index = Math.round(average);
+            // Ottiene il corrispettivo valore testuale
+            result = LIVELLI_RISCHIO[index];
+            // Valorizza e restituisce l'oggetto per l'indicatore
+            mitigatedPI.setNome(PIN);
+            mitigatedPI.setInformativa(result);
+            mitigatedPI.setDescrizione("PxI Mitigato");
+            mitigatedPI.setAutoreUltimaModifica("PxI Rischi");
+            //mitigatedPI.setProcesso(extraInfo);
+            return mitigatedPI;
         } catch (AttributoNonValorizzatoException anve) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
             LOG.severe(msg);
