@@ -105,6 +105,10 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileRischi = "/jsp/muRischi.jsp";
     /**
+    * Pagina a cui la command fa riferimento per mostrare il report tabellare con processi, misure e giudizio sintetico
+     */
+    private static final String nomeFileMisure = "/jsp/muMisure.jsp";
+    /**
      * Pagina a cui la command fa riferimento per mostrare la form di ricerca
      */
     private static final String nomeFileSearch = "/jsp/muRicerca.jsp";
@@ -150,6 +154,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_PROCESS,      nomeFileProcessi);
         nomeFile.put(PART_SELECT_STR,   nomeFileStrutture);
         nomeFile.put(PART_RISKS,        nomeFileRischi);
+        nomeFile.put(PART_MEASURES,     nomeFileMisure);
         nomeFile.put(PART_GRAPHICS,     nomeFileGraphics);
     }
 
@@ -266,7 +271,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                         // Ha bisogno di personalizzare le breadcrumbs
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                         bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report strutture");
-                    } else if (part.equalsIgnoreCase(PART_RISKS)) {
+                    } else if (part.equalsIgnoreCase(PART_RISKS) || part.equalsIgnoreCase(PART_MEASURES)) {
                         /* ************************************************ *
                          *           Generate report risks-measure          *
                          * ************************************************ */
@@ -619,7 +624,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                                                                                           String codeSurvey,
                                                                                           DBWrapper db)
                                                                                    throws CommandException {
-         ArrayList<RiskBean> risks, mitigatingRisks = null;
+         ArrayList<RiskBean> risks;
          LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risksByPat = new LinkedHashMap<>();
          try {
              // Prepara l'oggetto rilevazione
@@ -652,20 +657,33 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      
      
      /**
-      * // TODO COMMENTO ^v
+      * <p>Ricevuta una ArrayList (albero, vista gerarchica)
+      * di tutti macroprocessi censiti a fini anticorruttivi
+      * trovati in base a una rilevazione il cui identificativo 
+      * viene accettato come argomento, ma i cui figli non contengono
+      * al proprio interno i rischi, restituisce una mappa di rischi 
+      * associati a ciascun processo, indicizzata per il processo stesso,
+      * e in cui il valore del PxI del processo, idealmente estensibile 
+      * a tutti i rischi del processo stesso, viene mitigato, per ogni rischio, 
+      * tramite la verifica dell'esistenza di misure di mitigazione applicate al
+      * rischio stesso.</p>
+      * <p><strong>Attenzione:</strong> il ProcessBean viene utilizzato qui
+      * come chiave grazie all'override, nella classe stessa,
+      * dei metodi di comparazione nel bean del processo 
+      * (che mi sono dovuto scrivere).</p>
       * 
-      * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - privi di strutture associate
+      * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - privi di rischi associati
       * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
       * @param codeSurvey    il codice della rilevazione
       * @param db            WebStorage per l'accesso ai dati
-      * @return <code>HashMap&lt;ProcessBean, ArrayList&lt;RiskBean&gt;&gt;</code> - lista di rischi collegati al processo_at incapsulato in chiave
+      * @return <code>HashMap&lt;ProcessBean, ArrayList&lt;RiskBean&gt;&gt;</code> - lista di rischi, con PxI mitigato in funzione delle misure esistenti, collegati al processo_at incapsulato in chiave
       * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
       */
       public static LinkedHashMap<ProcessBean, ArrayList<RiskBean>> retrieveMitigatedRisksByProcess(final ArrayList<ProcessBean> mats,
-                                                                                           PersonBean user,
-                                                                                           String codeSurvey,
-                                                                                           DBWrapper db)
-                                                                                    throws CommandException {
+                                                                                                    PersonBean user,
+                                                                                                    String codeSurvey,
+                                                                                                    DBWrapper db)
+                                                                                             throws CommandException {
           ArrayList<RiskBean> risks, mitigatingRisks = null;
           LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risksByPat = new LinkedHashMap<>();
           try {
@@ -678,7 +696,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                       // Estrae i rischi di un dato processo in una data rilevazione
                       risks = db.getRisksByProcess(user, pat, survey);
                       // Resetta il vettore dei rischi mitigati
-                      mitigatingRisks = new ArrayList<RiskBean>();
+                      mitigatingRisks = new ArrayList<>();
                       // Per ogni rischio
                       for (RiskBean risk : risks) {
                           if (risk.getMisure() != null) {
@@ -689,7 +707,15 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                           }
                           mitigatingRisks.add(risk);
                       }
-                      // Setta nella mappa la lista appena calcolata
+                      // Passa la lista dei PxI mitigati al metodo che ricalcola il PxI mitigato
+                      InterviewBean pim = MeasureCommand.computePIMitigated(PIM, mitigatingRisks);
+                      // Recupera la lista degli indicatori caricati nel processo
+                      LinkedHashMap<String, InterviewBean>  indicatori = pat.getIndicatori();
+                      // Imposta il PxI ricalcolato come indicatore aggiuntivo nel processo corrente
+                      indicatori.put(PIM, pim);
+                      // Ricarica gli indicatori corredati del nuovo PxI mitigato
+                      pat.setIndicatori(indicatori);
+                      // Setta nella mappa la lista di rischi con PxI mitigati calcolata
                       risksByPat.put(pat, mitigatingRisks);
                   }
               }
