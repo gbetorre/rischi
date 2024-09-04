@@ -10,7 +10,7 @@
         <div class="col-xl-3 col-md-6">
           <div class="card bgAct20 text-dark mb-4">
             <div class="card-body">
-              <i class="fa-solid fa-table fa-4x"></i>&nbsp;&nbsp;
+              <i class="fa-solid fa-table-cells fa-4x"></i>&nbsp;&nbsp;
               <i class="fas fa-cogs fa-4x"></i>&nbsp;&nbsp;
               <!-- <i class="fa-solid fa-triangle-exclamation fa-4x"></i>&nbsp;&nbsp;  -->
               P x I &nbsp; Processi
@@ -37,12 +37,25 @@
         <div class="col-xl-3 col-md-6">
           <div class="card bgAct20 text-dark mb-4">
             <div class="card-body">
-              <i class="fa-solid fa-table fa-4x"></i>&nbsp;&nbsp;
+              <i class="fa-solid fa-table-cells fa-4x"></i>&nbsp;&nbsp;
               <i class="fa-solid fa-triangle-exclamation fa-4x"></i>&nbsp;&nbsp;
               P x I &nbsp; Rischi
             </div>
             <div class="card-footer d-flex align-items-center justify-content-between">
               <a class="small stretched-link" href="${mis}">Vai</a>
+              <div class="small"><i class="fas fa-angle-right"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="card bgAct20 text-dark mb-4">
+            <div class="card-body">
+              <i class="fa-solid fa-table fa-4x"></i>&nbsp;&nbsp;
+              <i class="fa-solid fa-umbrella fa-4x"></i>&nbsp;&nbsp;
+              P x I &nbsp; Misure
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+              <a class="small stretched-link" href="${mes}">Vai</a>
               <div class="small"><i class="fas fa-angle-right"></i></div>
             </div>
           </div>
