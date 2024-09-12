@@ -4,23 +4,12 @@
 <%@ include file="URL.jspf" %>
 <c:set var="mats" value="${requestScope.macroProcessi}" scope="page" />
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/2.1.5/features/searchHighlight/dataTables.searchHighlight.css">
     <h3 class="mt-1 m-0 font-weight-bold float-left">Report misure e rischi</h3>
-    <%--a href="${mtrRTF}" class="float-right badge badge-pill lightTable" title="Scarica il report in formato RTF">
-      <i class="fas fa-download"></i>Scarica report
-    </a>
-    <a href="${mtrHTM}" class="float-right badge badge-pill lightTable bgAct19" title="Scarica il log delle differenze sopravvenute nei valori degli indicatori rispetto all'ultimo ricalcolo">
-      <i class="fa-solid fa-book"></i> Log ricalcolo
-    </a>
-    <span class="float-right">
-      <a href="${mtr}&msg=refresh_ce" type="button" class="btn btn-primary float-right refresh" style="padding-top:5px;height:30px" id="refresh" title="Effettua un ricalcolo dei valori di rischio di tutti i processi e li memorizza come nuovi valori cache">
-        <i class="fa-solid fa-arrow-rotate-right"></i>
-        Ricalcola
-      </a>&nbsp;&nbsp;
-    </span>--%>
     <hr class="riga"/>
     <div class="col-md-offset-1">
       <div class="table-responsive">
-        <table class="table table-striped table-bordered table-hover" id="listStr">
+        <table class="table table-striped table-bordered table-hover" id="listMis">
           <thead class="thead-light">
             <tr class="thin">
               <th width="15%">Macroprocesso</th>
@@ -104,7 +93,7 @@
     </div>
     <script type="text/javascript">
       $(document).ready(function() {
-        $('#listStr').DataTable({
+          var table = $('#listMis').DataTable({
           "ordering": true,  
           "paging": false,
           "bInfo": false,
@@ -114,18 +103,15 @@
           "searchPanes": {
               "viewTotal": false
               },
-          "aaSorting": [[ 1, "asc" ]]
-        });
+          "aaSorting": [[ 1, "asc" ]],
+          "searchHighlight": true
+        });/*
+        table.on('draw', function () {
+            var body = $( table.table().body() );
+            body.unhighlight();
+            body.highlight( table.search() );  
+        });*/
       });
     </script>
-    <script type="text/javascript">
-      function doGet(){
-          if (confirm("Ricorda di consultare il log delle variazioni per verificare se le motivazioni del giudizio sintetico devono essere aggiornate. \n Vuoi ricalcolare gli indicatori?")) {
-              //window.open("${mtr}");  //&msg=refresh_ce
-              window.open("http://localhost:8080/rischi/data?q=mu&p=str&r=AT2022&out=html");  // Values must be in JSON format
-              window.location.replace("${mtr}&msg=refresh_ce");
-          } 
-          return false;
-        }
-    </script>
-    
+    <script src="https://cdn.datatables.net/plug-ins/2.1.5/features/searchHighlight/dataTables.searchHighlight.min.js"></script>
+    <script src="https://bartaz.github.io/sandbox.js/jquery.highlight.js"></script>
