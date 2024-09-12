@@ -54,7 +54,7 @@
       <div class="entry bgAct4"></div>
       <div class="entry bgAct4"></div>
       <div class="value bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (stima)').informativa)} border-${fn:toLowerCase(pat.indicatori.get('PxI (stima)').informativa)}">
-        <p class="text-center" title="${pat.indicatori.get('PxI (stima)').descrizione}">
+        <p class="text-center" title="PxI Ricalcolato">
           <c:out value="${pat.indicatori.get('PxI (stima)').informativa}" />
         </p>
       </div>
