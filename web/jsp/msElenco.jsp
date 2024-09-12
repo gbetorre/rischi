@@ -39,10 +39,6 @@
         }
     </style>
     <h3 class="mt-1 m-0 font-weight-bold float-left">Registro delle misure di prevenzione</h3>
-    <%-- 
-    <a href="${riCSV}" class="float-right badge badge-pill lightTable bgAct20" title="Scarica il database completo del registro dei rischi corruttivi">
-      <i class="fas fa-download"></i>Scarica tutti i dati
-    </a> --%>
     <hr class="riga"/>
     <c:if test="${param['msg'] eq 'newMes'}">
     <script>
@@ -66,22 +62,24 @@
           <cite>in parentesi: (n. di processi esposti a questo rischio)</cite>
         </span>        --%> 
       </div>
-      <table class="">
+      <table class="" id="regMis">
         <thead>
           <tr>
             <th width="20%">Misura</th>
             <th width="6%">Carattere</th>
             <th width="5%">Comporta spese?</th>
-            <th width="25%">Tipologie</th>
+            <th width="20%">Tipologie</th>
             <th width="20%">Struttura Capofila</th>
             <th width="20%">Strutture Coinvolte</th>
             <th width="4%">Usi</th>
+            <th width="5%">Funzioni</th>
           </tr>
         </thead>
         <tbody>
         <c:forEach var="ms" items="${measures}" varStatus="status">
           <tr>
             <td>
+              <img src="${initParam.urlDirectoryImmagini}mis-${ms.carattere.informativa}.png" class="ico-small" alt="icona" title="Misura ${ms.carattere.nome}" /> &nbsp;
               <a href="${initParam.appName}/?q=ms&mliv=${ms.codice}&r=${param['r']}" title="${ms.codice}">
                 <c:out value="${ms.nome}" />
               </a>
@@ -132,6 +130,11 @@
               </ul>
             </td>
             <td class="text-center"><c:out value="${ms.uso}" /></td>
+            <td class="text-center">
+              <a href="${initParam.appName}/?q=ms&p=add&mliv=${ms.codice}&r=${param['r']}" class="btn bgAct14 badge-pill refresh" title="Aggiungi dettagli">
+                Dettagli
+              </a>&nbsp;
+            </td>
           </tr>
         </c:forEach>
         </tbody>
@@ -141,10 +144,6 @@
       <button type="button" class="btn bgAct26">
         <span class="badge">${measures.size()}</span>
       </button>
-      <%-- 
-      <a href="${riCSV}" class="float-right badge badge-pill lightTable bgAct20" title="Scarica il database completo del registro dei rischi corruttivi">
-        <i class="fas fa-download"></i> <span class="sezioneElenco">Scarica tutti i dati&nbsp;</span>
-      </a>  --%>
     </h4>
     <a href="${mnm}" class="btn btn-success btn-lg btn-block" title="Aggiungi una nuova misura di contenimento o prevenzione al registro delle misure">
       <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Misura
