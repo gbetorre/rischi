@@ -6,6 +6,7 @@
 <c:set var="structs" value="${requestScope.strutture}" scope="page" />
 <c:set var="subjs" value="${requestScope.soggetti}" scope="page" />
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
+<link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/2.1.5/features/searchHighlight/dataTables.searchHighlight.css">
     <script>
     $(document).ready(function() {
         $('.refresh').on('click', function(event) {
@@ -145,7 +146,8 @@
           "searchPanes": {
               "viewTotal": false
               },
-          "aaSorting": [[ 1, "asc" ]]
+          "aaSorting": [[ 1, "asc" ]],
+          "searchHighlight": true
         });
       });
     </script>
@@ -159,4 +161,6 @@
           return false;
         }
     </script>
+    <script src="https://cdn.datatables.net/plug-ins/2.1.5/features/searchHighlight/dataTables.searchHighlight.min.js"></script>
+    <script src="https://bartaz.github.io/sandbox.js/jquery.highlight.js"></script>
     
