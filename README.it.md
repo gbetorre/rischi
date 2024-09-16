@@ -320,18 +320,19 @@ e fornirvi il relativo significato e la relativa motivazione.
 - Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
 - Implementata pagina di dettaglio soggetto contingente/interessato
 - Implementata pagina di dettaglio struttura
-- [1.9.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
-- [1.9.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
-- [1.9.7] Implementata estrazione risultati in formato CSV
-- [1.9.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
-- [1.9.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
-- [1.9.4] Implementata form di ricerca sui quesiti per chiave testuale
+- [2.9.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
+- [2.9.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
+- [2.9.7] Implementata estrazione risultati in formato CSV
+- [2.9.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
+- [2.9.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
+- [2.9.4] Implementata form di ricerca sui quesiti per chiave testuale
 - ...
 
 
 
 ### Done
 -->
+- [1.9.5] (16/09/2024) Miglioramenti nella presentazione (etichette); aggiunta evidenziazione testo filtrato tramite libreria DataTables
 - [1.9.4] (12/09/2024) Miglioramenti nella presentazione (icone, etichette); aggiunta evidenziazione testo filtrato tramite libreria DataTables
 - [1.9.3] (04/09/2024) Implementato report tabella dei PxI calmierati in base alle misure stimate
 - [1.9.2] (rilascio 02/08/2024 - commit 04/09/2024) Implementato algoritmo di ricalcolo PxI del processo in base alle misure applicate ai suoi rischi
