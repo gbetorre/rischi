@@ -332,6 +332,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [1.9.6] (23/09/2024) Prima bozza di implementazione componente software per la gestione degli indicatori di monitoraggio
 - [1.9.5] (16/09/2024) Miglioramenti nella presentazione (etichette); aggiunta evidenziazione testo filtrato tramite libreria DataTables
 - [1.9.4] (12/09/2024) Miglioramenti nella presentazione (icone, etichette); aggiunta evidenziazione testo filtrato tramite libreria DataTables
 - [1.9.3] (04/09/2024) Implementato report tabella dei PxI calmierati in base alle misure stimate
