@@ -153,6 +153,9 @@ public interface Constants extends Serializable {
      * <p>Costante identificante il parametro della rilevazione.</p>
      */
     public static final String PARAM_SURVEY             = "r";
+    /* 
+     * --------------------    COMMANDS    -------------------- 
+     */
     /**
      * <p>Costante per il parametro identificante la HomePageCommand.</p>
      */
@@ -182,6 +185,15 @@ public interface Constants extends Serializable {
      */
     public static final String COMMAND_MEASURE          = "ms";
     /**
+     * <p>Costante per il parametro identificante la Command degli indicatori
+     * di monitoraggio (sono diversi dagli indicatori di probabilit&agrave;
+     * e impatto, che si sarebbero dovuti chiamare indicatore_at).</p>
+     */
+    public static final String COMMAND_INDICATOR        = "ic";
+    /* 
+     * --------------------    MAIN PARTS    -------------------- 
+     */
+    /**
      * <p>Costante per il parametro identificante la parte dei macroprocessi.</p>
      */
     public static final String PART_MACROPROCESS        = "mac";
@@ -190,18 +202,13 @@ public interface Constants extends Serializable {
      */
     public static final String PART_PROCESS             = "pro";
     /**
-     * <p>Costante per il parametro identificante parte applicazione legata ad output.</p>
+     * <p>Costante per il parametro identificante la parte di selezione strutture.</p>
      */
-    public static final String PART_OUTPUT              = "out";
+    public static final String PART_SELECT_STR          = "str";
     /**
-     * <p>Costante per il parametro identificante parte applicazione legata ai fattori abilitanti.</p>
+     * <p>Costante per il parametro identificante parte legata ai fattori abilitanti.</p>
      */
     public static final String PART_FACTORS             = "fat";
-    /**
-     * <p>Costante per il parametro identificante la parte di 
-     * aggiunta/aggiornamento nota PxI (giudizio sintetico).</p>
-     */
-    public static final String PART_PI_NOTE             = "pin";
     /**
      * <p>Costante per il parametro identificante reportistica rischi.</p>
      */
@@ -209,7 +216,7 @@ public interface Constants extends Serializable {
     /**
      * <p>Costante per il parametro identificante reportistica misure.</p>
      */
-    public static final String PART_MEASURES            = "mes";
+    public static final String PART_MEASURES            = "mes";   
     /**
      * <p>Costante per il parametro identificante la form di ricerca.</p>
      */
@@ -219,9 +226,16 @@ public interface Constants extends Serializable {
      */
     public static final String PART_GRAPHICS            = "gra";
     /**
-     * <p>Costante per il parametro identificante la parte di selezione strutture.</p>
+     * <p>Costante per il parametro identificante elenco misure monitorate.</p>
      */
-    public static final String PART_SELECT_STR          = "str";
+    public static final String PART_MONITOR             = "mon";
+    /* 
+     * --------------------    PART PARAMS    -------------------- 
+     */
+    /**
+     * <p>Costante per il parametro identificante la parte di elenco interviste.</p>
+     */
+    public static final String PART_SELECT_QSS          = "sqs";
     /**
      * <p>Costante per il parametro identificante la parte di presentazione quesiti.</p>
      */
@@ -235,25 +249,9 @@ public interface Constants extends Serializable {
      */
     public static final String PART_RESUME_QST          = "rqs";
     /**
-     * <p>Costante per il parametro identificante la parte di elenco interviste.</p>
-     */
-    public static final String PART_SELECT_QSS          = "sqs";
-    /**
-     * <p>Costante per il parametro identificante la pagina dell'utente.</p>
-     */
-    public static final String PART_USR                 = "usr";
-    /**
-     * <p>Costante per il parametro identificante la pagina dei credits dell'applicazione.</p>
-     */
-    public static final String PART_CREDITS             = "crd";
-    /**
      * <p>Costante per il parametro identificante la funzione di aggiunta di un nuovo rischio.</p>
      */
     public static final String PART_INSERT_RISK         = "adr";
-    /**
-     * <p>Costante per il parametro identificante la funzione di aggiunta di una nuova misura.</p>
-     */
-    public static final String PART_INSERT_MEASURE      = "inm";
     /**
      * <p>Costante per il parametro identificante la funzione di associazione tra un rischio e un processo.</p>
      */
@@ -269,13 +267,42 @@ public interface Constants extends Serializable {
      */
     public static final String PART_INSERT_M_R_P        = "adm";
     /**
-     * <p>Costante per il parametro identificante la funzione di aggiornamento di una entit&agrave;.</p>
+     * <p>Costante per il parametro identificante la funzione di aggiunta 
+     * dettagli monitoraggio (monitor data) ad una misura monitorata.</p>
      */
-    public static final String UPDATE                   = "upd";
+    public static final String PART_INSERT_MONITOR_DATA = "add";
     /**
-     * <p>Costante per il parametro identificante la funzione di eliminazione di una entit&agrave;.</p>
+     * <p>Costante per il parametro identificante la funzione di selezione 
+     * dettagli monitoraggio (monitor data) relativi a una misura monitorata.</p>
      */
-    public static final String DELETE                   = "del";
+    public static final String PART_SELECT_MONITOR_DATA = "sed";
+    /**
+     * <p>Costante per il parametro identificante la funzione di aggiunta 
+     * di una nuova misura di mitigazione del rischio.</p>
+     */
+    public static final String PART_INSERT_MEASURE      = "inm";
+    /**
+     * <p>Costante per il parametro identificante la funzione di aggiunta 
+     * di un nuovo indicatore di monitoraggio.</p>
+     */
+    public static final String PART_INSERT_INDICATOR    = "ini";    
+    /**
+     * <p>Costante per il parametro identificante la funzione di aggiunta 
+     * di una nuova misurazione relativamente all'applicazione di una misura.</p>
+     */
+    public static final String PART_INSERT_MEASUREMENT  = "imm";
+    /**
+     * <p>Costante per il parametro identificante la parte di 
+     * aggiunta/aggiornamento nota PxI (giudizio sintetico).</p>
+     */
+    public static final String PART_PI_NOTE             = "pin";
+    /* 
+     * --------------------    FORMAT PARAMS    -------------------- 
+     */
+    /**
+     * <p>Costante per il parametro identificante parte applicazione legata ad output.</p>
+     */
+    public static final String PART_OUTPUT              = "out";
     /**
      * <p>Costante per il parametro identificante un messaggio (conferma, codice di errore, etc.).</p>
      */
@@ -292,6 +319,28 @@ public interface Constants extends Serializable {
      * sufficiente mantenere l'identificazione del chiamante (caller).</p>
      */
     public static final String REFERRAL                 = "ref";
+    /* 
+     * --------------------    OTHER PARAMS    -------------------- 
+     */
+    /**
+     * <p>Costante per il parametro identificante la pagina dell'utente.</p>
+     */
+    public static final String PART_USR                 = "usr";
+    /**
+     * <p>Costante per il parametro identificante la pagina dei credits dell'applicazione.</p>
+     */
+    public static final String PART_CREDITS             = "crd";
+    /* 
+     * --------------------    GENERIC OPERATIONS    -------------------- 
+     */
+    /**
+     * <p>Costante per il parametro identificante la funzione di aggiornamento di una entit&agrave;.</p>
+     */
+    public static final String UPDATE                   = "upd";
+    /**
+     * <p>Costante per il parametro identificante la funzione di eliminazione di una entit&agrave;.</p>
+     */
+    public static final String DELETE                   = "del";
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
