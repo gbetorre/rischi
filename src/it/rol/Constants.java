@@ -44,9 +44,10 @@ import it.rol.bean.CodeBean;
 
 /**
  * <p>Questa &egrave; l'interfaccia contenente le costanti utilizzabili da tutti i 
- * consumer java della web-application &nbsp;<code>Processi on Line (prol)</code>.</p>
- * <p>Definisce costanti di utilit&agrave; e
- * insiemi di valori ammessi per parametri applicativi.</p>
+ * consumer java della web-application &nbsp;<code>Rischi on Line (rol)</code>.</p>
+ * <p>Definisce costanti di utilit&agrave;,
+ * insiemi di valori ammessi per parametri applicativi, maschere di input, 
+ * etichette etc.</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
@@ -216,7 +217,11 @@ public interface Constants extends Serializable {
     /**
      * <p>Costante per il parametro identificante reportistica misure.</p>
      */
-    public static final String PART_MEASURES            = "mes";   
+    public static final String PART_MEASURES            = "mes";
+    /**
+     * <p>Costante per il parametro identificante elenco indicatori.</p>
+     */
+    public static final String PART_INDICATOR           = "ind";
     /**
      * <p>Costante per il parametro identificante la form di ricerca.</p>
      */
