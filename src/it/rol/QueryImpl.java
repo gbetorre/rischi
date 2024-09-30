@@ -158,10 +158,30 @@ public class QueryImpl implements Query, Constants {
         return null;
     }
 
+    
+    /* (non-Javadoc)
+     * @see it.rol.Query#getMeasuresByFactors(int, int, String)
+     */
+    @SuppressWarnings("javadoc")
     @Override
     public String getMeasuresByFactors(int idF, int idS, String codeM) {
-        // TODO Auto-generated method stub
-        return null;
+        final String GET_MEASURES_BY_FACTOR = 
+                "SELECT DISTINCT" +
+                "       MS.codice                           AS \"codice\"" +
+                "   ,   MS.nome                             AS \"nome\"" +
+                "   ,   MS.descrizione                      AS \"stato\"" +
+                "   ,   MS.onerosa                          AS \"onerosa\"" +
+                "   ,   MS.ordinale                         AS \"ordinale\"" +
+                "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+                "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+                "   FROM fattore_tipologia FATTY" +
+                "       INNER JOIN misura_tipologia MISTY ON MISTY.id_tipo_misura = FATTY.id_tipo_misura" +
+                "       INNER JOIN misura MS ON (MISTY.cod_misura = MS.codice AND MISTY.id_rilevazione = MS.id_rilevazione)" +
+                "   WHERE FATTY.id_fattore_abilitante = " + idF +
+                "       AND FATTY.id_rilevazione = " + idS +
+                "       AND MS.codice NOT IN (" + codeM + ")" +
+                "   ORDER BY MS.nome";
+        return GET_MEASURES_BY_FACTOR;
     }
     
     
