@@ -4158,32 +4158,6 @@ public class DBWrapper extends QueryImpl {
     }
     
     
-    /* (non-Javadoc)
-     * @see it.rol.Query#getMeasuresByFactors(int, int, String)
-     */
-    @SuppressWarnings("javadoc")
-    @Override
-    public String getMeasuresByFactors(int idF, int idS, String codeM) {
-        final String GET_MEASURES_BY_FACTOR = 
-                "SELECT DISTINCT" +
-                "       MS.codice                           AS \"codice\"" +
-                "   ,   MS.nome                             AS \"nome\"" +
-                "   ,   MS.descrizione                      AS \"stato\"" +
-                "   ,   MS.onerosa                          AS \"onerosa\"" +
-                "   ,   MS.ordinale                         AS \"ordinale\"" +
-                "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
-                "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
-                "   FROM fattore_tipologia FATTY" +
-                "       INNER JOIN misura_tipologia MISTY ON MISTY.id_tipo_misura = FATTY.id_tipo_misura" +
-                "       INNER JOIN misura MS ON (MISTY.cod_misura = MS.codice AND MISTY.id_rilevazione = MS.id_rilevazione)" +
-                "   WHERE FATTY.id_fattore_abilitante = " + idF +
-                "       AND FATTY.id_rilevazione = " + idS +
-                "       AND MS.codice NOT IN (" + codeM + ")" +
-                "   ORDER BY MS.nome";
-        return GET_MEASURES_BY_FACTOR;
-    }
-    
-    
     /**
      * <p>Restituisce un ArrayList contenente tutte le misure collegate,
      * tramite la propria tipologia, ad uno o pi&uacute; fattori abilitanti
@@ -4404,6 +4378,212 @@ public class DBWrapper extends QueryImpl {
             LOG.severe(msg);
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         }
+    }
+    
+    
+    /**
+     * <p>Restituisce un ArrayList contenente tutte le tipologie di indicatori
+     * di monitoraggio.<br />
+     * Non si considera l'utente loggato in quanto questa informazione
+     * pu&ograve; essere considerata visibile a tutte le tipologie di utenti.
+     * Inoltre, baipassando l'utente loggato, questi dati possono essere
+     * acquisiti ancor prima che l'utente si logghi, quindi a livello di
+     * applicazione (quando il server viene caricato) &ndash; cosa utile
+     * per poter caricare staticamente in memoria le tuple corrispondenti, quindi 
+     * evitare di dover rifare da pi&uacute; punti la stessa query.</p>
+     *
+     * @return <code>ArrayList&lt;CodeBean&gt;</code> - un vettore ordinato di CodeBean, che rappresentano le tipologie di indicatori trovate
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<CodeBean> getIndicatorTypes()
+                                          throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            AbstractList<CodeBean> types = new ArrayList<>();
+            try {
+                pst = con.prepareStatement(GET_INDICATOR_TYPES);
+                pst.clearParameters();
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Prepara il tipo
+                    CodeBean type = new CodeBean();
+                    // Valorizza il tipo
+                    BeanUtil.populate(type, rs);
+                    // Aggiunge il tipo alla lista
+                    types.add(type);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<CodeBean>) types;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Data una rilevazione, restituisce un elenco di misure monitorate 
+     * trovate, oppure una specifica misura, in funzione dei parametri ricevuti.<br />
+     * In particolare: <dl>
+     * <dt>se si passa il codice della misura sul II parametro e 0 sul III parametro </dt>
+     * <dd><cite>esempio:</cite><pre>(user, 'MP.G.4', 0, survey);</pre></dd>
+     * <dd>restituisce una lista vettoriale contenente la misura avente il codice ricevuto (se esiste), oppure una lista vuota (se non esiste).</dd>
+     * <dt>se si passa una stringa SQL vuota sul II parametro e -1 sul III parametro</dt>
+     * <dd><cite>esempio:</cite> <pre>(user, '', -1, survey);</pre></dd>
+     * <dd>restituisce l'elenco completo delle misure monitorate trovate nella rilevazione passata sul IV parametro</dd>
+     * </dl></p>
+     * 
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param code      il codice di una misura cercata oppure una stringa vuota in linguaggio SQL
+     * @param getAll    0 oppure -1 a seconda se si voglia rispettivamente ottenere una singola misura oppure tutte
+     * @param survey    oggetto contenente gli estremi della rilevazione
+     * @return <code>ArrayList&lt;MeasureBean&gt;</code> - l'elenco di misure cercate
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings("static-method")
+    public ArrayList<MeasureBean> getMonitoredMeasures(PersonBean user,
+                                                       String code,
+                                                       int getAll,
+                                                       CodeBean survey)
+                                                throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs, rs1, rs2 = null;
+            int nextParam = NOTHING;
+            MeasureBean measure = null;
+            AbstractList<MeasureBean> measures = new ArrayList<>(); 
+            ArrayList<CodeBean> types = null; 
+            // TODO: Controllare se user è superuser
+            try {
+                pst = con.prepareStatement(GET_MEASURES_MONITORED);
+                pst.clearParameters();
+                pst.setInt(++nextParam, survey.getId());
+                pst.setString(++nextParam, code);
+                pst.setInt(++nextParam, getAll);
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    measure = new MeasureBean();
+                    types = new ArrayList<>();
+                    BeanUtil.populate(measure, rs);
+                    /* === Carattere === */
+                    // Il carattere si puo' ricavare dal codice:
+                    String measureCode = measure.getCodice();
+                    String charCode = measureCode.substring(measureCode.indexOf(DOT) + 1, measureCode.lastIndexOf(DOT));
+                    CodeBean character = ConfigManager.getMeasureCharacters().get(charCode);
+                    measure.setCarattere(character);
+                    /* === Tipologie === */
+                    // Le tipologie invece si devono ricavare tramite una query
+                    nextParam = NOTHING;
+                    pst = null;
+                    pst = con.prepareStatement(GET_MEASURE_TYPE);
+                    pst.clearParameters();
+                    pst.setString(++nextParam, measure.getCodice());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs1 = pst.executeQuery();
+                    while (rs1.next()) {
+                        // Crea una tipologia vuota
+                        CodeBean type = new CodeBean();
+                        // Lo valorizza col risultato della query
+                        BeanUtil.populate(type, rs1);
+                        // La aggiunge alla lista delle tipologie della misura corrente
+                        types.add(type);
+                    }
+                    measure.setTipologie(types);
+                    /* === Strutture === */
+                    nextParam = NOTHING;
+                    pst = null;
+                    ArrayList<DepartmentBean> capofila1 = new ArrayList<>();
+                    ArrayList<DepartmentBean> capofila2 = new ArrayList<>();
+                    ArrayList<DepartmentBean> capofila3 = new ArrayList<>();
+                    ArrayList<DepartmentBean> gregarie = new ArrayList<>();
+                    pst = con.prepareStatement(GET_STRUCTS_BY_MEASURE);
+                    pst.clearParameters();
+                    pst.setString(++nextParam, measure.getCodice());
+                    pst.setString(++nextParam, String.valueOf(PER_CENT));
+                    pst.setInt(++nextParam, survey.getId());
+                    rs2 = pst.executeQuery();
+                    while (rs2.next()) {
+                        // Crea una struttura generica
+                        ItemBean st = new ItemBean();
+                        // La valorizza col risultato della query
+                        BeanUtil.populate(st, rs2);
+                        // Trasforma la capofila/gregaria da ItemBean a DepartmentBean
+                        DepartmentBean struttura = measure.getStruttura(st);
+                        // Smista le strutture trovate
+                        if (st.getExtraInfo().equals(CP1)) {
+                            // Trasforma la capofila da DepartmentBean a ArrayList
+                            capofila1 = measure.getCapofila(struttura);
+                        } else if (st.getExtraInfo().equals(CP2)) {
+                            capofila2 = measure.getCapofila(struttura);
+                        } else if (st.getExtraInfo().equals(CP3)) {
+                            capofila3 = measure.getCapofila(struttura);
+                        } else if (st.getExtraInfo().equals(GR)) {
+                            gregarie.add(struttura);
+                        } else {
+                            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del ruolo di una struttura.\n";
+                            LOG.severe(msg);
+                            throw new WebStorageException(msg);
+                        }
+                    }
+                    measure.setCapofila(capofila1);
+                    measure.setCapofila2(capofila2);
+                    measure.setCapofila3(capofila3);
+                    measure.setGregarie(gregarie);
+                    measure.setRilevazione(survey);
+                    measures.add(measure);
+                }
+                // Just to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<MeasureBean>) measures;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nel metodo di recupero misure.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in una conversione in numero.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + nfe.getMessage(), nfe);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }        
     }
     
     /* ********************************************************** *
@@ -5241,7 +5421,7 @@ public class DBWrapper extends QueryImpl {
                     String sc3L3 = measure.get("sc3-3");
                     String sc3L4 = measure.get("sc3-4");
                     // Se non è vero che tutti questi valori sono vuoti
-                    if (!(sc2L1.equals(VOID_STRING) && sc2L2.equals(VOID_STRING) && sc2L3.equals(VOID_STRING) && sc2L4.equals(VOID_STRING))) {
+                    if (!(sc3L1.equals(VOID_STRING) && sc3L2.equals(VOID_STRING) && sc3L3.equals(VOID_STRING) && sc3L4.equals(VOID_STRING))) {
                         // Fa la query
                         ps3 = con.prepareStatement(INSERT_MEASURE_STRUCT);
                         ps3.setString(++nextParam, CP3);
