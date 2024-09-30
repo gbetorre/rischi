@@ -53,15 +53,17 @@ import it.rol.exception.WebStorageException;
 
 
 /**
- * <p>ConfigManager &egrave; la classe che recupera i parametri di inizializzazione
- * della web-application <code>Processi on Line (prol)</code>
+ * <p>ConfigManager &egrave; la classe che recupera i parametri 
+ * di inizializzazione della web-application &nbsp;
+ * <code>Rischi on Line (rol)</code> 
  * e li espone attraverso metodi accessori.</p>
- * <p>Per evitare riferimenti circolari, questa classe <strong>non deve
- * chiedere niente</strong> a nessun'altra classe della web-application!<br>
- * Viceversa, le altre classi (sia Servlet sia Command) possono chiedere
- * a questa classe i valori delle variabili di classe, che sono esposte
- * tramite appositi metodi accessori, e che rappresentano, in definitiva,
- * il motivo per cui questa classe &egrave; stata creata.</p>
+ * <p>Per evitare riferimenti circolari, questa classe &egrave; autorizzata 
+ * a chiedere cose ad altre classi, ma le classi interrogate non dovrebbero 
+ * poi, a loro volta, chiedere a questa.<br>
+ * Invece, le classi non interpellate da questa (sia Servlet sia Command) 
+ * possono chiedere a questa classe tutti i valori delle variabili di classe, 
+ * che sono esposte tramite appositi metodi accessori, e che rappresentano 
+ * il motivo per cui questa classe stessa &egrave; stata creata.</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
@@ -161,12 +163,17 @@ public class ConfigManager extends HttpServlet {
      * del rischio corruttivo
      */
     private static HashMap<String, CodeBean> measureCharacters;
+    /** 
+     * Lista dei tipi di indicatori di monitoraggio
+     */
+    private static ArrayList<CodeBean> indicatorTypes;
     /**
      * <p>Nome del parametro di inizializzazione, valorizzato nel
      * descrittore di deploy, che identifica il nome della web application.</p>
-     * <p>Nelle ultime applicazioni che ho sviluppato valeva<ul> 
+     * <p>Nelle ultime applicazioni che ho sviluppato valeva:<code><ul> 
      * <li>'almalaurea',</li> <li>'pm',</li> <li>'pol',</li> <li>'processi'</li> 
-     * etc.;</ul> comunque si chiami, di esso &egrave; da ricercare il valore
+     * <li>'rischi'.</li></ul></code> 
+     * Comunque si chiami, di esso &egrave; da ricercare dopo la root ma
      * <em>prima</em> della QueryString.</p>
      */
     private static String appName;
@@ -174,7 +181,8 @@ public class ConfigManager extends HttpServlet {
      * <p>Nome del parametro di inizializzazione, valorizzato nel
      * descrittore di deploy, che identifica la command cui la Servlet che risponde
      * (Main, Data, etc.) deve girare la richiesta. </p>
-     * <p>Storicamente valeva 'ent'; comunque si chiami, di esso &egrave;
+     * <p>Storicamente valeva <code>'ent'</code> ma &egrave; stato abbreviato.<br> 
+     * Comunque si chiami, di esso &egrave;
      * da ricercare il valore nella QueryString.</p>
      */
     private static String entToken;
@@ -413,6 +421,22 @@ public class ConfigManager extends HttpServlet {
         }
         catch (Exception e) {
             throw new ServletException(FOR_NAME + "Problemi nel caricare i caratteri di misura.\n" + e.getMessage(), e);
+        }
+        /*
+         * Carica una lista, che esporra' staticamente, contenente
+         * tutti i tipi di misura (informazione pubblica, non storicizzata e
+         * necessaria in vari punti dell'applicazione perche' le liste che
+         * dipendono dai tipi sono scorse dinamicamente).
+         */
+        indicatorTypes = null;
+        try {
+            indicatorTypes = db.getIndicatorTypes();
+        }
+        catch (WebStorageException wse) {
+            throw new ServletException(FOR_NAME + "Problemi nel metodo che estrae i tipi di indicatori.\n" + wse.getMessage(), wse);
+        }
+        catch (Exception e) {
+            throw new ServletException(FOR_NAME + "Problemi nel caricare i tipi di indicatori.\n" + e.getMessage(), e);
         }
         /*
          * Carica una struttura dati, che esporra' staticamente, contenente tutte 
@@ -688,6 +712,22 @@ public class ConfigManager extends HttpServlet {
      */
     public static HashMap<String, CodeBean> getMeasureCharacters() {
         return measureCharacters;
+    }
+    
+    
+    /**
+     * <p>Restituisce una struttura di tipo vettoriale,
+     * contenente le tipologie degli indicatori.<br> 
+     * Si &egrave; resa necessaria per discriminare tra i tipi di indicatori 
+     * di monitoraggio per la verifica dell'applicazione 
+     * delle misure di mitigazione del rischio corruttivo; tuttavia, 
+     * le tipologie di indicatori sono descrittori generici ed applicabili, 
+     * ovviamente, anche agli indicatori delle dimensioni P ed I.</p>
+     *
+     * @return <code>ArrayList&lt;CodeBean&gt;</code> - lista tipi di indicatori
+     */
+    public static ArrayList<CodeBean> getIndicatorTypes() {
+        return indicatorTypes;
     }
     
 }
