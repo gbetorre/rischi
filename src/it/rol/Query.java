@@ -1170,6 +1170,18 @@ public interface Query extends Serializable {
             "   ORDER BY TC.codice";
     
     /**
+     * <p>Estrae i valori di tutte le tipologie di indicatori.</p>
+     */
+    public static final String GET_INDICATOR_TYPES = 
+            "SELECT" +
+            "       TI.id                               AS \"id\"" +
+            "   ,   TI.nome                             AS \"nome\"" +
+            "   ,   TI.valore                           AS \"informativa\"" +
+            "   ,   TI.ordinale                         AS \"ordinale\"" +
+            "   FROM tipo_indicatore TI" +
+            "   ORDER BY TI.ordinale";
+    
+    /**
      * <p>Estrae le tipologie di una misura.</p>
      */
     public static final String GET_MEASURE_TYPE = 
@@ -1261,6 +1273,109 @@ public interface Query extends Serializable {
             "   WHERE MRPAT.cod_misura = ?" +
             "       AND MRPAT.id_rilevazione = ?" +
             "   ORDER BY RC.nome";
+    
+    /**
+     * <p>Seleziona l'elenco di tutte le misure di mitigazione trovate per una 
+     * data rilevazione cui corrispondano anche i dettagli inseriti 
+     * ai fini del monitoraggio; in base ai valori passati come parametri,
+     * pu&ograve; anche selezionare una specifica misura.</p>
+     * <p>Ogni riga, quindi, corrisponder&agrave; ad una distinta 
+     * misura monitorata.</p>
+     */
+    public static final String GET_MEASURES_MONITORED = 
+            "SELECT DISTINCT" +
+            "       MS.codice                           AS \"codice\"" +
+            "   ,   MS.nome                             AS \"nome\"" +
+            "   ,   MS.descrizione                      AS \"informativa\"" +
+            "   ,   MS.onerosa                          AS \"onerosa\"" +
+            "   ,   MS.ordinale                         AS \"ordinale\"" +
+            "   ,   MM.obiettivopiao                    AS \"obiettivo\"" +
+            "   ,   MM.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   MM.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   ,   MM.id_rilevazione                   AS \"idRilevazione\"" +
+            "   FROM misura MS" +
+            "   ,    misuramonitoraggio MM" +
+            "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
+            "       LEFT JOIN misura_rischio_processo_at MRPAT ON (MRPAT.cod_misura = MS.codice AND MRPAT.id_rilevazione = MS.id_rilevazione)" +
+            "   WHERE (MS.codice = MM.codice AND MS.id_rilevazione = MM.id_rilevazione) " +
+            "       AND MS.id_rilevazione = ?" +
+            "       AND (MS.codice = ? OR -1 = ?)" +
+            "   ORDER BY MS.nome";
+    
+    /**
+     * <p>Estrae gli estremi delle strutture:<ol>
+     * <li>aventi nei confronti di una misura uno specifico ruolo 
+     * ricevuto come parametro;</li> 
+     * <li>che hanno almeno una misura collegata;</li>
+     * <li>calcolando anche quante misure sono effettivamente collegate 
+     * a ciascuna struttura selezionata.</li></ol></p>
+     */
+    public static final String GET_STRUCTS_BY_ROLE = 
+            "   SELECT" +
+            "       S4.id                               AS \"id\"" +
+            "   ,   4                                   AS \"livello\"" +
+            "   ,   S4.prefisso                         AS \"prefisso\"" +  
+            "   ,   S4.nome                             AS \"nome\"" +
+            "   ,   count(MST.cod_misura)::SMALLINT     AS \"fte\"" +
+            "   FROM struttura_liv4 S4" +
+            "       INNER JOIN misura_struttura MST ON S4.id = MST.id_struttura_liv4" +
+            "   WHERE   MST.ruolo ILIKE ?" +
+            "       AND MST.id_rilevazione = ?" +
+            "   GROUP BY (S4.id, S4.prefisso, S4.nome)" +
+            "UNION" +
+            "   SELECT" +
+            "       S3.id                               AS \"id\"" +
+            "   ,   3                                   AS \"livello\"" +
+            "   ,   S3.prefisso                         AS \"prefisso\"" +  
+            "   ,   S3.nome                             AS \"nome\"" +
+            "   ,   count(MST.cod_misura)::SMALLINT     AS \"fte\"" +
+            "   FROM struttura_liv3 S3" +
+            "       INNER JOIN misura_struttura MST ON S3.id = MST.id_struttura_liv3" +
+            "   WHERE   MST.ruolo ILIKE ?" +
+            "       AND MST.id_struttura_liv4 IS NULL" +
+            "       AND MST.id_rilevazione = ?" +
+            "   GROUP BY (S3.id, S3.prefisso, S3.nome)" +
+            "UNION" +
+            "   SELECT" +
+            "       S2.id                               AS \"id\"" +
+            "   ,   2                                   AS \"livello\"" +
+            "   ,   S2.prefisso                         AS \"prefisso\"" +  
+            "   ,   S2.nome                             AS \"nome\"" +
+            "   ,   count(MST.cod_misura)::SMALLINT     AS \"fte\"" +
+            "   FROM struttura_liv2 S2" +
+            "       INNER JOIN misura_struttura MST ON S2.id = MST.id_struttura_liv2" +
+            "   WHERE   MST.ruolo ILIKE ?" +
+            "       AND MST.id_struttura_liv3 IS NULL" +
+            "       AND MST.id_struttura_liv4 IS NULL" +
+            "       AND MST.id_rilevazione = ?" +
+            "   GROUP BY (S2.id, S2.prefisso, S2.nome)" +
+            "   ORDER BY livello, prefisso, id";
+    
+    /**
+     * <p>Seleziona l'elenco di tutte le misure di mitigazione trovate 
+     * per una data struttura inclusi anche i dettagli inseriti ai fini 
+     * del monitoraggio.</p>
+     */
+    public static final String GET_MEASURES_BY_STRUCT_L4 = 
+            "SELECT DISTINCT" +
+            "       MST.codice                          AS \"codice\"" +
+                    // AS "ruolo" : aggiungere attributo nel bean Measure
+            "   ,   MS.nome                             AS \"nome\"" +
+            "   ,   MS.descrizione                      AS \"informativa\"" +
+            "   ,   MS.onerosa                          AS \"onerosa\"" +
+            "   ,   MS.ordinale                         AS \"ordinale\"" +
+            "   ,   MM.obiettivopiao                    AS \"obiettivo\"" +
+            "   ,   MM.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   MM.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   ,   MM.id_rilevazione                   AS \"idRilevazione\"" +
+            "   FROM misura MS" +
+            "   ,    misuramonitoraggio MM" +
+            "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
+            "       LEFT JOIN misura_rischio_processo_at MRPAT ON (MRPAT.cod_misura = MS.codice AND MRPAT.id_rilevazione = MS.id_rilevazione)" +
+            "   WHERE (MS.codice = MM.codice AND MS.id_rilevazione = MM.id_rilevazione) " +
+            "       AND MS.id_rilevazione = ?" +
+            "       AND (MS.codice = ? OR -1 = ?)" +
+            "   ORDER BY MS.nome";
     
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
