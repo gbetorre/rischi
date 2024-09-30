@@ -87,7 +87,11 @@ public class MeasureBean extends CodeBean {
     private ArrayList<DepartmentBean> capofila3;
     /** Lista di strutture gregarie che sovrintendono alla misura */
     private ArrayList<DepartmentBean> gregarie;
-
+    /* 
+     * ----------------    Attributi relativi al monitoraggio    ---------------- 
+     */
+    /** Obiettivo PIAO  */
+    private String obiettivo;
     
     /* ************************************************************************ *
      *                               Costruttori                                *
@@ -109,11 +113,13 @@ public class MeasureBean extends CodeBean {
         rilevazione = null;
         tipologie = null;
         capofila = capofila2 = capofila3 = gregarie = null;
+        obiettivo = null;
     }
 
 
     /**
      * <p>Costruttore parametrizzato.</p>
+     * 
      * @param o oggetto di cui propagare gli attributi
      * @throws AttributoNonValorizzatoException se un dato obbligatorio non e' stato valorizzato nel parametro
      */
@@ -383,6 +389,7 @@ public class MeasureBean extends CodeBean {
     
     /**
      * Restituisce un oggetto CodeBean che rappresenta il carattere della misura
+     * 
      * @return <code>carattere</code> - carattere della misura
      * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
      */
@@ -395,6 +402,7 @@ public class MeasureBean extends CodeBean {
 
     /**
      * Imposta il carattere con l'oggetto CodeBean passato
+     * 
      * @param carattere - il carattere della misura
      */
     public void setCarattere(CodeBean carattere) {
@@ -455,7 +463,9 @@ public class MeasureBean extends CodeBean {
      * ********************************************************* */
     
     /**
-     * Restituisce il vettore contenente le strutture capofila
+     * Restituisce il vettore contenente le strutture capofila.
+     * La vera capofila &egrave; l'ultima dell'elenco; quelle che la precedono
+     * sono i suoi ascendenti.
      * 
      * @return <code>strutture</code> - ArrayList contenente le strutture capofila
      */
@@ -464,7 +474,7 @@ public class MeasureBean extends CodeBean {
     }
 
     /**
-     * Imposta le strutture che capofila
+     * Imposta le strutture capofila
      * 
      * @param capofila - ArrayList da impostare
      */
@@ -574,7 +584,11 @@ public class MeasureBean extends CodeBean {
      * Trasforma una struttura capofila contenente al proprio interno
      * la gerarchia delle strutture figlie, in una lista ordinata
      * di tipo vettoriale, in cui ogni nodo viene collocato 
-     * allo stesso livello.
+     * allo stesso livello. 
+     * Dal punto di vista del registro delle misure, l'ultima foglia, quindi
+     * l'ultimo elemento della lista, &egrave; l'elemento pi&uacute; 
+     * significativo,la "reale" capofila, rappresentando i nodi precedenti 
+     * soltanto la memorizzazione della sua gerarchia.
      * 
      * @param capofilaTree - la struttura gerarchica di struttura capofila  
      * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - la struttura capofila in cui i nodi sono stati trasformati in elementi di una lista
@@ -671,4 +685,28 @@ public class MeasureBean extends CodeBean {
         this.gregarie = gregarie;
     }
     
+    
+    /* ********************************************************* *
+     *        Metodi getter e setter per obiettivo [PIAO]        *
+     * ********************************************************* */
+
+    /**
+     * Restituisce l'obiettivo della misura
+     * 
+     * @return <code>obiettivo</code> - Stringa contenente i dettagli dell'obiettivo che la misura intende realizzare
+     */
+    public String getObiettivo() {
+        return obiettivo;
+    }
+
+
+    /**
+     * Imposta l'obiettivo della misura
+     * 
+     * @param obiettivo - obiettivo della misura, da impostare
+     */
+    public void setObiettivo(String obiettivo) {
+        this.obiettivo = obiettivo;
+    }
+
 }
