@@ -128,3 +128,7 @@
   <c:param name="p" value="inm" />
   <c:param name="r" value="${ril}" />
 </c:url>
+<c:url var="ic" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ic" />
+  <c:param name="r" value="${ril}" />
+</c:url>
