@@ -39,7 +39,7 @@ import java.util.Vector;
 
 /**
  * <p>Classe usata per rappresentare un dipartimento o, pi&uacute; 
- * in generale, una struttura organizzativa (direzione, scuola, centro, etc.).</p>
+ * in generale, una struttura organizzativa (direzione, polo, centro, etc.).</p>
  * 
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
@@ -51,19 +51,13 @@ public class DepartmentBean extends CodeBean {
      * (Se questo dato non fosse inserito, verrebbe calcolato in maniera automatica
      * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione). 
 	 */
-	private static final long serialVersionUID = 1L;
-	/* **************************************************************************** *  
-     *                     Dati identificativi della struttura                      *
-     * **************************************************************************** */
+    private static final long serialVersionUID = 4579077159512261378L;
     /** Prefisso della struttura */
     private String prefisso;
     /** Acronimo della struttura */
     private String acronimo;
     /** Indirizzo della sede della struttura */
     private String indirizzo;
-    /* **************************************************************************** *  
-     *                      Dati contestuali della struttura                        *
-     * **************************************************************************** */
     /** Livello gerarchico della struttura in una gerarchia di organigramma */
     private int livello;
     /** Struttura padre della struttura corrente */
@@ -76,7 +70,13 @@ public class DepartmentBean extends CodeBean {
     private ArrayList<PersonBean> persone;
     /** Oggetto per contenere informazioni aggiuntive relative alla struttura */
     private ItemBean extraInfo;
+    /** Lista di misure di mitigazione associate alla struttura */
+    private ArrayList<MeasureBean> misure;
     
+    
+    /* ************************************************************************ *
+     *                               Costruttori                                *
+     * ************************************************************************ */
     
     /**
      * <p>Costruttore che inizializza i campi a valori di default.</p>
@@ -92,14 +92,17 @@ public class DepartmentBean extends CodeBean {
     	persone = null;
     	fte = BEAN_DEFAULT_FLOAT;
     	setExtraInfo(null);
+    	misure = null;
     }
 
     
 	/* **************************************************** *
      *           Metodi getter e setter per prefisso        *
      * **************************************************** */
+    
 	/**
-	 * Restituisce il prefisso di un dipartimento.
+	 * Restituisce il prefisso di un dipartimento
+	 * 
 	 * @return <code>prefisso</code> - prefisso del dipartimento
 	 */
 	public String getPrefisso() {
@@ -107,7 +110,8 @@ public class DepartmentBean extends CodeBean {
 	}
 
 	/**
-	 * Imposta il prefisso di un dipartimento.
+	 * Imposta il prefisso di un dipartimento
+	 * 
 	 * @param prefisso - il prefisso del dipartimento da impostare
 	 */
 	public void setPrefisso(String prefisso) {
@@ -118,8 +122,10 @@ public class DepartmentBean extends CodeBean {
     /* **************************************************** *
      *           Metodi getter e setter per acronimo        *
      * **************************************************** */
+	
     /**
-     * Restituisce l'acronimo di un dipartimento.
+     * Restituisce l'acronimo di un dipartimento
+     * 
      * @return <code>acronimo</code> - acronimo del dipartimento
      */
     public String getAcronimo() {
@@ -127,7 +133,8 @@ public class DepartmentBean extends CodeBean {
     }
 
     /**
-     * Imposta il prefisso di un dipartimento.
+     * Imposta il prefisso di un dipartimento
+     * 
      * @param acronimo - il prefisso del dipartimento da impostare
      */
     public void setAcronimo(String acronimo) {
@@ -136,10 +143,12 @@ public class DepartmentBean extends CodeBean {
     
     
 	/* **************************************************** *
-     *        Metodi getter e setter per indirizzo      *
+     *        Metodi getter e setter per indirizzo          *
      * **************************************************** */
+    
 	/**
-	 * Restituisce l'indirizzo della sede di un dipartimento.
+	 * Restituisce l'indirizzo della sede di un dipartimento
+	 * 
 	 * @return <code>indirizzo</code> - indirizzo della sede del dipartimento
 	 */
 	public String getIndirizzo() {
@@ -147,7 +156,8 @@ public class DepartmentBean extends CodeBean {
 	}
 
 	/**
-	 * Imposta l'indirizzo della sede di un dipartimento.
+	 * Imposta l'indirizzo della sede di un dipartimento
+	 * 
 	 * @param indirizzoSede - indirizzo della sede da impostare
 	 */
 	public void setIndirizzo(String indirizzoSede) {
@@ -158,8 +168,10 @@ public class DepartmentBean extends CodeBean {
     /* **************************************************** *
      *          Metodi getter e setter per livello          *
      * **************************************************** */
+	
     /**
-     * Restituisce il livello di una struttura.
+     * Restituisce il livello di una struttura
+     * 
      * @return <code>livello</code> - il livello della struttura
      */
     public int getLivello() {
@@ -167,7 +179,8 @@ public class DepartmentBean extends CodeBean {
     }
     
     /**
-     * Imposta il livello di una struttura.
+     * Imposta il livello di una struttura
+     * 
      * @param livello - il livello della struttura da impostare
      */
     public void setLivello(int livello) {
@@ -178,8 +191,10 @@ public class DepartmentBean extends CodeBean {
     /* **************************************************** *
      *      Metodi getter e setter per struttura padre      *
      * **************************************************** */
+    
     /**
      * Restituisce il diretto ascendente della struttura corrente
+     * 
      * @return <code>DepartmentBean</code> - il padre della struttura corrente
      */
     public DepartmentBean getPadre() {
@@ -188,6 +203,7 @@ public class DepartmentBean extends CodeBean {
 
     /**
      * Imposta il padre della struttura corrente
+     * 
      * @param padre - il padre da impostare
      */
     public void setPadre(DepartmentBean padre) {
@@ -197,9 +213,11 @@ public class DepartmentBean extends CodeBean {
 
     /* **************************************************** *
      *      Metodi getter e setter per strutture figlie     *
-     * **************************************************** */    
+     * **************************************************** */
+    
     /**
      * Restituisce una lista di diretti discendenti della struttura corrente
+     * 
      * @return <code>Vector&lt;DepartmentBean&gt; - strutture figlie della struttura corrente
      */
     public Vector<DepartmentBean> getFiglie() {
@@ -208,6 +226,7 @@ public class DepartmentBean extends CodeBean {
 
     /**
      * Imposta le figlie della struttura corrente
+     * 
      * @param figlie - le strutture figlie da impostare
      */
     public void setFiglie(Vector<DepartmentBean> figlie) {
@@ -218,8 +237,9 @@ public class DepartmentBean extends CodeBean {
     /* **************************************************** *
      *    Metodi getter e setter per full time equivalent   *
      * **************************************************** */
+    
     /**
-     * <p>Restituisce indice full time equivalent della struttura.</p>
+     * Restituisce indice full time equivalent della struttura
      * 
      * @return <code>float</code> - full time equivalent
      */
@@ -229,6 +249,7 @@ public class DepartmentBean extends CodeBean {
 
     /**
      * Imposta fte della struttura
+     * 
      * @param fte - indice full time equivalent della struttura da impostare
      */
     public void setFte(float fte) {
@@ -238,9 +259,11 @@ public class DepartmentBean extends CodeBean {
 
     /* **************************************************** *
      *      Metodi getter e setter per persone allocate     *
-     * **************************************************** */    
+     * **************************************************** */
+    
     /**
      * Restituisce una lista di persone allocate sulla struttura corrente
+     * 
      * @return <code>Vector&lt;PersonBean&gt; - persone allocate sulla struttura corrente
      */
     public ArrayList<PersonBean> getPersone() {
@@ -249,6 +272,7 @@ public class DepartmentBean extends CodeBean {
 
     /**
      * Imposta le persone allocate sulla struttura corrente
+     * 
      * @param persone - le persone allocate da impostare
      */
     public void setPersone(ArrayList<PersonBean> persone) {
@@ -258,9 +282,11 @@ public class DepartmentBean extends CodeBean {
 
     /* **************************************************** *
      *  Metodi getter e setter per informazioni aggiuntive  *
-     * **************************************************** */    
+     * **************************************************** */
+    
     /**
      * Restituisce informazioni aggiuntive relative alla struttura corrente
+     * 
      * @return <code>ItemBean - informazioni aggiunte relative alla struttura
      */
     public ItemBean getExtraInfo() {
@@ -269,11 +295,36 @@ public class DepartmentBean extends CodeBean {
 
     /**
      * Imposta informazioni aggiuntive relative alla struttura corrente
+     * 
      * @param extraInfo - le informazioni aggiuntive da impostare
      */
     public void setExtraInfo(ItemBean extraInfo) {
         this.extraInfo = extraInfo;
     }
+
     
+    /* **************************************************** *
+     *   Metodi getter e setter per misure di mitigazione   *
+     * **************************************************** */
+    
+    /**
+     * Restituisce lista di misure di mitigazione eventualmente associate
+     * alla struttura corrente
+     * 
+     * @return <code>ArrayList&lt;MeasureBean&gt;</code> - misure associate con eventuali dettagli di monitoraggio
+     */
+    public ArrayList<MeasureBean> getMisure() {
+        return misure;
+    }
+
+
+    /**
+     * Imposta lista di misure cui la struttura corrente &egrave; associata
+     * 
+     * @param misure - le misure associate da impostare
+     */
+    public void setMisure(ArrayList<MeasureBean> misure) {
+        this.misure = misure;
+    }
 
 }
