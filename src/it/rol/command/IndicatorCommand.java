@@ -103,7 +103,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
     /**
      * Pagina per mostrare la lista delle misure monitorate (pagina iniziale monitoraggio)
      */
-    private static final String nomeFileElencoMisure  = "/jsp/icMisure";
+    private static final String nomeFileElencoMisure  = "/jsp/icMisure.jsp";
     /**
      * Pagina per mostrare la lista degli indicatori di una misura monitorata
      */
@@ -119,7 +119,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
     /**
      * Pagina per mostrare i dettagli di una misura monitorata
      */
-    private static final String nomeFileMisura = "/jsp/icMisura";    
+    private static final String nomeFileMisura = "/jsp/icMisura.jsp";    
     /**
      * Pagina per mostrare i dettagli di una misurazione
      */
@@ -127,11 +127,11 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
     /**
      * Pagina per mostrare la form di aggiunta dei dettagli di una misura monitorata
      */
-    private static final String nomeFileInsertMeasure = "/jsp/icMisuraForm";
+    private static final String nomeFileInsertMeasure = "/jsp/icMisuraForm.jsp";
     /**
      * Pagina per mostrare il riepilogo dei dettagli di una misura monitorata
      */ 
-    private static final String nomeFileResumeMeasure = "/jsp/icEpilogo";
+    private static final String nomeFileResumeMeasure = "/jsp/icEpilogo.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
      */    
@@ -220,12 +220,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         MeasureBean measure = null;
         // Elenco di misure di prevenzione monitorate
         ArrayList<MeasureBean> measures = null;
-        // Elenco parziale delle misure sulla base di alcuni fattori abilitanti
-        ArrayList<MeasureBean> suggestedMeasures = null;
-        // Elenco di misure depurate di altre liste (suggerite, già applicate...)
-        ArrayList<MeasureBean> lessMeasures = null;
-        // Elenco di rischi associati a una misura
-        ArrayList<ItemBean> risksByMeasure = null;
         // Tabella che conterrà le misure suggerite raggruppate per tipo
         LinkedHashMap<String, ArrayList<MeasureBean>> measuresByType = null;
         // Elenco dei caratteri delle misure
@@ -307,7 +301,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
             // Recupera i tipi di indicatore
             types = ConfigManager.getIndicatorTypes();
             // Recupera l'elenco completo degli indicatori di monitoraggio
-            indicators = db.getMeasures(user, VOID_SQL_STRING, Query.GET_ALL_BY_CLAUSE, survey);
+            //indicators = db.getMeasures(user, VOID_SQL_STRING, Query.GET_ALL_BY_CLAUSE, survey);
             // Controllo sull'input
             if (!codeSur.equals(DASH)) {
                 // Creazione della tabella che conterrà i valori dei parametri passati dalle form
@@ -363,28 +357,27 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                      *               Manage Indicator Part              *
                      * ************************************************ */
                     if (nomeFile.containsKey(part)) {
-                        //macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
                         if (part.equalsIgnoreCase(PART_MEASURES)) {
                             // Controlla la presenza dell'id di una misura
                             if (codeMis.equals(DASH)) {
                             /* ************************************************ *
-                             *            Ramo elenco misure monitorate         *
+                             *                Elenco Monitoraggio               *
                              * ************************************************ */
-                                measures = db.getMonitoredMeasures(user, VOID_SQL_STRING, Query.GET_ALL_BY_CLAUSE, survey);
+                                structs = db.getMeasuresByStructs(user, survey);
                                 // Imposta la jsp
                                 fileJspT = nomeFile.get(part);
-                            } else {
+                            //} else {
                             /* ************************************************ *
                              *            Ramo dettagli misura monitorata       *
                              * ************************************************ */
                             }
                         } else if (part.equalsIgnoreCase(PART_INDICATOR)) {
                             // Controlla la presenza dell'id di un indicatore
-                            //if ()
+                            if (idI > DEFAULT_ID) {
                             /* ************************************************ *
                              *        Ramo elenco indicatori di una misura      *
                              * ************************************************ */
-                            
+                            }
                             /* ************************************************ *
                              *             Ramo modifica indicatore             *
                              * ************************************************ */
@@ -399,50 +392,23 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              * ************************************************ */
                             
                             
-                        } else if (part.equalsIgnoreCase(VOID_STRING)) {
+                        //} else if (part.equalsIgnoreCase(VOID_STRING)) {
                             /* ************************************************ *
                              * Form aggiunta dettagli monitoraggio a una misura *
                              * ************************************************ */
-                        } else if (part.equalsIgnoreCase(VOID_STRING)) {
+                        //} else if (part.equalsIgnoreCase(VOID_STRING)) {
                             /* ************************************************ *
                              *  Pagina riepilogo dettagli monitoraggio inseriti *
                              * ************************************************ */
-                        } else if (part.equalsIgnoreCase(VOID_STRING)) {
+                        //} else if (part.equalsIgnoreCase(VOID_STRING)) {
                             /* ************************************************ *
                              *      Form inserimento indicatore di una misura   *
                              * ************************************************ */
-                        } else if (part.equalsIgnoreCase(VOID_STRING)) {
+                        //} else if (part.equalsIgnoreCase(VOID_STRING)) {
                             /* ************************************************ *
                              *     Form inserimento misurazione di una misura   *
                              * ************************************************ */
                             
-                            /* Recupera i caratteri
-                            characters = db.getMeasureCharacters();
-                            // Recupera le strutture della rilevazione corrente
-                            structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
-                            // Travasa le strutture in una mappa piatta indicizzata per codice
-                            flatStructs = AuditCommand.decantStructs(structs);
-                            // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuova Misura");
-
-                            /* Prepara un ProcessBean di cui recuperare tutti i rischi
-                            process = db.getProcessById(user, idP, survey);
-                            // Recupera tutti i rischi del processo; tra questi ci sarà quello cui si vuole applicare la misura
-                            ArrayList<RiskBean> risks = db.getRisksByProcess(user, process, survey);
-                            // Individua il rischio specifico a cui si vuole applicare la misura
-                            risk = ProcessCommand.decant(risks, idR);
-                            // Recupera tutte le misure suggerite in base ai fattori abilitanti del rischio
-                            suggestedMeasures = db.getMeasuresByFactors(user, risk, Query.GET_ALL, survey);
-                            // Recupera le misure suggerite, tolte quelle già applicate al rischio e al processo correnti
-                            lessMeasures = db.getMeasuresByFactors(user, risk, !Query.GET_ALL, survey);
-                            // Toglie dall'elenco totale delle misure tutte quelle suggerite e quelle già applicate
-                            measures = purge(allMeasures, suggestedMeasures, risk);
-                            // Raggruppa le misure suggerite per tipologia
-                            measuresByType = decantMeasures(types, lessMeasures);
-                            // Ha bisogno di personalizzare le breadcrumbs*/
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-M");
                         }
 
                     } else {
@@ -459,9 +425,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             fileJspT = nomeFileDettaglio;
                         } else {
                             /* ************************************************ *
-                             *    Ramo elenco indicatori tout court (Registro)  *
+                             *   Ramo elenco solo misure monitorate (Registro)  *
                              * ************************************************ */
-                            //indicators = ;
+                            measures = db.getMonitoredMeasures(user, VOID_SQL_STRING, Query.GET_ALL_BY_CLAUSE, survey);
                             fileJspT = nomeFileElenco;                            
                         }
                     }
@@ -506,13 +472,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         if (characters != null) {
             req.setAttribute("caratteriMisure", characters);
         }
-        // Imposta nella request elenco misure di prevenzione dei rischi
-        if (measures != null) {
-            req.setAttribute("misure", measures);
-        }
-        // Imposta nella request oggetto misura di prevenzione specifica
-        if (measure != null) {
-            req.setAttribute("misura", measure);
+        // Imposta nella request elenco misure raggruppate per strutture
+        if (structs != null) {
+            req.setAttribute("strutture", structs);
         }
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
