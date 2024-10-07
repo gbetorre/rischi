@@ -4586,6 +4586,108 @@ public class DBWrapper extends QueryImpl {
         }        
     }
     
+    
+    /**
+     * <p>Restituisce un ArrayList contenente tutte le strutture capofila
+     * di misure, con all'interno le misure stesse.
+     * Le capofila possono essere di vario sottotipo (capofila 1, capofila 2,
+     * capofila 3) ma non di tipo gregarie.</p>
+     *
+     * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - un vettore ordinato di DepartmentBean, che rappresentano le capofila delle misure
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public ArrayList<DepartmentBean> getMeasuresByStructs(PersonBean user,
+                                                          CodeBean survey)
+                                                   throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs, rs1 = null;
+            int nextParam = NOTHING;
+            AbstractList<DepartmentBean> structs = new ArrayList<>();
+            AbstractList<MeasureBean> measures = null;
+            try {
+                String capofilaLabel = CP1.substring(NOTHING, CP1.indexOf(BLANK_SPACE)) + PER_CENT;
+                pst = con.prepareStatement(GET_STRUCTS_BY_ROLE);
+                pst.clearParameters();
+                pst.setString(++nextParam, capofilaLabel);
+                pst.setInt(++nextParam, survey.getId());
+                pst.setString(++nextParam, capofilaLabel);
+                pst.setInt(++nextParam, survey.getId());
+                pst.setString(++nextParam, capofilaLabel);
+                pst.setInt(++nextParam, survey.getId());
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Inizializza elenco misure
+                    measures = new ArrayList<>();
+                    // Prepara il tipo
+                    DepartmentBean capofila = new DepartmentBean();
+                    // Valorizza il tipo
+                    BeanUtil.populate(capofila, rs);
+                    // Differenzia in base al livello
+                    nextParam = NOTHING;
+                    pst = null;
+                    pst = con.prepareStatement(getMeasuresByStruct(survey.getId(), capofila.getId(), (byte) capofila.getLivello(), capofilaLabel));
+                    pst.clearParameters();
+                    rs1 = pst.executeQuery();
+                    while (rs1.next()) {
+                        // Crea una misura vuota
+                        MeasureBean measure = new MeasureBean();
+                        // Lo valorizza col risultato della query
+                        BeanUtil.populate(measure, rs1);
+                        // La aggiunge alla lista delle misure 
+                        measures.add(measure);
+                    }
+                    capofila.setMisure((ArrayList<MeasureBean>) measures);
+                    structs.add(capofila);
+                    /* === Strutture === */
+                    /*
+                    switch(capofila.getLivello()) {
+                    case (ELEMENT_LEV_2) :
+                        query = new StringBuffer(GET_MEASURES_BY_STRUCT_L2);
+                        break;
+                    case (ELEMENT_LEV_3) :
+                        query = new StringBuffer(GET_MEASURES_BY_STRUCT_L3);
+                        break;
+                    case (ELEMENT_LEV_4) :
+                        query = new StringBuffer(GET_MEASURES_BY_STRUCT_L4);
+                        break;
+                    default:
+                        break;
+                    }*/
+                    
+                    // Aggiunge il tipo alla lista
+                    //types.add(type);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return (ArrayList<DepartmentBean>) structs;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
     /* ********************************************************** *
      *                    Metodi di INSERIMENTO                   *
      * ********************************************************** */
