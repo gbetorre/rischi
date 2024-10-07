@@ -1359,7 +1359,7 @@ public interface Query extends Serializable {
     public static final String GET_MEASURES_BY_STRUCT_L4 = 
             "SELECT DISTINCT" +
             "       MST.codice                          AS \"codice\"" +
-                    // AS "ruolo" : aggiungere attributo nel bean Measure
+            "   ,   MST.ruolo                           AS \"ruolo\"" +
             "   ,   MS.nome                             AS \"nome\"" +
             "   ,   MS.descrizione                      AS \"informativa\"" +
             "   ,   MS.onerosa                          AS \"onerosa\"" +
@@ -1369,12 +1369,11 @@ public interface Query extends Serializable {
             "   ,   MM.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
             "   ,   MM.id_rilevazione                   AS \"idRilevazione\"" +
             "   FROM misura MS" +
-            "   ,    misuramonitoraggio MM" +
+            "       LEFT JOIN misuramonitoraggio MM ON (MS.codice = MM.codice AND MS.id_rilevazione = MM.id_rilevazione)" +
+            "       INNER JOIN misura_struttura MST ON (MS.codice = MST.codice AND MS.id_rilevazione = MST.id_rilevazione)" +
             "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
-            "       LEFT JOIN misura_rischio_processo_at MRPAT ON (MRPAT.cod_misura = MS.codice AND MRPAT.id_rilevazione = MS.id_rilevazione)" +
-            "   WHERE (MS.codice = MM.codice AND MS.id_rilevazione = MM.id_rilevazione) " +
-            "       AND MS.id_rilevazione = ?" +
-            "       AND (MS.codice = ? OR -1 = ?)" +
+            "   WHERE (MST.id_struttura_liv4 = ?) " +
+            "       AND MST.id_rilevazione = ?" +
             "   ORDER BY MS.nome";
     
     /* ************************************************************************ *
@@ -1529,6 +1528,21 @@ public interface Query extends Serializable {
      * @return <code>String</code> - la query che seleziona le misure cercate
      */
     public String getMeasureByRiskAndProcess(String idR, String idP, String idS, String codeM, int getAll);
+
+    /**
+     * <p>Seleziona le misure di mitigazione recuperando anche attributi
+     * esclusivi dei dettagli inseriti ai fini del monitoraggio e riferimenti
+     * alla struttura collegata alla misura stessa.
+     * Basa la selezione principalmente sull'identificativo della struttura
+     * e sul suo ruolo rispetto alla misura.</p> 
+     * 
+     * @param idR   identificativo della rilevazione
+     * @param idS   identificativo della struttura
+     * @param level livello della struttura
+     * @param role  ruolo della struttura rispetto alla misura
+     * @return <code>String</code> - la query che seleziona le misure cercate
+     */
+    public String getMeasuresByStruct(int idR, int idS, byte level, String role);
     
     /* ********************************************************************** *
      *                         Query di inserimento                           *
