@@ -238,6 +238,7 @@ in the case of the current application, in fact, version numbers have only the s
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)</p>
 <cite>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</cite>
 
+- [1.9.8] (07/10/2024) First draft implementation about monitoring page 
 - [1.9.7] (30/09/2024) Bug fix
 - [1.9.6] (23/09/2024) First draft implementation software component for the management of monitoring indicators
 - [1.9.5] (16/09/2024) Presentation improvements (labels); highlighted filtered text via DataTables library
