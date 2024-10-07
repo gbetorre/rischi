@@ -87,11 +87,13 @@ public class MeasureBean extends CodeBean {
     private ArrayList<DepartmentBean> capofila3;
     /** Lista di strutture gregarie che sovrintendono alla misura */
     private ArrayList<DepartmentBean> gregarie;
-    /* 
-     * ----------------    Attributi relativi al monitoraggio    ---------------- 
-     */
     /** Obiettivo PIAO  */
     private String obiettivo;
+    /** Ruolo  */
+    private String ruolo;
+    /** Dettagli Monitoraggio */
+    private boolean dettagli;
+    
     
     /* ************************************************************************ *
      *                               Costruttori                                *
@@ -113,7 +115,8 @@ public class MeasureBean extends CodeBean {
         rilevazione = null;
         tipologie = null;
         capofila = capofila2 = capofila3 = gregarie = null;
-        obiettivo = null;
+        obiettivo = ruolo = null;
+        dettagli = false;
     }
 
 
@@ -707,6 +710,60 @@ public class MeasureBean extends CodeBean {
      */
     public void setObiettivo(String obiettivo) {
         this.obiettivo = obiettivo;
+    }
+    
+    
+    /* ********************************************************* *
+     *              Metodi getter e setter per ruolo             *
+     * ********************************************************* */
+
+    /**
+     * Restituisce un'informazione relativa a un ruolo
+     * (p.es. un ruolo rivestito dalla misura oppure il ruolo
+     * rivestito da una struttura collegata alla misura nei confronti 
+     * della misura stessa).
+     * 
+     * @return <code>ruolo</code> - Stringa contenente i dettagli di un ruolo
+     */
+    public String getRuolo() {
+        return ruolo;
+    }
+
+
+    /**
+     * Imposta un ruolo correlato alla misura corrente
+     * 
+     * @param ruolo - ruolo attinente alla misura, da impostare
+     */
+    public void setRuolo(String ruolo) {
+        this.ruolo = ruolo;
+    }
+    
+    
+    /* ********************************************************* *
+     *      Metodi getter e setter per dettagli monitoraggio     *
+     * ********************************************************* */
+
+    /**
+     * Restituisce <code>true</code> se la misura corrente &egrave; sottoposta
+     * a monitoraggio, ovvero se sono presenti i dettagli relativi 
+     * al monitoraggio per la misura considerata.
+     * 
+     * @return <code>dettagli</code> - true se la misura e' sottoposta a monitoraggio, false altrimenti
+     */
+    public boolean isDettagli() {
+        return dettagli;
+    }
+
+
+    /**
+     * Imposta il flag specificante se la misura ha dettagli di monitoraggio
+     * associati.
+     * 
+     * @param dettagli - flag specificante la presenza di dettagli relativi al monitoraggio
+     */
+    public void setDettagli(boolean dettagli) {
+        this.dettagli = dettagli;
     }
 
 }
