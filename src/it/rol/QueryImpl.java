@@ -213,5 +213,46 @@ public class QueryImpl implements Query, Constants {
                         "   ORDER BY MS.codice";
         return GET_MEASURES_BY_RISK_AND_PROCESS;
     }
+    
+    
+    /* (non-Javadoc)
+     * @see it.rol.Query#getMeasuresByStruct(int, int, byte, String)
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String getMeasuresByStruct(int idR, 
+                                      int idS,
+                                      byte level,
+                                      String role) {
+        final String GET_MEASURE_BY_STRUCT =
+                "SELECT DISTINCT" +
+                "       MST.cod_misura                                              AS \"codice\"" +
+                "   ,   MST.ruolo                                                   AS \"ruolo\"" +
+                "   ,   MS.nome                                                     AS \"nome\"" +
+                "   ,   MS.descrizione                                              AS \"informativa\"" +
+                "   ,   MS.onerosa                                                  AS \"onerosa\"" +
+                "   ,   MS.ordinale                                                 AS \"ordinale\"" +
+                "   ,   MM.obiettivopiao                                            AS \"obiettivo\"" +
+                "   ,   COALESCE(MM.data_ultima_modifica, MS.data_ultima_modifica)  AS \"dataUltimaModifica\"" +
+                "   ,   COALESCE(MM.ora_ultima_modifica, MS.ora_ultima_modifica)    AS \"oraUltimaModifica\"" +
+                "   ,   COALESCE(MM.id_rilevazione, MS.id_rilevazione)              AS \"idRilevazione\"" +
+                "   ,   CASE " +
+                "           WHEN" +
+                "               (SELECT MM.codice" +
+                "                   FROM misuramonitoraggio MM" +
+                "                   WHERE MM.codice = MST.cod_misura AND MM.id_rilevazione = MS.id_rilevazione) " +
+                "               IS NOT NULL THEN true " +
+                "           ELSE false " +
+                "       END                                                         AS \"dettagli\"" +
+                "   FROM misura MS" +
+                "       LEFT JOIN misuramonitoraggio MM ON (MS.codice = MM.codice AND MS.id_rilevazione = MM.id_rilevazione)" +
+                "       INNER JOIN misura_struttura MST ON (MS.codice = MST.cod_misura AND MS.id_rilevazione = MST.id_rilevazione)" +
+                "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
+                "   WHERE MST.id_struttura_liv" + level + " = " + idS +
+                "       AND MST.ruolo ILIKE '" + role + "'" +
+                "       AND MST.id_rilevazione = " + idR +
+                "   ORDER BY MS.nome";
+        return GET_MEASURE_BY_STRUCT;
+    }
 
 }
