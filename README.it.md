@@ -332,6 +332,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [1.9.8] (07/10/2024) Implementata pagina iniziale monitoraggio
 - [1.9.7] (30/09/2024) Prima bozza di implementazione codice per il monitoraggio; correzione di bug
 - [1.9.6] (23/09/2024) Prima bozza di implementazione componente software per la gestione degli indicatori di monitoraggio
 - [1.9.5] (16/09/2024) Miglioramenti nella presentazione (etichette); aggiunta evidenziazione testo filtrato tramite libreria DataTables
