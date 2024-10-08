@@ -223,10 +223,6 @@ public class ConfigManager extends HttpServlet {
      * generati dall'applicazione e utilizzati tipicamente da librerie lato client.</p>
      */
     private static String dirJson = "json";
-    /**
-     * <p>Stringa per il puntamento al db di produzione</p>
-     */
-    private static StringBuffer contextDbName = new StringBuffer("java:comp/env/jdbc/rol");
 
 
     /**
@@ -301,17 +297,11 @@ public class ConfigManager extends HttpServlet {
         /*
          * Attiva la connessione al database
          */
-        log.info("==>" + getServletContext().getRealPath("/") + "<==");
-        // Prima deve capire su quale database deve insistere
-        // Di default va in produzione, ma se non siamo in produzione deve andare in locale
-        if ( !getServletContext().getRealPath("/").equals("/var/lib/tomcat9/webapps/rischi/") ) {
-            contextDbName = new StringBuffer("java:comp/env/jdbc/roldev");
-        }
         try {
             db = new DBWrapper();
         }
         catch (WebStorageException wse) {
-            throw new ServletException(FOR_NAME + "Non e\' possibile avere una connessione al database " + contextDbName + ".\n" + wse.getMessage(), wse);
+            throw new ServletException(FOR_NAME + "Non e\' possibile avere una connessione al database.\n" + wse.getMessage(), wse);
         }
         /*
          * Inizializza la tabella <code>commands</code> che deve contenere
@@ -484,33 +474,6 @@ public class ConfigManager extends HttpServlet {
     /* ************************************************************************ *
      *                    Getters sulle variabili di classe                     *
      * ************************************************************************ */
-
-    /**
-     * <p>Restituisce la stringa necessaria al connettore del database.</p>
-     * <p><cite id="https://stackoverrun.com/it/q/3104484">
-     * java:comp/env is the node in the JNDI tree where you can find properties
-     * for the current Java EE component (a webapp, or an EJB).<br />
-     * <code>Context envContext = (Context)initContext.lookup("java:comp/env");</code>
-     * allows defining a variable pointing directly to this node. It allows doing
-     * <code>SomeBean s = (SomeBean) envContext.lookup("ejb/someBean");
-     * DataSource ds = (DataSource) envContext.lookup("jdbc/dataSource");</code>
-     * rather than
-     * <code>SomeBean s = (SomeBean) initContext.lookup("java:comp/env/ejb/someBean");
-     * DataSource ds = (DataSource) initContext.lookup("java:comp/env/jdbc/dataSource");</code>
-     * Relative paths instead of absolute paths. That's what it's used for.<br />
-     * It's an in-memory global hashtable where you can store global
-     * variables by name.
-     * The "java:" url scheme causes JNDI to look for a
-     * javaURLContextFactory class, which is usually provided by your
-     * app container, e.g. here is Tomcat's implementation javadoc.</cite></p>
-     * <p>Metodo getter sulla variabile di classe.</p>
-     *
-     * @return <code>String</code> - il nome usato dal DbWrapper per realizzare il puntamento jdbc
-     */
-    public static String getDbName() {
-        return new String(contextDbName);
-    }
-
 
     /**
      * <p>Restituisce il nome del parametro identificante la Root dell'applicazione web.</p>
