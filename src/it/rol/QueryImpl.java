@@ -224,6 +224,24 @@ public class QueryImpl implements Query, Constants {
                                       int idS,
                                       byte level,
                                       String role) {
+        String clause = null;
+        switch(level) {
+        case (ELEMENT_LEV_1) :
+            clause = "  AND MST.id_struttura_liv2 IS NULL" +
+                     "  AND MST.id_struttura_liv3 IS NULL" +
+                     "  AND MST.id_struttura_liv4 IS NULL";
+            break;
+        case (ELEMENT_LEV_2) :
+            clause = "  AND MST.id_struttura_liv3 IS NULL" +
+                     "  AND MST.id_struttura_liv4 IS NULL";
+            break;
+        case (ELEMENT_LEV_3) :
+            clause = "  AND MST.id_struttura_liv4 IS NULL";
+            break;
+        default:
+            clause = "";
+            break;
+        }
         final String GET_MEASURE_BY_STRUCT =
                 "SELECT DISTINCT" +
                 "       MST.cod_misura                                              AS \"codice\"" +
@@ -249,9 +267,10 @@ public class QueryImpl implements Query, Constants {
                 "       INNER JOIN misura_struttura MST ON (MS.codice = MST.cod_misura AND MS.id_rilevazione = MST.id_rilevazione)" +
                 "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
                 "   WHERE MST.id_struttura_liv" + level + " = " + idS +
+                        clause +
                 "       AND MST.ruolo ILIKE '" + role + "'" +
                 "       AND MST.id_rilevazione = " + idR +
-                "   ORDER BY MS.nome";
+                "   ORDER BY MST.ruolo, MS.nome";
         return GET_MEASURE_BY_STRUCT;
     }
 
