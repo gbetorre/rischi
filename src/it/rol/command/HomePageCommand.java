@@ -51,6 +51,7 @@ import com.oreilly.servlet.ParameterParser;
 
 import it.rol.ConfigManager;
 import it.rol.Constants;
+import it.rol.DBManager;
 import it.rol.DBWrapper;
 import it.rol.Main;
 import it.rol.Query;
@@ -249,7 +250,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         dbName = (String) req.getServletContext().getAttribute("dbName");
         if (dbName == null || dbName.isEmpty()) {
             // Uso la stessa stringa perché, se non valorizzata in application, non sarà mai empty ma sarà null
-            dbName = ConfigManager.getDbName();
+            dbName = DBManager.getDbName();
             // Attenzione: crea una variabile di APPLICAZIONE
             req.getServletContext().setAttribute("db", dbName);
         }
