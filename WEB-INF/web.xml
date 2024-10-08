@@ -5,7 +5,7 @@
   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
     
     <servlet>
-      <description>Servlet centrale dell'applicazione rischi corruttivi</description>        
+      <description>Servlet ROL entrypoint</description>        
       <servlet-name>main</servlet-name>
       <servlet-class>it.rol.Main</servlet-class>
       <load-on-startup>5</load-on-startup>
@@ -16,7 +16,7 @@
     </servlet-mapping>
    
     <servlet>
-      <description>Servlet per la gestione di richieste XHR e output diversi da text/html</description>
+      <description>Servlet to manage XHR requests and output other than text/html</description>
       <servlet-name>data</servlet-name>
       <servlet-class>it.rol.Data</servlet-class>
       <load-on-startup>10</load-on-startup>
@@ -27,7 +27,7 @@
     </servlet-mapping>  
    
     <servlet>
-      <description>Servlet per la gestione delle sessioni utente</description>
+      <description>Servlet to manage user sessions</description>
       <servlet-name>session</servlet-name>
       <servlet-class>it.rol.SessionManager</servlet-class>
     </servlet>
@@ -37,9 +37,16 @@
     </servlet-mapping>
 
     <servlet>
-      <description>Configuration Manager (never asks anything from anyone)</description>        
+      <description>Servlet to cache configuration variables</description>        
       <servlet-name>config</servlet-name>
-      <servlet-class>it.rol.ConfigManager</servlet-class>
+      <servlet-class>it.rol.manager.ConfigManager</servlet-class>
+      <load-on-startup>2</load-on-startup>
+    </servlet>
+    
+    <servlet>
+      <description>Servlet to provide database connection</description>        
+      <servlet-name>db</servlet-name>
+      <servlet-class>it.rol.DBManager</servlet-class>
       <load-on-startup>1</load-on-startup>
     </servlet>
       
