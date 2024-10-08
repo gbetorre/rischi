@@ -122,7 +122,7 @@ public class DBWrapper extends QueryImpl {
     /**
      * <p>Recupera da Servlet la stringa opportuna per il puntamento del DataSource.</p>
      */
-    private static String contextDbName = ConfigManager.getDbName();
+    private static String contextDbName = DBManager.getDbName();
 
 
     /**
@@ -143,7 +143,7 @@ public class DBWrapper extends QueryImpl {
                 if (rol_manager == null)
                     throw new WebStorageException(FOR_NAME + "La risorsa " + contextDbName + "non e\' disponibile. Verificare configurazione e collegamenti.\n");
             } catch (NamingException ne) {
-                throw new WebStorageException(FOR_NAME + "Problema nel recuperare la risorsa jdbc/prol per problemi di naming: " + ne.getMessage());
+                throw new WebStorageException(FOR_NAME + "Problema nel recuperare la risorsa jdbc/rol per problemi di naming: " + ne.getMessage());
             } catch (Exception e) {
                 throw new WebStorageException(FOR_NAME + "Errore generico nel costruttore: " + e.getMessage(), e);
             }
@@ -4593,6 +4593,8 @@ public class DBWrapper extends QueryImpl {
      * Le capofila possono essere di vario sottotipo (capofila 1, capofila 2,
      * capofila 3) ma non di tipo gregarie.</p>
      *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param survey    oggetto contenente gli estremi della rilevazione
      * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - un vettore ordinato di DepartmentBean, che rappresentano le capofila delle misure
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
@@ -4639,24 +4641,6 @@ public class DBWrapper extends QueryImpl {
                     }
                     capofila.setMisure((ArrayList<MeasureBean>) measures);
                     structs.add(capofila);
-                    /* === Strutture === */
-                    /*
-                    switch(capofila.getLivello()) {
-                    case (ELEMENT_LEV_2) :
-                        query = new StringBuffer(GET_MEASURES_BY_STRUCT_L2);
-                        break;
-                    case (ELEMENT_LEV_3) :
-                        query = new StringBuffer(GET_MEASURES_BY_STRUCT_L3);
-                        break;
-                    case (ELEMENT_LEV_4) :
-                        query = new StringBuffer(GET_MEASURES_BY_STRUCT_L4);
-                        break;
-                    default:
-                        break;
-                    }*/
-                    
-                    // Aggiunge il tipo alla lista
-                    //types.add(type);
                 }
                 // Just tries to engage the Garbage Collector
                 pst = null;
