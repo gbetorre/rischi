@@ -39,7 +39,7 @@
     <servlet>
       <description>Servlet to cache configuration variables</description>        
       <servlet-name>config</servlet-name>
-      <servlet-class>it.rol.manager.ConfigManager</servlet-class>
+      <servlet-class>it.rol.ConfigManager</servlet-class>
       <load-on-startup>2</load-on-startup>
     </servlet>
     
