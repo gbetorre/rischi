@@ -1530,7 +1530,8 @@ public interface Query extends Serializable {
     public String getMeasureByRiskAndProcess(String idR, String idP, String idS, String codeM, int getAll);
 
     /**
-     * <p>Seleziona le misure di mitigazione recuperando anche attributi
+     * <p>Seleziona le misure di mitigazione <strong>direttamente</strong>
+     * collegate a una struttura di dato livello, recuperando anche attributi
      * esclusivi dei dettagli inseriti ai fini del monitoraggio e riferimenti
      * alla struttura collegata alla misura stessa.
      * Basa la selezione principalmente sull'identificativo della struttura
@@ -1853,6 +1854,46 @@ public interface Query extends Serializable {
             "   ,       ? " +       // data_ultima_modifica
             "   ,       ? " +       // ora_ultima_modifica
             "   ,       ? " +       // id_usr_ultima_modifica
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento dei dettagli di una misura di mitigazione.</p>
+     */
+    public static final String INSERT_MEASURE_DETAILS =
+            "INSERT INTO misuramonitoraggio" +
+            "   (   codice" +
+            "   ,   id_rilevazione" +                   
+            "   ,   obiettivopiao" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       // codice
+            "   ,       ? " +       // id rilevazione
+            "   ,       ? " +       // obiettivopiao
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di una fase di attuazione di una misura di mitigazione.</p>
+     */
+    public static final String INSERT_MEASURE_ACTIVITY =
+            "INSERT INTO fase" +
+            "   (   nome" +
+            "   ,   id_rilevazione" +                   
+            "   ,   obiettivopiao" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       // codice
+            "   ,       ? " +       // id rilevazione
+            "   ,       ? " +       // obiettivopiao
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
             "          )" ;
     
     /* ********************************************************************** *
