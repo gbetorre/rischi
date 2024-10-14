@@ -176,7 +176,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_INSERT_INDICATOR,     nomeFileDettaglio);
         nomeFile.put(PART_INSERT_MEASUREMENT,   nomeFileMisurazione);
         nomeFile.put(PART_INSERT_MONITOR_DATA,  nomeFileInsertMeasure);
-        nomeFile.put(PART_SELECT_MONITOR_DATA,  nomeFileResumeMeasure);
+        //nomeFile.put(PART_SELECT_MONITOR_DATA,  nomeFileResumeMeasure);
     }
     
     
@@ -220,20 +220,20 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         MeasureBean measure = null;
         // Elenco di misure di prevenzione monitorate
         ArrayList<MeasureBean> measures = null;
-        // Tabella che conterrà le misure suggerite raggruppate per tipo
-        LinkedHashMap<String, ArrayList<MeasureBean>> measuresByType = null;
         // Elenco dei caratteri delle misure
         ArrayList<CodeBean> characters = null;
         // Elenco strutture collegate alla rilevazione
         ArrayList<DepartmentBean> structs = null;
-        // Elenco strutture collegate alla rilevazione indicizzate per codice
-        HashMap<String, Vector<DepartmentBean>> flatStructs = null;
+        // Elenco di rischi associati a una misura
+        ArrayList<ItemBean> risksByMeasure = null;
         // Tabella che conterrà i valori dei parametri passati dalle form
         HashMap<String, LinkedHashMap<String, String>> params = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
         String redirect = null;
+        // Data di oggi sotto forma di oggetto Date
+        java.util.Date today = Utils.convert(Utils.getCurrentDate());
         /* ******************************************************************** *
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
@@ -247,10 +247,10 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         boolean write = writeAsObject.booleanValue();
         // Recupera o inizializza 'id misura'
         String codeMis = parser.getStringParameter("mliv", DASH);
-        // Recupera o inizializza 'id misura'
-        String codeM = parser.getStringParameter("mliv", DASH);
+        // Recupera o inizializza 'id misurazione'
+        String codeMon = parser.getStringParameter("nliv", DASH);
         // Recupera o inizializza 'id indicatore'
-        int idI = parser.getIntParameter("idI", DEFAULT_ID);
+        int idInd = parser.getIntParameter("idI", DEFAULT_ID);
         /* ******************************************************************** *
          *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
          * ******************************************************************** */
@@ -264,32 +264,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
          * ******************************************************************** */
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-            HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
-            if (ses == null) {
-                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-            }
-            // Bisogna essere autenticati 
-            user = (PersonBean) ses.getAttribute("usr");
-            // Cioè bisogna che l'utente corrente abbia una sessione valida
-            if (user == null) {
-                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-            }
-        } catch (IllegalStateException ise) {
-            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + ise.getMessage(), ise);
-        } catch (ClassCastException cce) {
-            String msg = FOR_NAME + ": Si e\' verificato un problema in una conversione di tipo.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + cce.getMessage(), cce);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null, probabilmente nel tentativo di recuperare l\'utente.\n";
-            LOG.severe(msg);
-            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n" + npe.getMessage(), npe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + e.getMessage(), e);
+            checkSession(req.getSession(IF_EXISTS_DONOT_CREATE_NEW));
+        } catch (RuntimeException re) {
+            throw new CommandException(FOR_NAME + "Problema a livello dell\'autenticazione utente!\n" + re.getMessage(), re);
         }
         /* ******************************************************************** *
          *                          Corpo del programma                         *
@@ -313,15 +290,17 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                     // Controlla quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
                         // Controlla quale richiesta deve gestire
-                        if (part.equalsIgnoreCase(PART_INSERT_MEASURE)) {
+                        if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
                             /* ************************************************ *
-                             *        PROCESS Form to INSERT new Measure        *
+                             * PROCESS Form to INSERT Measure Monitoring Details*
                              * ************************************************ */
-                            db.insertMeasure(user, params);
+                            //db.insertMeasureDetails(user, params);
                             // Prepara la redirect 
-                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + 
-                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur +
-                                       AMPERSAND + MESSAGE + EQ + "newMes";
+                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + 
+                                       AMPERSAND + "p" + EQ + PART_MEASURES +
+                                       AMPERSAND + "mliv" + EQ + codeMis + 
+                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;// +
+                                       //AMPERSAND + MESSAGE + EQ + "newMes";
                         } else if (part.equalsIgnoreCase(PART_INSERT_M_R_P)) {
                             /* ************************************************ *
                              *   INSERT new relation between Risk and Measure   *
@@ -366,14 +345,15 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 structs = db.getMeasuresByStructs(user, survey);
                                 // Imposta la jsp
                                 fileJspT = nomeFile.get(part);
-                            //} else {
+                            } else {
                             /* ************************************************ *
                              *            Ramo dettagli misura monitorata       *
                              * ************************************************ */
+                                fileJspT = nomeFileMisura;
                             }
                         } else if (part.equalsIgnoreCase(PART_INDICATOR)) {
                             // Controlla la presenza dell'id di un indicatore
-                            if (idI > DEFAULT_ID) {
+                            if (idInd > DEFAULT_ID) {
                             /* ************************************************ *
                              *        Ramo elenco indicatori di una misura      *
                              * ************************************************ */
@@ -392,10 +372,17 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              * ************************************************ */
                             
                             
-                        //} else if (part.equalsIgnoreCase(VOID_STRING)) {
+                        } else if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
                             /* ************************************************ *
                              * Form aggiunta dettagli monitoraggio a una misura *
                              * ************************************************ */
+                            if (!codeMis.equals(DASH)) {
+                                // Recupera la misura di prevenzione/mitigazione
+                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                // Recupera i rischi cui è associata
+                                risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
+                                fileJspT = nomeFile.get(part);
+                            }
                         //} else if (part.equalsIgnoreCase(VOID_STRING)) {
                             /* ************************************************ *
                              *  Pagina riepilogo dettagli monitoraggio inseriti *
@@ -476,6 +463,14 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         if (structs != null) {
             req.setAttribute("strutture", structs);
         }
+        // Imposta nella request oggetto misura di prevenzione specifica
+        if (measure != null) {
+            req.setAttribute("misura", measure);
+        }
+        // Imposta in request elenco dei rischi cui una misura è applicata
+        if (risksByMeasure != null) {
+            req.setAttribute("rischi", risksByMeasure);
+        }
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
@@ -489,10 +484,43 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
             req.removeAttribute("breadCrumbs");
             req.setAttribute("breadCrumbs", bC);
         }
+        // Imposta nella request data di oggi 
+        req.setAttribute("now", today);
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
     
+    // TODO
+    private void checkSession(HttpSession session)
+                       throws CommandException {
+        if (session == null) {
+            throw new CommandException("Attenzione: controllare di aver effettuato l\'accesso!\n");    
+        }
+        try {
+            // Bisogna essere autenticati 
+            PersonBean user = (PersonBean) session.getAttribute("usr");
+            // Cioè bisogna che l'utente corrente abbia una sessione valida
+            if (user == null) {
+                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+            }
+        } catch (IllegalStateException ise) {
+            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + ise.getMessage(), ise);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + ": Si e\' verificato un problema in una conversione di tipo.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + cce.getMessage(), cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null, probabilmente nel tentativo di recuperare l\'utente.\n";
+            LOG.severe(msg);
+            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n" + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
     
     /* **************************************************************** *
      *  Metodi di caricamento dei parametri in strutture indicizzabili  *                     
@@ -512,7 +540,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
     private static void loadParams(String part, 
                                    HttpServletRequest req,
                                    HashMap<String, LinkedHashMap<String, String>> formParams)
-                            throws CommandException {
+                            throws CommandException,
+                                   AttributoNonValorizzatoException {
         LinkedHashMap<String, String> survey = new LinkedHashMap<>();
         LinkedHashMap<String, String> measure = new LinkedHashMap<>();
         // Parser per la gestione assistita dei parametri di input
@@ -525,13 +554,31 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         // Recupera l'oggetto rilevazione a partire dal suo codice
         CodeBean surveyAsBean = ConfigManager.getSurvey(codeSur);
         // Inserisce l'ìd della rilevazione come valore del parametro
-        //survey.put(PARAM_SURVEY, String.valueOf(surveyAsBean.getId()));
+        survey.put(PARAM_SURVEY, String.valueOf(surveyAsBean.getId()));
         // Aggiunge il tutto al dizionario dei parametri
         formParams.put(PARAM_SURVEY, survey);
+        /* ******************************************************** *
+         *  Ramo di INSERT di ulteriori informazioni da aggiungere  *
+         *      a una misura (dettagli relativi al monitoraggio)    *
+         * ******************************************************** */
+        if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
+            GregorianCalendar date = Utils.getCurrentDate();
+            String dateAsString = Utils.format(date, DATA_SQL_PATTERN);
+            measure.put("ms-code",  parser.getStringParameter("ms-code", VOID_STRING));
+            measure.put("ms-data",  dateAsString);            
+            measure.put("ms-piao",  parser.getStringParameter("ms-piao", VOID_STRING));
+            // Fasi di attuazione (Array)
+            String[] fasi = req.getParameterValues("ms-fasi");
+            // Aggiunge tutte le fasi di attuazione trovate
+            decantStructures("fase", fasi, measure);
+            // Aggiunge i dettagli monitoraggio al dizionario dei parametri
+            formParams.put(part, measure);
+        }        
+        
         /* **************************************************** *
          *       Ramo di INSERT / UPDATE di un Indicatore       *
          * **************************************************** *
-        if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT) || part.equalsIgnoreCase(Query.MODIFY_PART)) {
+        else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT) || part.equalsIgnoreCase(Query.MODIFY_PART)) {
             GregorianCalendar date = Utils.getUnixEpoch();
             String dateAsString = Utils.format(date, DATA_SQL_PATTERN);
             HashMap<String, String> ind = new HashMap<String, String>();
@@ -564,23 +611,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
             ind.put("mon-milestone",    parser.getStringParameter("mon-milestone", VOID_STRING));
             formParams.put(Query.MONITOR_PART, ind);
         }
-        /* ******************************************************** *
-         *  Ramo di INSERT di ulteriori informazioni da aggiungere  *
-         *      a un Indicatore (p.es.: target rivisto, etc.)       *
-         * ******************************************************** *
-        else if (part.equalsIgnoreCase(Query.EXTRAINFO_PART)) {
-            GregorianCalendar date = Utils.getUnixEpoch();
-            String dateAsString = Utils.format(date, Query.DATA_SQL_PATTERN);
-            HashMap<String, String> ind = new HashMap<String, String>();
-            ind.put("ind-id",           parser.getStringParameter("ind-id", Utils.VOID_STRING));
-            ind.put("prj-id",           parser.getStringParameter("prj-id", Utils.VOID_STRING));
-            ind.put("ext-target",       parser.getStringParameter("ext-target", Utils.VOID_STRING));
-            ind.put("ext-datatarget",   parser.getStringParameter("ext-datatarget", dateAsString));
-            ind.put("ext-annotarget",   parser.getStringParameter("ext-annotarget",  Utils.VOID_STRING));
-            ind.put("ext-note",         parser.getStringParameter("ext-note", Utils.VOID_STRING));
-            ind.put("ext-data",         parser.getStringParameter("ext-data", dateAsString));
-            formParams.put(Query.EXTRAINFO_PART, ind);
-        }
+
         /* ******************************************************** *
          *  Ramo di UPDATE di ulteriori informazioni da aggiungere  *
          *      a un Indicatore (p.es.: target rivisto, etc.)       *
@@ -606,6 +637,33 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
      *                    (decant, filter, purge)                       *
      * **************************************************************** */
     
-
+    /**
+     * Dati in input un array di valori e un livello numerico, distribuisce
+     * tali valori in una struttura dictionary, passata come parametro, 
+     * assegnandone ciascuno a una chiave diversa, costruita
+     * in base a un progressivo ed un'etichetta passata come parametro.
+     * In pratica, questo metodo serve a trasformare una serie di valori
+     * di campi aventi nomi uguali in una form, che quindi vengono passati
+     * in un unico array avente lo stesso nome dei campi omonimi, 
+     * in una serie di parametri distinti, ciascuno avente per nome 
+     * la stessa radice ma contraddistinto da un progressivo.
+     * 
+     * @param label     etichetta per i nomi dei parametri
+     * @param values    valori dei campi selezionati
+     * @param params    mappa dei parametri della richiesta
+     */
+    public static void decantStructures(String label,
+                                        String[] values,
+                                        LinkedHashMap<String, String> params) {
+        int index = NOTHING;
+        int size = ELEMENT_LEV_1; 
+        if (values != null) { // <- Controllo sull'input
+            while (index < values.length) {
+                params.put(label + size,  values[index]);
+                size++;
+                index++;
+            }
+        }        
+    }
     
 }
