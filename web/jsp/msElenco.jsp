@@ -57,10 +57,6 @@
         <a href="${mnm}" class="btn btn-success btn-lg" title="Aggiungi una nuova misura di contenimento o prevenzione al registro delle misure">
           <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Misura
         </a>
-        <%-- 
-        <span class="float-right panel-body monospace">
-          <cite>in parentesi: (n. di processi esposti a questo rischio)</cite>
-        </span>        --%> 
       </div>
       <table class="" id="regMis">
         <thead>
@@ -131,7 +127,7 @@
             </td>
             <td class="text-center"><c:out value="${ms.uso}" /></td>
             <td class="text-center">
-              <a href="${initParam.appName}/?q=ms&p=add&mliv=${ms.codice}&r=${param['r']}" class="btn bgAct14 badge-pill refresh" title="Aggiungi dettagli">
+              <a href="${initParam.appName}/?q=ic&p=add&mliv=${ms.codice}&r=${param['r']}" class="btn bgAct14 badge-pill refresh" title="Aggiungi dettagli">
                 Dettagli
               </a>&nbsp;
             </td>
