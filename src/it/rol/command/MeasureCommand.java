@@ -384,7 +384,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                          * ************************************************ */
                         if (!codeMis.equals(DASH)) {
                             // Recupera la misura di prevenzione/mitigazione
-                            measure = db.getMeasures(user, codeMis, NOTHING, survey).get(NOTHING);
+                            measure = retrieveMeasure(user, codeMis, survey, db);
                             // Recupera i rischi cui è associata
                             risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
                             // Ha bisogno di personalizzare le breadcrumbs perché sull'indirizzo non c'è il parametro 'p'
@@ -450,11 +450,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         // Imposta in request specifico rischio cui aggiungere misure di prevenzione
         if (risk != null) {
             req.setAttribute("rischio", risk);
-        }        
-        /* Imposta in request elenco delle misure suggerite in base ai fattori abilitanti, meno le misure già applicate
-        if (lessMeasures != null) {
-            req.setAttribute("suggerimenti", lessMeasures);
-        }*/
+        }
         // Imposta in request elenco delle misure suggerite in base ai fattori abilitanti, raggruppate per nome del tipo
         if (measuresByType != null) {
             req.setAttribute("misureTipo", measuresByType);
@@ -597,6 +593,35 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
     }
     
     
+    /* **************************************************************** *
+     *                  Metodi di recupero dei dati                     *                     
+     *                          (retrieve)                              *
+     * **************************************************************** */
+    
+    /**
+     * <p>Estrae i dettagli di una misura del registro (quindi priva 
+     * dei dettagli necessari al monitoraggio) dato il codice 
+     * e la rilevazione.</p>
+     * 
+     * @param user      utente loggato
+     * @param code      codice della misura cercata
+     * @param survey    oggetto rilevazione
+     * @param db        databound gia' istanziato
+     * @return <code>MeasureBean</code> - misura, da registro, desiderata
+     * @throws WebStorageException se si verifica un problema a livello di query o di estrazione
+     * @throws CommandException se si verifica un problema nel recupero di valori o in qualche altro tipo di puntamento
+     */
+    public static MeasureBean retrieveMeasure(PersonBean user, 
+                                              String code, 
+                                              CodeBean survey, 
+                                              DBWrapper db)
+                                       throws WebStorageException, 
+                                              CommandException {
+        // Recupera la misura di dato codice e data rilevazione
+        return db.getMeasures(user, code, NOTHING, survey).get(NOTHING);
+    }
+
+
     /* **************************************************************** *
      *                   Metodi di travaso dei dati                     *                     
      *                    (decant, filter, purge)                       *
