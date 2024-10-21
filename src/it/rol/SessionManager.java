@@ -1,12 +1,24 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio.
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -65,9 +77,9 @@ import it.rol.exception.WebStorageException;
 /**
  * <p>SessionManager &egrave; la classe che si occupa dell'autenticazione
  * dell'utente, dell'impostazione dei privilegi, di eventuali cookies,
- * del logout e di quan'altro occorra alle funzioni di gestione utenti
- * della web-application di gestione dei processi di ateneo
- * <code>prol</code>.</p>
+ * del logout e di quant'altro occorra alle funzioni di gestione utenti
+ * della web-application 
+ * <code>Rischi on Line (rol)</code>.</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
@@ -146,15 +158,11 @@ public class SessionManager extends HttpServlet implements Constants {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        /*
-         * Nome della pagina di errore
-         */
+        /*  Nome della pagina di errore  */
         errorJsp = getServletContext().getInitParameter("errorJsp");
         if (errorJsp == null)
             throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'errorJsp'!\n\n");
-        /*
-         * Nome del parametro che identifica la Command da interpellare
-         */
+        /*  Nome del parametro che identifica la Command da interpellare  */
         entToken = getServletContext().getInitParameter("entToken");
         if (entToken == null) {
             throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'entToken'!\n\n");
@@ -294,7 +302,7 @@ public class SessionManager extends HttpServlet implements Constants {
             //req.setAttribute("error", true);
             //req.setAttribute("msg", msg);
             //Log dell'evento
-            LOG.severe("Oggetto PersonBean non valorizzato; l\'username passato come parametro non ha associato alcun processo.\n");
+            LOG.severe("Oggetto PersonBean non valorizzato; l\'username passato come parametro non ha associato alcun processo.\n" + e.getMessage());
             //final RequestDispatcher rd = getServletContext().getRequestDispatcher("/jsp/error.jsp"  + "?" + req.getQueryString());
             //rd.forward(req, res);
             // Solleva un'eccezione per far andare diretti sulla pagina di errore, senza nemmeno rispondere
@@ -304,7 +312,7 @@ public class SessionManager extends HttpServlet implements Constants {
 
 
     /**
-     * <p>Crea la sessione utente.<br />
+     * <p>Crea la sessione utente.<br>
      * Inserisce la sessione creata nella HttpServletRequest, modificandola
      * per riferimento (<code>ByRef</code>).</p>
      *
@@ -363,7 +371,7 @@ public class SessionManager extends HttpServlet implements Constants {
 
 
     /**
-     * <p>Crea la sessione utente.<br />
+     * <p>Crea la sessione utente.<br>
      * Inserisce la sessione creata nella HttpServletRequest, modificandola
      * per riferimento <code>ByRef</code>.</p>
      *
@@ -428,7 +436,7 @@ public class SessionManager extends HttpServlet implements Constants {
 
     /**
      * <p>Prepara le informazioni da registrare nel database per tracciare
-     * l'evento di login di un determinato utente, passato come argomento.<br />
+     * l'evento di login di un determinato utente, passato come argomento.<br>
      * Chiama il metodo del model, un cui riferimento viene passato come
      * argomento, che scriver&agrave; nel database i dati  dell'accesso
      * &ndash; o ne aggiorner&agrave; gli estremi nel caso in cui
@@ -457,7 +465,7 @@ public class SessionManager extends HttpServlet implements Constants {
      * @param length  lunghezza del seme
      * @return <code>String</code> - stringa contenente il seme generato
      */
-    public static String generateSalt (final int length) {
+    public static String generateSalt(final int length) {
         if (length < 1) {
           System.err.println("Error in generateSalt: length must be > 0");
           return VOID_STRING;
@@ -478,24 +486,23 @@ public class SessionManager extends HttpServlet implements Constants {
      * @throws NoSuchAlgorithmException  se non &egrave; disponibile l'algoritmo di criptaggio nell'ambiente
      * @throws InvalidKeySpecException   se la chiave non &egrave; valida (codifica non valida, lunghezza non valida, non inizializzata, ...)
      */
-    public static String hashPassword (String password,
-                                       String salt)
-                                throws NoSuchAlgorithmException,
-                                       InvalidKeySpecException {
-
+    public static String hashPassword(String password,
+                                      String salt)
+                               throws NoSuchAlgorithmException,
+                                      InvalidKeySpecException {
         char[] chars = password.toCharArray();
         byte[] bytes = salt.getBytes();
         KeySpec spec = new PBEKeySpec(chars, bytes, ITERATIONS, KEY_LENGTH);
         Arrays.fill(chars, Character.MIN_VALUE);
         try {
-          SecretKeyFactory fac = SecretKeyFactory.getInstance(ALGORITHM);
-          byte[] securePassword = fac.generateSecret(spec).getEncoded();
-          return DatatypeConverter.printBase64Binary(securePassword);
+            SecretKeyFactory fac = SecretKeyFactory.getInstance(ALGORITHM);
+            byte[] securePassword = fac.generateSecret(spec).getEncoded();
+            return DatatypeConverter.printBase64Binary(securePassword);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
-          System.err.println("Exception encountered in hashPassword()" + ex.getMessage() + "\nCause: " + ex.getCause());
-          return VOID_STRING;
+            System.err.println("Exception encountered in hashPassword()" + ex.getMessage() + "\nCause: " + ex.getCause());
+            return VOID_STRING;
         } finally {
-          ((PBEKeySpec) spec).clearPassword();
+            ((PBEKeySpec) spec).clearPassword();
         }
       }
 
@@ -511,11 +518,11 @@ public class SessionManager extends HttpServlet implements Constants {
      * @throws InvalidKeySpecException se la chiave non &egrave; valida (codifica non valida, lunghezza non valida, non inizializzata, ...)
      * @throws NoSuchAlgorithmException se non &egrave; disponibile l'algoritmo di criptaggio nell'ambiente
      */
-    public static boolean verifyPassword (String password,
-                                          CodeBean encryptedPassword)
-                                   throws NoSuchAlgorithmException,
-                                          InvalidKeySpecException,
-                                          AttributoNonValorizzatoException {
+    public static boolean verifyPassword(String password,
+                                         CodeBean encryptedPassword)
+                                  throws NoSuchAlgorithmException,
+                                         InvalidKeySpecException,
+                                         AttributoNonValorizzatoException {
         String salt = encryptedPassword.getInformativa();
         if (salt.equals(VOID_STRING)) {
             return false;
@@ -523,4 +530,46 @@ public class SessionManager extends HttpServlet implements Constants {
         String optEncrypted = hashPassword(password, encryptedPassword.getInformativa());
         return optEncrypted.equals(encryptedPassword.getNome());
     }
+    
+
+    /**
+     * <p>Verifica se la sessione utente, che accetta come argomento, &egrave;
+     * valida o esistente. In tal caso, non solleva eccezione; 
+     * in caso contrario, viene sollevata un'eccezione tramite cui 
+     * il chiamante pu&ograve; interrompere l'esecuzione.</p>
+     * 
+     * @param session           sessione utente gia' creata (se l'utente non e' loggato vale null)
+     * @throws CommandException se l'utente non e' ancora loggato o si verifica un problema di puntamento
+     */
+    public static void checkSession(HttpSession session)
+                             throws CommandException {
+        if (session == null) {
+            throw new CommandException("Attenzione: controllare di aver effettuato l\'accesso!\n");    
+        }
+        try {
+            // Bisogna essere autenticati 
+            PersonBean user = (PersonBean) session.getAttribute("usr");
+            // Cioè bisogna che l'utente corrente abbia una sessione valida
+            if (user == null) {
+                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+            }
+        } catch (IllegalStateException ise) {
+            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + ise.getMessage(), ise);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + ": Si e\' verificato un problema in una conversione di tipo.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + cce.getMessage(), cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null, probabilmente nel tentativo di recuperare l\'utente.\n";
+            LOG.severe(msg);
+            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n" + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
 }
