@@ -1,15 +1,24 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -47,7 +56,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import com.oreilly.servlet.ParameterParser;
 
@@ -57,6 +65,7 @@ import it.rol.DBWrapper;
 import it.rol.Data;
 import it.rol.Main;
 import it.rol.Query;
+import it.rol.SessionManager;
 import it.rol.Utils;
 import it.rol.bean.ActivityBean;
 import it.rol.bean.CodeBean;
@@ -233,6 +242,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         ItemBean pxi = null;
         // Flag di scrittura
         Boolean writeAsObject = (Boolean) req.getAttribute("w");
+        // Explicit unboxing
         boolean write = writeAsObject.booleanValue();
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
         String redirect = null;
@@ -247,31 +257,13 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
         /* ******************************************************************** *
-         *                         Recupera la Sessione                         *
+         *         Previene il rischio di attacchi di tipo Garden Gate          *
          * ******************************************************************** */
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-            HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
-            user = (PersonBean) ses.getAttribute("usr");
-            if (user == null) {
-                throw new CommandException(FOR_NAME + "Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-            }
-        } catch (IllegalStateException ise) {
-            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + ise.getMessage(), ise);
-        } catch (ClassCastException cce) {
-            String msg = FOR_NAME + ": Si e\' verificato un problema in una conversione di tipo.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + cce.getMessage(), cce);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null, probabilmente nel tentativo di recuperare l\'utente.\n";
-            LOG.severe(msg);
-            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n" + npe.getMessage(), npe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + e.getMessage(), e);
+            SessionManager.checkSession(req.getSession(IF_EXISTS_DONOT_CREATE_NEW));
+        } catch (RuntimeException re) {
+            throw new CommandException(FOR_NAME + "Problema a livello dell\'autenticazione utente!\n" + re.getMessage(), re);
         }
         /* ******************************************************************** *
          *                           Corpo del metodo                           *
@@ -284,7 +276,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
                 RiskCommand.loadParams(part, parser, params);
-                // @PostMapping
+                /* @PostMapping */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
@@ -334,7 +326,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             }
                         }
                     }
-                // @GetMapping
+                /* @GetMapping */
                 } else {
                     // Il parametro di navigazione 'p' permette di addentrarsi nelle funzioni
                     if (nomeFile.containsKey(part)) {
@@ -591,7 +583,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
 
     
     /**
-     * <p>Interfaccia alternativa (semplificata) del il metodo che restituisce 
+     * <p>Interfaccia alternativa (semplificata) del metodo che restituisce 
      * di tutti processi figli di macroprocessi censiti dall'anticorruzione 
      * nel contesto di una data rilevazione senza necessit&agrave; 
      * che il chiamante passi un'istanza di WebStorage.
@@ -695,7 +687,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * @param level         valore specificante la tabella in cui cercare l'identificativo (2 = processo_at | 3 = sottoprocesso_at)
      * @param codeSurvey    il codice della rilevazione
      * @param db            istanza di WebStorage per l'accesso ai dati
-     * @return <code>ArrayList&lt;ItemBean&gt;</code> - lista di input recuperati
+     * @return <code>ArrayList&lt;ActivityBean&gt;</code> - lista di fasi recuperate
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
      */
     public static ArrayList<ActivityBean> retrieveActivities(PersonBean user,
@@ -951,6 +943,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * <p>In ossequio al paradigma DRY (Don't Repeat Yourself), centralizza 
      * il codice che effettua il recupero di tutte le liste e le informazioni 
      * necessarie per costruire la pagina dei dettagli di un processo.</p>
+     * <p>Inoltre, il recupero delle informazioni viene svolto non in modo 
+     * sequenziale ma parallelo, attraverso l'avviamento di threads separati, 
+     * dedicati ciascuno al recupero di informazioni omogenee, al fine 
+     * di velocizzare i tempi di computazione.</p>
      * 
      * @param user              utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
      * @param idP               identificativo del processo o del sottoprocesso (si capisce dal livello)
@@ -1060,6 +1056,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 LOG.severe(msg + ie.getLocalizedMessage());
                 Thread.currentThread().interrupt();
             }
+            /* ************************************************ *
+             *              Codice legacy sequenziale           *
+             * ************************************************ *
             // Recupera Input estratti in base al processo
             //ArrayList<ItemBean> listaInput = retrieveInputs(user, idP, liv, codeSur, db);
             // Recupera Fasi estratte in base al processo
@@ -1068,7 +1067,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             //ArrayList<ItemBean> listaOutput = retrieveOutputs(user, idP, liv, codeSur, db);
             // Recupera Rischi estratti in base al processo
             //ArrayList<RiskBean> listaRischi = retrieveRisks(user, idP, liv, codeSur, db);
-            // Recupera le interviste in cui il processo è stato esaminato
+            // Recupera le interviste in cui il processo è stato esaminato  */
             ArrayList<InterviewBean> listaInterviste = (ArrayList<InterviewBean>) processElements.get(TIPI_LISTE[ELEMENT_LEV_4]);
             // Recupera gli indicatori corretti (calcolati a runtime e privi solo delle note)
             HashMap<String, InterviewBean> listaIndicatori = AuditCommand.compare(listaInterviste);

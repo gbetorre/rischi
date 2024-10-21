@@ -1,15 +1,24 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -57,6 +66,7 @@ import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Main;
 import it.rol.Query;
+import it.rol.SessionManager;
 import it.rol.Utils;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
@@ -71,17 +81,17 @@ import it.rol.exception.WebStorageException;
 
 
 /** 
- * <p><code>AuditCommand.java</code><br />
+ * <p><code>AuditCommand.java</code><br>
  * Implementa la logica per la presentazione dei quesiti (interviste) 
  * e per la gestione dell'inserimento, dell'aggiornamento e della visualizzazione 
  * delle risposte, nel contesto della raccolta e dell'analisi dei dati
- * relativi alla mappatura e analisi dei rischi corruttivi in ateneo (ROL).
+ * relativi alla mappatura effettuata tramite la web-application 
+ * <code>Rischi on Line (rol)</code> .
  * Si occupa, inoltre, del calcolo dei valori degli indicatori di rischio.</p>
  * 
  * <p>Created on Tue 12 Apr 2022 09:46:04 AM CEST</p>
  * 
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
- * @version 1.55
  */
 public class AuditCommand extends ItemBean implements Command, Constants {
     
@@ -236,36 +246,13 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
         /* ******************************************************************** *
-         *                       Controllo no Garden Gate                       *
+         *         Previene il rischio di attacchi di tipo Garden Gate          *
          * ******************************************************************** */
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-            HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
-            if (ses == null) {
-                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-            }
-            // Bisogna essere autenticati 
-            user = (PersonBean) ses.getAttribute("usr");
-            // Cioè bisogna che l'utente corrente abbia una sessione valida
-            if (user == null) {
-                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-            }
-        } catch (IllegalStateException ise) {
-            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + ise.getMessage(), ise);
-        } catch (ClassCastException cce) {
-            String msg = FOR_NAME + ": Si e\' verificato un problema in una conversione di tipo.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + cce.getMessage(), cce);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null, probabilmente nel tentativo di recuperare l\'utente.\n";
-            LOG.severe(msg);
-            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n" + npe.getMessage(), npe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + e.getMessage(), e);
+            SessionManager.checkSession(req.getSession(IF_EXISTS_DONOT_CREATE_NEW));
+        } catch (RuntimeException re) {
+            throw new CommandException(FOR_NAME + "Problema a livello dell\'autenticazione utente!\n" + re.getMessage(), re);
         }
         /* ******************************************************************** *
          *                           Corpo del metodo                           *
@@ -917,7 +904,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * contenenti internamente le risposte e scarta le domande con risposte vuote.</p>
      *
      * @param questions ArrayList di QuestionBean da indicizzare per ambito
-     * @return <code>HashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
+     * @return <code>ArrayList&lt;QuestionBean&gt;</code> - lista contenente solo le domande con risposte
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     public static ArrayList<QuestionBean> filter(ArrayList<QuestionBean> questions)
@@ -958,7 +945,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * 
      * @param questions ArrayList di QuestionBean rappresentanti ciascuno una domanda con risposta 
      * @param answers   ArrayList di QuestionBean rappresentanti ciascuno una risposta con domanda
-     * @return <code>HashMap&lt;Integer&comma; QuestionBean&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave il quesito e per valore l'oggetto risposta
+     * @return <code>HashMap&lt;Integer&comma; QuestionBean&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'id quesito e per valore l'oggetto risposta
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     public static HashMap<Integer, QuestionBean> decantAnswers(ArrayList<QuestionBean> questions, 
@@ -1043,7 +1030,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * 
      * @param map       tabella di elementi strutturali (strutture di organigramma, soggetti contingenti...) indicizzati per id di processo_at incapsulato in un Wrapper di tipo primitivo
      * @param params    mappa contenente i parametri di navigazione, indicizzati per valore del parametro di navigazione
-     * @return <code>HashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
+     * @return <code>ArrayList&lt;DepartmentBean&gt;&gt;</code> - lista ordinata di strutture collegate all'id di processo contenuto nella mappa di parametri
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     private static ArrayList<DepartmentBean> filter(final HashMap<Integer, ArrayList<DepartmentBean>> map,
@@ -1222,7 +1209,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * @param indicatorByCode   tabella in cui ogni oggetto contenente i dati di un indicatore e' ricavabile utilizzando come chiave il codice dell'indicatore stesso
      * @param structs           lista di strutture coinvolte nell'elaborazione del processo di cui si vogliono calcolare gli indicatori
      * @param subjects          lista di soggetti interessati nell'elaborazione del processo di cui si vogliono calcolare gli indicatori
-     * @return HashMap&lt;String&comma; InterviewBean&gt; - tabella contenente tutti i valori degli indicatori e delle dimensioni di rischio, indicizzati per nome
+     * @return LinkedHashMap&lt;String&comma; InterviewBean&gt; - tabella ordinata contenente tutti i valori degli indicatori e delle dimensioni di rischio, indicizzati per nome
      * @throws CommandException se si verifica un problema nel calcolo di un indicatore, nel recupero di dati o in qualche tipo di puntamento
      * @see java.util.LinkedHashMap
      * @see java.util.concurrent.ConcurrentHashMap
@@ -1391,7 +1378,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             indicators.put(I2, syncIndicators.get(I2));
             indicators.put(I3, syncIndicators.get(I3));
             indicators.put(I4, syncIndicators.get(I4));
-            /*indicators.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
+            /* Computazione alternativa:
+            //indicators.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
             //indicators.put(P3, computeP3(questByIndicator.get(P3), answerByQuestion, indicatorByCode));
             //indicators.put(P4, computeP4(questByIndicator.get(P4), answerByQuestion, indicatorByCode));
             //indicators.put(P5, computeP5(questByIndicator.get(P5), answerByQuestion, indicatorByCode));
@@ -2877,12 +2865,5 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         }
         return results;
     }
-    
-    
-    /* **************************************************************** *
-     *     Metodi di implementazione degli algoritmi di mitigazione     *                     
-     * **************************************************************** */
-    
-    
-    
+
 }
