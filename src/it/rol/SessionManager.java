@@ -539,9 +539,10 @@ public class SessionManager extends HttpServlet implements Constants {
      * il chiamante pu&ograve; interrompere l'esecuzione.</p>
      * 
      * @param session           sessione utente gia' creata (se l'utente non e' loggato vale null)
-     * @throws CommandException se l'utente non e' ancora loggato o si verifica un problema di puntamento
+     * @return <code>PersonBean</code> - restituisce l'utente loggato, se esiste, altrimenti solleva un'eccezione
+     * @throws CommandException se l'utente non e' loggato o si verifica un problema di puntamento
      */
-    public static void checkSession(HttpSession session)
+    public static PersonBean checkSession(HttpSession session)
                              throws CommandException {
         if (session == null) {
             throw new CommandException("Attenzione: controllare di aver effettuato l\'accesso!\n");    
@@ -553,6 +554,7 @@ public class SessionManager extends HttpServlet implements Constants {
             if (user == null) {
                 throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
             }
+            return user;
         } catch (IllegalStateException ise) {
             String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
             LOG.severe(msg);
