@@ -250,7 +250,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
          * ******************************************************************** */
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-            SessionManager.checkSession(req.getSession(IF_EXISTS_DONOT_CREATE_NEW));
+            user = SessionManager.checkSession(req.getSession(IF_EXISTS_DONOT_CREATE_NEW));
         } catch (RuntimeException re) {
             throw new CommandException(FOR_NAME + "Problema a livello dell\'autenticazione utente!\n" + re.getMessage(), re);
         }
