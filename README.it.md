@@ -332,6 +332,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [2.0.2] (23/10/2024) Correzione di bug
 - [2.0.1] (21/10/2024) Delegato metodo di prevenzione attacchi tipo "Garden Gate" al manager che si occupa della sessione utente
 - [2.0.0] (15/10/2024) Aggiunta pagina contenente form per inserire i dettagli relativi al monitoraggio ad una misura di mitigazione selezionata
 - [1.9.9] (08/10/2024) Implementata gestione separata della connessione al database; correzione di bug
