@@ -1,8 +1,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<fmt:formatDate var="datasistema" value="${requestScope.now}" pattern="dd/MM/yyyy" scope="page"/>
 <%@ include file="URL.jspf" %>
 <%@ include file="msMisura.jsp"%>
+<fmt:formatDate var="datasistema" value="${requestScope.now}" pattern="dd/MM/yyyy" scope="page"/>
+<c:set var="piao" value="Inserisci una descrizione dell'obiettivo PIAO" scope="page" />
+<c:if test="${meas.dettagli}">
+  <fmt:formatDate var="datasistema" value="${meas.dataMonitoraggio}" pattern="dd/MM/yyyy" scope="page"/>
+  <c:set var="piao" value="${meas.obiettivo}" scope="page" />
+</c:if>
     <style>
         .form-control::placeholder {
             color: #6c757d; /* Default placeholder color */
@@ -18,7 +23,7 @@
         <div class="panel-heading bgAct19">
           <h5 class="fw-bold text-dark">
             <i class="fa-solid fa-file-circle-plus"></i>
-            <c:out value="Inserimento dettagli monitoraggio" />
+            <c:out value="Dettagli monitoraggio" />
           </h5>
         </div>
         <div class="panel-body">
@@ -34,9 +39,9 @@
           <br />
           <div class="row">
             <div class="col-sm-1">&nbsp;</div>
-            <div class="col-sm-4 mandatory-thin"><strong>Obiettivo PIAO</strong></div>
+            <div class="col-sm-4 bgAct26 text-white form-custom"><strong>Obiettivo PIAO</strong></div>
             <div class="col-sm-6">
-              <textarea class="form-control" id="ms-piao" name="ms-piao" placeholder="Inserisci una descrizione dell'obiettivo PIAO"></textarea>
+              <textarea class="form-control" id="ms-piao" name="ms-piao" placeholder="${piao}"></textarea>
               <div id="custom-error-location-1"></div>
               <div class="charNum"></div>
             </div>
@@ -74,9 +79,16 @@
 <!--                 <i class="fa-regular fa-square-caret-right"></i> Salva -->
 <!--               </button> -->
               <div class="float-right">
+              <c:choose>
+              <c:when test="${meas.dettagli}">
+                <a href="#" type="button" class="btn btn-save bgAct18" title="Vai alla pagina di aggiunta indicatori">Continua</a>
+              </c:when>
+              <c:otherwise>
                 <button type="submit" class="btn btn-save bgAct18" id="btn-save" value="Save" title="Salva i dettagli del monitoraggio e vai alla pagina di aggiunta indicatori">
                 <i class="far fa-save"></i>  Salva e continua 
                 </button>
+              </c:otherwise>
+              </c:choose>
               </div>
             </div>
           </div>
@@ -105,15 +117,15 @@
               'ms-date': {
                 required: true
               },
-              'ms-piao': {
+              /*'ms-piao': {
                 required: true
-              },
+              },*/
               'ms-fasi': {
                 required: true
               }
             }, 
             messages: {
-              'ms-piao': "Inserire l'obiettivo PIAO",
+              //'ms-piao': "Inserire l'obiettivo PIAO",
               'ms-fasi': "Inserire almeno una fase di attuazione"
             },
             errorPlacement: function(error, element) {
