@@ -1,15 +1,28 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio e stabilire quantitativamente 
+ *   in che grado questa attuazione di misure abbia effettivamente ridotto 
+ *   i livelli di rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented 
+ *   and quantify how much that implementation of measures actually 
+ *   reduced risk levels.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -566,16 +579,18 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         deniedTokens.add("t");
         deniedTokens.add("idO");
         deniedTokens.add("msg");
+        deniedTokens.add("mliv");
         // Aggiunge i valori del token 'p' che devono generare breadcrumb associandoli a un'etichetta da mostrare in breadcrumb
-        allowedParams.put(PART_SEARCH,          "Ricerca");
-        allowedParams.put(PART_SELECT_STR,      "Scelta Struttura");
-        allowedParams.put(PART_PROCESS,         "Scelta Processi");
-        allowedParams.put(PART_SELECT_QST,      "Quesiti");
-        allowedParams.put(PART_CONFIRM_QST,     "Riepilogo");
-        allowedParams.put(PART_SELECT_QSS,      "Interviste");
-        allowedParams.put(PART_RESUME_QST,      "Risposte");
-        allowedParams.put(PART_OUTPUT,          "Output");
-        allowedParams.put(PART_FACTORS,         "Fattori abilitanti");
+        allowedParams.put(PART_SEARCH,              "Ricerca");
+        allowedParams.put(PART_SELECT_STR,          "Scelta Struttura");
+        allowedParams.put(PART_PROCESS,             "Scelta Processi");
+        allowedParams.put(PART_SELECT_QST,          "Quesiti");
+        allowedParams.put(PART_CONFIRM_QST,         "Riepilogo");
+        allowedParams.put(PART_SELECT_QSS,          "Interviste");
+        allowedParams.put(PART_RESUME_QST,          "Risposte");
+        allowedParams.put(PART_OUTPUT,              "Output");
+        allowedParams.put(PART_FACTORS,             "Fattori abilitanti");
+        allowedParams.put(PART_INSERT_MONITOR_DATA, "Dettagli");
         try {
             // Tokenizza la querystring in base all'ampersand
             String[] tokens = pageParams.split(AMPERSAND);
@@ -694,6 +709,37 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
         return nav;
     }
 
+    
+    /**
+     * <p>Prende in input una struttura di breadcrumbs gi&agrave; formata 
+     * (serie di link corenti con il percorso seguito dall'utente fino 
+     * alla richiesta corrente) e sostituisce la foglia di dato indice index
+     * con un nuovo oggetto che riceve come parametro extraInfo.</p>
+     * 
+     * @param nav       lista di breadcrumbs preesistente
+     * @param index     l'indice della foglia da sostituire
+     * @param extraInfo la foglia sostitutiva
+     * @return <code>LinkedList&lt;ItemBean&gt;</code> - struttura vettoriale, rispettante l'ordine originale, rimaneggiata
+     * @throws CommandException se si verifica un problema nell'accesso a qualche parametro o in qualche altro puntamento
+     */
+    public static LinkedList<ItemBean> makeBreadCrumbs(final LinkedList<ItemBean> nav,
+                                                       int index,
+                                                       ItemBean extraInfo)
+                                                throws CommandException {
+        LinkedList<ItemBean> newNav = (LinkedList<ItemBean>) nav.clone();
+        // Rimuove una foglia di Lorien
+        if (index > NOTHING) {  
+            // Non avrebbe senso rimuovere 'home'
+            newNav.remove(index);
+            // La sostituisce con una foglia di Valinor
+            if (extraInfo != null) {
+                newNav.set(index, extraInfo);
+            }
+        }
+        // Restituisce l'albero rimaneggiato
+        return newNav;
+    }
+    
 
     /* ************************************************************************ *
      *                             Metodi di debug                              *
