@@ -8,7 +8,9 @@
  *   che possono calmierare specifici rischi 
  *   - e per effettuare il monitoraggio al fine di verificare quali misure
  *   proposte sono state effettivamente attuate dai soggetti interessati
- *   alla gestione dei processi a rischio.
+ *   alla gestione dei processi a rischio e stabilire quantitativamente 
+ *   in che grado questa attuazione di misure abbia effettivamente ridotto 
+ *   i livelli di rischio.
  *
  *   Risk Mapping and Management Software (ROL-RMS),
  *   web application: 
@@ -16,7 +18,9 @@
  *   - to publish and manage, reports and information on risk
  *   - and to propose mitigation measures specifically aimed at reducing risk, 
  *   - also allowing monitoring to be carried out to see 
- *   which proposed mitigation measures were then actually implemented.
+ *   which proposed mitigation measures were then actually implemented 
+ *   and quantify how much that implementation of measures actually 
+ *   reduced risk levels.
  *   
  *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
@@ -225,6 +229,8 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         HashMap<String, LinkedHashMap<String, String>> params = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
+        // Titolo pagina
+        String tP = null;
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
         String redirect = null;
         /* ******************************************************************** *
@@ -382,6 +388,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                              *              SELECT List of Measures             *
                              * ************************************************ */
                             measures = allMeasures;
+                            tP = "Registro delle misure di prevenzione";
                             fileJspT = nomeFileElenco;                            
                         }
                     }
@@ -466,6 +473,10 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         if (!params.isEmpty()) {
             req.setAttribute("params", params);
         }
+        // Titolo pagina in caso sia significativo
+        if (tP != null && !tP.equals(VOID_STRING)) {
+            req.setAttribute("tP", tP);
+        }    
         // Imposta nella request le breadcrumbs in caso siano state personalizzate
         if (bC != null) {
             req.removeAttribute("breadCrumbs");
@@ -682,6 +693,25 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg + e.getMessage(), e);
         } 
+    }
+    
+    
+    /**
+     * Dato un elenco complessivo di misure, restituisce solo
+     * quelle che hanno inseriti i dettagli del monitoraggio,
+     * ovvero solo le misure monitorate.
+     * 
+     * @param measures  elenco complessivo di misure di prevenzione
+     * @return lista vettoriale ottenuta scartando dall'elenco le misure non monitorate
+     */
+    public static ArrayList<MeasureBean> filter(final ArrayList<MeasureBean> measures) {
+        ArrayList<MeasureBean> results = new ArrayList<>();
+        for (MeasureBean measure : measures) {
+            if (measure.isDettagli()) {
+                results.add(measure);
+            }
+        }
+        return results;
     }
     
     
