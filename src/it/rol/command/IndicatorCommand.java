@@ -1,14 +1,16 @@
 /*
  *   Rischi On Line (ROL-RMS), Applicazione web: 
  *   - per la gestione di sondaggi inerenti al rischio corruttivo 
- *   cui i processi organizzativi di una PA possono essere esposti, 
+ *     cui i processi organizzativi di una PA possono essere esposti, 
  *   - per la produzione di mappature e reportistica finalizzate 
- *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *     alla valutazione del rischio corruttivo nella pubblica amministrazione, 
  *   - per ottenere suggerimenti riguardo le misure di mitigazione 
- *   che possono calmierare specifici rischi 
+ *     che possono calmierare specifici rischi 
  *   - e per effettuare il monitoraggio al fine di verificare quali misure
- *   proposte sono state effettivamente attuate dai soggetti interessati
- *   alla gestione dei processi a rischio e stabilire quantitativamente in che grado questa attuazione di misure abbia effettivamente ridotto i livelli di rischio.
+ *     proposte sono state effettivamente attuate dai soggetti interessati
+ *     alla gestione dei processi a rischio e stabilire quantitativamente 
+ *     in che grado questa attuazione di misure abbia effettivamente ridotto 
+ *     i livelli di rischio.
  *
  *   Risk Mapping and Management Software (ROL-RMS),
  *   web application: 
@@ -16,7 +18,9 @@
  *   - to publish and manage, reports and information on risk
  *   - and to propose mitigation measures specifically aimed at reducing risk, 
  *   - also allowing monitoring to be carried out to see 
- *   which proposed mitigation measures were then actually implemented and quantify how much that implementation of measures has actually reduced risk levels.
+ *     which proposed mitigation measures were then actually implemented 
+ *     and quantify how much that implementation of measures actually 
+ *     reduced risk levels.
  *   
  *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
@@ -236,6 +240,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         HashMap<String, LinkedHashMap<String, String>> params = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
+        // Titolo pagina
+        String tP = null;
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
         String redirect = null;
         // Data di oggi sotto forma di oggetto Date
@@ -300,7 +306,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              * PROCESS Form to INSERT Measure Monitoring Details*
                              * ************************************************ */
-                            //db.insertMeasureDetails(user, params);
+                            db.insertMeasureDetails(user, params);
                             // Prepara la redirect 
                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + 
                                        AMPERSAND + "p" + EQ + PART_MEASURES +
@@ -349,12 +355,17 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              *                Elenco Monitoraggio               *
                              * ************************************************ */
                                 structs = db.getMeasuresByStructs(user, survey);
-                                // Imposta la jsp
+                                // Imposta la pagina
                                 fileJspT = nomeFile.get(part);
                             } else {
                             /* ************************************************ *
                              *            Ramo dettagli misura monitorata       *
                              * ************************************************ */
+                                // Recupera la misura di prevenzione/mitigazione
+                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                // Recupera i rischi cui è associata
+                                risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
+                                // Imposta la pagina
                                 fileJspT = nomeFileMisura;
                             }
                         } else if (part.equalsIgnoreCase(PART_INDICATOR)) {
@@ -387,6 +398,17 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Recupera i rischi cui è associata
                                 risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
+                                // Recupera le breadcrumbs
+                                LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                                // Url da sostituire al posto di quello di una breadcrumb esistente
+                                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
+                                // Preparazione nuova breadcrumb per puntare sulla command delle misure
+                                ItemBean crumb = new ItemBean("Misure", "Misure", url, SUB_MENU);
+                                // Sostituzione di una breadcrumb esistente con la nuova
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
+                                // Aggiunta inoltre di una foglia
+                                bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Dettagli");
+                                // Pagina
                                 fileJspT = nomeFile.get(part);
                             }
                         //} else if (part.equalsIgnoreCase(VOID_STRING)) {
@@ -420,7 +442,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *   Ramo elenco solo misure monitorate (Registro)  *
                              * ************************************************ */
-                            measures = db.getMonitoredMeasures(user, VOID_SQL_STRING, Query.GET_ALL_BY_CLAUSE, survey);
+                            measures = MeasureCommand.filter(db.getMeasures(user, VOID_SQL_STRING, Query.GET_ALL_BY_CLAUSE, survey));
+                            tP = "Registro delle misure monitorate";
                             fileJspT = nomeFileElenco;                            
                         }
                     }
@@ -469,6 +492,10 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         if (structs != null) {
             req.setAttribute("strutture", structs);
         }
+        // Imposta nella request elenco misure di prevenzione dei rischi
+        if (measures != null) {
+            req.setAttribute("misure", measures);
+        }
         // Imposta nella request oggetto misura di prevenzione specifica
         if (measure != null) {
             req.setAttribute("misura", measure);
@@ -480,11 +507,15 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
-        }
+        }   
         // Imposta struttura contenente tutti i parametri di navigazione già estratti
         if (!params.isEmpty()) {
             req.setAttribute("params", params);
         }
+        // Titolo pagina in caso sia significativo
+        if (tP != null && !tP.equals(VOID_STRING)) {
+            req.setAttribute("tP", tP);
+        }    
         // Imposta nella request le breadcrumbs in caso siano state personalizzate
         if (bC != null) {
             req.removeAttribute("breadCrumbs");
