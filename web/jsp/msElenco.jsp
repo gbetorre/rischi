@@ -38,7 +38,7 @@
             border-bottom: none; /* Remove bottom border from the last list item */
         }
     </style>
-    <h3 class="mt-1 m-0 font-weight-bold float-left">Registro delle misure di prevenzione</h3>
+    <h3 class="mt-1 m-0 font-weight-bold float-left"><c:out value="${requestScope.tP}" /></h3>
     <hr class="riga"/>
     <c:if test="${param['msg'] eq 'newMes'}">
     <script>
@@ -76,7 +76,7 @@
           <tr>
             <td>
               <img src="${initParam.urlDirectoryImmagini}mis-${ms.carattere.informativa}.png" class="ico-small" alt="icona" title="Misura ${ms.carattere.nome}" /> &nbsp;
-              <a href="${initParam.appName}/?q=ms&mliv=${ms.codice}&r=${param['r']}" title="${ms.codice}">
+              <a href="${initParam.appName}/?q=${param['q']}&p=mes&mliv=${ms.codice}&r=${param['r']}" title="${ms.codice}">
                 <c:out value="${ms.nome}" />
               </a>
             </td>
@@ -126,8 +126,20 @@
               </ul>
             </td>
             <td class="text-center"><c:out value="${ms.uso}" /></td>
+            <c:choose>
+            <c:when test="${ms.dettagli}">
+              <c:set var="bg" value="bgAct14" scope="page" />
+              <c:set var="title" value="Dettagli &nbsp; inseriti" scope="page" />
+              <c:set var="url" value="?q=ic&p=mes&mliv=${ms.codice}" scope="page" />
+            </c:when>
+            <c:otherwise>
+              <c:set var="bg" value="bgcolor3" scope="page" />
+              <c:set var="title" value="Aggiungi dettagli" scope="page" />
+              <c:set var="url" value="?q=ic&p=add&mliv=${ms.codice}" scope="page" />
+            </c:otherwise>
+            </c:choose>
             <td class="text-center">
-              <a href="${initParam.appName}/?q=ic&p=add&mliv=${ms.codice}&r=${param['r']}" class="btn bgAct14 badge-pill refresh" title="Aggiungi dettagli">
+              <a href="${initParam.appName}/${url}&r=${param['r']}" class="btn ${bg} badge-pill refresh" title="${title}">
                 Dettagli
               </a>&nbsp;
             </td>
