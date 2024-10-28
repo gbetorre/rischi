@@ -1,15 +1,28 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio e stabilire quantitativamente 
+ *   in che grado questa attuazione di misure abbia effettivamente ridotto 
+ *   i livelli di rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented 
+ *   and quantify how much that implementation of measures actually 
+ *   reduced risk levels.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -1214,12 +1227,19 @@ public interface Query extends Serializable {
             "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
             "   ,   MS.id_rilevazione                   AS \"idRilevazione\"" +
             "   ,   count(MRPAT.id_rischio_corruttivo)::SMALLINT  AS \"uso\"" +
+            "   ,   CASE" +
+            "           WHEN (SELECT MM.codice FROM misuramonitoraggio MM WHERE MM.codice = MS.codice AND MM.id_rilevazione = MS.id_rilevazione) IS NOT NULL THEN true" +
+            "           ELSE false" +
+            "       END                                 AS \"dettagli\"" +
+            "   ,   MM.obiettivopiao                    AS \"obiettivo\"" +
+            "   ,   MM.data_ultima_modifica             AS \"dataMonitoraggio\"" +
             "   FROM misura MS" +
             "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
             "       LEFT JOIN misura_rischio_processo_at MRPAT ON (MRPAT.cod_misura = MS.codice AND MRPAT.id_rilevazione = MS.id_rilevazione)" +
+            "       LEFT JOIN misuramonitoraggio MM ON MM.codice = MS.codice AND MM.id_rilevazione = MS.id_rilevazione" +
             "   WHERE MS.id_rilevazione = ?" +
             "       AND (MS.codice = ? OR -1 = ?)" +
-            "   GROUP BY (MS.codice, MS.nome, MS.descrizione, MS.onerosa, MS.ordinale, MS.data_ultima_modifica, MS.ora_ultima_modifica, MS.id_rilevazione)" +
+            "   GROUP BY (MS.codice, MS.nome, MS.descrizione, MS.onerosa, MS.ordinale, MS.data_ultima_modifica, MS.ora_ultima_modifica, MS.id_rilevazione, MM.obiettivopiao, MM.data_ultima_modifica)" +
             "   ORDER BY MS.nome";
     
     /**
@@ -1352,29 +1372,25 @@ public interface Query extends Serializable {
             "   ORDER BY livello, prefisso, id";
     
     /**
-     * <p>Seleziona l'elenco di tutte le misure di mitigazione trovate 
-     * per una data struttura inclusi anche i dettagli inseriti ai fini 
-     * del monitoraggio.</p>
+     * <p>Seleziona l'elenco di tutte le fasi di attuazione 
+     * di una data misura.</p>
      */
-    public static final String GET_MEASURES_BY_STRUCT_L4 = 
+    public static final String GET_MEASURE_ACTIVITIES = 
             "SELECT DISTINCT" +
-            "       MST.codice                          AS \"codice\"" +
-            "   ,   MST.ruolo                           AS \"ruolo\"" +
-            "   ,   MS.nome                             AS \"nome\"" +
-            "   ,   MS.descrizione                      AS \"informativa\"" +
-            "   ,   MS.onerosa                          AS \"onerosa\"" +
-            "   ,   MS.ordinale                         AS \"ordinale\"" +
-            "   ,   MM.obiettivopiao                    AS \"obiettivo\"" +
-            "   ,   MM.data_ultima_modifica             AS \"dataUltimaModifica\"" +
-            "   ,   MM.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
-            "   ,   MM.id_rilevazione                   AS \"idRilevazione\"" +
-            "   FROM misura MS" +
-            "       LEFT JOIN misuramonitoraggio MM ON (MS.codice = MM.codice AND MS.id_rilevazione = MM.id_rilevazione)" +
-            "       INNER JOIN misura_struttura MST ON (MS.codice = MST.codice AND MS.id_rilevazione = MST.id_rilevazione)" +
+            "       FA.id                               AS \"id\"" +
+            "   ,   FA.nome                             AS \"nome\"" +
+            "   ,   FA.cod_misura                       AS \"codice\"" +
+            "   ,   FA.ordinale                         AS \"ordinale\"" +
+            "   ,   FA.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   FA.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   ,   FA.id_rilevazione                   AS \"idRilevazione\"" +
+            "   FROM fase FA" +
+            "       INNER JOIN misuramonitoraggio MM ON (FA.cod_misura = MM.codice AND FA.id_rilevazione = MM.id_rilevazione)" +
+            "       INNER JOIN misura MS ON (MM.codice = MS.codice AND MM.id_rilevazione = MS.id_rilevazione)" +
             "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
-            "   WHERE (MST.id_struttura_liv4 = ?) " +
-            "       AND MST.id_rilevazione = ?" +
-            "   ORDER BY MS.nome";
+            "   WHERE (FA.cod_misura = ?) " +
+            "       AND FA.id_rilevazione = ?" +
+            "   ORDER BY FA.id";
     
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
@@ -1882,18 +1898,20 @@ public interface Query extends Serializable {
     public static final String INSERT_MEASURE_ACTIVITY =
             "INSERT INTO fase" +
             "   (   nome" +
-            "   ,   id_rilevazione" +                   
-            "   ,   obiettivopiao" +
+            "   ,   ordinale" +
             "   ,   data_ultima_modifica" +
             "   ,   ora_ultima_modifica " +
-            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_usr_ultima_modifica" +            
+            "   ,   cod_misura" +
+            "   ,   id_rilevazione" +
             "   )" +
-            "   VALUES (? " +       // codice
-            "   ,       ? " +       // id rilevazione
-            "   ,       ? " +       // obiettivopiao
+            "   VALUES (? " +       // nome
+            "   ,       ? " +       // ordinale
             "   ,       ? " +       // data ultima modifica
             "   ,       ? " +       // ora ultima modifica
             "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // cod_misura
+            "   ,       ? " +       // id_rilevazione
             "          )" ;
     
     /* ********************************************************************** *
