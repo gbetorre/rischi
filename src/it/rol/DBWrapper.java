@@ -1,15 +1,28 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio e stabilire quantitativamente 
+ *   in che grado questa attuazione di misure abbia effettivamente ridotto 
+ *   i livelli di rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented 
+ *   and quantify how much that implementation of measures actually 
+ *   reduced risk levels.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -3972,7 +3985,7 @@ public class DBWrapper extends QueryImpl {
                                        throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
-            ResultSet rs, rs1, rs2 = null;
+            ResultSet rs, rs1, rs2, rs3 = null;
             int nextParam = NOTHING;
             MeasureBean measure = null;
             AbstractList<MeasureBean> measures = new ArrayList<>(); 
@@ -4053,6 +4066,24 @@ public class DBWrapper extends QueryImpl {
                     measure.setCapofila2(capofila2);
                     measure.setCapofila3(capofila3);
                     measure.setGregarie(gregarie);
+                    /* === Fasi di attuazione della misura === */
+                    nextParam = NOTHING;
+                    pst = null;
+                    ArrayList<ActivityBean> fasi = new ArrayList<>();
+                    pst = con.prepareStatement(GET_MEASURE_ACTIVITIES);
+                    pst.clearParameters();
+                    pst.setString(++nextParam, measure.getCodice());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs3 = pst.executeQuery();
+                    while (rs3.next()) {
+                        // Crea una fase vuota
+                        ActivityBean fs = new ActivityBean();
+                        // La valorizza col risultato della query
+                        BeanUtil.populate(fs, rs3);
+                        // Aggiunge la fase alla lista delle fasi di attuazione
+                        fasi.add(fs);
+                    }
+                    measure.setFasi(fasi);
                     measure.setRilevazione(survey);
                     measures.add(measure);
                 }
@@ -4439,154 +4470,8 @@ public class DBWrapper extends QueryImpl {
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         }
     }
-    
-    
-    /**
-     * <p>Data una rilevazione, restituisce un elenco di misure monitorate 
-     * trovate, oppure una specifica misura, in funzione dei parametri ricevuti.<br />
-     * In particolare: <dl>
-     * <dt>se si passa il codice della misura sul II parametro e 0 sul III parametro </dt>
-     * <dd><cite>esempio:</cite><pre>(user, 'MP.G.4', 0, survey);</pre></dd>
-     * <dd>restituisce una lista vettoriale contenente la misura avente il codice ricevuto (se esiste), oppure una lista vuota (se non esiste).</dd>
-     * <dt>se si passa una stringa SQL vuota sul II parametro e -1 sul III parametro</dt>
-     * <dd><cite>esempio:</cite> <pre>(user, '', -1, survey);</pre></dd>
-     * <dd>restituisce l'elenco completo delle misure monitorate trovate nella rilevazione passata sul IV parametro</dd>
-     * </dl></p>
-     * 
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param code      il codice di una misura cercata oppure una stringa vuota in linguaggio SQL
-     * @param getAll    0 oppure -1 a seconda se si voglia rispettivamente ottenere una singola misura oppure tutte
-     * @param survey    oggetto contenente gli estremi della rilevazione
-     * @return <code>ArrayList&lt;MeasureBean&gt;</code> - l'elenco di misure cercate
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    @SuppressWarnings("static-method")
-    public ArrayList<MeasureBean> getMonitoredMeasures(PersonBean user,
-                                                       String code,
-                                                       int getAll,
-                                                       CodeBean survey)
-                                                throws WebStorageException {
-        try (Connection con = rol_manager.getConnection()) {
-            PreparedStatement pst = null;
-            ResultSet rs, rs1, rs2 = null;
-            int nextParam = NOTHING;
-            MeasureBean measure = null;
-            AbstractList<MeasureBean> measures = new ArrayList<>(); 
-            ArrayList<CodeBean> types = null; 
-            // TODO: Controllare se user è superuser
-            try {
-                pst = con.prepareStatement(GET_MEASURES_MONITORED);
-                pst.clearParameters();
-                pst.setInt(++nextParam, survey.getId());
-                pst.setString(++nextParam, code);
-                pst.setInt(++nextParam, getAll);
-                rs = pst.executeQuery();
-                while (rs.next()) {
-                    measure = new MeasureBean();
-                    types = new ArrayList<>();
-                    BeanUtil.populate(measure, rs);
-                    /* === Carattere === */
-                    // Il carattere si puo' ricavare dal codice:
-                    String measureCode = measure.getCodice();
-                    String charCode = measureCode.substring(measureCode.indexOf(DOT) + 1, measureCode.lastIndexOf(DOT));
-                    CodeBean character = ConfigManager.getMeasureCharacters().get(charCode);
-                    measure.setCarattere(character);
-                    /* === Tipologie === */
-                    // Le tipologie invece si devono ricavare tramite una query
-                    nextParam = NOTHING;
-                    pst = null;
-                    pst = con.prepareStatement(GET_MEASURE_TYPE);
-                    pst.clearParameters();
-                    pst.setString(++nextParam, measure.getCodice());
-                    pst.setInt(++nextParam, survey.getId());
-                    rs1 = pst.executeQuery();
-                    while (rs1.next()) {
-                        // Crea una tipologia vuota
-                        CodeBean type = new CodeBean();
-                        // Lo valorizza col risultato della query
-                        BeanUtil.populate(type, rs1);
-                        // La aggiunge alla lista delle tipologie della misura corrente
-                        types.add(type);
-                    }
-                    measure.setTipologie(types);
-                    /* === Strutture === */
-                    nextParam = NOTHING;
-                    pst = null;
-                    ArrayList<DepartmentBean> capofila1 = new ArrayList<>();
-                    ArrayList<DepartmentBean> capofila2 = new ArrayList<>();
-                    ArrayList<DepartmentBean> capofila3 = new ArrayList<>();
-                    ArrayList<DepartmentBean> gregarie = new ArrayList<>();
-                    pst = con.prepareStatement(GET_STRUCTS_BY_MEASURE);
-                    pst.clearParameters();
-                    pst.setString(++nextParam, measure.getCodice());
-                    pst.setString(++nextParam, String.valueOf(PER_CENT));
-                    pst.setInt(++nextParam, survey.getId());
-                    rs2 = pst.executeQuery();
-                    while (rs2.next()) {
-                        // Crea una struttura generica
-                        ItemBean st = new ItemBean();
-                        // La valorizza col risultato della query
-                        BeanUtil.populate(st, rs2);
-                        // Trasforma la capofila/gregaria da ItemBean a DepartmentBean
-                        DepartmentBean struttura = measure.getStruttura(st);
-                        // Smista le strutture trovate
-                        if (st.getExtraInfo().equals(CP1)) {
-                            // Trasforma la capofila da DepartmentBean a ArrayList
-                            capofila1 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(CP2)) {
-                            capofila2 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(CP3)) {
-                            capofila3 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(GR)) {
-                            gregarie.add(struttura);
-                        } else {
-                            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del ruolo di una struttura.\n";
-                            LOG.severe(msg);
-                            throw new WebStorageException(msg);
-                        }
-                    }
-                    measure.setCapofila(capofila1);
-                    measure.setCapofila2(capofila2);
-                    measure.setCapofila3(capofila3);
-                    measure.setGregarie(gregarie);
-                    measure.setRilevazione(survey);
-                    measures.add(measure);
-                }
-                // Just to engage the Garbage Collector
-                pst = null;
-                // Get out
-                return (ArrayList<MeasureBean>) measures;
-            } catch (SQLException sqle) {
-                String msg = FOR_NAME + "Oggetto non valorizzato; problema nel metodo di recupero misure.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + sqle.getMessage(), sqle);
-            } catch (AttributoNonValorizzatoException anve) {
-                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + anve.getMessage(), anve);
-            } catch (NumberFormatException nfe) {
-                String msg = FOR_NAME + "Si e\' verificato un problema in una conversione in numero.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + nfe.getMessage(), nfe);
-            } finally {
-                try {
-                    con.close();
-                } catch (NullPointerException npe) {
-                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                    LOG.severe(msg);
-                    throw new WebStorageException(msg + npe.getMessage());
-                } catch (SQLException sqle) {
-                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
-                }
-            }
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        }        
-    }
-    
-    
+
+
     /**
      * <p>Restituisce un ArrayList contenente tutte le strutture capofila
      * di misure, con all'interno le misure stesse.
@@ -5815,6 +5700,140 @@ public class DBWrapper extends QueryImpl {
                 con.commit();
                 pst.close();
                 pst = null;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Metodo per fare l'inserimento dei dettagli relativi al monitoraggio
+     * di una misura di prevenzione/mitigazione del rischio corruttivo.</p>
+     * <p>About reusing the same PrepraredStatement across multiple updates 
+     * (into the same transaction), Perplexity.ai said:<br /> 
+     * <cite>&quot;There is a discussion about reusing a single 
+     * PreparedStatement for multiple queries. Just don't do that.</p>
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    @SuppressWarnings("static-method")
+    public void insertMeasureDetails(PersonBean user, 
+                                     HashMap<String, LinkedHashMap<String, String>> params) 
+                              throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement ps, pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri della misura inserita dall'utente
+            LinkedHashMap<String, String> measure = params.get(PART_INSERT_MONITOR_DATA);
+            // Lista delle fasi collegate a una misura monitorata
+            //ArrayList<CodeBean> types = ConfigManager.getMeasureTypes();
+            // Prepara data e ora (potrebbero cambiare da una query all'altra se calcolate in itinere)
+            java.sql.Date lastModifiedDate = Utils.convert(Utils.convert(Utils.getCurrentDate()));
+            // Inoltre, la memorizzazione è più efficiente del ricalcolo
+            Time lastModifiedTime = Utils.getCurrentTime();
+            // Definisce un indice per il numero di parametro da passare alla query
+            int nextParam = NOTHING;
+            try {
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                try {
+                    /* ************************************************
+                    ** === 1. QUERY inserimento dettagli misura   === */ 
+                    pst = con.prepareStatement(INSERT_MEASURE_DETAILS);
+                    pst.clearParameters();
+                    /* === Codice === */
+                    String code = measure.get("code");
+                    pst.setString(++nextParam, code);
+                    /* === Collegamento a rilevazione === */
+                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    /* === Obiettivo PIAO === */
+                    pst.setString(++nextParam, measure.get("piao"));
+                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                    pst.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                    pst.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());
+                    pst.executeUpdate();
+                    /* **************************************************
+                    /* === 2. QUERY contestuale di inserimento fasi === */
+                    ps = con.prepareStatement(INSERT_MEASURE_ACTIVITY);
+                    //ps.clearParameters();
+                    Set<String> keys = measure.keySet();
+                    // Convert the Set to a List for reordering
+                    int ordinale = 10;
+                    // Reverse the List
+                    //Collections.reverse(keysList); 
+                    for (String key : keys) {
+                        if (key.startsWith("fase")) {
+                            String value = measure.get(key);
+                            if (!value.equals(VOID_STRING)) {
+                                //if (key.endsWith(DASH + ELEMENT_LEV_1)) {
+                                nextParam = NOTHING;
+                                /* === Nome fase === */
+                                ps.setString(++nextParam, value);
+                                /* === Ordinale fase === */
+                                ps.setInt(++nextParam, ordinale);
+                                // Incrementa l'ordinale
+                                ordinale += 10;
+                                /* === Campi automatici === */
+                                ps.setDate(++nextParam, lastModifiedDate); // deve essere uguale a sopra
+                                ps.setTime(++nextParam, lastModifiedTime); // deve essere uguale a sopra
+                                ps.setInt(++nextParam, user.getUsrId());                          
+                                /* === Codice misura === */
+                                ps.setString(++nextParam, code);
+                                /* === Identificativo rilevazione === */
+                                ps.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                                ps.addBatch();
+                            }
+                            //key = null;
+                        }
+                    }
+                    // Execute the batch updates
+                    int[] updateCounts = ps.executeBatch();
+                    LOG.info(updateCounts.length + " fasi della misura in transazione attiva.\n");
+                } catch (SQLException sqle) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella query di inserimento misura monitorata.\n" + sqle.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, sqle);
+                } catch (NumberFormatException nfe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, nfe);
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, npe);
+                } catch (Exception e) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
+                // End: <==
+                con.commit();
+                pst.close();
+                ps.close();
+                pst = ps = null;
+                LOG.info("Transazione committata.\n");
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
                 LOG.severe(msg); 
