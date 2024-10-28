@@ -238,6 +238,7 @@ in the case of the current application, in fact, version numbers have only the s
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)</p>
 <cite>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</cite>
 
+- [2.0.3] (28/10/2024) Added facility to insert monitoring details about a measure
 - [2.0.2] (23/10/2024) Bug fix
 - [2.0.1] (21/10/2024) Delegated “Garden Gate” attack prevention to the manager in charge of the user session
 - [2.0.0] (15/10/2024) Added page containing form to assign monitoring details to a selected measure
