@@ -1,15 +1,28 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio e stabilire quantitativamente 
+ *   in che grado questa attuazione di misure abbia effettivamente ridotto 
+ *   i livelli di rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented 
+ *   and quantify how much that implementation of measures actually 
+ *   reduced risk levels.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -93,6 +106,10 @@ public class MeasureBean extends CodeBean {
     private String ruolo;
     /** Dettagli Monitoraggio */
     private boolean dettagli;
+    /** Data Monitoraggio */
+    private Date dataMonitoraggio;
+    /** Fasi di attuazione */
+    private ArrayList<ActivityBean> fasi;
     
     
     /* ************************************************************************ *
@@ -108,7 +125,7 @@ public class MeasureBean extends CodeBean {
         codice = null;
         onerosa = null;
         uso = BEAN_DEFAULT_ID;
-        dataUltimaModifica = new Date(0);
+        dataUltimaModifica = dataMonitoraggio = new Date(0);
         oraUltimaModifica = null;
         autoreUltimaModifica = BEAN_DEFAULT_ID;
         carattere = null;
@@ -117,6 +134,7 @@ public class MeasureBean extends CodeBean {
         capofila = capofila2 = capofila3 = gregarie = null;
         obiettivo = ruolo = null;
         dettagli = false;
+        fasi = null;
     }
 
 
@@ -764,6 +782,58 @@ public class MeasureBean extends CodeBean {
      */
     public void setDettagli(boolean dettagli) {
         this.dettagli = dettagli;
+    }
+    
+    
+    /* ********************************************************* *
+     *      Metodi getter e setter per dettagli monitoraggio     *
+     * ********************************************************* */
+
+    /**
+     * Restituisce la data di ultima modifica dei dettagli del monitoraggio
+     * collegati alla misura corrente. Se i dettagli non sono stati mai 
+     * aggiornati, la data &egrave; quella di inserimento dei dettagli;
+     * altrimenti, la data &egrave; quella dell'ultimo aggiornamento 
+     * dei dettagli stessi.
+     * 
+     * @return <code>dataMonitoraggio</code> - la data di inserimento o ultima modifica dei dettagli del monitoraggio 
+     */
+    public Date getDataMonitoraggio() {
+        return dataMonitoraggio;
+    }
+
+
+    /**
+     * Imposta la data di ultima modifica dei dettagli del monitoraggio trovata.
+     * 
+     * @param dataMonitoraggio - data in cui sono stati inseriti i dettagli del monitoraggio, da impostare
+     */
+    public void setDataMonitoraggio(Date dataMonitoraggio) {
+        this.dataMonitoraggio = dataMonitoraggio;
+    }
+    
+    
+    /* ********************************************************* *
+     *        Metodi getter e setter per fasi di attuazione      *
+     * ********************************************************* */
+
+    /**
+     * Restituisce l'elenco delle fasi di attuazione
+     * 
+     * @return <code>fasi</code> - le fasi di attuazione della misura
+     */
+    public ArrayList<ActivityBean> getFasi() {
+        return fasi;
+    }
+
+
+    /**
+     * Imposta lista delle fasi di attuazione della misura
+     * 
+     * @param fasi - le fasi da impostare
+     */
+    public void setFasi(ArrayList<ActivityBean> fasi) {
+        this.fasi = fasi;
     }
 
 }
