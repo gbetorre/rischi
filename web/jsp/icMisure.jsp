@@ -60,14 +60,14 @@
             <tr>
               <td scope="row" class="align-middle">
                 <img src="${initParam.urlDirectoryImmagini}${ms.dettagli}.png" class="ico-small" alt="icona" title="${details} Dettagli Monitoraggio" /> &nbsp;
-                <a href="${initParam.appName}/?q=ms&mliv=${ms.codice}&r=${param['r']}" title="${ms.codice}">
+                <a href="${initParam.appName}/?q=ic&p=mes&mliv=${ms.codice}&r=${param['r']}" title="${ms.codice}">
                   <c:out value="${ms.nome}" escapeXml="false" />
                 </a>
               </td>
               <td scope="row">
-                <a href="<c:out value= "" />" class="btn bgAct14 btn-spacer"><i class="fas fa-ruler-combined"></i> Indicatori</a>
-                <a href="<c:out value= "" />" class="btn bgAct11 btn-spacer"><i class="fas fa-bars"></i> Misurazioni</a>              
-                <a href="<c:out value= "${report}${prj.id}" />" class="btn bgAct22 btn-spacer"><i class="fas fa-chart-line"></i> Report</a>
+                <a href="${initParam.appName}/?q=ic&p=ind&r=${param['r']}" class="btn bgAct14 btn-spacer"><i class="fas fa-ruler-combined"></i> Indicatori</a>
+                <a href="${initParam.appName}/?q=ic&p=mon&r=${param['r']}" class="btn bgAct11 btn-spacer text-black"><i class="fas fa-bars"></i> Misurazioni</a>              
+                <a href="" class="btn bgAct22 btn-spacer"><i class="fas fa-chart-line"></i> Report</a>
               </td>
               <td class="align-middle">
                 <span class="align-middle badge-pill ${bgAct} btn-small lightTable"><c:out value="${ms.ruolo}" /></span>
