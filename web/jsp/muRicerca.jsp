@@ -8,9 +8,9 @@
       </ol>
       <div class="row">
         <div class="col-xl-3 col-md-6">
-          <div class="card bgAct20 text-dark mb-4">
+          <div class="card bgAct20 mb-4 text-dark">
             <div class="card-body">
-              <i class="fa-solid fa-cloud-bolt fa-5x"></i>&nbsp;&nbsp; 
+              <i class="fa-solid fa-cloud-bolt fa-4x"></i>&nbsp;&nbsp; 
               Fattori abilitanti
             </div>
             <div class="card-footer d-flex align-items-center justify-content-between">
@@ -20,9 +20,9 @@
           </div>
         </div>
         <div class="col-xl-3 col-md-6">
-          <div class="card bgAct11 text-dark mb-4">
+          <div class="card bgAct11 mb-4 text-dark">
             <div class="card-body">
-              <i class="fa-solid fa-right-from-bracket fa-5x"></i>&nbsp;&nbsp; 
+              <i class="fa-solid fa-right-from-bracket fa-4x"></i>&nbsp;&nbsp; 
               Output dei processi
             </div>
             <div class="card-footer d-flex align-items-center justify-content-between">
@@ -32,9 +32,9 @@
           </div>
         </div>
         <div class="col-xl-3 col-md-6">
-          <div class="card bgAct22 mb-4">
+          <div class="card bgAct22 mb-4 text-white">
             <div class="card-body">
-              <i class="fa-solid fa-umbrella fa-5x"></i>&nbsp;&nbsp; 
+              <i class="fa-solid fa-desktop fa-4x"></i>&nbsp;&nbsp; 
               <span class="text-white">Misure monitorate</span>
             </div>
             <div class="card-footer d-flex align-items-center justify-content-between">
@@ -49,7 +49,7 @@
         <li class="breadcrumb-item active">Ricerca libera</li>
       </ol>
       <div id="search_div">
-        <form id="pe_form" method="post" action="${pes}" class="panel reportWp">
+        <form id="pe_form" method="post" action="${pes}" class="section reportWp">
           <input type="hidden" id="act-id" name="act-id" value="${actInstance.id}" />
           <div class="panel-body">
             <hr class="separatore" />
@@ -134,7 +134,7 @@
                 <button type="submit" class="btn btn-success text-white" value="pe_search" title="Effettua ricerca">
                   <i class="fas fa-search"></i> &nbsp;Cerca
                 </button>
-                <a href="${pe}" class="btn btn-warning" title="Ripulisce la pagina da campi e risultati">
+                <a href="${pe}" class="btn btn-warning text-black" title="Ripulisce la pagina da campi e risultati">
                   <i class="fa fa-times" aria-hidden="true"></i> &nbsp;Ripristina
                 </a>
                 <a href="${project}" class="btn btn-primary" title="Imposta i valori trovati all'insieme pi&uacute; grande, se esiste">
@@ -147,4 +147,3 @@
       </div>
       <br />
     </div>
-
