@@ -228,7 +228,7 @@
             <td width="25%" class="text-center">
               <div class="btn-group">
                 <a href="${initParam.appName}/?q=pr&p=adf&idR=${risk.id}&pliv=${param['pliv']}&liv=2&r=${param['r']}" class="btn btn-primary" title="Aggiungi un fattore abilitante al rischio &quot;${fn:substring(risk.nome, 0, 22)}...&quot; nel contesto del processo &quot;${processo}&quot;">
-                  <small><i class="fa-solid fa-circle-plus"></i> Fattore</small>
+                  <small><i class="fa-solid fa-square-plus"></i> Fattore</small>
                 </a>&nbsp;
                 <a href="${initParam.appName}/?q=ms&p=adm&idR=${risk.id}&pliv=${param['pliv']}&liv=2&r=${param['r']}" class="btn btn-success" title="Aggiungi una misura di prevenzione al rischio &quot;${fn:substring(risk.nome, 0, 22)}...&quot; nel contesto del processo &quot;${processo}&quot;">
                   <small><i class="fa-solid fa-square-plus"></i> Misura</small>
