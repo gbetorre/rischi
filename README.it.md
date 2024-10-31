@@ -332,6 +332,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [2.0.4] (31/10/2024) Revisione grafica pagine; miglioramenti nella presentazione (bottoni, etichette)
 - [2.0.3] (28/10/2024) Implementata funzionalit&agrave; di inserimento dettagli del monitoraggio di una misura
 - [2.0.2] (23/10/2024) Correzione di bug
 - [2.0.1] (21/10/2024) Delegato metodo di prevenzione attacchi tipo "Garden Gate" al manager che si occupa della sessione utente
