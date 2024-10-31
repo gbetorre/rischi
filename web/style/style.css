@@ -890,6 +890,26 @@ textarea {
   line-height: 1.45em;
 }
 
+.bordo-bgcolor1 {
+    border-left-color: #2980b9;
+}
+
+.bordo-bgcolor2 {
+    border-left-color: #f39c12;
+}
+
+.bordo-bgcolor3 {
+    border-left-color: #2ecc71;
+}
+
+.bordo-bgcolor4 {
+    border-left-color: #9b59b6;
+}
+
+.bordo-bgcolor5 {
+    border-left-color: #566573;
+}
+
 .file-data {
 	color: #999;  
 	font-style: italic;
@@ -927,7 +947,7 @@ textarea {
 }
 
 .btn-small {
-  height: 20px;
+  height: 30px;
   font-size: 8px;
   font-weight: bold;
 }
