@@ -230,8 +230,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         MeasureBean measure = null;
         // Elenco di misure di prevenzione monitorate
         ArrayList<MeasureBean> measures = null;
-        // Elenco dei caratteri delle misure
-        ArrayList<CodeBean> characters = null;
         // Elenco strutture collegate alla rilevazione
         ArrayList<DepartmentBean> structs = null;
         // Elenco di rischi associati a una misura
@@ -348,13 +346,18 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                      *               Manage Indicator Part              *
                      * ************************************************ */
                     if (nomeFile.containsKey(part)) {
+                        // Recupera le breadcrumbs
+                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                        // Gestione Rami
                         if (part.equalsIgnoreCase(PART_MEASURES)) {
                             // Controlla la presenza dell'id di una misura
                             if (codeMis.equals(DASH)) {
                             /* ************************************************ *
-                             *                Elenco Monitoraggio               *
+                             *      Elenco Misure raggruppate per struttura     *
                              * ************************************************ */
                                 structs = db.getMeasuresByStructs(user, survey);
+                                // Aggiunge una foglia alle breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Misure-Struttura");
                                 // Imposta la pagina
                                 fileJspT = nomeFile.get(part);
                             } else {
@@ -365,6 +368,14 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Recupera i rischi cui è associata
                                 risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
+                                // Url da sostituire al posto di quello di una breadcrumb esistente
+                                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
+                                // Preparazione nuova breadcrumb per puntare sulla command delle misure
+                                ItemBean crumb = new ItemBean("Misure", "Misure", url, SUB_MENU);
+                                // Sostituzione di una breadcrumb esistente con la nuova
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
+                                // Aggiunta inoltre di una foglia
+                                bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Dettagli");
                                 // Imposta la pagina
                                 fileJspT = nomeFileMisura;
                             }
@@ -372,13 +383,14 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             // Controlla la presenza dell'id di un indicatore
                             if (idInd > DEFAULT_ID) {
                             /* ************************************************ *
+                             *  Ramo pagina visualizzazione/modifica indicatore *
+                             * ************************************************ */
+                            } else {
+                            /* ************************************************ *
                              *        Ramo elenco indicatori di una misura      *
                              * ************************************************ */
+                                
                             }
-                            /* ************************************************ *
-                             *             Ramo modifica indicatore             *
-                             * ************************************************ */
-                            
                         } else if (part.equalsIgnoreCase(PART_MONITOR)) {
                             /* ************************************************ *
                              * Ramo elenco misurazioni di una misura monitorata *
@@ -398,8 +410,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Recupera i rischi cui è associata
                                 risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
-                                // Recupera le breadcrumbs
-                                LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                                 // Url da sostituire al posto di quello di una breadcrumb esistente
                                 String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
                                 // Preparazione nuova breadcrumb per puntare sulla command delle misure
@@ -415,10 +425,12 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *  Pagina riepilogo dettagli monitoraggio inseriti *
                              * ************************************************ */
-                        //} else if (part.equalsIgnoreCase(VOID_STRING)) {
+                        } else if (part.equalsIgnoreCase(PART_INSERT_INDICATOR)) {
                             /* ************************************************ *
                              *      Form inserimento indicatore di una misura   *
                              * ************************************************ */
+                            // Pagina
+                            fileJspT = nomeFile.get(part);
                         //} else if (part.equalsIgnoreCase(VOID_STRING)) {
                             /* ************************************************ *
                              *     Form inserimento misurazione di una misura   *
@@ -444,7 +456,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              * ************************************************ */
                             measures = MeasureCommand.filter(db.getMeasures(user, VOID_SQL_STRING, Query.GET_ALL_BY_CLAUSE, survey));
                             tP = "Registro delle misure monitorate";
-                            fileJspT = nomeFileElenco;                            
+                            fileJspT = nomeFileElenco;
                         }
                     }
                 }
@@ -480,23 +492,19 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
-        // Imposta nella request elenco tipologie di misure
+        // Imposta nella request elenco tipologie di indicatori
         if (types != null) {
-            req.setAttribute("tipiMisure", types);
+            req.setAttribute("tipiIndicatori", types);
         }
-        // Imposta nella request elenco caratteri delle misure
-        if (characters != null) {
-            req.setAttribute("caratteriMisure", characters);
-        }
-        // Imposta nella request elenco misure raggruppate per strutture
+        // Imposta nella request elenco strutture ciascuna con all'interno le sue misure
         if (structs != null) {
             req.setAttribute("strutture", structs);
         }
-        // Imposta nella request elenco misure di prevenzione dei rischi
+        // Imposta nella request elenco misure aventi dettagli monitoraggio
         if (measures != null) {
             req.setAttribute("misure", measures);
         }
-        // Imposta nella request oggetto misura di prevenzione specifica
+        // Imposta nella request oggetto misura specifica
         if (measure != null) {
             req.setAttribute("misura", measure);
         }
