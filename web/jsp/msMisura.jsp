@@ -3,6 +3,10 @@
 <%@ include file="URL.jspf" %>
 <c:set var="meas" value="${requestScope.misura}" scope="page" />
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
+<c:set var="dets" value="NO" scope="page" />
+<c:if test="${meas.dettagli}">
+  <c:set var="dets" value="SI" scope="page" />
+</c:if>
     <style>
     section {
       margin-top: 20px;
@@ -24,6 +28,15 @@
         <dd><c:out value="${meas.carattere.nome}" /></dd>
         <dt class="text-primary">Comporta Spese?</dt>
         <dd><c:out value="${fn:toUpperCase(meas.getOnerosa(meas.onerosa))}" /></dd>
+        <dt class="text-primary">Codice</dt>
+        <dd><c:out value="${meas.codice}" /></dd>
+        <dt class="text-primary">Monitorata</dt>
+        <dd>
+          <c:out value="${dets}" />&nbsp; 
+          <c:if test="${meas.dettagli}">&nbsp; 
+          <a href="${initParam.appName}/?q=ic&p=mes&mliv=MP.S.22&r=AT2022#details" class="badge badge-pill border-basso">dettagli monitoraggio</a>
+          </c:if>
+        </dd>
       </dl>
       <h5 class="fw-bold text-dark border-bottom border-2 border-secondary">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-umbrella ico-home" viewBox="0 0 16 16">
