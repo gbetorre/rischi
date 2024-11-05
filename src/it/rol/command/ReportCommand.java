@@ -1,15 +1,28 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *     cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *     alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *     che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *     proposte sono state effettivamente attuate dai soggetti interessati
+ *     alla gestione dei processi a rischio e stabilire quantitativamente 
+ *     in che grado questa attuazione di misure abbia effettivamente ridotto 
+ *     i livelli di rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *     which proposed mitigation measures were then actually implemented 
+ *     and quantify how much that implementation of measures actually 
+ *     reduced risk levels.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -41,7 +54,6 @@ import java.util.LinkedList;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import com.oreilly.servlet.ParameterParser;
 
@@ -49,6 +61,7 @@ import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Main;
+import it.rol.SessionManager;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
@@ -189,8 +202,6 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         String fileJspT = null;
         // Dichiara elenco di macroprocessi anticorruttivi collegati alla rilevazione
         ArrayList<ProcessBean> matsWithIndicators = null;
-        // Dichiara mappa di parametri di ricerca
-        //HashMap<String, LinkedHashMap<String, String>> params = null;
         // Dichiara mappa di strutture indicizzate per id processo_at
         HashMap<Integer, ArrayList<DepartmentBean>> structs = null;
         // Dichiara mappa di soggetti contingenti indicizzati per id processo_at
@@ -208,31 +219,13 @@ public class ReportCommand extends ItemBean implements Command, Constants {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
         /* ******************************************************************** *
-         *                         Recupera la Sessione                         *
+         *         Previene il rischio di attacchi di tipo Garden Gate          *
          * ******************************************************************** */
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-            HttpSession ses = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
-            user = (PersonBean) ses.getAttribute("usr");
-            if (user == null) {
-                throw new CommandException(FOR_NAME + "Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-            }
-        } catch (IllegalStateException ise) {
-            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + ise.getMessage(), ise);
-        } catch (ClassCastException cce) {
-            String msg = FOR_NAME + ": Si e\' verificato un problema in una conversione di tipo.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + cce.getMessage(), cce);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null, probabilmente nel tentativo di recuperare l\'utente.\n";
-            LOG.severe(msg);
-            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n" + npe.getMessage(), npe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + e.getMessage(), e);
+            user = SessionManager.checkSession(req.getSession(IF_EXISTS_DONOT_CREATE_NEW));
+        } catch (RuntimeException re) {
+            throw new CommandException(FOR_NAME + "Problema a livello dell\'autenticazione utente!\n" + re.getMessage(), re);
         }
         /* ******************************************************************** *
          *                   Decide il valore della pagina                      *
