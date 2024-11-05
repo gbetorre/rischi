@@ -125,7 +125,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
     /**
      * Pagina per mostrare i dettagli di un indicatore di monitoraggio
      */
-    private static final String nomeFileDettaglio = "/jsp/icIndicatore.jsp";    
+    private static final String nomeFileDettaglio = "/jsp/icIndicatoreForm.jsp";    
     /**
      * Pagina per mostrare i dettagli di una misura monitorata
      */
@@ -362,7 +362,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 fileJspT = nomeFile.get(part);
                             } else {
                             /* ************************************************ *
-                             *            Ramo dettagli misura monitorata       *
+                             *             Dettagli misura monitorata           *
                              * ************************************************ */
                                 // Recupera la misura di prevenzione/mitigazione
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
@@ -389,13 +389,15 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *        Ramo elenco indicatori di una misura      *
                              * ************************************************ */
-                                
+                                // Imposta la pagina
+                                fileJspT = nomeFile.get(part);
                             }
                         } else if (part.equalsIgnoreCase(PART_MONITOR)) {
                             /* ************************************************ *
                              * Ramo elenco misurazioni di una misura monitorata *
                              * ************************************************ */
-                            
+                            // Imposta la pagina
+                            fileJspT = nomeFile.get(part);
                             /* ************************************************ *
                              *          Ramo dettagli di una misurazione        *
                              * ************************************************ */
@@ -427,7 +429,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              * ************************************************ */
                         } else if (part.equalsIgnoreCase(PART_INSERT_INDICATOR)) {
                             /* ************************************************ *
-                             *      Form inserimento indicatore di una misura   *
+                             *           Inserimento nuovo indicatore           *
                              * ************************************************ */
                             // Pagina
                             fileJspT = nomeFile.get(part);
@@ -494,7 +496,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
          * ******************************************************************** */
         // Imposta nella request elenco tipologie di indicatori
         if (types != null) {
-            req.setAttribute("tipiIndicatori", types);
+            req.setAttribute("tipi", types);
         }
         // Imposta nella request elenco strutture ciascuna con all'interno le sue misure
         if (structs != null) {
