@@ -34,7 +34,7 @@
         <dd>
           <c:out value="${dets}" />&nbsp; 
           <c:if test="${meas.dettagli}">&nbsp; 
-          <a href="${initParam.appName}/?q=ic&p=mes&mliv=MP.S.22&r=AT2022#details" class="badge badge-pill border-basso">dettagli monitoraggio</a>
+          <a href="${initParam.appName}/?q=ic&p=mes&mliv=${meas.codice}&r=AT2022#details" class="badge badge-pill border-basso">dettagli monitoraggio</a>
           </c:if>
         </dd>
       </dl>
