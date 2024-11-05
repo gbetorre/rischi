@@ -68,7 +68,7 @@
       </div>
       <br><hr class="separatore" />
       <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item active">Report grafici</li>
+        <li class="breadcrumb-item active">Altri Report</li>
       </ol>
       <div class="row">
         <div class="col-xl-3 col-md-6">
@@ -80,6 +80,18 @@
             </div>
             <div class="card-footer d-flex align-items-center justify-content-between">
               <a class="small stretched-link  text-white" href="${gra}">Report aggregati e sintetici</a>
+              <div class="small"><i class="fas fa-angle-right"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="card reportWp mb-4">
+            <div class="card-body">
+              <i class="fa fa-search tm-home-fa fa-4x"></i>&nbsp;&nbsp;
+              Ricerche
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+              <a class="small stretched-link" href="${mic}">Ricerche predefinite e libere</a>
               <div class="small"><i class="fas fa-angle-right"></i></div>
             </div>
           </div>
