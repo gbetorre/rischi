@@ -332,6 +332,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [2.0.5] (05/11/2024) Aggiunta pagina contenente form per inserire un nuovo indicatore di monitoraggio; correzione di bug
 - [2.0.4] (31/10/2024) Revisione grafica pagine; miglioramenti nella presentazione (bottoni, etichette)
 - [2.0.3] (28/10/2024) Implementata funzionalit&agrave; di inserimento dettagli del monitoraggio di una misura
 - [2.0.2] (23/10/2024) Correzione di bug
