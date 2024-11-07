@@ -74,6 +74,7 @@ import it.rol.bean.ActivityBean;
 import it.rol.bean.BeanUtil;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
+import it.rol.bean.IndicatorBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.MeasureBean;
@@ -4073,6 +4074,8 @@ public class DBWrapper extends QueryImpl {
                     pst = con.prepareStatement(GET_MEASURE_ACTIVITIES);
                     pst.clearParameters();
                     pst.setString(++nextParam, measure.getCodice());
+                    pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                    pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
                     pst.setInt(++nextParam, survey.getId());
                     rs3 = pst.executeQuery();
                     while (rs3.next()) {
@@ -4080,6 +4083,12 @@ public class DBWrapper extends QueryImpl {
                         ActivityBean fs = new ActivityBean();
                         // La valorizza col risultato della query
                         BeanUtil.populate(fs, rs3);
+                        // Cerca l'indicatore collegato eventualmente alla fase
+                        IndicatorBean ind = getIndicatorByActivity(user, fs, survey);
+                        // Aggiunge l'indicatore alla fase se significativo
+                        if (ind != null) {
+                            fs.setIndicatore(ind);
+                        }
                         // Aggiunge la fase alla lista delle fasi di attuazione
                         fasi.add(fs);
                     }
@@ -4557,6 +4566,160 @@ public class DBWrapper extends QueryImpl {
         }
     }
     
+    
+    /**
+     * <p>Restituisce una fase di attuazione di dato id, appartenente 
+     * a una misura di dato codice, nel contesto di una data rilevazione.</p>
+     * 
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti 
+     * @param code      il codice di una misura di cui si cercano le fasi
+     * @param idF       identificativo della fase cercata
+     * @param survey    oggetto contenente gli estremi della rilevazione
+     * @return <code>ActivityBean</code> - la fase di attuazione cercata
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ActivityBean getMeasureActivity(PersonBean user,
+                                           String code,
+                                           int idF,
+                                           CodeBean survey)
+                                    throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            int nextParam = NOTHING;
+            ActivityBean fs = null;
+            try {
+                pst = con.prepareStatement(GET_MEASURE_ACTIVITIES);
+                pst.clearParameters();
+                pst.setString(++nextParam, code);
+                pst.setInt(++nextParam, idF);
+                pst.setInt(++nextParam, idF);
+                pst.setInt(++nextParam, survey.getId());
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    // Crea una fase vuota
+                    fs = new ActivityBean();
+                    // La valorizza col risultato della query
+                    BeanUtil.populate(fs, rs);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return fs;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di bean.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un indicatore di monitoraggio collegato ad una specifica
+     * fase di attuazione passata come parametro.</p>
+     * 
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param fase      la fase di attuazione cui l'indicatore cercato puo' essere collegato
+     * @param survey    oggetto contenente gli estremi della rilevazione
+     * @return <code>IndicatorBea</code> - l'indicatore di monitoraggio collegato alla fase
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public IndicatorBean getIndicatorByActivity(PersonBean user,
+                                                ActivityBean fase,
+                                                CodeBean survey)
+                                         throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs, rs1 = null;
+            IndicatorBean indicator = null;
+            // TODO: Controllare se user è superuser
+            try {
+                int nextParam = NOTHING;
+                pst = con.prepareStatement(GET_INDICATOR_BY_ACTIVITY_RAW);
+                pst.clearParameters();
+                pst.setInt(++nextParam, fase.getId());
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    // Prepara il bean contenente i riferimenti
+                    ItemBean data = new ItemBean();
+                    // Valorizza il bean
+                    BeanUtil.populate(data, rs);
+                    // Recupera il tipo
+                    CodeBean tipo = ConfigManager.getIndicatorTypesAsMap().get(new Integer(data.getCod3()));
+                    // Recupera lo stato
+                    CodeBean stato = new CodeBean(data.getCod4(), STATI_STRUTTURA[data.getCod4()], VOID_STRING, NOTHING);
+                    // Recupera l'indicatore
+                    nextParam = NOTHING;
+                    pst = null;
+                    pst = con.prepareStatement(GET_INDICATOR_BY_ACTIVITY);
+                    pst.clearParameters();
+                    pst.setInt(++nextParam, fase.getId());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs1 = pst.executeQuery();
+                    if (rs1.next()) {
+                        // Crea l'indicatore vuoto
+                        indicator = new IndicatorBean();
+                        // Valorizza il bean
+                        BeanUtil.populate(indicator, rs1);
+                        // Vi aggiunge il tipo
+                        indicator.setTipo(tipo);
+                        // Vi aggiunge lo stato
+                        indicator.setStato(stato);
+                        // Vi aggiunge la fase
+                        indicator.setFase(fase);
+                    }                    
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return indicator;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di bean.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+
     /* ********************************************************** *
      *                    Metodi di INSERIMENTO                   *
      * ********************************************************** */
@@ -5834,6 +5997,113 @@ public class DBWrapper extends QueryImpl {
                 ps.close();
                 pst = ps = null;
                 LOG.info("Transazione committata.\n");
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Metodo per fare l'inserimento di un nuovo indicatore collegato
+     * ad una fase di attuazione di una misura monitorata,
+     * nel contesto di una data misura e di una data rilevazione.</p>
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    @SuppressWarnings("static-method")
+    public void insertIndicatorMeasure(PersonBean user, 
+                                       HashMap<String, LinkedHashMap<String, String>> params) 
+                                throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri contenente l'identificativo del rischio da associare
+            LinkedHashMap<String, String> indicator = params.get(PART_INSERT_INDICATOR);
+            try {
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(INSERT_MEASURE_INDICATOR);
+                pst.clearParameters();
+                 // Prepara i parametri per l'inserimento
+                try {
+                    // Definisce un indice per il numero di parametro da passare alla query
+                    int nextParam = NOTHING;
+                    /* === Nome === */
+                    pst.setString(++nextParam, indicator.get("nome"));
+                    /* === Descrizione === */
+                    pst.setString(++nextParam, indicator.get("desc"));
+                    /* === Baseline === */
+                    pst.setString(++nextParam, indicator.get("base"));
+                    /* === Data Baseline === */
+                    java.util.Date dataBaseline = Utils.format(indicator.get("database"), "dd/MM/yyyy", DATA_SQL_PATTERN);
+                    java.sql.Date  dateAsSqlDate = Utils.convert(dataBaseline);
+                    pst.setDate(++nextParam, dateAsSqlDate);
+                    /* === Target === */
+                    pst.setString(++nextParam, indicator.get("targ"));
+                    /* === Data Target === */
+                    java.util.Date dataTarg = Utils.format(indicator.get("datatarg"), "dd/MM/yyyy", DATA_SQL_PATTERN);
+                    dateAsSqlDate = Utils.convert(dataTarg);
+                    pst.setDate(++nextParam, dateAsSqlDate);
+                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());
+                    /* === Id Fase === */
+                    pst.setInt(++nextParam, Integer.parseInt(indicator.get("fase")));
+                    /* === Id Tipo === */
+                    pst.setInt(++nextParam, Integer.parseInt(indicator.get("tipo")));
+                    /* === Id Stato === */
+                    pst.setInt(++nextParam, ELEMENT_LEV_1);
+                    /* === Id Rilevazione === */
+                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    // CR (Carriage Return) o 0DH
+                    pst.executeUpdate();
+                } catch (NumberFormatException nfe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, nfe);
+                } catch (ClassCastException cce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di tipo.\n" + cce.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, cce);
+                } catch (ArrayIndexOutOfBoundsException aiobe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, aiobe);
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, npe);
+                } catch (Exception e) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
+                // End: <==
+                con.commit();
+                pst.close();
+                pst = null;
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
                 LOG.severe(msg); 
