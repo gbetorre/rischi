@@ -1,15 +1,28 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *     cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *     alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *     che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *     proposte sono state effettivamente attuate dai soggetti interessati
+ *     alla gestione dei processi a rischio e stabilire quantitativamente 
+ *     in che grado questa attuazione di misure abbia effettivamente ridotto 
+ *     i livelli di rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *     which proposed mitigation measures were then actually implemented 
+ *     and quantify how much that implementation of measures actually 
+ *     reduced risk levels.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -116,6 +129,7 @@ public class CodeBean implements Serializable {
         nome = informativa = null;
     }
     
+    
     /**
      * <p>Costruttore per clonazione.</p>
      * <p>Inizializza i campi a valori presi da un altro bean &dash; se sono valorizzati
@@ -162,6 +176,23 @@ public class CodeBean implements Serializable {
         ordinale = o.getOrdinale();
     }
     
+    
+    /**
+     * Costruttore parametrico.
+     * 
+     * CodeBean(String nome, String labelWeb, String url, int livello)
+     * 
+     * @param id            identificativo dell'oggetto da istanziare
+     * @param nome          nome dell'oggetto da istanziare
+     * @param informativa   descrizione estesa dell'oggetto da istanziare
+     * @param ordinale      livello di indentazione dell'oggetto da istanziare
+     */
+    public CodeBean(int id, String nome, String informativa, int ordinale) {
+        this.id = id;
+        this.nome = nome;
+        this.informativa = informativa;
+        this.ordinale = ordinale;
+    }
 
     /* **************************************************** *
      *           Metodi getter e setter per id              *
