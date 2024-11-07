@@ -1,15 +1,28 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *     cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *     alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *     che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *     proposte sono state effettivamente attuate dai soggetti interessati
+ *     alla gestione dei processi a rischio e stabilire quantitativamente 
+ *     in che grado questa attuazione di misure abbia effettivamente ridotto 
+ *     i livelli di rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *     which proposed mitigation measures were then actually implemented 
+ *     and quantify how much that implementation of measures actually 
+ *     reduced risk levels.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -167,6 +180,10 @@ public class ConfigManager extends HttpServlet {
      * Lista dei tipi di indicatori di monitoraggio
      */
     private static ArrayList<CodeBean> indicatorTypes;
+    /**
+     * Tabella hash (dictionary) contenente i tipi di indicatori indicizzati per id
+     */
+    private static ConcurrentHashMap<Integer, CodeBean> indicatorTypesAsMap;
     /**
      * <p>Nome del parametro di inizializzazione, valorizzato nel
      * descrittore di deploy, che identifica il nome della web application.</p>
@@ -427,6 +444,23 @@ public class ConfigManager extends HttpServlet {
         }
         catch (Exception e) {
             throw new ServletException(FOR_NAME + "Problemi nel caricare i tipi di indicatori.\n" + e.getMessage(), e);
+        }
+        try {
+            // Istanzia la mappa quando gli serve...
+            indicatorTypesAsMap = new ConcurrentHashMap<>();
+            // for each
+            for (CodeBean type : indicatorTypes) {
+                // Chiave del dizionario dei tipi indicatore
+                Integer key = new Integer(type.getId());
+                // Valorizza la mappa contenente i tipi indicatore
+                indicatorTypesAsMap.put(key, type);                
+            }
+        }
+        catch (NullPointerException npe) {
+            throw new ServletException(FOR_NAME + "Si e\' verificato un problema di puntamento alle rilevazioni o a un altro oggetto.\n" + npe.getMessage(), npe);
+        }
+        catch (Exception e) {
+            throw new ServletException(FOR_NAME + "Problemi nel caricare la struttura contenente le rilevazioni.\n" + e.getMessage(), e);
         }
         /*
          * Carica una struttura dati, che esporra' staticamente, contenente tutte 
@@ -691,6 +725,18 @@ public class ConfigManager extends HttpServlet {
      */
     public static ArrayList<CodeBean> getIndicatorTypes() {
         return indicatorTypes;
+    }
+    
+
+    /**
+     * <p>Restituisce una struttura di tipo Tabella hash (dictionary),
+     * contenente tutti i tipi indicatore indicizzati per id.</p>
+     * <p>Metodo getter sulla variabile privata di classe.</p>
+     *
+     * @return <code>ConcurrentHashMap&lt;Integer, CodeBean&gt;</code> - i tipi indicatore indicizzati per Wrapper di id
+     */
+    public static ConcurrentHashMap<Integer, CodeBean> getIndicatorTypesAsMap() {
+        return indicatorTypesAsMap;
     }
     
 }
