@@ -1052,7 +1052,7 @@ public interface Query extends Serializable {
      *  Inoltre, d&agrave; la possibilit&agrave; di sottrarre un ammontare
      *  passato come parametro dai valori effettivi degli indicatori
      *  (se non si desidera alterare questi valori, &egrave; sufficiente 
-     *  impostare il valore dell'ammontare a zero)
+     *  impostare il valore dell'ammontare a zero).
      *  Se, effettuando un'operazione utilizzando questo ammontare, si ottiene
      *  un risultato inferiore a zero (0 = rischio MINIMO) la query mantiene
      *  il valore 0.</p>
@@ -1372,8 +1372,14 @@ public interface Query extends Serializable {
             "   ORDER BY livello, prefisso, id";
     
     /**
-     * <p>Seleziona l'elenco di tutte le fasi di attuazione 
-     * di una data misura.</p>
+     * <p>Relativamente a una misura di dato codice seleziona:<ul>
+     * <li>l'elenco di tutte le sue fasi di attuazione</li> 
+     * <li>oppure, entro questo insieme, una specifica misura di dato id.</li>
+     * </ul>Quindi:<dl>
+     * <dt>se si vuol ottenere l'elenco completo delle fasi di una misura:</dt>
+     * <dd>passare un valore qualunque sul 2° parametro (p.es. -1) e -1 sul 3° parametro</dd>
+     * <dt>se si vuol ottenere una specifica fase della misura:</dt>
+     * <dd>passare l'id della misura sul 2° e sul 3° parametro.</dd></dl></p>
      */
     public static final String GET_MEASURE_ACTIVITIES = 
             "SELECT DISTINCT" +
@@ -1389,8 +1395,42 @@ public interface Query extends Serializable {
             "       INNER JOIN misura MS ON (MM.codice = MS.codice AND MM.id_rilevazione = MS.id_rilevazione)" +
             "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
             "   WHERE (FA.cod_misura = ?) " +
+            "       AND (FA.id = ? OR -1 = ?)" +
             "       AND FA.id_rilevazione = ?" +
             "   ORDER BY FA.id";
+    
+    /**
+     * <p>Estrae gli estremi dei collegamenti di un indicatore 
+     * associato a una fase di attuazione di dato id.</p>
+     */
+    public static final String GET_INDICATOR_BY_ACTIVITY_RAW = 
+            "SELECT " +
+            "       IND.id                              AS \"cod1\"" +
+            "   ,   IND.id_fase                         AS \"cod2\"" +
+            "   ,   IND.id_tipo                         AS \"cod3\"" +
+            "   ,   IND.id_stato                        AS \"cod4\"" +
+            "   FROM indicatoremonitoraggio IND" +
+            "   WHERE IND.id_fase = ?";
+    
+    /**
+     * <p>Estrae i valori di un indicatore associato a una fase di attuazione
+     * di dato id.</p>
+     */
+    public static final String GET_INDICATOR_BY_ACTIVITY = 
+            "SELECT DISTINCT" +
+            "       IND.id                              AS \"id\"" +
+            "   ,   IND.nome                            AS \"nome\"" +
+            "   ,   IND.descrizione                     AS \"descrizione\"" +
+            "   ,   IND.baseline                        AS \"baseline\"" +
+            "   ,   IND.databaseline                    AS \"dataBaseline\"" +
+            "   ,   IND.target                          AS \"target\"" +
+            "   ,   IND.datatarget                      AS \"dataTarget\"" +
+            "   ,   IND.data_ultima_modifica            AS \"dataUltimaModifica\"" +
+            "   ,   IND.ora_ultima_modifica             AS \"oraUltimaModifica\"" +
+            "   ,   IND.id_usr_ultima_modifica          AS \"autoreUltimaModifica\"" +
+            "   FROM indicatoremonitoraggio IND" +
+            "   WHERE IND.id_fase = ?" +
+            "       AND IND.id_rilevazione = ?";        // pleonastica
     
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
@@ -1912,6 +1952,40 @@ public interface Query extends Serializable {
             "   ,       ? " +       // autore ultima modifica
             "   ,       ? " +       // cod_misura
             "   ,       ? " +       // id_rilevazione
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di un indicatore di monitoraggio.</p>
+     */
+    public static final String INSERT_MEASURE_INDICATOR =
+            "INSERT INTO indicatoremonitoraggio" +
+            "   (   nome" +
+            "   ,   descrizione" +
+            "   ,   baseline" +
+            "   ,   databaseline" +
+            "   ,   target" +
+            "   ,   datatarget" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_fase" +
+            "   ,   id_tipo" +
+            "   ,   id_stato" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // nome
+            "   ,       ? " +       // descrizione
+            "   ,       ? " +       // baseline
+            "   ,       ? " +       // databaseline
+            "   ,       ? " +       // target
+            "   ,       ? " +       // datatarget         
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id fase
+            "   ,       ? " +       // id tipo
+            "   ,       ? " +       // id stato
+            "   ,       ? " +       // id rilevazione
             "          )" ;
     
     /* ********************************************************************** *
