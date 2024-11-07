@@ -33,10 +33,23 @@
                   <c:set var="color" value="bordo-bgcolor${status.index}" scope="page" />
                 </c:if>
                 <li class="list-group-item bordo ${color}"><c:out value="${fase.nome}" />
-                <div class="btn-group float-right">
-                <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="btn btn-primary" title="Aggiungi un indicatore alla misura &quot;${fn:substring(meas.nome, 0, 22)}...&quot; nel contesto della fase &quot;${fase.nome}&quot;">
-                  <small><i class="fa-solid fa-square-plus"></i> Indicatore</small>
-                </a>&nbsp;</div>
+                <c:choose>
+                <c:when test="${not empty fase.indicatore}">
+                  <div class="ico-func float-right">
+                    <strong>Indicatore: </strong>
+                    <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="" title="Visualizza dettagli indicatore">
+                      <c:out value="${fase.indicatore.nome}" />
+                    </a>&nbsp;
+                  </div>
+                </c:when>
+                <c:otherwise>
+                  <div class="btn-group ico-func float-right">
+                    <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="btn btn-primary" title="Aggiungi un indicatore alla misura &quot;${fn:substring(meas.nome, 0, 22)}...&quot; nel contesto della fase &quot;${fase.nome}&quot;">
+                      <small><i class="fa-solid fa-square-plus"></i> Indicatore</small>
+                    </a>&nbsp;
+                  </div>
+                </c:otherwise>
+                </c:choose>                
                 </li>
               </c:forEach>
               </ul>
