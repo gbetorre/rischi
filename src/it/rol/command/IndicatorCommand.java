@@ -66,6 +66,7 @@ import it.rol.Main;
 import it.rol.Query;
 import it.rol.SessionManager;
 import it.rol.Utils;
+import it.rol.bean.ActivityBean;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.ItemBean;
@@ -228,6 +229,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         PersonBean user = null;
         // Misura monitorata specifica
         MeasureBean measure = null;
+        // Fase specifica di una misura specifica
+        ActivityBean phase = null;
         // Elenco di misure di prevenzione monitorate
         ArrayList<MeasureBean> measures = null;
         // Elenco strutture collegate alla rilevazione
@@ -259,6 +262,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         String codeMis = parser.getStringParameter("mliv", DASH);
         // Recupera o inizializza 'id misurazione'
         String codeMon = parser.getStringParameter("nliv", DASH);
+        // Recupera o inizializza 'id fase di attuazione'
+        int idFas = parser.getIntParameter("idF", DEFAULT_ID);
         // Recupera o inizializza 'id indicatore'
         int idInd = parser.getIntParameter("idI", DEFAULT_ID);
         /* ******************************************************************** *
@@ -295,56 +300,43 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
                 loadParams(part, req, params);
-                /* @PostMapping */
+                /* ======================= @PostMapping ======================= */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
                         // Controlla quale richiesta deve gestire
                         if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              * PROCESS Form to INSERT Measure Monitoring Details*
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                             db.insertMeasureDetails(user, params);
                             // Prepara la redirect 
                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + 
                                        AMPERSAND + "p" + EQ + PART_MEASURES +
                                        AMPERSAND + "mliv" + EQ + codeMis + 
-                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;// +
-                                       //AMPERSAND + MESSAGE + EQ + "newMes";
-                        } else if (part.equalsIgnoreCase(PART_INSERT_M_R_P)) {
-                            /* ************************************************ *
-                             *   INSERT new relation between Risk and Measure   *
-                             * ************************************************ */
-                            // Controlla che non sia già presente l'associazione 
-                            boolean check = db.isMeasureRiskProcess(user, params, indicators);
-                            if (check) {  // Genera un errore
-                                // Duplicate key value violates unique constraint 
-                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + 
-                                           AMPERSAND + "p" + EQ + PART_INSERT_M_R_P +
-                                           AMPERSAND + "idR" + EQ + parser.getStringParameter("r-id", VOID_STRING) + 
-                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur +
-                                           AMPERSAND + MESSAGE + EQ + "dupKey";
-                            } else {
-                                // Inserisce nel DB nuova associazione tra rischio e misura
-                                db.insertMeasureRiskProcess(user, params);
-                                // Prepara la redirect 
-                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
-                                           AMPERSAND + "p" + EQ + PART_PROCESS +
-                                           AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
-                                           AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur +
-                                           AMPERSAND + MESSAGE + EQ + "newRel#rischi-fattori-misure";
-                            }
+                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                       //+AMPERSAND + MESSAGE + EQ + "newMes";
+                        } else if (part.equalsIgnoreCase(PART_INSERT_INDICATOR)) {
+                            /* ------------------------------------------------ *
+                             *         PROCESS Form to INSERT Indicator         *
+                             * ------------------------------------------------ */
+                            db.insertIndicatorMeasure(user, params);
+                            // Prepara la redirect 
+                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + 
+                                       AMPERSAND + "p" + EQ + PART_MEASURES +
+                                       AMPERSAND + "mliv" + EQ + codeMis + 
+                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                       //+AMPERSAND + MESSAGE + EQ + "newRel#rischi-fattori-misure";
                         }
                     } else {
                         // Azione di default
                         // do delete?
                     }
-                /* @GetMapping */
+                /* ======================== @GetMapping ======================= */
                 } else {
-                    /* ************************************************ *
-                     *               Manage Indicator Part              *
-                     * ************************************************ */
+                    /* ------------------------------------------------ *
+                     *                        Part                      *
+                     * ------------------------------------------------ */
                     if (nomeFile.containsKey(part)) {
                         // Recupera le breadcrumbs
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
@@ -352,18 +344,18 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                         if (part.equalsIgnoreCase(PART_MEASURES)) {
                             // Controlla la presenza dell'id di una misura
                             if (codeMis.equals(DASH)) {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              *      Elenco Misure raggruppate per struttura     *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                                 structs = db.getMeasuresByStructs(user, survey);
                                 // Aggiunge una foglia alle breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Misure-Struttura");
                                 // Imposta la pagina
                                 fileJspT = nomeFile.get(part);
                             } else {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              *             Dettagli misura monitorata           *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                                 // Recupera la misura di prevenzione/mitigazione
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Recupera i rischi cui è associata
@@ -386,16 +378,16 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              *  Ramo pagina visualizzazione/modifica indicatore *
                              * ************************************************ */
                             } else {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              *        Ramo elenco indicatori di una misura      *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                                 // Imposta la pagina
                                 fileJspT = nomeFile.get(part);
                             }
                         } else if (part.equalsIgnoreCase(PART_MONITOR)) {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              * Ramo elenco misurazioni di una misura monitorata *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                             // Imposta la pagina
                             fileJspT = nomeFile.get(part);
                             /* ************************************************ *
@@ -404,9 +396,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             
                             
                         } else if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              * Form aggiunta dettagli monitoraggio a una misura *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                             if (!codeMis.equals(DASH)) {
                                 // Recupera la misura di prevenzione/mitigazione
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
@@ -428,9 +420,11 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              *  Pagina riepilogo dettagli monitoraggio inseriti *
                              * ************************************************ */
                         } else if (part.equalsIgnoreCase(PART_INSERT_INDICATOR)) {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              *           Inserimento nuovo indicatore           *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
+                            // Recupera la fase cui si vuol aggiungere l'indicatore
+                            phase = db.getMeasureActivity(user, codeMis, idFas, survey);
                             // Pagina
                             fileJspT = nomeFile.get(part);
                         //} else if (part.equalsIgnoreCase(VOID_STRING)) {
@@ -441,9 +435,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                         }
 
                     } else {
-                        /* ************************************************ *
+                        /* ------------------------------------------------ *
                          *            SELECT a Specific Indicator           *
-                         * ************************************************ */
+                         * ------------------------------------------------ */
                         if (!codeMis.equals(DASH)) {
                             /* Recupera la misura di prevenzione/mitigazione
                             measure = db.getMeasures(user, codeMis, NOTHING, survey).get(NOTHING);
@@ -453,9 +447,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), "Misura");*/
                             fileJspT = nomeFileDettaglio;
                         } else {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              *   Ramo elenco solo misure monitorate (Registro)  *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                             measures = MeasureCommand.filter(db.getMeasures(user, VOID_SQL_STRING, Query.GET_ALL_BY_CLAUSE, survey));
                             tP = "Registro delle misure monitorate";
                             fileJspT = nomeFileElenco;
@@ -514,6 +508,10 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         if (risksByMeasure != null) {
             req.setAttribute("rischi", risksByMeasure);
         }
+        // Imposta nella request specifica fase di attuazione di una misura
+        if (phase != null) {
+            req.setAttribute("fase", phase);
+        }
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
@@ -560,6 +558,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                    AttributoNonValorizzatoException {
         LinkedHashMap<String, String> survey = new LinkedHashMap<>();
         LinkedHashMap<String, String> measure = new LinkedHashMap<>();
+        LinkedHashMap<String, String> indicator = null;
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
         /* **************************************************** *
@@ -580,37 +579,32 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
             GregorianCalendar date = Utils.getCurrentDate();
             String dateAsString = Utils.format(date, DATA_SQL_PATTERN);
-            measure.put("code",  parser.getStringParameter("ms-code", VOID_STRING));
-            measure.put("data",  dateAsString);            
-            measure.put("piao",  parser.getStringParameter("ms-piao", VOID_STRING));
+            measure.put("code",         parser.getStringParameter("ms-code", VOID_STRING));
+            measure.put("data",         dateAsString);            
+            measure.put("piao",         parser.getStringParameter("ms-piao", VOID_STRING));
             // Fasi di attuazione (Array)
             String[] fasi = req.getParameterValues("ms-fasi");
             // Aggiunge tutte le fasi di attuazione trovate
             decantStructures("fase", fasi, measure);
             // Aggiunge i dettagli monitoraggio al dizionario dei parametri
             formParams.put(part, measure);
-        }        
-        
+        }
         /* **************************************************** *
          *       Ramo di INSERT / UPDATE di un Indicatore       *
-         * **************************************************** *
-        else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT) || part.equalsIgnoreCase(Query.MODIFY_PART)) {
+         * **************************************************** */
+        else if (part.equalsIgnoreCase(PART_INSERT_INDICATOR) /*|| part.equalsIgnoreCase(Query.MODIFY_PART)*/ ) {
+            indicator = new LinkedHashMap<>();            
             GregorianCalendar date = Utils.getUnixEpoch();
             String dateAsString = Utils.format(date, DATA_SQL_PATTERN);
-            HashMap<String, String> ind = new HashMap<String, String>();
-            ind.put("ind-id",           parser.getStringParameter("ind-id", VOID_STRING));
-            ind.put("ind-nome",         parser.getStringParameter("ind-nome", VOID_STRING));
-            ind.put("ind-descr",        parser.getStringParameter("ind-descr", VOID_STRING));
-            ind.put("ind-baseline",     parser.getStringParameter("ind-baseline", VOID_STRING));
-            ind.put("ind-database",     parser.getStringParameter("ind-database", dateAsString));
-            ind.put("ind-annobase",     parser.getStringParameter("ind-annobase", VOID_STRING));
-            ind.put("ind-target",       parser.getStringParameter("ind-target", VOID_STRING));
-            ind.put("ind-datatarget",   parser.getStringParameter("ind-datatarget", dateAsString));
-            ind.put("ind-annotarget",   parser.getStringParameter("ind-annotarget",  VOID_STRING));
-            ind.put("ind-tipo",         parser.getStringParameter("ind-tipo", VOID_STRING));
-            ind.put("ind-wbs",          parser.getStringParameter("ind-wbs", VOID_STRING));
-            formParams.put(Query.ADD_TO_PROJECT, ind);
-            formParams.put(Query.MODIFY_PART, ind);
+            indicator.put("fase",       parser.getStringParameter("ind-fase",       VOID_STRING));
+            indicator.put("tipo",       parser.getStringParameter("ind-tipo",       VOID_STRING));
+            indicator.put("nome",       parser.getStringParameter("ind-nome",       VOID_STRING));
+            indicator.put("desc",       parser.getStringParameter("ind-descr",      VOID_STRING));
+            indicator.put("base",       parser.getStringParameter("ind-baseline",   VOID_STRING));
+            indicator.put("database",   parser.getStringParameter("ind-database",   dateAsString));
+            indicator.put("targ",       parser.getStringParameter("ind-target",     VOID_STRING));
+            indicator.put("datatarg",   parser.getStringParameter("ind-datatarget", dateAsString));
+            formParams.put(part, indicator);
         }
         /* **************************************************** *
          *  Ramo di INSERT di una misurazione su un Indicatore  *
