@@ -1,15 +1,28 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *     cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *     alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *     che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *     proposte sono state effettivamente attuate dai soggetti interessati
+ *     alla gestione dei processi a rischio e stabilire quantitativamente 
+ *     in che grado questa attuazione di misure abbia effettivamente ridotto 
+ *     i livelli di rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *     which proposed mitigation measures were then actually implemented 
+ *     and quantify how much that implementation of measures actually 
+ *     reduced risk levels.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -107,6 +120,8 @@ public class ActivityBean extends CodeBean {
     private int idStato;
     /** Stato esatto in cui si trova l'attivit&agrave; */
     private CodeBean stato;
+    /** Indicatore di monitoraggio collegato alla fase di attuazione della misura */
+    private IndicatorBean indicatore;
     
     
     /**
@@ -122,6 +137,7 @@ public class ActivityBean extends CodeBean {
     	soggetti = null;
     	idComplessita = idStato = -2;
     	stato = null;
+    	indicatore = null;
     }
     
     
@@ -588,7 +604,32 @@ public class ActivityBean extends CodeBean {
      */
     public void setStato(CodeBean stato) {
         this.stato = stato;
+    }
+    
+    
+    /* ********************************************************* *
+     *          Metodi getter e setter per l'indicatore          *
+     * ********************************************************* */
+
+    /**
+     * <p>Restituisce l'eventuale indicatore di monitoraggio collegato alla
+     * fase di attuazione di una misura.</p>
+     * 
+     * @return <code>IndicatorBean</code> - l'indicatore
+     */
+    public IndicatorBean getIndicatore() {
+        return indicatore;
+    }
+
+    /**
+     * <p>Imposta l'eventuale indicatore di monitoraggio collegato alla
+     * fase corrente nel contesto di una certa misura di mitigazione 
+     * monitorata.</p>
+     * 
+     * @param indicatore - l'indicatore da impostare
+     */
+    public void setIndicatore(IndicatorBean indicatore) {
+        this.indicatore = indicatore;
     }   
 
-    
 }
