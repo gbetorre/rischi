@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<c:set var="fase" value="${requestScope.fase}" scope="page" />
+<c:set var="fase" value="${requestScope.phase}" scope="page" />
 <c:set var="tipi" value="${requestScope.types}" scope="page" />
 <c:catch var="exception">
     <style>
@@ -14,6 +14,7 @@
         }
     </style>
     <form accept-charset="ISO-8859-1" id="ind-form" class="panel subfields-green" action="" method="post">
+      <input type="hidden" id="ind-fase" name="ind-fase" value="${fase.id}" />
       <div class="panel-heading bgAct15">
         <div class="noHeader">
           <i class="fa-solid fa-pen-ruler"></i>&nbsp;
@@ -23,22 +24,9 @@
       <hr class="separatore" />
       <div class="panel-body">
         <div class="row"> 
-          <div class="content-holder col-sm-10">
-            <div class="column">
-              <div class=""><strong> &nbsp;Fase Indicatore</strong></div>
-              <div class="text-center"><div id="custom-error-location"></div></div>
-            </div>
-            <div class="row">
-              <div class="text-center"><c:out value="${fase.nome}" /></div>
-            </div>
-          </div>
-        </div>
-        <hr class="separatore">
-        <div class="row">
-          <div class="col-sm-1">&nbsp;</div>
-          <div class="col-sm-4 mandatory-thin bgAct13"><strong>Nome Indicatore</strong></div>
-          <div class="col-sm-6">
-            <input type="text" class="form-control" id="ind-nome" name="ind-nome" placeholder="Inserisci nome dell'indicatore">
+          <div class="content-holder col-sm-10 bgAct">
+            <strong> &nbsp;Fase Indicatore:</strong> 
+            <c:out value="${fase.nome}" escapeXml="false" />
           </div>
         </div>
         <hr class="separatore">
@@ -58,6 +46,14 @@
                 <option value="${tipo.id}" ${selected}>${tipo.nome}</option>
               </c:forEach>
             </select>
+          </div>
+        </div>
+        <hr class="separatore">
+        <div class="row">
+          <div class="col-sm-1">&nbsp;</div>
+          <div class="col-sm-4 mandatory-thin bgAct13"><strong>Nome Indicatore</strong></div>
+          <div class="col-sm-6">
+            <input type="text" class="form-control" id="ind-nome" name="ind-nome" placeholder="Inserisci nome dell'indicatore">
           </div>
         </div>
         <hr class="separatore">
@@ -100,18 +96,9 @@
             <input type="text" class="form-control calendarData" id="ind-datatarget" name="ind-datatarget" placeholder="Inserisci data target">
           </div>
         </div>
-        <hr class="separatore">
-        <div class="row">
-          <div class="col-sm-5">
-            <a id="btnBack" class="btn btnNav" onclick="goBack()"><i class="fas fa-chevron-left"></i> Indietro</a>
-            <a href="<c:out value="${ind}${requestScope.progetto.id}&v=o" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-ruler"></i> Indicatori</a>
-          </div>
-          <div class="col-sm-5">          
-          </div>
-        </div>
         <hr class="separatore" />
         <div class="centerlayout">
-          <button type="submit" class="btn btnNav"" id="btn-save" value="Save">
+          <button type="submit" class="btn btnNav" id="btn-save" value="Save">
             <i class="far fa-save"></i> Salva
           </button>
         </div>
