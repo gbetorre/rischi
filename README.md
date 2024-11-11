@@ -238,6 +238,7 @@ in the case of the current application, in fact, version numbers have only the s
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)</p>
 <cite>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</cite>
 
+- [2.0.7] (11/11/2024) Implementation of page containing list of indicators regarding a monitored measure
 - [2.0.6] (07/11/2024) Added facility to insert monitoring indicator
 - [2.0.5] (05/11/2024) Added page containing form to add an indicator for monitoring; bug fix
 - [2.0.4] (31/10/2024) Presentation improvements (buttons, labels, colours)
