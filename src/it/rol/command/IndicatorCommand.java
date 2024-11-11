@@ -381,6 +381,15 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             /* ------------------------------------------------ *
                              *        Ramo elenco indicatori di una misura      *
                              * ------------------------------------------------ */
+                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                // Url da sostituire al posto di quello di una breadcrumb esistente
+                                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + AMPERSAND + "p" + EQ + PART_MEASURES + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
+                                // Preparazione nuova breadcrumb per puntare sulla command delle misure
+                                ItemBean crumb = new ItemBean("Monitoraggio", "Monitoraggio", url, SUB_MENU);
+                                // Sostituzione di una breadcrumb esistente con la nuova
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
+                                // Aggiunta inoltre di una foglia
+                                bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Indicatori");
                                 // Imposta la pagina
                                 fileJspT = nomeFile.get(part);
                             }
