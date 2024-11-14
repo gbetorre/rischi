@@ -51,7 +51,7 @@
 <!-- TABLE OF CONTENTS -->
 <!-- Insert TOC here -->
 
-# Rischi
+# Software di Mappatura dei Rischi corruttivi [RMS]
 L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti, Pubbliche Amministrazioni e aziende partecipate <strong style="color:maroon;">a quantificare automaticamente i rischi corruttivi</strong> cui i loro processi organizzativi sono esposti e ad indirizzare questi soggetti a mettere in atto le contromisure adeguate.
 
 [![Product Landing Page][product-landing2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png)
@@ -104,9 +104,10 @@ Incrociando i valori ottenuti negli indicatori di probabilit&agrave; (P) con que
 
 Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le azioni organizzative da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
 
-## Come funziona il software
+# Come funziona il software
 Ovviamente l'applicazione Rischi On Line (ROL) si appoggia su un database, specificamente un database relazionale di tipo PostgreSQL (versione 12 e successive), in cui sono popolati i quesiti che verranno sottoposti alle strutture nelle interviste.
 
+## Fase 1: individuazione del contesto (mappatura organizzativa)
 In una prima fase viene effettuato il caricamento delle strutture organizzative (organigramma) e quello dei processi organizzativi che vengono prodotti dalle strutture stesse.
 
 Questi caricamenti nel database possono essere effettuati tramite query di inserimento generate automaticamente o tramite ETL ma, allo studio, vi &egrave; una modalit&agrave; di caricamento massivo tramite l'upload di file formattati opportunamente.
@@ -131,17 +132,29 @@ Inoltre, per ogni processo viene fornita una pagina di dettaglio, contenente, ol
 <br>
 <strong>*Fig.9 - Esempio di pagina di dettaglio di un processo censito a fini anticorruttivi*</strong>
 
-Dopo aver popolato il database con le strutture, i macroprocessi e i loro sottolivelli, si pu&ograve; passare alla fase dell'intervista, che consiste nel rivolgere una serie di quesiti ad una serie di specifiche strutture che presiedono uno specifico processo. La batteria di quesiti &egrave; ampia (pi&uacute; di 150) ma la decisione circa quali quesiti somministrare pu&ograve; essere stabilita di volta in volta dall'intervistatore, nel senso che tutti i quesiti sono facoltativi e vi sono quesiti pi&uacute; generici, che probabilmente ha senso rivolgere in ogni intervista, e quesiti pi&uacute; specifici, che ha senso somministrare soltanto se si sta prendendo in esame processi molto peculiari. I quesiti sono raggruppati in ambiti di analisi e nel caso di alcune strutture potrebbe anche aver senso omettere i quesiti di interi ambiti di analisi.
+## Fase 2: calcolo del rischio (interviste e indicatori)
+Dopo aver popolato il database con le strutture, i macroprocessi e i loro sottolivelli, si pu&ograve; passare alla fase <cite>delle interviste</cite>, che consiste nel rivolgere una serie di quesiti ad una serie di specifiche strutture che presiedono uno specifico processo. 
+
+La batteria di quesiti &egrave; ampia (pi&uacute; di 150) ma la decisione circa quali quesiti somministrare pu&ograve; essere stabilita di volta in volta dall'intervistatore, nel senso che tutti i quesiti sono facoltativi e vi sono quesiti pi&uacute; generici, che probabilmente ha senso rivolgere in ogni intervista, e quesiti pi&uacute; specifici, che ha senso somministrare soltanto se si sta prendendo in esame processi molto peculiari. 
+I quesiti sono raggruppati in <strong>ambiti di analisi</strong> e, nel caso di alcune strutture, potrebbe anche aver senso omettere i quesiti di interi ambiti di analisi.
+[![Question domains sample][question-domains]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/questions-domains.png)
+<br>
+<strong>*Fig.10 - Esempio di raggruppamenti di quesiti in ambiti di analisi*</strong>
 
 Le risposte vengono poi utilizzate per ottenere il valore di una serie di indicatori, come accennato in precedenza.<br>
-Tutti gli indicatori, tranne uno, dipendono dalle risposte ai quesiti, nel senso che il valore ottenuto nell'indicatore viene calcolato tramite un algoritmo che tiene conto delle risposte ottenute.
+[![PxI analytical dashboard][dashboard-risk]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-pxi.png)
+<br>
+<strong>*Fig.11 - Il cruscotto degli indicatori permette di consultare non solo il valore del PxI di ogni processo ma anche i valori di tutte le dimensioni e gli indicatori in base ai quali questo indice sintetico &egrave; stato calcolato*</strong>
+
+<strong>Il calcolo dei valori di tutti gli indicatori e dello stesso indice PxI di ogni processo &egrave; automatizzato</strong> nel senso che, nel momento in cui l'intervista viene salvata, in automatico viene processato il calcolo del valore di tutti gli indicatori e del PxI.
+Tutti gli indicatori &ndash; tranne uno &ndash; dipendono infatti dalle risposte ai quesiti, nel senso che il valore ottenuto nell'indicatore viene calcolato tramite un algoritmo che tiene conto delle risposte ottenute.
 Vi &egrave; soltanto un indicatore di impatto che non dipende dai quesiti ma dal numero e dalla tipologia di strutture coinvolte nel processo misurato.
 
 Gli algoritmi di calcolo degli indicatori sono tutti diversi tra loro.
 <br><br>
 [![Product Algorithm][product-algorithm]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png)
 <br>
-<strong>*Fig.10 - Esempio (semplificato) del flowchart dell'algoritmo di calcolo di uno specifico indicatore di probabilit&agrave; (P3: analisi/valutazione delle segnalazioni ricevute)*</strong><br><br>
+<strong>*Fig.12 - Esempio (semplificato) del flowchart dell'algoritmo di calcolo di uno specifico indicatore di probabilit&agrave; (P3: analisi/valutazione delle segnalazioni ricevute)*</strong><br><br>
 
 Come accennato nel paragrafo precedente, tramite ulteriori algoritmi vengono incrociati tutti i valori ottenuti negli indicatori di probabilit&agrave; (indice globale di probabilit&agrave; P) e tutti i valori ottenuti negli indicatori di impatto (indice globale di impatto I).
 
@@ -149,9 +162,81 @@ Infine, tramite una classica tabella della Quantitative Risk Analysis, viene cal
 
 [![PxI][pxi]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/PxI.png)
 <br>
-<strong>*Fig.11 - Tabella di decisione dell’algoritmo per il calcolo del PxI, con i 9 valori possibili derivanti dalle disposizioni con ripetizione D'(3,2) = 3<sup>2</sup> dei 3 valori possibili del P e dei 3 valori possibili di I.*</strong>
+<strong>*Fig.13 - Tabella di decisione dell’algoritmo per il calcolo del PxI, con i 9 valori possibili derivanti dalle disposizioni con ripetizione D'(3,2) = 3<sup>2</sup> dei 3 valori possibili del P e dei 3 valori possibili di I.*</strong>
 
-## Sviluppi futuri
+&Egrave; importante sottolineare che una feature del software consiste dunque nell'automazione del calcolo degli indicatori e del PxI: &egrave; sufficiente effettuare le interviste per far s&iacute; che il software pensi al resto.
+
+##Fase 3: trattamento del rischio (misure di mitigazione, stima)
+Ottenere una visione complessiva sul livello di rischio cui ogni processo organizzativo censito risulta esposto costituisce un buon punto di partenza per poter stabilire quali misure di mitigazione/prevenzione del rischio corruttivo &egrave; opportuno applicare ai rischi stessi.
+
+[![PxI concise dashboard][dashboard-risk2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-pxi.png)
+<br>
+<strong>*Fig.14 - La tabella del PxI totalizzato da ogni processo fornisce una visione d'insieme sui livelli di rischio cui sono esposti i processi organizzativi*</strong>
+
+Le misure di mitigazione del rischio corruttivo corrispondono ad azioni atte a:<ul> 
+<li>contenere</li>
+<li>calmierare</li>
+<li>mitigare</li>
+<li>prevenire</li>
+<li>trattare</li>
+<li>ridurre</li> 
+</ul>il rischio corruttivo, a seconda della tipologia e dello scopo della misura stessa.
+Senza entrare nei dettagli dell'entit&agrave; misura, i cui attributi e riferimenti vengono approfonditi nell'<a href="#readme-contact">analisi dei requisiti</a>, basti tener conto che la misura di mitigazione &egrave; un oggetto complesso, avente uno o pi&uacute; tipologie, parecchie relazioni con le strutture organizzative e una serie di propriet&agrave; specifiche (la sostenibilit&agrave; economica, il carattere, 
+
+[![Form to insert new measure][add-measure]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure.png)
+<br>
+<strong>*Fig.15 - La maschera per inserire una nuova misura di mitigazione del rischio corruttivo*</strong>
+
+In un primo step, quindi, l'ufficio &ndash; o l'esperto &ndash; anticorruzione si occupa di censire tutte le varie misure che ritiene opportuno suggerire, andando a costituire un registro delle misure.
+[![List of inserted measure][list-measures]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-measures.png)
+<br>
+<strong>*Fig.16 - Il registro delle misure di mitigazione del rischio corruttivo*</strong>
+
+Dopo aver costituito questa lista di misure applicabili, il problema di chi si occupa di anticorruzione &egrave; andare a individuare quale o quali misure applicare a quale specifico rischio di quale specifico processo.
+La granularit&agrave; delle associazioni tra processo e misura &egrave; infatti relativamente fine e per essere rappresentata ha bisogno di una relazione ternaria.
+[![Schema ER measure (part)][schema-measure]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-measure.png)
+<br>
+<strong>*Fig.17 - Parte del diagramma ER per la rappresentazione delle misure*</strong>
+
+Quello che accade in pratica, quindi, &egrave; che, partendo dall'analisi dei livelli di rischio cui sono esposti i processi (fotografata dalla dashboard dei PxI) l'esperto decide che &egrave; opportuno che l'organizzazione metta in atto opportune misure.
+
+Quali misure, per&ograve;, scegliere, tra le varie misure possibili? Ovvero: come individuare le misure migliori per ogni rischio di ogni dato processo?
+Qui viene in aiuto il sistema ROL-RMS: uno dei vantaggi offerti dal software su questo versante, &egrave; il fatto che il sistema stesso suggerisce quali misure applicare a ciascun rischio nel contesto di ogni processo. 
+
+Le misure di mitigazione, infatti, tramite la tipologia hanno un'associazione con il fattore abilitante e questa relazione rende possibile individuare il contesto di applicazione delle misure stesse in funzione del rischio e del processo.
+
+Una volta applicate le misure, &egrave; possibile verificare come variano i livelli di rischio attraverso la consultazione di appositi cruscotti, che mettono a confronto il PxI prima e dopo l'applicazione della misura.
+
+##Fase 4: certificazione del rischio (misure di mitigazione, monitoraggio)
+La fase di applicazione delle misure, appena vista, &egrave; per&ograve; soltanto una <cite>stima</cite> della misura in cui il rischio pu&ograve; essere ridotto <cite>se</cite> le misure proposte vengono applicate.
+La fase di monitoraggio, che conclude il ciclo di gestione del rischio corruttivo, consiste nel verificare se le misure proposte sono poi state effettivamente applicate.
+
+Naturalmente, il software offre specifici strumenti analitici per verificare in che misura &egrave; cambiato il livello di rischio in funzione dell'applicazione ipotetica e di quella effettiva delle misure di mitigazione.
+Semplificando, alla fine della fase di monitoraggio verranno ottenuti alcuni report con 3 colonne:
+* il livello del PxI iniziale
+* il livello del PxI dopo l'applicazione delle misure di mitigazione (stima)
+* il livello del PxI dopo la verifica delle misure effettivamente applicate (monitoraggio)
+
+Questo tipo di report conclude il ciclo di gestione del rischio e costituisce la certificazione dei livelli di rischio prodotta dall'esperto/ufficio anticorruzione.
+
+###Misura e misurazione
+Diamo un'occhiata pi&uacute; in dettaglio alla fase di monitoraggio.
+
+Quest'ultima fase del ciclo di gestione del rischio corruttivo, cio&egrave; appunto la fase di monitoraggio, consiste quindi nel consultare le strutture che avevano in carico i processi per verificare se effettivamente le misure proposte sono state applicate.
+
+Per poter procedere anche su questo versante in modo scientifico, evitando che la verifica si riduca a una banale telefonata alla struttura incaricata chiedendo se le misure sono state messe in atto (semplice flag SI/NO), &egrave; stata realizzata un'impalcatura di entit&agrave; pi&uacute; articolata, non per complicare inutilmente il modello, ma piuttosto per ottenere un riscontro puntuale in merito alle singole azioni effettuate.
+
+Distinguiamo, quindi, tra misura e misura monitorata; quest'ultima &egrave, una <code>is a</code> della misura, che contiene al suo interno i dettagli necessari al monitoraggio della misura stessa, ovvero necessari a stabilire se la misura sia o meno stata applicata.
+[![Schema ER monitoring (part)][schema-monitor]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-monitoring.png)
+<br>
+<strong>*Fig.18 - Parte del diagramma ER per la rappresentazione della misura monitorata ed entit&agrave; relative*</strong>
+
+Oltre alla  misura monitorata, sono stati sviluppati gli oggetti indicatore e misurazione; quest'ultima non va confusa con la misura!
+La misura &egrave; una rappresentazione delle azioni correttive da realizzare per abbassare il livello di rischio.
+La misurazione &egrave; invece una verifica applicata a un indicatore di monitoraggio che consiste nel registrare se effettivamente le azioni correttive sono state messe in atto; &egrave; quindi in certo qual modo &egrave; un epifenomeno della misura.
+Un indicatore di monitoraggio, infine, &egrave; un oggetto completamente distinto dall'indicatore di probabilit&agrave; o di impatto visto nelle fasi precedenti: esso consta di una baseline e di un target e rappresenta il criterio cui si applica la misurazione.
+
+# Sviluppi futuri
 Allo stato attuale il software &egrave; gi&agrave; pronto per essere adattato,
 con un minimo adeguamento, a qualunque realt&agrave; organizzativa che voglia
 effettuare un'analisi dettagliata dei rischi corruttivi cui i processi erogati
@@ -273,9 +358,10 @@ Distribuito nei termini della licenza GNU GPL-2.0 License. Consulta <a href="htt
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
+<a name="readme-contact"></a>
 <!-- CONTACT -->
 ## Contatti
+Per approfondire ed ottenere accesso al documento di analisi dei requisiti, <a href="mailto:gianroberto.torre@gmail.com">contattare l'autore</a>.
 
 Software Engineer: Giovanroberto Torre - [@GianroTorres](https://twitter.com/GianroTorres) - gianroberto.torre@gmail.com
 
@@ -327,11 +413,12 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [2.9.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [2.9.4] Implementata form di ricerca sui quesiti per chiave testuale
 - ...
-
+- [2.0.8] (18/11/2024) Implementati controlli lato client in form di aggiunta indicatore di monitoraggio
 
 
 ### Done
 -->
+
 - [2.0.7] (11/11/2024) Implementata pagina elenco indicatori di una misura monitorata
 - [2.0.6] (07/11/2024) Implementata funzionalit&agrave; di inserimento indicatore di monitoraggio 
 - [2.0.5] (05/11/2024) Aggiunta pagina contenente form per inserire un nuovo indicatore di monitoraggio; correzione di bug
@@ -459,6 +546,14 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [indicator-sample02]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample02.png
 [indicator-sample03]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample03.png
 [pxi]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/PxI.PNG
+[question-domains]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/questions-domains.png
+[dashboard-risk]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-pxi.png
+[dashboard-risk2]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-pxi.png
+[dashboard-risk3]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-overwiev-pxi.png
+[add-measure]:      https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure.png
+[list-measures]:    https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-measures.png
+[schema-measure]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-measure.png
+[schema-monitor]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-monitoring.png
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/othneildrew/Best-README-Template/issues
 [license-shield]: https://img.shields.io/badge/license-GPL-blue
