@@ -166,7 +166,7 @@ Infine, tramite una classica tabella della Quantitative Risk Analysis, viene cal
 
 &Egrave; importante sottolineare che una feature del software consiste dunque nell'automazione del calcolo degli indicatori e del PxI: &egrave; sufficiente effettuare le interviste per far s&iacute; che il software pensi al resto.
 
-##Fase 3: trattamento del rischio (misure di mitigazione, stima)
+## Fase 3: trattamento del rischio (misure di mitigazione, stima)
 Ottenere una visione complessiva sul livello di rischio cui ogni processo organizzativo censito risulta esposto costituisce un buon punto di partenza per poter stabilire quali misure di mitigazione/prevenzione del rischio corruttivo &egrave; opportuno applicare ai rischi stessi.
 
 [![PxI concise dashboard][dashboard-risk2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-pxi.png)
@@ -207,7 +207,7 @@ Le misure di mitigazione, infatti, tramite la tipologia hanno un'associazione co
 
 Una volta applicate le misure, &egrave; possibile verificare come variano i livelli di rischio attraverso la consultazione di appositi cruscotti, che mettono a confronto il PxI prima e dopo l'applicazione della misura.
 
-##Fase 4: certificazione del rischio (misure di mitigazione, monitoraggio)
+## Fase 4: certificazione del rischio (misure di mitigazione, monitoraggio)
 La fase di applicazione delle misure, appena vista, &egrave; per&ograve; soltanto una <cite>stima</cite> della misura in cui il rischio pu&ograve; essere ridotto <cite>se</cite> le misure proposte vengono applicate.
 La fase di monitoraggio, che conclude il ciclo di gestione del rischio corruttivo, consiste nel verificare se le misure proposte sono poi state effettivamente applicate.
 
