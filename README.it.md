@@ -235,12 +235,12 @@ La fase di monitoraggio, che conclude il ciclo di gestione del rischio corruttiv
 <br>
 <strong>*Fig.21 - Pagina iniziale monitoraggio.*</strong>
 
-Naturalmente, dal momento che dispone di una serie di cruscotti e report on-demand, 
+Dal momento che dispone di una serie di cruscotti e report on-demand:
 > <strong>il software offre anche specifici strumenti analitici per verificare in che misura &egrave; cambiato il livello di rischio non solo in funzione dell'applicazione ipotetica, ma anche di quella effettiva delle misure di mitigazione.</strong>
 
 Semplificando, alla fine della fase di monitoraggio verranno ottenuti alcuni report con 3 colonne:
 * <strong>il livello del PxI iniziale:</strong> determinato in base alle risposte ai quesiti date dalle strutture intervistate;
-* <strong>il livello del PxI intermedio:</strong> calcolato in base all'applicazione delle misure di mitigazione (stima)
+* <strong>il livello del PxI intermedio:</strong> calcolato in base all'ipotetica applicazione delle misure di mitigazione (stima)
 * <strong>il livello del PxI finale:</strong> ricalibrato dopo aver verificato quali delle misure richieste siano state effettivamente applicate (monitoraggio).
 
 Questo tipo di report conclude il ciclo di gestione del rischio e costituisce la certificazione dei livelli di rischio prodotta dall'esperto/ufficio anticorruzione.
@@ -289,7 +289,15 @@ Su un indicatore di monitoraggio vengono applicate una o pi&ugrave; misurazioni;
 La misurazone &egrave; quindi, in certo qual modo, un epifenomeno della misura.<br>
 
 # Sviluppi futuri
-Allo stato attuale il software &egrave; gi&agrave; pronto per essere adattato,
+Tre delle funzioni attualmente implementate nel software ROL-RMS, ovvero:
+
+* il calcolo del rischio esistente, 
+* il suggerimento circa le misure di mitigazione da applicare al rischio esistente,
+* la produzione di tabelle comparative per consultare come varia il rischio in funzione delle misure ipotetiche e di quelle applicate,
+
+costituiscono strumenti utili (tools), che possono costituire un valido aiuto per l'ufficio o l'esperto del rischio corruttivo che devono effettuare un assessment relativamente a questi aspetti nel contesto di un'organizzazione.<br>
+
+Allo stato attuale (versione di riferimento: <code>2.0.8</code>) il software &egrave; gi&agrave; pronto per essere adattato,
 con un minimo adeguamento, a qualunque realt&agrave; organizzativa che voglia
 effettuare un'analisi dettagliata dei rischi corruttivi cui i processi erogati
 dall'organizzazione stessa sono esposti.
@@ -308,7 +316,7 @@ affinch&eacute; sia possibile iniziare la campagna di interviste e, conseguentem
 
 Vi sono, inoltre, alcune possibili evoluzioni, che potrebbero essere implementate in versioni successive:
 * Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentire loro di compilare autonomamente le risposte ai quesiti (certificando, automaticamente, i dati inseriti)
-* Predisposizione di monitoraggi e reportistica per consentire alla <em>governance</em> di effettuare controlli sugli stati di avanzamento e sui risultati raggiunti tramite il progetto di mappatura dei rischi
+* Predisposizione di monitoraggi e reportistica, anche in forma grafica (istogrammi, grafici a torta, etc.), per consentire alla <em>governance</em> di effettuare controlli sugli stati di avanzamento e sui risultati raggiunti tramite il progetto di mappatura dei rischi
 * Predisposizione di appositi strumenti di ricerca per consentire all'ufficio trasparenza di ottenere query analitiche sulle interviste effettuate.
 
 <br>
