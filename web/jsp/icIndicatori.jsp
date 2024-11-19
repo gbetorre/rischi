@@ -44,7 +44,7 @@
           <td scope="row" id="nameColumn" class="success bgAct${fase.indicatore.tipo.id} bgFade ico-func">
           <c:choose>
           <c:when test="${not empty fase.indicatore}">
-            <a href="" title="Modificato:${lastModified} ${fn:substring(fase.indicatore.oraUltimaModifica,0,5)}">
+            <a href="${initParam.appName}/?q=ic&p=ind&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Modificato:${lastModified} ${fn:substring(fase.indicatore.oraUltimaModifica,0,5)}">
               <c:out value="${fase.indicatore.nome}"/>
             </a>
           </c:when>
