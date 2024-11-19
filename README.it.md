@@ -108,7 +108,7 @@ Ovviamente l'applicazione Rischi On Line: Risk Mapping Software (ROL-RMS) si app
 <strong>*Fig.7 - Rappresentazione grafica delle entit&agrave; e relazioni dello schema, Layout: Circular (powered by yFiles)*</strong>
 <br><br>
 
-## Fase 1: individuazione del contesto (mappatura organizzativa)
+## Step 1: Individuazione del contesto (mappatura organizzativa)
 In una prima fase viene effettuato il caricamento delle strutture organizzative (organigramma) e quello dei processi organizzativi che vengono prodotti dalle strutture stesse.
 
 Questi caricamenti nel database possono essere effettuati tramite query di inserimento generate automaticamente o tramite ETL ma, allo studio, vi &egrave; una modalit&agrave; di caricamento massivo tramite l'upload di file formattati opportunamente.
@@ -127,13 +127,13 @@ Ogni processo o sottoprocesso (ma non il macroprocesso) pu&ograve; essere a sua 
 
 Il software prevede apposite funzionalit&agrave; di navigazione nell'albero dei macroprocessi ed in quello dell'organigramma (cfr. <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png">Fig. 8</a> e <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png">9</a>), in modo da verificare rapidamente che la mappatura corrisponda a quanto effettivamente presente nell'organizzazione.
 
-Inoltre, per ogni processo viene fornita una pagina di dettaglio, contenente, oltre al livello di rischio cui il processo &egrave; esposto (informazione di grande interesse dato lo scopo del software), anche tutte le altre informazioni aggregate che riguardano il processo stesso, tra cui: gli input, le fasi, gli output, i rischi ed i fattori abilitanti.
+Inoltre, per ogni processo viene fornita una pagina di dettaglio, contenente, oltre ai rischi ed ai livelli di rischio cui il processo &egrave; esposto (informazione di grande interesse dato lo scopo del software), anche tutte le altre informazioni aggregate che riguardano il processo stesso, tra cui: gli input, le fasi, gli output, i rischi ed i fattori abilitanti.
 
 [![Product Sample Process][process-29]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-29.png)
 <br>
-<strong>*Fig.10 - Esempio di pagina di dettaglio di un processo censito a fini anticorruttivi ma non ancora investigato tramite intervista*</strong>
+<strong>*Fig.10 - Esempio di pagina di dettaglio di un processo censito a fini anticorruttivi ma non ancora investigato tramite intervista &ndash; per il quale, quindi, non &egrave; stato ancora possibile determinare i livelli di rischio*</strong>
 
-## Fase 2: calcolo del rischio (interviste e indicatori)
+## Step 2: Calcolo del rischio (interviste e indicatori di rischio)
 Dopo aver popolato il database con le strutture, i macroprocessi e i loro sottolivelli, si pu&ograve; passare alla fase <cite>delle interviste</cite>, che consiste nel rivolgere una serie di quesiti ad una serie di specifiche strutture che presiedono uno specifico processo. 
 
 La batteria di quesiti &egrave; ampia (pi&uacute; di 150) ma la decisione circa quali quesiti somministrare pu&ograve; essere stabilita di volta in volta dall'intervistatore, nel senso che tutti i quesiti sono facoltativi e vi sono quesiti pi&uacute; generici, che probabilmente ha senso rivolgere in ogni intervista, e quesiti pi&uacute; specifici, che ha senso somministrare soltanto se si sta prendendo in esame processi molto peculiari. 
@@ -143,7 +143,7 @@ I quesiti sono raggruppati in <strong>ambiti di analisi</strong> e, nel caso di 
 <br>
 <strong>*Fig.11 - Esempio di raggruppamenti di quesiti in ambiti di analisi*</strong>
 
-Le risposte vengono poi utilizzate per ottenere il valore di una serie di indicatori, come accennato in precedenza.<br>
+Le risposte vengono poi utilizzate per ottenere il valore di una serie di indicatori di rischio, come accennato in precedenza.<br>
 
 [![PxI analytical dashboard][dashboard-risk]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-pxi.png)
 <br>
@@ -167,10 +167,10 @@ Infine, tramite una classica tabella della Quantitative Risk Analysis, viene cal
 <br>
 <strong>*Fig.14 - Tabella di decisione dell’algoritmo per il calcolo del PxI, con i 9 valori possibili derivanti dalle disposizioni con ripetizione D'(3,2) = 3<sup>2</sup> dei 3 valori possibili del P e dei 3 valori possibili di I.*</strong>
 
-><strong>&Egrave; importante sottolineare che una feature del software consiste dunque nell'automazione del calcolo degli indicatori e del PxI: dopo aver censito processi e strutture, &egrave; sufficiente effettuare le interviste per far s&iacute; che il software pensi al resto.</strong>
+><strong>&Egrave; importante sottolineare che una feature del software consiste dunque nell'automazione del calcolo degli indicatori e del PxI: dopo aver censito processi e strutture, &egrave; sufficiente effettuare le interviste per far s&iacute; che il software faccia il resto.</strong>
 
-## Fase 3: trattamento del rischio (misure di mitigazione, stima)
-Tramite le fasi 1 e 2 si ottiene una visione complessiva sul livello di rischio cui ogni processo organizzativo censito risulta esposto.
+## Step 3: Trattamento del rischio (misure di mitigazione, stima)
+Tramite le fasi 1 e 2 si ottiene dunque una visione complessiva sul livello di rischio cui ogni processo organizzativo censito risulta esposto.
 
 [![PxI concise dashboard][dashboard-risk2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-pxi.png)
 <br>
@@ -225,37 +225,68 @@ Una volta applicate le misure, &egrave; possibile verificare come variano i live
 
 [![How to risk decrease applying measures][dashboard-risk4]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-measures.png)
 <br>
-<strong>*Fig.20 - Tabella che mostra quali sono le misure da applicare ad ogni processo e come variano i livelli del PxI prima e dopo l'applicazione.*</strong>
+<strong>*Fig.20 - Tabella che mostra quali sono le misure da applicare ad ogni processo e come varierebbero i livelli del PxI prima e dopo l'applicazione.*</strong>
 
-## Fase 4: certificazione del rischio (misure di mitigazione, monitoraggio)
+## Step 4: Certificazione del rischio (misure di mitigazione, monitoraggio)
 La fase di applicazione delle misure, appena vista, &egrave; per&ograve; soltanto una <i>stima</i> della misura in cui il rischio pu&ograve; essere ridotto <i>se</i> le misure proposte vengono applicate.
 La fase di monitoraggio, che conclude il ciclo di gestione del rischio corruttivo, consiste nel verificare se le misure proposte sono poi state effettivamente applicate.
 
-Naturalmente, dal momento che dispone di una serie di cruscotti e report on-demand, il software offre anche specifici strumenti analitici per verificare in che misura &egrave; cambiato il livello di rischio non solo in funzione dell'applicazione ipotetica, ma anche di quella effettiva delle misure di mitigazione.
+[![Monitor entrypoint][list-monitor]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-monitored-measures.png)
+<br>
+<strong>*Fig.21 - Pagina iniziale monitoraggio.*</strong>
+
+Naturalmente, dal momento che dispone di una serie di cruscotti e report on-demand, 
+> <strong>il software offre anche specifici strumenti analitici per verificare in che misura &egrave; cambiato il livello di rischio non solo in funzione dell'applicazione ipotetica, ma anche di quella effettiva delle misure di mitigazione.</strong>
+
 Semplificando, alla fine della fase di monitoraggio verranno ottenuti alcuni report con 3 colonne:
-* il livello del PxI iniziale
-* il livello del PxI dopo l'applicazione delle misure di mitigazione (stima)
-* il livello del PxI dopo la verifica delle misure effettivamente applicate (monitoraggio)
+* <strong>il livello del PxI iniziale:</strong> determinato in base alle risposte ai quesiti date dalle strutture intervistate;
+* <strong>il livello del PxI intermedio:</strong> calcolato in base all'applicazione delle misure di mitigazione (stima)
+* <strong>il livello del PxI finale:</strong> ricalibrato dopo aver verificato quali delle misure richieste siano state effettivamente applicate (monitoraggio).
 
 Questo tipo di report conclude il ciclo di gestione del rischio e costituisce la certificazione dei livelli di rischio prodotta dall'esperto/ufficio anticorruzione.
 
-### Misura e misurazione
-Vale la pena anche di approfondire brevemente alcuni aspetti della fase di monitoraggio.
+### Fasi di attuazione e Indicatori di monitoraggio
+Vale la pena anche di approfondire brevemente alcuni aspetti coinvolti nel monitoraggio.
 
-Quest'ultima fase del ciclo di gestione del rischio corruttivo consiste nel consultare le strutture che avevano in carico i processi per verificare se effettivamente le misure proposte sono state applicate.
+Quest'ultimo step del ciclo di gestione del rischio corruttivo consiste, come gi&agrave; detto, nel consultare le strutture che avevano in carico i processi per verificare se effettivamente le misure proposte sono state applicate.
 
-Per poter procedere anche su questo versante in modo scientifico, evitando che la verifica si riduca a una banale telefonata alla struttura incaricata chiedendo se le misure sono state messe in atto (semplice flag SI/NO), &egrave; stata realizzata un'impalcatura di entit&agrave; pi&uacute; articolata, non per complicare inutilmente il modello, ma piuttosto per ottenere un riscontro puntuale in merito alle singole azioni effettuate.
+Per poter procedere anche su questo versante in modo <i>scientifico,</i> evitando che la verifica si riduca a una banale telefonata alla struttura incaricata chiedendo se le misure sono state messe in atto (semplice flag SI/NO), &egrave; stata realizzata un'impalcatura di entit&agrave; pi&uacute; articolata, non per complicare inutilmente il modello, ma piuttosto per ottenere un riscontro puntuale in merito alle singole azioni effettuate.
 
-Distinguiamo, quindi, tra misura censita e misura monitorata; quest'ultima &egrave, una <code>is a</code> della prima, e contiene al suo interno i dettagli necessari al monitoraggio della misura stessa, ovvero necessari a stabilire se la misura sia o meno stata applicata.<br>
+Distinguiamo, quindi, tra misura assoluta (vale a dire la misura <i>tout-court</i>) e misura monitorata; quest'ultima &egrave; una <code>is a</code> della prima, e contiene, al suo interno, i dettagli necessari al monitoraggio della misura stessa, ovvero necessari a stabilire se la misura sia o meno stata applicata.<br>
 
 [![Schema ER monitoring (part)][schema-monitor]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-monitoring.png)
 <br>
-<strong>*Fig.21 - Parte del diagramma ER per la rappresentazione della misura monitorata ed entit&agrave; relative*</strong>
+<strong>*Fig.22 - Parte del diagramma ER per la rappresentazione della misura monitorata ed entit&agrave; relative*</strong>
 
-Oltre alla  misura monitorata, sono stati sviluppati gli oggetti indicatore e misurazione; quest'ultima non va confusa con la misura!
-La misura &egrave; una rappresentazione delle azioni correttive da realizzare per abbassare il livello di rischio.
-La misurazione &egrave; invece una verifica applicata a un indicatore di monitoraggio che consiste nel registrare se effettivamente le azioni correttive sono state messe in atto; &egrave; quindi, in certo qual modo, un epifenomeno della misura.<br>
-Un indicatore di monitoraggio, infine, &egrave; un oggetto completamente distinto dall'indicatore di probabilit&agrave; o di impatto visto nelle fasi precedenti: esso consta di una baseline e di un target e rappresenta il criterio cui si applica la misurazione.
+Questi dettagli includono: 
+* la descrizione e il numero delle fasi di attuazione della misura;
+* l'obiettivo del piano integrato di programmazione e governance, o di altro documento analogo, che giustifica l'applicazione della misura.
+
+Su ogni fase di attuazione (che non va confusa con la "fase" del processo organizzativo, che &egrave; un'attivit&agrave;, ovvero un sottolivello, un task attraverso cui passa la realizzazione del processo stesso, e che da alcuni autori viene etichettata come "sottoprocesso") pu&ograve; essere applicato un <strong>indicatore di monitoraggio</strong>.
+
+[![List of phases with indicators][list-indicators]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-phases_indicators.png)
+<br>
+<strong>*Fig.23 - Esempio di una misura monitorata con 2 fasi di attuazione: su una &egrave; stato assegnato un indicatore di monitoraggio, sull'altra non ancora*</strong>
+
+Un indicatore di monitoraggio &egrave; un oggetto completamente distinto dall'<strong>indicatore di rischio</strong>, ovvero quello ottenuto in base alle risposte date all'intervista; mentre un indicatore di rischio (oggetto approfondito nello Step 2: Calcolo del rischio)  pu&ograve; quantificare il livello di probabilit&agrave; o di impatto che un certo rischio abbia rispetto ad un certo processo, l'indicatore di monitoraggio definisce una baseline ed un target e rappresenta il criterio cui si applica la misurazione (un oggetto a sua volta distinto).
+
+[![Form to insert new monitoring indicator][add-indicator]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-indicator.png)
+<br>
+<strong>*Fig.24 - Maschera per l'inserimento di un nuovo indicatore di monitoraggio*</strong>
+
+Riepilogando:
+<mark>
+* fase di attuazione  ≠ fase di processo
+* indicatore di monitoraggio ≠ indicatore di rischio
+</mark>
+
+### Misura e Misurazione
+Su un indicatore di monitoraggio vengono applicate una o pi&ugrave; misurazioni; quest'ultimo oggetto, a sua volta, non va confuso con la misura!
+
+* La misura &egrave; una rappresentazione delle azioni correttive da realizzare per abbassare il livello di rischio.
+* La misurazione &egrave; invece una verifica applicata a un indicatore di monitoraggio che consiste nel registrare se effettivamente le azioni correttive sono state messe in atto.
+
+La misurazone &egrave; quindi, in certo qual modo, un epifenomeno della misura.<br>
 
 # Sviluppi futuri
 Allo stato attuale il software &egrave; gi&agrave; pronto per essere adattato,
@@ -434,12 +465,11 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [2.9.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
 - [2.9.4] Implementata form di ricerca sui quesiti per chiave testuale
 - ...
-- [2.0.8] (18/11/2024) Implementati controlli lato client in form di aggiunta indicatore di monitoraggio
 
 
 ### Done
 -->
-
+- [2.0.8] (19/11/2024) Implementati controlli lato client in form di aggiunta indicatore di monitoraggio; aggiunta pagina dettagli indicatore di monitoraggio; correzione di bug
 - [2.0.7] (11/11/2024) Implementata pagina elenco indicatori di una misura monitorata
 - [2.0.6] (07/11/2024) Implementata funzionalit&agrave; di inserimento indicatore di monitoraggio 
 - [2.0.5] (05/11/2024) Aggiunta pagina contenente form per inserire un nuovo indicatore di monitoraggio; correzione di bug
@@ -574,7 +604,10 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [dashboard-risk4]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-measures.png
 [add-measure]:      https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure.png
 [assign-measure]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure2.png
+[add-indicator]:    https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-indicator.png
 [list-measures]:    https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-measures.png
+[list-monitor]:     https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-monitored-measures.png
+[list-indicators]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-phases_indicators.png
 [schema-measure]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-measure.png
 [schema-monitor]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-monitoring.png
 [schema-physical]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/DB-circular.png
