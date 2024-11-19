@@ -3,7 +3,8 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <c:set var="fase" value="${requestScope.phase}" scope="page" />
 <c:set var="tipi" value="${requestScope.types}" scope="page" />
-<c:catch var="exception">
+  <c:catch var="exception">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <style>
         .form-control::placeholder {
             color: #6c757d; /* Default placeholder color */
@@ -11,6 +12,13 @@
         }
         .form-control:focus::placeholder {
             visibility: hidden; /* Hide placeholder on focus */
+        }
+        .error {
+            color: maroon;      /* Change text color */
+            font-weight: bold;  /* Make text bold */
+            /*font-size: 14px;  /* Adjust font size */
+            /*margin-top: 5px;  /* Add some space above the message */
+            /*background: #cccccc;*/
         }
     </style>
     <form accept-charset="ISO-8859-1" id="ind-form" class="panel subfields-green" action="" method="post">
@@ -32,19 +40,15 @@
         <hr class="separatore">
         <div class="row">
           <div class="col-sm-1">&nbsp;</div>
-          <div class="col-sm-4 mandatory-thin bgAct13"><strong>Tipo Indicatore</strong></div>
+          <div class="col-sm-4 mandatory-thin bgAct13">
+            <label for="ind-tipo"><strong>Tipo Indicatore</strong></label>
+          </div>
           <div class="col-sm-6">
             <select class="form-custom large-4" id="ind-tipo" name="ind-tipo">
-              <c:if test="${indicatore.tipo.id ne -3}">
-                <option value="${indicatore.tipo.id}">${indicatore.tipo.nome}</option>
-              </c:if>
-              <c:forEach var="tipo" items="${tipi}" varStatus="status">
-                <c:set var="selected" value="" scope="page" />
-                <c:if test="${tipo.id eq indicatore.idTipo}">
-                  <c:set var="selected" value="selected" scope="page" />
-                </c:if>
-                <option value="${tipo.id}" ${selected}>${tipo.nome}</option>
-              </c:forEach>
+              <option value=''>-- seleziona un tipo --</option>
+            <c:forEach var="tipo" items="${tipi}" varStatus="status">
+              <option value="${tipo.id}"><c:out value="${tipo.nome}" /></option>
+            </c:forEach>
             </select>
           </div>
         </div>
@@ -68,7 +72,7 @@
         <div class="row">
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory-thin bgAct13"><strong>Baseline</strong></div>
-          <div class="col-sm-5">
+          <div class="col-sm-5" id="displayBase">
             <input type="text" class="form-control" id="ind-baseline" name="ind-baseline" placeholder="Inserisci valore baseline">
           </div>
         </div>
@@ -84,7 +88,7 @@
         <div class="row">
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory-thin bgAct13"><strong>Target</strong></div>
-          <div class="col-sm-5">
+          <div class="col-sm-5" id="displayTarget">
             <input type="text" class="form-control" id="ind-target" name="ind-target" placeholder="Inserisci valore target">
           </div>
         </div>
@@ -104,52 +108,111 @@
         </div>
       </div>
     </form>
-
-      </c:catch>
-      <c:out value="${exception}" />
-
-      <script type="text/javascript">
-        var offsetcharacter = 5;
-        // Variabili per formattazione stringhe
-        var limNoteTitleOpen = "\n - ";
-        var limNoteTitleClose = " -\n";
-        var newLine = "\n";
-        var separatore = "\n================================\n";
-        $(document).ready(function () {
-          $('#ind-form').validate ({
-            rules: {
-              'ind-tipo': {
-                required: true
-              },
-              'ind-nome': {
-                required: true,
-                minlength: offsetcharacter
-              },
-              'ind-baseline': {
-                required: true
-              },
-              'ind-database': {
-                  required: true
-              },
-              'ind-target': {
-                required: true
-              },
-              'ind-datatarget': {
-                  required: true
-              }
-            }, 
-            messages: {
-              'ind-tipo':     "Inserire il tipo dell'indicatore",
-              'ind-nome':     "Inserire almeno " + offsetcharacter + " caratteri.",
-              'ind-baseline': "Inserire il valore baseline",
-              'ind-database': "Inserire la data baseline",
-              'ind-target':   "Inserire il valore target",
-              'ind-datatarget': "Inserire la data target"
+    <script type="text/javascript">
+      var offsetcharacter = 5;
+      
+      $('input[type="text"].calendarData').datepicker();        
+      
+      $('#btn-save').click(function (e){
+        e.preventDefault; 
+      });
+      
+      $(document).ready(function () {
+        $('#ind-form').validate ({
+          rules: {
+            'ind-tipo': {
+              required: true
             },
-            submitHandler: function (form) {
-              return true;
+            'ind-nome': {
+              required: true,
+              minlength: offsetcharacter
+            },
+            'ind-baseline': {
+              required: true,
+              checkNumber: true,
+              checkPercent: true
+            },
+            'ind-database': {
+                required: true
+            },
+            'ind-target': {
+              required: true,
+              checkNumber: true,
+              checkPercent: true
+            },
+            'ind-datatarget': {
+                required: true
             }
-          });
-          $('input[type=\'text\'].calendarData').datepicker();
+          }, 
+          messages: {
+            'ind-tipo':       "Inserire il tipo dell'indicatore",
+            'ind-nome':       "Inserire almeno " + offsetcharacter + " caratteri.",
+            'ind-baseline': {  
+              required:       "Inserire il valore baseline",
+              checkNumber:    "Inserire un numero",
+              checkPercent:   "Inserire una percentuale nel formato ##.##"
+            },
+            'ind-database':   "Inserire la data baseline",
+            'ind-target':   {  
+              required:       "Inserire il valore target",
+              checkNumber:    "Inserire un numero",
+              checkPercent:   "Inserire una percentuale nel formato ##.##"
+            },
+            'ind-datatarget': "Inserire la data target"
+          },
+          submitHandler: function (form) {
+            return true;
+          }
         });
-      </script> 
+          
+        $('#ind-tipo').change(function() {
+          var selectedValue = $(this).val();
+          var displayB = $('#displayBase');
+          var displayT = $('#displayTarget');
+          switch (selectedValue) {
+            case '1':
+              displayB.html('<select class="form-custom large-4" name="ind-baseline"><option value="0">Off</option><option value="1">On</option></select>');
+              displayT.html('<select class="form-custom large-4" name="ind-target"><option value="0">Off</option><option value="1">On</option></select>');
+              $.validator.addMethod("checkNumber", function(value, element) {
+                return true;
+              });
+              $.validator.addMethod("checkPercent", function(value, element) {
+                return true;
+              });
+              break;
+            case '2':
+              displayB.html('<input type="text" class="form-control large-4" id="ind-baseline" name="ind-baseline" placeholder="Inserisci un numero">');
+              displayT.html('<input type="text" class="form-control large-4" id="ind-target" name="ind-target" placeholder="Inserisci un numero">');
+              $.validator.addMethod("checkNumber", function(value, element) {
+                if (this.optional(element) || parseInt(value) || value == 0)
+                  return true;
+              }, "Inserire un numero");
+              $.validator.addMethod("checkPercent", function(value, element) {
+                return true;
+              });
+              break;
+            case '3':
+              displayB.html('<input type="text" class="form-control large-4" id="ind-baseline" name="ind-baseline" placeholder="Inserisci una percentuale">');
+              displayT.html('<input type="text" class="form-control large-4" id="ind-target" name="ind-target" placeholder="Inserisci una percentuale">');
+              $.validator.addMethod("checkNumber", function(value, element) {
+                return true;
+              });
+              $.validator.addMethod("checkPercent", function(value, element) {
+                // Regular expression to match the percentage format
+                const regex = /^(100\.00|[0-9]{1,2}\.[0-9]{2})$/;
+                // Test the value against the regex
+                if (regex.test(value)) {
+                  return true; // Valid percentage
+                }
+              }, "Inserire una percentuale nel formato ##.##");
+              break;
+            default:
+              displayB.html('<p class="alert alert-danger">Scegliere un tipo indicatore!</p>');
+              displayT.html('<p class="alert alert-danger">Scegliere un tipo indicatore!</p>');
+          }
+        });
+
+      });
+    </script> 
+  </c:catch>
+  <c:out value="${exception}" />
