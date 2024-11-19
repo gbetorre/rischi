@@ -108,37 +108,41 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
     /**
-     * Pagina per mostrare la lista degli indicatori di monitoraggio (registro degli indicatori)
+     * Pagina per mostrare la lista delle misure aventi dettagli di monitoraggio (registro delle misure monitorate)
      */
     private static final String nomeFileElenco = "/jsp/icElenco.jsp";
     /**
-     * Pagina per mostrare la lista delle misure monitorate (pagina iniziale monitoraggio)
+     * Pagina per mostrare la lista delle misure monitorate raggruppate per struttura (pagina iniziale monitoraggio)
      */
     private static final String nomeFileElencoMisure  = "/jsp/icMisure.jsp";
+    /**
+     * Pagina per mostrare i dettagli di una misura monitorata
+     */
+    private static final String nomeFileMisura = "/jsp/icMisura.jsp"; 
+    /**
+     * Pagina per mostrare la form di aggiunta dei dettagli di una misura monitorata
+     */
+    private static final String nomeFileInsertMisura = "/jsp/icMisuraForm.jsp";    
     /**
      * Pagina per mostrare la lista degli indicatori di una misura monitorata
      */
     private static final String nomeFileElencoIndicatori = "/jsp/icIndicatori.jsp";
     /**
+     * Pagina per mostrare i dettagli di un indicatore di monitoraggio
+     */
+    private static final String nomeFileDettaglio = "/jsp/icIndicatore.jsp";
+    /**
+     * Pagina per mostrare la maschera di inserimento/modifica di un indicatore di monitoraggio
+     */
+    private static final String nomeFileInsertIndicatore = "/jsp/icIndicatoreForm.jsp";    
+    /**
      * Pagina per mostrare la lista delle misurazioni (collegate agli indicatori) di una misura monitorata
      */
     private static final String nomeFileElencoMisurazioni = "/jsp/icMisurazioni.jsp";
     /**
-     * Pagina per mostrare i dettagli di un indicatore di monitoraggio
-     */
-    private static final String nomeFileDettaglio = "/jsp/icIndicatoreForm.jsp";    
-    /**
-     * Pagina per mostrare i dettagli di una misura monitorata
-     */
-    private static final String nomeFileMisura = "/jsp/icMisura.jsp";    
-    /**
      * Pagina per mostrare i dettagli di una misurazione
      */
     private static final String nomeFileMisurazione = "/jsp/icMisurazione.jsp";
-    /**
-     * Pagina per mostrare la form di aggiunta dei dettagli di una misura monitorata
-     */
-    private static final String nomeFileInsertMeasure = "/jsp/icMisuraForm.jsp";
     /**
      * Pagina per mostrare il riepilogo dei dettagli di una misura monitorata
      */ 
@@ -184,9 +188,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_MEASURES,             nomeFileElencoMisure);
         nomeFile.put(PART_INDICATOR,            nomeFileElencoIndicatori);
         nomeFile.put(PART_MONITOR,              nomeFileElencoMisurazioni);
-        nomeFile.put(PART_INSERT_INDICATOR,     nomeFileDettaglio);
+        nomeFile.put(PART_INSERT_INDICATOR,     nomeFileInsertIndicatore);
         nomeFile.put(PART_INSERT_MEASUREMENT,   nomeFileMisurazione);
-        nomeFile.put(PART_INSERT_MONITOR_DATA,  nomeFileInsertMeasure);
+        nomeFile.put(PART_INSERT_MONITOR_DATA,  nomeFileInsertMisura);
         //nomeFile.put(PART_SELECT_MONITOR_DATA,  nomeFileResumeMeasure);
     }
     
@@ -360,36 +364,27 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Recupera i rischi cui è associata
                                 risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
-                                // Url da sostituire al posto di quello di una breadcrumb esistente
-                                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
-                                // Preparazione nuova breadcrumb per puntare sulla command delle misure
-                                ItemBean crumb = new ItemBean("Misure", "Misure", url, SUB_MENU);
-                                // Sostituzione di una breadcrumb esistente con la nuova
-                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
-                                // Aggiunta inoltre di una foglia
-                                bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Dettagli");
+                                // Personalizza le breadcrumbs
+                                bC = loadBreadCrumbs(breadCrumbs, part, survey); 
                                 // Imposta la pagina
                                 fileJspT = nomeFileMisura;
                             }
                         } else if (part.equalsIgnoreCase(PART_INDICATOR)) {
                             // Controlla la presenza dell'id di un indicatore
                             if (idInd > DEFAULT_ID) {
-                            /* ************************************************ *
-                             *  Ramo pagina visualizzazione/modifica indicatore *
-                             * ************************************************ */
-                            } else {
                             /* ------------------------------------------------ *
-                             *        Ramo elenco indicatori di una misura      *
+                             *       Dettagli di un indicatore di dato id       *
                              * ------------------------------------------------ */
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
-                                // Url da sostituire al posto di quello di una breadcrumb esistente
-                                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + AMPERSAND + "p" + EQ + PART_MEASURES + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
-                                // Preparazione nuova breadcrumb per puntare sulla command delle misure
-                                ItemBean crumb = new ItemBean("Monitoraggio", "Monitoraggio", url, SUB_MENU);
-                                // Sostituzione di una breadcrumb esistente con la nuova
-                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
-                                // Aggiunta inoltre di una foglia
-                                bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Indicatori");
+                                // Imposta la pagina
+                                fileJspT = nomeFileDettaglio;
+                            } else {
+                            /* ------------------------------------------------ *
+                             *          Elenco indicatori di una misura         *
+                             * ------------------------------------------------ */
+                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                // Personalizza le breadcrumbs
+                                bC = loadBreadCrumbs(breadCrumbs, part, survey);
                                 // Imposta la pagina
                                 fileJspT = nomeFile.get(part);
                             }
@@ -413,14 +408,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Recupera i rischi cui è associata
                                 risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
-                                // Url da sostituire al posto di quello di una breadcrumb esistente
-                                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
-                                // Preparazione nuova breadcrumb per puntare sulla command delle misure
-                                ItemBean crumb = new ItemBean("Misure", "Misure", url, SUB_MENU);
-                                // Sostituzione di una breadcrumb esistente con la nuova
-                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
-                                // Aggiunta inoltre di una foglia
-                                bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Dettagli");
+                                // Personalizza le breadcrumbs
+                                bC = loadBreadCrumbs(breadCrumbs, part, survey); 
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
                             }
@@ -454,7 +443,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
                             // Ha bisogno di personalizzare le breadcrumbs perché sull'indirizzo non c'è il parametro 'p'
                             bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), "Misura");*/
-                            fileJspT = nomeFileDettaglio;
+                            fileJspT = nomeFileInsertIndicatore;
                         } else {
                             /* ------------------------------------------------ *
                              *   Ramo elenco solo misure monitorate (Registro)  *
@@ -648,6 +637,49 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
             ind.put("modext-auto",      parser.getStringParameter("modext-auto", dateAsString));
             formParams.put(Query.UPDATE_PART, ind);
         }*/
+    }
+    
+    
+    private static LinkedList<ItemBean> loadBreadCrumbs(LinkedList<ItemBean> breadCrumbs, 
+                                                        String part,
+                                                        CodeBean survey) 
+                                                 throws CommandException {
+        LinkedList<ItemBean> bC = null;
+        try {
+            if (part.equalsIgnoreCase(PART_MEASURES)) {
+                // Url da sostituire al posto di quello di una breadcrumb esistente
+                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
+                // Preparazione nuova breadcrumb per puntare sulla command delle misure
+                ItemBean crumb = new ItemBean("Misure", "Misure", url, SUB_MENU);
+                // Sostituzione di una breadcrumb esistente con la nuova
+                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
+                // Aggiunta inoltre di una foglia
+                bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Dettagli");
+            } else if (part.equalsIgnoreCase(PART_INDICATOR)) {
+                // Url da sostituire al posto di quello di una breadcrumb esistente
+                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + AMPERSAND + "p" + EQ + PART_MEASURES + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
+                // Preparazione nuova breadcrumb per puntare sulla command delle misure
+                ItemBean crumb = new ItemBean("Monitoraggio", "Monitoraggio", url, SUB_MENU);
+                // Sostituzione di una breadcrumb esistente con la nuova
+                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
+                // Aggiunta inoltre di una foglia
+                bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Indicatori");
+            } else if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
+                // Url da sostituire al posto di quello di una breadcrumb esistente
+                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
+                // Preparazione nuova breadcrumb per puntare sulla command delle misure
+                ItemBean crumb = new ItemBean("Misure", "Misure", url, SUB_MENU);
+                // Sostituzione di una breadcrumb esistente con la nuova
+                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
+                // Aggiunta inoltre di una foglia
+                bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Dettagli");
+            }
+            return bC;
+        }  catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori da bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        }
     }
     
     
