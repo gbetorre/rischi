@@ -37,7 +37,7 @@
                 <c:when test="${not empty fase.indicatore}">
                   <div class="ico-func float-right">
                     <strong>Indicatore: </strong>
-                    <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="" title="Visualizza dettagli indicatore">
+                    <a href="${initParam.appName}/?q=ic&p=ind&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="" title="Visualizza dettagli indicatore">
                       <c:out value="${fase.indicatore.nome}" />
                     </a>&nbsp;
                   </div>
@@ -49,7 +49,7 @@
                     </a>&nbsp;
                   </div>
                 </c:otherwise>
-                </c:choose>                
+                </c:choose>      
                 </li>
               </c:forEach>
               </ul>
