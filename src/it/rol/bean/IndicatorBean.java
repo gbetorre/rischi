@@ -239,6 +239,25 @@ public class IndicatorBean extends CodeBean {
     }
     
     
+    /* ********************************************************* *
+     *              Metodo getter per valore parlante            *
+     * ********************************************************* */
+    /**
+     * Restituisce il valore parlante se indicatore di tipo On/Off
+     * 
+     * @param valore un valore da etichettare se talune condizioni sono rispettate
+     * @return <code>String</code> - valore parlante del valore numerico
+     * @throws AttributoNonValorizzatoException se non &egrave; possibile accedere al tipo indicatore
+     */
+    public String getLabel(String valore) throws AttributoNonValorizzatoException {
+        if (this.tipo.getNome().equalsIgnoreCase("On/Off")) {
+            String value = valore.equalsIgnoreCase("0") ? "Off" : "On"; 
+            return value;
+        }
+        return valore;
+    }
+    
+    
     /* ***************************************************************** *
      *    Metodi getter e setter per data baseline (risultati attuali)   *
      * ***************************************************************** */
