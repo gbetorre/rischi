@@ -78,6 +78,7 @@ import it.rol.bean.IndicatorBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.MeasureBean;
+import it.rol.bean.MeasurementBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
@@ -4651,7 +4652,7 @@ public class DBWrapper extends QueryImpl {
                                          throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
-            ResultSet rs, rs1 = null;
+            ResultSet rs, rs1, rs2 = null;
             IndicatorBean indicator = null;
             // TODO: Controllare se user è superuser
             try {
@@ -4688,6 +4689,23 @@ public class DBWrapper extends QueryImpl {
                         indicator.setStato(stato);
                         // Vi aggiunge la fase
                         indicator.setFase(fase);
+                        // Cerca le misurazioni
+                        Vector<MeasurementBean> measurements = new Vector<>();
+                        nextParam = NOTHING;
+                        pst = null;
+                        pst = con.prepareStatement(GET_MEASUREMENTS_BY_INDICATOR);
+                        pst.clearParameters();
+                        pst.setInt(++nextParam, indicator.getId());
+                        pst.setInt(++nextParam, survey.getId());
+                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                        rs2 = pst.executeQuery();
+                        while (rs2.next()) {
+                            MeasurementBean measurement = new MeasurementBean();
+                            BeanUtil.populate(measurement, rs2);
+                            measurements.add(measurement);
+                        }
+                        indicator.setMisurazioni(measurements);
                     }                    
                 }
                 // Just tries to engage the Garbage Collector
