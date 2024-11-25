@@ -33,10 +33,10 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
   -->
-  <h3 align="center">ROL [Rischi On Line]</h3>
+  <h3 align="center">ROL-RMS</h3>
 
   <p align="center">
-    Applicazione web per la mappatura dei rischi corruttivi cui sono esposti i processi organizzativi
+    Applicazione web per la mappatura e il monitoraggio dei rischi corruttivi cui sono esposti i processi organizzativi
     <br><br>
     <a href="https://github.com/gbetorre/rischi"><strong>Esplora i files »</strong></a>
     <br><br>
@@ -51,8 +51,8 @@
 <!-- TABLE OF CONTENTS -->
 <!-- Insert TOC here -->
 
-# Software di Mappatura dei Rischi corruttivi [RMS]
-L'applicazione web per la mappatura dei rischi corruttivi serve ad aiutare Enti, Pubbliche Amministrazioni, aziende partecipate &ndash; e qualunque altro soggetto interessato a monitorare e gestire il rischio corruttivo nel contesto di un'organizzazione &ndash; <strong style="color:maroon;">a quantificare automaticamente i rischi corruttivi</strong> cui i loro processi organizzativi sono esposti e ad indirizzare questi soggetti a mettere in atto le contromisure adeguate.
+# Software di Mappatura dei Rischi corruttivi [ROL-RMS]
+L'applicazione web per la mappatura dei rischi corruttivi <code>ROL-RMS</code> serve ad aiutare Enti, Pubbliche Amministrazioni, aziende partecipate &ndash; e chiunque sia interessato a monitorare e gestire il rischio corruttivo &ndash; <strong>a quantificare automaticamente i rischi corruttivi</strong> cui i loro processi organizzativi sono esposti e ad indirizzare questi soggetti a mettere in atto <strong>le contromisure adeguate</strong>.
 
 [![Product Landing Page][product-landing2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png)
 <br>
@@ -477,6 +477,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [2.0.9] (25/11/2024) Aggiunta pagina contenente form per inserire una nuova misurazione di indicatore; correzione di bug
 - [2.0.8] (19/11/2024) Implementati controlli lato client in form di aggiunta indicatore di monitoraggio; aggiunta pagina dettagli indicatore di monitoraggio; correzione di bug
 - [2.0.7] (11/11/2024) Implementata pagina elenco indicatori di una misura monitorata
 - [2.0.6] (07/11/2024) Implementata funzionalit&agrave; di inserimento indicatore di monitoraggio 
