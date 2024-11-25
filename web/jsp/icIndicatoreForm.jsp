@@ -2,7 +2,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <c:set var="fase" value="${requestScope.phase}" scope="page" />
-<c:set var="tipi" value="${requestScope.types}" scope="page" />
   <c:catch var="exception">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <style>
@@ -46,7 +45,7 @@
           <div class="col-sm-6">
             <select class="form-custom large-4" id="ind-tipo" name="ind-tipo">
               <option value=''>-- seleziona un tipo --</option>
-            <c:forEach var="tipo" items="${tipi}" varStatus="status">
+            <c:forEach var="tipo" items="${requestScope.tipi}" varStatus="status">
               <option value="${tipo.id}"><c:out value="${tipo.nome}" /></option>
             </c:forEach>
             </select>
