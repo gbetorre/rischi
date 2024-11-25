@@ -2,6 +2,7 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
 <c:set var="meas" value="${requestScope.misura}" scope="page" />
+<c:set var="totI" value="${zero}" scope="page" />
 <c:catch var="exception">
     <h5 class="p-2 bgAct17 rounded popupMenu heading">
       <i class="fa-solid fa-umbrella ico-home" title="misura di prevenzione"></i>&nbsp; 
@@ -34,7 +35,6 @@
       <c:forEach var="fase" items="${meas.fasi}" varStatus="loop">
         <c:set var="status" value="${loop.index}" scope="page" />
         <fmt:formatDate var="lastModified" value="${fase.indicatore.dataUltimaModifica}" pattern="dd/MM/yyyy" />
-        <input type="hidden" id="ind-id${status}" name="ind-id${status}" value="<c:out value="${fase.indicatore.id}"/>">
         <tr>
           <td scope="row">
             <a href="">
@@ -44,13 +44,14 @@
           <td scope="row" id="nameColumn" class="success bgAct${fase.indicatore.tipo.id} bgFade ico-func">
           <c:choose>
           <c:when test="${not empty fase.indicatore}">
+            <c:set var="totI" value="${totI + 1}" scope="page" />
             <a href="${initParam.appName}/?q=ic&p=ind&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Modificato:${lastModified} ${fn:substring(fase.indicatore.oraUltimaModifica,0,5)}">
               <c:out value="${fase.indicatore.nome}"/>
             </a>
           </c:when>
           <c:otherwise>
             <div class="btn-group align-items-center">
-              <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" type="button" class="badge bg-primary btn-small lightTable text-white  align-middle refresh" title="Aggiungi un indicatore alla misura &quot;${fn:substring(meas.nome, 0, 22)}...&quot; nel contesto della fase &quot;${fase.nome}&quot;">
+              <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" type="button" class="badge bg-success btn-small lightTable text-white  align-middle refresh" title="Aggiungi un indicatore alla misura &quot;${fn:substring(meas.nome, 0, 22)}...&quot; nel contesto della fase &quot;${fase.nome}&quot;">
                 <i class="fa-solid fa-square-plus"></i> INDICATORE
               </a>&nbsp;
             </div>
@@ -70,8 +71,11 @@
             <fmt:formatDate value="${fase.indicatore.dataTarget}" pattern="dd/MM/yyyy" />
           </td>
           <td scope="row">
-            <c:out value="${fase.indicatore.tipo.nome}"/>
+            <span class="badge border-basso textcolormaroon">
+              <c:out value="${fase.indicatore.tipo.nome}"/>
+            </span>
           </td>
+      <c:if test="${not empty fase.indicatore}">
         <c:choose>
           <c:when test="${false}">
             <td scope="row" class="bgcolorgreen">
@@ -88,15 +92,22 @@
           <c:otherwise>
             <td scope="row" class="bgcolorred">
               <div class="form-check text-center">
-                <span>NO</span>
+                <strong>NO</strong>
+                <div class="btn-group align-items-center border-basso">
+                  <a href="${initParam.appName}/?q=ic&p=imm&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" type="button" class="badge bgAct11 btn-small lightTable text-black align-middle refresh" title="Clicca per misurare questo indicatore">
+                    <i class="fa-solid fa-pen-to-square"></i> MISURA
+                  </a>
+                </div>
               </div>
             </td>
           </c:otherwise>
         </c:choose>
+      </c:if>
         </tr>
       </c:forEach>
       </tbody>
     </table>
+    <div class="avvisiTot text-right">Tot indicatori: <c:out value="${totI}" /></div>
     </c:when>
     <c:otherwise>
     <div class="alert alert-danger">
@@ -104,20 +115,5 @@
     </div>
     </c:otherwise>
   </c:choose>
-    <div id="container-fluid">
-      <div class="row">
-        <div class="col-2">
-          <span class="float-left">
-            <a class="btn btnNav" href="${initParam.appName}/?q=ic&p=mes&r=${param['r']}">
-              <i class="fas fa-home"></i>
-              Monitoraggio
-            </a>
-          </span>
-        </div>
-        <div class="col-8 text-center">
-
-        </div>
-      </div>
-    </div>
 </c:catch>
 <c:out value="${exception}" />
