@@ -1432,6 +1432,30 @@ public interface Query extends Serializable {
             "   WHERE IND.id_fase = ?" +
             "       AND IND.id_rilevazione = ?";        // pleonastica
     
+    /**
+     * <p><ul><li>Seleziona l'elenco di tutte le misurazioni collegate a un 
+     * indicatore di dato id, nel contesto di una rilevazione di dato id<br>
+     * OPPURE</li>
+     * <li>seleziona una specifica misurazione collegata agli specifici
+     * parametri di cui sopra.</li></ul></p>
+     */
+    public static final String GET_MEASUREMENTS_BY_INDICATOR = 
+            "SELECT DISTINCT" +
+            "       MZ.id                               AS \"id\"" +
+            "   ,   MZ.valore                           AS \"valore\"" +
+            "   ,   MZ.azioni                           AS \"informativa\"" +
+            "   ,   MZ.motivazioni                      AS \"descrizione\"" +
+            "   ,   MZ.ultimo                           AS \"ultimo\"" +
+            "   ,   MZ.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   MZ.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   ,   MZ.id_rilevazione                   AS \"idRilevazione\"" +
+            "   FROM misurazione MZ" +
+            "       INNER JOIN rilevazione S ON MZ.id_rilevazione = S.id" +
+            "   WHERE (MZ.id_indicatoremonitoraggio = ?) " +
+            "       AND MZ.id_rilevazione = ?" +
+            "       AND (MZ.id = ? OR -1 = ?)" +
+            "   ORDER BY MZ.data_ultima_modifica";
+    
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
      *    (in taluni casi non si riesce a prestabilire la query ma questa va    *
