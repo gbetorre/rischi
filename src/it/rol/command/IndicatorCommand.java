@@ -144,13 +144,17 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileMisurazione = "/jsp/icMisurazione.jsp";
     /**
-     * Pagina per mostrare il riepilogo dei dettagli di una misura monitorata
+     * Pagina per mostrare la maschera di inserimento di una misurazione
      */ 
-    private static final String nomeFileResumeMeasure = "/jsp/icEpilogo.jsp";
+    private static final String nomeFileInsertMisurazione = "/jsp/icMisurazioneForm.jsp";
     /**
-     * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
+     * Struttura a cui la command fa riferimento per richiamare le pagine
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<>();
+    /**
+     * Struttura a cui la command fa riferimento per generare i titoli pagina
+     */    
+    private static final HashMap<String, String> titleFile = new HashMap<>();
     /** 
      * Lista dei tipi di indicatore
      */
@@ -184,14 +188,22 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        nomeFile.put(COMMAND_INDICATOR,         nomeFileElenco);
-        nomeFile.put(PART_MEASURES,             nomeFileElencoMisure);
-        nomeFile.put(PART_INDICATOR,            nomeFileElencoIndicatori);
-        nomeFile.put(PART_MONITOR,              nomeFileElencoMisurazioni);
-        nomeFile.put(PART_INSERT_INDICATOR,     nomeFileInsertIndicatore);
-        nomeFile.put(PART_INSERT_MEASUREMENT,   nomeFileMisurazione);
-        nomeFile.put(PART_INSERT_MONITOR_DATA,  nomeFileInsertMisura);
-        //nomeFile.put(PART_SELECT_MONITOR_DATA,  nomeFileResumeMeasure);
+        nomeFile.put(COMMAND_INDICATOR,             nomeFileElenco);
+        nomeFile.put(PART_MEASURES,                 nomeFileElencoMisure);
+        nomeFile.put(PART_INDICATOR,                nomeFileElencoIndicatori);
+        nomeFile.put(PART_MONITOR,                  nomeFileElencoMisurazioni);
+        nomeFile.put(PART_INSERT_MONITOR_DATA,      nomeFileInsertMisura);     
+        nomeFile.put(PART_INSERT_INDICATOR,         nomeFileInsertIndicatore);
+        nomeFile.put(PART_INSERT_MEASUREMENT,       nomeFileInsertMisurazione);
+        //nomeFile.put(PART_INSERT_,  nomeFileResumeMeasure);
+        // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
+        titleFile.put(COMMAND_INDICATOR,            "Registro misure monitorate");
+        titleFile.put(PART_MEASURES,                "Pagina iniziale monitoraggio");
+        titleFile.put(PART_INDICATOR,               "Indicatori di monitoraggio");
+        titleFile.put(PART_MONITOR,                 "Monitoraggi della misura");
+        titleFile.put(PART_INSERT_MONITOR_DATA,     "Dettagli di monitoraggio");
+        titleFile.put(PART_INSERT_INDICATOR,        "Nuovo indicatore");
+        titleFile.put(PART_INSERT_MEASUREMENT,      "Nuovo monitoraggio");
     }
     
     
@@ -322,9 +334,20 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                        //+AMPERSAND + MESSAGE + EQ + "newMes";
                         } else if (part.equalsIgnoreCase(PART_INSERT_INDICATOR)) {
                             /* ------------------------------------------------ *
-                             *         PROCESS Form to INSERT Indicator         *
+                             *        PROCESS Form to INSERT an Indicator       *
                              * ------------------------------------------------ */
                             db.insertIndicatorMeasure(user, params);
+                            // Prepara la redirect 
+                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + 
+                                       AMPERSAND + "p" + EQ + PART_MEASURES +
+                                       AMPERSAND + "mliv" + EQ + codeMis + 
+                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                       //+AMPERSAND + MESSAGE + EQ + "newRel#rischi-fattori-misure";
+                        } else if (part.equalsIgnoreCase(PART_INSERT_MEASUREMENT)) {
+                            /* ------------------------------------------------ *
+                             * PROCESS Form to INSERT a Measurement (Monitoring)*
+                             * ------------------------------------------------ */
+                            //db.insertMeasurement(user, params);
                             // Prepara la redirect 
                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + 
                                        AMPERSAND + "p" + EQ + PART_MEASURES +
@@ -344,16 +367,18 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                     if (nomeFile.containsKey(part)) {
                         // Recupera le breadcrumbs
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                        // Gestione Rami
+                        // Imposta il titolo pagina
+                        tP = titleFile.get(part);
+                        // Gestione rami
                         if (part.equalsIgnoreCase(PART_MEASURES)) {
-                            // Controlla la presenza dell'id di una misura
+                            // Controlla l'esistenza del codice di una misura
                             if (codeMis.equals(DASH)) {
                             /* ------------------------------------------------ *
                              *      Elenco Misure raggruppate per struttura     *
                              * ------------------------------------------------ */
                                 structs = db.getMeasuresByStructs(user, survey);
                                 // Aggiunge una foglia alle breadcrumbs
-                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Misure-Struttura");
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Misure x Struttura");
                                 // Imposta la pagina
                                 fileJspT = nomeFile.get(part);
                             } else {
@@ -370,19 +395,17 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 fileJspT = nomeFileMisura;
                             }
                         } else if (part.equalsIgnoreCase(PART_INDICATOR)) {
-                            // Controlla la presenza dell'id di un indicatore
+                            measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                             if (idInd > DEFAULT_ID) {
                             /* ------------------------------------------------ *
                              *       Dettagli di un indicatore di dato id       *
                              * ------------------------------------------------ */
-                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Imposta la pagina
                                 fileJspT = nomeFileDettaglio;
                             } else {
                             /* ------------------------------------------------ *
                              *          Elenco indicatori di una misura         *
                              * ------------------------------------------------ */
-                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Personalizza le breadcrumbs
                                 bC = loadBreadCrumbs(breadCrumbs, part, survey);
                                 // Imposta la pagina
@@ -397,7 +420,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *          Ramo dettagli di una misurazione        *
                              * ************************************************ */
-                            
                             
                         } else if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
                             /* ------------------------------------------------ *
@@ -419,39 +441,29 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              * ************************************************ */
                         } else if (part.equalsIgnoreCase(PART_INSERT_INDICATOR)) {
                             /* ------------------------------------------------ *
-                             *           Inserimento nuovo indicatore           *
+                             *      Maschera inserimento nuovo Indicatore       *
                              * ------------------------------------------------ */
                             // Recupera la fase cui si vuol aggiungere l'indicatore
                             phase = db.getMeasureActivity(user, codeMis, idFas, survey);
                             // Pagina
                             fileJspT = nomeFile.get(part);
-                        //} else if (part.equalsIgnoreCase(VOID_STRING)) {
-                            /* ************************************************ *
-                             *     Form inserimento misurazione di una misura   *
-                             * ************************************************ */
-                            
+                        } else if (part.equalsIgnoreCase(PART_INSERT_MEASUREMENT)) {
+                            /* ------------------------------------------------ *
+                             *       Maschera inserimento nuova Misurazione     *
+                             * ------------------------------------------------ */
+                            // Recupera l'indicatore cui si vuol aggiungere la misurazione
+                            measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                            // Breadcrumbs
+                            // Pagina
+                            fileJspT = nomeFile.get(part);
                         }
-
                     } else {
                         /* ------------------------------------------------ *
-                         *            SELECT a Specific Indicator           *
+                         *      Elenco sole misure monitorate (Registro)    *
                          * ------------------------------------------------ */
-                        if (!codeMis.equals(DASH)) {
-                            /* Recupera la misura di prevenzione/mitigazione
-                            measure = db.getMeasures(user, codeMis, NOTHING, survey).get(NOTHING);
-                            // Recupera i rischi cui è associata
-                            risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
-                            // Ha bisogno di personalizzare le breadcrumbs perché sull'indirizzo non c'è il parametro 'p'
-                            bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), "Misura");*/
-                            fileJspT = nomeFileInsertIndicatore;
-                        } else {
-                            /* ------------------------------------------------ *
-                             *   Ramo elenco solo misure monitorate (Registro)  *
-                             * ------------------------------------------------ */
-                            measures = MeasureCommand.filter(db.getMeasures(user, VOID_SQL_STRING, Query.GET_ALL_BY_CLAUSE, survey));
-                            tP = "Registro delle misure monitorate";
-                            fileJspT = nomeFileElenco;
-                        }
+                        measures = MeasureCommand.filter(db.getMeasures(user, VOID_SQL_STRING, Query.GET_ALL_BY_CLAUSE, survey));
+                        tP = titleFile.get(COMMAND_INDICATOR);
+                        fileJspT = nomeFileElenco;
                     }
                 }
             } else {
