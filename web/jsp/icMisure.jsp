@@ -11,14 +11,6 @@
       padding: 10px 10px 0px 10px;
       margin-bottom: 15px;
     }
-    .avvisiTot {
-      font-weight: bold; 
-      font-style: italic;
-      padding: 3px;
-      margin-bottom: 10px;
-      border-top: 1px dotted #ddd;
-      background: #cccc99;
-    }
     .table td {
         padding-bottom: 0;
     }

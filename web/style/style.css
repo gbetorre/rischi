@@ -836,7 +836,13 @@ textarea {
   /*margin: 5px;*/
 }
 
-.mandatory:after, .mandatory-thin:after {
+.mandatory-xthin {
+  background-color: #99ccff;
+  font-size: 10px;
+  height: 31px;
+}
+
+.mandatory:after, .mandatory-thin:after, .mandatory-xthin:after {
 	font-weight: bold;
 	font-size: 15pt;
 	content: ' *';
@@ -962,6 +968,15 @@ textarea {
   /*font-size: 20px;*/
   margin: 6px 10px;
   cursor: pointer;
+}
+
+.avvisiTot {
+  font-weight: bold; 
+  font-style: italic;
+  padding: 3px;
+  margin-bottom: 10px;
+  border-top: 1px dotted #ddd;
+  background: #cccc99;
 }
 
 /*---------------------- Righe Orizzontali ------------------------*/
