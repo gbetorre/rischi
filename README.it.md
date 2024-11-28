@@ -477,6 +477,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Done
 -->
+- [2.1.0] (28/11/2024) Aggiunta funzionalit&agrave; di download processi con PxI mitigati (stima) in formato CSV (estrae processi, PxI iniziale e valore del PxI calmierato che si otterrebbe se tutte le misure previste venissero effettivamente applicate)
 - [2.0.9] (25/11/2024) Aggiunta pagina contenente form per inserire una nuova misurazione di indicatore; correzione di bug
 - [2.0.8] (19/11/2024) Implementati controlli lato client in form di aggiunta indicatore di monitoraggio; aggiunta pagina dettagli indicatore di monitoraggio; correzione di bug
 - [2.0.7] (11/11/2024) Implementata pagina elenco indicatori di una misura monitorata
