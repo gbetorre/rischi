@@ -1,15 +1,24 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -287,6 +296,7 @@ public class Data extends HttpServlet implements Constants {
             csvCommands.add(COMMAND_STRUCTURES);//Estrazione strutture  ("data?q=st")
             csvCommands.add(COMMAND_AUDIT);     //Estrazione interviste ("data?q=in")
             csvCommands.add(COMMAND_RISK);      //Estrazione rischi     ("data?q=ri")
+            csvCommands.add(COMMAND_REPORT);    //Estrazione rischi     ("data?q=mu")
             // Verifica se deve servire un output su file
             if (format != null && !format.isEmpty()) {
                 // Output è Comma Separated Values
@@ -359,10 +369,9 @@ public class Data extends HttpServlet implements Constants {
                 req.setAttribute("listaIndicatori", indicators);
                 // Output in formato di default
                 fileJsp = nomeFileProcessoAjax;
-            } else if (qToken.equalsIgnoreCase(COMMAND_MEASURE)) {
+            //} else if (qToken.equalsIgnoreCase(COMMAND_MEASURE)) {
                 //req.setAttribute("XHRResp", "test");
                 //fileJsp = "/jsp/msMisuraForm.jsp";
-                
                 //res.setContentType("text/plain");
                 //res.getWriter().write("test test");
                 //return;
@@ -502,6 +511,20 @@ public class Data extends HttpServlet implements Constants {
                 ArrayList<DepartmentBean> structures = DepartmentCommand.retrieveStructures(codeSurvey, user, db);
                 // Restituisce la lista gerarchica di strutture trovate in base alla rilevazione
                 list = structures;
+             // "data?q=mu"    
+            } else if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
+             // "&p=mes"
+                if (part.equalsIgnoreCase(PART_MEASURES)) {
+                    // Fa la query della navigazione per reportistica
+                    ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSurvey, db);
+                    
+                    ArrayList<ProcessBean> matsWithIndicators = ReportCommand.retrieveIndicators(matsWithoutIndicators, user, codeSurvey, NOTHING, db);
+                    // Recupera i rischi indicizzati per identificativo di processo
+                    LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risks = ReportCommand.retrieveMitigatedRisksByProcess(matsWithIndicators, user, codeSurvey, db);
+                    // Restituisce la lista gerarchica di strutture trovate in base alla rilevazione
+                    java.util.Set listAsSet = risks.keySet();
+                    list = new ArrayList<ProcessBean>(listAsSet);
+                }
             }
         } catch (CommandException ce) {
             String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + ce.getLocalizedMessage();
@@ -1139,164 +1162,208 @@ public class Data extends HttpServlet implements Constants {
                 out.println(e.getMessage());
             }
         }
-        /* **************************************************************** *
-         *          Contenuto files RTF per processi e indicatori           *
-         * **************************************************************** */
+        //?q=mu
         else if (req.getParameter(ConfigManager.getEntToken()).equalsIgnoreCase(COMMAND_REPORT)) {
-            try {
-                Calendar now = Calendar.getInstance();
-                // Recupera mappa completa da Request
-                HashMap<String, HashMap<Integer, ArrayList<?>>> map = (HashMap<String, HashMap<Integer, ArrayList<?>>>) req.getAttribute("lista");
-                // Macroprocessi
-                ArrayList<ProcessBean> mats = (ArrayList<ProcessBean>) map.get(TIPI_LISTE[5]).get(Integer.valueOf(NOTHING));
-                // Rischi indicizzati per id processo_at
-                HashMap<Integer, ArrayList<?>> risks = map.get(TIPI_LISTE[3]);
-                // Strutture indicizzate per id processo_at
-                HashMap<Integer, ArrayList<?>> structs = map.get(TIPI_LISTE[6]);
-                // Soggetti contingenti indicizzati per id processo_at
-                HashMap<Integer, ArrayList<?>> subjects = map.get(TIPI_LISTE[7]);
-                // Preprazione file RTF
-                String prolog = "{\\rtf1 \\ansi \\ansicpg1252\\deff0\\nouicompat\\deflang1040 \n";
-                String header = 
-                    "{\\fonttbl\n" + 
-                      "\t{\\f0\\froman\\fprq2\\fcharset0 Times New Roman;}\n" + 
-                      "\t{\\f1\\fswiss\\fprq2\\fcharset0 Calibri;}\n" +
-                      "\t{\\f2\\fnil\\fcharset0 Calibri;}\n" + 
-                    "}\n" +
-                    "{\\info\n" +
-                      "\t{\\title Report Strutture e Rischi}\n" +
-                      "\t{\\author Giovanroberto Torre}\n" +
-                      //"\t{\\company Athenaeum}\n" +
-                      "\t{\\creatim\\yr" + new Integer(now.get(Calendar.YEAR)).toString() +  
-                      "\\mo" + new Integer(now.get(Calendar.MONTH) + 1) + 
-                      "\\dy" + String.format("%02d", new Integer(now.get(Calendar.DAY_OF_MONTH))) +
-                      "\\hr" + String.format("%02d", new Integer(now.get(Calendar.HOUR_OF_DAY))) + 
-                      "\\min" + String.format("%02d", new Integer(now.get(Calendar.MINUTE))) + 
-                      "}\n" +
-                      "\t{\\doccomm https://at.univr.it/rischi/}\n" +
-                    "}\n" +
-                    "{\\colortbl ;\\red255\\green255\\blue0;\\red255\\green0\\blue0;}\n" +
-                    "{\\*\\generator Riched20 10.0.19041}\n";
-                String thead =
-                    "\\viewkind4\\uc1\n" +
-                    "\\trowd\\trgaph70\\trleft5\\trqc\\trbrdrl\\brdrs\\brdrw10 \n" +
-                    "\\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \n" + 
-                    "\\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n" +
-                    "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" + 
-                    "\\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx10186 \n" +
-                    "\\pard\\intbl\\widctlpar\\qc\\b\\f1\\fs22 \n" +
-                    "Area di rischio \\cell \n" +
-                    "Macroprocesso \\cell \n" + 
-                    "Processo \\cell \n" +
-                    "Rischi Potenziali \\cell \n" +
-                    "Strutture \\cell \n" + 
-                    "Soggetti \\cell \n" + 
-                    "Giudizio sintetico \\cell \n" +
-                    "\\row \n";
-                String tr = 
-                    "\\trowd\\trgaph70\\trleft5\\trqc\\trrh5103\\trbrdrl\\brdrs\\brdrw10 \n" + 
-                    "\\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \n" + 
-                    "\\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n" +
-                    "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                    "\\cellx10186 \n" +
-                    "\\pard\\intbl\\widctlpar\\qc\\b0\\highlight0 \n";
-            StringBuffer content = new StringBuffer();
-                content.append(prolog);         // RFT file starts
-                content.append(header);         // RTF header
-                content.append(thead);          // Table header
-                for (ProcessBean m : mats) {
-                    for (ProcessBean p : m.getProcessi()) {
-                        ArrayList<RiskBean> processRisks = (ArrayList<RiskBean>) risks.get(Integer.valueOf(p.getId()));
-                        ArrayList<DepartmentBean> processStructs = (ArrayList<DepartmentBean>) structs.get(Integer.valueOf(p.getId()));
-                        ArrayList<DepartmentBean> processSubjs = (ArrayList<DepartmentBean>) subjects.get(Integer.valueOf(p.getId()));
-                        // <tr>
-                        content.append(tr);
-                        content.append(p.getAreaRischio());
-                        content.append("\\cell ");
-                        content.append(m.getNome()
-                                        .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
-                                        .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
-                                        .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
-                        content.append("\\cell ");
-                        content.append(p.getNome()
-                                        .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
-                                        .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
-                                        .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
-                        content.append("\\cell \n");
-                        content.append("\\pard\\intbl\\widctlpar\\sl240\\slmult1");
-                        for (RiskBean r : processRisks) {
-                            content.append("{\\pict{\\*\\picprop}\\wmetafile8\\picw847\\pich847\\picwgoal288\\pichgoal288 \n");
-                            content.append(CAUTION_EXCLAMATION_MARK_SIGN_TRIANGLE);
-                            content.append("} ");
-                            content.append(r.getNome()
+            /* **************************************************************** *
+             *          Contenuto files RTF per processi e indicatori           *
+             * **************************************************************** */
+            if (part.equalsIgnoreCase(PART_SELECT_STR)) {
+                try {
+                    Calendar now = Calendar.getInstance();
+                    // Recupera mappa completa da Request
+                    HashMap<String, HashMap<Integer, ArrayList<?>>> map = (HashMap<String, HashMap<Integer, ArrayList<?>>>) req.getAttribute("lista");
+                    // Macroprocessi
+                    ArrayList<ProcessBean> mats = (ArrayList<ProcessBean>) map.get(TIPI_LISTE[5]).get(Integer.valueOf(NOTHING));
+                    // Rischi indicizzati per id processo_at
+                    HashMap<Integer, ArrayList<?>> risks = map.get(TIPI_LISTE[3]);
+                    // Strutture indicizzate per id processo_at
+                    HashMap<Integer, ArrayList<?>> structs = map.get(TIPI_LISTE[6]);
+                    // Soggetti contingenti indicizzati per id processo_at
+                    HashMap<Integer, ArrayList<?>> subjects = map.get(TIPI_LISTE[7]);
+                    // Preprazione file RTF
+                    String prolog = "{\\rtf1 \\ansi \\ansicpg1252\\deff0\\nouicompat\\deflang1040 \n";
+                    String header = 
+                        "{\\fonttbl\n" + 
+                          "\t{\\f0\\froman\\fprq2\\fcharset0 Times New Roman;}\n" + 
+                          "\t{\\f1\\fswiss\\fprq2\\fcharset0 Calibri;}\n" +
+                          "\t{\\f2\\fnil\\fcharset0 Calibri;}\n" + 
+                        "}\n" +
+                        "{\\info\n" +
+                          "\t{\\title Report Strutture e Rischi}\n" +
+                          "\t{\\author Giovanroberto Torre}\n" +
+                          //"\t{\\company Athenaeum}\n" +
+                          "\t{\\creatim\\yr" + new Integer(now.get(Calendar.YEAR)).toString() +  
+                          "\\mo" + new Integer(now.get(Calendar.MONTH) + 1) + 
+                          "\\dy" + String.format("%02d", new Integer(now.get(Calendar.DAY_OF_MONTH))) +
+                          "\\hr" + String.format("%02d", new Integer(now.get(Calendar.HOUR_OF_DAY))) + 
+                          "\\min" + String.format("%02d", new Integer(now.get(Calendar.MINUTE))) + 
+                          "}\n" +
+                          "\t{\\doccomm https://at.univr.it/rischi/}\n" +
+                        "}\n" +
+                        "{\\colortbl ;\\red255\\green255\\blue0;\\red255\\green0\\blue0;}\n" +
+                        "{\\*\\generator Riched20 10.0.19041}\n";
+                    String thead =
+                        "\\viewkind4\\uc1\n" +
+                        "\\trowd\\trgaph70\\trleft5\\trqc\\trbrdrl\\brdrs\\brdrw10 \n" +
+                        "\\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \n" + 
+                        "\\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n" +
+                        "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" + 
+                        "\\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx10186 \n" +
+                        "\\pard\\intbl\\widctlpar\\qc\\b\\f1\\fs22 \n" +
+                        "Area di rischio \\cell \n" +
+                        "Macroprocesso \\cell \n" + 
+                        "Processo \\cell \n" +
+                        "Rischi Potenziali \\cell \n" +
+                        "Strutture \\cell \n" + 
+                        "Soggetti \\cell \n" + 
+                        "Giudizio sintetico \\cell \n" +
+                        "\\row \n";
+                    String tr = 
+                        "\\trowd\\trgaph70\\trleft5\\trqc\\trrh5103\\trbrdrl\\brdrs\\brdrw10 \n" + 
+                        "\\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \n" + 
+                        "\\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n" +
+                        "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
+                        "\\cellx10186 \n" +
+                        "\\pard\\intbl\\widctlpar\\qc\\b0\\highlight0 \n";
+                StringBuffer content = new StringBuffer();
+                    content.append(prolog);         // RFT file starts
+                    content.append(header);         // RTF header
+                    content.append(thead);          // Table header
+                    for (ProcessBean m : mats) {
+                        for (ProcessBean p : m.getProcessi()) {
+                            ArrayList<RiskBean> processRisks = (ArrayList<RiskBean>) risks.get(Integer.valueOf(p.getId()));
+                            ArrayList<DepartmentBean> processStructs = (ArrayList<DepartmentBean>) structs.get(Integer.valueOf(p.getId()));
+                            ArrayList<DepartmentBean> processSubjs = (ArrayList<DepartmentBean>) subjects.get(Integer.valueOf(p.getId()));
+                            // <tr>
+                            content.append(tr);
+                            content.append(p.getAreaRischio());
+                            content.append("\\cell ");
+                            content.append(m.getNome()
                                             .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
                                             .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
                                             .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
-                            content.append(BLANK_SPACE);
-                            content.append("\\par\n");
-                            content.append("\\pard\\intbl\\widctlpar\\par\n");
-                        }
-                        content.append("\\cell \n");
-                        for (DepartmentBean s : processStructs) {
-                            content.append(s.getPrefisso()).append(BLANK_SPACE);
-                            content.append(s.getNome()
+                            content.append("\\cell ");
+                            content.append(p.getNome()
                                             .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
                                             .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
                                             .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
-                            content.append("\\par\n");
-                            content.append("\\pard\\intbl\\widctlpar\\par\n");
+                            content.append("\\cell \n");
+                            content.append("\\pard\\intbl\\widctlpar\\sl240\\slmult1");
+                            for (RiskBean r : processRisks) {
+                                content.append("{\\pict{\\*\\picprop}\\wmetafile8\\picw847\\pich847\\picwgoal288\\pichgoal288 \n");
+                                content.append(CAUTION_EXCLAMATION_MARK_SIGN_TRIANGLE);
+                                content.append("} ");
+                                content.append(r.getNome()
+                                                .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
+                                                .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
+                                                .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
+                                content.append(BLANK_SPACE);
+                                content.append("\\par\n");
+                                content.append("\\pard\\intbl\\widctlpar\\par\n");
+                            }
+                            content.append("\\cell \n");
+                            for (DepartmentBean s : processStructs) {
+                                content.append(s.getPrefisso()).append(BLANK_SPACE);
+                                content.append(s.getNome()
+                                                .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
+                                                .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
+                                                .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
+                                content.append("\\par\n");
+                                content.append("\\pard\\intbl\\widctlpar\\par\n");
+                            }
+                            content.append("\\cell \n");
+                            for (DepartmentBean t : processSubjs) {
+                                content.append(t.getNome()
+                                                .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
+                                                .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
+                                                .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
+                                content.append("\\par\n");
+                                content.append("\\pard\\intbl\\widctlpar\\par\n");
+                            }
+                            content.append("\\cell \n");
+                            if (p.getIndicatori() != null && !p.getIndicatori().isEmpty()) {
+                                content.append("\\qc");
+                                content.append(getHighlight(p.getIndicatori().get("PxI").getInformativa()));
+                                content.append(BLANK_SPACE);
+                                content.append(p.getIndicatori().get("PxI").getInformativa());
+                                content.append(BLANK_SPACE).append("\\highlight0").append(BLANK_SPACE);
+                                content.append(BLANK_SPACE);
+                                content.append(p.getIndicatori().get("PxI").getNote()
+                                                .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
+                                                .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
+                                                .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
+                                content.append(BLANK_SPACE).append(BLANK_SPACE);
+                            }
+                            content.append("\\cell");
+                            content.append("\\row \n");
+                            // </tr>
                         }
-                        content.append("\\cell \n");
-                        for (DepartmentBean t : processSubjs) {
-                            content.append(t.getNome()
-                                            .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
-                                            .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
-                                            .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
-                            content.append("\\par\n");
-                            content.append("\\pard\\intbl\\widctlpar\\par\n");
-                        }
-                        content.append("\\cell \n");
-                        if (p.getIndicatori() != null && !p.getIndicatori().isEmpty()) {
-                            content.append("\\qc");
-                            content.append(getHighlight(p.getIndicatori().get("PxI").getInformativa()));
-                            content.append(BLANK_SPACE);
-                            content.append(p.getIndicatori().get("PxI").getInformativa());
-                            content.append(BLANK_SPACE).append("\\highlight0").append(BLANK_SPACE);
-                            content.append(BLANK_SPACE);
-                            content.append(p.getIndicatori().get("PxI").getNote()
-                                            .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
-                                            .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
-                                            .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
-                            content.append(BLANK_SPACE).append(BLANK_SPACE);
-                        }
-                        content.append("\\cell");
-                        content.append("\\row \n");
-                        // </tr>
                     }
+                    content.append("\\pard\\sa200\\sl276\\slmult1\\f2\\lang16\\par");
+                    content.append(BLANK_SPACE);
+                    content.append("}");                // RTF file ends 
+                    // Stampa il contenuto del file
+                    out.println(String.valueOf(content));
+                } catch (RuntimeException re) {
+                    log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene la tabella MDM.\n" + re.getMessage());
+                    out.println(re.getMessage());
+                } catch (Exception e) {
+                    log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
+                    out.println(e.getMessage());
                 }
-                content.append("\\pard\\sa200\\sl276\\slmult1\\f2\\lang16\\par");
-                content.append(BLANK_SPACE);
-                content.append("}");                // RTF file ends 
-                // Stampa il contenuto del file
-                out.println(String.valueOf(content));
-            } catch (RuntimeException re) {
-                log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene la tabella MDM.\n" + re.getMessage());
-                out.println(re.getMessage());
-            } catch (Exception e) {
-                log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
-                out.println(e.getMessage());
+            } else if (part.equalsIgnoreCase(PART_MEASURES)) {
+                /* ************************************************************ *
+                 * Generazione contenuto files CSV di processi at e PxI mitigati*
+                 * ************************************************************ */
+                try {
+                    // Recupera i macro at da Request
+                    ArrayList<ProcessBean> list = (ArrayList<ProcessBean>) req.getAttribute("lista");
+                    // Scrittura file CSV
+                    StringBuffer headers = new StringBuffer("N." + SEPARATOR)
+                            .append("Area Rischio").append(SEPARATOR)
+                            .append("Codice Macroprocesso").append(SEPARATOR)
+                            .append("Macroprocesso").append(SEPARATOR)
+                            .append("Codice Processo").append(SEPARATOR)
+                            .append("Processo").append(SEPARATOR)
+                            .append("PxI").append(SEPARATOR)
+                            .append("PxI mitigato (stima)").append(SEPARATOR);
+                    out.println(headers);
+                    if (list.size() > NOTHING) {
+                        int itCounts = NOTHING, record = NOTHING;
+                        do {
+                            ProcessBean pat = list.get(itCounts);
+                            StringBuffer tupla = new StringBuffer(++record + SEPARATOR)
+                                .append(pat.getAreaRischio()).append(SEPARATOR)
+                                .append(pat.getCodice().substring(NOTHING, pat.getCodice().lastIndexOf(DOT))).append(SEPARATOR)
+                                .append(VOID_STRING).append(SEPARATOR)
+                                .append(pat.getCodice()).append(SEPARATOR)
+                                .append(pat.getNome()).append(SEPARATOR)
+                                .append(pat.getIndicatori().get("PxI").getInformativa()).append(SEPARATOR)
+                                .append(pat.getIndicatori().get("PxI (stima)").getInformativa()).append(SEPARATOR);
+                            out.println(String.valueOf(tupla));
+                            itCounts++;
+                        } while (itCounts < list.size());
+                        success = itCounts;
+                    }
+                } catch (RuntimeException re) {
+                    log.severe(FOR_NAME + "Si e\' verificato un problema nella scrittura del file che contiene l\'elenco dei macroprocessi.\n" + re.getMessage());
+                    out.println(re.getMessage());
+                } catch (Exception e) {
+                    log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
+                    out.println(e.getMessage());
+                }
             }
         }
         else {
