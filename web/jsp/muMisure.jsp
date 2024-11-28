@@ -6,6 +6,9 @@
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
     <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/2.1.5/features/searchHighlight/dataTables.searchHighlight.css">
     <h3 class="mt-1 m-0 font-weight-bold float-left">Report misure e rischi</h3>
+    <a href="${mesCSV}" class="float-right badge badge-pill lightTable bgAct20" title="Scarica il dataset dei processi organizzativi con PxI iniziale e PxI mitigato (stima)">
+      <i class="fas fa-download"></i>Scarica i dati
+    </a>
     <hr class="riga"/>
     <div class="col-md-offset-1">
       <div class="table-responsive">

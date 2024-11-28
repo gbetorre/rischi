@@ -119,6 +119,12 @@
   <c:param name="p" value="mes" />
   <c:param name="r" value="${ril}" />
 </c:url>
+<c:url var="mesCSV" context="${initParam.appName}" value="/data" scope="page">
+  <c:param name="q" value="mu" />
+  <c:param name="p" value="mes" />
+  <c:param name="r" value="${ril}" />
+  <c:param name="out" value="csv" />
+</c:url>
 <c:url var="ms" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="ms" />
   <c:param name="r" value="${ril}" />
