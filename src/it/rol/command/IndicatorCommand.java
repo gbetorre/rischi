@@ -52,6 +52,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,8 +70,10 @@ import it.rol.Utils;
 import it.rol.bean.ActivityBean;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
+import it.rol.bean.IndicatorBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.MeasureBean;
+import it.rol.bean.MeasurementBean;
 import it.rol.bean.PersonBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
@@ -159,10 +162,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
      * Lista dei tipi di indicatore
      */
     private static ArrayList<CodeBean> types;
-    /** 
-     * Lista di indicatori di monitoraggio
-     */
-    private static ArrayList<MeasureBean> indicators;
 
   
     /* ******************************************************************** *
@@ -253,6 +252,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         ArrayList<DepartmentBean> structs = null;
         // Elenco di rischi associati a una misura
         ArrayList<ItemBean> risksByMeasure = null;
+        // Elenco di monitoraggi (misurazioni) di una misura
+        ArrayList<MeasurementBean> measurements = null;
         // Tabella che conterrà i valori dei parametri passati dalle form
         HashMap<String, LinkedHashMap<String, String>> params = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
@@ -347,10 +348,10 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             /* ------------------------------------------------ *
                              * PROCESS Form to INSERT a Measurement (Monitoring)*
                              * ------------------------------------------------ */
-                            //db.insertMeasurement(user, params);
+                            db.insertMeasurement(user, params);
                             // Prepara la redirect 
                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + 
-                                       AMPERSAND + "p" + EQ + PART_MEASURES +
+                                       AMPERSAND + "p" + EQ + PART_INDICATOR +
                                        AMPERSAND + "mliv" + EQ + codeMis + 
                                        AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                        //+AMPERSAND + MESSAGE + EQ + "newRel#rischi-fattori-misure";
@@ -412,14 +413,14 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 fileJspT = nomeFile.get(part);
                             }
                         } else if (part.equalsIgnoreCase(PART_MONITOR)) {
+                            
                             /* ------------------------------------------------ *
-                             * Ramo elenco misurazioni di una misura monitorata *
+                             *    Elenco Misurazioni di una misura monitorata   *
                              * ------------------------------------------------ */
+                            measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                            measurements = decantMeasurements(measure);
                             // Imposta la pagina
                             fileJspT = nomeFile.get(part);
-                            /* ************************************************ *
-                             *          Ramo dettagli di una misurazione        *
-                             * ************************************************ */
                             
                         } else if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
                             /* ------------------------------------------------ *
@@ -518,6 +519,10 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         if (risksByMeasure != null) {
             req.setAttribute("rischi", risksByMeasure);
         }
+        // Imposta in request elenco dei monitoraggi effettuati per una misura
+        if (measurements != null) {
+            req.setAttribute("monitoraggi", measurements);
+        }
         // Imposta nella request specifica fase di attuazione di una misura
         if (phase != null) {
             req.setAttribute("fase", phase);
@@ -569,11 +574,12 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         LinkedHashMap<String, String> survey = new LinkedHashMap<>();
         LinkedHashMap<String, String> measure = new LinkedHashMap<>();
         LinkedHashMap<String, String> indicator = null;
+        LinkedHashMap<String, String> measurement = null;
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
-        /* **************************************************** *
+        /* ---------------------------------------------------- *
          *     Caricamento parametro di Codice Rilevazione      *
-         * **************************************************** */      
+         * ---------------------------------------------------- */      
         // Recupera o inizializza 'codice rilevazione' (Survey)
         String codeSur = parser.getStringParameter("r", DASH);
         // Recupera l'oggetto rilevazione a partire dal suo codice
@@ -582,10 +588,10 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         survey.put(PARAM_SURVEY, String.valueOf(surveyAsBean.getId()));
         // Aggiunge il tutto al dizionario dei parametri
         formParams.put(PARAM_SURVEY, survey);
-        /* ******************************************************** *
+        /* -------------------------------------------------------- *
          *  Ramo di INSERT di ulteriori informazioni da aggiungere  *
          *      a una misura (dettagli relativi al monitoraggio)    *
-         * ******************************************************** */
+         * -------------------------------------------------------- */
         if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
             GregorianCalendar date = Utils.getCurrentDate();
             String dateAsString = Utils.format(date, DATA_SQL_PATTERN);
@@ -599,9 +605,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
             // Aggiunge i dettagli monitoraggio al dizionario dei parametri
             formParams.put(part, measure);
         }
-        /* **************************************************** *
+        /* ---------------------------------------------------- *
          *       Ramo di INSERT / UPDATE di un Indicatore       *
-         * **************************************************** */
+         * ---------------------------------------------------- */
         else if (part.equalsIgnoreCase(PART_INSERT_INDICATOR) /*|| part.equalsIgnoreCase(Query.MODIFY_PART)*/ ) {
             indicator = new LinkedHashMap<>();            
             GregorianCalendar date = Utils.getUnixEpoch();
@@ -616,20 +622,20 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
             indicator.put("datatarg",   parser.getStringParameter("ind-datatarget", dateAsString));
             formParams.put(part, indicator);
         }
-        /* **************************************************** *
+        /* ---------------------------------------------------- *
          *  Ramo di INSERT di una misurazione su un Indicatore  *
-         * **************************************************** *
-        else if (part.equalsIgnoreCase(Query.MONITOR_PART)) {
+         * ---------------------------------------------------- */
+        else if (part.equalsIgnoreCase(PART_INSERT_MEASUREMENT)) {
+            measurement = new LinkedHashMap<>();
             GregorianCalendar date = Utils.getUnixEpoch();
-            String dateAsString = Utils.format(date, Query.DATA_SQL_PATTERN);
-            HashMap<String, String> ind = new HashMap<String, String>();
-            ind.put("ind-id",           parser.getStringParameter("ind-id", VOID_STRING));
-            ind.put("prj-id",           parser.getStringParameter("prj-id", VOID_STRING));
-            ind.put("mon-nome",         parser.getStringParameter("mon-nome", VOID_STRING));
-            ind.put("mon-descr",        parser.getStringParameter("mon-descr", VOID_STRING));
-            ind.put("mon-data",         parser.getStringParameter("mon-data", dateAsString));
-            ind.put("mon-milestone",    parser.getStringParameter("mon-milestone", VOID_STRING));
-            formParams.put(Query.MONITOR_PART, ind);
+            String dateAsString = Utils.format(date, DATA_SQL_PATTERN);
+            measurement.put("valore",   parser.getStringParameter("mon-value", VOID_STRING));
+            measurement.put("azioni",   parser.getStringParameter("mon-descr", VOID_STRING));
+            measurement.put("motivi",   parser.getStringParameter("mon-infos", VOID_STRING));
+            measurement.put("ultima",   parser.getStringParameter("mon-miles", String.valueOf(NOTHING)));
+            measurement.put("data",     parser.getStringParameter("mon-data", dateAsString));
+            measurement.put("ind",      parser.getStringParameter("mon-ind", VOID_STRING));
+            formParams.put(part, measurement);
         }
 
         /* ******************************************************** *
@@ -652,6 +658,15 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
     }
     
     
+    /**
+     * Calcola le breadcrumbs appropriate per le varie richieste
+     * 
+     * @param breadCrumbs   lista di breadcrumbs by default, da manipolare
+     * @param part          valore del parametro di navigazione 'p'
+     * @param survey        oggetto rilevazione
+     * @return <code>LinkedList&lt;ItemBean&gt;</code> - breadcrumbs rimaneggiate
+     * @throws CommandException se si verifica un problema nel recupero di un attributo obbligatorio
+     */
     private static LinkedList<ItemBean> loadBreadCrumbs(LinkedList<ItemBean> breadCrumbs, 
                                                         String part,
                                                         CodeBean survey) 
@@ -727,6 +742,34 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                 index++;
             }
         }        
+    }
+    
+    
+    /**
+     * Dati in input una misura di mitigazione del rischio corruttivo,
+     * travasa le misurazioni dei suoi indicatori, collegati alle sue fasi
+     * di attuazione, in un oggetto vettoriale restituito come valore.
+     * 
+     * @param ms la misura di mitigazione, contenente i dettagli del monitoraggio (fasi etc.)
+     * @return <code>ArrayList&lt;MeasurementBean&gt;</code> - elenco delle misurazioni trovate per la misura data 
+     */
+    private static ArrayList<MeasurementBean> decantMeasurements(MeasureBean ms) {
+        // Measurement Bean List
+        ArrayList<MeasurementBean> mbl = new ArrayList<>();
+        // Per ogni fase della misura
+        for (ActivityBean fs : ms.getFasi()) {
+            // Per ogni indicatore di ogni fase
+            IndicatorBean ib = fs.getIndicatore();
+            if (ib != null) {
+                // Recupera le sue misurazioni
+                Vector<MeasurementBean> mbv = (Vector<MeasurementBean>) ib.getMisurazioni();
+                // E le trasforma in una lista con order insertion (non sincronizzata)
+                for (MeasurementBean mb :  mbv) {
+                    mbl.add(mb);
+                }
+            }
+        }
+        return mbl;
     }
     
 }
