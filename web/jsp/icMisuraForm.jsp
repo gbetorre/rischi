@@ -20,7 +20,7 @@
     <div class="form-custom bg-note">
       <form accept-charset="ISO-8859-1" id="inm-form" action="" method="post">
         <input type="hidden" id="ms-code" name="ms-code" value="${meas.codice}" />
-        <div class="panel-heading bgAct19">
+        <div class="panel-heading bgAct19" id="details">
           <h5 class="fw-bold text-dark">
             <i class="fa-solid fa-file-circle-plus"></i>
             <c:out value="Dettagli monitoraggio" />
