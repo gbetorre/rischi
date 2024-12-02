@@ -51,6 +51,7 @@ import java.sql.Time;
 import java.util.Date;
 import java.util.Vector;
 
+import it.rol.Constants;
 import it.rol.exception.AttributoNonValorizzatoException;
 
 /**
@@ -136,7 +137,7 @@ public class IndicatorBean extends CodeBean {
         noteRevisione = null;
         tipo = null;
         stato = null;
-        totMisurazioni = BEAN_DEFAULT_ID;
+        totMisurazioni = Constants.NOTHING;
         misurazioni = null;
 	}
 
@@ -515,18 +516,14 @@ public class IndicatorBean extends CodeBean {
      * ************************************************************************* */
     /**
      * Restituisce il numero di misurazioni eventualmente presenti 
-     * relative all'indicatore, o il valore di default altrimenti.
-     * L'attributo &egrave; obbligatorio non perch&eacute; sia obbligatorio
-     * che per un dato indicatore siano presenti misurazioni, ma perch&eacute;
-     * deve essere sempre possibile stabilire, quanto meno, se per quell'
-     * indicatore sono o meno presenti misurazioni "at all".
+     * relative all'indicatore, o il valore di default altrimenti
+     * (cio&egrave;, in questo caso, zero).
      * 
      * @return <code>int</code> - numero di misurazioni trovate sull'indicatore
-     * @throws AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (potrebbe essere un dato obbligatorio)
      */
-    public int getTotMisurazioni() throws AttributoNonValorizzatoException {
-        if (totMisurazioni == BEAN_DEFAULT_ID) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo numero misurazioni indicatore non valorizzato! Ci sono o non ci sono misurazioni su questo indicatore? Questo deve essere un attributo sempre decidibile.");
+    public int getTotMisurazioni() {
+        if (misurazioni != null && !misurazioni.isEmpty()) {
+            totMisurazioni = misurazioni.size();
         }
         return totMisurazioni;
     }
