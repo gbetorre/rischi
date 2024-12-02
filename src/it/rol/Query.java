@@ -1448,6 +1448,26 @@ public interface Query extends Serializable {
             "   ,   MZ.ultimo                           AS \"ultimo\"" +
             "   ,   MZ.data_ultima_modifica             AS \"dataUltimaModifica\"" +
             "   ,   MZ.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   FROM misurazione MZ" +
+            "       INNER JOIN rilevazione S ON MZ.id_rilevazione = S.id" +
+            "   WHERE (MZ.id_indicatoremonitoraggio = ?) " +
+            "       AND MZ.id_rilevazione = ?" +
+            "       AND (MZ.id = ? OR -1 = ?)" +
+            "   ORDER BY MZ.data_ultima_modifica";
+    
+    /**
+     * <p>Seleziona l'elenco di tutte le misurazioni collegate a una 
+     * misurazione di dato codice, nel contesto di una rilevazione di dato id</p>
+     */
+    public static final String GET_MEASUREMENTS_BY_MEASURE = 
+            "SELECT DISTINCT" +
+            "       MZ.id                               AS \"id\"" +
+            "   ,   MZ.valore                           AS \"valore\"" +
+            "   ,   MZ.azioni                           AS \"informativa\"" +
+            "   ,   MZ.motivazioni                      AS \"descrizione\"" +
+            "   ,   MZ.ultimo                           AS \"ultimo\"" +
+            "   ,   MZ.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   MZ.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
             "   ,   MZ.id_rilevazione                   AS \"idRilevazione\"" +
             "   FROM misurazione MZ" +
             "       INNER JOIN rilevazione S ON MZ.id_rilevazione = S.id" +
@@ -2012,6 +2032,32 @@ public interface Query extends Serializable {
             "   ,       ? " +       // id rilevazione
             "          )" ;
     
+    /**
+     * <p>Query per inserimento di una misurazione di un indicatore di monitoraggio.</p>
+     */
+    public static final String INSERT_MEASUREMENT =
+            "INSERT INTO misurazione" +
+            "   (   valore" +
+            "   ,   azioni" +
+            "   ,   motivazioni" +
+            "   ,   ultimo" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_indicatoremonitoraggio" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // valore
+            "   ,       ? " +       // azioni
+            "   ,       ? " +       // motivazioni
+            "   ,       ? " +       // ultimo
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id indicatore
+            "   ,       ? " +       // id rilevazione
+            "          )" ;
+
     /* ********************************************************************** *
      *                         Query di aggiornamento                         *
      * ********************************************************************** */
