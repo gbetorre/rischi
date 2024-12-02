@@ -246,7 +246,7 @@ label.profileLabel {
 }
 
 .marginBottom {
-	margin-bottom: 10px;
+	margin-bottom: 10px !important;
 }
 
 div.actstate{
