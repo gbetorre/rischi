@@ -28,10 +28,10 @@
             /*background: #cccccc;*/
         }
     </style>
-    <form accept-charset="ISO-8859-1" id="mis-form" class="panel subfields-green" action="" method="post">
+    <form accept-charset="ISO-8859-1" id="mon-form" class="panel subfields-green" action="" method="post">
       <input type="hidden" id="mon-meas" name="mon-meas" value="${meas.codice}" />
-      <input type="hidden" id="mon-fase" name="mon-fase" value="${fase.id}" />
-      <input type="hidden" id="mon-ind" name="mon-ind" value="${fase.indicatore.id}" />
+      <input type="hidden" id="mon-fase" name="mon-fase" value="${phas.id}" />
+      <input type="hidden" id="mon-ind" name="mon-ind" value="${ind.id}" />
       <div class="panel-heading bgAct13">
         <div class="noHeader">
           <i class="fa-regular fa-pen-to-square"></i>&nbsp;
@@ -60,7 +60,7 @@
             <a href="${initParam.appName}/?q=ic&p=ind&idI=${ind.id}&idF=${phas.id}&mliv=${meas.codice}&r=${param['r']}" title="Modificato:${indLastMod} ${fn:substring(ind.oraUltimaModifica,0,5)}">
               <c:out value="${ind.nome}" escapeXml="false" />
             </a>
-            <dl class="sezioneElenco custom-dl" style="margin-bottom: 10px;">
+            <dl class="sezioneElenco custom-dl marginBottom">
               <dt class="text-primary">Tipo Indicatore</dt>
               <dd>
                 <span class="badge border-basso textcolormaroon">
@@ -83,7 +83,7 @@
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory-xthin bgAct13"><strong>Data Monitoraggio</strong></div>
           <div class="col-sm-5">
-            <input type="text" class="form-custom calendarData" id="mon-data" name="mon-data" value="<fmt:formatDate value='${now}' pattern='dd/MM/yyyy' />" title="data di sistema" readonly disabled>
+            <input type="text" class="form-custom" id="mon-data" name="mon-data" value="<fmt:formatDate value='${now}' pattern='dd/MM/yyyy' />" title="data di sistema" readonly>
           </div>
         </div>
         <hr class="separatore">
@@ -93,70 +93,55 @@
             <c:when test="${ind.tipo.id eq 1}">
             <script>
               function saveVal(val) {
-                var hiddenValue = document.getElementById("mon-nome");
+                var hiddenValue = document.getElementById("mon-value");
                 hiddenValue.value = val;
               }
             </script>
             <div class="col-sm-4 mandatory-xthin bgAct13"><strong>Risultato</strong></div>
             <div class="col-sm-6">
-              <select class="form-custom bgAct2" id="mon-value" name="mon-value" onchange="saveVal(this.value)">
+              <select class="form-custom bgAct2" id="mon-name" name="mon-name" onchange="saveVal(this.value)">
                 <option value="0" selected>Off</option>
                 <option value="1">On</option>
               </select>
-              <input type="hidden" class="form-control" id="mon-nome" name="mon-nome" value="OFF">
+              <input type="hidden" class="form-control" id="mon-value" name="mon-value" value="0">
             </div>
             </c:when>
             <c:when test="${ind.tipo.id eq 2}">
-            <div class="col-sm-4 mandatory-xthin bgAct13"><strong>Risultato</strong>
-             <span class="float-right"><a href="javascript:popupWindow('Help sul formato','popup1',true,'Sono ammesse cifre decimali: utilizzare il punto come separatore dei decimali.<br><cite>(Esempio: 3.65)</cite>');" class="helpInfo" id="milestone">
-              </a></span>
+            <div class="col-sm-4 mandatory-xthin bgAct13">
+              <strong>Risultato</strong>
             </div>
             <div class="col-sm-6">
-             
-              <input type="text" class="form-custom bg-warning" id="mon-nome" name="mon-nome" value="" placeholder="Inserisci un numero">
-
-              </div>
-              
-
+              <span class="float-right">
+                <a href="javascript:popupWindow('Help sul formato','popup1',true,'Sono ammesse cifre decimali: utilizzare il punto come separatore dei decimali.<br><cite>(Esempio: 3.65)</cite>');" class="helpInfo" id="milestone"></a>
+              </span>
+              <input type="text" class="form-custom bg-warning" id="mon-value" name="mon-value" value="" placeholder="Inserisci un numero">
+            </div>
             </c:when>
             <c:when test="${ind.tipo.id eq 3}">
-            <script>
-              function saveVal(val) {
-                var hiddenValue = document.getElementById("mon-nome");
-                hiddenValue.value = val + '%';
-              }
-              function reset(val) {
-                var showValue = document.getElementById("mon-value");
-                showValue.value = val;
-              }
-            </script>
-            <div class="col-sm-4 mandatory-xthin bgAct13"><strong>Risultato</strong></div>
+            <div class="col-sm-4 mandatory-xthin bgAct13">
+              <strong>Risultato</strong>
+            </div>
             <div class="col-sm-6">
-              <a href="javascript:popupWindow('Help sul formato','popup1',true,'Inserire un valore compreso tra 0 e 100 (senza il simbolo di percentuale).<br>Sono ammesse cifre decimali: utilizzare il punto come separatore dei decimali.<br><cite>(Esempio: 3.65, diventer&agrave; 3.65%)</cite>');" class="helpInfo" id="milestone">
-              ?
-              </a>
-
-              <input type="text" class="form-custom bg-warning" id="mon-value" name="mon-value" value="" placeholder="Inserisci una percentuale" onblur="saveVal(this.value)">%
-              <i class="fa fa-arrow-right"></i>
-              <input type="text" class="form-control-custom" id="mon-nome" name="mon-nome" value="" readonly onclick="reset('')">
+              <span class="float-right">
+                <a href="javascript:popupWindow('Help sul formato','popup1',true,'Inserire un valore compreso tra 0.00 e 100.00 (senza il simbolo di percentuale).<br>Sono obbligatorie due cifre decimali: utilizzare il punto come separatore dei decimali.<br><cite>(Esempio: 3.65, diventer&agrave; 3.65%)</cite>');" class="helpInfo" id="milestone"></a>
+              </span>
+              <input type="text" class="form-custom bg-warning" id="mon-value" name="mon-value" value="" placeholder="Inserisci una percentuale">%
             </div>
             </c:when>
             <c:otherwise>
-          <div class="col-sm-4 mandatory-xthin bgAct13"><strong>Risultato</strong></div>
-          <div class="col-sm-6">
-              <input type="text" class="form-control" id="mon-nome" name="mon-nome" value="" placeholder="Inserisci valore misurazione (obbligatorio)">
-          </div>
+            <div class="col-sm-4 mandatory-xthin bgAct13"><strong>Risultato</strong></div>
+            <div class="col-sm-6">
+              <input type="text" class="form-control" id="mon-value" name="mon-value" value="" placeholder="Inserisci valore misurazione (obbligatorio)">
+            </div>
             </c:otherwise>
           </c:choose>
-
-
         </div>
         <hr class="separatore">
         <div class="row">
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory bgAct13"><strong>Azioni svolte per raggiungere l'obiettivo</strong></div>
           <div class="col-sm-6">
-            <textarea class="form-control" name="ind-descr" placeholder="Inserisci una descrizione delle attivit&agrave; svolte"></textarea>
+            <textarea class="form-control" id="mon-descr" name="mon-descr" placeholder="Inserisci una descrizione delle attivit&agrave; svolte"></textarea>
           </div>
         </div>
         <hr class="separatore">
@@ -164,7 +149,7 @@
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 bg-note"><br><strong>Motivazioni ritardo / mancato raggiungimento</strong></div>
           <div class="col-sm-6">
-            <textarea class="form-control" name="ind-descr" placeholder="Inserisci il motivo del mancato raggiungimento del target"></textarea>
+            <textarea class="form-control" id="mon-infos" name="mon-infos" placeholder="Inserisci il motivo del mancato raggiungimento del target"></textarea>
           </div>
         </div>
         <hr class="separatore" />
@@ -187,107 +172,80 @@
     <script type="text/javascript">
       var offsetcharacter = 5;
       
-      $('input[type="text"].calendarData').datepicker();        
+      //$('input[type="text"].calendarData').datepicker();        
       
       $('#btn-save').click(function (e){
         e.preventDefault; 
       });
       
       $(document).ready(function () {
-        $('#ind-form').validate ({
+        $('#mon-form').validate ({
           rules: {
-            'ind-tipo': {
+            'mon-data': {
               required: true
             },
-            'ind-nome': {
+            'mon-value': {
+              required: true,
+              checkNumber: true,
+              checkPercent: true
+            },            
+            'mon-descr': {
               required: true,
               minlength: offsetcharacter
             },
-            'ind-baseline': {
-              required: true,
-              checkNumber: true,
-              checkPercent: true
-            },
-            'ind-database': {
-                required: true
-            },
-            'ind-target': {
-              required: true,
-              checkNumber: true,
-              checkPercent: true
-            },
-            'ind-datatarget': {
-                required: true
+            'mon-infos': {
+              required: false,
+              minlength: offsetcharacter
             }
           }, 
           messages: {
-            'ind-tipo':       "Inserire il tipo dell'indicatore",
-            'ind-nome':       "Inserire almeno " + offsetcharacter + " caratteri.",
-            'ind-baseline': {  
-              required:       "Inserire il valore baseline",
-              checkNumber:    "Inserire un numero",
-              checkPercent:   "Inserire una percentuale nel formato ##.##"
+            'mon-data':       "La data &grave; obbligatoria",
+            'mon-value': {  
+                required:       "Campo obbligatorio",
+                checkNumber:    "Inserire un numero",
+                checkPercent:   "Inserire una percentuale nel formato ##.##"
             },
-            'ind-database':   "Inserire la data baseline",
-            'ind-target':   {  
-              required:       "Inserire il valore target",
-              checkNumber:    "Inserire un numero",
-              checkPercent:   "Inserire una percentuale nel formato ##.##"
-            },
-            'ind-datatarget': "Inserire la data target"
+            'mon-descr':      "Inserire almeno " + offsetcharacter + " caratteri.",
+            'mon-infos':      "Inserire almeno " + offsetcharacter + " caratteri."
           },
           submitHandler: function (form) {
             return true;
           }
         });
-          
-        $('#ind-tipo').change(function() {
-          var selectedValue = $(this).val();
-          var displayB = $('#displayBase');
-          var displayT = $('#displayTarget');
-          switch (selectedValue) {
-            case '1':
-              displayB.html('<select class="form-custom large-4" name="ind-baseline"><option value="0">Off</option><option value="1">On</option></select>');
-              displayT.html('<select class="form-custom large-4" name="ind-target"><option value="0">Off</option><option value="1">On</option></select>');
-              $.validator.addMethod("checkNumber", function(value, element) {
-                return true;
-              });
-              $.validator.addMethod("checkPercent", function(value, element) {
-                return true;
-              });
-              break;
-            case '2':
-              displayB.html('<input type="text" class="form-control large-4" id="ind-baseline" name="ind-baseline" placeholder="Inserisci un numero">');
-              displayT.html('<input type="text" class="form-control large-4" id="ind-target" name="ind-target" placeholder="Inserisci un numero">');
-              $.validator.addMethod("checkNumber", function(value, element) {
-                if (this.optional(element) || parseInt(value) || value == 0)
-                  return true;
-              }, "Inserire un numero");
-              $.validator.addMethod("checkPercent", function(value, element) {
-                return true;
-              });
-              break;
-            case '3':
-              displayB.html('<input type="text" class="form-control large-4" id="ind-baseline" name="ind-baseline" placeholder="Inserisci una percentuale">');
-              displayT.html('<input type="text" class="form-control large-4" id="ind-target" name="ind-target" placeholder="Inserisci una percentuale">');
-              $.validator.addMethod("checkNumber", function(value, element) {
-                return true;
-              });
-              $.validator.addMethod("checkPercent", function(value, element) {
-                // Regular expression to match the percentage format
-                const regex = /^(100\.00|[0-9]{1,2}\.[0-9]{2})$/;
-                // Test the value against the regex
-                if (regex.test(value)) {
-                  return true; // Valid percentage
-                }
-              }, "Inserire una percentuale nel formato ##.##");
-              break;
-            default:
-              displayB.html('<p class="alert alert-danger">Scegliere un tipo indicatore!</p>');
-              displayT.html('<p class="alert alert-danger">Scegliere un tipo indicatore!</p>');
-          }
+        
+    <c:choose>
+      <c:when test="${ind.tipo.id eq 1}">
+        $.validator.addMethod("checkNumber", function(value, element) {
+          return true;
         });
-
+        $.validator.addMethod("checkPercent", function(value, element) {
+          return true;
+        });
+      </c:when>
+      <c:when test="${ind.tipo.id eq 2}">
+        $.validator.addMethod("checkNumber", function(value, element) {
+          if (this.optional(element) || parseInt(value) || value == 0)
+            return true;
+        }, "Inserire un numero");
+        $.validator.addMethod("checkPercent", function(value, element) {
+          return true;
+        });
+      </c:when>
+      <c:when test="${ind.tipo.id eq 3}">
+        $.validator.addMethod("checkNumber", function(value, element) {
+          return true;
+        });
+        $.validator.addMethod("checkPercent", function(value, element) {
+          // Regular expression to match the percentage format
+          const regex = /^(100\.00|[0-9]{1,2}\.[0-9]{2})$/;
+          // Test the value against the regex
+          if (regex.test(value)) {
+            return true; // Valid percentage
+          }
+        }, "Inserire una percentuale nel formato ##.##");
+      </c:when>
+    </c:choose>
+        
       });
     </script> 
   </c:catch>
