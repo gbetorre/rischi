@@ -238,6 +238,7 @@ in the case of the current application, in fact, version numbers have only the s
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)</p>
 <cite>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</cite>
 
+- [2.1.1] (02/12/2024) Implemented client-side controls in measurement form
 - [2.1.0] (28/11/2024) Added facility to download process register in CSV format (extracts processes with PxI original and PxI mitigated after measures)
 - [2.0.9] (25/11/2024) Added page containing form to add a measurement for monitoring; bug fix
 - [2.0.8] (19/11/2024) Implemented client-side controls in form to add an indicator; added indicator details page; bug fix
