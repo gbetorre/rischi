@@ -77,15 +77,17 @@
           </td>
       <c:if test="${not empty fase.indicatore}">
         <c:choose>
-          <c:when test="${false}">
+          <c:when test="${fase.indicatore.totMisurazioni gt zero}">
             <td scope="row" class="bgcolorgreen">
               <div class="form-check text-center">
-                <span>
-                  <a href="" title="Clicca per visualizzare le misurazioni">SI</a>
-                  <span class="badge badge-dark">
-                    <c:out value="20" />
-                  </span>
-                </span>
+                <strong>
+                  <a href="${initParam.appName}/?q=ic&p=mon&mliv=${meas.codice}&r=${param['r']}" title="Clicca per visualizzare le misurazioni">
+                    SI&nbsp;
+                    <span class="badge badge-warning align-items-center border-basso">
+                      <c:out value="${fase.indicatore.totMisurazioni}" />
+                    </span>
+                  </a>
+                </strong>
               </div>
             </td>
           </c:when>
