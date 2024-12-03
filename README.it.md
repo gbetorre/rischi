@@ -52,6 +52,7 @@
 <!-- Insert TOC here -->
 
 # Software di Mappatura dei Rischi corruttivi [ROL-RMS]
+
 L'applicazione web per la mappatura dei rischi corruttivi <code>ROL-RMS</code> serve ad aiutare Enti, Pubbliche Amministrazioni, aziende partecipate &ndash; e chiunque sia interessato a monitorare e gestire il rischio corruttivo &ndash; <strong>a quantificare automaticamente i rischi corruttivi</strong> cui i loro processi organizzativi sono esposti e ad indirizzare questi soggetti a mettere in atto <strong>le contromisure adeguate</strong>.
 
 [![Product Landing Page][product-landing2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png)
@@ -64,16 +65,48 @@ L'applicazione web per la mappatura dei rischi corruttivi <code>ROL-RMS</code> s
 
 [![Goal Sample][indicator-sample01]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample01.png)
 <br>
-<strong>*Fig.1 - L'obiettivo del software &egrave; ottenere, in automatico, il valore di rischio per ogni processo organizzativo considerato (dati fittizi&#770;)*</strong><br>
+<strong>*Fig.1 - Uno degli obiettivi del software &egrave; quantificare, in automatico, il valore di rischio per ogni processo organizzativo considerato (dati fittizi&#770;)*</strong><br>
 
 <p>
-Attraverso la risposta ad una serie di quesiti posti a responsabili ed operatori presso specifici uffici amministrativi (intervista), l'applicazione permette di ottenere, automaticamente, una serie di indici relativi a specifici rischi corruttivi cui possono essere esposti i processi organizzativi presidiati dalle strutture stesse.<br>
+Il workflow generale &egrave; suddiviso in 4 distinti step, o filoni di lavoro:
+* Step 1: caricamento di strutture e processi
+* Step 2: calcolo del rischio corruttivo di ogni processo
+* Step 3: indicazione delle misure di mitigazione da applicare ad ogni processo
+* Step 4: monitoraggio al fine di verificare se le misure previste sono state applicate.
+
+Questi 4 step sono pensati entro un flusso sincrono, ovvero per essere portati a compimento in sequenza, non in parallelo: ad esempio, non si pu&ograve; passare allo Step 2 se non &egrave; stato completato lo Step 1; e cos&iacute; via.
+<br>
+Alla fine del 4° Step, sar&agrave; stata completata una rilevazione completa del monitoraggio e del trattamento del rischio corruttivo in organizzazione.
+<br>
+A questo punto, si pu&ograve; iterare il processo, procedendo con una nuova rilevazione; il sistema &egrave; predisposto, infatti, per la storicizzazione.
+<br>
+Ogni rilevazione successiva potr&agrave; essere messa a confronto con la precedente attraverso specifici cruscotti multirilevazione, che permetteranno di analizzare i delta e i trend relativi ai processi e ai relativi rischi corruttivi, da una rilevazione all'altra.
 </p>
+
+## Overview
+
+Nel prossimo capitolo verranno esaminati pi&uacute; in dettaglio i vari step.<br>
+Nel presente paragrafo viene data, invece, una descrizione a grandi linee del workflow generale dal punto di vista delle azioni messe in atto per realizzare l'obiettivo generale.
+<p>
+Anzitutto definiamo i soggetti coinvolti:
+* L'esperto o l'ufficio anticorruzione
+* I responsabili e gli operatori degli uffici
+* Il software engineer
 
 [![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.95.png)
 <br>
-<strong>*Fig.2 - Il software &egrave; un'applicazione ad accesso riservato (per accedere &egrave; necessario disporre di credenziali)*</strong>
+<strong>*Fig.2 - Il software &egrave; un'applicazione ad accesso riservato (per accedere &egrave; necessario disporre di credenziali). Pertanto &egrave; possibile determinare il profilo utente all'accesso al sistema.*</strong>
 <br><br>
+
+Rispetto ai ruoli svolti: 
+* L'esperto di anticorruzione, con l'aiuto del software, effettua il calcolo del rischio, stabilisce quali misure di mitigazione applicare ai processi pi&uacute; a rischio e ne cura il monitoraggio.
+* Il personale degli uffici che sovrintendono i processi rispondono alle domande e forniscono i valori raccolti nel monitoraggio.
+* Il software engineer cura la fase di mappatura dei processi e coadiuva gli altri soggetti attraverso tutto il workflow.
+
+Consultando la mappatura dei processi, effettuata nello Step 1, si &egrave; in grado di stilare un elenco delle strutture organizzative coinvolte nell'erogazione dei relativi processi.
+A quel punto, &egrave; possibile quindi rivolgere una serie di quesiti a responsabili ed operatori ubicati presso tali strutture, in merito ai processi prodotti dalle strutture stesse.
+Attraverso l'analisi delle risposte a tali quesiti, l'applicazione permette di ottenere, automaticamente, una serie di indici relativi a specifici rischi corruttivi cui risultano esposti i processi organizzativi presidiati dalle strutture stesse.<br>
+</p>
 
 <p>
 Ogni quesito, infatti, &egrave; collegato ad uno o pi&uacute; specifici rischi corruttivi; perci&ograve;, in funzione della risposta data dal personale intervistato, l'applicazione esprime specifici indici e punti di attenzione e, in sintesi, calcola il livello di rischio cui il processo esaminato risulta esposto. 
@@ -101,6 +134,7 @@ Incrociando i valori ottenuti negli indicatori di probabilit&agrave; (P) con que
 Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le azioni organizzative da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
 
 # Come funziona il software
+
 Ovviamente l'applicazione Rischi On Line: Risk Mapping Software (ROL-RMS) si appoggia su un database, specificamente un database relazionale di tipo PostgreSQL (versione 12 e successive), in cui sono popolati i quesiti che verranno sottoposti alle strutture nelle interviste (e tutte le altre informazioni persistenti).
 
 [![DB representation, layout circular][schema-physical]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/DB-circular.png)
@@ -286,18 +320,20 @@ Su un indicatore di monitoraggio vengono applicate una o pi&ugrave; misurazioni;
 * La misura &egrave; una rappresentazione delle azioni correttive da realizzare per abbassare il livello di rischio.
 * La misurazione &egrave; invece una verifica applicata a un indicatore di monitoraggio che consiste nel registrare se effettivamente le azioni correttive sono state messe in atto.
 
-La misurazone &egrave; quindi, in certo qual modo, un epifenomeno della misura.<br>
+La misurazione &egrave; quindi, in certo qual modo, un epifenomeno della misura.<br>
 
-# Sviluppi futuri
+# Roadmap
+
 Tre delle funzioni attualmente implementate nel software ROL-RMS, ovvero:
-
+<mark>
 * il calcolo del rischio esistente, 
 * il suggerimento circa le misure di mitigazione da applicare al rischio esistente,
 * la produzione di tabelle comparative per consultare come varia il rischio in funzione delle misure ipotetiche e di quelle applicate,
+</mark>
 
 costituiscono strumenti utili (tools), che possono costituire un valido aiuto per l'ufficio o l'esperto del rischio corruttivo che devono effettuare un assessment relativamente a questi aspetti nel contesto di un'organizzazione.<br>
 
-Allo stato attuale (versione di riferimento: <code>2.0.8</code>) il software &egrave; gi&agrave; pronto per essere adattato,
+Allo stato attuale (versione di riferimento: <code>2.1</code>) il software &egrave; gi&agrave; pronto per essere adattato,
 con un minimo adeguamento, a qualunque realt&agrave; organizzativa che voglia
 effettuare un'analisi dettagliata dei rischi corruttivi cui i processi erogati
 dall'organizzazione stessa sono esposti.
@@ -312,8 +348,7 @@ diventa possibile effettuare una stima relativamente accurata del tempo necessar
 affinch&eacute; sia possibile iniziare la campagna di interviste e, conseguentemente, ottenere i risultati dei vari indicatori di rischio e del giudizio sintetico P x I.
 <br><br>
 
----
-
+## Sviluppi futuri
 Vi sono, inoltre, alcune possibili evoluzioni, che potrebbero essere implementate in versioni successive:
 * Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentire loro di compilare autonomamente le risposte ai quesiti (certificando, automaticamente, i dati inseriti)
 * Predisposizione di monitoraggi e reportistica, anche in forma grafica (istogrammi, grafici a torta, etc.), per consentire alla <em>governance</em> di effettuare controlli sugli stati di avanzamento e sui risultati raggiunti tramite il progetto di mappatura dei rischi
@@ -326,6 +361,160 @@ Ognuno pu&ograve; sentirsi libero di proporre miglioramenti ed evoluzioni.
 </p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### ToDo (Roadmap)
+- Implementare un motore di ricerca interno
+- Implementare ricerca sui quesiti per chiave testuale
+- Aggiungere suggerimenti asincroni sulla digitazione della chiave testuale
+- Implementare ricerca per struttura
+- Implementare ricerca per processo 
+- Implementare ricerca di quesiti e risposte per ambito di analisi 
+- Implementare estrazione risultati forniti dal motore di ricerca interno in open data
+- Aggiungere pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
+- Implementare reportistiche e grafici sul rischio in rapporto alla struttura
+- Implementare pagina di dettaglio struttura
+- Implementare pagina di dettaglio soggetto contingente/interessato
+- Implementare estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
+- Aggiungere pagina che mostra i processi erogati dalla struttura evocata in maniera asincrona al clic sul nodo di una struttura
+
+# History
+
+Questa sezione illustra l'evoluzione del software ROL nel contesto delle varie release.<br />
+In corrispondenza di ogni numero di versione non vengono descritte tutte le modifiche 
+effettuate ma solo i rilasci delle funzionalit&agrave; pi&uacute; significative.<br />
+Ogni numero di versione &egrave; per&ograve; corredato della data del commit 
+dei sorgenti, per cui consultando la History del repository sar&agrave; facile
+entrare nel merito di tutte le modifiche effettuate in corrispondenza della
+sottoversione: inoltre, ogni versione corrisponde ad un commit (a meno di errori), ma non ogni commit
+genera una versione.<br />
+
+<sub>
+NOTA: Per convenzione, nel software la versione viene mostrata in formato x.xx
+quindi accorpando la cifra della sub-sub versione a quella della subversione,
+mentre in questo changelog ha il classico formato x.x.x (ci&ograve;
+per apportare maggiore precisione descrittiva).<br />
+Inoltre, il significato delle subversioni &egrave; abbastanza differente da
+quello generale; infatti non identifica se la versione sia stabile o meno
+(aspetto solitamente identificato rispettivamente dalla cifra finale diversa da zero o uguale a zero)
+n&eacute; presenta salti rilevanti in funzione di modifiche di elevato impatto
+(p.es. passaggio dalla versione 6.1.38 alla versione 7.0.1 di VirtualBox, che ha
+segnato una modifica abbastanza grossa); nel caso dell'applicazione corrente, infatti,
+i numeri di versione hanno solo il signficato di tenere traccia dei rilasci 
+e dei deploy che sono stati effettuati 
+(1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)
+e fornirvi il relativo significato e la relativa motivazione.
+</sub>
+
+<!--
+- Aggiunta pagina che mostra i processi erogati dalla struttura evocata in maniera asincrona al clic sul nodo di una struttura
+- Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
+- Implementata pagina di dettaglio soggetto contingente/interessato
+- Implementata pagina di dettaglio struttura
+- [2.9.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
+- [2.9.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
+- [2.9.7] Implementata estrazione risultati in formato CSV
+- [2.9.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
+- [2.9.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
+- [2.9.4] Implementata form di ricerca sui quesiti per chiave testuale
+- ...
+-->
+
+- [2.1.1] (02/12/2024) Implementati controlli lato client in form di aggiunta misurazione di indicatore
+- [2.1.0] (28/11/2024) Aggiunta funzionalit&agrave; di download processi con PxI mitigati (stima) in formato CSV (estrae processi, PxI iniziale e valore del PxI calmierato che si otterrebbe se tutte le misure previste venissero effettivamente applicate)
+- [2.0.9] (25/11/2024) Aggiunta pagina contenente form per inserire una nuova misurazione di indicatore; correzione di bug
+- [2.0.8] (19/11/2024) Implementati controlli lato client in form di aggiunta indicatore di monitoraggio; aggiunta pagina dettagli indicatore di monitoraggio; correzione di bug
+- [2.0.7] (11/11/2024) Implementata pagina elenco indicatori di una misura monitorata
+- [2.0.6] (07/11/2024) Implementata funzionalit&agrave; di inserimento indicatore di monitoraggio 
+- [2.0.5] (05/11/2024) Aggiunta pagina contenente form per inserire un nuovo indicatore di monitoraggio; correzione di bug
+- [2.0.4] (31/10/2024) Revisione grafica pagine; miglioramenti nella presentazione (bottoni, etichette)
+- [2.0.3] (28/10/2024) Implementata funzionalit&agrave; di inserimento dettagli del monitoraggio di una misura
+- [2.0.2] (23/10/2024) Correzione di bug
+- [2.0.1] (21/10/2024) Delegato metodo di prevenzione attacchi tipo "Garden Gate" al manager che si occupa della sessione utente
+- [2.0.0] (15/10/2024) Aggiunta pagina contenente form per inserire i dettagli relativi al monitoraggio ad una misura di mitigazione selezionata
+- [1.9.9] (08/10/2024) Implementata gestione separata della connessione al database; correzione di bug
+- [1.9.8] (07/10/2024) Implementata pagina iniziale monitoraggio
+- [1.9.7] (30/09/2024) Prima bozza di implementazione codice per il monitoraggio; correzione di bug
+- [1.9.6] (23/09/2024) Prima bozza di implementazione componente software per la gestione degli indicatori di monitoraggio
+- [1.9.5] (16/09/2024) Miglioramenti nella presentazione (etichette); aggiunta evidenziazione testo filtrato tramite libreria DataTables
+- [1.9.4] (12/09/2024) Miglioramenti nella presentazione (icone, etichette); aggiunta evidenziazione testo filtrato tramite libreria DataTables
+- [1.9.3] (04/09/2024) Implementato report tabella dei PxI calmierati in base alle misure stimate
+- [1.9.2] (rilascio 02/08/2024 - commit 04/09/2024) Implementato algoritmo di ricalcolo PxI del processo in base alle misure applicate ai suoi rischi
+- [1.9.1] (29/07/2024) Miglioramenti nella presentazione (header, bottoni, messaggi); aggiunto attributo a oggetto misura per contenere un valore di popolarit&agrave; della misura stessa
+- [1.9.0] (22/07/2024) Implementato algoritmo di mitigazione a livello del PxI del singolo rischio in funzione delle misure applicate
+- [1.8.9] (25/06/2024) Uniformazione versione, descrizioni e commenti
+- [1.8.8] (20/06/2024) Ripristino del tema chiaro, mantenendo il tema scuro solo per l'header e le pagine di landing
+- [1.8.7] (19/06/2024) Prova tema scuro; prima bozza di implementazione algoritmo di mitigazione
+- [1.8.6] (05/06/2024) Revisione grafica pagina di landing; revisione di etichette
+- [1.8.5] (28/05/2024) Implementazione parallela calcolo indicatori di impatto; implementazione parallela calcolo rischi di processi e interviste collegate
+- [1.8.4] (27/05/2024) Prima bozza di implementazione report variazioni PxI dei rischi in funzione dell'applicazione (stimata) delle misure
+- [1.8.3] (17/05/2024) Completamento implementazione pagina dei dettagli di una misura. Implementazione parallela calcolo output di processi
+- [1.8.2] (16/05/2024) Implementazione parallela calcolo fasi di processo. Miglioramenti nella presentazione dei dettagli di una misura. Trasformazione di icone vettoriali in raster
+- [1.8.1] (14/05/2024) Implementazione parallela calcolo elementi (indicatori di tipo P, input di processi). Miglioramenti nella presentazione delle misure suggerite (eliminati doppioni)
+- [1.8.0] (13/05/2024) Prima bozza implementazione pagina dei dettagli di una misura di prevenzione/mitigazione del rischio. Miglioramenti nella presentazione delle misure suggerite (raggruppamento delle misure suggerite per tipologia di misura)
+- [1.7.9] (07/05/2024) Miglioramenti nella presentazione delle misure applicate; correzione di bug
+- [1.7.8] (06/05/2024) Implementazione funzione di assegnazione delle misure di mitigazione a specifico rischio nel contesto di un processo
+- [1.7.7] (22/04/2024) Aggiunta pagina contenente form per applicare misure di mitigazione a un rischio, elencante anche le misure suggerite sulla base dei fattori abilitanti trovati associati al rischio entro il contesto del processo
+- [1.7.6] (15/04/2024) Miglioramenti visualizzazione del registro delle misure di prevenzione: mostrata sostenibilit&agrave; economica della misura e strutture coinvolte
+- [1.7.5] (08/04/2024) Miglioramenti visualizzazione del registro delle misure di prevenzione: mostrata struttura capofila della misura
+- [1.7.4] (27/03/2024) Completamento implementazione funzione di inserimento delle misure di prevenzione
+- [1.7.3] (25/03/2024) Proseguimento implementazione inserimento e recupero delle misure di prevenzione
+- [1.7.2] (18/03/2024) Prima bozza di implementazione misure di prevenzione del rischio corruttivo
+- [1.7.1] (26/02/2024) Implementato blocco prima riga tabella del log delle variazioni; migliorie pagina report tabella dei rischi
+- [1.7.0] (13/02/2024) Completata prima versione del log delle variazioni tra l'ultimo caching dei valori degli indicatori e gli stessi calcolati a runtime; revisione di etichette
+- [1.6.9] (12/02/2024) Implementato nel ricalcolo indicatori il salvataggio delle motivazioni gi&agrave; inserite; correzione di bug
+- [1.6.8] (06/02/2024) Prima bozza di implementazione del log delle variazioni tra l'ultimo caching dei valori degli indicatori e gli stessi calcolati a runtime
+- [1.6.7] (29/01/2024) Implementata funzione di modifica/aggiunta nota al PxI; revisione di etichette; correzione di bug
+- [1.6.6] (22/01/2024) Implementata visualizzazione delle note al PxI con confronto valore PxI in memoria (a runtime) e valore PxI su disco (in cache)
+- [1.6.5] (16/01/2024) Aggiornamento annuale licenza
+- [1.6.4] (15/01/2024) Modificato ordinamento strutture; cambiata presentazione valore di rischio altissimo; correzione di bug
+- [1.6.3] (08/01/2024) Raffinata estrazione CSV relativa a intervista singola; aggiunto ordinamento per nome a nodi albero processi; migliorata presentazione report PxI dei processi
+- [1.6.2] (15/12/2023) Revisionato algoritmo di calcolo della dimensione di probabilit&agrave; P; aggiunto stile per evidenziare valore di rischio altissimo
+- [1.6.1] (11/12/2023) Revisionato algoritmo di calcolo dell'indicatore di impatto I3; correzione di bug
+- [1.6.0] (07/12/2023) Implementato output su file RTF del report tabellare riepilogante rischi e strutture; correzione di bug
+- [1.5.9] (30/11/2023) Raffinato algoritmo di calcolo indicatore I3 tenendo conto dell'interessamento di categorie globali di strutture e considerando non determinabili i casi in cui non risultano n&eacute; strutture n&eacute; soggetti associati alle fasi del processo (un processo &egrave; sempre funzione dell'attivit&agrave; di almeno una struttura o un soggetto contingente) 
+- [1.5.8] (29/11/2023) Predisposizione alla generazione di output su file RTF; correzioni nelle transcodifiche dei fine riga
+- [1.5.7] (28/11/2023) Riscritto codice per la produzione di output diversi da html sincrono; revisione di etichette
+- [1.5.6] (27/11/2023) Implementato calcolo dimensione I (impatto del rischio) e della combinazione di P ed I (indice PxI)
+- [1.5.5] (20/11/2023) Aggiunto calcolo dimensione P (probabilit&agrave; del rischio)
+- [1.5.4] (16/11/2023) Revisionato algoritmo di calcolo dell'indicatore di probabilit&agrave; P4; revisioni screenshot
+- [1.5.3] (13/11/2023) Aggiunta tabella riepilogativa del PxI di tutti i processi, elencante il valore ottenuto in ogni indicatore per ogni processo
+- [1.5.2] (06/11/2023) Aggiunti in tabella riepilogativa del PxI di tutti i processi e strutture, i macroprocessi, le aree di rischio ed i soggetti interessati a ogni processo
+- [1.5.1] (30/10/2023) Aggiunta tabella riepilogativa del PxI di tutti i processi, elencante rischi e strutture associate a ogni processo
+- [1.5.0] (23/10/2023) Aggiunte sottopagine in sezione report; migliorata presentazione ricerche predefinite
+- [1.4.9] (19/10/2023) Raffinato controllo formale sulla validita' della risposta: omessi alcuni controlli in caso la risposta sia relativa a un quesito figlio (quesiti di tipo "di cui")
+- [1.4.8] (17/10/2023) Implementato caching su disco dei valori degli indicatori di rischio
+- [1.4.7] (11/10/2023) Trasformata struttura contenente gli indicatori di rischio in mappa ordinata
+- [1.4.6] (10/10/2023) Aggiunto attributo a oggetto processo anticorruttivo per contenere valori degli indicatori di rischio
+- [1.4.5] (02/10/2023) Mostrate interviste nella pagina di dettaglio del processo, con valori degli indicatori calcolati; implementato algoritmo di scelta in caso di valori di rischio divergenti tra interviste multiple sullo stesso processo. Rimosso codice legacy.
+- [1.4.4] (25/09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5 nel contesto della singola intervista; implementato metodo per effettuare i controlli lato server riguardo la validit&agrave; della risposta
+- [1.4.3] (18/09/2023) Prima bozza di implementazione degli indicatori P1, P2, P3 nel contesto della singola intervista
+- [1.4.2] (12/09/2023) Corretta gestione charset nella form di modifica della risposta; mostrato id della fase come title nella pagina di dettaglio del processo
+- [1.4.1] (11/09/2023) Aggiunta gestione in intervista del tipo di quesito che prevede come risposta una percentuale; aggiunta di immagini svg come marcatori di alberatura; revisione pagina di landing; spostamento di alcune ricerche predefinite dalla pagina di landing alla pagina della ricerca libera; ampliata larghezza visibile applicazione. 
+- [1.4.0] (04/09/2023) Correzione etichetta, tipografia; aggiunti screenshot.
+- [1.3.9] (29/08/2023) Implementata pagina consultazione intervista per nascondere/mostrare le domande senza risposta. Migliorie grafiche di presentazione dei dettagli di un processo; revisione grafica pagina di login, link per scaricare csv, etichette e altri ornamenti.
+- [1.3.8] (24/08/2023) Implementata facility in consultazione intervista per nascondere/mostrare le domande senza risposta.
+- [1.3.7] (01/08/2023) Implementata funzione inserimento relazione ternaria tra rischio corruttivo e fattore abilitante, nel contesto di un processo. Correzione di bug.
+- [1.3.6] (24/07/2023) Implementato registro dei fattori abilitanti i rischi; mostrati fattori abilitanti collegati a rischi nel contesto di un processo
+- [1.3.5] (26/06/2023) Implementata funzione inserimento relazione tra rischio corruttivo e processo censito dall'anticorruzione
+- [1.3.4] (27/03/2023) Delegata gestione interviste (visualizzazione, inserimento, aggiornamento risposte) a un nuovo componente sofware gemmato dalla Command dei rischi
+- [1.3.3] (06/03/2023) Implementata funzione di aggiunta di un rischio corruttivo al registro dei rischi
+- [1.3.2] (28/02/2023) Aggiunta pagina dettagli output, elencante i processi generati a partire dall'output corrente laddove esso abbia agito da input di processo. Implementata pagina di elenco output. Correzione di bug.
+- [1.3.1] (15/02/2023) Aggiunta funzionalit&agrave; di download registro dei rischi in formato CSV (estrae solo rischi con processi associati, come da regole di business)
+- [1.3.0] (13/02/2023) Aggiunta pagina dettagli rischio corruttivo, elencante i processi esposti al rischio selezionato. Implementata pagina stand-alone dettagli processo. Riordinata pagina di landing.
+- [1.2.9] (08/02/2023) Piccole migliorie di presentazione nei dettagli di un processo: evidenziata area di rischio, mostrato dettaglio soggetto contingente
+- [1.2.8] (06/02/2023) Ampliato dettaglio processo anticorruttivo: mostrati i rischi cui il processo &egrave; esposto
+- [1.2.7] (30/01/2023) Implementato registro dei rischi corruttivi; correzione di bug
+- [1.2.6] (21/12/2022) Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
+- [1.2.5] (13/12/2022) Aggiunti estremi input, fasi, output nel CSV di estrazione generale dei processi
+- [1.2.4] (01/12/2022) Mostrati dettagli di un processo in una finestra separata a fini di stampa in pdf
+- [1.2.3] (29/11/2022) Implementati primi esempi di generazione grafici
+- [1.2.2] (23/11/2022) Aggiunta funzionalit&agrave; di download albero completo processi in formato CSV
+- [1.2.1] (22/11/2022) Mostrato in nodo albero processi numero di input e fasi
+- [1.2.0] (21/11/2022) Implementato questo file di documentazione
+- [1.1.9] (17/11/2022) Aggiunto dettaglio processo anticorruttivo: input, fasi, output
+
+- [&le; 1.1.9] Implementata intervista (scelta struttura e processo anticorruttivo, compilazione risposte ai quesiti), pagina di elenco interviste, estrazioni varie in CSV, organigramma ed elenco processi in albero navigabile
+
 
 
 
@@ -428,150 +617,6 @@ Software Engineer: Giovanroberto Torre - [@GianroTorres](https://twitter.com/Gia
 Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/rischi)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ROADMAP -->
-## History
-
-Questa sezione illustra l'evoluzione del software ROL nel contesto delle varie release.<br />
-In corrispondenza di ogni numero di versione non vengono descritte tutte le modifiche 
-effettuate ma solo i rilasci delle funzionalit&agrave; pi&uacute; significative.<br />
-Ogni numero di versione &egrave; per&ograve; corredato della data del commit 
-dei sorgenti, per cui consultando la History del repository sar&agrave; facile
-entrare nel merito di tutte le modifiche effettuate in corrispondenza della
-sottoversione: inoltre, ogni versione corrisponde ad un commit (a meno di errori), ma non ogni commit
-genera una versione.<br />
-
-<sub>
-NOTA: Per convenzione, nel software la versione viene mostrata in formato x.xx
-quindi accorpando la cifra della sub-sub versione a quella della subversione,
-mentre in questo changelog ha il classico formato x.x.x (ci&ograve;
-per apportare maggiore precisione descrittiva).<br />
-Inoltre, il significato delle subversioni &egrave; abbastanza differente da
-quello generale; infatti non identifica se la versione sia stabile o meno
-(aspetto solitamente identificato rispettivamente dalla cifra finale diversa da zero o uguale a zero)
-n&eacute; presenta salti rilevanti in funzione di modifiche di elevato impatto
-(p.es. passaggio dalla versione 6.1.38 alla versione 7.0.1 di VirtualBox, che ha
-segnato una modifica abbastanza grossa); nel caso dell'applicazione corrente, infatti,
-i numeri di versione hanno solo il signficato di tenere traccia dei rilasci 
-e dei deploy che sono stati effettuati 
-(1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)
-e fornirvi il relativo significato e la relativa motivazione.
-</sub>
-
-<!--
-### ToDo (Roadmap)
-- Aggiunta pagina che mostra i processi erogati dalla struttura evocata in maniera asincrona al clic sul nodo di una struttura
-- Implementata estrazione di tutti i dati dell'organigramma (query organigramma e strutture - estrazione)
-- Implementata pagina di dettaglio soggetto contingente/interessato
-- Implementata pagina di dettaglio struttura
-- [2.9.9] Implementate reportistiche e grafici sul rischio in rapporto alla struttura
-- [2.9.8] Aggiunta pesatura dei quesiti in funzione del rischio (associazione quesito / rischio)
-- [2.9.7] Implementata estrazione risultati in formato CSV
-- [2.9.6] Implementata ricerca per ambito di analisi | Implementata ricerca per processo | Implementata ricerca per struttura
-- [2.9.5] Aggiunti suggerimenti asincroni sulla digitazione della chiave testuale
-- [2.9.4] Implementata form di ricerca sui quesiti per chiave testuale
-- ...
-
-
-### Done
--->
-- [2.1.1] (02/12/2024) Implementati controlli lato client in form di aggiunta misurazione di indicatore
-- [2.1.0] (28/11/2024) Aggiunta funzionalit&agrave; di download processi con PxI mitigati (stima) in formato CSV (estrae processi, PxI iniziale e valore del PxI calmierato che si otterrebbe se tutte le misure previste venissero effettivamente applicate)
-- [2.0.9] (25/11/2024) Aggiunta pagina contenente form per inserire una nuova misurazione di indicatore; correzione di bug
-- [2.0.8] (19/11/2024) Implementati controlli lato client in form di aggiunta indicatore di monitoraggio; aggiunta pagina dettagli indicatore di monitoraggio; correzione di bug
-- [2.0.7] (11/11/2024) Implementata pagina elenco indicatori di una misura monitorata
-- [2.0.6] (07/11/2024) Implementata funzionalit&agrave; di inserimento indicatore di monitoraggio 
-- [2.0.5] (05/11/2024) Aggiunta pagina contenente form per inserire un nuovo indicatore di monitoraggio; correzione di bug
-- [2.0.4] (31/10/2024) Revisione grafica pagine; miglioramenti nella presentazione (bottoni, etichette)
-- [2.0.3] (28/10/2024) Implementata funzionalit&agrave; di inserimento dettagli del monitoraggio di una misura
-- [2.0.2] (23/10/2024) Correzione di bug
-- [2.0.1] (21/10/2024) Delegato metodo di prevenzione attacchi tipo "Garden Gate" al manager che si occupa della sessione utente
-- [2.0.0] (15/10/2024) Aggiunta pagina contenente form per inserire i dettagli relativi al monitoraggio ad una misura di mitigazione selezionata
-- [1.9.9] (08/10/2024) Implementata gestione separata della connessione al database; correzione di bug
-- [1.9.8] (07/10/2024) Implementata pagina iniziale monitoraggio
-- [1.9.7] (30/09/2024) Prima bozza di implementazione codice per il monitoraggio; correzione di bug
-- [1.9.6] (23/09/2024) Prima bozza di implementazione componente software per la gestione degli indicatori di monitoraggio
-- [1.9.5] (16/09/2024) Miglioramenti nella presentazione (etichette); aggiunta evidenziazione testo filtrato tramite libreria DataTables
-- [1.9.4] (12/09/2024) Miglioramenti nella presentazione (icone, etichette); aggiunta evidenziazione testo filtrato tramite libreria DataTables
-- [1.9.3] (04/09/2024) Implementato report tabella dei PxI calmierati in base alle misure stimate
-- [1.9.2] (rilascio 02/08/2024 - commit 04/09/2024) Implementato algoritmo di ricalcolo PxI del processo in base alle misure applicate ai suoi rischi
-- [1.9.1] (29/07/2024) Miglioramenti nella presentazione (header, bottoni, messaggi); aggiunto attributo a oggetto misura per contenere un valore di popolarit&agrave; della misura stessa
-- [1.9.0] (22/07/2024) Implementato algoritmo di mitigazione a livello del PxI del singolo rischio in funzione delle misure applicate
-- [1.8.9] (25/06/2024) Uniformazione versione, descrizioni e commenti
-- [1.8.8] (20/06/2024) Ripristino del tema chiaro, mantenendo il tema scuro solo per l'header e le pagine di landing
-- [1.8.7] (19/06/2024) Prova tema scuro; prima bozza di implementazione algoritmo di mitigazione
-- [1.8.6] (05/06/2024) Revisione grafica pagina di landing; revisione di etichette
-- [1.8.5] (28/05/2024) Implementazione parallela calcolo indicatori di impatto; implementazione parallela calcolo rischi di processi e interviste collegate
-- [1.8.4] (27/05/2024) Prima bozza di implementazione report variazioni PxI dei rischi in funzione dell'applicazione (stimata) delle misure
-- [1.8.3] (17/05/2024) Completamento implementazione pagina dei dettagli di una misura. Implementazione parallela calcolo output di processi
-- [1.8.2] (16/05/2024) Implementazione parallela calcolo fasi di processo. Miglioramenti nella presentazione dei dettagli di una misura. Trasformazione di icone vettoriali in raster
-- [1.8.1] (14/05/2024) Implementazione parallela calcolo elementi (indicatori di tipo P, input di processi). Miglioramenti nella presentazione delle misure suggerite (eliminati doppioni)
-- [1.8.0] (13/05/2024) Prima bozza implementazione pagina dei dettagli di una misura di prevenzione/mitigazione del rischio. Miglioramenti nella presentazione delle misure suggerite (raggruppamento delle misure suggerite per tipologia di misura)
-- [1.7.9] (07/05/2024) Miglioramenti nella presentazione delle misure applicate; correzione di bug
-- [1.7.8] (06/05/2024) Implementazione funzione di assegnazione delle misure di mitigazione a specifico rischio nel contesto di un processo
-- [1.7.7] (22/04/2024) Aggiunta pagina contenente form per applicare misure di mitigazione a un rischio, elencante anche le misure suggerite sulla base dei fattori abilitanti trovati associati al rischio entro il contesto del processo
-- [1.7.6] (15/04/2024) Miglioramenti visualizzazione del registro delle misure di prevenzione: mostrata sostenibilit&agrave; economica della misura e strutture coinvolte
-- [1.7.5] (08/04/2024) Miglioramenti visualizzazione del registro delle misure di prevenzione: mostrata struttura capofila della misura
-- [1.7.4] (27/03/2024) Completamento implementazione funzione di inserimento delle misure di prevenzione
-- [1.7.3] (25/03/2024) Proseguimento implementazione inserimento e recupero delle misure di prevenzione
-- [1.7.2] (18/03/2024) Prima bozza di implementazione misure di prevenzione del rischio corruttivo
-- [1.7.1] (26/02/2024) Implementato blocco prima riga tabella del log delle variazioni; migliorie pagina report tabella dei rischi
-- [1.7.0] (13/02/2024) Completata prima versione del log delle variazioni tra l'ultimo caching dei valori degli indicatori e gli stessi calcolati a runtime; revisione di etichette
-- [1.6.9] (12/02/2024) Implementato nel ricalcolo indicatori il salvataggio delle motivazioni gi&agrave; inserite; correzione di bug
-- [1.6.8] (06/02/2024) Prima bozza di implementazione del log delle variazioni tra l'ultimo caching dei valori degli indicatori e gli stessi calcolati a runtime
-- [1.6.7] (29/01/2024) Implementata funzione di modifica/aggiunta nota al PxI; revisione di etichette; correzione di bug
-- [1.6.6] (22/01/2024) Implementata visualizzazione delle note al PxI con confronto valore PxI in memoria (a runtime) e valore PxI su disco (in cache)
-- [1.6.5] (16/01/2024) Aggiornamento annuale licenza
-- [1.6.4] (15/01/2024) Modificato ordinamento strutture; cambiata presentazione valore di rischio altissimo; correzione di bug
-- [1.6.3] (08/01/2024) Raffinata estrazione CSV relativa a intervista singola; aggiunto ordinamento per nome a nodi albero processi; migliorata presentazione report PxI dei processi
-- [1.6.2] (15/12/2023) Revisionato algoritmo di calcolo della dimensione di probabilit&agrave; P; aggiunto stile per evidenziare valore di rischio altissimo
-- [1.6.1] (11/12/2023) Revisionato algoritmo di calcolo dell'indicatore di impatto I3; correzione di bug
-- [1.6.0] (07/12/2023) Implementato output su file RTF del report tabellare riepilogante rischi e strutture; correzione di bug
-- [1.5.9] (30/11/2023) Raffinato algoritmo di calcolo indicatore I3 tenendo conto dell'interessamento di categorie globali di strutture e considerando non determinabili i casi in cui non risultano n&eacute; strutture n&eacute; soggetti associati alle fasi del processo (un processo &egrave; sempre funzione dell'attivit&agrave; di almeno una struttura o un soggetto contingente) 
-- [1.5.8] (29/11/2023) Predisposizione alla generazione di output su file RTF; correzioni nelle transcodifiche dei fine riga
-- [1.5.7] (28/11/2023) Riscritto codice per la produzione di output diversi da html sincrono; revisione di etichette
-- [1.5.6] (27/11/2023) Implementato calcolo dimensione I (impatto del rischio) e della combinazione di P ed I (indice PxI)
-- [1.5.5] (20/11/2023) Aggiunto calcolo dimensione P (probabilit&agrave; del rischio)
-- [1.5.4] (16/11/2023) Revisionato algoritmo di calcolo dell'indicatore di probabilit&agrave; P4; revisioni screenshot
-- [1.5.3] (13/11/2023) Aggiunta tabella riepilogativa del PxI di tutti i processi, elencante il valore ottenuto in ogni indicatore per ogni processo
-- [1.5.2] (06/11/2023) Aggiunti in tabella riepilogativa del PxI di tutti i processi e strutture, i macroprocessi, le aree di rischio ed i soggetti interessati a ogni processo
-- [1.5.1] (30/10/2023) Aggiunta tabella riepilogativa del PxI di tutti i processi, elencante rischi e strutture associate a ogni processo
-- [1.5.0] (23/10/2023) Aggiunte sottopagine in sezione report; migliorata presentazione ricerche predefinite
-- [1.4.9] (19/10/2023) Raffinato controllo formale sulla validita' della risposta: omessi alcuni controlli in caso la risposta sia relativa a un quesito figlio (quesiti di tipo "di cui")
-- [1.4.8] (17/10/2023) Implementato caching su disco dei valori degli indicatori di rischio
-- [1.4.7] (11/10/2023) Trasformata struttura contenente gli indicatori di rischio in mappa ordinata
-- [1.4.6] (10/10/2023) Aggiunto attributo a oggetto processo anticorruttivo per contenere valori degli indicatori di rischio
-- [1.4.5] (02/10/2023) Mostrate interviste nella pagina di dettaglio del processo, con valori degli indicatori calcolati; implementato algoritmo di scelta in caso di valori di rischio divergenti tra interviste multiple sullo stesso processo. Rimosso codice legacy.
-- [1.4.4] (25/09/2023) Implementata la logica di calcolo degli indicatori P1, P2, P3, P4, P5 nel contesto della singola intervista; implementato metodo per effettuare i controlli lato server riguardo la validit&agrave; della risposta
-- [1.4.3] (18/09/2023) Prima bozza di implementazione degli indicatori P1, P2, P3 nel contesto della singola intervista
-- [1.4.2] (12/09/2023) Corretta gestione charset nella form di modifica della risposta; mostrato id della fase come title nella pagina di dettaglio del processo
-- [1.4.1] (11/09/2023) Aggiunta gestione in intervista del tipo di quesito che prevede come risposta una percentuale; aggiunta di immagini svg come marcatori di alberatura; revisione pagina di landing; spostamento di alcune ricerche predefinite dalla pagina di landing alla pagina della ricerca libera; ampliata larghezza visibile applicazione. 
-- [1.4.0] (04/09/2023) Correzione etichetta, tipografia; aggiunti screenshot.
-- [1.3.9] (29/08/2023) Implementata pagina consultazione intervista per nascondere/mostrare le domande senza risposta. Migliorie grafiche di presentazione dei dettagli di un processo; revisione grafica pagina di login, link per scaricare csv, etichette e altri ornamenti.
-- [1.3.8] (24/08/2023) Implementata facility in consultazione intervista per nascondere/mostrare le domande senza risposta.
-- [1.3.7] (01/08/2023) Implementata funzione inserimento relazione ternaria tra rischio corruttivo e fattore abilitante, nel contesto di un processo. Correzione di bug.
-- [1.3.6] (24/07/2023) Implementato registro dei fattori abilitanti i rischi; mostrati fattori abilitanti collegati a rischi nel contesto di un processo
-- [1.3.5] (26/06/2023) Implementata funzione inserimento relazione tra rischio corruttivo e processo censito dall'anticorruzione
-- [1.3.4] (27/03/2023) Delegata gestione interviste (visualizzazione, inserimento, aggiornamento risposte) a un nuovo componente sofware gemmato dalla Command dei rischi
-- [1.3.3] (06/03/2023) Implementata funzione di aggiunta di un rischio corruttivo al registro dei rischi
-- [1.3.2] (28/02/2023) Aggiunta pagina dettagli output, elencante i processi generati a partire dall'output corrente laddove esso abbia agito da input di processo. Implementata pagina di elenco output. Correzione di bug.
-- [1.3.1] (15/02/2023) Aggiunta funzionalit&agrave; di download registro dei rischi in formato CSV (estrae solo rischi con processi associati, come da regole di business)
-- [1.3.0] (13/02/2023) Aggiunta pagina dettagli rischio corruttivo, elencante i processi esposti al rischio selezionato. Implementata pagina stand-alone dettagli processo. Riordinata pagina di landing.
-- [1.2.9] (08/02/2023) Piccole migliorie di presentazione nei dettagli di un processo: evidenziata area di rischio, mostrato dettaglio soggetto contingente
-- [1.2.8] (06/02/2023) Ampliato dettaglio processo anticorruttivo: mostrati i rischi cui il processo &egrave; esposto
-- [1.2.7] (30/01/2023) Implementato registro dei rischi corruttivi; correzione di bug
-- [1.2.6] (21/12/2022) Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
-- [1.2.5] (13/12/2022) Aggiunti estremi input, fasi, output nel CSV di estrazione generale dei processi
-- [1.2.4] (01/12/2022) Mostrati dettagli di un processo in una finestra separata a fini di stampa in pdf
-- [1.2.3] (29/11/2022) Implementati primi esempi di generazione grafici
-- [1.2.2] (23/11/2022) Aggiunta funzionalit&agrave; di download albero completo processi in formato CSV
-- [1.2.1] (22/11/2022) Mostrato in nodo albero processi numero di input e fasi
-- [1.2.0] (21/11/2022) Implementato questo file di documentazione
-- [1.1.9] (17/11/2022) Aggiunto dettaglio processo anticorruttivo: input, fasi, output
-
-- [&le; 1.1.9] Implementata intervista (scelta struttura e processo anticorruttivo, compilazione risposte ai quesiti), pagina di elenco interviste, estrazioni varie in CSV, organigramma ed elenco processi in albero navigabile
 
 <!--
 - [1.1.9] Add Additional Templates w/ Examples
