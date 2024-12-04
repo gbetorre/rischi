@@ -1,0 +1,339 @@
+# This repository adheres to the publiccode.yml standard by including this 
+# metadata file that makes public software easily discoverable.
+# More info at https://github.com/italia/publiccode.yml
+
+publiccodeYmlVersion: '0.2'
+categories:
+  - workflow-management
+  - web-collaboration
+  - business-process-management
+description:
+  it:
+    documentation: 'https://github.com/gbetorre/rischi/blob/main/README.it.md'
+    features:
+      - Rappresentazione dinamica di strutture organizzative e processi mappati
+      - |-
+        Rappresentazione dinamica dei dettagli di ogni processo organizzativo
+        (fasi, soggetti, rischi...)
+    genericName: 'ROL-RMS: Risk Mapping Software'
+    localisedName: 'ROL-RMS: Rischi On Line-Risk Mapping Software'
+    longDescription: |
+      ## Introduzione
+
+
+      L'applicazione web per la mappatura dei rischi corruttivi `ROL-RMS` serve
+      ad aiutare Enti, Pubbliche Amministrazioni, aziende partecipate – e
+      chiunque sia interessato a monitorare e gestire il rischio corruttivo –
+      **a quantificare automaticamente i rischi corruttivi** cui i loro processi
+      organizzativi sono esposti e ad indirizzare questi soggetti a mettere in
+      atto **le contromisure adeguate**. 
+
+       Il workflow generale è suddiviso in 4 distinti step, o filoni di lavoro: 
+
+      1. Step 1: caricamento di strutture e processi 
+
+      2. Step 2: calcolo del rischio corruttivo di ogni processo 
+
+      3. Step 3: scelta delle misure di mitigazione da applicare ad ogni
+      processo 
+
+      4. Step 4: monitoraggio al fine di verificare se le misure previste sono
+      state applicate.
+
+
+      Questi 4 step si svolgono entro un flusso sincrono; sono pensati, ovvero,
+      per essere portati a compimento in sequenza, non in parallelo. Ad esempio,
+      non si può passare allo Step 2 se non è stato completato lo Step 1; né si
+      può passare allo Step 3 se non è stato completato lo Step 2; e cosí via.
+
+      Questa modalità "lineare" guida gli attori nel processo di mappatura e
+      gestione e permette di gestire in modo semplificato la complessità del
+      dominio.
+
+      Alla fine del 4° Step, sarà stata realizzata una rilevazione completa del
+      calcolo, del trattamento e del monitoraggio dei livelli di rischio
+      corruttivo in organizzazione - il tutto documentato e certificato
+      attraverso specifici report, anche scaricabili.
+
+      A questo punto, si può iterare il processo, procedendo con una nuova
+      rilevazione; il sistema è predisposto, infatti, per la storicizzazione.
+
+
+
+      ## Soggetti coinvolti
+
+
+      I soggetti interessati dall'uso del software, ovvero gli attori coinvolti,
+      sono i seguenti:
+
+
+      - L'esperto, o l'ufficio, anticorruzione e trasparenza
+
+      - I responsabili e gli operatori degli uffici dell'organizzazione presa in
+      esame
+
+      - Il software engineer 
+
+
+      ​
+
+
+      ## Funzionamento
+
+
+      ### Step 1: Individuazione del contesto (mappatura organizzativa)
+
+
+      In una prima fase viene effettuato il caricamento delle strutture
+      organizzative (organigramma) e quello dei processi organizzativi che
+      vengono prodotti dalle strutture stesse.
+
+
+      Il software prevede apposite funzionalità di navigazione nell'albero dei
+      macroprocessi ed in quello dell'organigramma in modo da verificare
+      rapidamente che la mappatura corrisponda a quanto effettivamente presente
+      nell'organizzazione.
+
+
+      Inoltre, per ogni processo viene fornita una pagina di dettaglio
+      contenente tutte le informazioni aggregate che riguardano il processo
+      stesso, tra cui: gli input, le fasi, gli output, i rischi ed i fattori
+      abilitanti.
+
+
+      Mentre l'articolazione di processi e strutture è specifica di ogni
+      organizzazione e quindi deve essere preparata e caricata ogni volta che il
+      software viene deployato in una nuova organizzazione, vi sono alcuni
+      "dizionari" che sono predefiniti e forniti, già pronti, in _bundle _col
+      software: il registro dei rischi, quello delle misure di mitigazione, il
+      dizionario dei quesiti, quello dei fattori abilitanti, ed altri ancora. 
+
+
+      ### Step 2: Calcolo del rischio (interviste e indicatori di rischio)
+
+
+      Consultando la mappatura dei processi, effettuata nello Step 1, l'ufficio
+      anticorruzione diviene in grado di consultare un **elenco **delle
+      strutture organizzative coinvolte nell'erogazione dei relativi processi. 
+
+
+      A quel punto, è possibile quindi rivolgere una serie di **quesiti **a
+      responsabili ed operatori ubicati presso tali strutture, in merito ai
+      processi prodotti dalle strutture stesse. 
+
+      Attraverso l'analisi delle risposte a tali quesiti, l'applicazione
+      permette di ottenere, automaticamente, una serie di **indici **relativi a
+      specifici rischi corruttivi cui risultano esposti i processi organizzativi
+      presidiati dalle strutture stesse: in pratica, sulle risposte il software
+      applica specifici algoritmi che permettono di individuare il livello del
+      **PxI **(livello di rischio **Probabilità x Impatto**)** **di ogni
+      processo esaminato.
+
+
+      Ogni quesito, infatti, è collegato ad uno o piú specifici rischi
+      corruttivi; perciò, in funzione della risposta data dal personale
+      intervistato, l'applicazione calcola il livello di rischio cui il processo
+      esaminato risulta esposto.
+
+
+      La batteria di quesiti è ampia (piú di 150) ma la decisione circa quali
+      quesiti somministrare può essere stabilita di volta in volta
+      dall'intervistatore, nel senso che tutti i quesiti sono facoltativi e vi
+      sono quesiti piú generici, che probabilmente ha senso rivolgere in ogni
+      intervista, e quesiti piú specifici, che ha senso somministrare soltanto
+      se si sta prendendo in esame processi molto peculiari.
+
+
+      ### Step 3: Trattamento del rischio (misure di mitigazione - stima)
+
+
+      Tramite gli Step 1 e 2 si ottiene dunque un rapporto complessivo sul
+      livello di rischio cui ogni processo organizzativo censito risulta
+      esposto.
+
+
+      Aver realizzato questa mappatura costituisce un buon punto di partenza per
+      poter stabilire quali misure di mitigazione/prevenzione del rischio
+      corruttivo è opportuno applicare ai rischi stessi. Questa è la fase 3,
+      ovvero **la fase di individuazione delle misure di mitigazione atte a
+      ridurre il valore del rischio.** 
+
+
+      Si è accennato, in precedenza, al fatto che un registro delle misure di
+      mitigazione viene fornito nativamente dal software. 
+
+      Quali misure, però, scegliere esattamente, tra le varie misure possibili?
+      Ovvero: come individuare le misure migliori per ogni rischio di ogni dato
+      processo?
+
+      Anche qui viene in aiuto il sistema ROL-RMS:
+
+       > **uno dei vantaggi offerti dal software, su questo versante, è il fatto che il sistema stesso suggerisce quali misure applicare a ciascun rischio nel contesto di ciascun processo.**
+
+      Le misure di mitigazione, infatti, tramite la loro tipologia, hanno
+      un'associazione con il fattore abilitante e questa relazione rende
+      possibile individuare il contesto di applicazione delle misure stesse in
+      funzione del rischio e del processo.
+
+
+      Una volta applicate le misure, è possibile verificare come variano i
+      livelli di rischio attraverso la consultazione di appositi cruscotti, che
+      mettono a confronto il PxI prima e dopo l'applicazione delle misure.
+
+
+      ### Step 4: Certificazione del rischio (misure di mitigazione -
+      monitoraggio)
+
+
+      Il fatto di prevedere, o suggerire, che una misura venga applicata ad un
+      processo non implica però, automaticamente, che essa venga effettivamente
+      applicata!
+
+
+      La fase di assegnazione delle misure - cioè lo Step 3 - permette di
+      ottenere quindi soltanto una _stima_ della riduzione del rischio _se_ le
+      misure proposte vengono applicate (può essere un grande _SE_). La fase di
+      monitoraggio, che conclude il ciclo di gestione del rischio corruttivo,
+      consiste nel verificare se le misure proposte sono poi state
+      effettivamente applicate.
+
+
+      Lo Step 4 permette di stabilire effettivamente quali misure sono state
+      applicate e quindi permette di calcolare il valore reale del livello di
+      rischio, ovvero il valore effettivo e finale del rischio per ogni processo
+      considerato alla fine del ciclo di valutazione (rilevazione).
+
+       >  **Il software offre anche specifici strumenti analitici per verificare in che misura è cambiato il livello di rischio non solo in funzione dell'applicazione ipotetica, ma anche di quella effettiva delle misure di mitigazione.** 
+
+      ​
+
+
+      ## Ruoli dei soggetti
+
+
+      Ogni soggetto ha un compito specifico: 
+
+
+      - L'esperto di anticorruzione, con l'aiuto del software, effettua il
+      calcolo del rischio (Step 2), stabilisce quali misure di mitigazione
+      applicare ai processi piú a rischio (Step 3) e ne cura il monitoraggio
+      (Step 4).
+
+      - Il personale degli uffici che sovrintendono i processi rispondono alle
+      domande (Step 2) e forniscono i valori raccolti nel monitoraggio (Step 4).
+
+      - Il software engineer cura la fase di mappatura dei processi (Step 1) e
+      coadiuva gli altri soggetti attraverso tutto il workflow (tutti gli Step).
+
+
+      ​
+
+
+      ## Conclusioni
+
+
+      Tra le varie funzioni attualmente implementate nel software ROL-RMS,
+      notiamo in particolare 3 _facilities_, che possono agevolare notevolmente
+      il lavoro dell'ufficio trasparenza e anticorruzione interno all'ente che
+      adotti la soluzione ROL-RMS:
+
+
+      - il calcolo automatico del rischio esistente;
+
+      - il suggerimento automatico circa le misure di mitigazione da applicare
+      al rischio esistente;
+
+      - la produzione di report comparativi per consultare l'andamento dei
+      livelli di rischio in funzione delle misure in ipotesi e di quelle
+      applicate.
+
+
+      Allo stato attuale (versione di riferimento: `2.1.1, dicembre 2024`) il
+      software è già pronto per essere adattato, con un minimo adeguamento, a
+      qualunque realtà organizzativa che voglia effettuare un'analisi
+      dettagliata dei rischi corruttivi cui i processi erogati
+      dall'organizzazione stessa sono esposti.
+
+
+      ### Customizzazione
+
+
+      È anche possibile stimare, con relativa precisione, quanto tempo è
+      necessario per customizzare il software in funzione di una specifica
+      realtà organizzativa. Infatti, acquisite:
+
+
+      - le dimensioni dell'organizzazione (in particolare, il numero di livelli
+      dell'organigramma ed il numero assoluto di strutture da mappare)
+
+      - il numero di livelli e la numerosità dei processi prodotti
+      dall'organizzazione stessa,
+
+
+      diventa possibile effettuare una stima relativamente accurata del tempo
+      necessario affinché sia possibile iniziare la campagna di interviste e,
+      conseguentemente, ottenere i risultati dei vari indicatori di rischio e
+      del giudizio sintetico P x I.
+
+
+      ### Storicizzazione
+
+
+      Ogni rilevazione successiva potrà essere messa a confronto con la
+      precedente attraverso specifici cruscotti multirilevazione, che
+      permetteranno di analizzare i delta e i trend relativi ai processi e ai
+      relativi rischi corruttivi, da una rilevazione all'altra, in modo che sia
+      alla fine possibile, per l'organizzazione, effettuare una valutazione
+      delle variazioni dei livelli di rischio attraverso gli anni.
+
+
+      ​
+    shortDescription: |-
+      ROL-RMS: Applicazione Web per la mappatura, la mitigazione e il
+      monitoraggio dei rischi corruttivi cui sono esposti i processi
+      organizzativi delle PA
+developmentStatus: development
+it:
+  conforme:
+    gdpr: false
+    lineeGuidaDesign: true
+    misureMinimeSicurezza: true
+    modelloInteroperabilita: false
+  countryExtensionVersion: '0.2'
+  piattaforme:
+    anpr: false
+    cie: false
+    pagopa: false
+    spid: false
+  riuso:
+    codiceIPA: uni_vr
+landingURL: 'https://github.com/gbetorre/rischi/blob/main/rol/index.html'
+legal:
+  authorsFile: 'https://raw.githubusercontent.com/gbetorre/rischi/master/AUTHORS'
+  license: GPL-2.0-or-later
+  mainCopyrightOwner: Giovanroberto Torre
+  repoOwner: Giovanroberto Torre
+localisation:
+  availableLanguages:
+    - it
+  localisationReady: false
+maintenance:
+  contacts:
+    - email: gianroberto.torre@gmail.com
+      name: Giovanroberto Torre
+  type: internal
+name: ROL-RMS
+platforms:
+  - web
+releaseDate: '2024-12-02'
+roadmap: 'https://github.com/gbetorre/rischi/blob/main/README.it.md#roadmap'
+softwareType: standalone/web
+softwareVersion: 2.1.1
+url: 'https://github.com/gbetorre/rischi'
+usedBy:
+  - Alberto Maria Arena Agostino
+outputTypes:
+  - text/html
+  - text/csv
+  - application/json
+  - application/rtf
