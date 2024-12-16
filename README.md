@@ -166,6 +166,9 @@ Everyone can feel free to propose improvements and evolutions.
 ### Built With
 
 This section explains the main libraries and technologies used to develop and execute the project. 
+
+This project uses just STANDARD technologies
+
 More details <a href=“https://github.com/gbetorre/rischi”>here</a>
 
 * [![Java][Java]][Java-url]
@@ -176,6 +179,24 @@ More details <a href=“https://github.com/gbetorre/rischi”>here</a>
 * [![SQL][SQL]][SQL-url]
 * [![Bootstrap][Bootstrap.com]][Bootstrap-url]
 * [![JQuery][JQuery.com]][JQuery-url]
+
+This project uses only STANDARD technologies and established frameworks. 
+For instance: 
+* POJO for Java (all CONTROLLER layer); 
+* Ajax for asynchronous requests (XHR); 
+* Bootstrap - and its plugins - for style sheets and responsive interface (VIEW); 
+* jQuery - and vanilla Javascript - for client-side DOM manipulation; 
+* SQL for MODEL access; 
+* JSTL (Expression Language) for VIEW construction; 
+* JSON for navigation tree construction; 
+and so on.
+
+Technically, this software application is a monolithic architecture. 
+It would not even be worth justifying this choice, given the nature of the project (an incremental development carried out over the years by a single software engineer), but let us recall the main advantages of a monolithic architecture over a microservices one, especially for the kind of tasks managed from this application:
+* the code is all deposited in a single repository - which one documented by this README file;
+* the application is easy to deploy: by running a single script, a new version is released and the server is updated in a few moments;
+* you can debug the application with ease: although the computation has been parallelized (where there was no risk of race condition), a single breakpoint is sufficient to enter debug, check all the values assumed by the variables, and access to all the control mechanisms;
+* the performance of a monolithic application is better than that of a microservices one because the individual components talk to each other efficiently (nevertheless, it was necessary to implement internal caching mechanisms because of the large number of calculations that need to be performed to obtain risk indicator values).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -193,12 +214,15 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+For a list of contributors, please see the [AUTHORS](AUTHORS) file.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
 <!-- LICENSE -->
 ## License
+This project is licensed under the terms of the [LICENSE](LICENSE).
 
 Distributed under the terms of the GNU GPL-2.0 License.<br> 
 See <a href="https://github.com/gbetorre/rischi/blob/main/LICENSE">`LICENSE.txt`</a> too.

@@ -67,27 +67,26 @@ L'applicazione web per la mappatura dei rischi corruttivi <code>ROL-RMS</code> s
 <br>
 <strong>*Fig.1 - Uno degli obiettivi del software &egrave; quantificare, in automatico, il valore di rischio per ogni processo organizzativo considerato (dati fittizi&#770;)*</strong><br>
 
-<p>
 Il workflow generale &egrave; suddiviso in 4 distinti step, o filoni di lavoro:
 * Step 1: caricamento di strutture e processi
 * Step 2: calcolo del rischio corruttivo di ogni processo
-* Step 3: indicazione delle misure di mitigazione da applicare ad ogni processo
+* Step 3: individuazione (e successiva indicazione) delle misure di mitigazione da applicare ad ogni processo
 * Step 4: monitoraggio al fine di verificare se le misure previste sono state applicate.
 
-Questi 4 step sono pensati entro un flusso sincrono, ovvero per essere portati a compimento in sequenza, non in parallelo: ad esempio, non si pu&ograve; passare allo Step 2 se non &egrave; stato completato lo Step 1; e cos&iacute; via.
+Questi 4 step sono pensati entro un flusso sincrono, ovvero per essere portati a compimento in sequenza, non in parallelo. Ad esempio, non si può passare allo Step 2 se non è stato completato lo Step 1; analogamente, non si può passare allo Step 3 se non è stato completato lo Step 2; e cosí via.
+Questa modalit&agrave; "lineare" guida gli attori nel processo di mappatura e gestione e permette di gestire in modo semplificato la complessit&agrave; del dominio informativo.
 <br>
-Alla fine del 4° Step, sar&agrave; stata completata una rilevazione completa del monitoraggio e del trattamento del rischio corruttivo in organizzazione.
+Alla fine del 4° Step, sar&agrave; stata realizzata una rilevazione completa del monitoraggio e del trattamento del rischio corruttivo in organizzazione.
 <br>
 A questo punto, si pu&ograve; iterare il processo, procedendo con una nuova rilevazione; il sistema &egrave; predisposto, infatti, per la storicizzazione.
 <br>
 Ogni rilevazione successiva potr&agrave; essere messa a confronto con la precedente attraverso specifici cruscotti multirilevazione, che permetteranno di analizzare i delta e i trend relativi ai processi e ai relativi rischi corruttivi, da una rilevazione all'altra.
-</p>
 
 ## Overview
 
 Nel prossimo capitolo verranno esaminati pi&uacute; in dettaglio i vari step.<br>
 Nel presente paragrafo viene data, invece, una descrizione a grandi linee del workflow generale dal punto di vista delle azioni messe in atto per realizzare l'obiettivo generale.
-<p>
+
 Anzitutto definiamo i soggetti coinvolti:
 * L'esperto o l'ufficio anticorruzione
 * I responsabili e gli operatori degli uffici
@@ -106,7 +105,7 @@ Rispetto ai ruoli svolti:
 Consultando la mappatura dei processi, effettuata nello Step 1, si &egrave; in grado di stilare un elenco delle strutture organizzative coinvolte nell'erogazione dei relativi processi.
 A quel punto, &egrave; possibile quindi rivolgere una serie di quesiti a responsabili ed operatori ubicati presso tali strutture, in merito ai processi prodotti dalle strutture stesse.
 Attraverso l'analisi delle risposte a tali quesiti, l'applicazione permette di ottenere, automaticamente, una serie di indici relativi a specifici rischi corruttivi cui risultano esposti i processi organizzativi presidiati dalle strutture stesse.<br>
-</p>
+
 
 <p>
 Ogni quesito, infatti, &egrave; collegato ad uno o pi&uacute; specifici rischi corruttivi; perci&ograve;, in funzione della risposta data dal personale intervistato, l'applicazione esprime specifici indici e punti di attenzione e, in sintesi, calcola il livello di rischio cui il processo esaminato risulta esposto. 
@@ -520,7 +519,25 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Built With
 
-Questa sezione illustra le principali librerie e tecnologie utilizzate per sviluppare ed eseguire il progetto. Maggiori dettagli sui linguaggi utilizzati si trovano <a href="https://github.com/gbetorre/rischi">qui</a>
+Questo progetto utilizza esclusivamente tecnologie STANDARD e framework consolidati. 
+Ad esempio: 
+* POJO per Java (tutto lo strato CONTROLLER); 
+* Ajax per le richieste asincrone (XHR); 
+* Bootstrap, e i suoi plugin, per i fogli di stile e l'interfaccia responsive (VIEW); 
+* jQuery, e standard JavaScript, per la manipolazione lato client del DOM; 
+* SQL per l'accesso al MODEL; 
+* JSTL (Expression Language) per la costruzione della VIEW; 
+* JSON per la costruzione di alberi di navigazione; 
+e così via.
+
+Tecnicamente, l'applicazione è un'architettura monolitica. 
+Non varrebbe neppure la pena di giustificare questa scelta, data la natura del progetto (uno sviluppo incrementale portato avanti negli anni da un singolo software engineer), ma val la pena di evidenziare i principali vantaggi di un'architettura monolitica rispetto ad una a microservizi, nel contesto dei task realizzati tramite il presente software:
+* il codice è depositato tutto in un unico repository, cioè quello che viene documentato dal presente file README;
+* l'applicazione è facile da deployare: eseguendo un singolo script, una nuova versione viene rilasciata ed il server viene aggiornato in pochi istanti;
+* l'applicazione è più facile da debuggare; nonostante - laddove non vi fossero rischi di race condition - il calcolo sia stato parallelizzato, è sufficiente attivare un singolo punto di interruzione per entrare in debug, controllare tutti i valori assunti dalle variabili e sfruttare tutti i meccanismi di controllo;
+* le performance di un'applicazione monolitica sono migliori rispetto a quella di una a microservizi perché i singoli componenti dialogano efficientemente (considerare che, nonostante questo, è stato necessario implementare meccanismi di caching a causa del grande numero di calcoli che è necessario realizzare per ottenere i valori degli indicatori di rischio).
+
+Di seguito sono elencate le principali librerie e tecnologie utilizzate per sviluppare ed eseguire il progetto. 
 
 * [![Java][Java]][Java-url]
 * [![JavaScript][JavaScript]][javascript-url]
@@ -530,6 +547,8 @@ Questa sezione illustra le principali librerie e tecnologie utilizzate per svilu
 * [![SQL][SQL]][SQL-url]
 * [![Bootstrap][Bootstrap.com]][Bootstrap-url]
 * [![JQuery][JQuery.com]][JQuery-url]
+
+Maggiori dettagli sui linguaggi utilizzati si trovano <a href="https://github.com/gbetorre/rischi">qui</a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -581,7 +600,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-<!-- CONTRIBUTING 
+<!-- CONTRIBUTING -->
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
@@ -595,8 +614,9 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+For a list of contributors, please see the [AUTHORS](AUTHORS) file.
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <!-- LICENSE -->
