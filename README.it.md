@@ -70,27 +70,28 @@ L'applicazione web per la mappatura dei rischi corruttivi <code>ROL-RMS</code> s
 Il workflow generale &egrave; suddiviso in 4 distinti step, o filoni di lavoro:
 * Step 1: caricamento di strutture e processi
 * Step 2: calcolo del rischio corruttivo di ogni processo
-* Step 3: individuazione (e successiva indicazione) delle misure di mitigazione da applicare ad ogni processo
+* Step 3: individuazione delle misure di mitigazione da applicare ad ogni processo
 * Step 4: monitoraggio al fine di verificare se le misure previste sono state applicate.
 
-Questi 4 step sono pensati entro un flusso sincrono, ovvero per essere portati a compimento in sequenza, non in parallelo. Ad esempio, non si può passare allo Step 2 se non è stato completato lo Step 1; analogamente, non si può passare allo Step 3 se non è stato completato lo Step 2; e cosí via.
-Questa modalit&agrave; "lineare" guida gli attori nel processo di mappatura e gestione e permette di gestire in modo semplificato la complessit&agrave; del dominio informativo.
+Questi 4 step sono pensati entro un flusso sincrono, ovvero per essere portati a compimento in sequenza, non in parallelo.<br> 
+Ad esempio, non si pu&ograve; passare allo Step 2 se non &egrave; stato completato lo Step 1; analogamente, non si pu&ograve; passare allo Step 3 se non &egrave; stato completato lo Step 2; e cos&iacute; via.<br>
+Questa modalit&agrave; "lineare" guida gli attori nel processo di mappatura e gestione e permette di gestire in modo semplificato la complessit&agrave; del dominio informativo.<br>
 <br>
 Alla fine del 4° Step, sar&agrave; stata realizzata una rilevazione completa del monitoraggio e del trattamento del rischio corruttivo in organizzazione.
 <br>
-A questo punto, si pu&ograve; iterare il processo, procedendo con una nuova rilevazione; il sistema &egrave; predisposto, infatti, per la storicizzazione.
+A questo punto, si pu&ograve; iterare il processo, procedendo con una nuova rilevazione: <strong>il sistema &egrave; predisposto</strong>, infatti, <strong>per la storicizzazione.</strong>
 <br>
 Ogni rilevazione successiva potr&agrave; essere messa a confronto con la precedente attraverso specifici cruscotti multirilevazione, che permetteranno di analizzare i delta e i trend relativi ai processi e ai relativi rischi corruttivi, da una rilevazione all'altra.
 
 ## Overview
 
-Nel prossimo capitolo verranno esaminati pi&uacute; in dettaglio i vari step.<br>
+[Nel prossimo capitolo](#come-funziona-il-software) verranno esaminati pi&uacute; in dettaglio i vari step.<br>
 Nel presente paragrafo viene data, invece, una descrizione a grandi linee del workflow generale dal punto di vista delle azioni messe in atto per realizzare l'obiettivo generale.
 
-Anzitutto definiamo i soggetti coinvolti:
-* L'esperto o l'ufficio anticorruzione
-* I responsabili e gli operatori degli uffici
-* Il software engineer
+Anzitutto, &egrave; opportuno definire i soggetti coinvolti:
+1. L'esperto o l'ufficio anticorruzione
+2. I responsabili e gli operatori degli uffici
+3. Il software engineer
 
 [![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.95.png)
 <br>
@@ -98,11 +99,14 @@ Anzitutto definiamo i soggetti coinvolti:
 <br><br>
 
 Rispetto ai ruoli svolti: 
-* L'esperto di anticorruzione, con l'aiuto del software, effettua il calcolo del rischio, stabilisce quali misure di mitigazione applicare ai processi pi&uacute; a rischio e ne cura il monitoraggio.
-* Il personale degli uffici che sovrintendono i processi rispondono alle domande e forniscono i valori raccolti nel monitoraggio.
-* Il software engineer cura la fase di mappatura dei processi e coadiuva gli altri soggetti attraverso tutto il workflow.
+1. L'esperto di anticorruzione, con l'aiuto del software: 
+  * effettua il calcolo del rischio, 
+  * stabilisce quali misure di mitigazione applicare ai processi pi&uacute; a rischio e 
+  * ne cura il monitoraggio.
+2. Il personale degli uffici che sovrintendono i processi risponde ai quesiti dell'intervista e fornisce i valori raccolti nel monitoraggio.
+3. Il software engineer cura la fase di mappatura dei processi e coadiuva gli altri soggetti attraverso tutto il workflow.
 
-Consultando la mappatura dei processi, effettuata nello Step 1, si &egrave; in grado di stilare un elenco delle strutture organizzative coinvolte nell'erogazione dei relativi processi.
+Consultando la mappatura dei processi, effettuata nello Step 1 ([v. paragrafo precedente](#about-the-project)), si diviene in grado di stabilire l'elenco delle strutture organizzative coinvolte nell'erogazione dei relativi processi.
 A quel punto, &egrave; possibile quindi rivolgere una serie di quesiti a responsabili ed operatori ubicati presso tali strutture, in merito ai processi prodotti dalle strutture stesse.
 Attraverso l'analisi delle risposte a tali quesiti, l'applicazione permette di ottenere, automaticamente, una serie di indici relativi a specifici rischi corruttivi cui risultano esposti i processi organizzativi presidiati dalle strutture stesse.<br>
 
@@ -535,7 +539,7 @@ Non varrebbe neppure la pena di giustificare questa scelta, data la natura del p
 * il codice è depositato tutto in un unico repository, cioè quello che viene documentato dal presente file README;
 * l'applicazione è facile da deployare: eseguendo un singolo script, una nuova versione viene rilasciata ed il server viene aggiornato in pochi istanti;
 * l'applicazione è più facile da debuggare; nonostante - laddove non vi fossero rischi di race condition - il calcolo sia stato parallelizzato, è sufficiente attivare un singolo punto di interruzione per entrare in debug, controllare tutti i valori assunti dalle variabili e sfruttare tutti i meccanismi di controllo;
-* le performance di un'applicazione monolitica sono migliori rispetto a quella di una a microservizi perché i singoli componenti dialogano efficientemente (considerare che, nonostante questo, è stato necessario implementare meccanismi di caching a causa del grande numero di calcoli che è necessario realizzare per ottenere i valori degli indicatori di rischio).
+* le performance di un'applicazione monolitica sono migliori rispetto a quella di una a microservizi perché i singoli componenti dialogano efficientemente (considerare che, nonostante questo, è stato necessario implementare meccanismi di caching a causa delle latenze indotte dal grande numero di calcoli che è necessario realizzare per ottenere i valori degli indicatori di rischio).
 
 Di seguito sono elencate le principali librerie e tecnologie utilizzate per sviluppare ed eseguire il progetto. 
 
