@@ -1,15 +1,24 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -584,6 +593,7 @@ public class Utils implements Constants {
      * @param mask la maschera in base a cui formattare la data
      * @return <code>String</code> - una rappresentazione String della data originale
      * @throws CommandException se il pattern
+     * @see java.text.SimpleDateFormat
      */
     public static String format(GregorianCalendar date,
                                 String mask)
@@ -635,7 +645,7 @@ public class Utils implements Constants {
      * @param endDateFormat il formato che l'oggetto Date restituito dovra' avere
      * @return <code>java.util.Date</code> - un oggetto Date costruito a partire dalla String ricevuta e formattato secondo il formato indicato
      * @throws CommandException se si verifica un problema nella conversione di tipo o in qualche tipo di puntamento
-     *
+     * @see java.text.SimpleDateFormat
      */
     public static Date format(String date,
                               String initDateFormat,
@@ -740,6 +750,8 @@ public class Utils implements Constants {
      *
      * @param date un java.util.GregorianCalendar da trasformare in una java.util.Date
      * @return <code>java.util.Date</code> - una java.util.Date in cui il GregorianCalendar passato come argomento e' stato trasformato
+     * @see java.util.GregorianCalendar
+     * @see java.util.Date
      */
     public static java.util.Date convert(GregorianCalendar date) {
         return date.getTime();
@@ -757,6 +769,7 @@ public class Utils implements Constants {
      *
      * @param date una java.util.Date da trasformare in una java.sql.Date
      * @return <code>java.sql.Date</code> - una java.sql.Date in cui la java.util.Date passata come argomento e' stato trasformata
+     * @see java.util.Date
      */
     public static java.sql.Date convert(java.util.Date date) {
         return new java.sql.Date(date.getTime());
@@ -847,6 +860,7 @@ public class Utils implements Constants {
      * (cio&egrave; azzerati).</p>
      *
      * @return <code>Time</code> - l'ora corrente, in formato "hh:mm:ss", con i secondi arbitrariamente impostati a zero
+     * @see java.sql.Time
      */
     public static Time getCurrentTime() {
         return Time.valueOf(getCurrentHour() + ":" + getCurrentMinutes() + ":00");

@@ -408,6 +408,7 @@ public class Data extends HttpServlet implements Constants {
      * @return <code>ArrayList&lt;?&gt; - lista contenente gli elementi trovati
      * @throws CommandException se si verifica un problema nella WebStorage (DBWrapper), nella Command interpellata, o in qualche puntamento
      */
+    @SuppressWarnings("rawtypes")
     private static ArrayList<?> retrieve(HttpServletRequest req,
                                          String qToken)
                                   throws CommandException {

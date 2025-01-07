@@ -57,13 +57,18 @@ import it.rol.exception.WebStorageException;
 
 
 /**
- * <p>Query &egrave; l'interfaccia pubblic contenente tutte le query della
- * web-application &nbsp;<code>Processi on Line (prol)</code>, tranne quelle
- * composte dinamicamente da metodi implementati, di cui comunque dichiara
- * l'interfaccia.</p>
+ * <p>Query &egrave; l'interfaccia contenente tutte le query, 
+ * &quot;secche&quot; e parametriche, della web-application &nbsp;
+ * <code>ROL-RMS (Rischi On Line-Risk Mapping Software)</code>, 
+ * tranne quelle composte a runtime da metodi implementati, 
+ * di cui comunque dichiara l'interfaccia pubblica.<br>
+ * Utilizza degli speciali marcatori (question marks) nei punti
+ * in cui verranno passati i parametri, sfruttando il classico meccanismo 
+ * del {@link java.sql.PreparedStatement}.</p>
  * <p>Definisce inoltre alcune costanti di utilit&agrave;.</p>
- *
+ * 
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
+ * @see java.sql.PreparedStatement
  */
 public interface Query extends Serializable {
     /* ********************************************************************** *

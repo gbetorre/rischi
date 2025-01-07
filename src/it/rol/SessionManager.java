@@ -67,7 +67,6 @@ import com.oreilly.servlet.ParameterParser;
 
 import it.rol.bean.CodeBean;
 import it.rol.bean.PersonBean;
-import it.rol.command.HomePageCommand;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.NotFoundException;
@@ -267,12 +266,13 @@ public class SessionManager extends HttpServlet implements Constants {
             if (authenticated) {
                 // Logga anzitutto l'accesso
                 traceAccess(req, username, db);
-                // Identifica l'ultima rilevazione
+                /* Identifica l'ultima rilevazione
                 CodeBean r = HomePageCommand.getLastSurvey();
                 // Prepara l'indirizzo di landing
                 String postAuthLand = "/?" + entToken + "=home&r=" + r.getNome();
                 // Redirige sull'indirizzo
-                //res.sendRedirect(res.encodeRedirectURL(getServletContext().getInitParameter("appName") + postAuthLand));
+                res.sendRedirect(res.encodeRedirectURL(getServletContext().getInitParameter("appName") + postAuthLand)); */
+                // Torna sempre alla home "vetrina"
                 res.sendRedirect(res.encodeRedirectURL("/rol"));
             }
             else {
@@ -290,8 +290,8 @@ public class SessionManager extends HttpServlet implements Constants {
                 final RequestDispatcher rd = getServletContext().getRequestDispatcher(getServletContext().getInitParameter("appName"));
                 rd.forward(req, res);
             }
-        } catch (AttributoNonValorizzatoException anve) {
-            throw new ServletException("Identificativo dell\'ultima rilevazione non trovato.\n" + anve.getMessage(), anve);
+        //} catch (AttributoNonValorizzatoException anve) {
+        //    throw new ServletException("Identificativo dell\'ultima rilevazione non trovato.\n" + anve.getMessage(), anve);
         } catch (NotFoundException nfe) {
             throw new ServletException("Errore nell'estrazione delle credenziali utente.\n" + nfe.getMessage(), nfe);
         } catch (IllegalStateException ise) {

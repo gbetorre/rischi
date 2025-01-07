@@ -53,6 +53,7 @@ import java.util.Vector;
 
 import it.rol.exception.AttributoNonValorizzatoException;
 
+
 /**
  * <p>Classe usata per rappresentare la misurazione di un indicatore (di monitoraggio).</p>
  * 
@@ -74,11 +75,10 @@ public class MeasurementBean extends CodeBean {
      *  Viene utilizzato per contestualizzare i messaggi di errore.
      */
     private final String FOR_NAME = "\n" + this.getClass().getName() + ": "; //$NON-NLS-1$
-    /* =======================   Dati  identificativi   ======================= */
-    // Inherited from its parent:
-    // informativa -> "azioni svolte per raggiungere l'obiettivo"
+    
+    // Inherited from its parent: informativa -> "azioni svolte per raggiungere l'obiettivo"
+    /** Dato  identificativo */
     private String valore;
-    /* =======================     Dati descrittivi     ======================= */
 	/** Motivazioni ritardo / mancato raggiungimento */
     private String descrizione;
     /** Data di contestualizzazione della misurazione dell'indicatore  */
@@ -95,7 +95,6 @@ public class MeasurementBean extends CodeBean {
     private String autoreUltimaModifica;
     /** Ulteriori informazioni (id indicatore, domanda 1-2-3...) */
     private ItemBean extraInfo;
-    /* =======================         Allegati         ======================= */
     /** Vector di fileset, ciascuno rappresentante un riferimento logico ad un allegato fisico */
     private Vector<FileDocBean> allegati;
     

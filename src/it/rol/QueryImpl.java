@@ -1,6 +1,46 @@
-/**
- * 
+/*
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio.
+ *
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
+ *   all right reserved
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA<br>
+ *
+ *   Giovanroberto Torre <gianroberto.torre@gmail.com>
+ *   Universita' degli Studi di Verona
+ *   Via Dell'Artigliere, 8
+ *   37129 Verona (Italy)
  */
+
 package it.rol;
 
 import java.util.HashMap;
@@ -10,25 +50,43 @@ import it.rol.bean.InterviewBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.WebStorageException;
 
+
 /**
- * @author outer-root
+ * <p>QueryImpl &egrave; l'implementazione dell'interfaccia {@link Query} 
+ * la quale contiene, oltre alle query parametriche della della web-application 
+ * &nbsp; <code>ROL-RMS (Rischi On Line &mdash; Risk Mapping Software)</code>,
+ * anche l'interfaccia pubblica di alcuni metodi per la costruzione di
+ * query a runtime &ndash; implementazione di cui si prende carico proprio
+ * il presente oggetto.<br> 
+ * Implementa pertanto alcuni metodi, dichiarati in quella, che costruiscono,
+ * a runtime, query la cui esatta struttura non era possibile stabilire 
+ * in anticipo (a meno di introdurre notevoli ridondanze e violare
+ * il paradigma DRY).<br>
  *
+ * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
+ * @see Query
  */
 public class QueryImpl implements Query, Constants {
 
     
     /**
-     * 
+     * Auto-generated serial version ID: parent implements 
+     * the Serializable interface.
+     * @see java.io.Serializable
      */
     private static final long serialVersionUID = 7339151352217708748L;
 
 
-    /* (non-Javadoc)
+    /** 
+     * {@link Query#getQueryStructures(int, int, int, int, int)} 
      * @see it.rol.Query#getQueryStructures(int, int, int, int, int)
      */
-    @SuppressWarnings("javadoc")
     @Override
-    public String getQueryStructures(int idR, int idl4, int idl3, int idl2, int idl1) {
+    public String getQueryStructures(int idR, 
+                                     int idl4, 
+                                     int idl3, 
+                                     int idl2, 
+                                     int idl1) {
         String tableFrom = null;
         String tableWhere = null;
         byte level = (byte) DEFAULT_ID;
@@ -88,10 +146,10 @@ public class QueryImpl implements Query, Constants {
     }
 
 
-    /* (non-Javadoc)
+    /**
+     * {@link Query#getQueryStructure(int, byte)}
      * @see it.rol.Query#getQueryStructure(int, byte)
      */
-    @SuppressWarnings("javadoc")
     @Override
     public String getQueryStructure(int id,
                                     byte level) {
@@ -159,12 +217,14 @@ public class QueryImpl implements Query, Constants {
     }
 
     
-    /* (non-Javadoc)
+    /**
+     * {@link Query#getMeasuresByFactors(int, int, String)}
      * @see it.rol.Query#getMeasuresByFactors(int, int, String)
      */
-    @SuppressWarnings("javadoc")
     @Override
-    public String getMeasuresByFactors(int idF, int idS, String codeM) {
+    public String getMeasuresByFactors(int idF, 
+                                       int idS, 
+                                       String codeM) {
         final String GET_MEASURES_BY_FACTOR = 
                 "SELECT DISTINCT" +
                 "       MS.codice                           AS \"codice\"" +
@@ -185,12 +245,16 @@ public class QueryImpl implements Query, Constants {
     }
     
     
-    /* (non-Javadoc)
+    /**
+     * {@link Query#getMeasureByRiskAndProcess(String, String, String, String, int)}
      * @see it.rol.Query#getMeasureByRiskAndProcess(String, String, String, String, int)
      */
-    @SuppressWarnings("javadoc")
     @Override
-    public String getMeasureByRiskAndProcess(String idR, String idP, String idS, String codeM, int getAll) {
+    public String getMeasureByRiskAndProcess(String idR, 
+                                             String idP, 
+                                             String idS, 
+                                             String codeM, 
+                                             int getAll) {
         final String GET_MEASURES_BY_RISK_AND_PROCESS = 
                 "SELECT DISTINCT" +
                         "       MS.codice                           AS \"codice\"" +
@@ -215,10 +279,10 @@ public class QueryImpl implements Query, Constants {
     }
     
     
-    /* (non-Javadoc)
+    /**
+     * {@link Query#getMeasuresByStruct(int, int, byte, String)}
      * @see it.rol.Query#getMeasuresByStruct(int, int, byte, String)
      */
-    @SuppressWarnings("javadoc")
     @Override
     public String getMeasuresByStruct(int idR, 
                                       int idS,
@@ -239,7 +303,7 @@ public class QueryImpl implements Query, Constants {
             clause = "  AND MST.id_struttura_liv4 IS NULL";
             break;
         default:
-            clause = "";
+            clause = VOID_STRING;
             break;
         }
         final String GET_MEASURE_BY_STRUCT =

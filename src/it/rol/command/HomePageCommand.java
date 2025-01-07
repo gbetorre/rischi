@@ -683,7 +683,11 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
      * <dt>0</dt><dd> =&gt; non toglie nulla,</dd>
      * <dt>1</dt><dd> =&gt; toglie l'ultima foglia,</dd> 
      * <dt>2</dt><dd> =&gt; toglie l'ultima e la penultima foglia</dd>
-     * </dl>etc.</p>
+     * </dl>etc.<br>
+     * Esempio:
+     * <pre>makeBreadCrumbs(nav, 0, "label")</pre>
+     * aggiunge la foglia "label" alle breadcrumbs contenute in nav
+     * (la foglia per definizione non ha link).</p>
      * 
      * @param nav       lista di breadcrumbs preesistente
      * @param items     numero di foglie da potare (opzionale)

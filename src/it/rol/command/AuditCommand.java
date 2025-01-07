@@ -219,7 +219,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         // Tabella che conterrà i valori degli indicatori calcolati
         HashMap<String, InterviewBean> indicators = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
-        LinkedList<ItemBean> bC = null;
+        //LinkedList<ItemBean> bC = null;
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
         String redirect = null;
         /* ******************************************************************** *
@@ -526,11 +526,11 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         if (questTime != null) {
             req.setAttribute("oraRisposte", questTime);
         }
-        // Imposta nella request le breadcrumbs in caso siano state personalizzate
+        /* Imposta nella request le breadcrumbs in caso siano state personalizzate
         if (bC != null) {
             req.removeAttribute("breadCrumbs");
             req.setAttribute("breadCrumbs", bC);
-        }
+        }*/
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
@@ -561,7 +561,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         LinkedHashMap<String, String> answs = new LinkedHashMap<>();
         LinkedHashMap<String, String> survey = new LinkedHashMap<>();
         LinkedHashMap<String, String> quest = new LinkedHashMap<>();
-        LinkedHashMap<String, String> risk = new LinkedHashMap<>();
+        //LinkedHashMap<String, String> risk = new LinkedHashMap<>();
         /* **************************************************** *
          *     Caricamento parametro di Codice Rilevazione      *
          * **************************************************** */      
@@ -1124,7 +1124,9 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                             Integer.parseInt(question.getAnswer().getNome());
                             // Se la risposta non è numerica, e il tipo di quesito è numerico, non puo' calcolare il valore dell'indicatore
                         } catch (NumberFormatException nfe) {
-                            reason.append("Risposta al quesito " + question.getCodice() + " non numerica ");
+                            String msg = "Risposta al quesito " + question.getCodice() + " non numerica ";
+                            reason.append(msg);
+                            LOG.severe(msg + nfe.getMessage());
                             return false;
                         }
                     } else if (question.getTipo().getId() == ELEMENT_LEV_3) { // Se il quesito è di tipo percentuale, non solo deve essere convertibile ma amche compreso tra 0.00 e 100.00
@@ -1137,7 +1139,9 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                                 return false;
                             }
                         } catch (NumberFormatException nfe) {
-                            reason.append("Risposta al quesito " + question.getCodice() + " non percentuale ");
+                            String msg = "Risposta al quesito " + question.getCodice() + " non percentuale ";
+                            reason.append(msg);
+                            LOG.severe(msg + nfe.getMessage());
                             return false;
                         }
                     } else if (question.getTipo().getId() == ELEMENT_LEV_4) { // Se il quesito è di tipo descrittivo

@@ -1,15 +1,24 @@
 /*
- *   Rischi On Line (ROL): Applicazione web per la gestione di 
- *   sondaggi inerenti al rischio corruttivo cui i processi organizzativi
- *   di una PA possono essere esposti e per la produzione di mappature
- *   e reportistica finalizzate alla valutazione del rischio corruttivo
- *   nella pubblica amministrazione.
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio.
  *
- *   Risk Mapping Software (ROL)
- *   web applications to assess the amount, and kind, of risk
- *   which each process is exposed, and to publish, and manage,
- *   report and risk information.
- *   Copyright (C) 2022-2024 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -37,6 +46,7 @@ package it.rol.bean;
 import java.util.AbstractList;
 
 import it.rol.exception.AttributoNonValorizzatoException;
+
 
 /**
  * <p>Classe usata per rappresentare un rischio.</p>
@@ -73,9 +83,9 @@ public class RiskBean extends CodeBean {
     private AbstractList<MeasureBean> misure;
     
 	
-    /* ************************************************************ *  
-     *                         Costruttori                          *
-     * ************************************************************ */
+    /* ************************************************************************ *
+     *                               Costruttori                                *
+     * ************************************************************************ */
     /**
      * <p>Costruttore senza parametri: inizializza i campi a valori di default.</p>
      */
@@ -90,6 +100,10 @@ public class RiskBean extends CodeBean {
     }
 	
 	
+    /* ************************************************************************ *  
+     *                          Accessori e Mutatori                            *
+     * ************************************************************************ */
+    
 	/* ********************************************************* *
      *           Metodi getter e setter per impatto              *
      * ********************************************************* */
