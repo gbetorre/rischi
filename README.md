@@ -28,6 +28,7 @@
     ·
     <a href="https://github.com/gbetorre/rischi/pulls">Request Feature</a>
   </p>
+  [![need italian?](https://icon-icons.com/icons2/266/PNG/512/Italy_29749.png)](https://github.com/gbetorre/rischi/blob/master/README.it.md "need italian?")
 </div>
 
 
@@ -262,6 +263,10 @@ in the case of the current application, in fact, version numbers have only the s
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)</p>
 <cite>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</cite>
 
+### 2025
+- [2.1.2] (13/01/2025) Presentation improvements (badges, labels, colours)
+
+### 2024
 - [2.1.1] (02/12/2024) Implemented client-side controls in measurement form
 - [2.1.0] (28/11/2024) Added facility to download process register in CSV format (extracts processes with PxI original and PxI mitigated after measures)
 - [2.0.9] (25/11/2024) Added page containing form to add a measurement for monitoring; bug fix
@@ -311,6 +316,8 @@ in the case of the current application, in fact, version numbers have only the s
 - [1.6.5] (16/01/2024) Annual license update.
 - [1.6.4] (15/01/2024) Modified structure sorting; changed presentation of highest risk value; bug fixes
 - [1.6.3] (08/01/2024) Refined CSV extraction relative to single interview; added sorting by name to process tree nodes; improved PxI report presentation of processes
+
+### 2023
 - [1.6.2] (15/12/2023) Revised algorithm for calculating probability size; P; added style to highlight very high risk value
 - [1.6.1] (11/12/2023) Revised algorithm for calculating impact indicator I3; fixed bugs
 - [1.6.0] (07/12/2023) Implemented output to Rich Text Format file of tabular report summarizing risk and facilities; bug fixes
@@ -347,6 +354,8 @@ in the case of the current application, in fact, version numbers have only the s
 - [1.2.9] (08/02/2023) Minor presentation improvements in process details: highlighted risk area, showed contingent subject detail.
 - [1.2.8] (06/02/2023) Expanded anti-corruption process detail: showed risk to which the process is exposed
 - [1.2.7] (30/01/2023) Implemented corrupt risk register; bug fixes
+
+### 2022
 - [1.2.6] (12/21/2022) Added functionality to download specific process details in CSV format
 - [1.2.5] (13/12/2022) Added input, phase, output details in general process extraction CSV
 - [1.2.4] (01/12/2022) Showed details of a process in a separate window for pdf printing purposes
