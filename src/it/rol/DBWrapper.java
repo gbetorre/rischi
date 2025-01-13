@@ -633,7 +633,7 @@ public class DBWrapper extends QueryImpl {
     
 
     /**
-     * <p>Dato un identificativo di un'attivit&grave;, restituisce una lista 
+     * <p>Dato un identificativo di un'attivit&agrave;, restituisce una lista 
      * di soggetti contingenti (enti esterni o soggetti interessati) collegati
      * ad essa.</p>
      *
@@ -4498,7 +4498,7 @@ public class DBWrapper extends QueryImpl {
                                                    throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
-            ResultSet rs, rs1 = null;
+            ResultSet rs, rs1, rs2 = null;
             int nextParam = NOTHING;
             AbstractList<DepartmentBean> structs = new ArrayList<>();
             AbstractList<MeasureBean> measures = null;
@@ -4531,6 +4531,33 @@ public class DBWrapper extends QueryImpl {
                         MeasureBean measure = new MeasureBean();
                         // Lo valorizza col risultato della query
                         BeanUtil.populate(measure, rs1);
+                        /* === Recupera le Fasi di attuazione della misura === */
+                        nextParam = NOTHING;
+                        pst = null;
+                        ArrayList<ActivityBean> fasi = new ArrayList<>();
+                        pst = con.prepareStatement(GET_MEASURE_ACTIVITIES);
+                        pst.clearParameters();
+                        pst.setString(++nextParam, measure.getCodice());
+                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                        pst.setInt(++nextParam, survey.getId());
+                        rs2 = pst.executeQuery();
+                        while (rs2.next()) {
+                            // Crea una fase vuota
+                            ActivityBean fs = new ActivityBean();
+                            // La valorizza col risultato della query
+                            BeanUtil.populate(fs, rs2);
+                            // Cerca l'indicatore collegato eventualmente alla fase
+                            IndicatorBean ind = getIndicatorByActivity(user, fs, survey);
+                            // Aggiunge l'indicatore alla fase se significativo
+                            if (ind != null) {
+                                fs.setIndicatore(ind);
+                            }
+                            // Aggiunge la fase alla lista delle fasi di attuazione
+                            fasi.add(fs);
+                        }
+                        measure.setFasi(fasi);
+                        measure.setRilevazione(survey);
                         // La aggiunge alla lista delle misure 
                         measures.add(measure);
                     }
