@@ -148,9 +148,9 @@ public class MeasureBean extends CodeBean {
         super(o);
     }
 
-    /* **************************************************************** *
-     *      Metodi per ordinare oggetti di questo tipo nelle liste      *
-     * **************************************************************** */
+    /* ************************************************************************ *
+     *          Metodi per ordinare oggetti di questo tipo nelle liste          *
+    /* ************************************************************************ */
     
     /* Careful: depends only on Ordinale!
      * <p>Compara due oggetti basandosi sulla loro chiave</p>
@@ -179,10 +179,10 @@ public class MeasureBean extends CodeBean {
             return 1;
     }
     
-    /* **************************************************************** *
-     *  Metodi Ovverride per usare l'oggetto come key di un dictionary  *
-     *  e/o per poter capire se è quello da rimuovere da una Collection *
-     * **************************************************************** */
+    /* ************************************************************************ *
+     *      Metodi Ovverride per usare l'oggetto come key di un dictionary      *
+     *      e/o per poter capire se è quello da rimuovere da una Collection     *
+    /* ************************************************************************ */
     
     /* The primary key of these types are both code AND id_rilevazione */
     /* (non-Javadoc)
@@ -247,6 +247,10 @@ public class MeasureBean extends CodeBean {
     }
         
     
+    /* ************************************************************************ *  
+     *                          Accessori e Mutatori                            *
+     * ************************************************************************ */
+    
     /* ********************************************************* *
      *              Metodi getter e setter per codice            *
      * ********************************************************* */
@@ -259,6 +263,7 @@ public class MeasureBean extends CodeBean {
     public String getCodice() {
         return codice;
     }
+    
     
     /**
      * Imposta il codice di una misura
@@ -283,6 +288,7 @@ public class MeasureBean extends CodeBean {
         return onerosa;
     }
 
+    
     /**
      * Imposta la specificit&agrave; economica della misura
      *
@@ -348,6 +354,7 @@ public class MeasureBean extends CodeBean {
         return dataUltimaModifica;
     }
 
+    
     /**
      * Imposta la data dell'ultima della misura
      *
@@ -371,6 +378,7 @@ public class MeasureBean extends CodeBean {
         return oraUltimaModifica;
     }
 
+    
     /**
      * Imposta l'ora dell'ultima modifica di una misura
      *
@@ -394,6 +402,7 @@ public class MeasureBean extends CodeBean {
         return autoreUltimaModifica;
     }
 
+    
     /**
      * Imposta l'autore dell'ultima modifica di una misura
      *
@@ -421,6 +430,7 @@ public class MeasureBean extends CodeBean {
         return carattere;
     }
 
+    
     /**
      * Imposta il carattere con l'oggetto CodeBean passato
      * 
@@ -447,6 +457,7 @@ public class MeasureBean extends CodeBean {
         return rilevazione;
     }
 
+    
     /**
      * Imposta rilevazione con l'oggetto CodeBean passato
      * @param rilevazione - rilevazione del processo da impostare
@@ -469,6 +480,7 @@ public class MeasureBean extends CodeBean {
         return tipologie;
     }
 
+    
     /**
      * Imposta le tipologie della misura
      * 
@@ -494,6 +506,7 @@ public class MeasureBean extends CodeBean {
         return capofila;
     }
 
+    
     /**
      * Imposta le strutture capofila
      * 
@@ -651,6 +664,7 @@ public class MeasureBean extends CodeBean {
         return capofila2;
     }
 
+    
     /**
      * Imposta le strutture che sono capofila aggiuntive
      * 
@@ -674,6 +688,7 @@ public class MeasureBean extends CodeBean {
         return capofila3;
     }
 
+    
     /**
      * Imposta le strutture che sono capofila opzionali
      * 
@@ -697,6 +712,7 @@ public class MeasureBean extends CodeBean {
         return gregarie;
     }
 
+    
     /**
      * Imposta le strutture che partecipano alla misura in qualit&agrave; di gregarie
      * 
@@ -834,6 +850,153 @@ public class MeasureBean extends CodeBean {
      */
     public void setFasi(ArrayList<ActivityBean> fasi) {
         this.fasi = fasi;
+    }
+    
+    
+    /* ************************************************************************ *
+     *      Metodi di calcolo (tot. indicatori e misurazioni, stato misura)     *
+     * ************************************************************************ */
+    
+    /**
+     * Conta quanti indicatori in totale insistono sulle varie fasi di attuazione
+     * della misura corrente
+     * 
+     * @return <code>totIndicatori</code> - un intero piccolo rappresentante il numero di indicatori complessivo della misura
+     */
+    public byte getTotIndicatori() {
+        byte totInd = Constants.NOTHING;
+        if (this.fasi != null) {
+            for (ActivityBean fase : this.fasi) {
+                // Ogni fase ha al più un indicatore: FASE (0,1)-<>-(1,1) INDICATORE
+                if (fase.hasIndicatore()) {
+                    // Se trova indicatore incrementa il contatore
+                    totInd++;
+                }
+            }
+        }
+        return totInd;
+    }
+    
+    
+    /**
+     * Conta quante misurazioni in totale sono effettuate sugli indicatori 
+     * collegati alle varie fasi di attuazione della misura corrente
+     * 
+     * @return <code>totMisurazioni</code> - un intero piccolo rappresentante il numero di misurazioni applicate agli indicatori delle fasi della misura
+     */
+    public byte getTotMisurazioni() {
+        byte totMis = Constants.NOTHING;
+        if (this.fasi != null) {
+            for (ActivityBean fase : this.fasi) {
+                // Ogni fase ha al più un indicatore: FASE (0,1)-<>-(1,1) INDICATORE
+                if (fase.hasIndicatore()) {
+                    IndicatorBean indicatore = fase.getIndicatore();
+                    if (indicatore.getMisurazioni() != null) {
+                        totMis += indicatore.getMisurazioni().size();
+                    }
+
+                }
+            }
+        }
+        return totMis;
+    }
+    
+    
+    /**
+     * Verifica se ogni indicatore collegato ad ogni fase ha ricevuto almeno
+     * una misurazione.<ol> 
+     * <li>Se questo &egrave; vero, allora la misura corrente pu&ograve; 
+     * essere considerata "monitorata" e il metodo restituisce 'true';</li>
+     * <li>altrimenti, se almeno un indicatore non ha ricevuto alcuna misurazione,
+     * la misura non pu&ograve; essere considerata "monitorata" e il presente
+     * metodo restituisce 'false'.</li></ol> 
+     * La definizione di &quot;misura monitorata&quot; &egrave; ben
+     * formalizzata:<br> 
+     * <cite>una /misura monitorata/ &egrave; una misura di mitigazione 
+     * suddivisa in fasi di attuazione, su cui &egrave; stato applicato 
+     * almeno un indicatore che &egrave; stato misurato almeno una volta.
+     * </cite><br> 
+     * In altri termini:<br>
+     * Per definire una misura di mitigazione come misura monitorata 
+     * &egrave; <strong>necessario e sufficiente</strong> che 
+     * sia stato inserito almeno un indicatore su una delle fasi della misura 
+     * e che lo stesso sia stato misurato almeno una volta.<br> 
+     * Nel contesto di una misura, potrebbero quindi esservi anche alcune fasi
+     * prive di indicatori e ci&ograve; nonostante la misura, se gli altri
+     * indicatori hanno ricevuto almeno una misurazione, sar&agrave; considerata
+     * "monitorata"; ci&ograve; per via del fatto che non sempre tutte le fasi
+     * di una misura hanno un indicatore associato, proprio da regole di 
+     * business.<br> 
+     * Come si vede, non &egrave; possibile trarre conclusioni sulla
+     * completezza del monitoraggio di una misura confrontando banalmente 
+     * se il totale degli indicatori ({@link #getTotIndicatori()}) &egrave;
+     * uguale al totale delle misurazioni ({@link #getTotMisurazioni()})
+     * perch&eacute; un numero di misurazioni elevato non garantisce che tutti
+     * gli indicatori siano stati misurati (p.es., una misura potrebbe avere: 
+     * 3 fasi, 2 indicatori e 2 misurazioni fatte solo sul primo indicatore; 
+     * il fatto che il numero di misurazioni in questo caso sia uguale
+     * al numero di indicatori non implica che tutti gli indicatori 
+     * abbiano ricevuto una misurazione).
+     * Alcuni casi d'uso:<ul>
+     * <li>Misura A ha 2 fasi, a1 e a2; solo a1 ha un indicatore e questo 
+     * ha ricevuto una misurazione: la misura A risulta "monitorata".</li>
+     * <li>Misura B ha 3 fasi, b1, b2 e b3; tutte e 3 le fasi hanno un indicatore
+     * ciascuno, quindi i1 per b1, i2 per b2, i3 per b3; i1 e i2 hanno ricevuto 
+     * rispettivamente 1 e 2 misurazioni, mentre i3 non ha ricevuto misurazioni:
+     * la misura risulta "non monitorata".</li>
+     * <li>Misura C ha 2 fasi ma nessun indicatore: la misura risulta 
+     * "non misurabile", perch&eacute; potrebbe anche essere corretto 
+     * non prevedere indicatori su una misura in presenza 
+     * di situazioni particolari (p.es. "verifica sul pantouflage" 
+     * che potrebbe restare a lungo dotata di dettagli ma priva di indicatori 
+     * in quanto non facilmente misurabile. Siccome il metodo restituisce
+     * soltanto un valore boolean, non &egrave; possibile discriminare
+     * tra "misura non monitorata" e "misura non misurabile" 
+     * (o "non monitorabile"), ma possono essere sviluppati ulteriori 
+     * strati di codice per intercettare a monte questo caso. 
+     * (Per ulteriori dettagli, v. analisi dei requisiti). </li></ul><br>
+     * 
+     * @return <code>boolean</code> - se vero la misura è monitorata, se falso è non monitorata
+     */
+    public boolean getMonitorata() {
+        // Inizializza tutti i contatori a zero
+        int totFasi = Constants.NOTHING;
+        int totIndicatori = Constants.NOTHING;
+        int indicatoriMisurati = Constants.NOTHING;
+        // Una misura potrebbe non avere i dettagli monitoraggio
+        if (this.fasi != null) {
+            // Conta le fasi della misura
+            totFasi = fasi.size();
+            // Scorre le fasi
+            for (int i = 0; i < totFasi; i++) {
+                ActivityBean fase = fasi.get(i);
+                // Le fasi potrebbero legittimamente non avere indicatori
+                if (fase.hasIndicatore()) {
+                    // Tiene il conto del totale degli indicatori della misura
+                    totIndicatori += 1;
+                    // Ottiene l'indicatore
+                    IndicatorBean indicatore = fase.getIndicatore();
+                    // Controlla se l'indicatore ha misurazioni
+                    if (indicatore.getMisurazioni() != null && !indicatore.getMisurazioni().isEmpty()) {
+                        // Tiene il conto degli indicatori che hanno misurazioni
+                        indicatoriMisurati += 1;
+                    } else {
+                        // Se c'è almeno un indicatore non misurato, la misura non può essere totalmente monitorata
+                        return false;
+                    }
+                }
+            }
+            // Se nessuna fase ha indicatori, la misura non è misurabile
+            if (totIndicatori == Constants.NOTHING) {
+                return false;
+            }
+            // Se il numero di tutti gli indicatori definiti è uguale a quello di tutti gli indicatori misurati, la misura è totalmente monitorata 
+            if (totIndicatori == indicatoriMisurati) {
+                return true;
+            }
+        }
+        // Se non ci sono le fasi la misura non è monitorabile
+        return false;
     }
 
 }
