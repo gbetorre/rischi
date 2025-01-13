@@ -630,6 +630,18 @@ public class ActivityBean extends CodeBean {
      */
     public void setIndicatore(IndicatorBean indicatore) {
         this.indicatore = indicatore;
-    }   
+    }
+    
+    /**
+     * <p>Restituisce 'vero' se l'attivit&agrave; corrente ha un indicatore
+     * collegato, 'falso' altrimenti.</p>
+     * 
+     * @return <code>boolean</code> - 'true' se l'attivita' ha un indicatore, 'false' altrimenti
+     */
+    public boolean hasIndicatore() {
+        if (indicatore != null)
+            return true;
+        return false;
+    }
 
 }
