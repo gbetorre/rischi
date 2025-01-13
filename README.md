@@ -28,7 +28,7 @@
     ·
     <a href="https://github.com/gbetorre/rischi/pulls">Request Feature</a>
     ·
-    <a href="https://github.com/gbetorre/rischi/blob/master/README.it.md"><img src="https://github.com/gbetorre/rischi/blob/main/web/img/italy.png">Need Italian?</a>
+    <a href="https://github.com/gbetorre/rischi/blob/master/README.it.md">Need Italian?&nbsp;<img src="https://github.com/gbetorre/rischi/blob/main/web/img/italy.png" alt="IT" width="40" height="40"></a>
   </p>
 </div>
 
