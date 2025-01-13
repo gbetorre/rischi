@@ -14,7 +14,7 @@
 <div align="center">
   <!--
   <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    
   </a>
   -->
   <h3 align="center">ROL [Risk OnLine]</h3>
@@ -27,8 +27,9 @@
     <a href="https://github.com/gbetorre/rischi/issues">Report Bug</a>
     ·
     <a href="https://github.com/gbetorre/rischi/pulls">Request Feature</a>
+    ·
+    <a href="https://github.com/gbetorre/rischi/blob/master/README.it.md"><img src="https://github.com/gbetorre/rischi/blob/main/web/img/italy.png">Need Italian?</a>
   </p>
-  [![need italian?](https://icon-icons.com/icons2/266/PNG/512/Italy_29749.png)](https://github.com/gbetorre/rischi/blob/master/README.it.md "need italian?")
 </div>
 
 
@@ -401,7 +402,7 @@ See [open issues](https://github.com/gbetorre/rischi/issues) for a complete list
 [license-url]: https://github.com/gbetorre/rischi/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
+[italy-flag]: https://github.com/gbetorre/rischi/blob/main/web/img/italy.png
 [Java]: https://img.shields.io/badge/linguaggio-java-red
 [Java-url]: https://www.java.com/it/
 [JavaScript]: https://img.shields.io/badge/linguaggio-javascript-green
