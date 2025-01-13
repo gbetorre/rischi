@@ -1,12 +1,24 @@
 /*
- *   Process Mapping Software: Modulo Applicazione web per la visualizzazione
- *   delle schede di indagine su allocazione risorse dell'ateneo,
- *   per la gestione dei processi on line (pms).
+ *   Rischi On Line (ROL-RMS), Applicazione web: 
+ *   - per la gestione di sondaggi inerenti al rischio corruttivo 
+ *   cui i processi organizzativi di una PA possono essere esposti, 
+ *   - per la produzione di mappature e reportistica finalizzate 
+ *   alla valutazione del rischio corruttivo nella pubblica amministrazione, 
+ *   - per ottenere suggerimenti riguardo le misure di mitigazione 
+ *   che possono calmierare specifici rischi 
+ *   - e per effettuare il monitoraggio al fine di verificare quali misure
+ *   proposte sono state effettivamente attuate dai soggetti interessati
+ *   alla gestione dei processi a rischio.
  *
- *   Process Mapping Software (pms)
- *   web applications to publish, and manage,
- *   processes, assessment and skill information.
- *   Copyright (C) renewed 2022 Giovanroberto Torre
+ *   Risk Mapping and Management Software (ROL-RMS),
+ *   web application: 
+ *   - to assess the amount and type of corruption risk to which each organizational process is exposed, 
+ *   - to publish and manage, reports and information on risk
+ *   - and to propose mitigation measures specifically aimed at reducing risk, 
+ *   - also allowing monitoring to be carried out to see 
+ *   which proposed mitigation measures were then actually implemented.
+ *   
+ *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -31,6 +43,7 @@
 
 package it.rol.exception;
 
+
 /**
  * <p>Semplice classe che permette di isolare
  * eventuali errori generati dalle classi che implementano
@@ -50,10 +63,8 @@ package it.rol.exception;
  * </cite><br />
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
- * 
  */
 public class CommandException extends Exception {
-    
     
     /**
 	 * <p>Necessario in quanto estende Exception.</p>
@@ -70,7 +81,7 @@ public class CommandException extends Exception {
      * fatto in <code>Throwable</code>, che &egrave; la superclasse di 
      * <code>Exception</code> - sar&agrave; automaticamente inizializzato con
      * il nome della classe personalizzata 
-     * (qui: <code>it.univr.di.uol.CommandException</code>), se il costruttore
+     * (qui: <code>it.rol.exception.CommandException</code>), se il costruttore
      * della propria classe personalizzata sar&agrave; utilizzato.</p> 
      * </cite>
 	 */
@@ -125,6 +136,9 @@ public class CommandException extends Exception {
     }
     
     
+    /**
+     * @param e
+     */
     public CommandException(Throwable e) {
         super(getLocalizedMessage(e));
     }
@@ -148,6 +162,5 @@ public class CommandException extends Exception {
             trace.append(stack.toString()).append("\n");
         return trace.toString();
     }
-    
     
 }
