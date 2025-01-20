@@ -348,6 +348,10 @@ public interface Constants extends Serializable {
      * --------------------    GENERIC OPERATIONS    -------------------- 
      */
     /**
+     * <p>Costante per il parametro identificante la funzione di avvio di un nuovo flusso.</p>
+     */
+    public static final String START                    = "new";
+    /**
      * <p>Costante per il parametro identificante la funzione di aggiornamento di una entit&agrave;.</p>
      */
     public static final String UPDATE                   = "upd";
