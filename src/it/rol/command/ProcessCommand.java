@@ -136,6 +136,11 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * di una nota (giudizio sintetico) ad un indice PxI
      */
     private static final String nomeFileNote = "/jsp/prNotaForm.jsp";
+    /** 
+     * Pagina di scelta del tipo di nuovo elemento da aggiungere
+     * (Macroprocesso  | Processo | Sottoprocesso)
+     */
+    private static final String nomeFileSceltaTipo = "/jsp/prTipoForm.jsp";
     /**
      * Nome del file json della Command (dipende dalla pagina di default)
      */
@@ -179,6 +184,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_FACTORS,      nomeFileFattori);
         nomeFile.put(PART_INSERT_F_R_P, nomeFileAddFactor);
         nomeFile.put(PART_PI_NOTE,      nomeFileNote);
+        nomeFile.put(START,             nomeFileSceltaTipo);
     }
 
 
@@ -276,14 +282,14 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
                 RiskCommand.loadParams(part, parser, params);
-                /* @PostMapping */
+                /* ======================= @PostMapping ======================= */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
                         if (part.equalsIgnoreCase(PART_INSERT_F_R_P)) {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              * INSERT new relation between Risk Process Factor  *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                             // Controlla che non sia già presente l'associazione 
                             int check = db.getFactorRiskProcess(user, params);
                             if (check > NOTHING) {  // Genera un errore
@@ -307,9 +313,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                            AMPERSAND + MESSAGE + EQ + "newRel#rischi";
                             }
                         } else if (part.equalsIgnoreCase(PART_PI_NOTE)) {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              *                UPDATE a note to PxI              *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                             // Aggiorna la nota
                             db.updateNote(user, params);
                             // Prepara la redirect 
@@ -326,15 +332,17 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             }
                         }
                     }
-                /* @GetMapping */
+                /* ======================== @GetMapping ======================= */
                 } else {
                     // Il parametro di navigazione 'p' permette di addentrarsi nelle funzioni
                     if (nomeFile.containsKey(part)) {
+                        // Definisce un  default per la pagina jsp
+                        fileJspT = nomeFile.get(part);
                         // Viene richiesta la visualizzazione del dettaglio di un processo
                         if (part.equalsIgnoreCase(PART_PROCESS)) {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              *                  SELECT Process                  *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                             // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                             processElements = new ConcurrentHashMap<>();
                             // Valorizza tali liste necessarie a visualizzare  i dettagli di un processo, restituendo gli indicatori corredati con le note al PxI
@@ -342,38 +350,46 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
-                            // Imposta la jsp
-                            fileJspT = nomeFile.get(part);
                         } else if (part.equalsIgnoreCase(PART_OUTPUT)) {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              *                  SELECT Output                   *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                             if (idO > DEFAULT_ID) {
                                 // Recupera un output specifico
                                 output = db.getOutput(user, idO, survey);
-                                // Imposta la jsp
+                               /* Sovrascrive la jsp con un valore ad hoc!
+                                * This approach utilizes string literals instead using constructor String() with the new operator.
+                                * String literals are stored in the string pool. 
+                                * This method is more memory-efficient because if the string fileJspT already exists in the pool, 
+                                * it will reuse that reference instead of creating a new object.
+                                * Both methods acknowledge that strings in Java are immutable. 
+                                * However, using new String() does not change this fact; it merely creates 
+                                * a new instance rather than modifying the existing one.  
+                                * The first method is generally faster because it can take advantage of the string pool and avoids unnecessary object creation.
+                                * The second method incurs overhead from creating a new object and is slower due to this additional allocation.
+                                * The second approach (fileJspT = new String(nomeFileOutput)) explicitly creates a new String object in the heap memory, 
+                                * which is less efficient as it always creates a new instance, regardless of whether an equivalent string already exists.
+                                * Using string literals allows Java to optimize memory usage through the string pool, 
+                                * making code cleaner and more efficient. In summary, always prefer reassigning with string literals over creating new instances 
+                                * unless having a specific reason to use new String().                                 */
                                 fileJspT = nomeFileOutput;
                             } else {
                                 // Deve recuperare l'elenco degli output
                                 outputs = db.getOutputs(user, survey);
-                                // Imposta la jsp
-                                fileJspT = nomeFile.get(part);
                             }
                         } else if (part.equalsIgnoreCase(PART_FACTORS)) {
-                            /* ************************************************ *
+                            /* ------------------------------------------------ *
                              *                  SELECT Factors                  *
-                             * ************************************************ */
+                             * ------------------------------------------------ */
                             // Deve recuperare l'elenco dei fattori abilitanti
                             factors = db.getFactors(user, survey);
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Fattori abilitanti");
-                            // Imposta la jsp
-                            fileJspT = nomeFile.get(part);
                         } else if (part.equalsIgnoreCase(PART_INSERT_F_R_P)) {
-                            /* **************************************************** *
-                             * SHOWS Form to LINK A Factor TO A Risk INTO A Process *
-                             * **************************************************** */
+                            /* ------------------------------------------------ *
+                             *  SHOWS Form to LINK Factor TO Risk INTO Process  *
+                             * ------------------------------------------------ */
                             // Deve recuperare l'elenco completo dei fattori abilitanti
                             factors = db.getFactors(user, survey);
                             // Prepara un ProcessBean di cui recuperare tutti i rischi
@@ -385,19 +401,22 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-F");
-                            // Imposta la jsp
-                            fileJspT = nomeFile.get(part);
                         } else if (part.equalsIgnoreCase(PART_PI_NOTE)) {
-                            /* **************************************************** *
-                             *   SHOWS Form to INSERT or UPDATE a note about PxI    *
-                             * **************************************************** */
+                            /* ------------------------------------------------ *
+                             * SHOWS Form to INSERT or UPDATE a note about PxI  *
+                             * ------------------------------------------------ */
                             // Deve recuperare e mostrare la nota al giudizio sintetico PxI
                             pxi = db.getIndicatorPI(user, idP, survey);
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nota");
-                            // Imposta la jsp
-                            fileJspT = nomeFile.get(part);
+                        } else if (part.equalsIgnoreCase(START)) {
+                            /* ------------------------------------------------ *
+                             *  SHOWS a Form to choose the type of new process  *
+                             * ------------------------------------------------ */
+                            // Ha bisogno di personalizzare le breadcrumbs
+                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo Elemento");
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
@@ -966,9 +985,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                                                  throws CommandException {
         HashMap<String, InterviewBean> indicators = null;
         try {
-            /* ************************************************ *
+            /* ------------------------------------------------ *
              *        Create threads for each computation       *
-             * ************************************************ */
+             * ------------------------------------------------ */
             // Inputs
             Thread threadInputs = new Thread(() -> {
                 LOG.info("Thread del recupero degli Input partito...");
@@ -1034,17 +1053,17 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 processElements.put(TIPI_LISTE[ELEMENT_LEV_4], listaInterviste);
                 LOG.info("Thread del recupero delle Interviste terminato...");
             });
-            /* ************************************************************ *
+            /* ------------------------------------------------------------ *
              *  Start all threads which are different from the mainthread   *
-             * ************************************************************ */
+             * ------------------------------------------------------------ */
             threadInterviews.start();            
             threadInputs.start();
             threadActivities.start();
             threadOutputs.start();
             threadRisks.start();
-            /* ************************************************ *
+            /* ------------------------------------------------ *
              *           Wait for all threads to finish         *
-             * ************************************************ */
+             * ------------------------------------------------ */
             try {
                 threadInputs.join();
                 threadActivities.join();
@@ -1213,9 +1232,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                           throws CommandException {
         FileWriter out = null;
         try {
-            /* **************************************************************** *
-             *     Controlla che la directory esista; se non esiste, la crea   *
-             * **************************************************************** */
+            /* ---------------------------------------------------------------- *
+             *   Controlla che la directory esista e, se non esiste, la crea    *
+             * ---------------------------------------------------------------- */
             // Ottiene la path assoluta della root della web application (/)
             String appPath = req.getServletContext().getRealPath(VOID_STRING);
             LOG.info(FOR_NAME + "appPath vale: " + appPath);
@@ -1238,9 +1257,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 jsonDir.mkdir();
                 LOG.info(FOR_NAME + jsonDir + " creata.\n");
             }
-            /* ************************************************************ *
-             *                    Genera e scrive il json                   *
-             * ************************************************************ */
+            /* ------------------------------------------------ *
+             *             Genera e scrive il json              *
+             * ------------------------------------------------ */
             String givenName = filename;
             LOG.info(FOR_NAME + "Nome stabilito per il file: " + givenName);
             String extension = DOT + JSON;
