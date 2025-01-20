@@ -4,6 +4,12 @@
     <a href="${prCSV}" class="float-right badge badge-pill lightTable bgAct20" title="Scarica il database completo dei processi organizzativi censiti a fini anticorruttivi">
       <i class="fas fa-download"></i>Scarica tutti i dati
     </a>
+    <span class="float-right">
+      <a href="${pew}" type="button" class="badge bg-success btn-small lightTable text-white marginLeft align-middle refresh" id="insert" title="Aggiungi un macro/processo">
+        <i class="fa-solid fa-square-plus"></i>
+        Aggiungi
+      </a>&nbsp;&nbsp;
+    </span>
     <hr class="riga"/>
     <div class="chart-container col-12" style="padding-top:10px;"> </div>
     <div class="ajax-loader" id="imgload">
