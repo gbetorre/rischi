@@ -423,6 +423,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.1.3] (20/01/2025) Implementata pagina iniziale inserimento processo
 - [2.1.2] (13/01/2025) Revisione grafica pagine; miglioramenti nella presentazione pagina iniziale monitoraggio (conteggio fasi, indicatori, misurazioni e completezza di ogni misura)
 
 ### 2024
