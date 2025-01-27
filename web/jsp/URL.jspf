@@ -64,9 +64,9 @@
   <c:param name="p" value="fat" />
   <c:param name="r" value="${ril}" />
 </c:url>
-<c:url var="pew" context="${initParam.appName}" value="/" scope="page">
+<c:url var="ppr" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pr" />
-  <c:param name="p" value="new" />
+  <c:param name="p" value="ipr" />
   <c:param name="r" value="${ril}" />
 </c:url>
 <c:url var="st" context="${initParam.appName}" value="/" scope="page">
