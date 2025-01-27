@@ -306,6 +306,16 @@ public interface Constants extends Serializable {
      */
     public static final String PART_INSERT_MEASUREMENT  = "imm";
     /**
+     * <p>Costante per il parametro identificante la funzione di aggiunta 
+     * di un nuovo processo o macroprocesso.</p>
+     */
+    public static final String PART_INSERT_PROCESS      = "ipr";
+    /**
+     * <p>Costante per il parametro identificante la funzione di aggiunta 
+     * di uno o pi&uacute; input collegati ad un processo.</p>
+     */
+    public static final String PART_INSERT_INPUT        = "inp";
+    /**
      * <p>Costante per il parametro identificante la parte di 
      * aggiunta/aggiornamento nota PxI (giudizio sintetico).</p>
      */
@@ -347,10 +357,6 @@ public interface Constants extends Serializable {
     /* 
      * --------------------    GENERIC OPERATIONS    -------------------- 
      */
-    /**
-     * <p>Costante per il parametro identificante la funzione di avvio di un nuovo flusso.</p>
-     */
-    public static final String START                    = "new";
     /**
      * <p>Costante per il parametro identificante la funzione di aggiornamento di una entit&agrave;.</p>
      */
