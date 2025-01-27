@@ -132,6 +132,16 @@ public interface Query extends Serializable {
             "       MAX(codice)         AS \"nome\"" +
             "   FROM rischio_corruttivo" +
             "   WHERE codice ILIKE ?";
+
+    /**
+     * <p>Estrae il massimo codice di un macroprocesso appartenente a una 
+     * data area di rischio</p>
+     */
+    public static final String SELECT_MAX_MAT_CODE =
+            "SELECT " +
+            "       MAX(codice)         AS \"nome\"" +
+            "   FROM macroprocesso_at" +
+            "   WHERE id_area_rischio = ?";
     
     /**
      * <p>Estrae il numero di record di una tabella definita nel chiamante</p>
@@ -218,6 +228,22 @@ public interface Query extends Serializable {
             "   WHERE (R.id = ? OR -1 = ?)" +
             "       AND R.chiusa = true" +
             "   ORDER BY data_rilevazione DESC";    
+    
+    /**
+     * <p>Estrae tutte le aree di rischio censite e storicizzate in base
+     * alla rilevazione, il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_AREE_BY_SURVEY =
+            "SELECT " +
+            "       AR.id                   AS \"id\"" +
+            "   ,   AR.codice               AS \"codice\"" +
+            "   ,   AR.nome                 AS \"nome\"" +
+            "   ,   AR.descrizione          AS \"informativa\"" +
+            "   ,   AR.ordinale             AS \"ordinale\"" +
+            "   FROM area_rischio AR" +
+            "       INNER JOIN rilevazione R ON AR.id_rilevazione = R.id" +
+            "   WHERE R.id = ?" +
+            "   ORDER BY AR.codice, AR.nome";
     
     /**
      * <p>Estrae tutti i macroprocessi censiti dall'anticorruzione filtrati 
@@ -2061,6 +2087,35 @@ public interface Query extends Serializable {
             "   ,       ? " +       // autore ultima modifica
             "   ,       ? " +       // id indicatore
             "   ,       ? " +       // id rilevazione
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di un macroprocesso censito a fini
+     * di mappatura, valutazione, gestione e monitoraggio del rischio corruttivo.
+     * Deve gestire manualmente l'identificativo a causa del flusso di 
+     * navigazione (serve subito a valle dell'INSERT) per cui ha pi&uacute;
+     * senso gestirlo a mano piuttosto che fare una INSERT e subito dopo
+     * una SELECT (sono due accessi al disco anzich&eacute; uno).</p>
+     */
+    public static final String INSERT_MACRO_AT =
+            "INSERT INTO macroprocesso_at" +
+            "   (   id" +
+            "   ,   codice" +
+            "   ,   nome" +           
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_area_rischio" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // codice
+            "   ,       ? " +       // nome     
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id_area_rischio
+            "   ,       ? " +       // id_rilevazione
             "          )" ;
 
     /* ********************************************************************** *
