@@ -294,6 +294,65 @@ public class DBWrapper extends QueryImpl {
             }
         }
     }
+    
+    
+    /**
+     * <p>Seleziona la lista delle aree di rischio collegate alla
+     * rilevazione passata come parametro.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param survey    oggetto contenente i dati della rilevazione rispetto a cui si vogliono recuperare le strutture
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - ArrayList rappresentante l'elenco delle aree di rischio trovate
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<ItemBean> getAree(PersonBean user,
+                                       CodeBean survey)
+                                throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            ArrayList<ItemBean> aree = new ArrayList<>();
+            try {
+                // TODO: Controllare se user è superuser
+                pst = con.prepareStatement(GET_AREE_BY_SURVEY);
+                pst.clearParameters();
+                pst.setInt(1, survey.getId());
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    ItemBean areaRischio = new ItemBean();
+                    BeanUtil.populate(areaRischio, rs);
+                    aree.add(areaRischio);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get Out
+                return aree;
+             } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di un bean.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);               
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Struttura di CodeBean non valorizzata; problema nella query delle aree di rischio.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
 
 
     /**
@@ -4766,111 +4825,6 @@ public class DBWrapper extends QueryImpl {
         }
     }
     
-    
-    /**
-     * <p>Restituisce un indicatore di monitoraggio, collegato ad una specifica
-     * misura passata come parametro, contenente al proprio interno tutte
-     * le misurazioni trovate per l'indicatore.</p>
-     * TODO DRAFT
-     * 
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param fase      la fase di attuazione cui l'indicatore cercato puo' essere collegato
-     * @param survey    oggetto contenente gli estremi della rilevazione
-     * @return <code>IndicatorBea</code> - l'indicatore di monitoraggio collegato alla fase
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     *
-    @SuppressWarnings({ "static-method" })
-    public IndicatorBean getMeasurementsByMeasure(PersonBean user,
-                                                MeasureBean measure,
-                                                CodeBean survey)
-                                         throws WebStorageException {
-        try (Connection con = rol_manager.getConnection()) {
-            PreparedStatement pst = null;
-            ResultSet rs, rs1, rs2 = null;
-            IndicatorBean indicator = null;
-            // TODO: Controllare se user è superuser
-            try {
-                int nextParam = NOTHING;
-                pst = con.prepareStatement(GET_INDICATOR_BY_ACTIVITY_RAW);
-                pst.clearParameters();
-                pst.setInt(++nextParam, fase.getId());
-                rs = pst.executeQuery();
-                if (rs.next()) {
-                    // Prepara il bean contenente i riferimenti
-                    ItemBean data = new ItemBean();
-                    // Valorizza il bean
-                    BeanUtil.populate(data, rs);
-                    // Recupera il tipo
-                    CodeBean tipo = ConfigManager.getIndicatorTypesAsMap().get(new Integer(data.getCod3()));
-                    // Recupera lo stato
-                    CodeBean stato = new CodeBean(data.getCod4(), STATI_STRUTTURA[data.getCod4()], VOID_STRING, NOTHING);
-                    // Recupera l'indicatore
-                    nextParam = NOTHING;
-                    pst = null;
-                    pst = con.prepareStatement(GET_INDICATOR_BY_ACTIVITY);
-                    pst.clearParameters();
-                    pst.setInt(++nextParam, fase.getId());
-                    pst.setInt(++nextParam, survey.getId());
-                    rs1 = pst.executeQuery();
-                    if (rs1.next()) {
-                        // Crea l'indicatore vuoto
-                        indicator = new IndicatorBean();
-                        // Valorizza il bean
-                        BeanUtil.populate(indicator, rs1);
-                        // Vi aggiunge il tipo
-                        indicator.setTipo(tipo);
-                        // Vi aggiunge lo stato
-                        indicator.setStato(stato);
-                        // Vi aggiunge la fase
-                        indicator.setFase(fase);
-                        // Cerca le misurazioni
-                        Vector<MeasurementBean> measurements = new Vector<>();
-                        nextParam = NOTHING;
-                        pst = null;
-                        pst = con.prepareStatement(GET_MEASUREMENTS_BY_INDICATOR);
-                        pst.clearParameters();
-                        pst.setInt(++nextParam, indicator.getId());
-                        pst.setInt(++nextParam, survey.getId());
-                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
-                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
-                        rs2 = pst.executeQuery();
-                        while (rs2.next()) {
-                            MeasurementBean measurement = new MeasurementBean();
-                            BeanUtil.populate(measurement, rs2);
-                            measurements.add(measurement);
-                        }
-                        indicator.setMisurazioni(measurements);
-                    }                    
-                }
-                // Just tries to engage the Garbage Collector
-                pst = null;
-                // Get out
-                return indicator;
-            } catch (SQLException sqle) {
-                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + sqle.getMessage(), sqle);
-            } catch (AttributoNonValorizzatoException anve) {
-                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di bean.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + anve.getMessage(), anve);
-            } finally {
-                try {
-                    con.close();
-                } catch (NullPointerException npe) {
-                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                    LOG.severe(msg);
-                    throw new WebStorageException(msg + npe.getMessage());
-                } catch (SQLException sqle) {
-                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
-                }
-            }
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        }
-    }
 
     /* ********************************************************** *
      *                    Metodi di INSERIMENTO                   *
@@ -6379,6 +6333,103 @@ public class DBWrapper extends QueryImpl {
         }
     }
     
+    
+    /**
+     * <p>Metodo per fare l'inserimento di un nuovo macroprocesso
+     * censito a fini anticorruttivi.</p>
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @return <code>int</code> - l'id del processo appena inserito
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    public int insertMacroAt(PersonBean user, 
+                             HashMap<String, LinkedHashMap<String, String>> params) 
+                      throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri contenente gli estremi dell'area di rischio
+            LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
+            try {
+                // Recupera i valori necessari all'inserimento
+                String idCodeArea = proat.get("area");
+                String nomeMat = proat.get("liv1");
+                // Calcola l'id da inserire
+                int maxMatId = getMax("macroprocesso_at");
+                // Calcola il codice macroprocesso da inserire
+                String nextCode = getMatCode(idCodeArea);
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                /* === Se siamo qui vuol dire che ok   === */ 
+                pst = con.prepareStatement(INSERT_MACRO_AT);
+                pst.clearParameters();
+                 // Prepara i parametri per l'inserimento
+                try {
+                    // Definisce un indice per il numero di parametro da passare alla query
+                    int nextParam = NOTHING;
+                    /* === Id === */
+                    pst.setInt(++nextParam, ++maxMatId);
+                    /* === Codice === */
+                    pst.setString(++nextParam, nextCode);
+                    /* === Nome === */
+                    pst.setString(++nextParam, nomeMat);
+                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());
+                    /* === Collegamento ad area di rischio === */
+                    pst.setInt(++nextParam, Integer.parseInt(idCodeArea.substring(NOTHING, idCodeArea.indexOf(DOT))));
+                    /* === Collegamento a rilevazione === */
+                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    // CR (Carriage Return) o 0DH
+                    pst.executeUpdate();
+                } catch (NumberFormatException nfe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, nfe);
+                } catch (ClassCastException cce) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di tipo.\n" + cce.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, cce);
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, npe);
+                } catch (Exception e) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
+                // End: <==
+                con.commit();
+                pst.close();
+                pst = null;
+                return maxMatId;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
     /* ********************************************************** *
      *                  Metodi di AGGIORNAMENTO                   *
      * ********************************************************** */
@@ -6874,6 +6925,123 @@ public class DBWrapper extends QueryImpl {
             LOG.severe(msg);
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         }
+    }
+    
+    
+    /**
+     * <p>Restituisce il codice del macroprocesso da utilizzare, data la sua
+     * area di rischio.
+     * Il codice dell'area di rischio passata ha il seguente formato:
+     * <pre>idArea.codiceArea</pre>.
+     * <ul>
+     * <li>Se nell'area di rischio considerata non ci sono ancora
+     * macroprocessi, restituisce<br> 
+     * "&lt;CODICE_AREA&gt;.01"</li>
+     * <li>invece, se sono gi&agrave; presenti macroprocessi, individua
+     * l'ultimo e restituisce<br> 
+     * "&lt;CODICE_AREA&gt;.&lt;ULTIMO PROGRESSIVO + 1&gt;".</li>
+     * </ul>
+     * I progressivi sono concepiti in 2-digits, con uno zero che precede
+     * il numero per i progressivi da 1 a 9 e senza zero per i progressivi
+     * da 10 in poi.<br> 
+     * Oltre il progressivo 99 si passa ovviamente a 3 cifre,
+     * e così via.<br><hr>
+     * Il metodo funziona sempre, anche per progressivi malformati; esempio:<pre>
+     * Next code for PER.02: PER.03
+     * Next code for RIC.99: RIC.100
+     * Next code for ABC.10: ABC.11
+     * Next code for XYZ.9:  XYZ.10
+     * Next code for TEST.0: TEST.1
+     * </pre></p>
+     *
+     * @param code id e codice, nel formato #.XYZ, dell'area di rischio relativamente alla quale si vuol generare il codice macroprocesso_at 
+     * @return <code>String</code> - il codice macroprocesso, nel formato XYZ.##, utile all'inserimento
+     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public String getMatCode(String code)
+                      throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            // ID dell'area di rischio cui il macro_at va collegato
+            String idAreaAsString = code.substring(NOTHING, code.indexOf(DOT));
+            // Conversione
+            int idArea = Integer.parseInt(idAreaAsString);
+            // Codice dell'area di rischio cui il macro_at va collegato
+            String codeArea = code.substring(code.indexOf(DOT) + 1);
+            // Oggetto per memorizzare eventuale codice del macroprocesso esistente entro l'area data
+            CodeBean matCode = null;
+            // Codice da inserire del Macroprocesso_at appartenente all'area data
+            String nextCode = null;
+            // Fa la query per individuare eventuale max codice macro_at collegato all'area data 
+            try {
+                pst = con.prepareStatement(SELECT_MAX_MAT_CODE);
+                pst.clearParameters();
+                pst.setInt(1, idArea);
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    matCode = new CodeBean();
+                    BeanUtil.populate(matCode, rs);
+                    String currentCode = matCode.getNome();
+                    if (currentCode != null && !currentCode.equals(VOID_STRING)) {
+                        // Separa il codice macro_at (p.es. RIC.04) trovato in prefisso e parte numerica
+                        String[] parts = currentCode.split("\\.");
+                        // Controllo sull'input
+                        if (parts.length != ELEMENT_LEV_2) {
+                            throw new IllegalArgumentException("Invalid code format. Expected format: PREFIX.NUMBER");
+                        }
+                        // Assignazione dei due token estratti alle variabili
+                        String prefix = parts[NOTHING]; // e.g., "PER" or "RIC"
+                        String numberPart = parts[ELEMENT_LEV_1]; // e.g., "02" or "04"
+                        int number = Integer.parseInt(numberPart);
+                        // Incrementa la parte numerica                 
+                        number++; 
+                        // Determina quanti zeri c'erano nel codice originale
+                        int leadingZeros = numberPart.length() - Integer.toString(number).length();
+                        // Costruisce una nuova parte numerica aggiungendo uno zero iniziale sse <10
+                        String newNumberPart = String.format("%0" + (leadingZeros + Integer.toString(number).length()) + "d", new Integer(number));
+                        // Genera il nuovo codice
+                        nextCode = prefix + DOT + newNumberPart;
+                    } else {
+                        nextCode = codeArea + DOT + "01";
+                    }
+                } else {
+                    nextCode = codeArea + DOT + "01";
+                }
+                return nextCode;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Probabile problema nel recupero del codice del rischio.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Problema nella conversione da String a intero.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + nfe.getMessage(), nfe);
+            }  catch (SQLException sqle) {
+                String msg = FOR_NAME + "Impossibile recuperare il max(code).\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un puntamento errato.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + e.getMessage(), e);
+        } 
     }
     
     
