@@ -141,6 +141,11 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * (Macroprocesso  | Processo | Sottoprocesso)
      */
     private static final String nomeFileSceltaTipo = "/jsp/prTipoForm.jsp";
+    /** 
+     * Pagina contenente la form per inserimento macro/processo
+     * (Macroprocesso  | Processo | Sottoprocesso)
+     */
+    private static final String nomeFileAddProcess = "/jsp/prProcessoForm.jsp";
     /**
      * Nome del file json della Command (dipende dalla pagina di default)
      */
@@ -149,6 +154,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<>();
+    /**
+     * Struttura a cui la command fa riferimento per generare i titoli pagina
+     */    
+    private static final HashMap<String, String> titleFile = new HashMap<>();
 
 
     /**
@@ -179,12 +188,15 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        nomeFile.put(PART_PROCESS,      nomeFileDettaglio);
-        nomeFile.put(PART_OUTPUT,       nomeFileOutputs);
-        nomeFile.put(PART_FACTORS,      nomeFileFattori);
-        nomeFile.put(PART_INSERT_F_R_P, nomeFileAddFactor);
-        nomeFile.put(PART_PI_NOTE,      nomeFileNote);
-        nomeFile.put(START,             nomeFileSceltaTipo);
+        nomeFile.put(PART_PROCESS,          nomeFileDettaglio);
+        nomeFile.put(PART_OUTPUT,           nomeFileOutputs);
+        nomeFile.put(PART_FACTORS,          nomeFileFattori);
+        nomeFile.put(PART_INSERT_F_R_P,     nomeFileAddFactor);
+        nomeFile.put(PART_PI_NOTE,          nomeFileNote);
+        nomeFile.put(PART_INSERT_PROCESS,   nomeFileSceltaTipo);
+        // Carica la hashmap contenente i titoli pagina
+        titleFile.put(new Byte(ELEMENT_LEV_1).toString(),  "Nuovo Macroprocesso");
+        titleFile.put(new Byte(ELEMENT_LEV_2).toString(),  "Nuovo Processo");
     }
 
 
@@ -238,6 +250,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         AbstractList<ProcessBean> outputs = new ArrayList<>();
         // Dichiara elenco di fattori abilitanti
         AbstractList<CodeBean> factors = new ArrayList<>();
+        // Dichiara elenco di aree di rischio
+        AbstractList<ItemBean> aree = new ArrayList<>();
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
         // Tabella che conterrà i valori dei parametri passati dalle form
@@ -250,6 +264,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         Boolean writeAsObject = (Boolean) req.getAttribute("w");
         // Explicit unboxing
         boolean write = writeAsObject.booleanValue();
+        // Titolo pagina
+        String tP = null;
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
         String redirect = null;
         // Dichiara la pagina a cui reindirizzare
@@ -330,6 +346,62 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                            AMPERSAND + "p" + EQ + PART_SELECT_STR +
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur;  
                             }
+                        } else if (part.equalsIgnoreCase(PART_INSERT_PROCESS)) {
+                            /* ------------------------------------------------ *
+                             *         INPUT new process - STEP 1: type         *
+                             * ------------------------------------------------ */
+                            // Deve differenziare tra finire e continuare
+                            String action = parser.getStringParameter("action", DASH);
+                            
+                            String idCodeArea = parser.getStringParameter("p-area", DASH);String nextCode = null;
+                            if (!idCodeArea.equals(DASH)) {
+                                 nextCode = db.getMatCode(idCodeArea);
+                            }
+                                
+                            switch (action) {
+                                case "save":
+                                    // Al momento i sottoprocessi non sono gestiti
+                                    if (liv == ELEMENT_LEV_1)
+                                        db.insertMacroAt(user, params);
+                                    else 
+                                        db.insertMacroAt(user, params);
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
+                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    break;
+                                case "cont":
+                                    switch (liv) {
+                                        case ELEMENT_LEV_1:
+                                            int nextId = db.insertMacroAt(user, params);
+                                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
+                                                       AMPERSAND + "p" + EQ + PART_INSERT_PROCESS +
+                                                       AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
+                                                       AMPERSAND + "pliv1" + EQ + nextId + 
+                                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                            break;
+                                        case ELEMENT_LEV_2:
+                                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
+                                                       AMPERSAND + "p" + EQ + PART_INSERT_PROCESS +
+                                                       AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
+                                                       AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
+                                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                            break;
+                                        default:
+                                            System.out.println("Unknown action");
+                                            break;
+                                    }
+                                    break;
+                                default:
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
+                                               AMPERSAND + "p" + EQ + PART_INSERT_PROCESS +
+                                               AMPERSAND + "liv" + EQ + liv +
+                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    break;
+                                    
+                            }
+
+                            // Prepara la redirect 
+/*
+*/  
                         }
                     }
                 /* ======================== @GetMapping ======================= */
@@ -371,7 +443,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 * which is less efficient as it always creates a new instance, regardless of whether an equivalent string already exists.
                                 * Using string literals allows Java to optimize memory usage through the string pool, 
                                 * making code cleaner and more efficient. In summary, always prefer reassigning with string literals over creating new instances 
-                                * unless having a specific reason to use new String().                                 */
+                                * unless having a specific reason to use new String(). */
                                 fileJspT = nomeFileOutput;
                             } else {
                                 // Deve recuperare l'elenco degli output
@@ -410,10 +482,17 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nota");
-                        } else if (part.equalsIgnoreCase(START)) {
+                        } else if (part.equalsIgnoreCase(PART_INSERT_PROCESS)) {
                             /* ------------------------------------------------ *
-                             *  SHOWS a Form to choose the type of new process  *
+                             *                  SHOWS a Form                    *
                              * ------------------------------------------------ */
+                            if (liv > DEFAULT_ID) {
+                                aree = db.getAree(user, survey);
+                                // Titolo pagina
+                                tP = titleFile.get(String.valueOf(liv));
+                                // Form to insert data of the process
+                                fileJspT = nomeFileAddProcess;
+                            }
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo Elemento");
@@ -484,6 +563,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         if (factors != null) {
             req.setAttribute("fattori", factors);
         }
+        // Imposta in request elenco completo delle aree di rischio
+        if (aree != null) {
+            req.setAttribute("aree", aree);
+        }
         // Imposta in request specifico rischio cui aggiungere fattore abilitante
         if (risk != null) {
             req.setAttribute("rischio", risk);
@@ -495,6 +578,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Imposta l'eventuale indirizzo a cui redirigere
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
+        }
+        // Titolo pagina in caso sia significativo
+        if (tP != null && !tP.equals(VOID_STRING)) {
+            req.setAttribute("tP", tP);
         }
         // Imposta in request le breadcrumbs in caso siano state personalizzate
         if (bC != null) {
