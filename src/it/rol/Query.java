@@ -247,6 +247,26 @@ public interface Query extends Serializable {
     
     /**
      * <p>Estrae tutti i macroprocessi censiti dall'anticorruzione filtrati 
+     * in base all'identificativo dell'area di rischio, il cui identificativo 
+     * viene passato come parametro, nel contesto della rilevazione, 
+     * il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_MACRO_AT_BY_AREA =
+            "SELECT DISTINCT" +
+            "       MAT.id                  AS \"id\"" +
+            "   ,   MAT.codice              AS \"codice\"" +
+            "   ,   MAT.nome                AS \"nome\"" +
+            "   ,   MAT.ordinale            AS \"ordinale\"" +
+            "   ,   MAT.id_rilevazione      AS \"idRilevazione\"" +
+            "   FROM macroprocesso_at MAT" +
+            "       INNER JOIN rilevazione R ON MAT.id_rilevazione = R.id" +
+            "       INNER JOIN area_rischio AR ON MAT.id_area_rischio = AR.id" +
+            "   WHERE AR.id = ?" +
+            "       AND R.id = ?" +
+            "   ORDER BY MAT.codice";
+    
+    /**
+     * <p>Estrae tutti i macroprocessi censiti dall'anticorruzione filtrati 
      * in base all'identificativo della rilevazione, passato come parametro.</p>
      */
     public static final String GET_MACRO_AT_BY_SURVEY =
@@ -1576,6 +1596,19 @@ public interface Query extends Serializable {
      * @return <code>String</code> - la query che seleziona l'insieme desiderato
      */
     public String getQueryMacroSubProcessAtBySurvey(int idP, byte level, int idSur);
+    
+    /**
+     * <p>In funzione del parametro specificante il livello
+     * (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at),
+     * costruisce dinamicamente la query che estrae uno specifico, 
+     * rispettivamente, macroprocesso, processo o sottoprocesso.</p>
+     * 
+     * @param idP       identificativo di macroprocesso_at, processo_at o sottoprocesso_at
+     * @param level     identificativo del livello a cui e' relativo l'id (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at)
+     * @param idSur     codice identificativo della rilevazione
+     * @return <code>String</code> - la query che seleziona l'elemento desiderato
+     */
+    public String getQueryMacroSubProcessAtById(int idP, byte level, int idSur);
     
     /**
      * <p>Costruisce dinamicamente la query che seleziona un insieme di risposte
