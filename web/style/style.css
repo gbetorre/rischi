@@ -1198,6 +1198,10 @@ li.line {
 .extra-wide {
   width:310px;
 }
+
+.total-wide {
+  width:100%;
+}
     
 /*---------------------- POP-UP ------------------------*/
 .popup {
