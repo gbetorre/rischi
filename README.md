@@ -265,6 +265,7 @@ in the case of the current application, in fact, version numbers have only the s
 <cite>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</cite>
 
 ### 2025
+- [2.1.5] (29/01/2025) Added facility to insert a new macroprocess
 - [2.1.4] (27/01/2025) First draft implementation about the page to insert a new macroprocess
 - [2.1.3] (20/01/2025) First draft implementation about the start page of the inserting a new process
 - [2.1.2] (13/01/2025) Presentation improvements (badges, labels, colours)
