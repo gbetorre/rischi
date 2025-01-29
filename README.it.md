@@ -68,14 +68,14 @@ L'applicazione web per la mappatura dei rischi corruttivi <code>ROL-RMS</code> s
 <strong>*Fig.1 - Uno degli obiettivi del software &egrave; quantificare, in automatico, il valore di rischio per ogni processo organizzativo considerato (dati fittizi&#770;)*</strong><br>
 
 Il workflow generale &egrave; suddiviso in 4 distinti step, o filoni di lavoro:
-* Step 1: caricamento di strutture e processi
-* Step 2: calcolo del rischio corruttivo di ogni processo
-* Step 3: individuazione delle misure di mitigazione da applicare ad ogni processo
-* Step 4: monitoraggio al fine di verificare se le misure previste sono state applicate.
+* Step 1: caricamento di strutture e processi <strong>(mappatura dell'organizzazione)</strong>
+* Step 2: <strong>calcolo del rischio</strong> corruttivo di ogni processo
+* Step 3: <strong>individuazione delle misure</strong> di mitigazione da applicare ad ogni processo
+* Step 4: <strong>monitoraggio</strong> al fine di verificare se le misure previste sono state applicate.
 
 Questi 4 step sono pensati entro un flusso sincrono, ovvero per essere portati a compimento in sequenza, non in parallelo.<br> 
-Ad esempio, non si pu&ograve; passare allo Step 2 se non &egrave; stato completato lo Step 1; analogamente, non si pu&ograve; passare allo Step 3 se non &egrave; stato completato lo Step 2; e cos&iacute; via.<br>
-Questa modalit&agrave; "lineare" guida gli attori nel processo di mappatura e gestione e permette di gestire in modo semplificato la complessit&agrave; del dominio informativo.<br>
+Ad esempio, non si pu&ograve; passare allo Step 2 (calcolo del rischio) se non &egrave; stato completato lo Step 1 (mappatura dei processi); analogamente, non si pu&ograve; passare allo Step 3 (individuazione delle misure) se non &egrave; stato completato lo Step 2; e cos&iacute; via.<br>
+Questa modalit&agrave; "lineare" guida gli attori nel processo di mappatura e gestione e permette di gestire, in modo semplificato, la complessit&agrave; del dominio informativo e dell'obiettivo globale che si vuol realizzare: ovvero la riduzione, quantificabile, comprovabile e scientificamente fondata, dei livelli di rischi corruttivi cui i processi organizzativi sono esposti.<br>
 <br>
 Alla fine del 4° Step, sar&agrave; stata realizzata una rilevazione completa del monitoraggio e del trattamento del rischio corruttivo in organizzazione.
 <br>
@@ -88,7 +88,7 @@ Ogni rilevazione successiva potr&agrave; essere messa a confronto con la precede
 [Nel prossimo capitolo](#come-funziona-il-software) verranno esaminati pi&uacute; in dettaglio i vari step.<br>
 Nel presente paragrafo viene data, invece, una descrizione a grandi linee del workflow generale dal punto di vista delle azioni messe in atto per realizzare l'obiettivo generale.
 
-Anzitutto, &egrave; opportuno definire i soggetti coinvolti:
+Anzitutto, &egrave; opportuno definire i <strong>soggetti</strong> coinvolti:
 1. L'esperto o l'ufficio anticorruzione
 2. I responsabili e gli operatori degli uffici
 3. Il software engineer
@@ -98,13 +98,13 @@ Anzitutto, &egrave; opportuno definire i soggetti coinvolti:
 <strong>*Fig.2 - Il software &egrave; un'applicazione ad accesso riservato (per accedere &egrave; necessario disporre di credenziali). Pertanto &egrave; possibile determinare il profilo utente all'accesso al sistema.*</strong>
 <br><br>
 
-Rispetto ai ruoli svolti: 
-1. L'esperto di anticorruzione, con l'aiuto del software: 
+Rispetto ai <strong>ruoli</strong> svolti: 
+1. <strong>L'esperto</strong> di anticorruzione, con l'aiuto del software: 
   * effettua il calcolo del rischio, 
   * stabilisce quali misure di mitigazione applicare ai processi pi&uacute; a rischio e 
   * ne cura il monitoraggio.
-2. Il personale degli uffici che sovrintendono i processi risponde ai quesiti dell'intervista e fornisce i valori raccolti nel monitoraggio.
-3. Il software engineer cura la fase di mappatura dei processi e coadiuva gli altri soggetti attraverso tutto il workflow.
+2. <strong>Il personale</strong> degli uffici che sovrintendono i processi risponde ai quesiti dell'intervista e fornisce i valori raccolti nel monitoraggio.
+3. <strong>Il software engineer</strong> cura la fase di mappatura dei processi e coadiuva gli altri soggetti attraverso tutto il workflow.
 
 Consultando la mappatura dei processi, effettuata nello Step 1 ([v. paragrafo precedente](#about-the-project)), si diviene in grado di stabilire l'elenco delle strutture organizzative coinvolte nell'erogazione dei relativi processi.
 A quel punto, &egrave; possibile quindi rivolgere una serie di quesiti a responsabili ed operatori ubicati presso tali strutture, in merito ai processi prodotti dalle strutture stesse.
@@ -159,6 +159,21 @@ Le strutture sono organizzate in un albero con vari livelli mentre i processi so
 [![Product Sample Macro][product-process]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png)
 <br>
 <strong>*Fig.9 - Funzione di navigazione dell'albero dei macroprocessi*</strong>
+
+Come &egrave; noto in letteratura sulla mappatura dei processi, vi sono svariate tassonomie che &egrave; possibile adottare. Nel presente software si è optato per la seguente strutturazione gerarchica:
+<pre>
+* Area di Rischio
+    * |_ Macroprocesso
+       *   |_  Processo
+           *     |_ Sottoprocesso
+</pre>
+
+tutte entit&agrave; legate tra loro da relazioni di composizione.
+L'area di rischio &egrave; il livello pi&uacute; generale: essa ha poche propriet&agrave; e aggrega i macroprocessi, i quali, a loro volta, aggregano i processi, e cos&iacute; via.
+
+[![Class Diagram part Process][[class-diagram]]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/class-diagram.png)
+<br>
+<strong>*Fig.10 - Diagramma delle classi delle entit&agrave; relative alla rappresentazione dei processi.*</strong>
 
 Ogni processo o sottoprocesso (ma non il macroprocesso) pu&ograve; essere a sua volta suddiviso in fasi (o attivit&agrave;). Ad ogni fase possono essere associate una o pi&ugrave; strutture e uno o pi&ugrave; soggetti terzi (che sono entit&agrave; non strutturate in organigramma ma comunque agenti sulla fase del processo).
 
@@ -702,6 +717,7 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [schema-measure]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-measure.png
 [schema-monitor]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-monitoring.png
 [schema-physical]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/DB-circular.png
+[class-diagram]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/class-diagram.png
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/othneildrew/Best-README-Template/issues
 [license-shield]: https://img.shields.io/badge/license-GPL-blue
