@@ -298,31 +298,49 @@ public class DBWrapper extends QueryImpl {
     
     /**
      * <p>Seleziona la lista delle aree di rischio collegate alla
-     * rilevazione passata come parametro.</p>
+     * rilevazione passata come parametro, corredate di macroprocessi
+     * ad esse aggregati.</p>
      *
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param survey    oggetto contenente i dati della rilevazione rispetto a cui si vogliono recuperare le strutture
-     * @return <code>ArrayList&lt;ItemBean&gt;</code> - ArrayList rappresentante l'elenco delle aree di rischio trovate
+     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - ArrayList rappresentante l'elenco delle aree di rischio trovate
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "static-method" })
-    public ArrayList<ItemBean> getAree(PersonBean user,
+    public ArrayList<ProcessBean> getAree(PersonBean user,
                                        CodeBean survey)
                                 throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
-            ResultSet rs = null;
-            ArrayList<ItemBean> aree = new ArrayList<>();
+            ResultSet rs, rs1 = null;
+            int nextParam = NOTHING;
+            ProcessBean area = null;
+            ArrayList<ProcessBean> aree = new ArrayList<>();
             try {
                 // TODO: Controllare se user è superuser
                 pst = con.prepareStatement(GET_AREE_BY_SURVEY);
                 pst.clearParameters();
-                pst.setInt(1, survey.getId());
+                pst.setInt(++nextParam, survey.getId());
                 rs = pst.executeQuery();
                 while (rs.next()) {
-                    ItemBean areaRischio = new ItemBean();
-                    BeanUtil.populate(areaRischio, rs);
-                    aree.add(areaRischio);
+                    area = new ProcessBean();
+                    ArrayList<ProcessBean> mats = new ArrayList<>();
+                    BeanUtil.populate(area, rs);
+                    // Per ogni area di rischio recupera i suoi macroprocessi
+                    pst = null;
+                    nextParam = NOTHING;
+                    pst = con.prepareStatement(GET_MACRO_AT_BY_AREA);
+                    pst.clearParameters();
+                    pst.setInt(++nextParam, area.getId());
+                    pst.setInt(++nextParam, survey.getId());    // pleonastica
+                    rs1 = pst.executeQuery();
+                    while (rs1.next()) {
+                        ProcessBean mat = new ProcessBean();
+                        BeanUtil.populate(mat, rs1);
+                        mats.add(mat);
+                    }
+                    area.setProcessi(mats);
+                    aree.add(area);
                 }
                 // Just tries to engage the Garbage Collector
                 pst = null;
@@ -1826,6 +1844,70 @@ public class DBWrapper extends QueryImpl {
                 throw new WebStorageException(msg + anve.getMessage(), anve);
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query dei macroprocessi denormalizzati.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Dato un id, restituisce un ProcessBean che incapsula
+     * i dati di un macroprocesso, processo o sottoprocesso, determinato in base
+     * al livello passato come parametro.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata
+     * @param idMPSAT   identificativo di un macroprocesso, di un processo o di un sottoprocesso anticorruttivo 
+     * @param level     insieme in cui cercare l'identificativo (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at)
+     * @param survey    oggetto rilevazione di cui si vogliono recuperare i macroprocessi, i processi e relative informazioni
+     * @return <code>ProcessBean</code> - un oggetto corrispondente all'elemento di id fornito come argomento nell'insieme desiderato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public ProcessBean getMacroSubProcessAtById(PersonBean user,
+                                                int idMPSAT,
+                                                byte level,
+                                                CodeBean survey)
+                                         throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            ProcessBean item = null;
+            try {
+                // TODO: Controllare se user è superuser
+                String query = getQueryMacroSubProcessAtById(idMPSAT, level, survey.getId());
+                pst = con.prepareStatement(query);
+                pst.clearParameters();
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    // Crea un item vuoto
+                    item = new ProcessBean();
+                    // Valorizza l'item col contenuto della query
+                    BeanUtil.populate(item, rs);
+                }
+                // Tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return item;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo identificativo della rilevazione non valorizzato; problema nel metodo di estrazione dei macro/sub/process.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally {
