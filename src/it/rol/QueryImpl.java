@@ -195,6 +195,44 @@ public class QueryImpl implements Query, Constants {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    
+    /**
+     * {@link Query#getQueryMacroSubProcessAtById(int, byte, int)}
+     * @see it.rol.Query#getQueryMacroSubProcessAtById(int, byte, int)
+     */
+    @Override
+    public String getQueryMacroSubProcessAtById(int idO, byte level, int idSur) {
+        String tableName = null;
+        String tableClause = null;
+        switch(level) {
+            case ELEMENT_LEV_1:
+                tableName = "macroprocesso_at";
+                tableClause = " AND macroprocesso_at.id = " + idO;
+                break;
+            case ELEMENT_LEV_2:
+                tableName = "processo_at";
+                tableClause = " AND processo_at.id = " + idO;
+                break;
+            case ELEMENT_LEV_3:
+                tableName = "sottoprocesso_at";
+                tableClause = " AND sottoprocesso_at.id = " + idO;
+                break;
+            default:
+                tableClause = VOID_STRING;
+                break;
+        }
+        final String GET_MPSAT_BY_SURVEY =
+                "SELECT " +
+                                 tableName + ".id       AS \"id\"" +
+                        "   ," + tableName + ".codice   AS \"codice\"" +
+                        "   ," + tableName + ".nome     AS \"nome\"" +
+                        "   ," + tableName + ".ordinale AS \"ordinale\"" +
+                        "   FROM " + tableName + 
+                        "   WHERE " + tableName + ".id_rilevazione = " + idSur + 
+                                tableClause;
+        return GET_MPSAT_BY_SURVEY;
+    }
 
     @Override
     public String getQueryAnswers(HashMap<String, LinkedHashMap<String, String>> params, int idSurvey, int limit,
