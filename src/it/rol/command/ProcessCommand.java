@@ -197,6 +197,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Carica la hashmap contenente i titoli pagina
         titleFile.put(new Byte(ELEMENT_LEV_1).toString(),  "Nuovo Macroprocesso");
         titleFile.put(new Byte(ELEMENT_LEV_2).toString(),  "Nuovo Processo");
+        titleFile.put(new Byte(ELEMENT_LEV_3).toString(),  "Nuovo Sottoprocesso");
     }
 
 
@@ -234,24 +235,30 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         int idO = parser.getIntParameter("idO", DEFAULT_ID);
         // Recupera o inizializza eventuale 'id rischio'
         int idR = parser.getIntParameter("idR", DEFAULT_ID);
+        // Recupera o inizializza eventuale 'id macroprocesso'
+        String idM = parser.getStringParameter("pliv1", DASH);
         // Recupera l'oggetto rilevazione a partire dal suo codice
         CodeBean survey = ConfigManager.getSurvey(codeSur);
-        // Dichiara elenco di processi
-        AbstractList<ProcessBean> macrosat = new ArrayList<>();
-        // Dichiara generico elenco di elementi afferenti a un processo
-        ConcurrentHashMap<String, ArrayList<?>> processElements = null;
         // Prepara un oggetto contenente i parametri opzionali per i nodi
         ItemBean options = new ItemBean("#009966",  VOID_STRING,  VOID_STRING, VOID_STRING, PRO_PFX, NOTHING);
         // Prepara un output di rischio corruttivo
         ProcessBean output = null;
         // Prepara un rischio corruttivo cui è esposto un processo
         RiskBean risk = null;
+        // Macroprocesso cui si vuole aggiungere un figlio
+        ProcessBean macro = null;
         // Dichiara elenco di output
         AbstractList<ProcessBean> outputs = new ArrayList<>();
         // Dichiara elenco di fattori abilitanti
         AbstractList<CodeBean> factors = new ArrayList<>();
         // Dichiara elenco di aree di rischio
-        AbstractList<ItemBean> aree = new ArrayList<>();
+        AbstractList<ProcessBean> aree = new ArrayList<>();
+        // Dichiara elenco di macroprocessi
+        AbstractList<ProcessBean> macros = new ArrayList<>();
+        // Dichiara generico elenco di elementi afferenti a un processo
+        ConcurrentHashMap<String, ArrayList<?>> processElements = null;
+   
+        LinkedHashMap<ProcessBean, ArrayList<ProcessBean>> processIndexed = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
         // Tabella che conterrà i valori dei parametri passati dalle form
@@ -353,10 +360,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Deve differenziare tra finire e continuare
                             String action = parser.getStringParameter("action", DASH);
                             
-                            String idCodeArea = parser.getStringParameter("p-area", DASH);String nextCode = null;
-                            if (!idCodeArea.equals(DASH)) {
-                                 nextCode = db.getMatCode(idCodeArea);
-                            }
+                            String idCodeArea = parser.getStringParameter("p-area", DASH);
                                 
                             switch (action) {
                                 case "save":
@@ -376,6 +380,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                                        AMPERSAND + "p" + EQ + PART_INSERT_PROCESS +
                                                        AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                                        AMPERSAND + "pliv1" + EQ + nextId + 
+                                                       AMPERSAND + "pliv0" + EQ + idCodeArea + 
                                                        AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                             break;
                                         case ELEMENT_LEV_2:
@@ -488,6 +493,15 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                              * ------------------------------------------------ */
                             if (liv > DEFAULT_ID) {
                                 aree = db.getAree(user, survey);
+                                processIndexed = decant((ArrayList<ProcessBean>) aree);
+                                //macros = retrieveMacroAtBySurvey(user, codeSur, db);
+                                // Se c'è un id macroprocesso vuol dire che bisogna aggiungere un processo
+                                if (!idM.equals(DASH)) {
+                                    int idMat = Integer.parseInt(idM);
+                                    String areaRischio = parser.getStringParameter("pliv0", DASH);
+                                    macro = db.getMacroSubProcessAtById(user, idMat, ELEMENT_LEV_1, survey);
+                                    macro.setAreaRischio(areaRischio);
+                                }
                                 // Titolo pagina
                                 tP = titleFile.get(String.valueOf(liv));
                                 // Form to insert data of the process
@@ -499,7 +513,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
-                        macrosat = retrieveMacroAtBySurvey(user, codeSur, db);
+                        ArrayList<ProcessBean> macrosat = retrieveMacroAtBySurvey(user, codeSur, db);
                         // Genera il file json contenente le informazioni strutturate
                         printJson(req, macrosat, nomeFileJson, options);
                         // Imposta la jsp
@@ -551,6 +565,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         if (indicators != null) {
             req.setAttribute("listaIndicatori", indicators);
         }
+        // Imposta in request elenco macroprocessi indicizzati per area di rischio
+        if (processIndexed != null) {
+            req.setAttribute("listaAree", processIndexed);
+        }
         // Imposta in request elenco completo degli output
         if (outputs != null) {
             req.setAttribute("outputs", outputs);
@@ -570,6 +588,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Imposta in request specifico rischio cui aggiungere fattore abilitante
         if (risk != null) {
             req.setAttribute("rischio", risk);
+        }
+        // Imposta in request specifico macroprocesso cui aggiungere un processo
+        if (macro != null) {
+            req.setAttribute("mat", macro);
         }
         // Imposta in request specifico pxi di uno specifico processo at
         if (pxi != null) {
@@ -1250,7 +1272,42 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         }
         return userProcesses;
     }
+    
 
+    /** 
+     * <p>Travasa una struttura vettoriale di aree di rischio in una 
+     * corrispondente struttura LinkedHashMap di tipo Dictionary, 
+     * in cui le chiavi sono rappresentate dalle aree stesse 
+     * e i valori sono rappresentati dai macroprocessi aggregati da
+     * ciascuna di esse.</p>
+     * <p>&Egrave; utile per un accesso pi&uacute; diretto agli oggetti
+     * memorizzati nella struttura rispetto a quanto garantito dalla
+     * struttura vettoriale (in cui bisogna, per ogni area, scorrere tutti
+     * i macroprocessi in essa contenuti).</p>
+     *
+     * @param areas ArrayList di ProcessBean (aree) contenenti ciascuna una struttura vettoriale di altri ProcessBean (macroprocessi) da travasare in HashMap
+     * @return <code>LinkedHashMap&lt;ProcessBean&comma; ArrayList&lt;ProcessBean&gt;&gt;</code> - Struttura di tipo Mappa ordinata avente per chiave un oggetto rappresentante l'area e per valore l'elenco dei suoi macroprocessi
+     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
+     */   
+    public static LinkedHashMap<ProcessBean, ArrayList<ProcessBean>> decant(ArrayList<ProcessBean> areas)
+                                                                     throws CommandException {
+        LinkedHashMap<ProcessBean, ArrayList<ProcessBean>> matsByAreas = new LinkedHashMap<>(17);
+        for (ProcessBean area: areas) {
+            try {
+                matsByAreas.put(area, (ArrayList<ProcessBean>) area.getProcessi());
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, npe);
+            } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nel travaso di un Vector in un Dictionary.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, e);
+            }
+        }
+        return matsByAreas;
+    }
+    
     
     /**
      * <p>Estrae da una struttura di rischi, uno di essi,
@@ -1355,7 +1412,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             // Json begins
             StringBuilder json = new StringBuilder("[");
             // First Node: the principal
-            json.append(Data.getStructureJsonNode(COMMAND_PROCESS, "1000", null, "Processi Anticorruttivi", VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, null, PRO_PFX, NOTHING)).append(",\n");
+            json.append(Data.getStructureJsonNode(COMMAND_PROCESS, "1000", null, "Processi Organizzativi", VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, VOID_STRING, null, PRO_PFX, NOTHING)).append(",\n");
             int count = NOTHING;
             do {
                 ProcessBean p1 = proc.get(count);
