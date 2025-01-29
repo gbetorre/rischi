@@ -20,7 +20,7 @@
       background-color: #020407;
     }
     
-    .container{
+    .wallpaper{
       width:100vw;
       height:100vh;
       display: flex;
@@ -31,6 +31,31 @@
       left:6vmin;
       text-align: center;
       background-image: url('/rischi/web/img/wallpaper1.png');
+    }
+    
+    .wallpaper1 {
+        background-image: url('/rischi/web/img/wallpaper1.png');
+    }
+    .wallpaper2 {
+        background-image: url('/rischi/web/img/wallpaper2.png');
+    }
+    .wallpaper3 {
+        background-image: url('/rischi/web/img/wallpaper3.png');
+    }
+    .wallpaper4 {
+        background-image: url('/rischi/web/img/wallpaper4.png');
+    }
+    .wallpaper5 {
+        background-image: url('/rischi/web/img/wallpaper5.png');
+    }
+    .wallpaper6 {
+        background-image: url('/rischi/web/img/wallpaper6.png');
+    }
+    .wallpaper7 {
+        background-image: url('/rischi/web/img/wallpaper7.png');
+    }
+    .wallpaper8 {
+        background-image: url('/rischi/web/img/wallpaper8.png');
     }
     
     .cog-wheel1, .cog-wheel2{
@@ -133,13 +158,13 @@
       position: absolute;
       bottom:15vmin;
       padding:3vmin 12vmin 3vmin 3vmin;
-      font-weight:600;
-      color:#6fdbf0;
+      font-weight:800;
+      color:#ffca18;
     }
     </style>
   </head>
   <body>
-    <div class="container">
+    <div id="container" class="wallpaper">
       <h1 class="first-four">5</h1>
       <div class="cog-wheel1">
           <div class="cog1">
@@ -209,11 +234,23 @@
         }
       });
       
+      const randomSuffix = pickOne();
+      // Get the element you want to add a class to
+      const element = document.getElementById('container');
+      // Add a class to the element
+      element.classList.add(`wallpaper${randomSuffix}`);
+      
       var ss = 6;
       function justcountdown(){
           ss = ss-1;
           document.getElementById("countdown").innerHTML = ss;
           window.setTimeout("justcountdown()", 1000);
+      }
+      
+      function pickOne(){
+          var images = 8;
+          let x = Math.floor((Math.random() * images) + 1);
+          return x;
       }
       // Avvia il countdown
       justcountdown();
