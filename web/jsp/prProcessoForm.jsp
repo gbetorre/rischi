@@ -27,7 +27,7 @@
             <label for="ind-tipo"><strong>Area di Rischio</strong></label>&nbsp;&nbsp;
           </div>
           <div class="col-sm-6">
-            <select class="form-custom total-wide" id="mat-area" name="p-area">
+            <select class="form-custom total-wide" id="mat-area" name="pliv0">
             <c:forEach var="area" items="${aree}" varStatus="status">
               <option value="${area.id}.${area.codice}">
                 <c:out value="${area.codice}" /> -- <c:out value="${area.nome}" />
@@ -70,7 +70,7 @@
               </option>
             </c:forEach>
             </select>
-            <input type="text" id="mat-area" name="mat-area" value="${macro.areaRischio}" />
+            <input type="text" id="mat-area" name="pliv0" value="${macro.areaRischio}" />
           </div>
         </div>
         <hr class="separapoco" />
@@ -82,7 +82,7 @@
           <div class="col-sm-6">
           <c:choose>
             <c:when test="${not empty macro}">
-            <input type="text" class="form-control" id="mat-nome" name="pliv1" value="${macro.nome}" readonly>
+            <input type="text" class="form-control" id="mat-nome" name="mat-nome" value="${macro.nome}" readonly>
             <input type="text" id="mat-id" name="pliv1" value="${macro.id}">
             </c:when>
             <c:otherwise>
