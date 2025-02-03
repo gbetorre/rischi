@@ -241,7 +241,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             throw new CommandException(FOR_NAME + "Problema a livello dell\'autenticazione utente!\n" + re.getMessage(), re);
         }
         /* ******************************************************************** *
-         *                          Corpo del programma                         *
+         *                           Corpo del metodo                           *
          * ******************************************************************** */
         // Decide il valore della pagina
         try {
@@ -251,7 +251,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
                 loadParams(part, parser, params);
-                /* @PostMapping */
+                /* ======================= @PostMapping ======================= */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
@@ -321,7 +321,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                         // Azione di default
                         // do delete?
                     }
-                /* @GetMapping */
+                /* ======================== @GetMapping ======================= */
                 } else {
                     /* ------------------------------------------------ *
                      *                  Manage Risk Part                *
@@ -530,9 +530,11 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Recupera o inizializza 'codice rilevazione' (Survey)
         String codeSur = parser.getStringParameter("r", DASH);
         // Recupera l'oggetto rilevazione a partire dal suo codice
-        CodeBean surveyAsBean = ConfigManager.getSurvey(codeSur);
+        CodeBean surveyAsBean = ConfigManager.getSurvey(codeSur);        
         // Inserisce l'ìd della rilevazione come valore del parametro
         survey.put(PARAM_SURVEY, String.valueOf(surveyAsBean.getId()));
+        // Oltre all'ID passa anche il codice (puo' essere utile)
+        survey.put("code", codeSur);
         // Aggiunge data e ora, se le trova
         survey.put("d", parser.getStringParameter("d", VOID_STRING));
         survey.put("t", parser.getStringParameter("t", VOID_STRING));
@@ -589,7 +591,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
          * ---------------------------------------------------- */
         } else if (part.equals(PART_INSERT_PROCESS)) {
             // Il nome del Macro o Processo è stato già recuperato sopra
-            proat.put("area",    parser.getStringParameter("p-area", VOID_STRING));
+            proat.put("area",    parser.getStringParameter("pliv0", VOID_STRING));
         }
         formParams.put(PART_PROCESS, proat);
     }
