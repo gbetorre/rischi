@@ -20,9 +20,7 @@
     <hr class="separatore" />
     <div class="row justify-content-center">
       <div class="col text-center">
-        <div class="seven">
-          <h1>Mappatura dei rischi corruttivi</h1>
-        </div>
+        <div class="seven"><h1>ROL: Rischi On Line</h1></div>
         <br />
         <hr class="separatore" />
         <div class="container justify-content-center bgAct8">
