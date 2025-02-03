@@ -6512,6 +6512,111 @@ public class DBWrapper extends QueryImpl {
         }
     }
     
+    
+    /**
+     * <p>Metodo per fare l'inserimento di un nuovo processo
+     * censito a fini anticorruttivi.</p>
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @return <code>int</code> - l'id del processo appena inserito
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    public int insertProcessAt(PersonBean user, 
+                               HashMap<String, LinkedHashMap<String, String>> params) 
+                        throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri contenente gli estremi dell'area di rischio
+            LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
+            try {
+                // Recupera i valori necessari all'inserimento
+                String idSurveyAsString = survey.get(PARAM_SURVEY);
+                int idSurvey = Integer.parseInt(idSurveyAsString);
+                String codeSurvey = survey.get("code");
+                // Oggetto rilevazione ricostruito
+                CodeBean sur = new CodeBean(idSurvey, codeSurvey, VOID_STRING, ELEMENT_LEV_1);
+                // Estremi macroprocesso
+                String idCodeMacro = proat.get("liv1");
+                int idMat = Integer.parseInt(idCodeMacro.substring(NOTHING, idCodeMacro.indexOf(DOT)));
+                // Processo at
+                String namePat = proat.get("liv2"); 
+                // Calcola l'id da inserire
+                int maxPatId = getMax("processo_at");
+                // Calcola il codice processo da inserire
+                String nextCode = getPatCode(user, idMat,sur);
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                /* === Se siamo qui vuol dire che ok   === */ 
+                pst = con.prepareStatement(INSERT_PROCESS_AT);
+                pst.clearParameters();
+                 // Prepara i parametri per l'inserimento
+                try {
+                    // Definisce un indice per il numero di parametro da passare alla query
+                    int nextParam = NOTHING;
+                    /* === Id === */
+                    pst.setInt(++nextParam, ++maxPatId);
+                    /* === Codice === */
+                    pst.setString(++nextParam, nextCode);
+                    /* === Nome === */
+                    pst.setString(++nextParam, namePat);
+                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());
+                    /* === Collegamento a macroprocesso === */
+                    pst.setInt(++nextParam, idMat);
+                    /* === Collegamento a rilevazione === */
+                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    // CR (Carriage Return) o 0DH
+                    pst.executeUpdate();
+                } catch (NumberFormatException nfe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, nfe);
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, npe);
+                } catch (Exception e) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
+                // End: <==
+                con.commit();
+                pst.close();
+                pst = null;
+                return maxPatId;
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
     /* ********************************************************** *
      *                  Metodi di AGGIORNAMENTO                   *
      * ********************************************************** */
@@ -7073,7 +7178,7 @@ public class DBWrapper extends QueryImpl {
                         if (parts.length != ELEMENT_LEV_2) {
                             throw new IllegalArgumentException("Invalid code format. Expected format: PREFIX.NUMBER");
                         }
-                        // Assignazione dei due token estratti alle variabili
+                        // Assegnazione dei due token estratti alle variabili
                         String prefix = parts[NOTHING]; // e.g., "PER" or "RIC"
                         String numberPart = parts[ELEMENT_LEV_1]; // e.g., "02" or "04"
                         int number = Integer.parseInt(numberPart);
@@ -7090,6 +7195,110 @@ public class DBWrapper extends QueryImpl {
                     }
                 } else {
                     nextCode = codeArea + DOT + "01";
+                }
+                return nextCode;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Probabile problema nel recupero del codice del rischio.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Problema nella conversione da String a intero.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + nfe.getMessage(), nfe);
+            }  catch (SQLException sqle) {
+                String msg = FOR_NAME + "Impossibile recuperare il max(code).\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un puntamento errato.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + e.getMessage(), e);
+        } 
+    }
+    
+    
+    /**
+     * <p>Restituisce il codice del processo da utilizzare, dato il suo
+     * macroprocesso.</p>
+     * 
+     * @param user      utente di cui si vogliono verificare i diritti
+     * @param idMat     identificativo macroprocesso cui collegare il nuovo processo
+     * @param survey    estremi della rilevazione
+     * @return <code>String</code> - il codice processo, nel formato XYZ.##, utile all'inserimento
+     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
+     */
+    public String getPatCode(PersonBean user, 
+                             int idMat, 
+                             CodeBean survey)
+                      throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            // ID dell'area di rischio cui il macro_at va collegato
+            //String idMatAsString = code.substring(code.indexOf(DOT), code.length());
+            // Conversione
+            //int idMat = Integer.parseInt(idMatAsString);
+            // Codice dell'area di rischio cui il macro_at va collegato
+            //String codeArea = code.substring(code.indexOf(DOT) + 1);
+            // Oggetto per memorizzare eventuale codice del macroprocesso esistente entro l'area data
+            CodeBean patCode = null;
+            // Codice da inserire del Macroprocesso_at appartenente all'area data
+            String nextCode = null;
+            // Fa la query per individuare eventuale max codice macro_at collegato all'area data 
+            try {
+                pst = con.prepareStatement(SELECT_MAX_PAT_CODE);
+                pst.clearParameters();
+                pst.setInt(1, idMat);
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    patCode = new CodeBean();
+                    BeanUtil.populate(patCode, rs);
+                    String currentCode = patCode.getNome();
+                    // Se c'è già un processo sul dato macroprocesso, deve incrementarne il progressivo
+                    if (currentCode != null && !currentCode.equals(VOID_STRING)) {
+                        // Separa il codice macro_at (p.es. RIC.02.03) trovato in prefisso e parte numerica
+                        String[] parts = currentCode.split("\\.");
+                        // Controllo sull'input
+                        if (parts.length != ELEMENT_LEV_3) {
+                            throw new IllegalArgumentException("Invalid code format. Expected format: PREFIX.NUMBER.NUMBER");
+                        }
+                        // Assegnazione dei tre token estratti alle variabili
+                        String prefix = parts[NOTHING]; // e.g., "PER" or "RIC"
+                        String numberPart = parts[ELEMENT_LEV_1]; // e.g., "02" or "04"
+                        String processPart = parts[ELEMENT_LEV_2]; // e.g., "02" or "04"
+                        int number = Integer.parseInt(processPart);
+                        // Incrementa la parte numerica                 
+                        number++; 
+                        // Determina quanti zeri c'erano nel codice originale
+                        int leadingZeros = numberPart.length() - Integer.toString(number).length();
+                        // Costruisce una nuova parte numerica aggiungendo uno zero iniziale sse <10
+                        String newNumberPart = String.format("%0" + (leadingZeros + Integer.toString(number).length()) + "d", new Integer(number));
+                        // Genera il nuovo codice
+                        nextCode = patCode.getInformativa() + DOT + newNumberPart;
+                    // Se non c'è ancora un processo sul dato macroprocesso, gli assegna il progressivo '01'
+                    } else {
+                        ProcessBean mat = this.getMacroSubProcessAtById(user, idMat, ELEMENT_LEV_1, survey);
+                        nextCode = mat.getCodice() + DOT + "01";
+                    }
+                // Default
+                } else {
+                    ProcessBean mat = this.getMacroSubProcessAtById(user, idMat, ELEMENT_LEV_1, survey);
+                    nextCode = mat.getCodice() + DOT + "01";
                 }
                 return nextCode;
             } catch (AttributoNonValorizzatoException anve) {
