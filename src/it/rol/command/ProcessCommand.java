@@ -146,6 +146,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * (Macroprocesso  | Processo | Sottoprocesso)
      */
     private static final String nomeFileAddProcess = "/jsp/prProcessoForm.jsp";
+    /** 
+     * Pagina contenente la form per inserimento input di processo_at
+     */
+    private static final String nomeFileAddInput = "/jsp/prInputForm.jsp";
     /**
      * Nome del file json della Command (dipende dalla pagina di default)
      */
@@ -194,10 +198,12 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_INSERT_F_R_P,     nomeFileAddFactor);
         nomeFile.put(PART_PI_NOTE,          nomeFileNote);
         nomeFile.put(PART_INSERT_PROCESS,   nomeFileSceltaTipo);
+        nomeFile.put(PART_INSERT_INPUT,     nomeFileAddInput);
         // Carica la hashmap contenente i titoli pagina
-        titleFile.put(new Byte(ELEMENT_LEV_1).toString(),  "Nuovo Macroprocesso");
-        titleFile.put(new Byte(ELEMENT_LEV_2).toString(),  "Nuovo Processo");
-        titleFile.put(new Byte(ELEMENT_LEV_3).toString(),  "Nuovo Sottoprocesso");
+        titleFile.put(new Byte(ELEMENT_LEV_1).toString(),   "Nuovo Macroprocesso");
+        titleFile.put(new Byte(ELEMENT_LEV_2).toString(),   "Nuovo Processo");
+        titleFile.put(new Byte(ELEMENT_LEV_3).toString(),   "Nuovo Sottoprocesso");
+        titleFile.put(PART_INSERT_INPUT,                    "Aggiunta Input");
     }
 
 
@@ -359,37 +365,45 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                              * ------------------------------------------------ */
                             // Deve differenziare tra finire e continuare
                             String action = parser.getStringParameter("action", DASH);
-                            
-                            String idCodeArea = parser.getStringParameter("p-area", DASH);
-                                
+                            // Dizionario dei parametri contenente gli estremi dell'area di rischio
+                            LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
+                            // Codice Area di Rischio
+                            String idCodeArea = proat.get("area");
+                            // Differenzia l'inoltro in funzione del bottone cliccato
                             switch (action) {
                                 case "save":
-                                    // Al momento i sottoprocessi non sono gestiti
-                                    if (liv == ELEMENT_LEV_1)
+                                    if (liv == ELEMENT_LEV_1) {
                                         db.insertMacroAt(user, params);
-                                    else 
-                                        db.insertMacroAt(user, params);
+                                    } else { // <- Al momento i sottoprocessi non sono gestiti
+                                        db.insertProcessAt(user, params);
+                                    }
                                     redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
                                                AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                     break;
                                 case "cont":
                                     switch (liv) {
-                                        case ELEMENT_LEV_1:
-                                            int nextId = db.insertMacroAt(user, params);
+                                        case ELEMENT_LEV_1: {
+                                            int idMat = db.insertMacroAt(user, params);
                                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
                                                        AMPERSAND + "p" + EQ + PART_INSERT_PROCESS +
                                                        AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                                       AMPERSAND + "pliv1" + EQ + nextId + 
+                                                       AMPERSAND + "pliv1" + EQ + idMat + 
                                                        AMPERSAND + "pliv0" + EQ + idCodeArea + 
                                                        AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                             break;
-                                        case ELEMENT_LEV_2:
+                                        }
+                                        case ELEMENT_LEV_2: {
+                                            int idPat = db.insertProcessAt(user, params);
                                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
-                                                       AMPERSAND + "p" + EQ + PART_INSERT_PROCESS +
-                                                       AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
+                                                       AMPERSAND + "p" + EQ + PART_INSERT_INPUT +
                                                        AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
+                                                       AMPERSAND + "pliv2" + EQ + idPat + 
+                                                       AMPERSAND + "pliv1" + EQ + parser.getStringParameter("pliv1", DASH) + 
+                                                       AMPERSAND + "pliv0" + EQ + idCodeArea + 
                                                        AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                             break;
+                                        }
+                                        // case ELEMENT_LEV_3 : Gestione sottoprocesso
                                         default:
                                             System.out.println("Unknown action");
                                             break;
