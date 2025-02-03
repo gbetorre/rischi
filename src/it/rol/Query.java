@@ -144,11 +144,29 @@ public interface Query extends Serializable {
             "   WHERE id_area_rischio = ?";
     
     /**
+     * <p>Estrae il massimo codice di un processo dato il codice
+     * del suo macroprocesso e fornisce anche il codice macroprocesso
+     * (il codice macroprocesso in effetti &egrave; gi&agrave; contenuto 
+     * nel codice processo per&ograve; siccome in questo punto abbiamo solo 
+     * l'id macro,ottenere il codice macro dalla stessa query &egrave; 
+     * gratis in termini di accesso al disco o computazione (legata 
+     * al successivo parsing nel caso in cui si debba ricavare a valle).</p>
+     */
+    public static final String SELECT_MAX_PAT_CODE =
+            "SELECT " +
+            "       MAX(PAT.codice)     AS \"nome\"" +
+            "   ,   MAT.codice          AS \"informativa\"" +
+            "   FROM processo_at PAT" +
+            "       INNER JOIN macroprocesso_at MAT ON PAT.id_macroprocesso_at = MAT.id" +
+            "   WHERE id_macroprocesso_at = ?" +
+            "   GROUP BY(MAT.codice)";
+    
+    /**
      * <p>Estrae il numero di record di una tabella definita nel chiamante</p>
      */
     public static final String SELECT_COUNT =
             "SELECT " +
-            "       count(*)             AS \"n\"" +
+            "       count(*)            AS \"n\"" +
             "   FROM ";
     
     /**
@@ -2148,6 +2166,35 @@ public interface Query extends Serializable {
             "   ,       ? " +       // ora ultima modifica
             "   ,       ? " +       // autore ultima modifica
             "   ,       ? " +       // id_area_rischio
+            "   ,       ? " +       // id_rilevazione
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di un processo censito a fini
+     * di mappatura, valutazione, gestione e monitoraggio del rischio corruttivo.
+     * Deve gestire manualmente l'identificativo a causa del flusso di 
+     * navigazione (serve subito a valle dell'INSERT) per cui ha pi&uacute;
+     * senso gestirlo a mano piuttosto che fare una INSERT e subito dopo
+     * una SELECT (sono due accessi al disco anzich&eacute; uno).</p>
+     */
+    public static final String INSERT_PROCESS_AT =
+            "INSERT INTO processo_at" +
+            "   (   id" +
+            "   ,   codice" +
+            "   ,   nome" +           
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_macroprocesso_at" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // codice
+            "   ,       ? " +       // nome     
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id_macroprocesso
             "   ,       ? " +       // id_rilevazione
             "          )" ;
 
