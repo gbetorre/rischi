@@ -57,7 +57,7 @@ L'applicazione web per la mappatura dei rischi corruttivi <code>ROL-RMS</code> s
 
 [![Product Landing Page][product-landing2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png)
 <br>
-<strong>*Pagina di landing, versione 2.0*</strong><br>
+<strong>*Fig.1 - Pagina di landing, versione 2.0*</strong><br>
 <br>
 <!-- ABOUT THE PROJECT -->
 
@@ -65,7 +65,7 @@ L'applicazione web per la mappatura dei rischi corruttivi <code>ROL-RMS</code> s
 
 [![Goal Sample][indicator-sample01]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample01.png)
 <br>
-<strong>*Fig.1 - Uno degli obiettivi del software &egrave; quantificare, in automatico, il valore di rischio per ogni processo organizzativo considerato (dati fittizi&#770;)*</strong><br>
+<strong>*Fig.2 - Uno degli obiettivi del software &egrave; quantificare, in automatico, il valore di rischio per ogni processo organizzativo considerato (dati fittizi&#770;)*</strong><br>
 
 Il workflow generale &egrave; suddiviso in 4 distinti step, o filoni di lavoro:
 * Step 1: caricamento di strutture e processi <strong>(mappatura dell'organizzazione)</strong>
@@ -95,7 +95,7 @@ Anzitutto, &egrave; opportuno definire i <strong>soggetti</strong> coinvolti:
 
 [![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.95.png)
 <br>
-<strong>*Fig.2 - Il software &egrave; un'applicazione ad accesso riservato (per accedere &egrave; necessario disporre di credenziali). Pertanto &egrave; possibile determinare il profilo utente all'accesso al sistema.*</strong>
+<strong>*Fig.3 - Il software &egrave; un'applicazione ad accesso riservato (per accedere &egrave; necessario disporre di credenziali). Pertanto &egrave; possibile determinare il profilo utente all'accesso al sistema.*</strong>
 <br><br>
 
 Rispetto ai <strong>ruoli</strong> svolti: 
@@ -138,7 +138,7 @@ Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una s
 
 # Come funziona il software
 
-Ovviamente l'applicazione Rischi On Line: Risk Mapping Software (ROL-RMS) si appoggia su un database, specificamente un database relazionale di tipo PostgreSQL (versione 12 e successive), in cui sono popolati i quesiti che verranno sottoposti alle strutture nelle interviste (e tutte le altre informazioni persistenti).
+Ovviamente l'applicazione <strong>Rischi On Line: Risk Mapping Software <code>(ROL-RMS)</code></strong> si appoggia su un database, specificamente un database relazionale di tipo PostgreSQL (versione 12 e successive), in cui sono popolati i quesiti che verranno sottoposti alle strutture nelle interviste (e tutte le altre informazioni persistenti).
 
 [![DB representation, layout circular][schema-physical]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/DB-circular.png)
 <br>
@@ -160,7 +160,8 @@ Le strutture sono organizzate in un albero con vari livelli mentre i processi so
 <br>
 <strong>*Fig.9 - Funzione di navigazione dell'albero dei macroprocessi*</strong>
 
-Come &egrave; noto in letteratura sulla mappatura dei processi, vi sono svariate tassonomie che &egrave; possibile adottare. Nel presente software si è optato per la seguente strutturazione gerarchica:
+Come &egrave; noto in letteratura sulla mappatura dei processi, vi sono svariate tassonomie che &egrave; possibile adottare per classificare e gerarchizzare i processi organizzativi.<br> 
+Nel presente software si è optato per la seguente strutturazione gerarchica:
 <pre>
 * Area di Rischio
     * |_ Macroprocesso
@@ -168,16 +169,16 @@ Come &egrave; noto in letteratura sulla mappatura dei processi, vi sono svariate
            *     |_ Sottoprocesso
 </pre>
 
-tutte entit&agrave; legate tra loro da relazioni di composizione.
+Tutte queste entit&agrave; sono legate tra loro da relazioni di composizione (&nquot; aggregazione forte &nquot;, o aggregazione compositiva).<br>
 L'area di rischio &egrave; il livello pi&uacute; generale: essa ha poche propriet&agrave; e aggrega i macroprocessi, i quali, a loro volta, aggregano i processi, e cos&iacute; via.
 
 [![Class Diagram part Process][class-diagram]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/class-diagram.png)
 <br>
-<strong>*Fig.10 - Diagramma delle classi delle entit&agrave; relative alla rappresentazione dei processi.*</strong>
+<strong>*Fig.10 - Diagramma delle classi relativo alle entit&agrave; coinvolte nella rappresentazione dei processi.*</strong>
 
 Ogni processo o sottoprocesso (ma non il macroprocesso) pu&ograve; essere a sua volta suddiviso in fasi (o attivit&agrave;). Ad ogni fase possono essere associate una o pi&ugrave; strutture e uno o pi&ugrave; soggetti terzi (che sono entit&agrave; non strutturate in organigramma ma comunque agenti sulla fase del processo).
 
-Il software prevede apposite funzionalit&agrave; di navigazione nell'albero dei macroprocessi ed in quello dell'organigramma (cfr. <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png">Fig. 9</a> e <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png">10</a>), in modo da verificare rapidamente che la mappatura corrisponda a quanto effettivamente presente nell'organizzazione.
+Il software prevede apposite funzionalit&agrave; di navigazione nell'albero dei macroprocessi ed in quello dell'organigramma (cfr. <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png">Fig. 8</a> e <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png">9</a>), in modo da verificare rapidamente che la mappatura corrisponda a quanto effettivamente presente nell'organizzazione.
 
 Inoltre, per ogni processo viene fornita una pagina di dettaglio, contenente, oltre ai rischi ed ai livelli di rischio cui il processo &egrave; esposto (informazione di grande interesse dato lo scopo del software), anche tutte le altre informazioni aggregate che riguardano il processo stesso, tra cui: gli input, le fasi, gli output, i rischi ed i fattori abilitanti.
 
@@ -211,7 +212,7 @@ Gli algoritmi di calcolo degli indicatori sono tutti diversi tra loro.
 <br>
 <strong>*Fig.14 - Esempio (semplificato) del flowchart dell'algoritmo di calcolo di uno specifico indicatore di probabilit&agrave; (P3: analisi/valutazione delle segnalazioni ricevute)*</strong><br>
 
-Come accennato nel paragrafo precedente, tramite ulteriori algoritmi vengono incrociati tutti i valori ottenuti negli indicatori di probabilit&agrave; (indice globale di probabilit&agrave; P) e tutti i valori ottenuti negli indicatori di impatto (indice globale di impatto I).
+Come accennato nel paragrafo precedente, tramite ulteriori algoritmi vengono incrociati tutti i valori ottenuti negli indicatori di probabilit&agrave; (indice globale di probabilit&agrave; <code>P</code>) e tutti i valori ottenuti negli indicatori di impatto (indice globale di impatto <code>I</code>).
 
 Infine, tramite una classica tabella della Quantitative Risk Analysis, viene calcolato l'indice  <code>P x I</code>, o giudizio sintetico, ottenuto per ogni processo censito ed investigato tramite le interviste.<br>
 
@@ -222,27 +223,35 @@ Infine, tramite una classica tabella della Quantitative Risk Analysis, viene cal
 ><strong>&Egrave; importante sottolineare che una feature del software consiste dunque nell'automazione del calcolo degli indicatori e del PxI: dopo aver censito processi e strutture, &egrave; sufficiente effettuare le interviste per far s&iacute; che il software faccia il resto.</strong>
 
 ## Step 3: Trattamento del rischio (misure di mitigazione, stima)
-Tramite le fasi 1 e 2 si ottiene dunque una visione complessiva sul livello di rischio cui ogni processo organizzativo censito risulta esposto.
+Tramite le fasi 1 e 2 (ovvero: mappatura dei processi e calcolo del rischio corruttivo degli stessi) si ottiene dunque una visione complessiva sul livello di rischio cui ogni processo organizzativo censito risulta esposto.
 
 [![PxI concise dashboard][dashboard-risk2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-pxi.png)
 <br>
 <strong>*Fig.16 - La tabella del PxI totalizzato da ogni processo fornisce una visione d'insieme sui livelli di rischio cui sono esposti i processi organizzativi*</strong>
 
 Aver realizzato questa mappatura costituisce un buon punto di partenza per poter stabilire quali misure di mitigazione/prevenzione del rischio corruttivo &egrave; opportuno applicare ai rischi stessi.
-Questa &egrave; la fase 3, ovvero <strong>la fase di individuazione delle misure di mitigazione atte a ridurre il valore del rischio.</strong>
+Quest'ultima &egrave; la fase 3, ovvero <strong>la fase di individuazione delle misure di mitigazione atte a ridurre il valore del rischio.</strong>
 
 Come si definisce una misura di mitigazione?
-Le misure di mitigazione del rischio corruttivo corrispondono ad azioni atte a:<ul> 
+Le misure di mitigazione del rischio corruttivo corrispondono ad azioni atte a:
+<ul> 
 <li>contenere</li>
 <li>calmierare</li>
 <li>mitigare</li>
 <li>prevenire</li>
 <li>trattare</li>
 <li>ridurre</li> 
-</ul>il rischio corruttivo, a seconda della tipologia e dello scopo della misura stessa.<br>
-(Notare che, generalmente, si pu&ograve; considerare la definizione data in implicazione doppia, <code>sse</code>).<br>
+</ul>
+il rischio corruttivo, a seconda della tipologia e dello scopo della misura stessa.<br>
+(Notare che, generalmente, si pu&ograve; considerare la definizione data in implicazione doppia, <code>sse</code> 
+<sub>vale a dire: <ul>
+<li> una misura di mitigazione M &egrave; un'azione che, applicata a un processo, ne riduce il rischio: M &rarr; rr </li>
+<li> &and;</li>
+<li> se il rischio di un processo &egrave; ridotto da una certa azione, allora quell'azione &egrave; una misura di mitigazione : rr &rarr; M</li></ul> 
+da cui <code>M &harr; rr</code> 
+</sub>).<br>
 
-Senza entrare nei dettagli implementativi dell'entit&agrave; misura, i cui attributi e riferimenti vengono approfonditi nell'<a href="#readme-contact">analisi dei requisiti</a>, basti tener conto che la misura di mitigazione &egrave; un oggetto complesso, avente uno o pi&uacute; tipologie, parecchie relazioni con le strutture organizzative e una serie di propriet&agrave; specifiche (la sostenibilit&agrave; economica, il carattere, il numero di fasi di attuazione, etc.)<br>
+<p>Senza entrare nei dettagli implementativi dell'entit&agrave; misura, i cui attributi e riferimenti vengono approfonditi nell'<a href="#readme-contact">analisi dei requisiti</a>, basti tener conto che la misura di mitigazione &egrave; un oggetto complesso, avente uno o pi&uacute; tipologie, parecchie relazioni con le strutture organizzative e una serie di propriet&agrave; specifiche (la sostenibilit&agrave; economica, il carattere, il numero di fasi di attuazione, etc.)</p><br>
 
 [![Form to insert new measure][add-measure]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure.png)
 <br>
@@ -260,10 +269,10 @@ La granularit&agrave; delle associazioni tra processo e misura &egrave; infatti 
 <br>
 <strong>*Fig.19 - Parte del diagramma ER per la rappresentazione delle misure*</strong>
 
-Quello che accade in pratica, quindi, &egrave; che, partendo dall'analisi dei livelli di rischio cui sono esposti i processi (fotografata dalla dashboard dei PxI: v. p.es. <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-pxi.png">Fig. 15</a>) l'esperto decide che &egrave; opportuno che l'organizzazione metta in atto opportune misure.
+Quello che accade in pratica, quindi, &egrave; che, partendo dall'analisi dei livelli di rischio cui sono esposti i processi (fotografata dalla dashboard dei PxI: v. p.es. <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-pxi.png">Fig. 16</a>) l'esperto decide che &egrave; opportuno che l'organizzazione metta in atto opportune misure.
 
 Quali misure, per&ograve;, scegliere, tra le varie misure possibili? Ovvero: come individuare le misure migliori per ogni rischio di ogni dato processo?<br>
-Anche qui viene in aiuto il sistema ROL-RMS: 
+Anche qui viene in aiuto il sistema <code>ROL-RMS</code>: 
 
 ><strong>uno dei vantaggi offerti dal software, su questo versante, &egrave; il fatto che il sistema stesso suggerisce quali misure applicare a ciascun rischio nel contesto di ciascun processo!</strong> 
 
@@ -273,11 +282,14 @@ Anche qui viene in aiuto il sistema ROL-RMS:
 
 Le misure di mitigazione, infatti, tramite la loro tipologia, hanno un'associazione con il fattore abilitante e questa relazione rende possibile individuare il contesto di applicazione delle misure stesse in funzione del rischio e del processo.
 
-Una volta applicate le misure, &egrave; possibile verificare come variano i livelli di rischio attraverso la consultazione di appositi cruscotti, che mettono a confronto il PxI prima e dopo l'applicazione delle misure.<br>
+Riepilogando: il software propone un insieme di misure che, sulla base dell'informazione di cui dispone internamente, sono appropriate per il rischio considerato entro il processo considerato. 
+Nulla vieta per&ograve; di assegnarne altre in aggiunta o in sostituzione di quelle proposte.
+
+Una volta applicate le misure, &egrave; possibile verificare come variano i livelli di rischio attraverso la consultazione di appositi cruscotti, che mettono a confronto il PxI prima e dopo l'applicazione delle misure stesse.<br>
 
 [![How to risk decrease applying measures][dashboard-risk4]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-measures.png)
 <br>
-<strong>*Fig.21 - Tabella che mostra quali sono le misure da applicare ad ogni processo e come varierebbero i livelli del PxI prima e dopo l'applicazione.*</strong>
+<strong>*Fig.21 - Tabella che mostra quali sono le misure da applicare ad ogni processo e come varierebbero i livelli del PxI prima e dopo l'applicazione. Nella schermata considerata, si sono avute riduzioni di rischio e un livello che, invece, &egrave; rimasto inviariato.*</strong>
 
 ## Step 4: Certificazione del rischio (misure di mitigazione, monitoraggio)
 La fase di applicazione delle misure, appena vista, &egrave; per&ograve; soltanto una <i>stima</i> della misura in cui il rischio pu&ograve; essere ridotto <i>se</i> le misure proposte vengono applicate.
@@ -312,7 +324,7 @@ Distinguiamo, quindi, tra misura assoluta (vale a dire la misura <i>tout-court</
 
 Questi dettagli includono: 
 * la descrizione e il numero delle fasi di attuazione della misura;
-* l'obiettivo del piano integrato di programmazione e governance, o di altro documento analogo, che giustifica l'applicazione della misura.
+* l'obiettivo del piano integrato di attivit&agrave; e organizzazione (PIAO), o di altro documento analogo, che giustifica l'applicazione della misura.
 
 Su ogni fase di attuazione (che non va confusa con la "fase" del processo organizzativo, che &egrave; un'attivit&agrave;, ovvero un sottolivello, un task attraverso cui passa la realizzazione del processo stesso, e che da alcuni autori viene etichettata come "sottoprocesso") pu&ograve; essere applicato un <strong>indicatore di monitoraggio</strong>.
 
@@ -342,7 +354,7 @@ La misurazione &egrave; quindi, in certo qual modo, un epifenomeno della misura.
 
 # Roadmap
 
-Tre delle funzioni attualmente implementate nel software ROL-RMS, ovvero:
+Tre delle funzioni attualmente implementate nel software <code>ROL-RMS</code>, ovvero:
 <mark>
 * il calcolo del rischio esistente, 
 * il suggerimento circa le misure di mitigazione da applicare al rischio esistente,
@@ -359,11 +371,11 @@ dall'organizzazione stessa sono esposti.
 
 &Egrave; anche possibile stimare, con relativa precisione, quanto tempo &egrave; necessario per customizzare il software in funzione di una specifica realt&agrave; organizzativa.
 Infatti, acquisite:
-* le dimensioni dell'organizzazione (in particolare, il numero di livelli dell'organigramma ed il numero assoluto di strutture da mappare)
+* le dimensioni dell'organizzazione (in particolare, il numero di livelli dell'organigramma ed il numero assoluto di strutture da mappare),
 * il numero di livelli e la numerosit&agrave; dei processi prodotti dall'organizzazione stessa,
   
 diventa possibile effettuare una stima relativamente accurata del tempo necessario 
-affinch&eacute; sia possibile iniziare la campagna di interviste e, conseguentemente, ottenere i risultati dei vari indicatori di rischio e del giudizio sintetico P x I.
+affinch&eacute; sia possibile iniziare la campagna di interviste e, conseguentemente, ottenere i risultati dei vari indicatori di rischio e del giudizio sintetico <code>P x I</code>.
 <br><br>
 
 ## Sviluppi futuri
@@ -438,6 +450,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.1.6] (03/02/2025) Implementata funzionalit&agrave; di inserimento processo
 - [2.1.5] (29/01/2025) Implementata funzionalit&agrave; di inserimento macroprocesso
 - [2.1.4] (27/01/2025) Prima bozza di implementazione form per inserimento macroprocesso
 - [2.1.3] (20/01/2025) Implementata pagina iniziale inserimento processo
@@ -549,7 +562,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### Built With
 
-Questo progetto utilizza esclusivamente tecnologie STANDARD e framework consolidati. 
+Questo progetto &egrave; rilasciato in Open Source ed utilizza esclusivamente tecnologie STANDARD e framework consolidati. 
 Ad esempio: 
 * POJO per Java (tutto lo strato CONTROLLER); 
 * Ajax per le richieste asincrone (XHR); 
@@ -560,7 +573,7 @@ Ad esempio:
 * JSON per la costruzione di alberi di navigazione; 
 e così via.
 
-Tecnicamente, l'applicazione è un'architettura monolitica. 
+Tecnicamente, <strong>l'applicazione è un'architettura monolitica.</strong>
 Non varrebbe neppure la pena di giustificare questa scelta, data la natura del progetto (uno sviluppo incrementale portato avanti negli anni da un singolo software engineer), ma val la pena di evidenziare i principali vantaggi di un'architettura monolitica rispetto ad una a microservizi, nel contesto dei task realizzati tramite il presente software:
 * il codice è depositato tutto in un unico repository, cioè quello che viene documentato dal presente file README;
 * l'applicazione è facile da deployare: eseguendo un singolo script, una nuova versione viene rilasciata ed il server viene aggiornato in pochi istanti;
@@ -633,18 +646,26 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+I contributi sono ci&ograve; che rende le comunit&agrave; Open Source uno spazio fantastico per apprendere, venire ispirati e dare spazio alla creativit&agrave;
+Ogni contributo sar&agrave; pertanto **grandemente apprezzato**.
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
+Chiunque abbia suggerimenti che potrebbero migliorare il progetto pu&ograve; scaricare il repository, testarlo in locale, apportarvi modifiche e creare una pull request:
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Effettuare un Fork del progetto (dall'URL https://github.com/gbetorre/rischi/tree/main cliccare sul pulsante "Fork" in alto a destra)
+2. Clonare il Fork  (`git clone https://github.com/username/rischi.git` dove username &egrave; l'utente GitHub)
+3. Creare la propria Feature Branch (`git checkout -b feature/AmazingFeature`)
+4. Committare le modifiche (`git commit -m 'Added some AmazingFeature | Aggiunta AmazingFeature'`)
+5. Fare il Push al Branch (`git push -u origin feature/AmazingFeature`)
+6. Aprire una Pull Request (cliccare sul tab "Pull requests" poi su "New pull request"; dare un titolo chiaro e aggiungere una descrizione dettagliata dei cambiamenti effettuati; quindi cliccare su "Create pull request").
 
-For a list of contributors, please see the [AUTHORS](AUTHORS) file.
+Per poter far girare il software &egrave; necessario effettuare un deploy del database su cui lo stesso &egrave; appoggiato.
+Per ottenere un dump del database di produzione, corrispondente a un'implementazione completa dello schema ma contenente solo dati esemplificativi, <a href="mailto:gianroberto.torre@gmail.com">contattare l'autore</a>.
+
+Un modo pi&uacute; semplificato per suggerire modifiche consiste nell'aprire semplicemente una issue contrassegnata con il tag "enhancement".
+
+Se sta risultando interessante, non dimenticare di dare una stella al progetto!
+
+Per una lista dei contributori, v.: [AUTHORS](AUTHORS) file.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
