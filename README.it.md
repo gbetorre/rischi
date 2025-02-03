@@ -244,12 +244,11 @@ Le misure di mitigazione del rischio corruttivo corrispondono ad azioni atte a:
 </ul>
 il rischio corruttivo, a seconda della tipologia e dello scopo della misura stessa.<br>
 (Notare che, generalmente, si pu&ograve; considerare la definizione data in implicazione doppia, <code>sse</code> 
-<sub>vale a dire: <ul>
+vale a dire: <ul>
 <li> una misura di mitigazione M &egrave; un'azione che, applicata a un processo, ne riduce il rischio: M &rarr; rr </li>
 <li> &and;</li>
 <li> se il rischio di un processo &egrave; ridotto da una certa azione, allora quell'azione &egrave; una misura di mitigazione : rr &rarr; M</li></ul> 
-da cui <code>M &harr; rr</code> 
-</sub>).<br>
+da cui <code>M &harr; rr</code>).<br>
 
 <p>Senza entrare nei dettagli implementativi dell'entit&agrave; misura, i cui attributi e riferimenti vengono approfonditi nell'<a href="#readme-contact">analisi dei requisiti</a>, basti tener conto che la misura di mitigazione &egrave; un oggetto complesso, avente uno o pi&uacute; tipologie, parecchie relazioni con le strutture organizzative e una serie di propriet&agrave; specifiche (la sostenibilit&agrave; economica, il carattere, il numero di fasi di attuazione, etc.)</p><br>
 
