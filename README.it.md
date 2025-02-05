@@ -169,7 +169,7 @@ Nel presente software si è optato per la seguente strutturazione gerarchica:
            *     |_ Sottoprocesso
 </pre>
 
-Tutte queste entit&agrave; sono legate tra loro da relazioni di composizione (&nquot; aggregazione forte &nquot;, o aggregazione compositiva).<br>
+Tutte queste entit&agrave; sono legate tra loro da relazioni di composizione (&ldquo;aggregazione forte&rdquo;, o aggregazione compositiva).<br>
 L'area di rischio &egrave; il livello pi&uacute; generale: essa ha poche propriet&agrave; e aggrega i macroprocessi, i quali, a loro volta, aggregano i processi, e cos&iacute; via.
 
 [![Class Diagram part Process][class-diagram]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/class-diagram.png)
@@ -248,9 +248,9 @@ vale a dire: <ul>
 <li> una misura di mitigazione M &egrave; un'azione che, applicata a un processo, ne riduce il rischio: M &rarr; rr </li>
 <li> &and;</li>
 <li> se il rischio di un processo &egrave; ridotto da una certa azione, allora quell'azione &egrave; una misura di mitigazione : rr &rarr; M</li></ul> 
-da cui <code>M &harr; rr</code>).<br>
+da cui <code>M &harr; rr</code>).<br><br>
 
-<p>Senza entrare nei dettagli implementativi dell'entit&agrave; misura, i cui attributi e riferimenti vengono approfonditi nell'<a href="#readme-contact">analisi dei requisiti</a>, basti tener conto che la misura di mitigazione &egrave; un oggetto complesso, avente uno o pi&uacute; tipologie, parecchie relazioni con le strutture organizzative e una serie di propriet&agrave; specifiche (la sostenibilit&agrave; economica, il carattere, il numero di fasi di attuazione, etc.)</p><br>
+Senza entrare nei dettagli implementativi dell'entit&agrave; misura, i cui attributi e riferimenti vengono approfonditi nell'<a href="#readme-contact">analisi dei requisiti</a>, basti tener conto che la misura di mitigazione &egrave; un oggetto complesso, avente uno o pi&uacute; tipologie, parecchie relazioni con le strutture organizzative e una serie di propriet&agrave; specifiche (la sostenibilit&agrave; economica, il carattere, il numero di fasi di attuazione, etc.)</p>
 
 [![Form to insert new measure][add-measure]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure.png)
 <br>
@@ -391,7 +391,7 @@ Ognuno pu&ograve; sentirsi libero di proporre miglioramenti ed evoluzioni.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### ToDo (Roadmap)
+### ToDo
 - Implementare un motore di ricerca interno
 - Implementare ricerca sui quesiti per chiave testuale
 - Aggiungere suggerimenti asincroni sulla digitazione della chiave testuale
@@ -449,6 +449,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.1.7] (05/02/2025) Correzione di bug
 - [2.1.6] (03/02/2025) Implementata funzionalit&agrave; di inserimento processo
 - [2.1.5] (29/01/2025) Implementata funzionalit&agrave; di inserimento macroprocesso
 - [2.1.4] (27/01/2025) Prima bozza di implementazione form per inserimento macroprocesso
@@ -657,6 +658,11 @@ Chiunque abbia suggerimenti che potrebbero migliorare il progetto pu&ograve; sca
 5. Fare il Push al Branch (`git push -u origin feature/AmazingFeature`)
 6. Aprire una Pull Request (cliccare sul tab "Pull requests" poi su "New pull request"; dare un titolo chiaro e aggiungere una descrizione dettagliata dei cambiamenti effettuati; quindi cliccare su "Create pull request").
 
+[![Repository features list][list-features]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/features.png)
+<br>
+*Fig.26 - Elenco delle features di un repository listate tramite il software Sourcetree*
+
+
 Per poter far girare il software &egrave; necessario effettuare un deploy del database su cui lo stesso &egrave; appoggiato.
 Per ottenere un dump del database di produzione, corrispondente a un'implementazione completa dello schema ma contenente solo dati esemplificativi, <a href="mailto:gianroberto.torre@gmail.com">contattare l'autore</a>.
 
@@ -738,6 +744,7 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [schema-monitor]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-monitoring.png
 [schema-physical]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/DB-circular.png
 [class-diagram]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/class-diagram.png
+[list-features]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/features.png
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/othneildrew/Best-README-Template/issues
 [license-shield]: https://img.shields.io/badge/license-GPL-blue
