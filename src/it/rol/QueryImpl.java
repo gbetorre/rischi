@@ -198,32 +198,37 @@ public class QueryImpl implements Query, Constants {
     
     
     /**
-     * {@link Query#getQueryMacroSubProcessAtById(int, byte, int)}
-     * @see it.rol.Query#getQueryMacroSubProcessAtById(int, byte, int)
+     * {@link Query#getQueryMacroSubProcessAtByIdOrCode(int, byte, int)}
+     * @see it.rol.Query#getQueryMacroSubProcessAtByIdOrCode(int, String, byte, int)
      */
     @Override
-    public String getQueryMacroSubProcessAtById(int idO, byte level, int idSur) {
+    public String getQueryMacroSubProcessAtByIdOrCode(int idO, 
+                                                      String codeO, 
+                                                      byte level, 
+                                                      int idSur) {
         String tableName = null;
         String tableClause = null;
         switch(level) {
             case ELEMENT_LEV_1:
                 tableName = "macroprocesso_at";
-                tableClause = " AND macroprocesso_at.id = " + idO;
                 break;
             case ELEMENT_LEV_2:
                 tableName = "processo_at";
-                tableClause = " AND processo_at.id = " + idO;
                 break;
             case ELEMENT_LEV_3:
                 tableName = "sottoprocesso_at";
-                tableClause = " AND sottoprocesso_at.id = " + idO;
                 break;
             default:
                 tableClause = VOID_STRING;
                 break;
         }
-        final String GET_MPSAT_BY_SURVEY =
-                "SELECT " +
+        tableClause = " AND (" +
+                            tableName + ".id = " + idO +
+                      "     OR " +
+                            tableName + ".codice = '" + codeO + "'" + 
+                      "     )"; 
+        final String GET_MPSAT_BY_ID_OR_CODE =
+                "SELECT DISTINCT " +
                                  tableName + ".id       AS \"id\"" +
                         "   ," + tableName + ".codice   AS \"codice\"" +
                         "   ," + tableName + ".nome     AS \"nome\"" +
@@ -231,7 +236,7 @@ public class QueryImpl implements Query, Constants {
                         "   FROM " + tableName + 
                         "   WHERE " + tableName + ".id_rilevazione = " + idSur + 
                                 tableClause;
-        return GET_MPSAT_BY_SURVEY;
+        return GET_MPSAT_BY_ID_OR_CODE;
     }
 
     @Override
