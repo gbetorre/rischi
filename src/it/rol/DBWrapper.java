@@ -1866,29 +1866,40 @@ public class DBWrapper extends QueryImpl {
     
     
     /**
-     * <p>Dato un id, restituisce un ProcessBean che incapsula
+     * <p>Dato un id o un codice, restituisce un ProcessBean che incapsula
      * i dati di un macroprocesso, processo o sottoprocesso, determinato in base
-     * al livello passato come parametro.</p>
+     * al livello passato come parametro.<ul>
+     * <li>&Egrave; possibile passare o un id o un codice 
+     * e il processo verr&agrave; recuperato in ogni caso;</li> 
+     * <li>se vengono passati entrambi, purch&eacute; attinenti allo stesso
+     * processo, il risultato sar&agrave; lo stesso che si ottiene passando
+     * uno solo dei due;</li> 
+     * <li>bisogna invece evitare di passare un id ed un codice relativi a
+     * due processi diversi, perch&eacute; in questo caso ne verr&agrave; 
+     * restituito uno solo, ottenendo un comportamento indesiderabile.</li>
+     * </ul></p>
      *
      * @param user      oggetto rappresentante la persona loggata
      * @param idMPSAT   identificativo di un macroprocesso, di un processo o di un sottoprocesso anticorruttivo 
+     * @param codeMPSAT codice di un macroprocesso, di un processo o di un sottoprocesso anticorruttivo 
      * @param level     insieme in cui cercare l'identificativo (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at)
      * @param survey    oggetto rilevazione di cui si vogliono recuperare i macroprocessi, i processi e relative informazioni
      * @return <code>ProcessBean</code> - un oggetto corrispondente all'elemento di id fornito come argomento nell'insieme desiderato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    public ProcessBean getMacroSubProcessAtById(PersonBean user,
-                                                int idMPSAT,
-                                                byte level,
-                                                CodeBean survey)
-                                         throws WebStorageException {
+    public ProcessBean getMacroSubProcessAtByIdOrCode(PersonBean user,
+                                                      int idMPSAT,
+                                                      String codeMPSAT,
+                                                      byte level,
+                                                      CodeBean survey)
+                                               throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
             ProcessBean item = null;
             try {
                 // TODO: Controllare se user è superuser
-                String query = getQueryMacroSubProcessAtById(idMPSAT, level, survey.getId());
+                String query = getQueryMacroSubProcessAtByIdOrCode(idMPSAT, codeMPSAT, level, survey.getId());
                 pst = con.prepareStatement(query);
                 pst.clearParameters();
                 rs = pst.executeQuery();
@@ -6425,23 +6436,27 @@ public class DBWrapper extends QueryImpl {
      * @return <code>int</code> - l'id del processo appena inserito
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
-    public int insertMacroAt(PersonBean user, 
-                             HashMap<String, LinkedHashMap<String, String>> params) 
-                      throws WebStorageException {
+    public ProcessBean insertMacroAt(PersonBean user, 
+                                     HashMap<String, LinkedHashMap<String, String>> params) 
+                              throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
             // Dizionario dei parametri contenente gli estremi dell'area di rischio
             LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
+            // Oggetto da restituire
+            ProcessBean mat = null;
             try {
                 // Recupera i valori necessari all'inserimento
-                String idCodeArea = proat.get("area");
+                String idCodeArea = proat.get("liv0");
                 String nomeMat = proat.get("liv1");
                 // Calcola l'id da inserire
                 int maxMatId = getMax("macroprocesso_at");
                 // Calcola il codice macroprocesso da inserire
                 String nextCode = getMatCode(idCodeArea);
+                // Istanzia il macroprocesso da restituire
+                mat = new ProcessBean();
                 // Begin: ==>
                 con.setAutoCommit(false);
                 // TODO: Controllare se user è superuser
@@ -6453,11 +6468,14 @@ public class DBWrapper extends QueryImpl {
                     // Definisce un indice per il numero di parametro da passare alla query
                     int nextParam = NOTHING;
                     /* === Id === */
-                    pst.setInt(++nextParam, ++maxMatId);
+                    mat.setId(++maxMatId);
+                    pst.setInt(++nextParam, mat.getId());
                     /* === Codice === */
-                    pst.setString(++nextParam, nextCode);
+                    mat.setCodice(nextCode);
+                    pst.setString(++nextParam, mat.getCodice());
                     /* === Nome === */
-                    pst.setString(++nextParam, nomeMat);
+                    mat.setNome(nomeMat);
+                    pst.setString(++nextParam, mat.getNome());
                     /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
                     pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
                     pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
@@ -6489,7 +6507,7 @@ public class DBWrapper extends QueryImpl {
                 con.commit();
                 pst.close();
                 pst = null;
-                return maxMatId;
+                return mat;
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
                 LOG.severe(msg); 
@@ -6541,12 +6559,13 @@ public class DBWrapper extends QueryImpl {
                 // Estremi macroprocesso
                 String idCodeMacro = proat.get("liv1");
                 int idMat = Integer.parseInt(idCodeMacro.substring(NOTHING, idCodeMacro.indexOf(DOT)));
+                String codeMat = idCodeMacro.substring(idCodeMacro.indexOf(DOT) + 1, idCodeMacro.length());
                 // Processo at
                 String namePat = proat.get("liv2"); 
                 // Calcola l'id da inserire
                 int maxPatId = getMax("processo_at");
                 // Calcola il codice processo da inserire
-                String nextCode = getPatCode(user, idMat,sur);
+                String nextCode = getPatCode(user, idMat, codeMat, sur);
                 // Begin: ==>
                 con.setAutoCommit(false);
                 // TODO: Controllare se user è superuser
@@ -7244,6 +7263,7 @@ public class DBWrapper extends QueryImpl {
      */
     public String getPatCode(PersonBean user, 
                              int idMat, 
+                             String codeMat,
                              CodeBean survey)
                       throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
@@ -7292,12 +7312,12 @@ public class DBWrapper extends QueryImpl {
                         nextCode = patCode.getInformativa() + DOT + newNumberPart;
                     // Se non c'è ancora un processo sul dato macroprocesso, gli assegna il progressivo '01'
                     } else {
-                        ProcessBean mat = this.getMacroSubProcessAtById(user, idMat, ELEMENT_LEV_1, survey);
+                        ProcessBean mat = this.getMacroSubProcessAtByIdOrCode(user, idMat, codeMat, ELEMENT_LEV_1, survey);
                         nextCode = mat.getCodice() + DOT + "01";
                     }
                 // Default
                 } else {
-                    ProcessBean mat = this.getMacroSubProcessAtById(user, idMat, ELEMENT_LEV_1, survey);
+                    ProcessBean mat = this.getMacroSubProcessAtByIdOrCode(user, idMat, codeMat, ELEMENT_LEV_1, survey);
                     nextCode = mat.getCodice() + DOT + "01";
                 }
                 return nextCode;
