@@ -368,7 +368,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Dizionario dei parametri contenente gli estremi dell'area di rischio
                             LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
                             // Codice Area di Rischio
-                            String idCodeArea = proat.get("area");
+                            String idCodeArea = proat.get("liv0");
                             // Differenzia l'inoltro in funzione del bottone cliccato
                             switch (action) {
                                 case "save":
@@ -383,11 +383,11 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 case "cont":
                                     switch (liv) {
                                         case ELEMENT_LEV_1: {
-                                            int idMat = db.insertMacroAt(user, params);
+                                            ProcessBean mat = db.insertMacroAt(user, params);
                                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
                                                        AMPERSAND + "p" + EQ + PART_INSERT_PROCESS +
                                                        AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                                       AMPERSAND + "pliv1" + EQ + idMat + 
+                                                       AMPERSAND + "pliv1" + EQ + mat.getId() + DOT + mat.getCodice() + 
                                                        AMPERSAND + "pliv0" + EQ + idCodeArea + 
                                                        AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                             break;
@@ -511,9 +511,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 //macros = retrieveMacroAtBySurvey(user, codeSur, db);
                                 // Se c'è un id macroprocesso vuol dire che bisogna aggiungere un processo
                                 if (!idM.equals(DASH)) {
-                                    int idMat = Integer.parseInt(idM);
+                                    int idMat = Integer.parseInt(idM.substring(NOTHING, idM.indexOf(DOT)));
                                     String areaRischio = parser.getStringParameter("pliv0", DASH);
-                                    macro = db.getMacroSubProcessAtById(user, idMat, ELEMENT_LEV_1, survey);
+                                    macro = db.getMacroSubProcessAtByIdOrCode(user, idMat, VOID_STRING, ELEMENT_LEV_1, survey);
                                     macro.setAreaRischio(areaRischio);
                                 }
                                 // Titolo pagina
