@@ -1619,14 +1619,18 @@ public interface Query extends Serializable {
      * <p>In funzione del parametro specificante il livello
      * (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at),
      * costruisce dinamicamente la query che estrae uno specifico, 
-     * rispettivamente, macroprocesso, processo o sottoprocesso.</p>
+     * rispettivamente, macroprocesso, processo o sottoprocesso
+     * dato il suo id oppure il suo codice (&egrave; sufficiente passare
+     * uno dei due ma, se si passano tutti e due e sono attinenti allo stesso
+     * processo, non cambia niente nei risultati).</p>
      * 
      * @param idP       identificativo di macroprocesso_at, processo_at o sottoprocesso_at
+     * @param codeP     codice macroprocesso_at, processo_at o sottoprocesso_at
      * @param level     identificativo del livello a cui e' relativo l'id (1 = macroprocesso_at | 2 = processo_at | 3 = sottoprocesso_at)
      * @param idSur     codice identificativo della rilevazione
      * @return <code>String</code> - la query che seleziona l'elemento desiderato
      */
-    public String getQueryMacroSubProcessAtById(int idP, byte level, int idSur);
+    public String getQueryMacroSubProcessAtByIdOrCode(int idP, String codeP, byte level, int idSur);
     
     /**
      * <p>Costruisce dinamicamente la query che seleziona un insieme di risposte
