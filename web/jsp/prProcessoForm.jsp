@@ -55,7 +55,7 @@
             <label for="ind-tipo"><strong>Area di Rischio</strong></label>&nbsp;&nbsp;
           </div>
           <div class="col-sm-6">
-            <select class="form-custom total-wide" id="sel-area" name="p-area" ${readonly}>
+            <select class="form-custom total-wide monospace" id="sel-area" name="p-area" ${readonly}>
             <c:forEach var="area" items="${aree}" varStatus="status">
             <c:choose>
               <c:when test="${area.id eq fn:substring(macro.areaRischio, zero, fn:indexOf(macro.areaRischio, '.'))}">
@@ -70,10 +70,10 @@
               </option>
             </c:forEach>
             </select>
-            <input type="text" id="mat-area" name="pliv0" value="${macro.areaRischio}" />
+            <input type="hidden" id="mat-area" name="pliv0" value="${macro.areaRischio}" />
           </div>
         </div>
-        <hr class="separapoco" />
+        <hr class="separatore" />
         <div class="row">
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory-thin bgAct8">
@@ -82,8 +82,8 @@
           <div class="col-sm-6">
           <c:choose>
             <c:when test="${not empty macro}">
-            <input type="text" class="form-control" id="mat-nome" name="mat-nome" value="${macro.nome}" readonly>
-            <input type="text" id="mat-id" name="pliv1" value="${macro.id}">
+            <input type="text" class="form-custom total-wide" id="mat-nome" name="mat-nome" value="${macro.nome}" readonly>
+            <input type="hidden" id="mat-code" name="pliv1" value="${macro.id}.${macro.codice}">
             </c:when>
             <c:otherwise>
             <select class="form-custom total-wide monospace" id="pat-liv1" name="pliv1">
@@ -127,7 +127,7 @@
 
           <div class="col-sm-12">
           <button type="submit" class="btn btnNav align-left" id="btn-save" name="action" value="save">
-            <i class="far fa-save"></i> Salva
+            <i class="far fa-save"></i> Salva ed esci
           </button>
           <button type="submit" class="btn btnNav bgAct14 float-right" id="btn-cont" name="action" value="cont">
             <i class="far fa-save"></i>  Salva e continua  <i class="fa-solid fa-circle-chevron-right"></i>
