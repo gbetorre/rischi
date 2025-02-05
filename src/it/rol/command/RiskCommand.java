@@ -591,7 +591,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
          * ---------------------------------------------------- */
         } else if (part.equals(PART_INSERT_PROCESS)) {
             // Il nome del Macro o Processo è stato già recuperato sopra
-            proat.put("area",    parser.getStringParameter("pliv0", VOID_STRING));
+            proat.put("liv0",    parser.getStringParameter("pliv0", VOID_STRING));
         }
         formParams.put(PART_PROCESS, proat);
     }
