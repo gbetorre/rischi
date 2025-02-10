@@ -73,7 +73,7 @@ Each subsequent detection can be compared with the previous one through specific
 [The next chapter](#how-the-software-works) will examine the various steps in more detail.<br>
 Instead, in this section, a broad description of the overall workflow is given from the perspective of the actions put in place to achieve the overall goal.
 
-First of all, it is appropriate to define the parties <strong>parties</strong> involved:
+First of all, it is appropriate to define the <strong>parties</strong> involved:
 1. The anti-corruption expert or office.
 2. The office managers and operators
 3. The software engineer
@@ -93,7 +93,7 @@ Regarding to the <strong>roles</strong> played:
 
 By consulting the process mapping, carried out in Step 1 ([see previous paragraph](#about-the-project)), one becomes able to establish the list of organizational structures involved in the delivery of the relevant processes.
 
-At that point, &egrave; it is then possible to ask a series of questions to managers and operators located at those facilities about the processes produced by those facilities.
+At that point, it is then possible to ask a series of questions to managers and operators located at those facilities about the processes produced by those facilities.
 
 Through the analysis of the answers to these questions, the application makes it possible to obtain, automatically, a series of indices related to specific corruption risks to which the organizational processes overseen by the structures themselves are exposed.<br>
 
@@ -160,7 +160,7 @@ In this software,  the following hierarchical structure was chosen:
 </pre>
 
 These entities are related to each other by composition relationships.<br>
-L'area di rischio &egrave; il livello pi&uacute; generale: essa ha poche propriet&agrave; e aggrega i macroprocessi, i quali, a loro volta, aggregano i processi, e cos&iacute; via.
+The risk area is the most general level: it has few properties and aggregates macro processes, which, in turn, aggregate processes, and so on.
 
 [![Class Diagram part Process][class-diagram]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/class-diagram.png)
 <br>
@@ -171,7 +171,7 @@ One or more structures and one or more third parties (which are entities not str
 
 The software provides special features for navigating the macroprocess tree and the organizational chart tree (see <a href=“https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png”>Fig. 8</a> and <a href=“https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png”>9</a>), so that you can quickly verify that the mapping corresponds to what is actually present in the organization.
 
-Furthermore, a detail page is provided for each process that contains not only the risks and risk levels to which the process &egrave; is exposed (information of great interest given the purpose of the software), but also all other aggregate information related to the process itself, including: the inputs, steps, outputs, risks, and enabling factors.
+Furthermore, a detail page is provided for each process that contains not only the risk levels to which the process is exposed (information of great interest given the purpose of the software), but also all other aggregate information related to the process itself, including: the inputs, steps, outputs, risks, and enabling factors.
 
 [![Product Sample Process][process-29]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-29.png)
 <br>
@@ -180,7 +180,7 @@ Furthermore, a detail page is provided for each process that contains not only t
 ## Step 2: Risk calculation (interviews and indicators)
 After populating the database with structures, macroprocesses and their sublayers, one can move on to the <cite>interviews</cite> phase, which consists of asking a series of questions to a number of specific structures that preside over a specific process. 
 
-The battery of questions is large (more than 150) but the decision about which questions to administer can be determined by the interviewer; in fact, all questions are optional, and there are more general questions, which probably make sense to address in every interview, and more specific questions, which only make sense to administer if you are looking at very specific processes. The questions are grouped into areas of analysis and, in the case of some structures, it might even make sense to omit questions from entire areas of analysis.<br>
+The battery of questions is very large (more than 150) but the decision about which questions to administer can be determined by the interviewer; in fact, all questions are optional, and there are more general questions, which probably make sense to address in every interview, and more specific questions, which only make sense to administer if you are looking at very specific processes. The questions are grouped into areas of analysis and, in the case of some structures, it might even make sense to omit questions from entire areas of analysis.<br>
 
 
 [![Question domains sample][question-domains]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/questions-domains.png)
@@ -193,7 +193,7 @@ The answers are then used to obtain the value of a series of indicators, as ment
 <br>
 <strong>*Fig.13 - The indicator dashboard allows to consult not only the PxI value of each process but also the values of all dimensions and indicators based on which this summary index was calculated*</strong>
 
-<strong>The calculation of the values of all indicators and the same PxI index of each process &egrave; automated!</strong> As a matter of fact, at the moment the interview is saved, the calculation of the value of all indicators and PxI is automatically processed.<br>
+<strong>The calculation of the values of all indicators and the same PxI index of each process is automated!</strong> As a matter of fact, at the moment the interview is saved, the calculation of the value of all indicators and PxI is automatically processed.<br>
 
 All - but one - among the indicators depend on the responses to the questions, so that the value obtained in every indicator (but one) is calculated through an algorithm that takes into account the responses obtained.<br>
 
@@ -233,16 +233,16 @@ How is a mitigation measure defined?
 Corruption risk mitigation measures correspond to actions aimed at: containing | calming | mitigating | preventing | treating | reducing the risk of corruption, 
 depending on the type and purpose of the measure itself.<br>
 
-(Note that, generally, one can consider the definition given in double implication, making it a good definition).<br><br>
+(Note that, generally, one can consider the definition given in double implication, making it a good definition).<br>
 
 Without detailing too much, let's say that a mitigation measure is a complex object, having one or more types, several relationships with organizational structures, 
 and a number of specific properties (economic viability, character, number of implementation steps, and so on)</p>
 
 [![Form to insert new measure][add-measure]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure.png)
 <br>
-<strong>*Fig.17 - The form to enter a new corruption risk mitigation measure*</strong>
+<strong>*Fig.17 - The form to enter a new mitigation measure*</strong>
 
-In a first step, then, the anti-corruption bureau-or expert-takes a census of all the various measures it deems appropriate to suggest, going on to form a list of measures.
+In a first step, then, the anti-corruption bureau - or expert - takes a census of all the various measures it deems appropriate to suggest, going on to form a list of measures.
 [![List of inserted measure][list-measures]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-measures.png)
 <br>
 <strong>*Fig.18 - List of corrupt risk mitigation measures*</strong>
@@ -320,7 +320,7 @@ Three of the functions currently implemented in the <code>ROL-RMS</code> softwar
 
 are useful tools which can be a valuable aid to the office or corrupt risk expert who needs to conduct an assessment regarding these issues in the context of an organization.<br>
 
-At the present (version <code>2.1</code>, the software is ready to be taylored, with minimal adaptation, 
+At the present (version <code>2.1</code>), the software is ready to be taylored, with minimal adaptation, 
 to any organization that would carry out a detailed analysis of the corruptive risk to which the processes provided by the organization itself are exposed.<br>
 
 It is also possible to estimate, with relative accuracy, how much time is needed to customize the software to suit a specific organization.<br>
@@ -373,7 +373,7 @@ Each version number is paired with the date of the commit, so by consulting the 
 to go into all the changes made at the subversion: 
 moreover, each version corresponds to a commit, but not each commit generates a version.<br>
 
-<p style="font-size:small">
+<sub>
 NOTE: By convention, in the software the version is shown in the x.xx format thus merging the sub-sub version figure with the subversion figure, while in this changelog it has the classic x.x.x format (this is to bring more descriptive accuracy).<br>
 In addition, the meaning of subversions is quite different from the general one; in fact, 
 it does not identify whether the version is stable or not (an aspect usually identified respectively by the final digit different from zero or equal to zero), 
@@ -381,6 +381,7 @@ nor does it have relevant jumps according to high-impact changes (e.g., moving f
 in the case of the current application, in fact, version numbers have only the signficance of keeping track of releases and deploys 
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)</p>
 <cite>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</cite>
+</sub>
 
 ### 2025
 - [2.1.8] (10/02/2025) First draft implementation about the page to insert a new input 
@@ -513,7 +514,7 @@ It would not even be worth justifying this choice, given the nature of the proje
 * you can debug the application with ease: although the computation has been parallelized (where there was no risk of race condition), a single breakpoint is sufficient to enter debug, check all the values assumed by the variables, and access to all the control mechanisms;
 * the performance of a monolithic application is better than that of a microservices one because the individual components talk to each other efficiently (nevertheless, it was necessary to implement internal caching mechanisms because of the large number of calculations that need to be performed to obtain risk indicator values).
 
-The main libraries and technologies used to develop and execute the project down below:
+The main libraries and technologies used to develop and execute the project are down below:
 
 * [![Java][Java]][Java-url]
 * [![JavaScript][JavaScript]][javascript-url]
@@ -586,10 +587,10 @@ Anyone with suggestions that could improve the project can download the reposito
 
 1. Fork the Project (from URL https://github.com/gbetorre/rischi/tree/main click on "Fork" button)
 2. Clone the fork (`git clone https://github.com/username/rischi.git`where username is your GitHub user)
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request (click on the “Pull requests” tab then on “New pull request”; give a clear title and add a detailed description of the changes made; then click on “Create pull request”).
+3. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+4. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+5. Push to the Branch (`git push origin feature/AmazingFeature`)
+6. Open a Pull Request (click on the “Pull requests” tab then on “New pull request”; give a clear title and add a detailed description of the changes made; then click on “Create pull request”).
 
 [![Repository features list][list-features]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/features.png)
 <br>
@@ -597,7 +598,7 @@ Anyone with suggestions that could improve the project can download the reposito
 
 
 In order to run the software, it is necessary to deploy the database on which it rests.
-A schema dump is not yet available in the repository, but to obtain a production one, but containing only sample data, <a href=“mailto:gianroberto.torre@gmail.com”>contact the author</a>.
+A schema dump is not yet available in the repository, but to obtain a production one (containing only sample data) [contact the author](readme-contact).
 
 A more simplified way to suggest changes is to simply open an issue tagged “enhancement.”
 
@@ -611,15 +612,15 @@ See also: [AUTHORS](AUTHORS) file.
 <!-- LICENSE -->
 ## License
 
-his project is licensed under the terms of the GNU GPL-2.0 License. See <a href="https://github.com/gbetorre/rischi/blob/main/LICENSE">`LICENSE.txt`</a> for further information.
+This project is licensed under the terms of the GNU GPL-2.0 License. See <a href="https://github.com/gbetorre/rischi/blob/main/LICENSE">`LICENSE.txt`</a> for further information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <a name="readme-contact"></a>
 <!-- CONTACT -->
-## Contatti
-To learn more and gain access to the requirements analysis document, <a href=“mailto:gianroberto.torre@gmail.com”>contact the author</a>.
+## Contact
+To learn more and gain access to the requirements analysis document, <a href="mailto:gianroberto.torre@gmail.com">contact the author</a>.
 
 Software Engineer: Giovanroberto Torre - [@GianroTorres](https://twitter.com/GianroTorres) - gianroberto.torre@gmail.com
 
