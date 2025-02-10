@@ -234,14 +234,7 @@ Quest'ultima &egrave; la fase 3, ovvero <strong>la fase di individuazione delle 
 
 Come si definisce una misura di mitigazione?
 Le misure di mitigazione del rischio corruttivo corrispondono ad azioni atte a:
-<ul> 
-<li>contenere</li>
-<li>calmierare</li>
-<li>mitigare</li>
-<li>prevenire</li>
-<li>trattare</li>
-<li>ridurre</li> 
-</ul>
+contenere / calmierare / mitigare / prevenire / trattare / ridurre
 il rischio corruttivo, a seconda della tipologia e dello scopo della misura stessa.<br>
 (Notare che, generalmente, si pu&ograve; considerare la definizione data in implicazione doppia, <code>sse</code> 
 vale a dire: <ul>
@@ -277,7 +270,7 @@ Anche qui viene in aiuto il sistema <code>ROL-RMS</code>:
 
 [![Assignment measure to risk][assign-measure]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure2.png)
 <br>
-<strong>*Fig.20 - La maschera per l'assegnazione di una misura a una coppia rischio-processo. Le misure pi&uacute; appropriate vengono suggerite dal software ma l'operatore &egrave; libero di assegnarne altre.*</strong>
+<strong>*Fig.20 - La maschera per l'assegnazione di una misura a una coppia rischio-processo. Le misure pi&uacute; appropriate vengono suggerite dal software ma l'operatore &egrave; libero di assegnarne altre, in aggiunta o in sostituzione di quelle suggerite.*</strong>
 
 Le misure di mitigazione, infatti, tramite la loro tipologia, hanno un'associazione con il fattore abilitante e questa relazione rende possibile individuare il contesto di applicazione delle misure stesse in funzione del rischio e del processo.
 
@@ -449,6 +442,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.1.8] (10/02/2025) Prima bozza di implementazione form per inserimento input
 - [2.1.7] (05/02/2025) Correzione di bug
 - [2.1.6] (03/02/2025) Implementata funzionalit&agrave; di inserimento processo
 - [2.1.5] (29/01/2025) Implementata funzionalit&agrave; di inserimento macroprocesso
@@ -646,7 +640,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- CONTRIBUTING -->
 ## Contributing
 
-I contributi sono ci&ograve; che rende le comunit&agrave; Open Source uno spazio fantastico per apprendere, venire ispirati e dare spazio alla creativit&agrave;
+I contributi sono ci&ograve; che rende le comunit&agrave; Open Source uno spazio fantastico per apprendere, venire ispirati e dare spazio alla creativit&agrave;.
 Ogni contributo sar&agrave; pertanto **grandemente apprezzato**.
 
 Chiunque abbia suggerimenti che potrebbero migliorare il progetto pu&ograve; scaricare il repository, testarlo in locale, apportarvi modifiche e creare una pull request:
@@ -660,7 +654,7 @@ Chiunque abbia suggerimenti che potrebbero migliorare il progetto pu&ograve; sca
 
 [![Repository features list][list-features]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/features.png)
 <br>
-*Fig.26 - Elenco delle features di un repository listate tramite il software Sourcetree*
+<strong>*Fig.26 - Elenco delle features di un repository listate tramite il software Sourcetree*</strong>
 
 
 Per poter far girare il software &egrave; necessario effettuare un deploy del database su cui lo stesso &egrave; appoggiato.
