@@ -327,7 +327,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                            AMPERSAND + "p" + EQ + PART_INSERT_F_R_P +
                                            AMPERSAND + "idR" + EQ + parser.getStringParameter("r-id", VOID_STRING) + 
                                            AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
-                                           AMPERSAND + "liv" + EQ + "2" +
+                                           AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "dupKey";
                             } else {
@@ -337,7 +337,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
                                            AMPERSAND + "p" + EQ + PART_PROCESS +
                                            AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
-                                           AMPERSAND + "liv" + EQ + "2" +
+                                           AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "newRel#rischi";
                             }
@@ -352,7 +352,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
                                            AMPERSAND + "p" + EQ + PART_PROCESS +
                                            AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
-                                           AMPERSAND + "liv" + EQ + "2" +
+                                           AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur;     
                             } else if (ref.equalsIgnoreCase(PART_SELECT_STR)) {
                                 redirect = ConfigManager.getEntToken() + EQ + COMMAND_REPORT + 
@@ -361,7 +361,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             }
                         } else if (part.equalsIgnoreCase(PART_INSERT_PROCESS)) {
                             /* ------------------------------------------------ *
-                             *         INPUT new process - STEP 1: type         *
+                             *     INPUT new process - STEP 1: type and data    *
                              * ------------------------------------------------ */
                             // Deve differenziare tra finire e continuare
                             String action = parser.getStringParameter("action", DASH);
@@ -417,10 +417,30 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     break;
                                     
                             }
-
-                            // Prepara la redirect 
-/*
-*/  
+                        } else if (part.equalsIgnoreCase(PART_INSERT_INPUT)) {
+                            /* ------------------------------------------------ *
+                             *        INSERT new process - STEP 2: inputs       *
+                             * ------------------------------------------------ */
+                            // Deve differenziare tra finire e continuare
+                            String action = parser.getStringParameter("action", DASH);
+                            db.insertInputs(user, params);
+                            // Differenzia l'inoltro in funzione del bottone cliccato
+                            switch (action) {
+                                case "save":
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
+                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    break;
+                                case "cont":
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
+                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    break;
+                                default:
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
+                                               AMPERSAND + "p" + EQ + PART_INSERT_PROCESS +
+                                               AMPERSAND + "liv" + EQ + liv +
+                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    break;
+                            }
                         }
                     }
                 /* ======================== @GetMapping ======================= */
@@ -503,7 +523,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nota");
                         } else if (part.equalsIgnoreCase(PART_INSERT_PROCESS)) {
                             /* ------------------------------------------------ *
-                             *                  SHOWS a Form                    *
+                             *             SHOWS Form Macro/Process             *
                              * ------------------------------------------------ */
                             if (liv > DEFAULT_ID) {
                                 aree = db.getAree(user, survey);
@@ -524,6 +544,24 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo Elemento");
+                        } else if (part.equalsIgnoreCase(PART_INSERT_INPUT)) {
+                            /* ------------------------------------------------ *
+                             *                 SHOWS Form Input                 *
+                             * ------------------------------------------------ */
+                             // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                             processElements = new ConcurrentHashMap<>();
+                             // Recupera Input estratti in base al processo
+                             ArrayList<ItemBean> listaInput = db.getInputs(user, survey);
+                             // Imposta nella tabella le liste ricavate
+                             processElements.put(TIPI_LISTE[0], listaInput);
+                             processElements.put(TIPI_LISTE[1], new ArrayList<>());
+                             processElements.put(TIPI_LISTE[2], new ArrayList<>());
+                             processElements.put(TIPI_LISTE[3], new ArrayList<>());
+                             processElements.put(TIPI_LISTE[4], new ArrayList<>());
+                             // Titolo pagina
+                             tP = titleFile.get(part);
+                             // Form to insert data of the process
+                             //fileJspT = nomeFileAddProcess;
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
