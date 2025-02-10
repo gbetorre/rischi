@@ -568,8 +568,28 @@ public interface Query extends Serializable {
             "   ORDER BY ordinale";
     
     /**
+     * <p>Estrae tutti gli input di processo collegati a una data rilevazione.</p>
+     */
+    public static final String GET_INPUTS = 
+            "SELECT DISTINCT" +
+            "       INP.id                      AS \"id\"" +
+            "   ,   INP.nome                    AS \"nome\"" +
+            "   ,   INP.descrizione             AS \"informativa\"" +
+            "   ,   INP.ordinale                AS \"ordinale\"" +
+            "   ,   INP.interno                 AS \"urlInterno\"" +
+            "   ,   INP.data_ultima_modifica    AS \"codice\"" +
+            "   ,   INP.ora_ultima_modifica     AS \"extraInfo\"" +
+            "   ,   INP.id_output               AS \"value1\"" +
+            "   ,   INP.id_rilevazione          AS \"value3\"" +
+            "   FROM input INP" +
+            "   WHERE INP.id_rilevazione = ?" +
+            "   ORDER BY INP.nome";
+    
+    /**
      * <p>Estrae tutti gli input di un processo anticorruttivo
-     * il cui identificativo viene passato come parametro.</p>
+     * il cui identificativo viene passato come parametro
+     * oppure tutti gli input indipendentemente dall'identificativo
+     * del processo ma dipendentemente solo dalla rilevazione.</p>
      */
     public static final String GET_INPUT_BY_PROCESS_AT = 
             "SELECT DISTINCT" +
@@ -590,7 +610,7 @@ public interface Query extends Serializable {
             "       INNER JOIN processo_at PAT ON INPAT.id_processo_at = PAT.id" +
             "       INNER JOIN macroprocesso_at MAT ON PAT.id_macroprocesso_at = MAT.id" +
             "       INNER JOIN area_rischio AR ON MAT.id_area_rischio = AR.id" +
-            "   WHERE INPAT.id_processo_at = ?" +
+            "   WHERE (INPAT.id_processo_at = ? OR -1 = ?)" +
             "       AND INPAT.id_rilevazione = ?" +
             "   ORDER BY INP.nome";
     
@@ -618,7 +638,7 @@ public interface Query extends Serializable {
             "       INNER JOIN processo_at PAT ON SPAT.id_processo_at = PAT.id" +
             "       INNER JOIN macroprocesso_at MAT ON PAT.id_macroprocesso_at = MAT.id" +
             "       INNER JOIN area_rischio AR ON MAT.id_area_rischio = AR.id" +
-            "   WHERE INSPAT.id_sottoprocesso_at = ?" +
+            "   WHERE (INSPAT.id_sottoprocesso_at = ? OR -1 = ?)" +
             "       AND INSPAT.id_rilevazione = ?" +
             "   ORDER BY INP.nome";
 
