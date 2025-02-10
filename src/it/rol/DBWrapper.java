@@ -1004,13 +1004,105 @@ public class DBWrapper extends QueryImpl {
         }
     }
 
+    
+    /**
+     * <p>Estrae un elenco di input in base all'identificativo
+     * del sotto/processo anticorruttivo, oppure estrae un elenco
+     * di tutti gli input trovati nella rilevazione corrente, indipendentemente
+     * dall'id del sotto/processo ricevuto, a seconda del valore della
+     * coppia di parametri (idp, getAll).</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - la lista di input cercati
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<ItemBean> getInputs(PersonBean user,
+                                         CodeBean survey)
+                                  throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            int nextParam = NOTHING;
+            ItemBean input = null;
+            AbstractList<ItemBean> inputs = new ArrayList<>();
+            // TODO: Controllare se user è superuser
+            try {
+                pst = con.prepareStatement(GET_INPUTS);
+                pst.clearParameters();
+                pst.setInt(++nextParam, survey.getId());
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Crea una struttura vuota
+                    input = new ItemBean();
+                    // La valorizza col contenuto della query
+                    BeanUtil.populate(input, rs);
+                    // La aggiunge alla lista di elementi trovati
+                    inputs.add(input);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get Out
+                return (ArrayList<ItemBean>) inputs;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean; verificare identificativo della rilevazione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query degli input in base all'id del processo at.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * Façade di {@link DBWrapper#getInputs(PersonBean, int, int, int, CodeBean)}
+     * Contestualizza sempre gli input sull'id del sotto/processo ricevuto.
+     * 
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param idp       identificativo del processo/sottoprocesso anticorruttivo
+     * @param level     identificativo del livello di processo di cui si devono recuperare gli input
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - la lista di input cercati
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     * @see it.rol.DBWrapper#getInputs(PersonBean, int, int, int, CodeBean)
+     */
+    public ArrayList<ItemBean> getInputs(PersonBean user,
+                                         int idp,
+                                         int level,
+                                         CodeBean survey)
+                                  throws WebStorageException {
+        return getInputs(user, idp, idp, level, survey);
+    }
+    
 
     /**
-     * <p>Estrae un elenco di input in base agli estremi 
-     * del sotto/processo anticorruttivo.</p>
+     * <p>Estrae un elenco di input in base all'identificativo
+     * del sotto/processo anticorruttivo, oppure estrae un elenco
+     * di tutti gli input trovati nella rilevazione corrente e collegati a 
+     * processi, indipendentemente dall'id del sotto/processo ricevuto, 
+     * a seconda del valore della coppia di parametri (idp, getAll).</p>
      *
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param idp       identificativo del processo/sottoprocesso anticorruttivo
+     * @param getAll    valore convenzionale; se vale -1 comporta il recupero di tutti gli input, indipendentemente dall'id sotto/processo passato come parametro
      * @param level     identificativo del livello di processo di cui si devono recuperare gli input
      * @param survey    oggetto contenente i dati della rilevazione
      * @return <code>ArrayList&lt;ItemBean&gt;</code> - la lista di input cercati
@@ -1019,6 +1111,7 @@ public class DBWrapper extends QueryImpl {
     @SuppressWarnings({ "static-method" })
     public ArrayList<ItemBean> getInputs(PersonBean user,
                                          int idp,
+                                         int getAll,
                                          int level,
                                          CodeBean survey)
                                   throws WebStorageException {
@@ -1031,10 +1124,11 @@ public class DBWrapper extends QueryImpl {
             // TODO: Controllare se user è superuser
             try {
                 // Calcola la query in funzione del livello (2 = processo_at)
-                String query = (level == 2 ? GET_INPUT_BY_PROCESS_AT : GET_INPUT_BY_SUBPROCESS_AT);
+                String query = (level == ELEMENT_LEV_2 ? GET_INPUT_BY_PROCESS_AT : GET_INPUT_BY_SUBPROCESS_AT);
                 pst = con.prepareStatement(query);
                 pst.clearParameters();
-                pst.setInt(++nextParam, idp);                
+                pst.setInt(++nextParam, idp);
+                pst.setInt(++nextParam, getAll);
                 pst.setInt(++nextParam, survey.getId());
                 rs = pst.executeQuery();
                 while (rs.next()) {
@@ -6541,6 +6635,112 @@ public class DBWrapper extends QueryImpl {
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
     public int insertProcessAt(PersonBean user, 
+                               HashMap<String, LinkedHashMap<String, String>> params) 
+                        throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri contenente gli estremi dell'area di rischio
+            LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
+            try {
+                // Recupera i valori necessari all'inserimento
+                String idSurveyAsString = survey.get(PARAM_SURVEY);
+                int idSurvey = Integer.parseInt(idSurveyAsString);
+                String codeSurvey = survey.get("code");
+                // Oggetto rilevazione ricostruito
+                CodeBean sur = new CodeBean(idSurvey, codeSurvey, VOID_STRING, ELEMENT_LEV_1);
+                // Estremi macroprocesso
+                String idCodeMacro = proat.get("liv1");
+                int idMat = Integer.parseInt(idCodeMacro.substring(NOTHING, idCodeMacro.indexOf(DOT)));
+                String codeMat = idCodeMacro.substring(idCodeMacro.indexOf(DOT) + 1, idCodeMacro.length());
+                // Processo at
+                String namePat = proat.get("liv2"); 
+                // Calcola l'id da inserire
+                int maxPatId = getMax("processo_at");
+                // Calcola il codice processo da inserire
+                String nextCode = getPatCode(user, idMat, codeMat, sur);
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                /* === Se siamo qui vuol dire che ok   === */ 
+                pst = con.prepareStatement(INSERT_PROCESS_AT);
+                pst.clearParameters();
+                 // Prepara i parametri per l'inserimento
+                try {
+                    // Definisce un indice per il numero di parametro da passare alla query
+                    int nextParam = NOTHING;
+                    /* === Id === */
+                    pst.setInt(++nextParam, ++maxPatId);
+                    /* === Codice === */
+                    pst.setString(++nextParam, nextCode);
+                    /* === Nome === */
+                    pst.setString(++nextParam, namePat);
+                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());
+                    /* === Collegamento a macroprocesso === */
+                    pst.setInt(++nextParam, idMat);
+                    /* === Collegamento a rilevazione === */
+                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    // CR (Carriage Return) o 0DH
+                    pst.executeUpdate();
+                } catch (NumberFormatException nfe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, nfe);
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, npe);
+                } catch (Exception e) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
+                // End: <==
+                con.commit();
+                pst.close();
+                pst = null;
+                return maxPatId;
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Metodo per fare l'inserimento di un nuovo processo
+     * censito a fini anticorruttivi.</p>
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @return <code>int</code> - l'id del processo appena inserito
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    public int insertInputs(PersonBean user, 
                                HashMap<String, LinkedHashMap<String, String>> params) 
                         throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
