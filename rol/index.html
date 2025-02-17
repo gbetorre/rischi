@@ -20,7 +20,32 @@ http://www.templatemo.com/tm-468-onetel
 <!-- google web font css -->
 <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700'
   rel='stylesheet' type='text/css'>
-
+<style>
+    .wallpaper1 {
+        background: url('images/home-bg1.jpg') no-repeat;
+    }
+    .wallpaper2 {
+        background: url('images/home-bg2.jpg') no-repeat;
+    }
+    .wallpaper3 {
+        background: url('images/home-bg3.jpg') no-repeat;
+    }
+    .wallpaper4 {
+        background: url('images/home-bg4.jpg') no-repeat;
+    }
+    .wallpaper5 {
+        background: url('images/home-bg5.jpg') no-repeat;
+    }
+    .wallpaper6 {
+        background: url('images/home-bg6.jpg') no-repeat;
+    }
+    .wallpaper7 {
+        background: url('images/home-bg7.jpg') no-repeat;
+    }
+    .wallpaper8 {
+        background: url('images/home-bg8.jpg') no-repeat;
+    }
+</style>
 </head>
 <body>
 
@@ -286,6 +311,18 @@ http://www.templatemo.com/tm-468-onetel
   <script src="js/bootstrap.min.js"></script>
 <!--   <script src="js/nivo-lightbox.min.js"></script> -->
   <script src="js/custom.js"></script>
-
+  <script>
+    const randomSuffix = pickOne();
+    // Get the element you want to add a class to
+    const element = document.getElementById('home');
+    // Add a class to the element
+    element.classList.add(`wallpaper${randomSuffix}`);
+    
+    function pickOne(){
+        var images = 8;
+        let x = Math.floor((Math.random() * images) + 1);
+        return x;
+    }
+  </script>
 </body>
 </html>

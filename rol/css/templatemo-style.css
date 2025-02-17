@@ -142,7 +142,7 @@ img {
 
 /* home section */
 #home {
-  background: url('../images/home-bg.jpg') no-repeat;
+  /*background: url('../images/home-bg.jpg') no-repeat;*/
   background-size: cover;
   background-position: center;
   min-height: 500px;
@@ -423,6 +423,11 @@ footer a:hover {
 
 /* media 960 */
 @media ( max-width: 980px ) {
+	h1, h3 {
+	  background-color: #9bcaef;
+	  /*color: #ed1c24;*/
+	  color: #008000;
+	}
   .divider .divider-wrapper {
     margin-bottom: 20px;
   }
