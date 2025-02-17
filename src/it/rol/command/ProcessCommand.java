@@ -253,6 +253,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         RiskBean risk = null;
         // Macroprocesso cui si vuole aggiungere un figlio
         ProcessBean macro = null;
+        // Processo cui si vuole aggiungere dati
+        ProcessBean pat = null;
         // Dichiara elenco di output
         AbstractList<ProcessBean> outputs = new ArrayList<>();
         // Dichiara elenco di fattori abilitanti
@@ -393,12 +395,12 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                             break;
                                         }
                                         case ELEMENT_LEV_2: {
-                                            int idPat = db.insertProcessAt(user, params);
+                                            pat = db.insertProcessAt(user, params);
                                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
                                                        AMPERSAND + "p" + EQ + PART_INSERT_INPUT +
                                                        AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                                       AMPERSAND + "pliv2" + EQ + idPat + 
-                                                       AMPERSAND + "pliv1" + EQ + parser.getStringParameter("pliv1", DASH) + 
+                                                       AMPERSAND + "pliv" + EQ + pat.getId() + // DOT + pat.getCodice() + 
+                                                       AMPERSAND + "pliv1" + EQ + pat.getPadre().getTag() + 
                                                        AMPERSAND + "pliv0" + EQ + idCodeArea + 
                                                        AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                             break;
@@ -558,6 +560,11 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                              processElements.put(TIPI_LISTE[2], new ArrayList<>());
                              processElements.put(TIPI_LISTE[3], new ArrayList<>());
                              processElements.put(TIPI_LISTE[4], new ArrayList<>());
+                             // Se c'è un id processo
+                             if (idP > NOTHING) {
+                                 // Controlla che il processo esista
+                                 pat = db.getMacroSubProcessAtByIdOrCode(user, idP, VOID_STRING, ELEMENT_LEV_2, survey);
+                             }
                              // Titolo pagina
                              tP = titleFile.get(part);
                              // Form to insert data of the process
@@ -645,6 +652,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         if (macro != null) {
             req.setAttribute("mat", macro);
         }
+        // Imposta in request specifico processo cui aggiungere dati
+        if (pat != null) {
+            req.setAttribute("pat", pat);
+        }
         // Imposta in request specifico pxi di uno specifico processo at
         if (pxi != null) {
             req.setAttribute("pxi", pxi);
@@ -664,6 +675,46 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         }
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
+    }
+    
+    
+    /* **************************************************************** *
+     *  Metodi di caricamento dei parametri in strutture indicizzabili  *                     
+     *                              (load)                              *
+     * **************************************************************** */
+    
+    /**
+     * Valorizza per riferimento una mappa contenente tutti i valori 
+     * parametrici riscontrati sulla richiesta.
+     * 
+     * @param part          la sezione corrente del sito
+     * @param req           la HttpServletRequest contenente la richiesta del client
+     * @param formParams    mappa da valorizzare per riferimento (ByRef)
+     * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
+     * @throws AttributoNonValorizzatoException se si fa riferimento a un attributo obbligatorio di bean che non viene trovato
+     */
+    public static void loadParams(String part, 
+                                  HttpServletRequest req,
+                                  HashMap<String, LinkedHashMap<String, String>> formParams)
+                           throws CommandException, 
+                                  AttributoNonValorizzatoException {
+        // Parser per la gestione assistita dei parametri di input
+        ParameterParser parser = new ParameterParser(req);
+        /* ---------------------------------------------------- *
+         *      Parametri inserimento nuovo Macro/Processo      *
+         * ---------------------------------------------------- */
+        if (part.equals(PART_INSERT_INPUT)) {
+            LinkedHashMap<String, String> input = new LinkedHashMap<>();
+            // ID processo da collegare
+            input.put("liv",  parser.getStringParameter("pliv", VOID_STRING));
+            // Nome e ID input esistente da collegare a processo
+            input.put("nome", parser.getStringParameter("in-name", VOID_STRING));
+            // Input da inserire
+            String[] deputyLiv1 = req.getParameterValues("in-newn");
+            String[] deputyLiv2 = req.getParameterValues("in-desc");
+            String[] deputyLiv3 = req.getParameterValues("in-type");
+            formParams.put(part, input);
+        } 
     }
     
     
@@ -1090,6 +1141,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                                                     String codeSurvey,
                                                                     DBWrapper db)
                                                              throws CommandException {
+        // Controllo sull'input
+        if (indicators == null || indicators.isEmpty()) {
+            return new HashMap<>();
+        }
         HashMap<String, InterviewBean> richIndicators = indicators;
         try {
             // Recupera il PxI
