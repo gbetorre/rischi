@@ -180,7 +180,7 @@ Ogni processo o sottoprocesso (ma non il macroprocesso) pu&ograve; essere a sua 
 
 Il software prevede apposite funzionalit&agrave; di navigazione nell'albero dei macroprocessi ed in quello dell'organigramma (cfr. <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png">Fig. 8</a> e <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png">9</a>), in modo da verificare rapidamente che la mappatura corrisponda a quanto effettivamente presente nell'organizzazione.
 
-Inoltre, per ogni processo viene fornita una pagina di dettaglio, contenente, oltre ai rischi ed ai livelli di rischio cui il processo &egrave; esposto (informazione di grande interesse dato lo scopo del software), anche tutte le altre informazioni aggregate che riguardano il processo stesso, tra cui: gli input, le fasi, gli output, i rischi ed i fattori abilitanti.
+Inoltre, per ogni processo viene fornita una pagina di dettaglio, contenente, oltre ai rischi ed ai livelli di rischio cui il processo &egrave; esposto (informazione di grande interesse dato lo scopo del software), anche tutte le altre informazioni aggregate che riguardano il processo stesso, tra cui: gli input, le fasi, gli output ed i fattori abilitanti.
 
 [![Product Sample Process][process-29]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-29.png)
 <br>
@@ -355,7 +355,7 @@ Tre delle funzioni attualmente implementate nel software <code>ROL-RMS</code>, o
 
 costituiscono strumenti utili (tools), che possono costituire un valido aiuto per l'ufficio o l'esperto del rischio corruttivo che devono effettuare un assessment relativamente a questi aspetti nel contesto di un'organizzazione.<br>
 
-Allo stato attuale (versione di riferimento: <code>2.1</code>) il software &egrave; gi&agrave; pronto per essere adattato,
+Allo stato attuale (versione di riferimento: <code>2.2</code>) il software &egrave; gi&agrave; pronto per essere adattato,
 con un minimo adeguamento, a qualunque realt&agrave; organizzativa che voglia
 effettuare un'analisi dettagliata dei rischi corruttivi cui i processi erogati
 dall'organizzazione stessa sono esposti.
@@ -372,9 +372,17 @@ affinch&eacute; sia possibile iniziare la campagna di interviste e, conseguentem
 
 ## Sviluppi futuri
 Vi sono, inoltre, alcune possibili evoluzioni, che potrebbero essere implementate in versioni successive:
-* Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentire loro di compilare autonomamente le risposte ai quesiti (certificando, automaticamente, i dati inseriti)
-* Predisposizione di monitoraggi e reportistica, anche in forma grafica (istogrammi, grafici a torta, etc.), per consentire alla <em>governance</em> di effettuare controlli sugli stati di avanzamento e sui risultati raggiunti tramite il progetto di mappatura dei rischi
+* Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentire loro di compilare autonomamente le risposte ai quesiti (certificando, automaticamente, i dati inseriti).
+* Predisposizione di monitoraggi e reportistica, anche in forma grafica (istogrammi, grafici a torta, etc.), per consentire alla <em>governance</em> di effettuare controlli sugli stati di avanzamento e sui risultati raggiunti tramite il progetto di mappatura dei rischi.
 * Predisposizione di appositi strumenti di ricerca per consentire all'ufficio trasparenza di ottenere query analitiche sulle interviste effettuate.
+* Implementazione del multilingue (internazionalizzazione)
+
+### Internazionalizzazione
+Implementare una resa degli output in molte lingue diverse &egrave; un'operazione relativamente semplice da fare agendo su un software che si appoggia su un database relazionale ben strutturato e definito, come &egrave; nel caso di <code>ROL-RMS</code>.
+Un modello consolidato, adatto alla resa di testi e titoli in un numero non prefissato di lingue diverse, &egrave; facilmente implementabile estendendo il database tramite: 
+1. l'aggiunta di una tabella di traduzione per ogni tabella che contiene elementi testuali da tradurre e 
+2. riscrivendo le query con l'aggiunta di LEFT OUTER JOIN che permettano di recuperare il valore tradotto, se presente.
+<sub>Per approfondire &egrave; possibile far riferimento al paper <cite>A Framework for the Internationalization of Data-Intensive Web Applications</cite></sub>
 
 <br>
 Naturalmente, nessuno strumento informatico &egrave; in grado da solo di ottenere risultati come l'abbassamento dei rischi corruttivi; pertanto ogni approfondimento analitico permesso dal software dovr&agrave; essere esaminato ed interpretato dagli esperti dell'anticorruzione.
@@ -442,6 +450,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.1.9] (14/02/2025) Miglioramenti nella presentazione (home)
 - [2.1.8] (10/02/2025) Prima bozza di implementazione form per inserimento input
 - [2.1.7] (05/02/2025) Correzione di bug
 - [2.1.6] (03/02/2025) Implementata funzionalit&agrave; di inserimento processo
@@ -591,7 +600,8 @@ Maggiori dettagli sui linguaggi utilizzati si trovano <a href="https://github.co
 
 
 
-<!-- GETTING STARTED 
+<!-- GETTING STARTED -->
+
 ## Getting Started
 
 This is an example of how you may give instructions on setting up your project locally.

@@ -320,7 +320,7 @@ Three of the functions currently implemented in the <code>ROL-RMS</code> softwar
 
 are useful tools which can be a valuable aid to the office or corrupt risk expert who needs to conduct an assessment regarding these issues in the context of an organization.<br>
 
-At the present (version <code>2.1</code>), the software is ready to be taylored, with minimal adaptation, 
+At the present (version <code>2.2</code>), the software is ready to be taylored, with minimal adaptation, 
 to any organization that would carry out a detailed analysis of the corruptive risk to which the processes provided by the organization itself are exposed.<br>
 
 It is also possible to estimate, with relative accuracy, how much time is needed to customize the software to suit a specific organization.<br>
@@ -335,9 +335,17 @@ for the interview campaign and - consequently - to obtain the results of the var
 ## Future developments
 
 There are, in addition, some possible developments, which could be implemented in later versions:
-* Preparation of a dashboard for RATs (Anti-Corruption and Transparency Referents) to enable them to independently fill in the answers to the questions (certifying, automatically, the data entered)
-* Preparation of monitoring and reporting to enable <em>governance</em> to conduct checks on progress and results achieved through the risk mapping project
+* Preparation of a dashboard for RATs (Anti-Corruption and Transparency Referents) to enable them to independently fill in the answers to the questions (certifying, automatically, the data entered).
+* Preparation of monitoring and reporting to enable <em>governance</em> to conduct checks on progress and results achieved through the risk mapping project.
 * Preparation of appropriate research tools to enable the transparency office to obtain analytical queries on the interviews conducted.
+* Implementation of multilingualism (internationalization)
+
+### Internationalization of the textual elements
+Implementing output rendering in many different languages is a relatively simple task to do by acting on software that relies on a well-structured and defined relational database - as in the present case.
+A well-established model, suitable for rendering text and titles in an unfixed number of different languages, is easily implemented by extending the database by: 
+* adding a translation table for each table that contains text elements to be translated, and 
+* rewriting the queries with the addition of LEFT OUTER JOINs to retrieve the translated value, if any.
+<sub>See also the paper <cite>A Framework for the Internationalization of Data-Intensive Web Applications</cite></sub>
 
 <br>
 Of course, even though it can be such a big help, no IT tool by itself can achieve results such as lowering corruption risk; therefore, 
@@ -384,6 +392,7 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+- [2.1.9] (14/02/2025) Presentation improvements (home)
 - [2.1.8] (10/02/2025) First draft implementation about the page to insert a new input 
 - [2.1.7] (05/02/2025) Bug fix
 - [2.1.6] (03/02/2025) Added facility to insert a new process
@@ -598,7 +607,7 @@ Anyone with suggestions that could improve the project can download the reposito
 
 
 In order to run the software, it is necessary to deploy the database on which it rests.
-A schema dump is not yet available in the repository, but to obtain a production one (containing only sample data) [contact the author](readme-contact).
+A schema dump is not yet available in the repository, but to obtain a production one (containing only sample data) <a href="mailto:gianroberto.torre@gmail.com">contact the author</a>.
 
 A more simplified way to suggest changes is to simply open an issue tagged “enhancement.”
 
