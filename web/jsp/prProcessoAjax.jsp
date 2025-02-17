@@ -74,7 +74,7 @@
     </div>
     <div class="subfields errorPwd">
       Area di rischio: 
-      <span class="badge lightTable bgAct25"><c:out value="${arearischio}" /></span>
+      <span class="badge lightTable bgAct25 text-dark"><c:out value="${arearischio}" /></span>
       <hr class="separatore" />
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples info">
         <div class="fs-2 mb-3">Input:</div>
@@ -385,11 +385,14 @@
   </c:when>
   <c:otherwise>
   <div class="alert alert-danger">
-    <strong>Il processo non &egrave; ancora stato dettagliato.</strong>
+    <strong>Il processo non esiste o non &egrave; ancora stato dettagliato.</strong>
     <hr class="separapoco" />
     <p>
       Dati carenti: non &egrave; ancora possibile mostrare la pagina.<br/>
-      Inserire almeno gli input di processo.
+      Se il processo esiste, inserire almeno 
+      <a href="${initParam.appName}/?q=pr&p=inp&liv=2&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}">
+        gli input di processo.
+      </a>
     </p>
   </div>
   </c:otherwise>
