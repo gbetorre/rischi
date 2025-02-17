@@ -1964,7 +1964,10 @@ public class DBWrapper extends QueryImpl {
      * i dati di un macroprocesso, processo o sottoprocesso, determinato in base
      * al livello passato come parametro.<ul>
      * <li>&Egrave; possibile passare o un id o un codice 
-     * e il processo verr&agrave; recuperato in ogni caso;</li> 
+     * e il processo verr&agrave; recuperato in ogni caso (se si conosce l'ID 
+     * ma non il codice, passare una stringa qualunque come codice, p.es.
+     * VOID_STRING; l'importante &egrave; che non corrisponda a un codice
+     * realmente esistente);</li> 
      * <li>se vengono passati entrambi, purch&eacute; attinenti allo stesso
      * processo, il risultato sar&agrave; lo stesso che si ottiene passando
      * uno solo dei due;</li> 
@@ -6527,7 +6530,7 @@ public class DBWrapper extends QueryImpl {
      *
      * @param user      utente loggato
      * @param params    mappa contenente i parametri di navigazione
-     * @return <code>int</code> - l'id del processo appena inserito
+     * @return <code>ProcessBean</code> - oggetto macroprocesso appena inserito
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
     public ProcessBean insertMacroAt(PersonBean user, 
@@ -6631,18 +6634,20 @@ public class DBWrapper extends QueryImpl {
      *
      * @param user      utente loggato
      * @param params    mappa contenente i parametri di navigazione
-     * @return <code>int</code> - l'id del processo appena inserito
+     * @return <code>ProcessBean</code> - oggetto processo appena inserito
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
-    public int insertProcessAt(PersonBean user, 
-                               HashMap<String, LinkedHashMap<String, String>> params) 
-                        throws WebStorageException {
+    public ProcessBean insertProcessAt(PersonBean user, 
+                                       HashMap<String, LinkedHashMap<String, String>> params) 
+                                throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
             // Dizionario dei parametri contenente gli estremi dell'area di rischio
             LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
+            // Oggetto da restituire
+            ProcessBean pat = null;
             try {
                 // Recupera i valori necessari all'inserimento
                 String idSurveyAsString = survey.get(PARAM_SURVEY);
@@ -6651,6 +6656,7 @@ public class DBWrapper extends QueryImpl {
                 // Oggetto rilevazione ricostruito
                 CodeBean sur = new CodeBean(idSurvey, codeSurvey, VOID_STRING, ELEMENT_LEV_1);
                 // Estremi macroprocesso
+                String idCodeArea = proat.get("liv0");
                 String idCodeMacro = proat.get("liv1");
                 int idMat = Integer.parseInt(idCodeMacro.substring(NOTHING, idCodeMacro.indexOf(DOT)));
                 String codeMat = idCodeMacro.substring(idCodeMacro.indexOf(DOT) + 1, idCodeMacro.length());
@@ -6660,6 +6666,18 @@ public class DBWrapper extends QueryImpl {
                 int maxPatId = getMax("processo_at");
                 // Calcola il codice processo da inserire
                 String nextCode = getPatCode(user, idMat, codeMat, sur);
+                // Istanzia il processo da restituire
+                pat = new ProcessBean();
+                // Ne istanzia anche il padre
+                ProcessBean mat = new ProcessBean();
+                mat.setId(idMat);
+                mat.setCodice(codeMat);
+                mat.setTag(idCodeMacro);
+                mat.setAreaRischio(idCodeArea);
+                // Imposta il padre
+                pat.setPadre(mat);
+                // Ridonda per comodità l'area di rischio (è la stessa del padre da regole di business)
+                pat.setAreaRischio(idCodeArea);
                 // Begin: ==>
                 con.setAutoCommit(false);
                 // TODO: Controllare se user è superuser
@@ -6671,11 +6689,14 @@ public class DBWrapper extends QueryImpl {
                     // Definisce un indice per il numero di parametro da passare alla query
                     int nextParam = NOTHING;
                     /* === Id === */
-                    pst.setInt(++nextParam, ++maxPatId);
+                    pat.setId(++maxPatId);
+                    pst.setInt(++nextParam, pat.getId());
                     /* === Codice === */
-                    pst.setString(++nextParam, nextCode);
+                    pat.setCodice(nextCode);
+                    pst.setString(++nextParam, pat.getCodice());
                     /* === Nome === */
-                    pst.setString(++nextParam, namePat);
+                    pat.setNome(namePat);
+                    pst.setString(++nextParam, pat.getNome());
                     /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
                     pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
                     pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
@@ -6703,7 +6724,7 @@ public class DBWrapper extends QueryImpl {
                 con.commit();
                 pst.close();
                 pst = null;
-                return maxPatId;
+                return pat;
             } catch (NumberFormatException nfe) {
                 String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
                 LOG.severe(msg);
@@ -6732,8 +6753,7 @@ public class DBWrapper extends QueryImpl {
     
     
     /**
-     * <p>Metodo per fare l'inserimento di un nuovo processo
-     * censito a fini anticorruttivi.</p>
+     * <p>Metodo per fare l'inserimento di nuovi input di processo.</p>
      *
      * @param user      utente loggato
      * @param params    mappa contenente i parametri di navigazione
@@ -6741,8 +6761,8 @@ public class DBWrapper extends QueryImpl {
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
     public int insertInputs(PersonBean user, 
-                               HashMap<String, LinkedHashMap<String, String>> params) 
-                        throws WebStorageException {
+                            HashMap<String, LinkedHashMap<String, String>> params) 
+                     throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             // Dizionario dei parametri contenente il codice della rilevazione
@@ -6770,7 +6790,7 @@ public class DBWrapper extends QueryImpl {
                 con.setAutoCommit(false);
                 // TODO: Controllare se user è superuser
                 /* === Se siamo qui vuol dire che ok   === */ 
-                pst = con.prepareStatement(INSERT_PROCESS_AT);
+                //pst = con.prepareStatement(INSERT_INPUT);
                 pst.clearParameters();
                  // Prepara i parametri per l'inserimento
                 try {
