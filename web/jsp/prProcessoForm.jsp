@@ -80,14 +80,13 @@
             <label for="ind-tipo"><strong>Macroprocesso</strong></label>&nbsp;&nbsp;
           </div>
           <div class="col-sm-6">
-          <c:choose>
-            <c:when test="${not empty macro}">
+        <c:choose>
+          <c:when test="${not empty macro}">
             <input type="text" class="form-custom total-wide" id="mat-nome" name="mat-nome" value="${macro.nome}" readonly>
             <input type="hidden" id="mat-code" name="pliv1" value="${macro.id}.${macro.codice}">
-            </c:when>
-            <c:otherwise>
+          </c:when>
+          <c:otherwise>
             <select class="form-custom total-wide monospace" id="pat-liv1" name="pliv1">
-              
             <c:forEach var="m" items="${macros.get(aree.get(zero))}">
               <option value="${m.id}.${m.codice}">
                 <c:out value="${m.codice}" /> -- <c:out value="${m.nome}" />
@@ -97,9 +96,8 @@
               <option value="0"> -- AREA SENZA MACROPROCESSI -- </option>
             </c:if>
             </select>
-            </c:otherwise>
-          </c:choose>
-
+          </c:otherwise>
+        </c:choose>
           </div>
         </div>
         <hr class="separatore">
@@ -124,7 +122,6 @@
     </c:choose>
         <hr class="separatore" /><br>
         <div class="row">
-
           <div class="col-sm-12">
           <button type="submit" class="btn btnNav align-left" id="btn-save" name="action" value="save">
             <i class="far fa-save"></i> Salva ed esci
@@ -156,9 +153,6 @@
             const $textField = $('#pat-nome');
             var parent = $(this).val();
             var child = "#pat-liv1";
-            //var child3 = "#pat-liv3";
-            //$(child).html(blank());
-            //$(child3).html(blank());
             switch (parent) {
             <c:forEach var="area" items="${aree}">
               case "${area.id}.${area.codice}":
