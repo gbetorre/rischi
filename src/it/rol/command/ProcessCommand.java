@@ -72,6 +72,7 @@ import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
+import it.rol.bean.MeasureBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
@@ -363,7 +364,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             }
                         } else if (part.equalsIgnoreCase(PART_INSERT_PROCESS)) {
                             /* ------------------------------------------------ *
-                             *     INPUT new process - STEP 1: type and data    *
+                             *        INPUT new process - type and data         *
                              * ------------------------------------------------ */
                             // Deve differenziare tra finire e continuare
                             String action = parser.getStringParameter("action", DASH);
@@ -421,25 +422,30 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             }
                         } else if (part.equalsIgnoreCase(PART_INSERT_INPUT)) {
                             /* ------------------------------------------------ *
-                             *        INSERT new process - STEP 2: inputs       *
+                             *                  INSERT Inputs                   *
                              * ------------------------------------------------ */
+                            // Deve aggiungere al dizionario dei parametri quelli di input
+                            loadParams(part, req, params);
                             // Deve differenziare tra finire e continuare
                             String action = parser.getStringParameter("action", DASH);
+                            // Inserimento input(s)
                             db.insertInputs(user, params);
                             // Differenzia l'inoltro in funzione del bottone cliccato
                             switch (action) {
                                 case "save":
                                     redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
-                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                            AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) +
+                                            AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
+                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                     break;
                                 case "cont":
                                     redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
+                                               AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) +
+                                               AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                                AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                     break;
                                 default:
-                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
-                                               AMPERSAND + "p" + EQ + PART_INSERT_PROCESS +
-                                               AMPERSAND + "liv" + EQ + liv +
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
                                                AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                     break;
                             }
@@ -552,19 +558,26 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                              * ------------------------------------------------ */
                              // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                              processElements = new ConcurrentHashMap<>();
-                             // Recupera Input estratti in base al processo
+                             // Recupera tutti gli Input
                              ArrayList<ItemBean> listaInput = db.getInputs(user, survey);
+                             // Se c'è un id processo
+                             if (idP > NOTHING) {
+                                 // Controlla che il processo esista
+                                 pat = db.getProcessById(user, idP, survey);
+                                 // Recupera Input estratti in base al processo
+                                 ArrayList<ItemBean> inputByPat = db.getInputs(user, idP, ELEMENT_LEV_2, survey);
+                                 // Visto che ci sono, ne approfitta per impostare gli input nel processo
+                                 pat.setInputs(inputByPat);
+                                 // Scarta dalla lista degli input quelli già collegati al processo corrente
+                                 listaInput = filter(listaInput, inputByPat);
+                             }
                              // Imposta nella tabella le liste ricavate
                              processElements.put(TIPI_LISTE[0], listaInput);
                              processElements.put(TIPI_LISTE[1], new ArrayList<>());
                              processElements.put(TIPI_LISTE[2], new ArrayList<>());
                              processElements.put(TIPI_LISTE[3], new ArrayList<>());
                              processElements.put(TIPI_LISTE[4], new ArrayList<>());
-                             // Se c'è un id processo
-                             if (idP > NOTHING) {
-                                 // Controlla che il processo esista
-                                 pat = db.getMacroSubProcessAtByIdOrCode(user, idP, VOID_STRING, ELEMENT_LEV_2, survey);
-                             }
+                             
                              // Titolo pagina
                              tP = titleFile.get(part);
                              // Form to insert data of the process
@@ -701,18 +714,25 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
         /* ---------------------------------------------------- *
-         *      Parametri inserimento nuovo Macro/Processo      *
+         *              Parametri inserimento Input             *
          * ---------------------------------------------------- */
         if (part.equals(PART_INSERT_INPUT)) {
             LinkedHashMap<String, String> input = new LinkedHashMap<>();
-            // ID processo da collegare
-            input.put("liv",  parser.getStringParameter("pliv", VOID_STRING));
+            // Suffissi convenzionali per i parametri di input
+            String inputName = "n";
+            String inputDesc = "d";
+            String inputFlag = "f";
+            // Input da inserire
+            String[] input1 = req.getParameterValues("in-newn");
+            String[] input2 = req.getParameterValues("in-desc");
+            String[] input3 = req.getParameterValues("in-type");
+            // Aggiunge tutti gli elementi dei nuovi input definiti dall'utente
+            decantInputs(inputName, input1, input);
+            decantInputs(inputDesc, input2, input);
+            decantInputs(inputFlag, input3, input);
             // Nome e ID input esistente da collegare a processo
             input.put("nome", parser.getStringParameter("in-name", VOID_STRING));
-            // Input da inserire
-            String[] deputyLiv1 = req.getParameterValues("in-newn");
-            String[] deputyLiv2 = req.getParameterValues("in-desc");
-            String[] deputyLiv3 = req.getParameterValues("in-type");
+            // Aggiunge tutti i parametri degli input ai parametri della richiesta
             formParams.put(part, input);
         } 
     }
@@ -1332,7 +1352,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
     
     /* **************************************************************** *
      *                   Metodi di travaso dei dati                     *                     
-     *                             (decant)                             *
+     *                    (decant, filter, purge)                       *
      * **************************************************************** */
     
     /**
@@ -1457,6 +1477,51 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg, e);
         }
+    }
+
+    
+    /**
+     * Dati in input un array di valori e un livello numerico, distribuisce
+     * tali valori in una struttura dictionary, passata come parametro, 
+     * assegnandone ciascuno a una chiave diversa, costruita
+     * in base a un progressivo ed un valore intero passato come parametro.
+     * 
+     * @param suffix    livello di informazione convenzionale
+     * @param inputs    valori inseriti nella form
+     * @param params    mappa dei parametri della richiesta
+     */
+    private static void decantInputs(String suffix,
+                                     String[] inputs,
+                                     LinkedHashMap<String, String> params) {
+        int index = NOTHING;
+        int size = ELEMENT_LEV_1;
+        if (inputs != null) { // <- Controllo sull'input
+            while (index < inputs.length) {
+                params.put("in" + suffix + DASH + size,  inputs[index]);
+                size++;
+                index++;
+            }
+        }        
+    }
+      
+    
+    /**
+     * Dato un elenco complessivo di oggetti e un elenco dato di oggetti, 
+     * scarta dall'elenco complessivo gli oggetti presenti nell'elento dato.
+     * 
+     * @param allObjects elenco complessivo di oggetti
+     * @param someObject elenco specifico di oggetti
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> -  lista vettoriale ottenuta scartando dall'elenco maggiore gli elementi dell'elenco minore
+     */
+    public static ArrayList<ItemBean> filter(final ArrayList<ItemBean> allObjects,
+                                             final ArrayList<ItemBean> someObject) {
+        ArrayList<ItemBean> results = allObjects;
+        for (ItemBean o : someObject) {
+            if (allObjects.contains(o)) {
+                results.remove(o);
+            }
+        }
+        return results;
     }
     
     
