@@ -344,8 +344,18 @@ There are, in addition, some possible developments, which could be implemented i
 Implementing output rendering in many different languages is a relatively simple task to do by acting on software that relies on a well-structured and defined relational database - as in the present case.
 A well-established model, suitable for rendering text and titles in an unfixed number of different languages, is easily implemented by extending the database by: 
 * adding a translation table for each table that contains text elements to be translated, and 
-* rewriting the queries with the addition of LEFT OUTER JOINs to retrieve the translated value, if any.
+* rewriting the queries with the addition of LEFT OUTER JOINs to retrieve the translated value, if any.<br>
 <sub>See also the paper <cite>A Framework for the Internationalization of Data-Intensive Web Applications</cite></sub>
+
+### Security Profiles.
+The system is already prepared to handle a number of attacks, such as SQL Injection or some Cross-site request forgery (CSRF) attacks.
+It also implements the user session, the state of which it systematically checks; still, it implements some mechanisms to prevent DDOS-type attacks, such as caching.
+However, if this software were to be opened to the public, a review would need to be made regarding security, and a number of additional checks would need to be implemented to ensure the validity of the assumptions made at each point of navigation, and in particular at the points where writing to the data is performed.
+
+One trusts in the contributor's understanding regarding the fact that, since the system is currently developed for internal use, some security aspects have not been explored extensively: since resources are limited, it was preferred, in development stages, to focus on functionality rather than on these issues, which are clearly important but crucial especially in the wide-release and production stage.
+
+The security aspects can certainly be beefed up, but the investment on this side is related to the popularity of the project: if this software, <code>ROL-RMS</code>, is doomed to remain confined within the boundaries of some Anti-Corruption and Transparency Bureau, there is clearly not much point in bothering to provide additional layers, since basic security is already provided.
+
 
 <br>
 Of course, even though it can be such a big help, no IT tool by itself can achieve results such as lowering corruption risk; therefore, 
@@ -392,6 +402,7 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+- [2.2.0] (19/02/2025) Added facility to insert new inputs and/or link an existing input to a process
 - [2.1.9] (14/02/2025) Presentation improvements (home)
 - [2.1.8] (10/02/2025) First draft implementation about the page to insert a new input 
 - [2.1.7] (05/02/2025) Bug fix

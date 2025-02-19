@@ -375,14 +375,24 @@ Vi sono, inoltre, alcune possibili evoluzioni, che potrebbero essere implementat
 * Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentire loro di compilare autonomamente le risposte ai quesiti (certificando, automaticamente, i dati inseriti).
 * Predisposizione di monitoraggi e reportistica, anche in forma grafica (istogrammi, grafici a torta, etc.), per consentire alla <em>governance</em> di effettuare controlli sugli stati di avanzamento e sui risultati raggiunti tramite il progetto di mappatura dei rischi.
 * Predisposizione di appositi strumenti di ricerca per consentire all'ufficio trasparenza di ottenere query analitiche sulle interviste effettuate.
-* Implementazione del multilingue (internazionalizzazione)
+* Implementazione del multilingue (internazionalizzazione).
+* Implementazione di layer di sicurezza aggiuntivi.
 
 ### Internazionalizzazione
 Implementare una resa degli output in molte lingue diverse &egrave; un'operazione relativamente semplice da fare agendo su un software che si appoggia su un database relazionale ben strutturato e definito, come &egrave; nel caso di <code>ROL-RMS</code>.
 Un modello consolidato, adatto alla resa di testi e titoli in un numero non prefissato di lingue diverse, &egrave; facilmente implementabile estendendo il database tramite: 
 1. l'aggiunta di una tabella di traduzione per ogni tabella che contiene elementi testuali da tradurre e 
-2. riscrivendo le query con l'aggiunta di LEFT OUTER JOIN che permettano di recuperare il valore tradotto, se presente.
+2. riscrivendo le query con l'aggiunta di LEFT OUTER JOIN che permettano di recuperare il valore tradotto, se presente.<br>
 <sub>Per approfondire &egrave; possibile far riferimento al paper <cite>A Framework for the Internationalization of Data-Intensive Web Applications</cite></sub>
+
+### Sicurezza
+Il sistema &egrave; gi&agrave; predisposto per gestire una serie di attacchi, quali la SQL Injection o alcuni attacchi di tipo Cross-site request forgery (CSRF).
+Inoltre, implementa la sessione utente, il cui stato controlla sistematicamente, e alcuni meccanismi per prevenire attacchi di tipo DDOS, come ad esempio il caching.
+Tuttavia, se dovesse essere aperto al pubblico, sarebbe necessario effettuare una revisione in merito alla sicurezza e sarebbe necessario implementare una serie di ulteriori controlli per garantire la validit&agrave; delle assunzioni effettuate in ciascun punto della navigazione, ed in particolare nei punti in cui si opera in scrittura sui dati.
+
+Si confida nella comprensione del contribuitore relativamente al fatto che, essendo il sistema al momento sviluppato ad uso interno, alcuni aspetti di sicurezza non siano stati approfonditi estesamente: essendo le risorse limitate, si &egrave; preferito, in fasi di sviluppo, concentrarsi sulle funzionalit&agrave; piuttosto che su queste tematiche, chiaramente importanti ma cruciali soprattutto in fase di pubblicazione.
+
+Gli aspetti di sicurezza possono certamente essere irrobustiti, ma l'investimento su questo versante &egrave; legato alla popolarit&agrave; del progetto: se questo &egrave; destinato a restare confinato entro i limiti di qualche ufficio anticorruzione e trasparenza, chiaramente non ha molto senso preoccuparsi di fornire strati aggiuntivi, essendo gi&agrave; implementata la sicurezza di base; in caso contrario, l'investimento anche su questo versante si arricchisce di senso.
 
 <br>
 Naturalmente, nessuno strumento informatico &egrave; in grado da solo di ottenere risultati come l'abbassamento dei rischi corruttivi; pertanto ogni approfondimento analitico permesso dal software dovr&agrave; essere esaminato ed interpretato dagli esperti dell'anticorruzione.
@@ -450,6 +460,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.2.0] (19/02/2025) Implementata funzionalit&agrave; di inserimento input di processo
 - [2.1.9] (14/02/2025) Miglioramenti nella presentazione (home)
 - [2.1.8] (10/02/2025) Prima bozza di implementazione form per inserimento input
 - [2.1.7] (05/02/2025) Correzione di bug
@@ -600,7 +611,7 @@ Maggiori dettagli sui linguaggi utilizzati si trovano <a href="https://github.co
 
 
 
-<!-- GETTING STARTED -->
+<!-- GETTING STARTED 
 
 ## Getting Started
 
@@ -648,6 +659,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 
 <!-- CONTRIBUTING -->
+
 ## Contributing
 
 I contributi sono ci&ograve; che rende le comunit&agrave; Open Source uno spazio fantastico per apprendere, venire ispirati e dare spazio alla creativit&agrave;.
