@@ -2221,6 +2221,52 @@ public interface Query extends Serializable {
             "   ,       ? " +       // id_macroprocesso
             "   ,       ? " +       // id_rilevazione
             "          )" ;
+    
+    /**
+     * <p>Query per inserimento di un input definito dall'utente.</p>
+     */
+    public static final String INSERT_INPUT =
+            "INSERT INTO input" +
+            "   (   id" +
+            "   ,   nome" +
+            "   ,   descrizione" +
+          //"   ,   ordinale" +
+            "   ,   interno" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // nome
+            "   ,       ? " +       // descrizione
+          //"   ,       ? " +       // ordinale
+            "   ,       ? " +       // interno
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id rilevazione
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di una relazione tra input e processo at.</p>
+     */
+    public static final String INSERT_INPUT_PROCESS =
+            "INSERT INTO input_processo_at" +
+            "   (   id_input" +
+            "   ,   id_processo_at" +
+            "   ,   id_rilevazione" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       // id input
+            "   ,       ? " +       // id processo
+            "   ,       ? " +       // id rilevazione
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "          )" ;
 
     /* ********************************************************************** *
      *                         Query di aggiornamento                         *
