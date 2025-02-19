@@ -42,7 +42,7 @@
       <form accept-charset="ISO-8859-1" id="inm-form" action="" method="post">
         <input type="hidden" id="mat-area" name="pliv0" value="${param['pliv0']}" />
         <input type="hidden" id="mat-code" name="pliv1" value="${param['pliv1']}" />
-        <input type="hidden" id="pat-code" name="pliv" value="${process.id}" />
+        <input type="hidden" id="pat-code" name="pliv2" value="${process.id}" />
         <div class="panel-heading bgAct17" id="details">
           <h5 class="fw-bold text-dark">
             <i class="fa-solid fa-file-circle-plus"></i>
@@ -51,6 +51,13 @@
         </div>
         <div class="panel-body">
           <div class="row"> 
+            <div class="content-holder col-sm-10 bgAct15">
+              <strong> &nbsp;Macroprocesso:</strong>
+              <c:out value="${process.padre.nome}" escapeXml="false" />
+            </div>
+          </div>
+          <hr class="separapoco" />
+          <div class="row"> 
             <div class="content-holder col-sm-10 bgAct19">
               <strong> &nbsp;Processo:</strong>
               <a href="${initParam.appName}/?q=pr&p=pro&pliv=${process.id}&liv=2&r=${param['r']}" title="${process.codice}">
@@ -58,19 +65,26 @@
               </a>
             </div>
           </div>
-          <hr class="separapoco" />
+          <hr class="separatore" />
           <div class="row">
-            <div class="col-sm-1">&nbsp;</div>
-            <div class="col-sm-4 mandatory-thin"><strong>Input</strong></div>
-            <div class="col-sm-6">
-              <input type="search" class="form-control sInp" id="in-nome" name="in-name" placeholder="Cerca Input...">
+            <div class="content-holder col-sm-10 bgAct4">
+              <div class="reportHead">&nbsp;&nbsp;Scelta Input esistenti</div>
+              <hr class="separapoco" />
+              <div class="row">
+                <div class="col-sm-4 mandatory-thin marginLeftSmall">
+                  <strong>Input</strong>
+                </div>
+                <div class="col-sm-7">
+                  <input type="search" class="form-control sInp" id="in-nome" name="in-name" placeholder="Cerca Input...">
+                </div>
+              </div>
             </div>
-            <div class="col-sm-1">&nbsp;</div>
-          </div>
           <br />
           <hr class="separatore" />
           <div class="content-holder col-sm-10">
             <div class="fas-container">
+              <div class="reportHead bgAct4">&nbsp;&nbsp;Inserimento nuovi Input</div>
+              <hr class="separapoco" />
               <div id="callable-row">
                 <div class="row">
                   <div class="col-12 large-4">
