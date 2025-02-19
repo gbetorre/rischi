@@ -77,7 +77,12 @@
       <span class="badge lightTable bgAct25 text-dark"><c:out value="${arearischio}" /></span>
       <hr class="separatore" />
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples info">
-        <div class="fs-2 mb-3">Input:</div>
+        <div class="fs-2 mb-3">
+          Input:
+          <a href="${initParam.appName}/?q=pr&p=inp&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg float-right" title="Aggiungi un nuovo input al processo corrente">
+            <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Input
+          </a>
+        </div>
         <ul class="list-group">
         <c:forEach var="input" items="${input}" varStatus="status">
           <c:set var="bgAct" value="bgAct4" scope="page" />
