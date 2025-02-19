@@ -567,6 +567,10 @@ select:disabled.bgcolor3 {
   background-color: #f3e5f5  !important;
 }
 
+.bgAct31 {
+  background-color: #e8e6d8  !important;
+}
+
 .bgFade {
   background-image: linear-gradient(to right, transparent, white) !important;
 }
