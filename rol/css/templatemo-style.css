@@ -424,7 +424,7 @@ footer a:hover {
 /* media 960 */
 @media ( max-width: 980px ) {
 	h1, h3 {
-	  background-color: #9bcaef;
+	  background-color: #bfbfbf;
 	  /*color: #ed1c24;*/
 	  color: #008000;
 	}
