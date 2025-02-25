@@ -49,6 +49,24 @@ The web application for <cite>corruption risk mapping</cite> is intended to help
 <br>
 <strong>*Fig.2 - The goal of the software is to obtain, automatically, the risk value for each organizational process considered (dummy data)*</strong><br>
 
+### In a nutshell
+In brief, the <code>ROL-RMS</code> software makes it possible to:
+* quantify the level of corruption risk to which each organizational process is exposed (<strong>initial risk level</strong>);
+* quantify how much the risk level is reduced if a series of mitigation measures are applied to the process (<strong>estimated risk level</strong>);
+* quantify how much you actually reduced that level of risk given the mitigation measures that were actually applied (<strong>actual risk level</strong>).
+
+All these quantities (initial, estimated and actual risk level) are numerical and determined by deterministic algorithms, thus not subject to stochastic variation.
+
+Given an initial risk level, applying certain measures will <i>always</i> result in a certain reduction in the risk level, and the process by which this reduction was determined will also be reconstructible. 
+Therefore, the explainability of all this software is complete (and, of course, accessible by reading the same sources published in this repository).
+
+The mitigation algorithms-as, moreover, are all algorithms for calculating risk, calculating PxI, etc. - were designed based on the know-how of experienced corrupt risk experts and were fully formalized in the analysis phase before moving to the implementation phase.
+
+[![Dashboard Graphics][dashboard-graph]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-graphics.png)
+<br>
+<strong>*Fig.3 - By performing quantification of the actors involved, it becomes possible to easily produce aggregate reports, even in the form of infographics (dummy data)*</strong><br>
+
+### In practice
 The general workflow is divided into 4 steps:
 * Step 1: Loading of structures and processes <strong>(organization mapping)</strong>
 * Step 2: <strong>Quantification of the corruption risk</strong> of each process
@@ -80,7 +98,7 @@ First of all, it is appropriate to define the <strong>parties</strong> involved:
 
 [![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.95.png)
 <br>
-<strong>*Fig.3 - Obviously, the software is a restricted access application*</strong>
+<strong>*Fig.4 - Obviously, the software is a restricted access application*</strong>
 <br><br>
 
 Regarding to the <strong>roles</strong> played: 
@@ -105,19 +123,19 @@ the application expresses specific indices and attention points and, in summary,
 
 [![Product Interview][product-interview]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/interview-sample.png)
 <br>
-<strong>*Fig.4 - Example of questions used to computate the vulnerability of an organizational process*</strong>
+<strong>*Fig.5 - Example of questions used to computate the vulnerability of an organizational process*</strong>
 
 Specifically, for each process probed through the interview, we obtain the values of 7 probability indicators (P) and 4 impact indicators (I).
 <br>
 
 [![Goal Sample alt][indicator-sample02]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample02.png)
 <br>
-<strong>*Fig.5 - The answers to the questions considered for some indicator may, occasionally, not allow obtaining the risk value in the dimension considered (dummy data)*</strong>
+<strong>*Fig.6 - The answers to the questions considered for some indicator may, occasionally, not allow obtaining the risk value in the dimension considered (dummy data)*</strong>
 <br><br>
 
 [![Sample alt][indicator-sample03]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample03.png)
 <br>
-<strong>*Fig.6 - In such cases, the software reports the reason for non-calculation; if there are multiple reasons, they are shown one at a time until the problem is corrected (dummy data)*</strong>
+<strong>*Fig.7 - In such cases, the software reports the reason for non-calculation; if there are multiple reasons, they are shown one at a time until the problem is corrected (dummy data)*</strong>
 <br><br>
 
 Crossing the values obtained in the indicators of probability (P) with those obtained in the indicators of impact (I) we obtain, for each organizational process surveyed, a synthetic index P x I, which expresses the final level of risk to which the process itself is exposed.
@@ -131,7 +149,7 @@ relational database (version 12 and later), in which the questions that will be 
 
 [![DB representation, layout circular][schema-physical]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/DB-circular.png)
 <br>
-<strong>*Fig.7 - Graphic representation of the entities and relations of the database, Layout: Circular (powered by yFiles)*</strong>
+<strong>*Fig.8 - Graphic representation of the entities and relations of the database, Layout: Circular (powered by yFiles)*</strong>
 <br><br>
 
 ## Step 1: Context identification (organizational mapping)
@@ -143,11 +161,11 @@ Structures are organized in a tree with various levels while processes are struc
 
 [![Product Sample OrgChart][product-orgchart]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png)
 <br>
-<strong>*Fig.8 - Organizational chart navigation function*</strong><br><br>
+<strong>*Fig.9 - Organizational chart navigation function*</strong><br><br>
 
 [![Product Sample Macro][product-process]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png)
 <br>
-<strong>*Fig.9 - Navigation function in the macroprocess - and process - tree*</strong>
+<strong>*Fig.10 - Navigation function in the macroprocess - and process - tree*</strong>
 
 In the literature on process mapping, there are a variety of taxonomies that can be adopted to classify and hierarchize organizational processes.<br> 
 In this software,  the following hierarchical structure was chosen:
@@ -164,18 +182,18 @@ The risk area is the most general level: it has few properties and aggregates ma
 
 [![Class Diagram part Process][class-diagram]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/class-diagram.png)
 <br>
-<strong>*Fig.10 - Class diagram regarding the entities involved in process representation.*</strong>
+<strong>*Fig.11 - Class diagram regarding the entities involved in process representation.*</strong>
 
 Each process or subprocess (but not the macroprocess) can itself be divided into phases (or activities). 
 One or more structures and one or more third parties (which are entities not structured in the organizational chart but still acting on the process step) can be associated with each phase..
 
-The software provides special features for navigating the macroprocess tree and the organizational chart tree (see <a href=“https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png”>Fig. 8</a> and <a href=“https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png”>9</a>), so that you can quickly verify that the mapping corresponds to what is actually present in the organization.
+The software provides special features for navigating the macroprocess tree and the organizational chart tree (see <a href=“https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png”>Fig. 9</a> and <a href=“https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png”>10</a>), so that you can quickly verify that the mapping corresponds to what is actually present in the organization.
 
 Furthermore, a detail page is provided for each process that contains not only the risk levels to which the process is exposed (information of great interest given the purpose of the software), but also all other aggregate information related to the process itself, including: the inputs, steps, outputs, risks, and enabling factors.
 
 [![Product Sample Process][process-29]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-29.png)
 <br>
-<strong>*Fig.11 - Example of a detail page of a process surveyed for anti-corruption purposes*</strong>
+<strong>*Fig.12 - Example of a detail page of a process surveyed for anti-corruption purposes*</strong>
 
 ## Step 2: Risk calculation (interviews and indicators)
 After populating the database with structures, macroprocesses and their sublayers, one can move on to the <cite>interviews</cite> phase, which consists of asking a series of questions to a number of specific structures that preside over a specific process. 
@@ -185,13 +203,13 @@ The battery of questions is very large (more than 150) but the decision about wh
 
 [![Question domains sample][question-domains]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/questions-domains.png)
 <br>
-<strong>*Fig.12 - Example of groupings of questions into areas of analysis*</strong>
+<strong>*Fig.13 - Example of groupings of questions into areas of analysis*</strong>
 
 The answers are then used to obtain the value of a series of indicators, as mentioned earlier.<br>
 
 [![PxI analytical dashboard][dashboard-risk]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-pxi.png)
 <br>
-<strong>*Fig.13 - The indicator dashboard allows to consult not only the PxI value of each process but also the values of all dimensions and indicators based on which this summary index was calculated*</strong>
+<strong>*Fig.14 - The indicator dashboard allows to consult not only the PxI value of each process but also the values of all dimensions and indicators based on which this summary index was calculated*</strong>
 
 <strong>The calculation of the values of all indicators and the same PxI index of each process is automated!</strong> As a matter of fact, at the moment the interview is saved, the calculation of the value of all indicators and PxI is automatically processed.<br>
 
@@ -203,7 +221,7 @@ The algorithms for calculating the indicators are all different from each other.
 <br><br>
 [![Product Algorithm][product-algorithm]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png)
 <br>
-<strong>*Fig.14 - Example (simplified) of the flowchart of the algorithm for calculating a specific probability indicator (P3: analysis/evaluation of reports received)*</strong><br>
+<strong>*Fig.15 - Example (simplified) of the flowchart of the algorithm for calculating a specific probability indicator (P3: analysis/evaluation of reports received)*</strong><br>
 
 As mentioned in the previous paragraph, through additional algorithms all values obtained in the probability indicators (global probability index <code>P</code>) 
 and all values obtained in the impact indicators (global impact index <code>I</code>) are crossed.
@@ -212,7 +230,7 @@ Finally, through a classic Quantitative Risk Analysis table, the <code>P x I</co
 
 [![PxI][pxi]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/PxI.png)
 <br>
-<strong>*Fig.15 - Decision table of the algorithm for calculating PxI, with the 9 possible values derived from the arrangements with repetition D'(3,2) = 3<sup>2</sup> of the 3 possible values of P and the 3 possible values of I.*</strong>
+<strong>*Fig.16 - Decision table of the algorithm for calculating PxI, with the 9 possible values derived from the arrangements with repetition D'(3,2) = 3<sup>2</sup> of the 3 possible values of P and the 3 possible values of I.*</strong>
 
 ><strong>It is important to remark that a feature of the software is thus the automation of the calculation of indicators and PxI: after surveying processes and structures, 
 it is enough to conduct the interviews for the software to do the rest.</strong>
@@ -222,7 +240,7 @@ Through steps 1 and 2 (i.e., process mapping and calculation of their corruptive
 
 [![PxI concise dashboard][dashboard-risk2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-pxi.png)
 <br>
-<strong>*Fig.16 - The table of PxI totaled by each process provides an overview of the levels of risk to which organizational processes are exposed*</strong>
+<strong>*Fig.17 - The table of PxI totaled by each process provides an overview of the levels of risk to which organizational processes are exposed*</strong>
 
 Having carried out this mapping is a good starting point for being able to determine which mitigation/prevention measures of corruption risk should be applied to the risks themselves.
 
@@ -240,22 +258,22 @@ and a number of specific properties (economic viability, character, number of im
 
 [![Form to insert new measure][add-measure]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure.png)
 <br>
-<strong>*Fig.17 - The form to enter a new mitigation measure*</strong>
+<strong>*Fig.18 - The form to enter a new mitigation measure*</strong>
 
 In a first step, then, the anti-corruption bureau - or expert - takes a census of all the various measures it deems appropriate to suggest, going on to form a list of measures.
 [![List of inserted measure][list-measures]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-measures.png)
 <br>
-<strong>*Fig.18 - List of corrupt risk mitigation measures*</strong>
+<strong>*Fig.19 - List of corrupt risk mitigation measures*</strong>
 
 Having constituted this list of applicable measures, the problem for anti-corruption practitioners is to go on to identify which measure or measures apply to which specific risk in which specific process.
 The granularity of the associations between process and measure is in fact relatively fine and needs a ternary relationship to be represented.<br>
 
 [![Schema ER measure (part)][schema-measure]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-measure.png)
 <br>
-<strong>*Fig.19 - Detail of the ER diagram for the representation of measurements*</strong>
+<strong>*Fig.20 - Detail of the ER diagram for the representation of measurements*</strong>
 
 What happens in practice, then, is that, starting from the analysis of the levels of risk to which processes are exposed (photographed by the PxI dashboard: 
-see, e.g., <a href=“https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-pxi.png”>Fig. 16</a>) 
+see, e.g., <a href=“https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-pxi.png”>Fig. 17</a>) 
 the expert decides that it is appropriate for the organization to implement appropriate measures.
 
 What measures, however, to choose from among the various possible measures? That is, how to identify the best measures for each risk of any given process?<br>
@@ -265,7 +283,7 @@ The <code>ROL-RMS</code> system also comes to the rescue here:
 
 [![Assignment measure to risk][assign-measure]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure2.png)
 <br>
-<strong>*Fig.20 - The form to assign a measure to a risk-process pair. The most appropriate measures are suggested by the software, but the operator is free to assign others, either in addition to or instead of those suggested.*</strong>
+<strong>*Fig.21 - The form to assign a measure to a risk-process pair. The most appropriate measures are suggested by the software, but the operator is free to assign others, either in addition to or instead of those suggested.*</strong>
 
 In fact, mitigation measures, through their typology, have an association with the enabling factor, and this relationship makes it possible to identify the context of application of these measures according to risk and process.
 
@@ -276,7 +294,7 @@ Once the measures have been applied, it is possible to check how risk levels var
 
 [![How to risk decrease applying measures][dashboard-risk4]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-measures.png)
 <br>
-<strong>*Fig.21 - Table showing what measures should be applied to each process and how PxI levels would vary before and after application. In the screen considered, there were reductions in risk and a level that, instead, remained unchanged.*</strong>
+<strong>*Fig.22 - Table showing what measures should be applied to each process and how PxI levels would vary before and after application. In the screen considered, there were reductions in risk and a level that, instead, remained unchanged.*</strong>
 
 ## Step 4: Risk certification (monitored risk reduction)
 However, the measure implementation stage, just seen, is only an <i>estimate</i> of the extent to which risk can be reduced <i>if</i> the proposed measures are implemented (could be a BIG IF).
@@ -284,7 +302,7 @@ The monitoring phase, which ends the corruption risk management cycle, is used t
 
 [![Monitor entrypoint][list-monitor]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-monitored-measures.png)
 <br>
-<strong>*Fig.22 - Monitoring start page.*</strong>
+<strong>*Fig.23 - Monitoring start page.*</strong>
 
 Since it has a number of on-demand dashboards and reports:
 > <strong>the software also offers specific analytical tools to check to what extent the level of risk has changed not only as a function of the hypothetical but also the actual application of mitigation measures.</strong>
@@ -298,15 +316,15 @@ This kind of report concludes the risk management cycle and is the certification
 
 [![Schema ER monitoring (part)][schema-monitor]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/SchemaER-monitoring.png)
 <br>
-<strong>*Fig.23 - Part of the ER diagram for the representation of the monitored measurement and related entities*</strong>
+<strong>*Fig.24 - Part of the ER diagram for the representation of the monitored measurement and related entities*</strong>
 
 [![List of phases with indicators][list-indicators]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-phases_indicators.png)
 <br>
-<strong>*Fig.24 - Example of a monitored measure with 2 implementation phases: on one a monitoring indicator has been assigned, on the other not yet*</strong>
+<strong>*Fig.25 - Example of a monitored measure with 2 implementation phases: on one a monitoring indicator has been assigned, on the other not yet*</strong>
 
 [![Form to insert new monitoring indicator][add-indicator]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-indicator.png)
 <br>
-<strong>*Fig.25 - Form for entering a new monitoring indicator*</strong>
+<strong>*Fig.26 - Form for entering a new monitoring indicator*</strong>
 
 
 # Roadmap
@@ -348,8 +366,13 @@ A well-established model, suitable for rendering text and titles in an unfixed n
 <sub>See also the paper <cite>A Framework for the Internationalization of Data-Intensive Web Applications</cite></sub>
 
 ### Security Profiles.
+[![Error 505][product-error2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/deniedAccess.png)
+<br>
+<strong>*Fig.27 - Error screen in case of login attempt without authentication*</strong>
+
 The system is already prepared to handle a number of attacks, such as SQL Injection or some Cross-site request forgery (CSRF) attacks.
 It also implements the user session, the state of which it systematically checks; still, it implements some mechanisms to prevent DDOS-type attacks, such as caching.
+
 However, if this software were to be opened to the public, a review would need to be made regarding security, and a number of additional checks would need to be implemented to ensure the validity of the assumptions made at each point of navigation, and in particular at the points where writing to the data is performed.
 
 One trusts in the contributor's understanding regarding the fact that, since the system is currently developed for internal use, some security aspects have not been explored extensively: since resources are limited, it was preferred, in development stages, to focus on functionality rather than on these issues, which are clearly important but crucial especially in the wide-release and production stage.
@@ -402,6 +425,7 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+- [2.2.1] (25/02/2025) Added facility to insert multiple inputs through a single submission
 - [2.2.0] (19/02/2025) Added facility to insert new inputs and/or link an existing input to a process
 - [2.1.9] (14/02/2025) Presentation improvements (home)
 - [2.1.8] (10/02/2025) First draft implementation about the page to insert a new input 
@@ -614,7 +638,7 @@ Anyone with suggestions that could improve the project can download the reposito
 
 [![Repository features list][list-features]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/features.png)
 <br>
-<strong>*Fig.26 - List of features of a repository listed using Sourcetree software*</strong>
+<strong>*Fig.28 - List of features of a repository listed using Sourcetree software*</strong>
 
 
 In order to run the software, it is necessary to deploy the database on which it rests.
@@ -677,6 +701,8 @@ See also [open issues](https://github.com/gbetorre/rischi/issues) for a complete
 [product-algorithm]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png
 [product-orgchart]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png
 [product-process]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png
+[product-error1]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/internalServerError.png
+[product-error2]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/deniedAccess.png
 [process-29]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-29.png
 [process-45]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/pro-45.png
 [indicator-sample01]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample01.png
@@ -688,6 +714,7 @@ See also [open issues](https://github.com/gbetorre/rischi/issues) for a complete
 [dashboard-risk2]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-pxi.png
 [dashboard-risk3]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-overwiev-pxi.png
 [dashboard-risk4]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-synthesis-measures.png
+[dashboard-graph]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-graphics.png
 [add-measure]:      https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure.png
 [assign-measure]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure2.png
 [add-indicator]:    https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-indicator.png
