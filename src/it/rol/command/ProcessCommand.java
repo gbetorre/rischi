@@ -722,16 +722,21 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             String inputName = "n";
             String inputDesc = "d";
             String inputFlag = "f";
+            String inputExist = "e";
             // Input da inserire
             String[] input1 = req.getParameterValues("in-newn");
             String[] input2 = req.getParameterValues("in-desc");
             String[] input3 = req.getParameterValues("in-type");
+            String[] input0 = req.getParameterValues("in-name");
             // Aggiunge tutti gli elementi dei nuovi input definiti dall'utente
             decantInputs(inputName, input1, input);
             decantInputs(inputDesc, input2, input);
             decantInputs(inputFlag, input3, input);
-            // Nome e ID input esistente da collegare a processo
-            input.put("nome", parser.getStringParameter("in-name", VOID_STRING));
+            // Aggiunge i nomi e gli id di input esistenti, da collegare
+            decantInputs(inputExist, input0, input);
+            // Aggiunge il numero di input da collegare
+            String inputToLink = (input0[NOTHING].equals(VOID_STRING)) ? String.valueOf(NOTHING) : String.valueOf(input0.length);
+            input.put("ine", inputToLink);
             // Aggiunge tutti i parametri degli input ai parametri della richiesta
             formParams.put(part, input);
         } 
