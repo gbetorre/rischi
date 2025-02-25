@@ -65,30 +65,57 @@
               </a>
             </div>
           </div>
+          <hr class="separapoco" />
+          <div class="row"> 
+            <div class="content-holder col-sm-10 bgAct23">
+              <strong> &nbsp;Input gi&agrave; collegati:</strong>
+              <c:if test="${empty process.inputs}">NESSUNO</c:if>
+              <ul>
+              <c:forEach var="input" items="${process.inputs}">
+                <li><c:out value="${input.nome}" escapeXml="false" /></li>
+              </c:forEach>
+              </ul>
+            </div>
+          </div>
           <hr class="separatore" />
           <div class="row">
             <div class="content-holder col-sm-10 bgAct4">
-              <div class="reportHead">&nbsp;&nbsp;Scelta Input esistenti</div>
-              <hr class="separapoco" />
-              <div class="row">
-                <div class="col-sm-4 mandatory-thin marginLeftSmall">
-                  <strong>Input</strong>
+              <div class="inp-container">
+                <div class="reportRow">&nbsp;&nbsp;Scelta Input esistenti</div>
+                <hr class="separapoco" />
+                <div id="callable-inp">
+                  <div class="row">
+                    <div class="col-sm-4 bgAct23 lastMenuContent marginLeftSmall">
+                      <strong>Input</strong>
+                    </div>
+                    <div class="col-sm-7">
+                      <input type="search" class="form-control sInp" id="in-nome" name="in-name" placeholder="Cerca Input...">
+                    </div>
+                    <hr class="separatore" />
+                  </div>
                 </div>
-                <div class="col-sm-7">
-                  <input type="search" class="form-control sInp" id="in-nome" name="in-name" placeholder="Cerca Input...">
+              </div>
+              <div class="row lblca">
+                <div class="col-sm-1">&nbsp;</div>
+                <div class="large-4 column">
+                  <a href="javascript:void(0);" type="button" class="js-add-inp btn bgAct14" title="Aggiungi un input di processo">+ Aggiungi</a>
+                </div>
+                <div class="large-4 column">
+                  <a href="javascript:void(0);" type="button" class="js-remove-inp btn bgAct25" title="Elimina l'ultimo input di processo">- Elimina</a>
                 </div>
               </div>
             </div>
+          </div>
           <br />
           <hr class="separatore" />
           <div class="content-holder col-sm-10">
             <div class="fas-container">
-              <div class="reportHead bgAct4">&nbsp;&nbsp;Inserimento nuovi Input</div>
+              <div class="reportRow bgAct31">&nbsp;&nbsp;Inserimento nuovi Input</div>
               <hr class="separapoco" />
               <div id="callable-row">
                 <div class="row">
                   <div class="col-12 large-4">
-                    <input type="text" class="form-control sInp" id="in-nuovo" name="in-newn" placeholder="Inserisci nome Input">
+                    <input type="text" class="form-control sIns" id="in-nuovo" name="in-newn" placeholder="Inserisci nome Input">
                     <div id="custom-error-location-2"></div>
                   </div>
                   <hr class="separapoco" />
@@ -134,21 +161,48 @@
     </div>
     <script>
     $(document).ready(function() {
-        let inputs = [
+        let names = [
             <c:forEach var="inp" items="${requestScope.listaInput}">
-              "${inp.nome} (${inp.id})",
+              "${inp.nome}",
             </c:forEach>
             ];
+        let inputs = [
+            <c:forEach var="inp" items="${requestScope.listaInput}">
+              "${inp.nome} \u200B \u200B \u200B \u200B \u200B \u200B (${inp.id})",
+            </c:forEach>
+            ];
+        
         $( function() {
             $(".sInp").autocomplete({
                 source: inputs,
                 minLength: 1
             });
-        });    
-        $('.js-add-row').on('click', function () {
-            $('.fas-container').append($('#callable-row').html());
+            $(".sIns").autocomplete({
+                source: names,
+                minLength: 1
+            });
+        });
+        
+        $('.js-add-inp').on('click', function () {
+            $('.inp-container').append($('#callable-inp').html());
             $(".sInp").autocomplete({
                 source: inputs,
+                minLength: 1
+            });
+        });
+        $('.js-remove-inp').on('click', function () {
+            var LastSibling = $('#callable-inp').siblings('.row:last-child');
+            if (LastSibling.length != 0) {
+                LastSibling.remove();
+            } else {
+                alert('Occorre prima aggiungere un campo');
+            }
+        });        
+        
+        $('.js-add-row').on('click', function () {
+            $('.fas-container').append($('#callable-row').html());
+            $(".sIns").autocomplete({
+                source: names,
                 minLength: 1
             });
         });
@@ -160,31 +214,9 @@
                 alert('Occorre prima aggiungere un campo');
             }
         });
+        
         $('#btn-save').click(function (e){
             e.preventDefault;
-          });
-
-        $('#inm-form').validate ({
-            rules: {
-              'in-nome': {
-                required: true
-              }
-            }, 
-            messages: {
-              'in-fasi': "Inserire almeno un input esistente"
-            },
-            errorPlacement: function(error, element) {
-                if (element.attr("name") == "ms-piao") {
-                    error.insertAfter("#custom-error-location-1"); // Place error message after a specific element
-                } else if (element.attr("name") == "ms-fasi") {
-                    error.insertAfter("#custom-error-location-2"); // Place error message after another specific element
-                } else {
-                    error.insertAfter(element); // Default placement for other elements
-                }
-            },
-            submitHandler: function (form) {
-              return true;
-            }
           });
           
     });
