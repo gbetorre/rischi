@@ -6781,9 +6781,9 @@ public class DBWrapper extends QueryImpl {
                 // Estremi della rilevazione
                 String idSurveyAsString = survey.get(PARAM_SURVEY);
                 int idSurvey = Integer.parseInt(idSurveyAsString);
-                String codeSurvey = survey.get("code");
+                //String codeSurvey = survey.get("code");
                 // Oggetto rilevazione ricostruito
-                CodeBean sur = new CodeBean(idSurvey, codeSurvey, VOID_STRING, ELEMENT_LEV_1);
+                //CodeBean sur = new CodeBean(idSurvey, codeSurvey, VOID_STRING, ELEMENT_LEV_1);
                 // Estremi processo
                 String idPatAsString = proat.get("liv2");
                 int idPat = Integer.parseInt(idPatAsString);
@@ -6799,14 +6799,18 @@ public class DBWrapper extends QueryImpl {
                 pst = con.prepareStatement(INSERT_INPUT_PROCESS);
                 // TODO: Controllare se user è superuser
                 /* === Se siamo qui vuol dire che ok   === */
-                //String prefixInp = "in";
+                String prefixInp = "ine";
                 String fieldName = "inn";
                 String fieldDesc = "ind";
                 String fieldFlag = "inf";
+                // Flag per verificare che almeno un inserimento sia avvenuto
+                boolean existSome = false;
+                // Conta quanti input esistenti da collegare ci sono
+                int inputToLink = Integer.parseInt(input.get(prefixInp));
                 // L'array di input è almeno di 4; se ci sono più di 4 elementi o il primo campo "nuovo input" non è vuoto
-                if (input.size() > ELEMENT_LEV_4 || !input.get("inn-1").equals(VOID_STRING)) {
-                    // Calcola il numero di nuovi input da inserire (n-1)/3
-                    int n = (input.size() - ELEMENT_LEV_1) /  ELEMENT_LEV_3;
+                if (!input.get("inn-1").equals(VOID_STRING)) {
+                    // Calcola il numero di nuovi input da inserire [n - (tot input da collegare)] / 3
+                    int n = (input.size() - (inputToLink + ELEMENT_LEV_1)) /  ELEMENT_LEV_3;
                     // Puntatore di input corrente (input 1, input 2...)
                     int pointerInp = ELEMENT_LEV_1;
                     // Contatore di cicli
@@ -6862,50 +6866,59 @@ public class DBWrapper extends QueryImpl {
                     int[] inputs = ps.executeBatch();
                     int[] relations = pst.executeBatch();
                     // CR (Carriage Return) o 0DH
-                    LOG.info(inputs.length + " input inseriti e " + relations.length + " relazioni tra processi e input in transazione attiva.\n");                    
+                    LOG.info(inputs.length + " input inseriti e " + relations.length + " relazioni tra processi e input in transazione attiva.\n");
+                    existSome = true;
                 } 
                 // Verifica se vi sono input esistenti da collegare
-                if (!input.get("nome").equals(VOID_STRING)) {
-                    // Resetta il contatore dei parametri
-                    nextParam = NOTHING;
-                    pst.clearParameters();
-                    // Recupera nome e (id)
-                    String value = input.get("nome");
-                    // Recupera il nome dell'input
-                    String name = value.substring(NOTHING, value.indexOf('('));
-                    // Recupera l'id dell'input
-                    String idAsString = value.substring(value.lastIndexOf('(') + 1, value.lastIndexOf(')'));
-                    int id = Integer.parseInt(idAsString);
-                    /* === Id Input === */
-                    pst.setInt(++nextParam, id);
-                    /* === Id Processo === */
-                    pst.setInt(++nextParam, idPat);
-                    /* === Id Rilevazione === */
-                    pst.setInt(++nextParam, idSurvey);
-                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
-                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
-                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
-                    pst.setInt(++nextParam, user.getUsrId());
+                if (inputToLink > NOTHING) {
+                    // Puntatore di input corrente (input 1, input 2...)
+                    int pointerInp = ELEMENT_LEV_1;
+                    // Contatore di cicli
+                    int cycles = NOTHING;
+                    // Processa gli input da collegare
+                    do {
+                        // Resetta il contatore dei parametri
+                        nextParam = NOTHING;
+                        pst.clearParameters();
+                        // Recupera nome e (id)
+                        String value = input.get(prefixInp + DASH + pointerInp);
+                        // Recupera il nome dell'input
+                        String name = value.substring(NOTHING, value.lastIndexOf('('));
+                        // Recupera l'id dell'input
+                        String idAsString = value.substring(value.lastIndexOf('(') + 1, value.lastIndexOf(')'));
+                        int id = Integer.parseInt(idAsString);
+                        /* === Id Input === */
+                        pst.setInt(++nextParam, id);
+                        /* === Id Processo === */
+                        pst.setInt(++nextParam, idPat);
+                        /* === Id Rilevazione === */
+                        pst.setInt(++nextParam, idSurvey);
+                        /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                        pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                        pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                        pst.setInt(++nextParam, user.getUsrId());
+                        // CR (Carriage Return) o 0DH
+                        pst.addBatch();
+                        // Incrementa il puntatore di input corrente
+                        pointerInp++;
+                        // Incrementa il contatore di cicli
+                        cycles++;
+                    } while (cycles < inputToLink);
+                    // Execute the batch updates
+                    int[] relations = pst.executeBatch();
                     // CR (Carriage Return) o 0DH
-                    pst.executeUpdate();
-                
-                } /*else {
-                    String msg = FOR_NAME + "Non sono presenti dati da inserire.\n";
-                    LOG.severe(msg);
-                    try {
-                        con.close();
-                    } catch (NullPointerException npe) {
-                        throw new WebStorageException(FOR_NAME + npe.getMessage());
-                    } catch (SQLException sqle) {
-                        throw new WebStorageException(FOR_NAME + sqle.getMessage());
-                    }
-                    throw new WebStorageException(msg);
-                }*/ // Se non ci sono né nuovi input da inserire né input esistenti da collegare, perché siamo qui?    
+                    LOG.info(relations.length + " relazioni tra processi e input in transazione attiva.\n");
+                    existSome = true;
+                }
                 // End: <==
                 con.commit();
                 pst.close();
                 ps.close();
                 pst = ps = null;
+                // Se non ci sono né nuovi input da inserire né input esistenti da collegare, perché siamo qui?
+                if (!existSome) {
+                    ; // Se piace, gestire qui la situazione di invio form vuota
+                }
                 return maxInpId;
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
