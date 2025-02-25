@@ -135,6 +135,8 @@ public class ProcessBean extends CodeBean {
     private int livello;
     /** Dictionary con insertion order di indicatori contenenti i valori di rischio ottenuti dal processo corrente */
     private LinkedHashMap<String, InterviewBean>  indicatori;
+    /** Input collegati al processo corrente */
+    private AbstractList<ItemBean> inputs;
     /* ------------------------------------------------------------------------ *
      *                   Dati descrittivi dell'ultima modifica                  *
      * ------------------------------------------------------------------------ */
@@ -175,6 +177,7 @@ public class ProcessBean extends CodeBean {
         padre = null;
         rilevazione = null;
         indicatori = null;
+        inputs = null;
     }
 
     
@@ -837,5 +840,28 @@ public class ProcessBean extends CodeBean {
     public void setIndicatori(LinkedHashMap<String, InterviewBean> indicatori) {
         this.indicatori = indicatori;
     }
+    
+
+    /* *************************************************** *
+     *           Metodi getter e setter per input          *
+     * *************************************************** */
+    /**
+     * Restituisce una lista di input collegati al processo corrente.
+     *
+     * @return <code>inputs</code> - lista di input che attivano il processo
+     */
+    public AbstractList<ItemBean> getInputs() {
+        return inputs;
+    }
+
+    /**
+     * Imposta gl input collegati al processo corrente.
+     *
+     * @param inputs - inputs collegati al processo corrente, da impostare
+     */
+    public void setInputs(AbstractList<ItemBean> inputs) {
+        this.inputs = inputs;
+    }
+
 
 }
