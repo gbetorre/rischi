@@ -83,6 +83,7 @@ import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
 import it.rol.bean.RiskBean;
+import it.rol.db.QueryImpl;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
