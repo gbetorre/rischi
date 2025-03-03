@@ -316,6 +316,16 @@ public interface Constants extends Serializable {
      */
     public static final String PART_INSERT_INPUT        = "inp";
     /**
+     * <p>Costante per il parametro identificante la funzione di aggiunta 
+     * di uno o pi&uacute; fasi collegate ad un processo.</p>
+     */
+    public static final String PART_INSERT_ACTIVITY     = "iac";
+    /**
+     * <p>Costante per il parametro identificante la funzione di aggiunta 
+     * di strutture/soggetti collegati alle fasi.</p>
+     */
+    public static final String PART_INSERT_ACT_STRUCTS  = "ias";
+    /**
      * <p>Costante per il parametro identificante la parte di 
      * aggiunta/aggiornamento nota PxI (giudizio sintetico).</p>
      */
