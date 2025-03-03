@@ -7156,6 +7156,104 @@ public class DBWrapper extends QueryImpl {
         }
     }
     
+    
+    /**
+     * <p>Metodo per fare l'aggiornamento dei numeri d'ordine delle attivit&agrave;.</p> 
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public void updateActivities(PersonBean user, 
+                                 HashMap<String, LinkedHashMap<String, String>> params) 
+                          throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri del processo
+            LinkedHashMap<String, String> proc = params.get(PART_PROCESS);
+            // Dizionario dei parametri delle attività da aggiornare
+            LinkedHashMap<String, String> activities = params.get(PART_INSERT_ACTIVITY);
+            try {
+                // BEGIN: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                // === Se siamo qui vuol dire che ok   === //
+                // Recupera l'identificativo del processo
+                int idP = new Integer(proc.get("liv2")).intValue();;
+                // Prepara la query
+                pst = con.prepareStatement(UPDATE_ORDER_BY_ACTIVITY);
+                // Cicla sulle attività da aggiornare
+                for (java.util.Map.Entry<String, String> entry : activities.entrySet()) {
+                    // Definisce l'indice del parametro da passare
+                    int nextParam = NOTHING;
+                    // Prepara i parametri per l'inserimento
+                    pst.clearParameters();
+                    // Chiave e valore
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    // Converte opportunamente la chiave in identificativo
+                    int id = Integer.parseInt(key);
+                    // Converte il valore e lo amplifica per un fattore fisso
+                    int ordinale = Integer.parseInt(value)*10;
+                    // === Ordinale === //
+                    pst.setInt(++nextParam, ordinale);
+                    // === Campi automatici: id utente, ora ultima modifica, data ultima modifica === *
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());
+                    // === Identificativo attività === //
+                    pst.setInt(++nextParam, id);
+                    // === Riferimento a processo === //
+                    pst.setInt(++nextParam, idP);
+                    // === Collegamento a rilevazione === //
+                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));                    
+                    // CR (Carriage Return) o 0DH (Invio)
+                    pst.addBatch();
+                }
+                // Execute the batch updates
+                int[] relations = pst.executeBatch();
+                LOG.info(relations.length + " relazioni tra processi e input in transazione attiva.\n");
+                // END: <==
+                con.commit();
+                pst.close();
+                pst = null;
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (ArrayIndexOutOfBoundsException aiobe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, aiobe);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, npe);
+        } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+        }
+    }
+    
     /* ********************************************************** *
      *                  Metodi di ELIMINAZIONE                    *
      * ********************************************************** */
