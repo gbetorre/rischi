@@ -8,7 +8,9 @@
  *   che possono calmierare specifici rischi 
  *   - e per effettuare il monitoraggio al fine di verificare quali misure
  *   proposte sono state effettivamente attuate dai soggetti interessati
- *   alla gestione dei processi a rischio.
+ *   alla gestione dei processi a rischio e stabilire quantitativamente 
+ *   in che grado questa attuazione di misure abbia effettivamente ridotto 
+ *   i livelli di rischio.
  *
  *   Risk Mapping and Management Software (ROL-RMS),
  *   web application: 
@@ -16,7 +18,9 @@
  *   - to publish and manage, reports and information on risk
  *   - and to propose mitigation measures specifically aimed at reducing risk, 
  *   - also allowing monitoring to be carried out to see 
- *   which proposed mitigation measures were then actually implemented.
+ *   which proposed mitigation measures were then actually implemented 
+ *   and quantify how much that implementation of measures actually 
+ *   reduced risk levels.
  *   
  *   Copyright (C) 2022-2025 Giovanroberto Torre
  *   all right reserved
@@ -49,9 +53,10 @@
  * delle date, per la conversione di oggetti, per il parsing
  * di valori, etc.</li></ul></p> 
  * 
- * <code>elementi del package:<ul>
+ * <code>elementi logicamente inclusi nel package:<ul>
  * <li><em>Constants</em></li>
  * <li>Utils</li>
+ * <li>DataUrl</li>
  * </ul></code>
  * 
  * <p>Created on Mon 21 Oct 2024 01:26:07 PM CEST</p>
