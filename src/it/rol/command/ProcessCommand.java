@@ -72,7 +72,6 @@ import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
-import it.rol.bean.MeasureBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
@@ -80,6 +79,7 @@ import it.rol.bean.RiskBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
+import it.rol.util.DataUrl;
 
 
 /**
@@ -151,6 +151,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * Pagina contenente la form per inserimento input di processo_at
      */
     private static final String nomeFileAddInput = "/jsp/prInputForm.jsp";
+    /** 
+     * Pagina contenente la form per inserimento fasi di processo_at
+     */
+    private static final String nomeFileAddActivity = "/jsp/prFasiForm.jsp";
     /**
      * Nome del file json della Command (dipende dalla pagina di default)
      */
@@ -169,7 +173,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * Crea una nuova istanza di ProcessCommand
      */
     public ProcessCommand() {
-        /*;*/   // It doesn't anything
+        /*;*/   // It doesn't do anything
     }
 
 
@@ -200,11 +204,18 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_PI_NOTE,          nomeFileNote);
         nomeFile.put(PART_INSERT_PROCESS,   nomeFileSceltaTipo);
         nomeFile.put(PART_INSERT_INPUT,     nomeFileAddInput);
+        nomeFile.put(PART_INSERT_ACTIVITY,  nomeFileAddActivity);
         // Carica la hashmap contenente i titoli pagina
+        titleFile.put(PART_PROCESS,                         "Dettagli Processo");
+        titleFile.put(PART_OUTPUT,                          "Output Processo");
+        titleFile.put(PART_FACTORS,                         "Fattori Abilitanti");
+        titleFile.put(PART_INSERT_F_R_P,                    "Fattore-Rischio-Processo");
+        titleFile.put(PART_PI_NOTE,                         "Nota Giudizio Sintetico");       
         titleFile.put(new Byte(ELEMENT_LEV_1).toString(),   "Nuovo Macroprocesso");
         titleFile.put(new Byte(ELEMENT_LEV_2).toString(),   "Nuovo Processo");
         titleFile.put(new Byte(ELEMENT_LEV_3).toString(),   "Nuovo Sottoprocesso");
         titleFile.put(PART_INSERT_INPUT,                    "Aggiunta Input");
+        titleFile.put(PART_INSERT_ACTIVITY,                 "Gestione Fasi");
     }
 
 
@@ -262,11 +273,11 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         AbstractList<CodeBean> factors = new ArrayList<>();
         // Dichiara elenco di aree di rischio
         AbstractList<ProcessBean> aree = new ArrayList<>();
-        // Dichiara elenco di macroprocessi
-        AbstractList<ProcessBean> macros = new ArrayList<>();
+        // Data Url
+        DataUrl dataUrl = new DataUrl();
         // Dichiara generico elenco di elementi afferenti a un processo
         ConcurrentHashMap<String, ArrayList<?>> processElements = null;
-   
+        // Dichiara mappa ordinata con: chiavi = aree di rischio, valori = processi aggregati
         LinkedHashMap<ProcessBean, ArrayList<ProcessBean>> processIndexed = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
@@ -318,10 +329,13 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
+                        // In alcuni rami deve differenziare tra finire e continuare
+                        String action = parser.getStringParameter("action", DASH);
+                        // Estrae l'azione dal parametro 'p'
+                        /* ------------------------------------------------ *
+                         * INSERT new relation between Risk Process Factor  *
+                         * ------------------------------------------------ */                       
                         if (part.equalsIgnoreCase(PART_INSERT_F_R_P)) {
-                            /* ------------------------------------------------ *
-                             * INSERT new relation between Risk Process Factor  *
-                             * ------------------------------------------------ */
                             // Controlla che non sia già presente l'associazione 
                             int check = db.getFactorRiskProcess(user, params);
                             if (check > NOTHING) {  // Genera un errore
@@ -344,10 +358,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "newRel#rischi";
                             }
+                        /* ------------------------------------------------ *
+                         *                UPDATE a note to PxI              *
+                         * ------------------------------------------------ */                            
                         } else if (part.equalsIgnoreCase(PART_PI_NOTE)) {
-                            /* ------------------------------------------------ *
-                             *                UPDATE a note to PxI              *
-                             * ------------------------------------------------ */
                             // Aggiorna la nota
                             db.updateNote(user, params);
                             // Prepara la redirect 
@@ -362,12 +376,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                            AMPERSAND + "p" + EQ + PART_SELECT_STR +
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur;  
                             }
+                        /* ------------------------------------------------ *
+                         *        INPUT new process - type and data         *
+                         * ------------------------------------------------ */                            
                         } else if (part.equalsIgnoreCase(PART_INSERT_PROCESS)) {
-                            /* ------------------------------------------------ *
-                             *        INPUT new process - type and data         *
-                             * ------------------------------------------------ */
-                            // Deve differenziare tra finire e continuare
-                            String action = parser.getStringParameter("action", DASH);
                             // Dizionario dei parametri contenente gli estremi dell'area di rischio
                             LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
                             // Codice Area di Rischio
@@ -420,36 +432,68 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     break;
                                     
                             }
+                        /* ------------------------------------------------ *
+                         *                  INSERT Inputs                   *
+                         * ------------------------------------------------ */                            
                         } else if (part.equalsIgnoreCase(PART_INSERT_INPUT)) {
-                            /* ------------------------------------------------ *
-                             *                  INSERT Inputs                   *
-                             * ------------------------------------------------ */
                             // Deve aggiungere al dizionario dei parametri quelli di input
                             loadParams(part, req, params);
-                            // Deve differenziare tra finire e continuare
-                            String action = parser.getStringParameter("action", DASH);
                             // Inserimento input(s)
                             db.insertInputs(user, params);
                             // Differenzia l'inoltro in funzione del bottone cliccato
                             switch (action) {
-                                case "save":
-                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
-                                            AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) +
-                                            AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur;
-                                    break;
                                 case "cont":
                                     redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
+                                               AMPERSAND + "p" + EQ + PART_INSERT_ACTIVITY +
                                                AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) +
                                                AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                                AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                     break;
                                 default:
                                     redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
+                                               AMPERSAND + "p" + EQ + PART_PROCESS +
+                                               AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) +
+                                               AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                                AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                     break;
                             }
-                        }
+                        /* ------------------------------------------------ *
+                         *                 INSERT Activities                *
+                         * ------------------------------------------------ */ 
+                        } else if (part.equalsIgnoreCase(PART_INSERT_ACTIVITY)) {
+                            // Deve aggiungere al dizionario dei parametri quelli delle fasi
+                            loadParams(part, req, params);                            
+                            // Differenzia le operazioni in funzione del bottone cliccato
+                            switch (action) {
+                                case "ordb":
+                                    db.updateActivities(user, params);
+                                    String p = ref.equalsIgnoreCase(PART_PROCESS) ? PART_PROCESS : PART_INSERT_ACTIVITY;
+                                    String pliv = parser.getStringParameter("pliv2", VOID_STRING);
+                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                           .put("p", p)
+                                           .put("pliv", pliv)
+                                           .put("liv", ELEMENT_LEV_2)
+                                           .put(PARAM_SURVEY, codeSur);
+                                    redirect = dataUrl.getUrl();
+                                    break;
+                                case "cont":
+                                    //db.insertActivities(user, params);
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
+                                               AMPERSAND + "p" + EQ + PART_INSERT_ACT_STRUCTS +
+                                               AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) +
+                                               AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
+                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    break;
+                                default:
+                                    //db.insertActivities(user, params);
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
+                                               AMPERSAND + "p" + EQ + PART_PROCESS +
+                                               AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) +
+                                               AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
+                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    break;
+                            }
+                        } 
                     }
                 /* ======================== @GetMapping ======================= */
                 } else {
@@ -457,11 +501,13 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                     if (nomeFile.containsKey(part)) {
                         // Definisce un  default per la pagina jsp
                         fileJspT = nomeFile.get(part);
-                        // Viene richiesta la visualizzazione del dettaglio di un processo
+                        // Titolo pagina
+                        tP = titleFile.get(part);
+                        /* ------------------------------------------------ *
+                         * Viene richiesta la visualizzazione del dettaglio * 
+                         *         di un processo [SELECT Process]          *
+                         * ------------------------------------------------ */                       
                         if (part.equalsIgnoreCase(PART_PROCESS)) {
-                            /* ------------------------------------------------ *
-                             *                  SELECT Process                  *
-                             * ------------------------------------------------ */
                             // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                             processElements = new ConcurrentHashMap<>();
                             // Valorizza tali liste necessarie a visualizzare  i dettagli di un processo, restituendo gli indicatori corredati con le note al PxI
@@ -469,10 +515,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
+                        /* ------------------------------------------------ *
+                         *                  SELECT Output                   *
+                         * ------------------------------------------------ */                            
                         } else if (part.equalsIgnoreCase(PART_OUTPUT)) {
-                            /* ------------------------------------------------ *
-                             *                  SELECT Output                   *
-                             * ------------------------------------------------ */
                             if (idO > DEFAULT_ID) {
                                 // Recupera un output specifico
                                 output = db.getOutput(user, idO, survey);
@@ -496,19 +542,19 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 // Deve recuperare l'elenco degli output
                                 outputs = db.getOutputs(user, survey);
                             }
+                        /* ------------------------------------------------ *
+                         *                  SELECT Factors                  *
+                         * ------------------------------------------------ */                          
                         } else if (part.equalsIgnoreCase(PART_FACTORS)) {
-                            /* ------------------------------------------------ *
-                             *                  SELECT Factors                  *
-                             * ------------------------------------------------ */
                             // Deve recuperare l'elenco dei fattori abilitanti
                             factors = db.getFactors(user, survey);
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Fattori abilitanti");
+                        /* ------------------------------------------------ *
+                         *  SHOWS Form to LINK Factor TO Risk INTO Process  *
+                         * ------------------------------------------------ */                           
                         } else if (part.equalsIgnoreCase(PART_INSERT_F_R_P)) {
-                            /* ------------------------------------------------ *
-                             *  SHOWS Form to LINK Factor TO Risk INTO Process  *
-                             * ------------------------------------------------ */
                             // Deve recuperare l'elenco completo dei fattori abilitanti
                             factors = db.getFactors(user, survey);
                             // Prepara un ProcessBean di cui recuperare tutti i rischi
@@ -520,23 +566,23 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-F");
+                        /* ------------------------------------------------ *
+                         * SHOWS Form to INSERT or UPDATE a note about PxI  *
+                         * ------------------------------------------------ */  
                         } else if (part.equalsIgnoreCase(PART_PI_NOTE)) {
-                            /* ------------------------------------------------ *
-                             * SHOWS Form to INSERT or UPDATE a note about PxI  *
-                             * ------------------------------------------------ */
                             // Deve recuperare e mostrare la nota al giudizio sintetico PxI
                             pxi = db.getIndicatorPI(user, idP, survey);
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nota");
+                        /* ------------------------------------------------ *
+                         *             SHOWS Form Macro/Process             *
+                         * ------------------------------------------------ */                            
                         } else if (part.equalsIgnoreCase(PART_INSERT_PROCESS)) {
-                            /* ------------------------------------------------ *
-                             *             SHOWS Form Macro/Process             *
-                             * ------------------------------------------------ */
+                            // Controlla che esista il livello
                             if (liv > DEFAULT_ID) {
                                 aree = db.getAree(user, survey);
                                 processIndexed = decant((ArrayList<ProcessBean>) aree);
-                                //macros = retrieveMacroAtBySurvey(user, codeSur, db);
                                 // Se c'è un id macroprocesso vuol dire che bisogna aggiungere un processo
                                 if (!idM.equals(DASH)) {
                                     int idMat = Integer.parseInt(idM.substring(NOTHING, idM.indexOf(DOT)));
@@ -544,7 +590,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     macro = db.getMacroSubProcessAtByIdOrCode(user, idMat, VOID_STRING, ELEMENT_LEV_1, survey);
                                     macro.setAreaRischio(areaRischio);
                                 }
-                                // Titolo pagina
+                                // Sovrascrive Titolo pagina
                                 tP = titleFile.get(String.valueOf(liv));
                                 // Form to insert data of the process
                                 fileJspT = nomeFileAddProcess;
@@ -552,10 +598,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo Elemento");
+                        /* ------------------------------------------------ *
+                         *                 SHOWS Form Input                 *
+                         * ------------------------------------------------ */                           
                         } else if (part.equalsIgnoreCase(PART_INSERT_INPUT)) {
-                            /* ------------------------------------------------ *
-                             *                 SHOWS Form Input                 *
-                             * ------------------------------------------------ */
                              // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                              processElements = new ConcurrentHashMap<>();
                              // Recupera tutti gli Input
@@ -565,23 +611,38 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                  // Controlla che il processo esista
                                  pat = db.getProcessById(user, idP, survey);
                                  // Recupera Input estratti in base al processo
-                                 ArrayList<ItemBean> inputByPat = db.getInputs(user, idP, ELEMENT_LEV_2, survey);
+                                 ArrayList<ItemBean> inputsByPat = db.getInputs(user, idP, ELEMENT_LEV_2, survey);
                                  // Visto che ci sono, ne approfitta per impostare gli input nel processo
-                                 pat.setInputs(inputByPat);
+                                 pat.setInputs(inputsByPat);
                                  // Scarta dalla lista degli input quelli già collegati al processo corrente
-                                 listaInput = filter(listaInput, inputByPat);
+                                 listaInput = filter(listaInput, inputsByPat);
                              }
-                             // Imposta nella tabella le liste ricavate
-                             processElements.put(TIPI_LISTE[0], listaInput);
-                             processElements.put(TIPI_LISTE[1], new ArrayList<>());
-                             processElements.put(TIPI_LISTE[2], new ArrayList<>());
-                             processElements.put(TIPI_LISTE[3], new ArrayList<>());
-                             processElements.put(TIPI_LISTE[4], new ArrayList<>());
-                             
-                             // Titolo pagina
-                             tP = titleFile.get(part);
-                             // Form to insert data of the process
-                             //fileJspT = nomeFileAddProcess;
+                             // Imposta nella tabella la lista ricavata
+                             retrieveProcess(user, listaInput, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
+                        /* ------------------------------------------------ *
+                         *              SHOWS Form Activities               *
+                         * ------------------------------------------------ */                           
+                        } else if (part.equalsIgnoreCase(PART_INSERT_ACTIVITY)) {
+                            // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                            processElements = new ConcurrentHashMap<>();
+                            // Recupera il processo corrente
+                            pat = db.getProcessById(user, idP, survey);
+                            // Recupera Attività estratte in base al processo
+                            ArrayList<ActivityBean> activitiesByPat = db.getActivities(user, idP, ELEMENT_LEV_2, survey);
+                            // Imposta nella tabella la lista ricavata
+                            retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
+                        /* ------------------------------------------------ *
+                         *          SHOWS Form to Update Activities         *
+                         * ------------------------------------------------ */                           
+                        } else if (part.equalsIgnoreCase(PART_INSERT_ACT_STRUCTS)) {
+                            // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                            processElements = new ConcurrentHashMap<>();
+                            // Recupera il processo corrente
+                            pat = db.getProcessById(user, idP, survey);
+                            // Recupera Attività estratte in base al processo
+                            ArrayList<ActivityBean> activitiesByPat = db.getActivities(user, idP, ELEMENT_LEV_2, survey);
+                            // Imposta nella tabella la lista ricavata
+                            retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
@@ -590,6 +651,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                         printJson(req, macrosat, nomeFileJson, options);
                         // Imposta la jsp
                         fileJspT = nomeFileElenco;
+                        // Imposta il titolo
+                        tP = "Processi Organizzativi";
                     }
                 }
             } else {    // Manca il codice rilevazione!!
@@ -716,30 +779,49 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         /* ---------------------------------------------------- *
          *              Parametri inserimento Input             *
          * ---------------------------------------------------- */
-        if (part.equals(PART_INSERT_INPUT)) {
-            LinkedHashMap<String, String> input = new LinkedHashMap<>();
-            // Suffissi convenzionali per i parametri di input
-            String inputName = "n";
-            String inputDesc = "d";
-            String inputFlag = "f";
-            String inputExist = "e";
-            // Input da inserire
-            String[] input1 = req.getParameterValues("in-newn");
-            String[] input2 = req.getParameterValues("in-desc");
-            String[] input3 = req.getParameterValues("in-type");
-            String[] input0 = req.getParameterValues("in-name");
-            // Aggiunge tutti gli elementi dei nuovi input definiti dall'utente
-            decantInputs(inputName, input1, input);
-            decantInputs(inputDesc, input2, input);
-            decantInputs(inputFlag, input3, input);
-            // Aggiunge i nomi e gli id di input esistenti, da collegare
-            decantInputs(inputExist, input0, input);
-            // Aggiunge il numero di input da collegare
-            String inputToLink = (input0[NOTHING].equals(VOID_STRING)) ? String.valueOf(NOTHING) : String.valueOf(input0.length);
-            input.put("ine", inputToLink);
-            // Aggiunge tutti i parametri degli input ai parametri della richiesta
-            formParams.put(part, input);
-        } 
+        switch (part) {
+            case (PART_INSERT_INPUT): {
+                LinkedHashMap<String, String> input = new LinkedHashMap<>();
+                // Suffissi convenzionali per i parametri di input
+                String inputName = "n";
+                String inputDesc = "d";
+                String inputFlag = "f";
+                String inputExist = "e";
+                // Input da inserire
+                String[] input1 = req.getParameterValues("in-newn");
+                String[] input2 = req.getParameterValues("in-desc");
+                String[] input3 = req.getParameterValues("in-type");
+                String[] input0 = req.getParameterValues("in-name");
+                // Aggiunge tutti gli elementi dei nuovi input definiti dall'utente
+                decantInputs(inputName, input1, input);
+                decantInputs(inputDesc, input2, input);
+                decantInputs(inputFlag, input3, input);
+                // Aggiunge i nomi e gli id di input esistenti, da collegare
+                decantInputs(inputExist, input0, input);
+                // Aggiunge il numero di input da collegare
+                String inputToLink = (input0[NOTHING].equals(VOID_STRING)) ? String.valueOf(NOTHING) : String.valueOf(input0.length);
+                input.put("ine", inputToLink);
+                // Aggiunge tutti i parametri degli input ai parametri della richiesta
+                formParams.put(part, input);
+                break;
+            }
+            case (PART_INSERT_ACTIVITY): { 
+                LinkedHashMap<String, String> activities = new LinkedHashMap<>();
+                String action = parser.getStringParameter("action", DASH);
+                // Controlla se deve fare l'aggiornamento delle fasi
+                if (action.equals("ordb")) {
+                    // Fasi da aggiornare
+                    String[] idActs = req.getParameterValues("ac-id");
+                    String[] dbActs = req.getParameterValues("ac-ordb");
+                    // Abbina gli id ai numeri d'ordine scelti dall'utente
+                    decantActivities(idActs, dbActs, activities);
+                    // Aggiunge tutti i parametri degli input ai parametri della richiesta
+                    formParams.put(part, activities);
+                }
+                break;
+            }
+        }
+
     }
     
     
@@ -818,8 +900,6 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                     // Calcola i valori degli indicatori di rischio per il processo corrente
                     pats.add(pat);
                 }
-
-                
             }
         } catch (WebStorageException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei macro/processi in base alla rilevazione.\n";
@@ -1200,7 +1280,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
     
     
     /**
-     * <p>In ossequio al paradigma DRY (Don't Repeat Yourself), centralizza 
+     * <p>In rispetto del paradigma DRY (Don't Repeat Yourself), centralizza 
      * il codice che effettua il recupero di tutte le liste e le informazioni 
      * necessarie per costruire la pagina dei dettagli di un processo.</p>
      * <p>Inoltre, il recupero delle informazioni viene svolto non in modo 
@@ -1355,6 +1435,44 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         return indicators;
     }
     
+    
+    /**
+     * Valorizza per riferimento una mappa sincronizzata contenente tutti
+     * gli elementi appartenenti ad uno stesso processo.
+     * 
+     * @param user              Utente corrente
+     * @param listaInput        Elenco input di processo
+     * @param listaFasi         Elenco fasi in cui e' strutturato il processo
+     * @param listaOutput       Elenco output di processo
+     * @param listaRischi       Elenco rischi cui il processo e' esposto
+     * @param listaInterviste   Elenco interviste in cui il processo e' stato oggetto di indagine
+     * @param processElements   Dictionary da valorizzare ByRef
+     * @param survey            Oggetto rilevazione
+     * @throws CommandException se si verifica un puntamento a null
+     */
+    public static void retrieveProcess(PersonBean user, 
+                                       ArrayList<ItemBean> listaInput,
+                                       ArrayList<ActivityBean> listaFasi,
+                                       ArrayList<ItemBean> listaOutput,
+                                       ArrayList<RiskBean> listaRischi,
+                                       ArrayList<InterviewBean> listaInterviste,
+                                       ConcurrentHashMap<String, ArrayList<?>> processElements, 
+                                       CodeBean survey) 
+                                       throws CommandException {
+        // Controllo sull'input
+        if (processElements == null) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Controllare il valore dei parametri!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg);
+        }
+        // Imposta nella tabella le liste ricevute
+        processElements.put(TIPI_LISTE[NOTHING], listaInput);
+        processElements.put(TIPI_LISTE[ELEMENT_LEV_1], listaFasi);
+        processElements.put(TIPI_LISTE[ELEMENT_LEV_2], listaOutput);
+        processElements.put(TIPI_LISTE[ELEMENT_LEV_3], listaRischi);
+        processElements.put(TIPI_LISTE[ELEMENT_LEV_4], listaInterviste);
+    }
+    
     /* **************************************************************** *
      *                   Metodi di travaso dei dati                     *                     
      *                    (decant, filter, purge)                       *
@@ -1424,7 +1542,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
     public static LinkedHashMap<ProcessBean, ArrayList<ProcessBean>> decant(ArrayList<ProcessBean> areas)
                                                                      throws CommandException {
         LinkedHashMap<ProcessBean, ArrayList<ProcessBean>> matsByAreas = new LinkedHashMap<>(17);
-        for (ProcessBean area: areas) {
+        for (ProcessBean area : areas) {
             try {
                 matsByAreas.put(area, (ArrayList<ProcessBean>) area.getProcessi());
             } catch (NullPointerException npe) {
@@ -1505,6 +1623,27 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 params.put("in" + suffix + DASH + size,  inputs[index]);
                 size++;
                 index++;
+            }
+        }        
+    }
+    
+    
+    /**
+     * Dati in input un array di id e un array di numeri d'ordine corrispondenti, 
+     * associa gli id ai numeri d'ordine, distribuendoli
+     * in una struttura dictionary, passata come parametro, che valorizza
+     * per riferimento (ByRef).
+     * 
+     * @param suffix    livello di informazione convenzionale
+     * @param inputs    valori inseriti nella form
+     * @param params    mappa dei parametri della richiesta
+     */
+    private static void decantActivities(String[] ids,
+                                         String[] dbs,
+                                         LinkedHashMap<String, String> params) {
+        if (ids != null && dbs != null) { // <- Controllo sull'input
+            for (int i = 0; i < ids.length; i++) {
+                params.put(ids[i],  dbs[i]);
             }
         }        
     }
