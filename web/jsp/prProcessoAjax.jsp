@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" integrity="sha384-/frq1SRXYH/bSyou/HUp/hib7RVN1TawQYja658FEOodR/FQBKVqT9Ol+Oz3Olq5" crossorigin="anonymous">
   </c:if>
 </c:if>
-<c:set var="input" value="${requestScope.listaInput}" scope="page" />
+<c:set var="inputs" value="${requestScope.listaInput}" scope="page" />
 <c:set var="fasi" value="${requestScope.listaFasi}" scope="page" />
 <c:set var="output" value="${requestScope.listaOutput}" scope="page" />
 <c:set var="risks" value="${requestScope.listaRischi}" scope="page" />
@@ -20,9 +20,9 @@
   <c:set var="processo" value="informazione non disponibile" scope="page" />
   <c:set var="arearischio" value="informazione non disponibile" scope="page" />
 <c:choose>
-  <c:when test="${not empty input}">
-    <c:set var="processo" value="${input.get(0).labelWeb}" scope="page" />
-    <c:set var="arearischio" value="${input.get(0).nomeReale}" scope="page" />
+  <c:when test="${not empty inputs}">
+    <c:set var="processo" value="${inputs.get(0).labelWeb}" scope="page" />
+    <c:set var="arearischio" value="${inputs.get(0).nomeReale}" scope="page" />
     <script type="text/javascript">
       let myWindow;
     
@@ -35,7 +35,7 @@
 
       function openWin() {
         var token = "data?q=pr" ; // -> Command token
-        var idP = "<c:out value='${input.get(0).value2AsInt}' />";  // -> id processo (lo recupera dal primo input)
+        var idP = "<c:out value='${inputs.get(0).value2AsInt}' />";  // -> id processo (lo recupera dal primo input)
         var lev =  <c:out value="${param['liv']}" />;  // -> livello: (2 = processo_at | 3 = sottoprocesso_at)
         var url = token + "&p=pro&pliv=" + idP + "&liv=" + lev + "&r=${param['r']}" + "&out=pop";
         // e.g.: /data?q=pr&p=pro&pliv=#&liv=#&r=$
@@ -52,15 +52,15 @@
     </script>
     <div class="row">
       <div class="col-xl-7 col-md-6 mx-auto">
-        <h3 class="mt-1 m-0">Processo: <a href="${initParam.appName}/?q=pr&p=pro&pliv=${input.get(0).value2AsInt}&liv=2&r=${param['r']}"><c:out value="${processo}" /></a></h3>
+        <h3 class="mt-1 m-0">Processo: <a href="${initParam.appName}/?q=pr&p=pro&pliv=${inputs.get(0).value2AsInt}&liv=2&r=${param['r']}"><c:out value="${processo}" /></a></h3>
       </div>
       <div class="col-xl-5 col-md-6 mx-auto">
       <c:choose>
       <c:when test="${empty param['out']}">
-        <a href="data?q=pr&p=pro&pliv=${input.get(0).value2AsInt}&liv=${param['liv']}&r=${param['r']}&out=csv" class="float-right badge badge-pill lightTable bgAct20" title="Scarica i dati del processo '${processo}'">
+        <a href="data?q=pr&p=pro&pliv=${inputs.get(0).value2AsInt}&liv=${param['liv']}&r=${param['r']}&out=csv" class="float-right badge badge-pill lightTable bgAct20" title="Scarica i dati del processo '${processo}'">
           <i class="fas fa-download"></i>Scarica i dati 
         </a>
-        <a href="javascript:openWin('data?q=pr&p=pro&pliv=${input.get(0).value2AsInt}&liv=2&r=AT2022&out=pop')" class="float-right badge badge-pill lightTable bgAct23" title="Apri in una finestra separata per la stampa">
+        <a href="javascript:openWin('data?q=pr&p=pro&pliv=${inputs.get(0).value2AsInt}&liv=2&r=AT2022&out=pop')" class="float-right badge badge-pill lightTable bgAct23" title="Apri in una finestra separata per la stampa">
           <i class="fa-solid fa-arrow-up-right-from-square"></i> Apri in finestra
         </a>
       </c:when>
@@ -77,14 +77,13 @@
       <span class="badge lightTable bgAct25 text-dark"><c:out value="${arearischio}" /></span>
       <hr class="separatore" />
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples info">
-        <div class="fs-2 mb-3">
-          Input:
-          <a href="${initParam.appName}/?q=pr&p=inp&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg float-right" title="Aggiungi un nuovo input al processo corrente">
-            <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Input
-          </a>
-        </div>
+        <h3 class="bordo" id="inputs">
+          INPUT &nbsp;
+          <span class="badge badge-info float-right"><c:out value="${inputs.size()}" /></span>
+        </h3>
+        <hr class="separapoco" />
         <ul class="list-group">
-        <c:forEach var="input" items="${input}" varStatus="status">
+        <c:forEach var="input" items="${inputs}" varStatus="status">
           <c:set var="bgAct" value="bgAct4" scope="page" />
           <c:if test="${status.index mod 2 eq 0}">
             <c:set var="bgAct" value="bgAct20" scope="page" />
@@ -92,59 +91,76 @@
           <li class="list-group-item ${bgAct}"><c:out value="${input.nome}" /></li>
         </c:forEach>
         </ul>
+        <hr class="separapoco" />
+        <div class="col-sm-12 centerlayout">
+          <a href="${initParam.appName}/?q=pr&p=inp&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg" title="Aggiungi un nuovo input al processo corrente">
+            <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Input
+          </a>
+        </div>
       </div>
       <hr class="separatore" />
-      <h3 class="bordo" id="fasi">
-        Fasi del processo 
-        <button type="button" class="btn btn-success float-right">
-          <span class="badge badge-pill badge-light"><c:out value="${fasi.size()}" /></span>
-        </button>
-      </h3>
-      <table class="table table-striped risultati" id="foundPerson">
-        <thead>
+      <div class="p-3 p-md-4 border rounded-3 icon-demo-examples bgAct27">
+        <h3 class="bordo" id="fasi">
+          FASI DEL PROCESSO &nbsp;
+          <span class="badge badge-primary float-right"><c:out value="${fasi.size()}" /></span>
+        </h3>
+        <table class="table table-striped risultati" id="foundPerson">
+          <thead>
+            <tr>
+              <th width="5%" align="center">N. </th>
+              <th width="55%" align="center">Fase </th>
+              <th width="40%" align="center">Struttura <small>e/o</small> Soggetto interessato </th>
+            </tr>
+          </thead>
+          <c:forEach var="fase" items="${fasi}" varStatus="status">
           <tr>
-            <th width="5%" align="center">N. </th>
-            <th width="55%" align="center">Fase </th>
-            <th width="40%" align="center">Struttura <small>e/o</small> Soggetto interessato </th>
+            <td width="5%">
+              <c:out value="${status.count}" />
+            </td>
+            <td width="55%">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-circle" viewBox="0 0 16 16"  title="${fase.id}">
+                <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
+              </svg>
+              <c:out value="${fase.nome}" />
+            </td>
+            <td width="40%">
+            <c:forEach var="struttura" items="${fase.strutture}">
+              <a href="#" title="Struttura di organigramma">
+                <img src="${initParam.urlDirectoryImmagini}str-l${struttura.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${struttura.livello}" /> 
+                <c:out value="${struttura.prefisso}" /> <c:out value="${struttura.nome}" />
+              </a><br />
+            </c:forEach>
+            <c:forEach var="soggetto" items="${fase.soggetti}">
+            <img src="${initParam.urlDirectoryImmagini}person-fill.png" class="ico-small" alt="icona" title="Soggetto contingente" /> 
+            <c:choose>
+            <c:when test="${not empty soggetto.informativa}">
+              <c:out value="${soggetto.informativa}" />
+            </c:when>
+            <c:otherwise>
+              <c:out value="${soggetto.nome}" />
+            </c:otherwise>
+            </c:choose>
+              <br />
+            </c:forEach>
+            </td>
           </tr>
-        </thead>
-        <c:forEach var="fase" items="${fasi}" varStatus="status">
-        <tr>
-          <td width="5%">
-            <c:out value="${status.count}" />
-          </td>
-          <td width="55%">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-circle" viewBox="0 0 16 16"  title="${fase.id}">
-              <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
-            </svg>
-            <c:out value="${fase.nome}" />
-          </td>
-          <td width="40%">
-          <c:forEach var="struttura" items="${fase.strutture}">
-            <a href="#" title="Struttura di organigramma">
-              <img src="${initParam.urlDirectoryImmagini}str-l${struttura.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${struttura.livello}" /> 
-              <c:out value="${struttura.prefisso}" /> <c:out value="${struttura.nome}" />
-            </a><br />
           </c:forEach>
-          <c:forEach var="soggetto" items="${fase.soggetti}">
-          <img src="${initParam.urlDirectoryImmagini}person-fill.png" class="ico-small" alt="icona" title="Soggetto contingente" /> 
-          <c:choose>
-          <c:when test="${not empty soggetto.informativa}">
-            <c:out value="${soggetto.informativa}" />
-          </c:when>
-          <c:otherwise>
-            <c:out value="${soggetto.nome}" />
-          </c:otherwise>
-          </c:choose>
-            <br />
-          </c:forEach>
-          </td>
-        </tr>
-        </c:forEach>
-      </table>
+        </table>
+        <div class="col-sm-12 centerlayout">
+          <a href="${initParam.appName}/?q=pr&p=ina&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg" title="Aggiungi una nuova fase al processo corrente">
+            <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Fase
+          </a> &nbsp;
+          <a href="${initParam.appName}/?q=pr&p=ina&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}&ref=pro" class="btn btn-warning btn-lg text-dark text-decoration-none" id="resort" title="Modifica l'ordine delle fasi">
+            <i class="fa-solid fa-sort"></i>    &nbsp;    Modifica Ordine
+          </a>&nbsp;&nbsp;
+        </div>
+      </div>
       <hr class="separatore" />
-      <div class="p-3 p-md-4 border rounded-3 icon-demo-examples bgAct">
-        <div class="fs-2 mb-3">Output:</div>
+      <div class="p-3 p-md-4 border rounded-3 icon-demo-examples bgAct2">
+        <h3 class="bordo" id="outputs">
+          OUTPUT &nbsp;
+          <span class="badge badge-primary float-right"><c:out value="${output.size()}" /></span>
+        </h3>
         <ul class="list-group">
         <c:forEach var="outp" items="${output}" varStatus="status">
           <c:set var="bgAct" value="bgAct4" scope="page" />
@@ -167,10 +183,8 @@
       <section id="rischi-fattori-misure">
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples errorPwd">
         <h3 class="bordo">
-          Rischi, fattori abilitanti, misure 
-          <button type="button" class="btn btn-danger float-right">
-            <span class="badge badge-pill badge-light"><c:out value="${risks.size()}" /></span>
-          </button>
+          RISCHI, FATTORI, MISURE &nbsp;
+          <span class="badge badge-danger float-right"><c:out value="${risks.size()}" /></span>
         </h3>
         <c:if test="${param['msg'] eq 'newRel'}">
         <script>
@@ -258,7 +272,10 @@
       </c:otherwise>
     </c:choose>
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples bgAct13">
-        <div class="fs-2 mb-3">Valutazione del rischio:</div>
+        <h3 class="bordo">
+          VALUTAZIONE DEL RISCHIO &nbsp;
+          <span class="badge badge-danger float-right"><c:out value="${interviews.size()}" /></span>
+        </h3>
         <ol class="breadcrumb mb-4">
           <li class="breadcrumb-item active">
             Il processo &egrave; stato esaminato in&nbsp;
