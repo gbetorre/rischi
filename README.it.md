@@ -77,11 +77,11 @@ Tutte queste quantit&agrave; (livello di rischio iniziale, stimato ed effettivo)
 
 In altri termini, dato un livello di rischio iniziale, applicando determinate misure si otterra <i>sempre</i> una determinata riduzione del livello di rischio e sar&agrave; anche ricostruibile il processo tramite cui &egrave; stata determinata tale riduzione. In tal senso, l'explainability di tutto questo software &egrave; completa (e anche accessibile tramite la lettura degli stessi sorgenti pubblicati in questo repository).
 
-Gli algoritmi di mitigazione - come peraltro tutti gli algoritmi di calcolo del rischio, di calcolo del PxI, etc. - sono stati disegnati in base al know-how di personale esperto del rischio corruttivo e sono stati formalizzati completamente in fase di analisi prima di passare alla fase di implementazione. 
+Gli algoritmi di mitigazione - come peraltro tutti gli algoritmi di calcolo del rischio, di calcolo del <code>PxI</code> (quest'ultimo verr&agrave; definito [nel prossimo capitolo](#overview)), etc. - sono stati disegnati in base al know-how di personale esperto del rischio corruttivo e sono stati formalizzati completamente in fase di analisi prima di passare alla fase di implementazione. 
 
 [![Dashboard Graphics][dashboard-graph]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-graphics.png)
 <br>
-<strong>*Fig.3 - Effettuando la quantificazione degli attori coinvolti, diventa possibile produrre in modo semplice reportistiche aggregate, anche sotto forma di infografiche  (dati fittizi&#770;)*</strong><br>
+<strong>*Fig.3 - Effettuando la quantificazione dei fattori coinvolti, diventa possibile produrre in modo semplice reportistiche aggregate, anche sotto forma di infografiche  (dati fittizi&#770;)*</strong><br>
 
 ### In pratica
 Il workflow generale &egrave; suddiviso in 4 distinti step, o filoni di lavoro:
@@ -149,7 +149,7 @@ In particolare, per ogni processo sondato attraverso l'intervista, si ottengono 
 <strong>*Fig.7 - In tali casi il software riporta il motivo del mancato calcolo; se i motivi sono molteplici, vengono mostrati uno per volta finch&eacute; il problema non viene corretto (dati fittizi&#770;)*</strong>
 <br><br>
 
-Incrociando i valori ottenuti negli indicatori di probabilit&agrave; (P) con quelli ottenuti negli indicatori di impatto (I) si ottiene, per ogni processo organizzativo censito, un indice sintetico <code>P x I</code>, che esprime il livello finale di rischio cui &egrave; esposto il processo stesso.
+Incrociando i valori ottenuti negli indicatori di probabilit&agrave; (P) con quelli ottenuti negli indicatori di impatto (I) si ottiene, per ogni processo organizzativo censito, un indice sintetico <code>P x I</code>, che esprime il livello iniziale di rischio cui &egrave; esposto il processo stesso.
 
 Collegando i rischi alle (contro)misure, &egrave; possibile ottenere anche una serie di suggerimenti circa le azioni organizzative da mettere in atto al fine di ridurre gli specifici rischi corruttivi individuati.
 
@@ -193,7 +193,7 @@ L'area di rischio &egrave; il livello pi&uacute; generale: essa ha poche proprie
 <br>
 <strong>*Fig.11 - Diagramma delle classi relativo alle entit&agrave; coinvolte nella rappresentazione dei processi.*</strong>
 
-Ogni processo o sottoprocesso (ma non il macroprocesso) pu&ograve; essere a sua volta suddiviso in fasi (o attivit&agrave;). Ad ogni fase possono essere associate una o pi&ugrave; strutture e uno o pi&ugrave; soggetti terzi (che sono entit&agrave; non strutturate in organigramma ma comunque agenti sulla fase del processo).
+Ogni processo o sottoprocesso (ma non il macroprocesso) pu&ograve; essere a sua volta suddiviso in fasi (o attivit&agrave;). Ad ogni fase possono essere associate una o pi&ugrave; strutture e uno o pi&ugrave; soggetti terzi (questi ultimi sono entit&agrave; non strutturate in organigramma ma comunque agenti sulla fase del processo).
 
 Il software prevede apposite funzionalit&agrave; di navigazione nell'albero dei macroprocessi ed in quello dell'organigramma (cfr. <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png">Fig. 9</a> e <a href="https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-pro.png">10</a>), in modo da verificare rapidamente che la mappatura corrisponda a quanto effettivamente presente nell'organizzazione.
 
@@ -204,7 +204,7 @@ Inoltre, per ogni processo viene fornita una pagina di dettaglio, contenente, ol
 <strong>*Fig.12 - Esempio di pagina di dettaglio di un processo censito a fini anticorruttivi ma non ancora investigato tramite intervista &ndash; per il quale, quindi, non &egrave; stato ancora possibile determinare i livelli di rischio*</strong>
 
 ## Step 2: Calcolo del rischio (interviste e indicatori di rischio)
-Dopo aver popolato il database con le strutture, i macroprocessi e i loro sottolivelli, si pu&ograve; passare alla fase <cite>delle interviste</cite>, che consiste nel rivolgere una serie di quesiti ad una serie di specifiche strutture che presiedono uno specifico processo. 
+Dopo aver popolato il database con le strutture, i macroprocessi e i loro sottolivelli, si pu&ograve; passare alla fase <i>delle interviste</i>, che consiste nel rivolgere una serie di quesiti ad una serie di specifiche strutture che presiedono uno specifico processo. 
 
 La batteria di quesiti &egrave; ampia (pi&uacute; di 150) ma la decisione circa quali quesiti somministrare pu&ograve; essere stabilita di volta in volta dall'intervistatore, nel senso che tutti i quesiti sono facoltativi e vi sono quesiti pi&uacute; generici, che probabilmente ha senso rivolgere in ogni intervista, e quesiti pi&uacute; specifici, che ha senso somministrare soltanto se si sta prendendo in esame processi molto peculiari. 
 I quesiti sono raggruppati in <strong>ambiti di analisi</strong> e, nel caso di alcune strutture, potrebbe anche aver senso omettere i quesiti di interi ambiti di analisi.<br>
@@ -312,9 +312,9 @@ Dal momento che dispone di una serie di cruscotti e report on-demand:
 > <strong>il software offre anche specifici strumenti analitici per verificare in che misura &egrave; cambiato il livello di rischio non solo in funzione dell'applicazione ipotetica, ma anche di quella effettiva delle misure di mitigazione.</strong>
 
 Semplificando, alla fine della fase di monitoraggio verranno ottenuti alcuni report con 3 colonne:
-* <strong>il livello del PxI iniziale:</strong> determinato in base alle risposte ai quesiti date dalle strutture intervistate;
-* <strong>il livello del PxI intermedio:</strong> calcolato in base all'ipotetica applicazione delle misure di mitigazione (stima)
-* <strong>il livello del PxI finale:</strong> ricalibrato dopo aver verificato quali delle misure richieste siano state effettivamente applicate (monitoraggio).
+* <strong>il livello del PxI iniziale:</strong> determinato in base alle risposte ai quesiti date dalle strutture intervistate (quello che, [in uno dei paragrafi qui sopra](#in-sintesi), non essendo allora stato definito il significato di PxI, &egrave; stato chiamato <i>livello di rischio iniziale</i>);
+* <strong>il livello del PxI intermedio:</strong> calcolato in base all'ipotetica applicazione delle misure di mitigazione (stima - ovvero quello che [pi&ugrave; sopra](#in-sintesi) &egrave; stato chiamato <i>livello di rischio stimato</i>)
+* <strong>il livello del PxI finale:</strong> ricalibrato dopo aver verificato quali delle misure richieste siano state effettivamente applicate (monitoraggio - [pi&ugrave; sopra](#in-sintesi) chiamato <i>livello di rischio effettivo</i>).
 
 Questo tipo di report conclude il ciclo di gestione del rischio e costituisce la certificazione dei livelli di rischio prodotta dall'esperto/ufficio anticorruzione.
 
@@ -400,15 +400,15 @@ Implementare una resa degli output in molte lingue diverse &egrave; un'operazion
 Un modello consolidato, adatto alla resa di testi e titoli in un numero non prefissato di lingue diverse, &egrave; facilmente implementabile estendendo il database tramite: 
 1. l'aggiunta di una tabella di traduzione per ogni tabella che contiene elementi testuali da tradurre e 
 2. riscrivendo le query con l'aggiunta di LEFT OUTER JOIN che permettano di recuperare il valore tradotto, se presente.<br>
-<sub>Per approfondire &egrave; possibile far riferimento al paper <cite>A Framework for the Internationalization of Data-Intensive Web Applications</cite></sub>
+<sub>Per approfondire &egrave; possibile far riferimento al paper <i>A Framework for the Internationalization of Data-Intensive Web Applications</i></sub>
 
 ### Sicurezza
-Il sistema &egrave; gi&agrave; predisposto per gestire una serie di attacchi, quali la SQL Injection o alcuni attacchi di tipo Cross-site request forgery (CSRF).
-Inoltre, implementa la sessione utente, il cui stato controlla sistematicamente, e alcuni meccanismi per prevenire attacchi di tipo DDOS, come ad esempio il caching.
-
 [![Error 505][product-error2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/deniedAccess.png)
 <br>
-<strong>*Fig.27 - Schermata di errore in caso di tentativo di accesso senza corretta autenticazione*</strong>
+<strong>*Fig.27 - Schermata di errore mostrata in caso di tentativo di accesso senza corretta autenticazione*</strong>
+
+Il sistema &egrave; gi&agrave; predisposto per gestire una serie di attacchi, quali la SQL Injection o alcuni attacchi di tipo Cross-site request forgery (CSRF).
+Inoltre, implementa la sessione utente, il cui stato controlla sistematicamente, e alcuni meccanismi per prevenire attacchi di tipo DDOS, come ad esempio il caching.
 
 Tuttavia, se dovesse essere aperto al pubblico, sarebbe necessario effettuare una revisione in merito alla sicurezza e sarebbe necessario implementare una serie di ulteriori controlli per garantire la validit&agrave; delle assunzioni effettuate in ciascun punto della navigazione, ed in particolare nei punti in cui si opera in scrittura sui dati.
 
@@ -482,6 +482,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.2.2] (03/03/2025) Implementata funzionalit&agrave; di modifica dell'ordinamento delle fasi collegate ad un processo
 - [2.2.1] (25/02/2025) Implementata possibilit&agrave; di collegare molteplici input a un processo in una sola operazione
 - [2.2.0] (19/02/2025) Implementata funzionalit&agrave; di inserimento input di processo
 - [2.1.9] (14/02/2025) Miglioramenti nella presentazione (home)

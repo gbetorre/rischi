@@ -36,7 +36,7 @@
 <!-- TABLE OF CONTENTS -->
 
 # Risk Mapping Software
-The web application for <cite>corruption risk mapping</cite> is intended to help Entities, Public Administrations and investee companies to <strong>automatically quantify the corruption risk</strong> to which their organizational processes are exposed and direct them to implement appropriate countermeasures.
+The web application for <i>corruption risk mapping</i> is intended to help Entities, Public Administrations and investee companies to <strong>automatically quantify the corruption risk</strong> to which their organizational processes are exposed and direct them to implement appropriate countermeasures.
 
 [![Product Landing Page][product-landing2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png)
 <br>
@@ -196,7 +196,7 @@ Furthermore, a detail page is provided for each process that contains not only t
 <strong>*Fig.12 - Example of a detail page of a process surveyed for anti-corruption purposes*</strong>
 
 ## Step 2: Risk calculation (interviews and indicators)
-After populating the database with structures, macroprocesses and their sublayers, one can move on to the <cite>interviews</cite> phase, which consists of asking a series of questions to a number of specific structures that preside over a specific process. 
+After populating the database with structures, macroprocesses and their sublayers, one can move on to the <i>interviews</i> phase, which consists of asking a series of questions to a number of specific structures that preside over a specific process. 
 
 The battery of questions is very large (more than 150) but the decision about which questions to administer can be determined by the interviewer; in fact, all questions are optional, and there are more general questions, which probably make sense to address in every interview, and more specific questions, which only make sense to administer if you are looking at very specific processes. The questions are grouped into areas of analysis and, in the case of some structures, it might even make sense to omit questions from entire areas of analysis.<br>
 
@@ -363,7 +363,7 @@ Implementing output rendering in many different languages is a relatively simple
 A well-established model, suitable for rendering text and titles in an unfixed number of different languages, is easily implemented by extending the database by: 
 * adding a translation table for each table that contains text elements to be translated, and 
 * rewriting the queries with the addition of LEFT OUTER JOINs to retrieve the translated value, if any.<br>
-<sub>See also the paper <cite>A Framework for the Internationalization of Data-Intensive Web Applications</cite></sub>
+<sub>See also the paper <i>A Framework for the Internationalization of Data-Intensive Web Applications</i></sub>
 
 ### Security Profiles.
 [![Error 505][product-error2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/deniedAccess.png)
@@ -421,10 +421,11 @@ it does not identify whether the version is stable or not (an aspect usually ide
 nor does it have relevant jumps according to high-impact changes (e.g., moving from version 6.1.38 to version 7.0.1 of VirtualBox, which marked a fairly big change); 
 in the case of the current application, in fact, version numbers have only the signficance of keeping track of releases and deploys 
 (1.1.9 = XIX deploy; 1.2.0 = XX deploy; 1.9.9 = IC deploy; 2.0.0 = C deploy)</p>
-<cite>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</cite>
+<i>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</i>
 </sub>
 
 ### 2025
+- [2.2.2] (03/03/2025) Added facility to update the order of activities linked to a process
 - [2.2.1] (25/02/2025) Added facility to insert multiple inputs through a single submission
 - [2.2.0] (19/02/2025) Added facility to insert new inputs and/or link an existing input to a process
 - [2.1.9] (14/02/2025) Presentation improvements (home)
