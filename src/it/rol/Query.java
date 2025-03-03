@@ -2308,6 +2308,19 @@ public interface Query extends Serializable {
             "   WHERE cod_indicatore = 'PxI'" +
             "       AND id_processo_at = ?" +
             "       AND id_rilevazione = ?";
+    
+    /**
+     * <p>Query per aggiornamento di una nota di un giudizio sintetico.</p>
+     */
+    public static final String UPDATE_ORDER_BY_ACTIVITY =
+            "UPDATE attivita" +
+            "   SET ordinale  = ?" +
+            "   ,  data_ultima_modifica =   ?" +
+            "   ,  ora_ultima_modifica =    ?" +
+            "   ,  id_usr_ultima_modifica = ?" +
+            "   WHERE id = ?" +
+            "       AND id_processo_at = ?" +
+            "       AND id_rilevazione = ?";
 
     /* ********************************************************************** *
      *                         Query di eliminazione                          *
