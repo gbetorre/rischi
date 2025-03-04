@@ -2267,6 +2267,53 @@ public interface Query extends Serializable {
             "   ,       ? " +       // ora ultima modifica
             "   ,       ? " +       // autore ultima modifica
             "          )" ;
+    
+    /**
+     * <p>Query per inserimento di una attivit&agrave; di processo at.<br>
+     * Deve gestire manualmente l'identificativo a causa dell'avvenuto
+     * sfasamento del relativo SEQUENCE. 
+     * NOTA: Si potrebbe sincronizzare il SEQUENCE stesso.
+     * Infatti l'errore &egrave; tipico:<hr><code>
+     * ERROR: duplicate key value violates unique constraint "attivita_pkey"<br>
+     * DETAIL: Key (id)=(1) already exists.</code><hr> 
+     * Questo problema si fixa con:<pre>
+     * ALTER SEQUENCE tablename_id_seq 
+     *       RESTART WITH 
+     *          [(SELECT max(id) FROM tablename) + 1]</pre>
+     * Nel caso specifico:<pre>
+     * ALTER SEQUENCE attivita_pkey 
+     *  RESTART WITH 223;</pre>
+     * Siccome per&ograve; l'attivit&agrave; di fixare il sequence &egrave; 
+     * ortogonale alla query di inserimento, o bisognerebbe effettuare la
+     * sincronizzazione del sequence in transazione o non ci si pu&ograve;
+     * fidare del fatto che il sequence sia stato sincronizzato. Pertanto,
+     * dal momento che la sfasatura &egrave; avvenuta, continuo a gestire
+     * manualmente l'identificativo perch&eacute; questa operazione, se da
+     * un lato aumenta l'overhead di gestione, dall'altro rende immuni
+     * dal problema dello sfasamento, perlomeno in questo contesto.</p>
+     */
+    public static final String INSERT_ACTIVITY =
+            "INSERT INTO attivita" +
+            "   (   id" +
+            "   ,   codice" +        
+            "   ,   nome" +
+            "   ,   ordinale" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_processo_at" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // codice
+            "   ,       ? " +       // nome
+            "   ,       ? " +       // ordinale
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id processo
+            "   ,       ? " +       // id rilevazione
+            "          )" ;
 
     /* ********************************************************************** *
      *                         Query di aggiornamento                         *
