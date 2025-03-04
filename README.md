@@ -341,6 +341,11 @@ are useful tools which can be a valuable aid to the office or corrupt risk exper
 At the present (version <code>2.2</code>), the software is ready to be taylored, with minimal adaptation, 
 to any organization that would carry out a detailed analysis of the corruptive risk to which the processes provided by the organization itself are exposed.<br>
 
+About that, it is now possible to make the entry of processes - and their elements (phases, inputs, outputs etc.) - directly via forms.
+[![Form to insert new inputs][add-inputs]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-inputs.png)
+<br>
+<strong>*Fig.27 - Form for entering new inputs or new links between processes and existing inputs*</strong>
+
 It is also possible to estimate, with relative accuracy, how much time is needed to customize the software to suit a specific organization.<br>
 In fact, acquired:
 * the size of the organization (in particular, the number of levels of the organizational chart and the absolute number of structures to be mapped)
@@ -368,7 +373,7 @@ A well-established model, suitable for rendering text and titles in an unfixed n
 ### Security Profiles.
 [![Error 505][product-error2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/deniedAccess.png)
 <br>
-<strong>*Fig.27 - Error screen in case of login attempt without authentication*</strong>
+<strong>*Fig.28 - Error screen in case of login attempt without authentication*</strong>
 
 The system is already prepared to handle a number of attacks, such as SQL Injection or some Cross-site request forgery (CSRF) attacks.
 It also implements the user session, the state of which it systematically checks; still, it implements some mechanisms to prevent DDOS-type attacks, such as caching.
@@ -425,6 +430,7 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+- [2.2.3] (04/03/2025) Added facility to insert multiple activities through a single submission
 - [2.2.2] (03/03/2025) Added facility to update the order of activities linked to a process
 - [2.2.1] (25/02/2025) Added facility to insert multiple inputs through a single submission
 - [2.2.0] (19/02/2025) Added facility to insert new inputs and/or link an existing input to a process
@@ -639,7 +645,7 @@ Anyone with suggestions that could improve the project can download the reposito
 
 [![Repository features list][list-features]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/features.png)
 <br>
-<strong>*Fig.28 - List of features of a repository listed using Sourcetree software*</strong>
+<strong>*Fig.29 - List of features of a repository listed using Sourcetree software*</strong>
 
 
 In order to run the software, it is necessary to deploy the database on which it rests.
@@ -719,6 +725,7 @@ See also [open issues](https://github.com/gbetorre/rischi/issues) for a complete
 [add-measure]:      https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure.png
 [assign-measure]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure2.png
 [add-indicator]:    https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-indicator.png
+[add-inputs]:       https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-inputs.png
 [list-measures]:    https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-measures.png
 [list-monitor]:     https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-monitored-measures.png
 [list-indicators]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-phases_indicators.png

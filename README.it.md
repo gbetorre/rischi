@@ -378,6 +378,11 @@ effettuare un'analisi dettagliata dei rischi corruttivi cui i processi erogati
 dall'organizzazione stessa sono esposti.
 <br>
 
+A questo proposito, &egrave; ora possibile effettuare l'inserimento dei processi - e relativi elementi (fasi, input, output etc.) - direttamente tramite form.
+[![Form to insert new inputs][add-inputs]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-inputs.png)
+<br>
+<strong>*Fig.27 - Maschera per l'inserimento di nuovi input o di nuovi collegamenti tra processi ed input esistenti*</strong>
+
 &Egrave; anche possibile stimare, con relativa precisione, quanto tempo &egrave; necessario per customizzare il software in funzione di una specifica realt&agrave; organizzativa.
 Infatti, acquisite:
 * le dimensioni dell'organizzazione (in particolare, il numero di livelli dell'organigramma ed il numero assoluto di strutture da mappare),
@@ -405,7 +410,7 @@ Un modello consolidato, adatto alla resa di testi e titoli in un numero non pref
 ### Sicurezza
 [![Error 505][product-error2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/deniedAccess.png)
 <br>
-<strong>*Fig.27 - Schermata di errore mostrata in caso di tentativo di accesso senza corretta autenticazione*</strong>
+<strong>*Fig.28 - Schermata di errore mostrata in caso di tentativo di accesso senza corretta autenticazione*</strong>
 
 Il sistema &egrave; gi&agrave; predisposto per gestire una serie di attacchi, quali la SQL Injection o alcuni attacchi di tipo Cross-site request forgery (CSRF).
 Inoltre, implementa la sessione utente, il cui stato controlla sistematicamente, e alcuni meccanismi per prevenire attacchi di tipo DDOS, come ad esempio il caching.
@@ -482,6 +487,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.2.3] (04/03/2025) Implementata funzionalit&agrave; di inserimento fasi di processo
 - [2.2.2] (03/03/2025) Implementata funzionalit&agrave; di modifica dell'ordinamento delle fasi collegate ad un processo
 - [2.2.1] (25/02/2025) Implementata possibilit&agrave; di collegare molteplici input a un processo in una sola operazione
 - [2.2.0] (19/02/2025) Implementata funzionalit&agrave; di inserimento input di processo
@@ -635,44 +641,95 @@ Maggiori dettagli sui linguaggi utilizzati si trovano <a href="https://github.co
 
 
 
-<!-- GETTING STARTED 
+<!-- GETTING STARTED -->
 
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+In questa sezione vengono brevemente fornite le istruzioni per effettuare il setup locale del progetto.
+Per ottenere una copia locale funzionante del software <code>ROL-RMS</code> &egrave; possibile procedere seguendo alcuni semplici step.
 
-### Prerequisites
+### Prerequisiti
+
+Il software usa molti framework standard ma anche alcune librerie specifiche.
+In particolare, sono utilizzate:
+
+* jQuery 3.3.1 e jQuery-UI 1.12.1
+* jQuery Validate 1.17
+* jQuery additional-methods 1.17
+* jQuery highlight 3
+* jQuery dataTables 1.12.1
+* jQuery modal 
+* jQuery textarea_autosize
+* Bootstrap 4.5.2
+* Bootstrap grayscale 5.0.2
+* Bootstrap SB Admin 6.0.2
+* OrgChart 1.0.5
+
+Queste librerie sono sempre referenziabili tramite link al sito del produttore, ma disponibili anche offline tramite clone del repository dei sorgenti.
+
+La sintassi utilizzata nei sorgenti Java li rende compatibili con versioni di Java pari o superiori alla 1.8; inoltre, per compilare richiedono l'inclusione, nel build path, di tutta la JRE System Library e inoltre di:
+
+* servlet-api
+* jsp-api
+* el-api
+* jstl 1.2
+* cos.jar
+* commons-text.jar
+* commons-logging
+* commons-lang
+* commons-beanutils-core
+
+Inoltre, per stabilire la connessione al database, il sorgenti del Model usano:
+
+* postgresql-jdbc.
+
+Il database su cui l'applicazione si appoggia &egrave; un database relazionale PostgreSQL v. 12 e superiori.
+L'SQL con cui sono scritte le query &egrave; comunuque relativamente standard e facilmente adattabile a qualunque DBMS.
+
+Per far girare l'applicazione &egrave; quindi necessario come prerequisito generare prima un'istanza dello schema e valorizzarlo con una serie di elementi di base.
+A questo scopo, &egrave; possibile partire da uno script di creazione e successive query di inserimento, ma anche effettuare il restore di un dump gi&agrave; pronto.
+
+Come noto, in quest'ultimo caso, su piattaforma derivata da Debian, si pu&ograve; procedere con:
 
 This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
+* pg_restore
+  ```cd /home/<user>/Backup/dump/rol
+  createdb rol -e utf-8 -U <user>
+  pg_restore -Fc -d rol -U <user> dumpRol.sql -v
   ```
+dove <user> &egrave; l'utente concordato, che diverr&agrave; proprietario del database, che &egrave; stato inserito in precedenza come utente di db, con i relativi diritti di amministratore.
 
-### Installation
+
+### Installazione
 
 _Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+Di seguito un esempio dei passi necessari per installare ed eseguire il sistema software <code>ROL-RMS</code>.
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Ottenere un dump del database di produzione, con preimpostato un utente concordato come pienamente in grado di consultarne e amministrarne i dati
+
+2. Clonare il repo
    ```sh
-   git clone https://github.com/your_username_/Project-Name.git
+   git clone https://github.com/gbetorre/rischi.git
    ```
-3. Install NPM packages
-   ```sh
-   npm install
+3. Installare i packages necessari, compreso un web server dotato di container JSP
+
+4. Configurare il server, compilare i sorgenti ed effettuare un deploy
+
+5. Puntare il browser all'indirizzo configurato, ad esempio
    ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
+   https://localhost:8080/rol/
    ```
+
+
+[![Index Sample screen][product-landing3]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.2.png)
+<br>
+<strong>*Fig.29 - Enjoy*</strong>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
-<!-- USAGE EXAMPLES 
+<!-- USAGE EXAMPLES -->
 ## Usage
 
 Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
@@ -700,7 +757,7 @@ Chiunque abbia suggerimenti che potrebbero migliorare il progetto pu&ograve; sca
 
 [![Repository features list][list-features]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/features.png)
 <br>
-<strong>*Fig.28 - Elenco delle features di un repository listate tramite il software Sourcetree*</strong>
+<strong>*Fig.30 - Elenco delle features di un repository listate tramite il software Sourcetree*</strong>
 
 
 Per poter far girare il software &egrave; necessario effettuare un deploy del database su cui lo stesso &egrave; appoggiato.
@@ -759,6 +816,7 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [product-login]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.95.png
 [product-landing]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing1.40.png
 [product-landing2]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png
+[product-landing3]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.2.png
 [product-interview]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/interview-sample.png
 [product-algorithm]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png
 [product-orgchart]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png
@@ -780,6 +838,7 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [add-measure]:      https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure.png
 [assign-measure]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure2.png
 [add-indicator]:    https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-indicator.png
+[add-inputs]:       https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-inputs.png
 [list-measures]:    https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-measures.png
 [list-monitor]:     https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-monitored-measures.png
 [list-indicators]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/list-phases_indicators.png
