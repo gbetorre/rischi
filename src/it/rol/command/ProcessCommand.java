@@ -155,6 +155,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * Pagina contenente la form per inserimento fasi di processo_at
      */
     private static final String nomeFileAddActivity = "/jsp/prFasiForm.jsp";
+    /** 
+     * Pagina contenente la form per assegnazione strutture/soggetti a fasi
+     */
+    private static final String nomeFileAddStructs = "/jsp/prStruttureForm.jsp";
     /**
      * Nome del file json della Command (dipende dalla pagina di default)
      */
@@ -197,14 +201,15 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        nomeFile.put(PART_PROCESS,          nomeFileDettaglio);
-        nomeFile.put(PART_OUTPUT,           nomeFileOutputs);
-        nomeFile.put(PART_FACTORS,          nomeFileFattori);
-        nomeFile.put(PART_INSERT_F_R_P,     nomeFileAddFactor);
-        nomeFile.put(PART_PI_NOTE,          nomeFileNote);
-        nomeFile.put(PART_INSERT_PROCESS,   nomeFileSceltaTipo);
-        nomeFile.put(PART_INSERT_INPUT,     nomeFileAddInput);
-        nomeFile.put(PART_INSERT_ACTIVITY,  nomeFileAddActivity);
+        nomeFile.put(PART_PROCESS,              nomeFileDettaglio);
+        nomeFile.put(PART_OUTPUT,               nomeFileOutputs);
+        nomeFile.put(PART_FACTORS,              nomeFileFattori);
+        nomeFile.put(PART_INSERT_F_R_P,         nomeFileAddFactor);
+        nomeFile.put(PART_PI_NOTE,              nomeFileNote);
+        nomeFile.put(PART_INSERT_PROCESS,       nomeFileSceltaTipo);
+        nomeFile.put(PART_INSERT_INPUT,         nomeFileAddInput);
+        nomeFile.put(PART_INSERT_ACTIVITY,      nomeFileAddActivity);
+        nomeFile.put(PART_INSERT_ACT_STRUCTS,   nomeFileAddStructs);
         // Carica la hashmap contenente i titoli pagina
         titleFile.put(PART_PROCESS,                         "Dettagli Processo");
         titleFile.put(PART_OUTPUT,                          "Output Processo");
@@ -216,6 +221,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         titleFile.put(new Byte(ELEMENT_LEV_3).toString(),   "Nuovo Sottoprocesso");
         titleFile.put(PART_INSERT_INPUT,                    "Aggiunta Input");
         titleFile.put(PART_INSERT_ACTIVITY,                 "Gestione Fasi");
+        titleFile.put(PART_INSERT_ACT_STRUCTS,              "Assegnazione Strutture/Soggetti");
     }
 
 
@@ -462,13 +468,13 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                          * ------------------------------------------------ */ 
                         } else if (part.equalsIgnoreCase(PART_INSERT_ACTIVITY)) {
                             // Deve aggiungere al dizionario dei parametri quelli delle fasi
-                            loadParams(part, req, params);                            
+                            loadParams(part, req, params);
+                            String pliv = parser.getStringParameter("pliv2", VOID_STRING);
                             // Differenzia le operazioni in funzione del bottone cliccato
                             switch (action) {
                                 case "ordb":
                                     db.updateActivities(user, params);
                                     String p = ref.equalsIgnoreCase(PART_PROCESS) ? PART_PROCESS : PART_INSERT_ACTIVITY;
-                                    String pliv = parser.getStringParameter("pliv2", VOID_STRING);
                                     dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
                                            .put("p", p)
                                            .put("pliv", pliv)
@@ -477,20 +483,22 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     redirect = dataUrl.getUrl();
                                     break;
                                 case "cont":
-                                    //db.insertActivities(user, params);
-                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
-                                               AMPERSAND + "p" + EQ + PART_INSERT_ACT_STRUCTS +
-                                               AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) +
-                                               AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    db.insertActivities(user, params);
+                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                           .put("p", PART_INSERT_ACT_STRUCTS)
+                                           .put("pliv", pliv)
+                                           .put("liv", ELEMENT_LEV_2)
+                                           .put(PARAM_SURVEY, codeSur);
+                                    redirect = dataUrl.getUrl();
                                     break;
                                 default:
-                                    //db.insertActivities(user, params);
-                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
-                                               AMPERSAND + "p" + EQ + PART_PROCESS +
-                                               AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) +
-                                               AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    db.insertActivities(user, params);
+                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                           .put("p", PART_PROCESS)
+                                           .put("pliv", pliv)
+                                           .put("liv", ELEMENT_LEV_2)
+                                           .put(PARAM_SURVEY, codeSur);
+                                    redirect = dataUrl.getUrl();
                                     break;
                             }
                         } 
@@ -632,7 +640,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Imposta nella tabella la lista ricavata
                             retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
                         /* ------------------------------------------------ *
-                         *          SHOWS Form to Update Activities         *
+                         * SHOWS Form to Link Structures to Empty Activities*
                          * ------------------------------------------------ */                           
                         } else if (part.equalsIgnoreCase(PART_INSERT_ACT_STRUCTS)) {
                             // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
@@ -815,9 +823,21 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                     String[] dbActs = req.getParameterValues("ac-ordb");
                     // Abbina gli id ai numeri d'ordine scelti dall'utente
                     decantActivities(idActs, dbActs, activities);
-                    // Aggiunge tutti i parametri degli input ai parametri della richiesta
-                    formParams.put(part, activities);
+                } else {
+                    // Ordinale di partenza
+                    String dbAct = parser.getStringParameter("ac-ordb", "100");
+                    // Codice ultima fase inserita (se non ci sono fasi = COD.PROD.00)
+                    String defaultCode = req.getParameter("pat-code") + DOT + "10";
+                    String cdAct = parser.getStringParameter("ac-code", defaultCode);
+                    // Fasi da inserire
+                    String[] acts = req.getParameterValues("ac-name");
+                    // Genera i codici e li abbina ai nomi scelti dall'utente
+                    decantActivities(cdAct, acts, activities);
+                    // Aggiunge alla mappa l'ordinale di partenza
+                    activities.put("ordb", dbAct);
                 }
+                // Aggiunge i parametri attività ai parametri della richiesta
+                formParams.put(part, activities);
                 break;
             }
         }
@@ -1634,8 +1654,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * in una struttura dictionary, passata come parametro, che valorizza
      * per riferimento (ByRef).
      * 
-     * @param suffix    livello di informazione convenzionale
-     * @param inputs    valori inseriti nella form
+     * @param ids       array di id
+     * @param dbs       ordinali inseriti nella form
      * @param params    mappa dei parametri della richiesta
      */
     private static void decantActivities(String[] ids,
@@ -1645,6 +1665,126 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             for (int i = 0; i < ids.length; i++) {
                 params.put(ids[i],  dbs[i]);
             }
+        }        
+    }
+    
+    
+    /*
+     * Dati in input un array nomi di attivit&agrave; e:<ol>
+     * <li>o il massimo numero d'ordine delle attivit&agrave; gi&agrave; 
+     * collegate a un processo, se presenti;</li>
+     * <li>o un numero d'ordine di default</li></ul> 
+     * associa i nomi ai numeri d'ordine, incrementando questi ultimi
+     * e inserendo il tutto in una struttura dictionary, 
+     * passata come parametro, che valorizza
+     * per riferimento (ByRef).
+     * 
+     * @param ordinaleAsString  ordinale da cui partire per ordinare le attivita' da inserire
+     * @param attivita          attivita' da inserire, definite dall'utente
+     * @param params            mappa dei parametri della richiesta
+     * @throws CommandException se l'ordinale da cui partire e/o le attivita' non sono in formato corretto
+     *
+    private static void decantActivities(String ordinaleAsString,
+                                         String[] attivita,
+                                         LinkedHashMap<String, String> params)
+                                  throws CommandException {
+        if (attivita != null && ordinaleAsString != null) { // <- Controllo sull'input
+            try {
+                int ordinale = Integer.parseInt(ordinaleAsString);
+                if (attivita.length > NOTHING) {
+                    for (int i = 0; i < attivita.length; i++) {
+                        // Amplifica l'ordinale ricevuto
+                        ordinale += 10;
+                        params.put(String.valueOf(ordinale),  attivita[i]);
+                    }
+                } else {
+                    String msg = FOR_NAME + "Attenzione: attivita\' da inserire non definite!\n";
+                    LOG.severe(msg);
+                    throw new CommandException(msg + " Verificare i valori ricevuti come parametro.\n");
+                }
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Attenzione: impossibile ottenere un ordinale valido!\n";
+                LOG.severe(msg);
+                throw new CommandException(msg + " Verificare il numero d\'ordine rievuto come parametro.\n" + nfe.getMessage(), nfe);
+            }
+        }        
+    }*/
+    
+    
+    /**
+     * Dati in input un array nomi di attivit&agrave; e:<ol>
+     * <li>o il codice massimo delle attivit&agrave; gi&agrave; 
+     * collegate a un processo, se presenti (p.es. RIC.02.02.03
+     * assumendo che per il processo RIC.02.02 siano state definite
+     * solo 3 attivit&agrave;);</li>
+     * <li>o un codice di default composto dal codice processo
+     * pi&uacute; il suffisso 00 (p.es. CVS.01.02.00 assumendo
+     * che rispetto al processo CSV.01.02 non siano ancora state definite
+     * attivit&agrave;);</li></ul> 
+     * genera un nuovo codice univoco per ogni nome dell'array
+     * e lo associa ad ogni nome corrispondente, 
+     * inserendo il tutto in una struttura dictionary, 
+     * passata come parametro, che valorizza
+     * per riferimento (ByRef).
+     * 
+     * @param currentCode   codice da cui partire per generare i successivi
+     * @param attivita      attivita' da inserire, definite dall'utente
+     * @param params        mappa dei parametri della richiesta
+     * @throws CommandException se l'ordinale da cui partire e/o le attivita' non sono in formato corretto
+     */
+    private static void decantActivities(String currentCode,
+                                         String[] attivita,
+                                         LinkedHashMap<String, String> params)
+                                  throws CommandException {
+        if (attivita != null && currentCode != null) { // <- Controllo sull'input
+            try {
+                //String progAsString = lastActCode.substring(lastActCode.lastIndexOf(DOT) + ELEMENT_LEV_1);
+                //int prog = Integer.parseInt(progAsString);
+                
+                // Separa il codice attività passato ( oppure  se non esistevano fasi) in prefisso e parte numerica
+                String[] parts = currentCode.split("\\.");
+                // Controllo sull'input (formato XYZ.##.##.##)
+                if (parts.length != ELEMENT_LEV_4) {
+                    throw new IllegalArgumentException("Invalid code format. Expected format: PREFIX.NUMBER.NUMBER.NUMBER");
+                }
+                // Assegnazione dei tre token estratti alle variabili
+                String prefix = parts[NOTHING]; // e.g., "PER" or "RIC"
+                String matPart = parts[ELEMENT_LEV_1]; // e.g., "02" or "04"
+                String patPart = parts[ELEMENT_LEV_2]; // e.g., "02" or "04"
+                String actPart = parts[ELEMENT_LEV_3];  // come sopra
+                int number = Integer.parseInt(actPart);
+                // Cicla sui nomi delle nuove attività
+                if (attivita.length > NOTHING) {
+                    for (int i = 0; i < attivita.length; i++) {
+                        // Non considera i campi vuoti
+                        if (attivita[i].equals(VOID_STRING)) {
+                            continue;
+                        }
+                        // Incrementa la parte numerica                 
+                        number += ELEMENT_LEV_1; 
+                        // Determina quanti zeri c'erano nel codice originale
+                        int leadingZeros = actPart.length() - Integer.toString(number).length();
+                        // Costruisce una nuova parte numerica aggiungendo uno zero iniziale sse <10
+                        String newNumberPart = String.format("%0" + (leadingZeros + Integer.toString(number).length()) + "d", new Integer(number));
+                        // Genera il nuovo codice
+                        String nextCode = prefix + DOT + matPart + DOT + patPart + DOT + newNumberPart;
+                        // Abbina il nuovo codice al nome definito dall'utente
+                        params.put(nextCode,  attivita[i]);
+                    }
+                } else {
+                    String msg = FOR_NAME + "Attenzione: attivita\' da inserire non definite!\n";
+                    LOG.severe(msg);
+                    throw new CommandException(msg + " Verificare i valori ricevuti come parametro.\n");
+                }
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Attenzione: impossibile ottenere un ordinale valido!\n";
+                LOG.severe(msg);
+                throw new CommandException(msg + " Verificare il numero d\'ordine rievuto come parametro.\n" + nfe.getMessage(), nfe);
+            }
+        } else {
+            String msg = FOR_NAME + "Attenzione: parametri di input non accettati!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + " Verificare i valori ricevuti come parametro.\n");
         }        
     }
       
