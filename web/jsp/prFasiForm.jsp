@@ -16,7 +16,8 @@
       <form accept-charset="ISO-8859-1" id="ina-form" action="" method="post">
         <input type="hidden" id="mat-area" name="pliv0" value="${param['pliv0']}" />
         <input type="hidden" id="mat-code" name="pliv1" value="${param['pliv1']}" />
-        <input type="hidden" id="pat-code" name="pliv2" value="${param['pliv']}" />
+        <input type="hidden" id="pat-id" name="pliv2" value="${param['pliv']}" />
+        <input type="hidden" id="pat-code" name="pat-code" value="${process.codice}" />
         <div class="panel-heading bgAct11" id="details">
           <h5 class="fw-bold text-dark">
             <i class="fa-solid fa-file-circle-plus"></i>
@@ -47,6 +48,8 @@
               <c:when test="${not empty fasi}">
               <ul>
               <c:forEach var="act" items="${fasi}">
+                <c:set var="lastOrdb" value="${act.ordinale}" scope="page" />
+                <c:set var="lastCode" value="${act.codice}" scope="page" />
                 <li><c:out value="${act.nome}" escapeXml="false" /></li>
               </c:forEach>
               </ul>
@@ -57,11 +60,15 @@
               </div>
               </c:when>
               <c:otherwise>
+                <c:set var="lastOrdb" value="100" scope="page" />
+                <c:set var="lastCode" value="${process.codice}.00" scope="page" />
               NESSUNA
               </c:otherwise>
             </c:choose>
             </div>
           </div>
+          <input type="hidden" id="act-ordb" name="ac-ordb" value="${lastOrdb}" />
+          <input type="hidden" id="act-code" name="ac-code" value="${lastCode}" />
         <c:if test="${(empty param['ref']) or (param['ref'] ne 'pro')}">
           <hr class="separatore" />
           <div class="row">
@@ -73,7 +80,7 @@
                   <div class="row">
                     <div class="col-sm-4 mandatory-thin marginLeftSmall"><strong>Fase</strong></div>
                     <div class="col-sm-7">
-                      <input type="text" class="form-control sAct" id="at-nome" name="at-name" placeholder="Inserisci fase...">
+                      <input type="text" class="form-control sAct" id="at-nome" name="ac-name" placeholder="Inserisci fase...">
                     </div>
                     <hr class="separatore" />
                   </div>
@@ -95,17 +102,7 @@
           <hr class="separatore" />
         </div>
         <c:if test="${(empty param['ref']) or (param['ref'] ne 'pro')}">
-        <hr class="separapoco" />
-        <div class="row">
-          <div class="col-sm-12">
-            <button type="submit" class="btn btnNav align-left" id="btn-save" name="action" value="save">
-              <i class="far fa-save"></i>  Salva ed esci  <i class="fa-solid fa-circle-chevron-up"></i>
-            </button>
-            <button type="submit" class="btn btnNav bgAct14 float-right" id="btn-cont" name="action" value="cont">
-              <i class="far fa-save"></i>  Salva e continua  <i class="fa-solid fa-circle-chevron-right"></i>
-            </button>
-          </div>
-        </div>
+        <%@ include file="btnSaveCont.jspf"%>
         </c:if>
       </form>
     </div>
@@ -127,7 +124,7 @@
           });
     });
     </script>
-    <form accept-charset="ISO-8859-1" id="ord-form" method="post" action="" class="modal bgAct" style="height:440px;">
+    <form accept-charset="ISO-8859-1" id="ord-form" method="post" action="" class="modal bgAct" style="height:auto;">
       <input type="hidden" id="pat-code" name="pliv2" value="${param['pliv']}" />
       <div class="heading bgAct13">
         <hr class="separapoco">
