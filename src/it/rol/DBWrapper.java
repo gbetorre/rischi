@@ -6753,7 +6753,7 @@ public class DBWrapper extends QueryImpl {
     
     
     /**
-     * <p>Metodo per fare l'inserimento di nuovi input di processo.</p>
+     * Metodo per fare l'inserimento di nuovi input di processo.
      * Ci sono molti gradi di libert&agrave; da gestire perch&eacute; 
      * potrebbero esservi solo nuovi input, solo input esistenti 
      * oppure sia nuovi input sia input esistenti (solo la situazione
@@ -6921,6 +6921,135 @@ public class DBWrapper extends QueryImpl {
                     ; // Se piace, gestire qui la situazione di invio form vuota
                 }
                 return maxInpId;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, npe);
+            } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * Metodo per fare l'inserimento di nuove attivit&agrave; di processo.
+     * Ci potrebbe essere l'accodamento di attivit&agrave; ad attivit&agrave;
+     * gi&agrave; esistenti oppure l'inserimento di nuove attivit&agrave;
+     * rispetto ad un processo non ancora articolato.
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @return <code>int</code> - l'id del processo appena inserito
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    public int insertActivities(PersonBean user, 
+                                HashMap<String, LinkedHashMap<String, String>> params) 
+                         throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri contenente gli estremi dell'area di rischio
+            LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
+            // Dizionario dei parametri contenente gli estremi degli input
+            LinkedHashMap<String, String> activities = params.get(PART_INSERT_ACTIVITY);
+            // Dizionario delle attività ha certamente una entry
+            if (activities.size() == ELEMENT_LEV_1) {
+                ; // Se ce n'è una sola, gestire qui la situazione di invio form vuota
+            }
+            // Recupera i valori necessari all'inserimento            
+            try {
+                // Estremi della rilevazione
+                String idSurveyAsString = survey.get(PARAM_SURVEY);
+                int idSurvey = Integer.parseInt(idSurveyAsString);
+                //String codeSurvey = survey.get("code");
+                // Oggetto rilevazione ricostruito
+                //CodeBean sur = new CodeBean(idSurvey, codeSurvey, VOID_STRING, ELEMENT_LEV_1);
+                // Estremi processo
+                String idPatAsString = proat.get("liv2");
+                int idPat = Integer.parseInt(idPatAsString);
+                // Calcola l'ordinale da cui partire per gli inserimenti di nuove attività
+                String currentOrd = activities.get("ordb");
+                // Calcola l'id attività
+                int maxActId = getMax("attivita");
+                int newIdAct = maxActId;
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // === QUERY di inserimento input === //
+                pst = con.prepareStatement(INSERT_ACTIVITY);
+                // TODO: Controllare se user è superuser
+                /* === Se siamo qui vuol dire che ok   === */
+                // Cicla sulle attività da inserire
+                for (java.util.Map.Entry<String, String> entry : activities.entrySet()) {
+                    // Definisce l'indice del parametro da passare
+                    int nextParam = NOTHING;
+                    // Incrementa l'identificativo
+                    newIdAct += ELEMENT_LEV_1;
+                    // Prepara i parametri per l'inserimento
+                    pst.clearParameters();
+                    // Chiave e valore
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    // Separa il codice attività passato
+                    String[] parts = key.split("\\.");
+                    // Se la chiave non è un codice deve saltare l'inserimento
+                    if (parts.length != ELEMENT_LEV_4) {
+                        continue;
+                    }
+                    // Converte l'ordinale e lo amplifica per un addendo fisso
+                    int ordinale = Integer.parseInt(currentOrd) + 10;
+                    // === Id === //
+                    pst.setInt(++nextParam, newIdAct);
+                    // === Codice === //
+                    pst.setString(++nextParam, key);
+                    // === Nome === //
+                    pst.setString(++nextParam, value);
+                    // === Ordinale === //
+                    pst.setInt(++nextParam, ordinale);
+                    // === Campi automatici: id utente, ora ultima modifica, data ultima modifica === *
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());
+                    // === Riferimento a processo === //
+                    pst.setInt(++nextParam, idPat);
+                    // === Collegamento a rilevazione === //
+                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));                    
+                    // CR (Carriage Return) o 0DH (Invio)
+                    pst.addBatch();
+                }
+                // Execute the batch updates
+                int[] rows = pst.executeBatch();
+                LOG.info(rows.length + " attivita\' in transazione attiva.\n");
+                // END: <==
+                con.commit();
+                pst.close();
+                pst = null;
+                return rows.length;
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
                 LOG.severe(msg); 
@@ -7722,7 +7851,7 @@ public class DBWrapper extends QueryImpl {
                         // Incrementa la parte numerica                 
                         number++; 
                         // Determina quanti zeri c'erano nel codice originale
-                        int leadingZeros = numberPart.length() - Integer.toString(number).length();
+                        int leadingZeros = processPart.length() - Integer.toString(number).length();
                         // Costruisce una nuova parte numerica aggiungendo uno zero iniziale sse <10
                         String newNumberPart = String.format("%0" + (leadingZeros + Integer.toString(number).length()) + "d", new Integer(number));
                         // Genera il nuovo codice
