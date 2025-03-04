@@ -120,17 +120,8 @@
         </div>
       </c:when>
     </c:choose>
-        <hr class="separatore" /><br>
-        <div class="row">
-          <div class="col-sm-12">
-          <button type="submit" class="btn btnNav align-left" id="btn-save" name="action" value="save">
-            <i class="far fa-save"></i> Salva ed esci
-          </button>
-          <button type="submit" class="btn btnNav bgAct14 float-right" id="btn-cont" name="action" value="cont">
-            <i class="far fa-save"></i>  Salva e continua  <i class="fa-solid fa-circle-chevron-right"></i>
-          </button>
-          </div>
-        </div>
+        <hr class="separatore" />
+        <%@ include file="btnSaveCont.jspf"%>
       </div>
     </form>
     <c:set var="singleQuote" value="'" scope="page" />
