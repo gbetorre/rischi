@@ -131,15 +131,8 @@
               </a><br />
             </c:forEach>
             <c:forEach var="soggetto" items="${fase.soggetti}">
-            <img src="${initParam.urlDirectoryImmagini}person-fill.png" class="ico-small" alt="icona" title="Soggetto contingente" /> 
-            <c:choose>
-            <c:when test="${not empty soggetto.informativa}">
-              <c:out value="${soggetto.informativa}" />
-            </c:when>
-            <c:otherwise>
-              <c:out value="${soggetto.nome}" />
-            </c:otherwise>
-            </c:choose>
+              <img src="${initParam.urlDirectoryImmagini}person-fill.png" class="ico-small" alt="icona" title="Soggetto contingente" /> 
+              <span title="${soggetto.informativa}"><c:out value="${soggetto.nome}" /></span>
               <br />
             </c:forEach>
             </td>
