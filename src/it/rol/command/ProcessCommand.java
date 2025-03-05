@@ -236,15 +236,20 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
     @Override
     public void execute(HttpServletRequest req)
                  throws CommandException {
-        /* ******************************************************************** *
-         *           Crea e inizializza le variabili locali comuni              *
-         * ******************************************************************** */
+        /* -------------------------------------------------------------------- *
+         *                         Classi di servizio                           *
+         * -------------------------------------------------------------------- */
         // Databound
         DBWrapper db = null;
+        // Dataurl
+        DataUrl dataUrl = new DataUrl();
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
         // Utente loggato
         PersonBean user = null;
+        /* -------------------------------------------------------------------- *
+         *                      Parametri della richiesta                       *
+         * -------------------------------------------------------------------- */
         // Recupera o inizializza 'codice rilevazione' (Survey)
         String codeSur = parser.getStringParameter("r", DASH);
         // Recupera o inizializza 'tipo pagina'
@@ -263,6 +268,22 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         String idM = parser.getStringParameter("pliv1", DASH);
         // Recupera l'oggetto rilevazione a partire dal suo codice
         CodeBean survey = ConfigManager.getSurvey(codeSur);
+        // Flag di scrittura
+        Boolean writeAsObject = (Boolean) req.getAttribute("w");
+        // Explicit unboxing
+        boolean write = writeAsObject.booleanValue();
+        /* -------------------------------------------------------------------- *
+         *                       Parametri della risposta                       *
+         * -------------------------------------------------------------------- */
+        // Titolo pagina
+        String tP = null;
+        // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
+        String redirect = null;
+        // Dichiara la pagina a cui reindirizzare
+        String fileJspT = null;
+        /* -------------------------------------------------------------------- *
+         *                              Oggetti                                 *
+         * -------------------------------------------------------------------- */
         // Prepara un oggetto contenente i parametri opzionali per i nodi
         ItemBean options = new ItemBean("#009966",  VOID_STRING,  VOID_STRING, VOID_STRING, PRO_PFX, NOTHING);
         // Prepara un output di rischio corruttivo
@@ -273,36 +294,29 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         ProcessBean macro = null;
         // Processo cui si vuole aggiungere dati
         ProcessBean pat = null;
+        // Eventuale indicatore pxi di uno specifico processo
+        ItemBean pxi = null;
+        /* -------------------------------------------------------------------- *
+         *                          Elenchi di Oggetti                          *
+         * -------------------------------------------------------------------- */
         // Dichiara elenco di output
         AbstractList<ProcessBean> outputs = new ArrayList<>();
         // Dichiara elenco di fattori abilitanti
         AbstractList<CodeBean> factors = new ArrayList<>();
         // Dichiara elenco di aree di rischio
         AbstractList<ProcessBean> aree = new ArrayList<>();
-        // Data Url
-        DataUrl dataUrl = new DataUrl();
         // Dichiara generico elenco di elementi afferenti a un processo
         ConcurrentHashMap<String, ArrayList<?>> processElements = null;
         // Dichiara mappa ordinata con: chiavi = aree di rischio, valori = processi aggregati
         LinkedHashMap<ProcessBean, ArrayList<ProcessBean>> processIndexed = null;
+        // Dichiara elenco gerarchico strutture collegate alla rilevazione
+        ArrayList<DepartmentBean> structs = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
         // Tabella che conterrà i valori dei parametri passati dalle form
         HashMap<String, LinkedHashMap<String, String>> params = null;
         // Tabella degli indicatori con i valori elaborati relativi a un processo
         HashMap<String, InterviewBean> indicators = null;
-        // Eventuale indicatore pxi di uno specifico processo
-        ItemBean pxi = null;
-        // Flag di scrittura
-        Boolean writeAsObject = (Boolean) req.getAttribute("w");
-        // Explicit unboxing
-        boolean write = writeAsObject.booleanValue();
-        // Titolo pagina
-        String tP = null;
-        // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
-        String redirect = null;
-        // Dichiara la pagina a cui reindirizzare
-        String fileJspT = null;
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -651,6 +665,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             ArrayList<ActivityBean> activitiesByPat = db.getActivities(user, idP, ELEMENT_LEV_2, survey);
                             // Imposta nella tabella la lista ricavata
                             retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
+                            // Recupera le strutture della rilevazione corrente
+                            structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
+                            // Travasa le strutture in una mappa piatta indicizzata per codice
+                            //flatStructs = AuditCommand.decantStructs(structs);
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
@@ -703,6 +721,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Imposta in request elenco completo interviste che hanno sondato il processo, se presenti
         if (processElements != null && !processElements.get(TIPI_LISTE[4]).isEmpty()) {
             req.setAttribute("listaInterviste", processElements.get(TIPI_LISTE[4]));
+        }
+        // Imposta nella request elenco completo strutture
+        if (structs != null) {
+            req.setAttribute("strutture", structs);
         }
         // Imposta in request elenco indicatori di rischio con i valori raffinati
         if (indicators != null) {
@@ -1802,6 +1824,26 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         ArrayList<ItemBean> results = allObjects;
         for (ItemBean o : someObject) {
             if (allObjects.contains(o)) {
+                results.remove(o);
+            }
+        }
+        return results;
+    }
+    
+    
+    /*
+     * Dato un elenco complessivo di attivit&agrave; di processo,  
+     * scarta dall'elenco complessivo le attivit&agrave; che non hanno 
+     * collegamenti con strutture e/o soggetti contingenti.
+     * 
+     * @param allObjects elenco complessivo di oggetti
+     * @param someObject elenco specifico di oggetti
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> -  lista vettoriale ottenuta scartando dall'elenco maggiore gli elementi dell'elenco minore
+     *
+    public static ArrayList<ActivityBean> filterUnstructured(final ArrayList<ActivityBean> activities) {
+        ArrayList<ActivityBean> results = new ArrayList<>();
+        for (ActivityBean a : activities) {
+            if (a.getS.contains(o)) {
                 results.remove(o);
             }
         }
