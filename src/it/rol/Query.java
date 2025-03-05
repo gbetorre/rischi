@@ -823,7 +823,7 @@ public interface Query extends Serializable {
             "   ,   SC.id_struttura_liv3        AS \"cod3\"" +
             "   ,   SC.id_struttura_liv4        AS \"cod4\"" +
             "   FROM soggetto_contingente SC" +
-            "   WHERE SC.id = ?" +
+            "   WHERE (SC.id = ? OR -1 = ?)" +
             "       AND SC.id_rilevazione = ?" +
             "       AND SC.id_stato = 1" +
             "   ORDER BY SC.nome";
