@@ -487,6 +487,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.2.4] (05/03/2025) Prima bozza di implementazione form per assegnazione strutture/soggetti alle fasi; miglioramenti nella presentazione delle fasi (nascoste descrizioni soggetti interessati)
 - [2.2.3] (04/03/2025) Implementata funzionalit&agrave; di inserimento fasi di processo
 - [2.2.2] (03/03/2025) Implementata funzionalit&agrave; di modifica dell'ordinamento delle fasi collegate ad un processo
 - [2.2.1] (25/02/2025) Implementata possibilit&agrave; di collegare molteplici input a un processo in una sola operazione
@@ -690,22 +691,21 @@ Per far girare l'applicazione &egrave; quindi necessario come prerequisito gener
 A questo scopo, &egrave; possibile partire da uno script di creazione e successive query di inserimento, ma anche effettuare il restore di un dump gi&agrave; pronto.
 
 Come noto, in quest'ultimo caso, su piattaforma derivata da Debian, si pu&ograve; procedere con:
-
-This is an example of how to list things you need to use the software and how to install them.
 * pg_restore
   ```cd /home/<user>/Backup/dump/rol
   createdb rol -e utf-8 -U <user>
   pg_restore -Fc -d rol -U <user> dumpRol.sql -v
   ```
-dove <user> &egrave; l'utente concordato, che diverr&agrave; proprietario del database, che &egrave; stato inserito in precedenza come utente di db, con i relativi diritti di amministratore.
+dove: 
+* <code>&lt;user&gt;</code> &egrave; l'utente concordato, che diverr&agrave; proprietario del database, che &egrave; stato inserito in precedenza come utente di db, con i relativi diritti di amministratore;
+* il dump si chiama "dumpRol.sql".
 
 
 ### Installazione
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
-Di seguito un esempio dei passi necessari per installare ed eseguire il sistema software <code>ROL-RMS</code>.
+_Di seguito un esempio dei passi necessari per installare ed eseguire il sistema software <code>ROL-RMS</code>._
 
-1. Ottenere un dump del database di produzione, con preimpostato un utente concordato come pienamente in grado di consultarne e amministrarne i dati
+1. Ottenere un dump del database di produzione, con preimpostato un utente concordato pienamente in grado di consultarne e amministrarne i dati
 
 2. Clonare il repo
    ```sh
@@ -729,7 +729,7 @@ Di seguito un esempio dei passi necessari per installare ed eseguire il sistema 
 
 
 
-<!-- USAGE EXAMPLES -->
+<!-- USAGE EXAMPLES 
 ## Usage
 
 Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.

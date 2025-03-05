@@ -430,6 +430,7 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+- [2.2.4] (05/03/2025) First draft implementation about form to assign stuctures/subjects to process activities; presentation improvements (process activities)
 - [2.2.3] (04/03/2025) Added facility to insert multiple activities through a single submission
 - [2.2.2] (03/03/2025) Added facility to update the order of activities linked to a process
 - [2.2.1] (25/02/2025) Added facility to insert multiple inputs through a single submission
