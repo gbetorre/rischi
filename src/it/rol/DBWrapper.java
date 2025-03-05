@@ -648,7 +648,8 @@ public class DBWrapper extends QueryImpl {
             try {
                 pst = con.prepareStatement(GET_SUBJECT);
                 pst.clearParameters();
-                pst.setInt(++nextParam, idSubject);                
+                pst.setInt(++nextParam, idSubject);
+                pst.setInt(++nextParam, idSubject);
                 pst.setInt(++nextParam, survey.getId());
                 rs = pst.executeQuery();
                 while (rs.next()) {
@@ -985,6 +986,71 @@ public class DBWrapper extends QueryImpl {
                 throw new WebStorageException(msg + anve.getMessage(), anve);
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query dei soggetti contingenti in base all'id del processo at.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Estrae un elenco di tutti i soggetti contingenti trovati nella rilevazione corrente.</p>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param survey    oggetto contenente i dati della rilevazione
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - la lista di soggetti cercati
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public ArrayList<ItemBean> getSubjects(PersonBean user,
+                                           CodeBean survey)
+                                    throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            int nextParam = NOTHING;
+            ItemBean subj = null;
+            AbstractList<ItemBean> subjects = new ArrayList<>();
+            // TODO: Controllare se user è superuser
+            try {
+                pst = con.prepareStatement(GET_SUBJECT);
+                pst.clearParameters();
+                pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                pst.setInt(++nextParam, survey.getId());
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Crea un soggetto vuoto
+                    subj = new ItemBean();
+                    // La valorizza col contenuto della query
+                    BeanUtil.populate(subj, rs);
+                    // La aggiunge alla lista di elementi trovati
+                    subjects.add(subj);
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get Out
+                return (ArrayList<ItemBean>) subjects;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean; verificare identificativo della rilevazione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query dei soggetti contingenti in base all'id della rilevazione.\n";
                 LOG.severe(msg);
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
             } finally {
