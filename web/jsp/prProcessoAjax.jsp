@@ -146,6 +146,9 @@
           <a href="${initParam.appName}/?q=pr&p=iac&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}&ref=pro" class="btn btn-warning btn-lg text-dark text-decoration-none" id="resort" title="Modifica l'ordine delle fasi">
             <i class="fa-solid fa-sort"></i>    &nbsp;    Modifica Ordine
           </a>&nbsp;&nbsp;
+          <a href="${initParam.appName}/?q=pr&p=ias&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-primary btn-lg" title="Aggiungi una nuova struttura/soggetto alle fasi del processo corrente">
+            <i class="fa-solid fa-file-circle-plus"></i> Struttura/Soggetto
+          </a> &nbsp;
         </div>
       </div>
       <hr class="separatore" />
