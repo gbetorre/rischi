@@ -311,6 +311,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         LinkedHashMap<ProcessBean, ArrayList<ProcessBean>> processIndexed = null;
         // Dichiara elenco gerarchico strutture collegate alla rilevazione
         ArrayList<DepartmentBean> structs = null;
+        // Dichiara elenco di soggetti contingenti
+        ArrayList<ItemBean> subjects = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
         // Tabella che conterrà i valori dei parametri passati dalle form
@@ -515,7 +517,48 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     redirect = dataUrl.getUrl();
                                     break;
                             }
+                        /* ------------------------------------------------ *
+                         *  INSERT Relation between Str/Subj and Activities *
+                         * ------------------------------------------------ */ 
+                        } else if (part.equalsIgnoreCase(PART_INSERT_ACT_STRUCTS)) {
+                            ArrayList<ItemBean> activities = decantActivities(req);
+                            // Deve aggiungere al dizionario dei parametri quelli delle strutture/soggetti
+                            //loadParams(part, req, params); non ha altro da aggiugere
+                            String pliv = parser.getStringParameter("pliv2", VOID_STRING);
+                            // Differenzia le operazioni in funzione del bottone cliccato
+                            switch (action) {
+                                case "x":
+                                    db.updateActivities(user, params);
+                                    String p = ref.equalsIgnoreCase(PART_PROCESS) ? PART_PROCESS : PART_INSERT_ACTIVITY;
+                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                           .put("p", p)
+                                           .put("pliv", pliv)
+                                           .put("liv", ELEMENT_LEV_2)
+                                           .put(PARAM_SURVEY, codeSur);
+                                    redirect = dataUrl.getUrl();
+                                    break;
+                                case "cont":
+                                    //db.insertStructuresActivities(user, params);
+                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                           .put("p", PART_INSERT_OUTPUT)
+                                           .put("pliv", pliv)
+                                           .put("liv", ELEMENT_LEV_2)
+                                           .put(PARAM_SURVEY, codeSur);
+                                    redirect = dataUrl.getUrl();
+                                    break;
+                                default:
+                                    db.insertActivitiesStructures(user, activities, params);
+                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                           .put("p", PART_PROCESS)
+                                           .put("pliv", pliv)
+                                           .put("liv", ELEMENT_LEV_2)
+                                           .put(PARAM_SURVEY, codeSur);
+                                    redirect = dataUrl.getUrl();
+                                    break;
+                            }
                         } 
+
+                        
                     }
                 /* ======================== @GetMapping ======================= */
                 } else {
@@ -667,8 +710,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
                             // Recupera le strutture della rilevazione corrente
                             structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
-                            // Travasa le strutture in una mappa piatta indicizzata per codice
-                            //flatStructs = AuditCommand.decantStructs(structs);
+                            // Recupera solo i soggetti contingenti di tipo master
+                            subjects = db.getSubjects(user, true, !Query.GET_ALL, survey);
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
@@ -725,6 +768,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Imposta nella request elenco completo strutture
         if (structs != null) {
             req.setAttribute("strutture", structs);
+        }
+        // Imposta nella request elenco soggetti contingenti
+        if (subjects != null) {
+            req.setAttribute("soggetti", subjects);
         }
         // Imposta in request elenco indicatori di rischio con i valori raffinati
         if (indicators != null) {
@@ -861,7 +908,20 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 // Aggiunge i parametri attività ai parametri della richiesta
                 formParams.put(part, activities);
                 break;
-            }
+            }/*
+            case (PART_INSERT_ACT_STRUCTS): {
+                LinkedHashMap<String, String> activities = new LinkedHashMap<>();
+                String ids = parser.getStringParameter("ids", DASH);
+                String[] parts = ids.split("\\.");
+                for (int i = 0; i < parts.length; i++) {
+                    if (!parts[i].equals(VOID_STRING)) {
+                        
+                    }
+                }
+                decantActivities(parts, activities, req);
+                
+                break;
+            }*/
         }
 
     }
@@ -1691,48 +1751,6 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
     }
     
     
-    /*
-     * Dati in input un array nomi di attivit&agrave; e:<ol>
-     * <li>o il massimo numero d'ordine delle attivit&agrave; gi&agrave; 
-     * collegate a un processo, se presenti;</li>
-     * <li>o un numero d'ordine di default</li></ul> 
-     * associa i nomi ai numeri d'ordine, incrementando questi ultimi
-     * e inserendo il tutto in una struttura dictionary, 
-     * passata come parametro, che valorizza
-     * per riferimento (ByRef).
-     * 
-     * @param ordinaleAsString  ordinale da cui partire per ordinare le attivita' da inserire
-     * @param attivita          attivita' da inserire, definite dall'utente
-     * @param params            mappa dei parametri della richiesta
-     * @throws CommandException se l'ordinale da cui partire e/o le attivita' non sono in formato corretto
-     *
-    private static void decantActivities(String ordinaleAsString,
-                                         String[] attivita,
-                                         LinkedHashMap<String, String> params)
-                                  throws CommandException {
-        if (attivita != null && ordinaleAsString != null) { // <- Controllo sull'input
-            try {
-                int ordinale = Integer.parseInt(ordinaleAsString);
-                if (attivita.length > NOTHING) {
-                    for (int i = 0; i < attivita.length; i++) {
-                        // Amplifica l'ordinale ricevuto
-                        ordinale += 10;
-                        params.put(String.valueOf(ordinale),  attivita[i]);
-                    }
-                } else {
-                    String msg = FOR_NAME + "Attenzione: attivita\' da inserire non definite!\n";
-                    LOG.severe(msg);
-                    throw new CommandException(msg + " Verificare i valori ricevuti come parametro.\n");
-                }
-            } catch (NumberFormatException nfe) {
-                String msg = FOR_NAME + "Attenzione: impossibile ottenere un ordinale valido!\n";
-                LOG.severe(msg);
-                throw new CommandException(msg + " Verificare il numero d\'ordine rievuto come parametro.\n" + nfe.getMessage(), nfe);
-            }
-        }        
-    }*/
-    
-    
     /**
      * Dati in input un array nomi di attivit&agrave; e:<ol>
      * <li>o il codice massimo delle attivit&agrave; gi&agrave; 
@@ -1809,6 +1827,73 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             throw new CommandException(msg + " Verificare i valori ricevuti come parametro.\n");
         }        
     }
+    
+    
+    /**
+     * Processa la richiesta per organizzare in una struttura vettoriale
+     * lista di relazioni tra attivit&agrave; e strutture/soggetti contingenti
+     * da passare ai metodi di inserimento del Model.
+     * 
+     * @param  req   la HttpServletRequest contenente la richiesta del client
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> -  lista vettoriale ottenuta travasando i parametri passati dalla form in oggetti
+     * @throws CommandException se si verifica un puntamento a null, un problema nella conversione di tipi o altro tipo di problematica
+     */
+    private static ArrayList<ItemBean> decantActivities(HttpServletRequest req)
+                                                 throws CommandException {
+        ArrayList<ItemBean> acts = new ArrayList<>();
+        ItemBean act = null;
+        String ids = req.getParameter("ids");
+        String[] parts = ids.split("\\.");
+        for (int i = 0; i < parts.length; i++) {
+            String actId = parts[i];
+            if (!actId.equals(VOID_STRING)) {
+                act = new ItemBean();
+                boolean atLeast1 = false;
+                String liv1 = req.getParameter("liv1" + DASH + actId);
+                String liv2 = req.getParameter("liv2" + DASH + actId);
+                String liv3 = req.getParameter("liv3" + DASH + actId);
+                String liv4 = req.getParameter("liv4" + DASH + actId);
+                String subj = req.getParameter("sc" + DASH + actId);
+                act.setId(Integer.parseInt(actId));
+                // Recupero strutture da collegare
+                if (liv1 != null && !liv1.equals(VOID_STRING)) {
+                    String liv1IdAsString = liv1.substring(liv1.lastIndexOf("(") + ELEMENT_LEV_1, liv1.lastIndexOf(")"));
+                    int liv1Id = Integer.parseInt(liv1IdAsString);
+                    act.setCod1(liv1Id);
+                    atLeast1 = true;
+                }
+                if (liv2 != null && !liv2.equals(VOID_STRING)) {
+                    String liv2IdAsString = liv2.substring(liv2.lastIndexOf("(") + ELEMENT_LEV_1, liv2.lastIndexOf(")"));
+                    int liv2Id = Integer.parseInt(liv2IdAsString);
+                    act.setCod2(liv2Id);
+                    atLeast1 = true;
+                }
+                if (liv3 != null && !liv3.equals(VOID_STRING)) {
+                    String liv3IdAsString = liv3.substring(liv3.lastIndexOf("(") + ELEMENT_LEV_1, liv3.lastIndexOf(")"));
+                    int liv3Id = Integer.parseInt(liv3IdAsString);
+                    act.setCod3(liv3Id);
+                    atLeast1 = true;
+                }
+                if (liv4 != null && !liv4.equals(VOID_STRING)) {
+                    String liv4IdAsString = liv4.substring(liv4.lastIndexOf("(") + ELEMENT_LEV_1, liv4.lastIndexOf(")"));
+                    int liv4Id = Integer.parseInt(liv4IdAsString);
+                    act.setCod4(liv4Id);
+                    atLeast1 = true;
+                }
+                // Recupero soggetto da collegare
+                if (subj != null && !subj.equals(VOID_STRING)) {
+                    String subjIdAsString = subj.substring(subj.lastIndexOf("(") + ELEMENT_LEV_1, subj.lastIndexOf(")"));
+                    int subjId = Integer.parseInt(subjIdAsString);
+                    act.setValue1(subjId);
+                    atLeast1 = true;
+                }
+                if (atLeast1) {
+                    acts.add(act);
+                }
+            }
+        }
+        return acts;
+    }
       
     
     /**
@@ -1829,28 +1914,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         }
         return results;
     }
-    
-    
-    /*
-     * Dato un elenco complessivo di attivit&agrave; di processo,  
-     * scarta dall'elenco complessivo le attivit&agrave; che non hanno 
-     * collegamenti con strutture e/o soggetti contingenti.
-     * 
-     * @param allObjects elenco complessivo di oggetti
-     * @param someObject elenco specifico di oggetti
-     * @return <code>ArrayList&lt;ItemBean&gt;</code> -  lista vettoriale ottenuta scartando dall'elenco maggiore gli elementi dell'elenco minore
-     *
-    public static ArrayList<ActivityBean> filterUnstructured(final ArrayList<ActivityBean> activities) {
-        ArrayList<ActivityBean> results = new ArrayList<>();
-        for (ActivityBean a : activities) {
-            if (a.getS.contains(o)) {
-                results.remove(o);
-            }
-        }
-        return results;
-    }
-    
-    
+
     /* **************************************************************** *
      *                          Metodi di stampa                        *                     
      *                              (print)                             *
