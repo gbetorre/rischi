@@ -487,6 +487,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.2.5] (11/03/2025) Implementata funzionalit&agrave; di inserimento associazioni tra strutture/soggetti terzi e fasi di processo
 - [2.2.4] (05/03/2025) Prima bozza di implementazione form per assegnazione strutture/soggetti alle fasi; miglioramenti nella presentazione delle fasi (nascoste descrizioni soggetti interessati)
 - [2.2.3] (04/03/2025) Implementata funzionalit&agrave; di inserimento fasi di processo
 - [2.2.2] (03/03/2025) Implementata funzionalit&agrave; di modifica dell'ordinamento delle fasi collegate ad un processo
