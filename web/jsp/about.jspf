@@ -1,5 +1,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+  <style>
+  .copyleft {
+    display:inline-block;
+    transform: rotate(180deg);
+  }
+  </style>
   <script type="text/javascript">
   function pickOne(){
       var colors = 21;
@@ -19,16 +25,16 @@
         </button>
       </div>
       <div class="toast-body">
-        Versione: 2.24
+        Versione: 2.25
         <fmt:setLocale value="it_IT"/>
-        <c:set var="deployDate" value="05-03-2025" scope="page" />
+        <c:set var="deployDate" value="11-03-2025" scope="page" />
         <fmt:parseDate var="releaseDate" value="${deployDate}" pattern="dd-MM-yyyy" scope="page" />
         <fmt:formatDate var="dataRilascio" value="${releaseDate}" pattern="dd MMMMM, yyyy" />
         <span class="float-right">
           <span class="btn-small">(data di rilascio: <c:out value="${dataRilascio}" />)</span>
         </span>
         <hr class="riga" />
-          &copy; 2022 &mdash; <c:out value="${requestScope.theCurrentYear}" />&nbsp;
+          <span class="copyleft">&copy;</span> 2022 &mdash; <c:out value="${requestScope.theCurrentYear}" />&nbsp;
       </div>
     </div>
   </div>
