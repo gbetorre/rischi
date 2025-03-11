@@ -13,7 +13,7 @@
         }
     </style>
     <div class="form-custom bg-note">
-      <form accept-charset="ISO-8859-1" id="ina-form" action="" method="post">
+      <form accept-charset="ISO-8859-1" id="iac-form" action="" method="post">
         <input type="hidden" id="mat-area" name="pliv0" value="${param['pliv0']}" />
         <input type="hidden" id="mat-code" name="pliv1" value="${param['pliv1']}" />
         <input type="hidden" id="pat-id" name="pliv2" value="${param['pliv']}" />
@@ -103,6 +103,7 @@
         </div>
         <c:if test="${(empty param['ref']) or (param['ref'] ne 'pro')}">
         <%@ include file="btnSaveCont.jspf"%>
+        <hr class="separatore" />
         </c:if>
       </form>
     </div>
