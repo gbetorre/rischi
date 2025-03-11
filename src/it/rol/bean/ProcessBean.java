@@ -137,6 +137,8 @@ public class ProcessBean extends CodeBean {
     private LinkedHashMap<String, InterviewBean>  indicatori;
     /** Input collegati al processo corrente */
     private AbstractList<ItemBean> inputs;
+    /** Attivit&agrave; collegate al processo corrente */
+    private AbstractList<ActivityBean> attivita;
     /* ------------------------------------------------------------------------ *
      *                   Dati descrittivi dell'ultima modifica                  *
      * ------------------------------------------------------------------------ */
@@ -178,6 +180,7 @@ public class ProcessBean extends CodeBean {
         rilevazione = null;
         indicatori = null;
         inputs = null;
+        attivita = null;
     }
 
     
@@ -855,12 +858,36 @@ public class ProcessBean extends CodeBean {
     }
 
     /**
-     * Imposta gl input collegati al processo corrente.
+     * Imposta gli input collegati al processo corrente.
      *
      * @param inputs - inputs collegati al processo corrente, da impostare
      */
     public void setInputs(AbstractList<ItemBean> inputs) {
         this.inputs = inputs;
+    }
+    
+    
+    /* *************************************************** *
+     *        Metodi getter e setter per activities        *
+     * *************************************************** */
+    /**
+     * Restituisce una lista, completa o parziale, di attivit&agrave; 
+     * collegate al processo corrente.
+     *
+     * @return <code>attivita</code> - lista di attivita che articolano il processo
+     */
+    public AbstractList<ActivityBean> getAttivita() {
+        return attivita;
+    }
+
+    /**
+     * Imposta tutte o parte delle attivit&agrave; in cui 
+     * &egrave; articolato il processo corrente.
+     *
+     * @param attivita - attivita collegate al processo corrente, da impostare
+     */
+    public void setAttivita(AbstractList<ActivityBean> attivita) {
+        this.attivita = attivita;
     }
 
 
