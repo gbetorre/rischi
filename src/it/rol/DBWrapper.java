@@ -650,6 +650,8 @@ public class DBWrapper extends QueryImpl {
                 pst.clearParameters();
                 pst.setInt(++nextParam, idSubject);
                 pst.setInt(++nextParam, idSubject);
+                pst.setBoolean(++nextParam, GET_ALL);
+                pst.setBoolean(++nextParam, GET_ALL);
                 pst.setInt(++nextParam, survey.getId());
                 rs = pst.executeQuery();
                 while (rs.next()) {
@@ -1008,15 +1010,33 @@ public class DBWrapper extends QueryImpl {
     
     
     /**
-     * <p>Estrae un elenco di tutti i soggetti contingenti trovati nella rilevazione corrente.</p>
+     * <p>Estrae un elenco di tutti i soggetti contingenti trovati 
+     * nella rilevazione corrente:<ul>
+     * <li>filtrandoli in base al loro essere master (se true) o slave (se false) 
+     * se il III parametro (getAll) &egrave; <i>false</i>, <b>oppure</b></li>
+     * <li>indipendentemente dal loro essere master/slave
+     * se il III parametro &egrave; <i>true</i>.</li></ul>
+     * Esempi:<dl>
+     * <dt><pre>getSubjects(user, true, false, survey)</pre></dt>
+     * <dd>restituisce solo i soggetti contingenti flaggati come master</dd>
+     * <dt><pre>getSubjects(user, false, false, survey)</pre></dt>
+     * <dd>restituisce solo i soggetti contingenti flaggati come slave</dd>
+     * <dt><pre>getSubjects(user, ?, true, survey)</pre></dt>
+     * <dd>restituisce tutti i soggetti contingenti indipendentemente da come sono flaggati
+     * (indipendentemente dal valore del II parametro)</dd>
+     * </p>
      *
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param master    boolean specificante se il soggetto cercato e' master o slave
+     * @param getAll    boolean invalidante il parametro precedente se false, rispettante il parametro precedente se true
      * @param survey    oggetto contenente i dati della rilevazione
      * @return <code>ArrayList&lt;ItemBean&gt;</code> - la lista di soggetti cercati
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "static-method" })
     public ArrayList<ItemBean> getSubjects(PersonBean user,
+                                           boolean master,
+                                           boolean getAll,
                                            CodeBean survey)
                                     throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
@@ -1031,6 +1051,8 @@ public class DBWrapper extends QueryImpl {
                 pst.clearParameters();
                 pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
                 pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                pst.setBoolean(++nextParam, master);
+                pst.setBoolean(++nextParam, getAll);
                 pst.setInt(++nextParam, survey.getId());
                 rs = pst.executeQuery();
                 while (rs.next()) {
@@ -7111,6 +7133,146 @@ public class DBWrapper extends QueryImpl {
                 // Execute the batch updates
                 int[] rows = pst.executeBatch();
                 LOG.info(rows.length + " attivita\' in transazione attiva.\n");
+                // END: <==
+                con.commit();
+                pst.close();
+                pst = null;
+                return rows.length;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, npe);
+            } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * Metodo per fare l'inserimento di nuove attivit&agrave; di processo.
+     * Ci potrebbe essere l'accodamento di attivit&agrave; ad attivit&agrave;
+     * gi&agrave; esistenti oppure l'inserimento di nuove attivit&agrave;
+     * rispetto ad un processo non ancora articolato.
+     *
+     * @param user          utente loggato
+     * @param activities    lista attivita' di processo da inserire
+     * @param params        mappa contenente i parametri di navigazione
+     * @return <code>int</code> - l'id del processo appena inserito
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    public int insertActivitiesStructures(PersonBean user,
+                                          ArrayList<ItemBean> activities,
+                                          HashMap<String, LinkedHashMap<String, String>> params) 
+                                   throws WebStorageException {
+        // Controllo sull'input
+        if (activities.isEmpty() || activities.size() == NOTHING) {
+            return NOTHING;
+        }
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri contenente gli estremi dell'area di rischio
+            LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
+            // Recupera i valori necessari all'inserimento            
+            try {
+                // Estremi della rilevazione
+                String idSurveyAsString = survey.get(PARAM_SURVEY);
+                int idSurvey = Integer.parseInt(idSurveyAsString);
+                //String codeSurvey = survey.get("code");
+                // Oggetto rilevazione ricostruito
+                //CodeBean sur = new CodeBean(idSurvey, codeSurvey, VOID_STRING, ELEMENT_LEV_1);
+                // Estremi processo
+                String idPatAsString = proat.get("liv2");
+                int idPat = Integer.parseInt(idPatAsString);
+                // Calcola l'id struttura_attivita
+                int maxTableId = getMax("struttura_attivita");
+                int newIdTuple = maxTableId;
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // === QUERY di inserimento input === //
+                pst = con.prepareStatement(INSERT_ACTIVITY_STRUCTS);
+                // TODO: Controllare se user è superuser
+                /* === Se siamo qui vuol dire che ok   === */
+                // Cicla sulle attività da inserire
+                for (ItemBean values : activities) {
+                    // Definisce l'indice del parametro da passare
+                    int nextParam = NOTHING;
+                    // Incrementa l'identificativo
+                    newIdTuple += ELEMENT_LEV_1;
+                    // Prepara i parametri per l'inserimento
+                    pst.clearParameters();
+                    // === Id === //
+                    pst.setInt(++nextParam, newIdTuple);
+                    // === Id Struttura Livello 1 === //
+                    if (values.getCod1() > NOTHING) {
+                        pst.setInt(++nextParam, values.getCod1());
+                    } else {    // Dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    // === Id Struttura Livello 2 === //
+                    if (values.getCod2() > NOTHING) {
+                        pst.setInt(++nextParam, values.getCod2());
+                    } else {
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    // === Id Struttura Livello 3 === //
+                    if (values.getCod3() > NOTHING) {
+                        pst.setInt(++nextParam, values.getCod3());
+                    } else {
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    // === Id Struttura Livello 4 === //
+                    if (values.getCod4() > NOTHING) {
+                        pst.setInt(++nextParam, values.getCod4());
+                    } else {
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    // === Id Soggetto Contingente / Terzo / Interessato === //
+                    if ((int) values.getValue1() > NOTHING) {
+                        pst.setInt(++nextParam, (int) values.getValue1());
+                    } else {
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    // === Id Attività === //
+                    pst.setInt(++nextParam, values.getId());
+                    // === Collegamento a rilevazione === //
+                    pst.setInt(++nextParam, idSurvey); 
+                    // === Campi automatici: id utente, ora ultima modifica, data ultima modifica === *
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());                   
+                    // CR (Carriage Return) o 0DH (Invio)
+                    pst.addBatch();
+                }
+                // Execute the batch updates
+                int[] rows = pst.executeBatch();
+                LOG.info(rows.length + " relazioni in transazione attiva.\n");
                 // END: <==
                 con.commit();
                 pst.close();
