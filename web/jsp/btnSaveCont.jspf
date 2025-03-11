@@ -5,7 +5,7 @@
             <button type="submit" class="btn btnNav align-left" id="btn-save" name="action" value="save">
               <i class="far fa-save"></i>  Salva ed esci &nbsp;<i class="fa-solid fa-arrow-up-from-bracket"></i>
             </button>
-            <button type="submit" class="btn btnNav bgAct14 float-right" id="btn-cont" name="action" value="cont">
+            <button type="submit" class="btn btnNav bgAct14 float-right" id="btn-save" name="action" value="cont">
               <i class="far fa-save"></i>  Salva e continua  <i class="fa-solid fa-circle-chevron-right"></i>
             </button>
           </div>
