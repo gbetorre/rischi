@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="private" author="true" classpath="/home/outer-root/Programs/apache-tomcat-8.5.60/lib/jsp-api.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/ext-lib/commons-text.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/ext-lib/cos.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/lib/el-api.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/ext-lib/jstl-1.2.jar:/home/outer-root/Programs/apache-tomcat-8.5.60/lib/servlet-api.jar" destdir="javadoc" doctitle="Java Risk Management Software API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="it.rol,it.rol.bean,it.rol.command,it.rol.exception" source="1.8" sourcepath="src" splitindex="true" stylesheetfile="/home/outer-root/git/rischi/javadoc/stylesheet_kenai.css" use="true" version="true"/>
+    </target>
+</project>
