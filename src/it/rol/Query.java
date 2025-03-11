@@ -824,6 +824,7 @@ public interface Query extends Serializable {
             "   ,   SC.id_struttura_liv4        AS \"cod4\"" +
             "   FROM soggetto_contingente SC" +
             "   WHERE (SC.id = ? OR -1 = ?)" +
+            "       AND (SC.master = ? OR true = ?)" +
             "       AND SC.id_rilevazione = ?" +
             "       AND SC.id_stato = 1" +
             "   ORDER BY SC.nome";
@@ -2313,6 +2314,33 @@ public interface Query extends Serializable {
             "   ,       ? " +       // autore ultima modifica
             "   ,       ? " +       // id processo
             "   ,       ? " +       // id rilevazione
+            "          )" ;
+    
+    public static final String INSERT_ACTIVITY_STRUCTS =
+            "INSERT INTO struttura_attivita" +
+            "   (   id" +
+            "   ,   id_struttura_liv1" +        
+            "   ,   id_struttura_liv2" +
+            "   ,   id_struttura_liv3" +
+            "   ,   id_struttura_liv4" +
+            "   ,   id_soggetto_contingente" +
+            "   ,   id_attivita" +
+            "   ,   id_rilevazione" +            
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       //  id
+            "   ,       ? " +       //  struttura liv 1
+            "   ,       ? " +       //  struttura liv 2
+            "   ,       ? " +       //  struttura liv 3
+            "   ,       ? " +       //  struttura liv 4
+            "   ,       ? " +       //  soggetto
+            "   ,       ? " +       //  id attività
+            "   ,       ? " +       //  id rilevazione
+            "   ,       ? " +       //  data ultima modifica
+            "   ,       ? " +       //  ora ultima modifica
+            "   ,       ? " +       //  autore ultima modifica
             "          )" ;
 
     /* ********************************************************************** *
