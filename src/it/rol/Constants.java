@@ -326,6 +326,11 @@ public interface Constants extends Serializable {
      */
     public static final String PART_INSERT_ACT_STRUCTS  = "ias";
     /**
+     * <p>Costante per il parametro identificante la funzione di aggiunta 
+     * di output.</p>
+     */
+    public static final String PART_INSERT_OUTPUT       = "ino";
+    /**
      * <p>Costante per il parametro identificante la parte di 
      * aggiunta/aggiornamento nota PxI (giudizio sintetico).</p>
      */
