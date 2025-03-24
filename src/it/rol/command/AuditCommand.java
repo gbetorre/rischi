@@ -265,7 +265,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
                 loadParams(part, parser, params);
-                /* @PostMapping */
+                /* ======================= @PostMapping ======================= */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
@@ -372,7 +372,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                         // Azione di default
                         // do delete?
                     }
-                /* @GetMapping */
+                /* ======================== @GetMapping ======================= */
                 } else {
                     /* ************************************************ *
                      *                Manage Interview Part             *
@@ -391,7 +391,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                              *              SELECT Questions Part               *
                              * ************************************************ */
                             questions = retrieveQuestions(user, codeSur, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
-                            ArrayList<ItemBean> ambits = db.getAmbits(user);
+                            ArrayList<ItemBean> ambits = db.getAmbits(user, ConfigManager.getSurvey(codeSur));
                             flatQuestions = decantQuestions(questions, ambits);
                         } else if (part.equalsIgnoreCase(PART_CONFIRM_QST)) {
                             /* ************************************************ *
@@ -860,20 +860,26 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      *
      * @param questions ArrayList di QuestionBean da indicizzare per ambito
      * @param ambits    ArrayList di ambiti cui ricondurre i quesiti
-     * @return <code>HashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
+     * @return <code>LinkedHashMap&lt;ItemBean&comma; ArrayList&lt;QuestionBean&gt;&gt;</code> - struttura di tipo Dictionary, o Mappa ordinata, avente per chiave l'ambito e per valore il Vector dei suoi quesiti
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
-    private static HashMap<ItemBean, ArrayList<QuestionBean>> decantQuestions(ArrayList<QuestionBean> questions, 
-                                                                              ArrayList<ItemBean> ambits)
-                                                                       throws CommandException {
-        HashMap<ItemBean, ArrayList<QuestionBean>> questionsByAmbit = new HashMap<>();
+    private static LinkedHashMap<ItemBean, ArrayList<QuestionBean>> decantQuestions(ArrayList<QuestionBean> questions, 
+                                                                                    ArrayList<ItemBean> ambits)
+                                                                             throws CommandException {
+        LinkedHashMap<ItemBean, ArrayList<QuestionBean>> questionsByAmbit = new LinkedHashMap<>();
         try {
             for (ItemBean ambit : ambits) {
+                int loadedQs = NOTHING;
                 int key = ambit.getId();
                 ArrayList<QuestionBean> qs = new ArrayList<>();
                 for (QuestionBean q : questions) {
                     if (q.getCod1() == key) {
                         qs.add(q);
+                        loadedQs += ELEMENT_LEV_1;
+                        // Se abbiamo caricato tutti i questiti dell'ambito...
+                        if (loadedQs == ambit.getLivello()) {
+                            break;  // ...non ha senso continuare i confronti
+                        }
                     }
                 }
                 questionsByAmbit.put(ambit, qs);
@@ -1181,7 +1187,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * del giudizio sintetico P x I, che memorizza in un oggetto 
      * associato alla chiave PI.</p>
      * <p>Il metodo &egrave; pensato per essere richiamato nel contesto di 
-     * uno specifico progetto organizzativo censito a fini anticorruttivi
+     * uno specifico processo organizzativo censito a fini anticorruttivi
      * (processo_at); l'hoverhead legato al richiamo ciclico, laddove &ndash;
      * come nei report aggregati &ndash; sia necessario calcolare gli indicatori 
      * di ogni processo, viene gestito attraverso un apposito meccanismo
@@ -1382,7 +1388,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
             indicators.put(I2, syncIndicators.get(I2));
             indicators.put(I3, syncIndicators.get(I3));
             indicators.put(I4, syncIndicators.get(I4));
-            /* Computazione alternativa:
+            /* Computazione legacy:
             //indicators.put(P2, computeP2(questByIndicator.get(P2), answerByQuestion, indicatorByCode));
             //indicators.put(P3, computeP3(questByIndicator.get(P3), answerByQuestion, indicatorByCode));
             //indicators.put(P4, computeP4(questByIndicator.get(P4), answerByQuestion, indicatorByCode));
