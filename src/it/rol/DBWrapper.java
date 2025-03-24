@@ -2126,25 +2126,30 @@ public class DBWrapper extends QueryImpl {
 
 
     /**
-     * <p>Restituisce un ArrayList contenente tutti gli ambiti di analisi trovati.</p>
+     * <p>Restituisce un ArrayList contenente tutti gli ambiti di analisi trovati
+     * nella rilevazione corrente.</p>
      *
      * @param user     oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @return <code>ArrayList&lt;ItemBean&gt;</code> - un vettore ordinato di ItemBean, che rappresentano gli ambiti di analisi trovati
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "static-method" })
-    public ArrayList<ItemBean> getAmbits(PersonBean user)
+    public ArrayList<ItemBean> getAmbits(PersonBean user,
+                                         CodeBean survey)
                                   throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs = null;
+            int nextParam = NOTHING;
             AbstractList<ItemBean> ambits = new ArrayList<>();
             try {
                 // TODO: Controllare se user è superuser
                 pst = con.prepareStatement(GET_AMBIT);
                 pst.clearParameters();
-                pst.setInt(1, GET_ALL_BY_CLAUSE);
-                pst.setInt(2, GET_ALL_BY_CLAUSE);
+                pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                pst.setInt(++nextParam, survey.getId());
+                pst.setInt(++nextParam, survey.getId());
                 rs = pst.executeQuery();
                 // Punta all'àmbito
                 while (rs.next()) {
@@ -2159,6 +2164,10 @@ public class DBWrapper extends QueryImpl {
                 pst = null;
                 // Get out
                 return (ArrayList<ItemBean>) ambits;
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean; verificare identificativo della rilevazione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "QuestionBean non valorizzato; problema nella query dei quesiti.\n";
                 LOG.severe(msg);
@@ -2252,6 +2261,8 @@ public class DBWrapper extends QueryImpl {
                     pst.clearParameters();
                     pst.setInt(++nextParam, question.getCod1());
                     pst.setInt(++nextParam, question.getCod1());
+                    pst.setInt(++nextParam, survey.getId());
+                    pst.setInt(++nextParam, survey.getId());
                     rs1 = pst.executeQuery();
                     // Punta all'àmbito
                     if (rs1.next()) {
@@ -6849,7 +6860,7 @@ public class DBWrapper extends QueryImpl {
      *
      * @param user      utente loggato
      * @param params    mappa contenente i parametri di navigazione
-     * @return <code>int</code> - l'id del processo appena inserito
+     * @return <code>int</code> - l'id dell'ultimo input prima dell'inserimento
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
     public int insertInputs(PersonBean user, 
@@ -7278,6 +7289,206 @@ public class DBWrapper extends QueryImpl {
                 pst.close();
                 pst = null;
                 return rows.length;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, npe);
+            } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * Metodo per fare l'inserimento di nuovi output di processo.
+     * Ci sono molti gradi di libert&agrave; da gestire perch&eacute; 
+     * potrebbero esservi solo nuovi output, solo output esistenti 
+     * oppure sia nuovi output sia output esistenti (solo la situazione
+     * n&eacute; nuovi output n&eacute; output esistenti va evitata).
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @return <code>int</code> - l'id dell'ultimo output prima dell'inserimento
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    public int insertOutputs(PersonBean user, 
+                             HashMap<String, LinkedHashMap<String, String>> params) 
+                      throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement ps, pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri contenente gli estremi dell'area di rischio
+            LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
+            // Dizionario dei parametri contenente gli estremi degli output
+            LinkedHashMap<String, String> output = params.get(PART_INSERT_OUTPUT);
+            // Definisce un indice per il numero di parametro da passare alla query
+            int nextParam = NOTHING;
+            // Recupera i valori necessari all'inserimento            
+            try {
+                // Estremi della rilevazione
+                String idSurveyAsString = survey.get(PARAM_SURVEY);
+                int idSurvey = Integer.parseInt(idSurveyAsString);
+                //String codeSurvey = survey.get("code");
+                // Oggetto rilevazione ricostruito
+                //CodeBean sur = new CodeBean(idSurvey, codeSurvey, VOID_STRING, ELEMENT_LEV_1);
+                // Estremi processo
+                String idPatAsString = proat.get("liv2");
+                int idPat = Integer.parseInt(idPatAsString);
+                // Calcola l'id da cui partire per gli inserimenti di nuovi input
+                int maxOutId = getMax("output");
+                int newIdOutput = maxOutId;
+                // Begin: ==>
+                con.setAutoCommit(false);
+                /* === 1. QUERY di inserimento output === */
+                ps = con.prepareStatement(INSERT_OUTPUT);
+                //ps.clearParameters();
+                /* === 2. QUERY contestuale di inserimento relazione === */
+                pst = con.prepareStatement(INSERT_OUTPUT_PROCESS);
+                // TODO: Controllare se user è superuser
+                /* === Se siamo qui vuol dire che ok   === */
+                String prefixInp = "ine";
+                String fieldName = "inn";
+                String fieldDesc = "ind";
+                // Flag per verificare che almeno un inserimento sia avvenuto
+                boolean existSome = false;
+                // Conta quanti input esistenti da collegare ci sono
+                int outputToLink = Integer.parseInt(output.get(prefixInp));
+                // L'array di input è almeno di 4; se ci sono più di 4 elementi o il primo campo "nuovo input" non è vuoto
+                if (!output.get("inn-1").equals(VOID_STRING)) {
+                    // Calcola il numero di nuovi input da inserire [n - (tot input da collegare)] / 3
+                    int n = (output.size() - (outputToLink + ELEMENT_LEV_1)) /  ELEMENT_LEV_3;
+                    // Puntatore di input corrente (input 1, input 2...)
+                    int pointerInp = ELEMENT_LEV_1;
+                    // Contatore di cicli
+                    int cycles = NOTHING;
+                    // Prepara i parametri per l'inserimento
+                    do {
+                        nextParam = NOTHING;
+                        newIdOutput += 1;
+                        // === Id === 
+                        ps.setInt(++nextParam, newIdOutput);
+                        // === Nome === 
+                        ps.setString(++nextParam, output.get(fieldName + DASH + pointerInp));
+                        // === Descrizione === 
+                        String descr = null;
+                        if (!output.get(fieldDesc + DASH + pointerInp).equals(VOID_STRING)) {
+                            descr = new String(output.get(fieldDesc + DASH + pointerInp));
+                            ps.setString(++nextParam, descr);
+                        } else {
+                            // Dato facoltativo non inserito
+                            ps.setNull(++nextParam, Types.NULL);
+                        }
+                        // === Campi automatici: id utente, ora ultima modifica, data ultima modifica === 
+                        ps.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                        ps.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                        ps.setInt(++nextParam, user.getUsrId());
+                        // === Collegamento a rilevazione === 
+                        ps.setInt(++nextParam, idSurvey);
+                        // Aggiunge allo stack
+                        ps.addBatch();
+                        /* === Collegamento a processo_at === */
+                        nextParam = NOTHING;
+                        // === Id Input === 
+                        pst.setInt(++nextParam, newIdOutput);
+                        // === Id Processo === 
+                        pst.setInt(++nextParam, idPat);
+                        // === Id Rilevazione === 
+                        pst.setInt(++nextParam, idSurvey);
+                        // === Campi automatici: id utente, ora ultima modifica, data ultima modifica === 
+                        pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                        pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                        pst.setInt(++nextParam, user.getUsrId());
+                        // Aggiunge allo stack
+                        pst.addBatch();
+                        // Incrementa il puntatore di input corrente
+                        pointerInp++;
+                        // Incrementa il contatore di cicli
+                        cycles++;
+                    } while (cycles < n);
+                    // Execute the batch updates
+                    int[] outputs = ps.executeBatch();
+                    int[] relations = pst.executeBatch();
+                    // CR (Carriage Return) o 0DH
+                    LOG.info(outputs.length + " output inseriti e " + relations.length + " relazioni tra processi e output in transazione attiva.\n");
+                    existSome = true;
+                } 
+                // Verifica se vi sono input esistenti da collegare
+                if (outputToLink > NOTHING) {
+                    // Puntatore di input corrente (input 1, input 2...)
+                    int pointerOut = ELEMENT_LEV_1;
+                    // Contatore di cicli
+                    int cycles = NOTHING;
+                    // Processa gli input da collegare
+                    do {
+                        // Resetta il contatore dei parametri
+                        nextParam = NOTHING;
+                        pst.clearParameters();
+                        // Recupera nome e (id)
+                        String value = output.get(prefixInp + DASH + pointerOut);
+                        // Recupera il nome dell'input
+                        String name = value.substring(NOTHING, value.lastIndexOf('('));
+                        // Recupera l'id dell'input
+                        String idAsString = value.substring(value.lastIndexOf('(') + 1, value.lastIndexOf(')'));
+                        int id = Integer.parseInt(idAsString);
+                        /* === Id Input === */
+                        pst.setInt(++nextParam, id);
+                        /* === Id Processo === */
+                        pst.setInt(++nextParam, idPat);
+                        /* === Id Rilevazione === */
+                        pst.setInt(++nextParam, idSurvey);
+                        /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                        pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                        pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                        pst.setInt(++nextParam, user.getUsrId());
+                        // CR (Carriage Return) o 0DH
+                        pst.addBatch();
+                        // Incrementa il puntatore di input corrente
+                        pointerOut++;
+                        // Incrementa il contatore di cicli
+                        cycles++;
+                    } while (cycles < outputToLink);
+                    // Execute the batch updates
+                    int[] relations = pst.executeBatch();
+                    // CR (Carriage Return) o 0DH
+                    LOG.info(relations.length + " relazioni tra processi e input in transazione attiva.\n");
+                    existSome = true;
+                }
+                // End: <==
+                con.commit();
+                pst.close();
+                ps.close();
+                pst = ps = null;
+                // Se non ci sono né nuovi input da inserire né input esistenti da collegare, perché siamo qui?
+                if (!existSome) {
+                    ; // Se piace, gestire qui la situazione di invio form vuota
+                }
+                return maxOutId;
             } catch (SQLException sqle) {
                 String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
                 LOG.severe(msg); 
