@@ -382,13 +382,14 @@ public interface Query extends Serializable {
             "   ,   Q.id_tipo_quesito       AS \"cod2\"" +
             "   ,   Q.id_tipo_formulazione  AS \"cod3\"" +
             "   ,   Q.id_quesito            AS \"cod4\"" +
+            "   ,   AA.ordinale             AS \"livello\"" +
             "   FROM quesito Q" +
             "       INNER JOIN ambito_analisi AA ON Q.id_ambito_analisi = AA.id" +
             "       INNER JOIN tipo_quesito TQ ON Q.id_tipo_quesito = TQ.id" +
             "       INNER JOIN tipo_formulazione TF ON Q.id_tipo_formulazione = TF.id" +
             "   WHERE id_rilevazione = ?" + 
             "       AND (Q.id = ? OR -1 = ?)" +
-            "   ORDER BY Q.id_ambito_analisi";
+            "   ORDER BY AA.ordinale, Q.id_ambito_analisi";
     
     /**
      * <p>Estrae i quesiti figli di un dato quesito padre in una data rilevazione
@@ -432,14 +433,17 @@ public interface Query extends Serializable {
      */
     public static final String GET_AMBIT =
             "SELECT DISTINCT" +
-            "       AA.id                   AS \"id\"" +
-            "   ,   AA.nome                 AS \"nome\"" +
-            "   ,   AA.valore               AS \"informativa\"" +
-            "   ,   AA.ordinale             AS \"ordinale\"" +
+            "       AA.id                       AS \"id\"" +
+            "   ,   AA.nome                     AS \"nome\"" +
+            "   ,   AA.valore                   AS \"informativa\"" +
+            "   ,   AA.ordinale                 AS \"ordinale\"" +
+            "   ,   count(Q.id_ambito_analisi)  AS \"livello\"" +
             "   FROM ambito_analisi AA" +
             "       INNER JOIN quesito Q ON AA.id = Q.id_ambito_analisi" +
             "   WHERE (AA.id = ? OR -1 = ?)" +
-            "   ORDER BY AA.id";
+            "       AND (Q.id_rilevazione = ? OR -1 = ?)" +
+            "   GROUP BY (AA.id, AA.nome, AA.valore, AA.ordinale)" +
+            "   ORDER BY AA.ordinale, AA.id";
     
     /**
      * <p>Estrae il tipo di quesito in base all'identificativo 
@@ -2316,6 +2320,10 @@ public interface Query extends Serializable {
             "   ,       ? " +       // id rilevazione
             "          )" ;
     
+    /**
+     * <p>Query per inserimento di una relazione tra una struttura 
+     * o un soggetto terzo e un'attivit&agrave; di processo.</p>
+     */
     public static final String INSERT_ACTIVITY_STRUCTS =
             "INSERT INTO struttura_attivita" +
             "   (   id" +
@@ -2341,6 +2349,50 @@ public interface Query extends Serializable {
             "   ,       ? " +       //  data ultima modifica
             "   ,       ? " +       //  ora ultima modifica
             "   ,       ? " +       //  autore ultima modifica
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di un output definito dall'utente.</p>
+     */
+    public static final String INSERT_OUTPUT =
+            "INSERT INTO output" +
+            "   (   id" +
+            "   ,   nome" +
+            "   ,   descrizione" +
+          //"   ,   ordinale" + 
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // nome
+            "   ,       ? " +       // descrizione
+          //"   ,       ? " +       // ordinale (-> let default does)
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id rilevazione
+            "          )" ;
+    
+    /**
+     * <p>Query per inserimento di una relazione tra output e processo at.</p>
+     */
+    public static final String INSERT_OUTPUT_PROCESS =
+            "INSERT INTO output_processo_at" +
+            "   (   id_output" +
+            "   ,   id_processo_at" +
+            "   ,   id_rilevazione" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       // id output
+            "   ,       ? " +       // id processo
+            "   ,       ? " +       // id rilevazione
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
             "          )" ;
 
     /* ********************************************************************** *
