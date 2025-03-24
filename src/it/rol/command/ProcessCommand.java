@@ -159,6 +159,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * Pagina contenente la form per assegnazione strutture/soggetti a fasi
      */
     private static final String nomeFileAddStructs = "/jsp/prStruttureForm.jsp";
+    /** 
+     * Pagina contenente la form per inserimento output di processo_at
+     */
+    private static final String nomeFileAddOutput = "/jsp/prOutputForm.jsp";
     /**
      * Nome del file json della Command (dipende dalla pagina di default)
      */
@@ -210,6 +214,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_INSERT_INPUT,         nomeFileAddInput);
         nomeFile.put(PART_INSERT_ACTIVITY,      nomeFileAddActivity);
         nomeFile.put(PART_INSERT_ACT_STRUCTS,   nomeFileAddStructs);
+        nomeFile.put(PART_INSERT_OUTPUT,        nomeFileAddOutput);
         // Carica la hashmap contenente i titoli pagina
         titleFile.put(PART_PROCESS,                         "Dettagli Processo");
         titleFile.put(PART_OUTPUT,                          "Output Processo");
@@ -222,6 +227,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         titleFile.put(PART_INSERT_INPUT,                    "Aggiunta Input");
         titleFile.put(PART_INSERT_ACTIVITY,                 "Gestione Fasi");
         titleFile.put(PART_INSERT_ACT_STRUCTS,              "Assegnazione Strutture/Soggetti");
+        titleFile.put(PART_INSERT_OUTPUT,                   "Aggiunta Output");
     }
 
 
@@ -256,8 +262,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         String part = parser.getStringParameter("p", DASH);
         // Recupera o inizializza eventuale parametro referral
         String ref = parser.getStringParameter("ref", DASH);
-        // Recupera o inizializza 'id processo'
+        // Id processo, nelle chiamate GET
         int idP = parser.getIntParameter("pliv", DEFAULT_ID);
+        // Id processo, nelle chiamate POST
+        String pliv = parser.getStringParameter("pliv2", VOID_STRING);
         // Recupera o inizializza livello di granularità del processo anticorruttivo
         int liv = parser.getIntParameter("liv", DEFAULT_ID);
         // Recupera o inizializza 'id output'
@@ -353,6 +361,12 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                     if (nomeFile.containsKey(part)) {
                         // In alcuni rami deve differenziare tra finire e continuare
                         String action = parser.getStringParameter("action", DASH);
+                        // Indirizzo pagina di dettaglio processo
+                        String prProcessoAjax = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
+                                                AMPERSAND + "p" + EQ + PART_PROCESS +
+                                                AMPERSAND + "pliv" + EQ + pliv +
+                                                AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
+                                                AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                         // Estrae l'azione dal parametro 'p'
                         /* ------------------------------------------------ *
                          * INSERT new relation between Risk Process Factor  *
@@ -365,7 +379,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
                                            AMPERSAND + "p" + EQ + PART_INSERT_F_R_P +
                                            AMPERSAND + "idR" + EQ + parser.getStringParameter("r-id", VOID_STRING) + 
-                                           AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
+                                           AMPERSAND + "pliv" + EQ + pliv + 
                                            AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "dupKey";
@@ -375,7 +389,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 // Prepara la redirect 
                                 redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
                                            AMPERSAND + "p" + EQ + PART_PROCESS +
-                                           AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
+                                           AMPERSAND + "pliv" + EQ + pliv + 
                                            AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "newRel#rischi";
@@ -390,7 +404,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             if (ref.equalsIgnoreCase(PART_PROCESS)) {
                                 redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
                                            AMPERSAND + "p" + EQ + PART_PROCESS +
-                                           AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) + 
+                                           AMPERSAND + "pliv" + EQ + pliv + 
                                            AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur;     
                             } else if (ref.equalsIgnoreCase(PART_SELECT_STR)) {
@@ -460,23 +474,22 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                         } else if (part.equalsIgnoreCase(PART_INSERT_INPUT)) {
                             // Deve aggiungere al dizionario dei parametri quelli di input
                             loadParams(part, req, params);
-                            // Inserimento input(s)
+                            // Inserimento input(s) (Salva...)
                             db.insertInputs(user, params);
                             // Differenzia l'inoltro in funzione del bottone cliccato
                             switch (action) {
                                 case "cont":
-                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
-                                               AMPERSAND + "p" + EQ + PART_INSERT_ACTIVITY +
-                                               AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) +
-                                               AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    // ...e Continua (-> Fasi)
+                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                           .put("p", PART_INSERT_ACTIVITY)
+                                           .put("pliv", pliv)
+                                           .put("liv", ELEMENT_LEV_2)
+                                           .put(PARAM_SURVEY, codeSur);
+                                    redirect = dataUrl.getUrl();
                                     break;
                                 default:
-                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
-                                               AMPERSAND + "p" + EQ + PART_PROCESS +
-                                               AMPERSAND + "pliv" + EQ + parser.getStringParameter("pliv2", VOID_STRING) +
-                                               AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    // ...ed Esci
+                                    redirect = prProcessoAjax;
                                     break;
                             }
                         /* ------------------------------------------------ *
@@ -485,11 +498,12 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                         } else if (part.equalsIgnoreCase(PART_INSERT_ACTIVITY)) {
                             // Deve aggiungere al dizionario dei parametri quelli delle fasi
                             loadParams(part, req, params);
-                            String pliv = parser.getStringParameter("pliv2", VOID_STRING);
                             // Differenzia le operazioni in funzione del bottone cliccato
                             switch (action) {
                                 case "ordb":
+                                    // Ordina attività
                                     db.updateActivities(user, params);
+                                    // Determina l'inoltro in funzione del chiamante
                                     String p = ref.equalsIgnoreCase(PART_PROCESS) ? PART_PROCESS : PART_INSERT_ACTIVITY;
                                     dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
                                            .put("p", p)
@@ -499,7 +513,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     redirect = dataUrl.getUrl();
                                     break;
                                 case "cont":
+                                    // Salva...
                                     db.insertActivities(user, params);
+                                    // ...e Continua (-> Strutture/Soggetti)
                                     dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
                                            .put("p", PART_INSERT_ACT_STRUCTS)
                                            .put("pliv", pliv)
@@ -507,38 +523,24 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                            .put(PARAM_SURVEY, codeSur);
                                     redirect = dataUrl.getUrl();
                                     break;
-                                default:
+                                default:    
+                                    // Salva...
                                     db.insertActivities(user, params);
-                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
-                                           .put("p", PART_PROCESS)
-                                           .put("pliv", pliv)
-                                           .put("liv", ELEMENT_LEV_2)
-                                           .put(PARAM_SURVEY, codeSur);
-                                    redirect = dataUrl.getUrl();
+                                    // ...ed Esci
+                                    redirect = prProcessoAjax;
                                     break;
                             }
                         /* ------------------------------------------------ *
                          *  INSERT Relation between Str/Subj and Activities *
                          * ------------------------------------------------ */ 
                         } else if (part.equalsIgnoreCase(PART_INSERT_ACT_STRUCTS)) {
+                            // Recupera dalla richiesta le relazioni da inserire
                             ArrayList<ItemBean> activities = decantActivities(req);
-                            // Deve aggiungere al dizionario dei parametri quelli delle strutture/soggetti
-                            //loadParams(part, req, params); non ha altro da aggiugere
-                            String pliv = parser.getStringParameter("pliv2", VOID_STRING);
-                            // Differenzia le operazioni in funzione del bottone cliccato
+                            // Inserisce comunque le relazioni
+                            db.insertActivitiesStructures(user, activities, params);
+                            // Differenzia i redirect in funzione del bottone cliccato
                             switch (action) {
-                                case "x":
-                                    db.updateActivities(user, params);
-                                    String p = ref.equalsIgnoreCase(PART_PROCESS) ? PART_PROCESS : PART_INSERT_ACTIVITY;
-                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
-                                           .put("p", p)
-                                           .put("pliv", pliv)
-                                           .put("liv", ELEMENT_LEV_2)
-                                           .put(PARAM_SURVEY, codeSur);
-                                    redirect = dataUrl.getUrl();
-                                    break;
-                                case "cont":
-                                    //db.insertStructuresActivities(user, params);
+                                case "cont":// Continua (-> Output)
                                     dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
                                            .put("p", PART_INSERT_OUTPUT)
                                            .put("pliv", pliv)
@@ -546,17 +548,33 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                            .put(PARAM_SURVEY, codeSur);
                                     redirect = dataUrl.getUrl();
                                     break;
-                                default:
-                                    db.insertActivitiesStructures(user, activities, params);
-                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
-                                           .put("p", PART_PROCESS)
-                                           .put("pliv", pliv)
-                                           .put("liv", ELEMENT_LEV_2)
+                                default:    // Esci
+                                    redirect = prProcessoAjax;
+                                    break;
+                            }
+                        /* ------------------------------------------------ *
+                         *                 INSERT Outputs                   *
+                         * ------------------------------------------------ */                            
+                        } else if (part.equalsIgnoreCase(PART_INSERT_OUTPUT)) {
+                            // Deve aggiungere al dizionario dei parametri quelli di output
+                            loadParams(part, req, params);
+                            // Inserimento output(s) (Salva...)
+                            db.insertOutputs(user, params);
+                            // Differenzia l'inoltro in funzione del bottone cliccato
+                            switch (action) {
+                                case "cont":
+                                    // ...e Continua (-> Nuova Intervista)
+                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_AUDIT)
+                                           .put("p", PART_SELECT_STR)
                                            .put(PARAM_SURVEY, codeSur);
                                     redirect = dataUrl.getUrl();
                                     break;
+                                default:
+                                    // ...ed Esci
+                                    redirect = prProcessoAjax;
+                                    break;
                             }
-                        } 
+                        }
 
                         
                     }
@@ -712,6 +730,27 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
                             // Recupera solo i soggetti contingenti di tipo master
                             subjects = db.getSubjects(user, true, !Query.GET_ALL, survey);
+                        /* ------------------------------------------------ *
+                         *                 SHOWS Form Output                *
+                         * ------------------------------------------------ */    
+                        } else if (part.equalsIgnoreCase(PART_INSERT_OUTPUT)) {
+                            // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                            processElements = new ConcurrentHashMap<>();
+                            // Recupera tutti gli Output
+                            ArrayList<ProcessBean> listaOutput = db.getOutputs(user, survey);
+                            // Se c'è un id processo
+                            if (idP > NOTHING) {
+                                // Controlla che il processo esista
+                                pat = db.getProcessById(user, idP, survey);
+                                // Recupera Output estratti in base al processo
+                                ArrayList<ItemBean> outputsByPat = db.getOutputs(user, idP, ELEMENT_LEV_2, survey);
+                                // Visto che ci sono, ne approfitta per impostare gli output nel processo
+                                pat.setOutputs(outputsByPat);
+                                // Scarta dalla lista degli input quelli già collegati al processo corrente
+                                //listaOutput = filter(listaOutput, outputsByPat);
+                            }
+                            // Imposta nella tabella la lista ricavata
+                            //retrieveProcess(user, listaInput, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
