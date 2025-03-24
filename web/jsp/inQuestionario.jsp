@@ -89,6 +89,7 @@
                 <h2 class="mb-0">
                   <button class="btn btn-link btn-block text-left text-black" type="button" data-toggle="collapse" data-target="#collapse${status.count}" aria-expanded="false" aria-controls="collapse${status.count}">
                     <c:out value="${status.count}. ${entry.key.nome}" />
+                    <span class="badge badge-info float-right"><c:out value="${entry.key.livello}" /></span>
                   </button>
                 </h2>
               </div>
