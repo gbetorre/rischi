@@ -55,9 +55,9 @@
 
 L'applicazione web per la mappatura dei rischi corruttivi <code>ROL-RMS</code> serve ad aiutare Enti, Pubbliche Amministrazioni, aziende partecipate &ndash; e chiunque sia interessato a monitorare e gestire il rischio corruttivo &ndash; <strong>a mappare in modo semplice i processi organizzativi, a quantificare automaticamente i rischi corruttivi</strong> cui gli stessi risultano esposti e ad indirizzare i soggetti a mettere in atto <strong>le contromisure adeguate</strong>.
 
-[![Product Landing Page][product-landing2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png)
+[![Product Landing Page][product-landing4]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.27.png)
 <br>
-<strong>*Fig.1 - Pagina di landing, versione 2.0*</strong><br>
+<strong>*Fig.1 - Pagina di landing, versione 2.2.7*</strong><br>
 <br>
 <!-- ABOUT THE PROJECT -->
 
@@ -70,7 +70,7 @@ L'applicazione web per la mappatura dei rischi corruttivi <code>ROL-RMS</code> s
 ### In sintesi
 In breve, il software <code>ROL-RMS</code> permette di:
 * quantificare il livello di rischio corruttivo cui &egrave; esposto ogni processo organizzativo (<strong>livello di rischio iniziale</strong>);
-* quantificare quanto si riduce tale livello di rischio se una serie di misure di mitigazione vengono applicate al processo (<strong>livello di rischio stimato</strong>);
+* quantificare quanto si riduce tale livello di rischio se una serie di misure di mitigazione viene applicata al processo (<strong>livello di rischio stimato</strong>);
 * quantificare quanto si &egrave; effettivamente ridotto il livello di rischio, date le misure di mitigazione che sono state effettivamente applicate (<strong>livello di rischio effettivo</strong>).
 
 Tutte queste quantit&agrave; (livello di rischio iniziale, stimato ed effettivo) sono numeriche e determinate tramite algoritmi deterministici, quindi non soggette a variazioni stocastiche.
@@ -84,7 +84,7 @@ Gli algoritmi di mitigazione - come peraltro tutti gli algoritmi di calcolo del 
 <strong>*Fig.3 - Effettuando la quantificazione dei fattori coinvolti, diventa possibile produrre in modo semplice reportistiche aggregate, anche sotto forma di infografiche  (dati fittizi&#770;)*</strong><br>
 
 ### L'approccio valutativo
-L'enfasi posta finora sulla quantificazione dei valori in gioco potrebbe indurre a credere che l'approccio utilizzato per stimare l'esposizione dell'organizzazione ai rischi sia esclusivamente di tipo quantitativo: ma cos&iacute; non &egrave.<br>
+L'enfasi posta finora sulla quantificazione dei valori in gioco potrebbe indurre a credere che l'approccio utilizzato per stimare l'esposizione dell'organizzazione ai rischi sia esclusivamente di tipo quantitativo: ma cos&iacute; non &egrave;.<br>
 La determinazione quantitativa dei livelli di rischio non esaurisce, infatti, le funzionalit&agrave; del software, che permette di accompagnare, ed arricchire, gli indici e i valori quantificati anche con valutazioni qualitative.<br>
 L'approccio valutativo scelto, pur non essendo esclusivamente di tipo qualitativo, non &egrave; neppure esclusivamente di tipo quantitativo: si tratta, infatti, di <strong>un approccio valutativo di tipo misto.</strong>
 
@@ -510,6 +510,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.2.7] (25/03/2025) Revisione pagina di landing; revisione di etichette
 - [2.2.6] (24/03/2025) Ordinamento ambiti di analisi che raggruppano i quesiti dell'intervista in base al loro numero d'ordine; ottimizzazioni
 - [2.2.5] (11/03/2025) Implementata funzionalit&agrave; di inserimento associazioni tra strutture/soggetti terzi e fasi di processo
 - [2.2.4] (05/03/2025) Prima bozza di implementazione form per assegnazione strutture/soggetti alle fasi; miglioramenti nella presentazione delle fasi (nascoste descrizioni soggetti interessati)
@@ -842,6 +843,7 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [product-landing]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing1.40.png
 [product-landing2]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png
 [product-landing3]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.2.png
+[product-landing4]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.27.png
 [product-interview]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/interview-sample.png
 [product-algorithm]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/algorithm-P3.png
 [product-orgchart]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/nav-str.png

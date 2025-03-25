@@ -430,6 +430,7 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+- [2.2.7] (25/03/2025) Landing page revision; revision of labels.
 - [2.2.6] (24/03/2025) Sorting analysis domains that group interview questions by their order number; improvements
 - [2.2.5] (11/03/2025) Added facility to insert relationships between structures or subjects from one hand and process activity on the other hand
 - [2.2.4] (05/03/2025) First draft implementation about form to assign stuctures/subjects to process activities; presentation improvements (process activities)
