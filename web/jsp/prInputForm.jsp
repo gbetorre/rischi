@@ -145,8 +145,10 @@
               </div>
             </div>
           </div>
+          <hr class="separatore" />
           <%@ include file="btnSaveCont.jspf"%>
         </div>
+        <hr class="separatore" />
       </form>
     </div>
     <script>
