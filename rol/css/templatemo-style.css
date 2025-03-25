@@ -192,7 +192,6 @@ img {
 .divider .divider-three {
   background: #ff0033;
 }
-
 .divider .divider-four {
   background: #000080;
 }
@@ -201,6 +200,15 @@ img {
 }
 .divider .divider-six {
   background: #ffa500;
+}
+.divider .divider-success {
+  background: #009900;
+}
+.divider .divider-danger {
+	background: #ff33cc;
+}
+.divider .divider-lime {
+	background: #ccff33;
 }
 
 /* about section */
