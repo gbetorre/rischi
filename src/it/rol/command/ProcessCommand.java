@@ -367,6 +367,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                                 AMPERSAND + "pliv" + EQ + pliv +
                                                 AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                                 AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                        // Indirizzo navigazione albero dei processi
+                        String prElenco =       ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
+                                                AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                         // Estrae l'azione dal parametro 'p'
                         /* ------------------------------------------------ *
                          * INSERT new relation between Risk Process Factor  *
@@ -383,6 +386,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                            AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "dupKey";
+                                
                             } else {
                                 // Inserisce nel DB nuova associazione pxrxf
                                 db.insertFactorRiskProcess(user, params);
@@ -428,45 +432,47 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     } else { // <- Al momento i sottoprocessi non sono gestiti
                                         db.insertProcessAt(user, params);
                                     }
-                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
-                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    redirect = prElenco;
                                     break;
                                 case "cont":
                                     switch (liv) {
                                         case ELEMENT_LEV_1: {
                                             ProcessBean mat = db.insertMacroAt(user, params);
-                                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
-                                                       AMPERSAND + "p" + EQ + PART_INSERT_PROCESS +
-                                                       AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                                       AMPERSAND + "pliv1" + EQ + mat.getId() + DOT + mat.getCodice() + 
-                                                       AMPERSAND + "pliv0" + EQ + idCodeArea + 
-                                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                            dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                                   .put("p", PART_INSERT_PROCESS)
+                                                   .put("liv", ELEMENT_LEV_2)
+                                                   .put("pliv1", mat.getId() + DOT + mat.getCodice())
+                                                   .put("pliv0", idCodeArea)
+                                                   .put(PARAM_SURVEY, codeSur);
+                                            redirect = dataUrl.getUrl();
                                             break;
                                         }
                                         case ELEMENT_LEV_2: {
                                             pat = db.insertProcessAt(user, params);
-                                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
-                                                       AMPERSAND + "p" + EQ + PART_INSERT_INPUT +
-                                                       AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                                       AMPERSAND + "pliv" + EQ + pat.getId() + // DOT + pat.getCodice() + 
-                                                       AMPERSAND + "pliv1" + EQ + pat.getPadre().getTag() + 
-                                                       AMPERSAND + "pliv0" + EQ + idCodeArea + 
-                                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                            dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                                   .put("p", PART_INSERT_INPUT)
+                                                   .put("liv", ELEMENT_LEV_2)
+                                                   .put("pliv", pat.getId() /*DOT + pat.getCodice()*/)
+                                                   .put("pliv1", pat.getPadre().getTag())
+                                                   .put("pliv0", idCodeArea)
+                                                   .put(PARAM_SURVEY, codeSur);
+                                            redirect = dataUrl.getUrl();
                                             break;
                                         }
-                                        // case ELEMENT_LEV_3 : Gestione sottoprocesso
+                                        // TODO
+                                        // case ELEMENT_LEV_3 : Gestione sottoprocesso 
                                         default:
                                             System.out.println("Unknown action");
                                             break;
                                     }
                                     break;
                                 default:
-                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
-                                               AMPERSAND + "p" + EQ + PART_INSERT_PROCESS +
-                                               AMPERSAND + "liv" + EQ + liv +
-                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                           .put("p", PART_INSERT_PROCESS)
+                                           .put("liv", liv)
+                                           .put(PARAM_SURVEY, codeSur);
+                                    redirect = dataUrl.getUrl();
                                     break;
-                                    
                             }
                         /* ------------------------------------------------ *
                          *                  INSERT Inputs                   *
@@ -488,7 +494,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     redirect = dataUrl.getUrl();
                                     break;
                                 default:
-                                    // ...ed Esci
+                                    // ...ed Esci (-> Processo)
                                     redirect = prProcessoAjax;
                                     break;
                             }
@@ -575,8 +581,6 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     break;
                             }
                         }
-
-                        
                     }
                 /* ======================== @GetMapping ======================= */
                 } else {
@@ -738,6 +742,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             processElements = new ConcurrentHashMap<>();
                             // Recupera tutti gli Output
                             ArrayList<ProcessBean> listaOutput = db.getOutputs(user, survey);
+                            // Li travasa in una lista di oggetti generici
+                            ArrayList<ItemBean> listaItems = decantOutputs(listaOutput);
                             // Se c'è un id processo
                             if (idP > NOTHING) {
                                 // Controlla che il processo esista
@@ -746,11 +752,11 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 ArrayList<ItemBean> outputsByPat = db.getOutputs(user, idP, ELEMENT_LEV_2, survey);
                                 // Visto che ci sono, ne approfitta per impostare gli output nel processo
                                 pat.setOutputs(outputsByPat);
-                                // Scarta dalla lista degli input quelli già collegati al processo corrente
-                                //listaOutput = filter(listaOutput, outputsByPat);
+                                // Scarta dalla lista degli output quelli già collegati al processo corrente
+                                listaItems = filter(listaItems, outputsByPat);
                             }
                             // Imposta nella tabella la lista ricavata
-                            //retrieveProcess(user, listaInput, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
+                            retrieveProcess(user, new ArrayList<>(), new ArrayList<>(), listaItems, new ArrayList<>(), new ArrayList<>(), processElements, survey);
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
@@ -785,24 +791,24 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
         // Imposta in request elenco completo input di processo, se presenti
-        if (processElements != null && !processElements.get(TIPI_LISTE[0]).isEmpty()) {
-            req.setAttribute("listaInput", processElements.get(TIPI_LISTE[0]));
+        if (processElements != null && !processElements.get(TIPI_LISTE[NOTHING]).isEmpty()) {
+            req.setAttribute("listaInput", processElements.get(TIPI_LISTE[NOTHING]));
         }
         // Imposta in request elenco completo fasi di processo, se presenti
-        if (processElements != null && !processElements.get(TIPI_LISTE[1]).isEmpty()) {
-            req.setAttribute("listaFasi", processElements.get(TIPI_LISTE[1]));
+        if (processElements != null && !processElements.get(TIPI_LISTE[ELEMENT_LEV_1]).isEmpty()) {
+            req.setAttribute("listaFasi", processElements.get(TIPI_LISTE[ELEMENT_LEV_1]));
         }
         // Imposta in request elenco completo output di processo, se presenti
-        if (processElements != null && !processElements.get(TIPI_LISTE[2]).isEmpty()) {
-            req.setAttribute("listaOutput", processElements.get(TIPI_LISTE[2]));
+        if (processElements != null && !processElements.get(TIPI_LISTE[ELEMENT_LEV_2]).isEmpty()) {
+            req.setAttribute("listaOutput", processElements.get(TIPI_LISTE[ELEMENT_LEV_2]));
         }
         // Imposta in request elenco completo rischi di processo, se presenti
-        if (processElements != null && !processElements.get(TIPI_LISTE[3]).isEmpty()) {
-            req.setAttribute("listaRischi", processElements.get(TIPI_LISTE[3]));
+        if (processElements != null && !processElements.get(TIPI_LISTE[ELEMENT_LEV_3]).isEmpty()) {
+            req.setAttribute("listaRischi", processElements.get(TIPI_LISTE[ELEMENT_LEV_3]));
         }
         // Imposta in request elenco completo interviste che hanno sondato il processo, se presenti
-        if (processElements != null && !processElements.get(TIPI_LISTE[4]).isEmpty()) {
-            req.setAttribute("listaInterviste", processElements.get(TIPI_LISTE[4]));
+        if (processElements != null && !processElements.get(TIPI_LISTE[ELEMENT_LEV_4]).isEmpty()) {
+            req.setAttribute("listaInterviste", processElements.get(TIPI_LISTE[ELEMENT_LEV_4]));
         }
         // Imposta nella request elenco completo strutture
         if (structs != null) {
@@ -892,10 +898,11 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                   AttributoNonValorizzatoException {
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
-        /* ---------------------------------------------------- *
-         *              Parametri inserimento Input             *
-         * ---------------------------------------------------- */
+        // Estrae l'azione dal parametro 'p'
         switch (part) {
+            /* ---------------------------------------------------- *
+             *              Parametri inserimento Input             *
+             * ---------------------------------------------------- */
             case (PART_INSERT_INPUT): {
                 LinkedHashMap<String, String> input = new LinkedHashMap<>();
                 // Suffissi convenzionali per i parametri di input
@@ -909,11 +916,11 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 String[] input3 = req.getParameterValues("in-type");
                 String[] input0 = req.getParameterValues("in-name");
                 // Aggiunge tutti gli elementi dei nuovi input definiti dall'utente
-                decantInputs(inputName, input1, input);
-                decantInputs(inputDesc, input2, input);
-                decantInputs(inputFlag, input3, input);
+                decantItems("in", inputName, input1, input);
+                decantItems("in", inputDesc, input2, input);
+                decantItems("in", inputFlag, input3, input);
                 // Aggiunge i nomi e gli id di input esistenti, da collegare
-                decantInputs(inputExist, input0, input);
+                decantItems("in", inputExist, input0, input);
                 // Aggiunge il numero di input da collegare
                 String inputToLink = (input0[NOTHING].equals(VOID_STRING)) ? String.valueOf(NOTHING) : String.valueOf(input0.length);
                 input.put("ine", inputToLink);
@@ -921,6 +928,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 formParams.put(part, input);
                 break;
             }
+            /* ---------------------------------------------------- *
+             *       Parametri aggiornamento/inserimento Fasi       *
+             * ---------------------------------------------------- */
             case (PART_INSERT_ACTIVITY): { 
                 LinkedHashMap<String, String> activities = new LinkedHashMap<>();
                 String action = parser.getStringParameter("action", DASH);
@@ -947,22 +957,36 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 // Aggiunge i parametri attività ai parametri della richiesta
                 formParams.put(part, activities);
                 break;
-            }/*
-            case (PART_INSERT_ACT_STRUCTS): {
-                LinkedHashMap<String, String> activities = new LinkedHashMap<>();
-                String ids = parser.getStringParameter("ids", DASH);
-                String[] parts = ids.split("\\.");
-                for (int i = 0; i < parts.length; i++) {
-                    if (!parts[i].equals(VOID_STRING)) {
-                        
-                    }
-                }
-                decantActivities(parts, activities, req);
-                
+            }
+            /* ---------------------------------------------------- *
+             *             Parametri inserimento Output             *
+             * ---------------------------------------------------- */
+            case (PART_INSERT_OUTPUT): {
+                LinkedHashMap<String, String> output = new LinkedHashMap<>();
+                // Suffissi convenzionali per i parametri di output
+                String outputName = "n";
+                String outputDesc = "d";
+                String outputFlag = "f";
+                String outputExist = "e";
+                // Output da inserire
+                String[] output1 = req.getParameterValues("ou-newn");
+                String[] output2 = req.getParameterValues("ou-desc");
+                String[] output3 = req.getParameterValues("ou-type");
+                String[] output0 = req.getParameterValues("ou-name");
+                // Aggiunge tutti gli elementi dei nuovi output definiti dall'utente
+                decantItems("ou", outputName, output1, output);
+                decantItems("ou", outputDesc, output2, output);
+                decantItems("ou", outputFlag, output3, output);
+                // Aggiunge i nomi e gli id di output esistenti, da collegare
+                decantItems("ou", outputExist, output0, output);
+                // Aggiunge il numero di output da collegare
+                String outputToLink = (output0[NOTHING].equals(VOID_STRING)) ? String.valueOf(NOTHING) : String.valueOf(output0.length);
+                output.put("oue", outputToLink);
+                // Aggiunge tutti i parametri degli output ai parametri della richiesta
+                formParams.put(part, output);
                 break;
-            }*/
+            }
         }
-
     }
     
     
@@ -1745,23 +1769,79 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
 
     
     /**
+     * <p>Travasa una struttura vettoriale ordinata di output, 
+     * incapsulati sotto forma di processi (ProcessBean), in una 
+     * struttura vettoriale ordinata di output, 
+     * rappresentati come oggetti generici (ItemBean).</p>
+     * <p>&Egrave; utile per un accesso pi&uacute; generale agli oggetti
+     * memorizzati nella struttura rispetto a quanto garantito da
+     * oggetti specifici come i ProcessBean.</p>
+     *
+     * @param outputs Struttura vettoriale di ProcessBean da travasare in ItemBean
+     * @return <code>ArrayList&lt;ItemBean&gt;</code> - Struttura di ItemBean in cui sono stati travasati i valori dei ProcessBean
+     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
+     */
+    public static ArrayList<ItemBean> decantOutputs(final ArrayList<ProcessBean> outputs)
+                                             throws CommandException {
+        ArrayList<ItemBean> outputsAsItems = new ArrayList<>();
+        for (ProcessBean o : outputs) {
+            try {
+                ItemBean item = new ItemBean();
+                item.setId(o.getId());
+                item.setNome(o.getNome());
+                item.setInformativa(o.getDescrizione());
+                item.setOrdinale(o.getOrdinale());
+                item.setExtraInfo1(String.valueOf(o.getDataUltimaModifica()));
+                item.setExtraInfo2(String.valueOf(o.getOraUltimaModifica()));
+                item.setExtraInfo3(String.valueOf(o.getIdRilevazione()));
+                item.setExtraInfo4(String.valueOf(o.getLivello()));
+                outputsAsItems.add(item);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio del bean.\n" + anve.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, anve);
+            } catch (ArrayIndexOutOfBoundsException aiobe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema di puntamento fuori tabella.\n" + aiobe.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, aiobe);
+            } catch (ClassCastException cce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema di conversione di tipo.\n" + cce.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, cce);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, npe);
+            } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nel travaso di un Vector in un Dictionary.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, e);
+            }
+        }
+        return outputsAsItems;
+    }
+    
+    
+    /**
      * Dati in input un array di valori e un livello numerico, distribuisce
      * tali valori in una struttura dictionary, passata come parametro, 
      * assegnandone ciascuno a una chiave diversa, costruita
      * in base a un progressivo ed un valore intero passato come parametro.
      * 
+     * @param prefix    prefisso delle chiavi
      * @param suffix    livello di informazione convenzionale
-     * @param inputs    valori inseriti nella form
+     * @param items     valori inseriti nella form
      * @param params    mappa dei parametri della richiesta
      */
-    private static void decantInputs(String suffix,
-                                     String[] inputs,
-                                     LinkedHashMap<String, String> params) {
+    private static void decantItems(String prefix,
+                                    String suffix,
+                                    String[] items,
+                                    LinkedHashMap<String, String> params) {
         int index = NOTHING;
         int size = ELEMENT_LEV_1;
-        if (inputs != null) { // <- Controllo sull'input
-            while (index < inputs.length) {
-                params.put("in" + suffix + DASH + size,  inputs[index]);
+        if (items != null) { // <- Controllo sull'input
+            while (index < items.length) {
+                params.put(prefix + suffix + DASH + size,  items[index]);
                 size++;
                 index++;
             }
