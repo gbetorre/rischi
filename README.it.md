@@ -102,7 +102,7 @@ Nell'analisi del software ROL-RMS si &egrave; considerato, tuttavia, che un appr
 Infatti:
 * gli elementi qualitativi (i giudizi sintetici) arricchiscono i dati numerici con una chiave di lettura interpretativa, che illumina meglio la scena e il contesto;
 * i valori quantitativi (indicatori di rischio, indici, monitoraggi...), dal canto loro, permettono di ottenere dati immediatamente comprensibili e comparabili, potenzialmente anche da un'amministrazione all'altra. 
-Inoltre, l'elevata automazione resa possibile dal linguaggio imperativo con cui il software &egrave; realizzato, non obbliga a lunghe ricognizioni e pesature per ottenere i valori numerici, ma facilita enormemente il compito di calcolo.
+Inoltre, l'elevata automazione resa possibile dal linguaggio imperativo con cui il software &egrave; realizzato (Java), non obbliga a lunghe ricognizioni e pesature per ottenere i valori numerici, ma facilita enormemente il compito di calcolo.
 
 Per questi motivi, l'approccio valutativo misto &egrave; stato ritenuto il migliore per lo sviluppo del software <code>ROL-RMS</code>.
 
@@ -510,6 +510,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.2.8] (26/03/2025) Implementata funzionalit&agrave; di inserimento output di processo
 - [2.2.7] (25/03/2025) Revisione pagina di landing; revisione di etichette
 - [2.2.6] (24/03/2025) Ordinamento ambiti di analisi che raggruppano i quesiti dell'intervista in base al loro numero d'ordine; ottimizzazioni
 - [2.2.5] (11/03/2025) Implementata funzionalit&agrave; di inserimento associazioni tra strutture/soggetti terzi e fasi di processo
@@ -711,12 +712,12 @@ Inoltre, per stabilire la connessione al database, il sorgenti del Model usano:
 * postgresql-jdbc.
 
 Il database su cui l'applicazione si appoggia &egrave; un database relazionale PostgreSQL v. 12 e superiori.
-L'SQL con cui sono scritte le query &egrave; comunuque relativamente standard e facilmente adattabile a qualunque DBMS.
+L'SQL con cui sono scritte le query &egrave; comunuque sostanzialmente standard e facilmente adattabile a qualunque DBMS.
 
 Per far girare l'applicazione &egrave; quindi necessario come prerequisito generare prima un'istanza dello schema e valorizzarlo con una serie di elementi di base.
 A questo scopo, &egrave; possibile partire da uno script di creazione e successive query di inserimento, ma anche effettuare il restore di un dump gi&agrave; pronto.
 
-Come noto, in quest'ultimo caso, su piattaforma derivata da Debian, si pu&ograve; procedere con:
+Come noto, in quest'ultimo caso, su piattaforma Linux, si pu&ograve; procedere con:
 * pg_restore
   ```cd /home/<user>/Backup/dump/rol
   createdb rol -e utf-8 -U <user>
