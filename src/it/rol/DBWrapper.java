@@ -7372,19 +7372,19 @@ public class DBWrapper extends QueryImpl {
                 pst = con.prepareStatement(INSERT_OUTPUT_PROCESS);
                 // TODO: Controllare se user è superuser
                 /* === Se siamo qui vuol dire che ok   === */
-                String prefixInp = "ine";
-                String fieldName = "inn";
-                String fieldDesc = "ind";
+                String prefixOut = "oue";
+                String fieldName = "oun";
+                String fieldDesc = "oud";
                 // Flag per verificare che almeno un inserimento sia avvenuto
                 boolean existSome = false;
                 // Conta quanti input esistenti da collegare ci sono
-                int outputToLink = Integer.parseInt(output.get(prefixInp));
-                // L'array di input è almeno di 4; se ci sono più di 4 elementi o il primo campo "nuovo input" non è vuoto
-                if (!output.get("inn-1").equals(VOID_STRING)) {
+                int outputToLink = Integer.parseInt(output.get(prefixOut));
+                // L'array di input è almeno di 4; se ci sono più di 4 elementi o il primo campo "nuovo input" non è vuoto:
+                if (!output.get("oun-1").equals(VOID_STRING)) {
                     // Calcola il numero di nuovi input da inserire [n - (tot input da collegare)] / 3
                     int n = (output.size() - (outputToLink + ELEMENT_LEV_1)) /  ELEMENT_LEV_3;
                     // Puntatore di input corrente (input 1, input 2...)
-                    int pointerInp = ELEMENT_LEV_1;
+                    int pointerOut = ELEMENT_LEV_1;
                     // Contatore di cicli
                     int cycles = NOTHING;
                     // Prepara i parametri per l'inserimento
@@ -7394,11 +7394,11 @@ public class DBWrapper extends QueryImpl {
                         // === Id === 
                         ps.setInt(++nextParam, newIdOutput);
                         // === Nome === 
-                        ps.setString(++nextParam, output.get(fieldName + DASH + pointerInp));
+                        ps.setString(++nextParam, output.get(fieldName + DASH + pointerOut));
                         // === Descrizione === 
                         String descr = null;
-                        if (!output.get(fieldDesc + DASH + pointerInp).equals(VOID_STRING)) {
-                            descr = new String(output.get(fieldDesc + DASH + pointerInp));
+                        if (!output.get(fieldDesc + DASH + pointerOut).equals(VOID_STRING)) {
+                            descr = new String(output.get(fieldDesc + DASH + pointerOut));
                             ps.setString(++nextParam, descr);
                         } else {
                             // Dato facoltativo non inserito
@@ -7427,7 +7427,7 @@ public class DBWrapper extends QueryImpl {
                         // Aggiunge allo stack
                         pst.addBatch();
                         // Incrementa il puntatore di input corrente
-                        pointerInp++;
+                        pointerOut++;
                         // Incrementa il contatore di cicli
                         cycles++;
                     } while (cycles < n);
@@ -7450,7 +7450,7 @@ public class DBWrapper extends QueryImpl {
                         nextParam = NOTHING;
                         pst.clearParameters();
                         // Recupera nome e (id)
-                        String value = output.get(prefixInp + DASH + pointerOut);
+                        String value = output.get(prefixOut + DASH + pointerOut);
                         // Recupera il nome dell'input
                         String name = value.substring(NOTHING, value.lastIndexOf('('));
                         // Recupera l'id dell'input
@@ -7476,7 +7476,7 @@ public class DBWrapper extends QueryImpl {
                     // Execute the batch updates
                     int[] relations = pst.executeBatch();
                     // CR (Carriage Return) o 0DH
-                    LOG.info(relations.length + " relazioni tra processi e input in transazione attiva.\n");
+                    LOG.info(relations.length + " relazioni tra processi e output in transazione attiva.\n");
                     existSome = true;
                 }
                 // End: <==
