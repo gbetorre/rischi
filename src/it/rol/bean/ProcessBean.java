@@ -139,6 +139,8 @@ public class ProcessBean extends CodeBean {
     private AbstractList<ItemBean> inputs;
     /** Attivit&agrave; collegate al processo corrente */
     private AbstractList<ActivityBean> attivita;
+    /** Output collegati al processo corrente */
+    private AbstractList<ItemBean> outputs;
     /* ------------------------------------------------------------------------ *
      *                   Dati descrittivi dell'ultima modifica                  *
      * ------------------------------------------------------------------------ */
@@ -179,7 +181,7 @@ public class ProcessBean extends CodeBean {
         padre = null;
         rilevazione = null;
         indicatori = null;
-        inputs = null;
+        inputs = outputs = null;
         attivita = null;
     }
 
@@ -890,5 +892,26 @@ public class ProcessBean extends CodeBean {
         this.attivita = attivita;
     }
 
+
+    /* *************************************************** *
+     *           Metodi getter e setter per output         *
+     * *************************************************** */
+    /**
+     * Restituisce una lista di output collegati al processo corrente.
+     *
+     * @return <code>outputs</code> - lista di output che derivano dal processo
+     */
+    public AbstractList<ItemBean> getOutputs() {
+        return outputs;
+    }
+
+    /**
+     * Imposta gli output collegati al processo corrente.
+     *
+     * @param outputs - outputs collegati al processo corrente, da impostare
+     */
+    public void setOutputs(AbstractList<ItemBean> outputs) {
+        this.outputs = outputs;
+    }
 
 }
