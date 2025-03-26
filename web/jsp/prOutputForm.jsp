@@ -66,7 +66,7 @@
           </div>
           <hr class="separapoco" />
           <div class="row"> 
-            <div class="content-holder col-sm-10 bgAct23">
+            <div class="content-holder col-sm-10 bg-note">
               <strong> &nbsp;Output gi&agrave; collegati:</strong>
               <c:if test="${empty process.outputs}">NESSUNO</c:if>
               <ul>
@@ -79,12 +79,12 @@
           <hr class="separatore" />
           <div class="row">
             <div class="content-holder col-sm-10 bgAct4">
-              <div class="inp-container">
+              <div class="out-container">
                 <div class="reportRow">&nbsp;&nbsp;Scelta Output esistenti</div>
                 <hr class="separapoco" />
-                <div id="callable-inp">
+                <div id="callable-out">
                   <div class="row">
-                    <div class="col-sm-4 bgAct23 lastMenuContent marginLeftSmall">
+                    <div class="col-sm-4 bgAct16 lastMenuContent marginLeftSmall">
                       <strong>Output</strong>
                     </div>
                     <div class="col-sm-7">
@@ -114,13 +114,13 @@
               <div id="callable-row">
                 <div class="row">
                   <div class="col-12 large-4">
-                    <input type="text" class="form-control sIno" id="in-nuovo" name="in-newn" placeholder="Inserisci nome Input">
+                    <input type="text" class="form-control sIno" id="ou-nuovo" name="ou-newn" placeholder="Inserisci nome Output">
                     <div id="custom-error-location-2"></div>
                   </div>
                   <hr class="separapoco" />
                   <div class="row">
                     <div class="col-12 large-4">
-                      <textarea class="form-control" id="in-desc" name="in-desc" placeholder="Inserisci una descrizione"></textarea>
+                      <textarea class="form-control" id="ou-desc" name="ou-desc" placeholder="Inserisci una descrizione"></textarea>
                       <div class="charNum"></div>
                     </div>
                   </div>
@@ -169,7 +169,7 @@
         });
         
         $('.js-add-out').on('click', function () {
-            $('.out-container').append($('#callable-inp').html());
+            $('.out-container').append($('#callable-out').html());
             $(".sOut").autocomplete({
                 source: inputs,
                 minLength: 1
