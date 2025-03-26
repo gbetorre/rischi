@@ -174,6 +174,12 @@
           </li>
         </c:forEach>
         </ul>
+        <hr class="separapoco" />
+        <div class="col-sm-12 centerlayout">
+          <a href="${initParam.appName}/?q=pr&p=ino&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg" title="Aggiungi un nuovo output al processo corrente">
+            <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Output
+          </a>
+        </div>
       </div>
       <hr class="separatore" />
       <section id="rischi-fattori-misure">
