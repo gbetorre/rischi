@@ -800,15 +800,33 @@ Per una lista dei contributori, v.: [AUTHORS](AUTHORS) file.
 
 
 <!-- LICENSE -->
-## License
 
-Distribuito nei termini della licenza GNU GPL-2.0 License. Consulta <a href="https://github.com/gbetorre/rischi/blob/main/LICENSE">`LICENSE.txt`</a> per ulteriori informazioni.
+## Licenze
+
+Il Software <code>ROL-RMS</code> &egrave; distribuito nei termini della licenza GNU GPL-2.0 License. 
+
+Per "Software", in questo contesto, si intendono tutti i sorgenti prodotti dall'<a href="mailto:gianroberto.torre@gmail.com">autore</a>.
+
+Laddove i sorgenti facciano riferimento a librerie di terze parti, occorre consultare la relativa documentazione, in particolare le condizioni di licenza e d'uso.
+
+Il Software in effetti, come &egrave; normale per qualunque software, fa ricorso a codici rilasciati con una licenza che pu&ograve; coincidere o meno con quella del software stesso.
+
+In particolare:
+* jQuery &egrave; rilasciato con _[licenza MIT](https://jquery.com/license/)_ analogamente a molte altre librerie (p.es. Boostrap, OrgChart etc.)
+* Servlet, JSP ed Expression Language sono rilasciati con Apache License 
+* Le pagine di landing usano modeli di templatemo, che sono rilasciati sostanzialmente nel pubblico dominio (Public Domain)
+* Alcune pagine utilizzano immagini rilasciate con licenza libera da _[Pixabay](https://pixabay.com/it/service/terms/)_ che fa uso di Creative Commons in combinazione con altri termini
+* Svariate immagini sono prodotte con il modello generativo di intelligenza artificiale FLUX1-schnell, che utilizza _[Apache License 2.0](https://github.com/black-forest-labs/flux/blob/main/LICENSE)_
+
+A ogni modo, il Software fa uso esclusivamente di componenti con licenza libera e viene rilasciato "AS IS", come previsto dalla propria licenza.
+Consulta <a href="https://github.com/gbetorre/rischi/blob/main/LICENSE">`LICENSE.txt`</a> per ulteriori informazioni.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <a name="readme-contact"></a>
 <!-- CONTACT -->
+
 ## Contatti
 Per approfondire ed ottenere accesso al documento di analisi dei requisiti, <a href="mailto:gianroberto.torre@gmail.com">contattare l'autore</a>.
 
