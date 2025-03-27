@@ -133,7 +133,7 @@ Anzitutto, &egrave; opportuno definire i <strong>soggetti</strong> coinvolti:
 2. I responsabili e gli operatori degli uffici
 3. Il software engineer
 
-[![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.95.png)
+[![Product Login Screen Shot][product-login2]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login2.25.png)
 <br>
 <strong>*Fig.5 - Il software &egrave; un'applicazione ad accesso riservato (per accedere &egrave; necessario disporre di credenziali). Pertanto &egrave; possibile determinare il profilo utente all'accesso al sistema.*</strong>
 <br><br>
@@ -841,6 +841,7 @@ Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una list
 [forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
 [product-screenshot]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/product-screenshot.png
 [product-login]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.95.png
+[product-login2]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login2.25.png
 [product-landing]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing1.40.png
 [product-landing2]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png
 [product-landing3]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.2.png

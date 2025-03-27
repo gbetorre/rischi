@@ -96,7 +96,7 @@ First of all, it is appropriate to define the <strong>parties</strong> involved:
 2. The office managers and operators
 3. The software engineer
 
-[![Product Login Screen Shot][product-login]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.95.png)
+[![Product Login Screen Shot][product-login2]][product-login2]
 <br>
 <strong>*Fig.4 - Obviously, the software is a restricted access application*</strong>
 <br><br>
@@ -707,6 +707,7 @@ See also [open issues](https://github.com/gbetorre/rischi/issues) for a complete
 [forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
 [product-screenshot]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/product-screenshot.png
 [product-login]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login1.95.png
+[product-login2]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/login2.25.png
 [product-landing]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing1.40.png
 [product-landing2]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/landing2.0.png
 [product-interview]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/interview-sample.png
