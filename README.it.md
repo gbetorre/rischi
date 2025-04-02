@@ -510,6 +510,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.2.9] (02/04/2025) Implementato registro degli input di processo
 - [2.2.8] (26/03/2025) Implementata funzionalit&agrave; di inserimento output di processo
 - [2.2.7] (25/03/2025) Revisione pagina di landing; revisione di etichette
 - [2.2.6] (24/03/2025) Ordinamento ambiti di analisi che raggruppano i quesiti dell'intervista in base al loro numero d'ordine; ottimizzazioni
