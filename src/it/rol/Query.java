@@ -572,7 +572,8 @@ public interface Query extends Serializable {
             "   ORDER BY ordinale";
     
     /**
-     * <p>Estrae tutti gli input di processo collegati a una data rilevazione.</p>
+     * <p>Estrae tutti gli input di processo collegati a una data rilevazione
+     * contando anche quanti processi sono collegati a ciascun input.</p>
      */
     public static final String GET_INPUTS = 
             "SELECT DISTINCT" +
@@ -585,8 +586,11 @@ public interface Query extends Serializable {
             "   ,   INP.ora_ultima_modifica     AS \"extraInfo\"" +
             "   ,   INP.id_output               AS \"value1\"" +
             "   ,   INP.id_rilevazione          AS \"value3\"" +
+            "   ,   count(INPAT.id_input)       AS \"value2\"" +
             "   FROM input INP" +
+            "       LEFT JOIN input_processo_at INPAT ON INPAT.id_input = INP.id" +
             "   WHERE INP.id_rilevazione = ?" +
+            "   GROUP BY (INP.id, INP.nome, INP.descrizione, INP.ordinale, INP.interno, INP.data_ultima_modifica, INP.ora_ultima_modifica, INP.id_output, INP.id_rilevazione)" + 
             "   ORDER BY INP.nome";
     
     /**
