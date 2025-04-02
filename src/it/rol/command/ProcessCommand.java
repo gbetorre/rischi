@@ -116,6 +116,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileDettaglio = "/jsp/prProcessoAjax.jsp";
     /**
+     * Pagina per mostrare l'elenco degli input
+     */
+    private static final String nomeFileInputs = "/jsp/prInputs.jsp";
+    /**
      * Pagina per mostrare l'elenco degli output
      */
     private static final String nomeFileOutputs = "/jsp/prOutputs.jsp";
@@ -206,6 +210,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         nomeFile.put(PART_PROCESS,              nomeFileDettaglio);
+        nomeFile.put(PART_INPUT,                nomeFileInputs);
         nomeFile.put(PART_OUTPUT,               nomeFileOutputs);
         nomeFile.put(PART_FACTORS,              nomeFileFattori);
         nomeFile.put(PART_INSERT_F_R_P,         nomeFileAddFactor);
@@ -217,6 +222,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_INSERT_OUTPUT,        nomeFileAddOutput);
         // Carica la hashmap contenente i titoli pagina
         titleFile.put(PART_PROCESS,                         "Dettagli Processo");
+        titleFile.put(PART_INPUT,                           "Input Processo");
         titleFile.put(PART_OUTPUT,                          "Output Processo");
         titleFile.put(PART_FACTORS,                         "Fattori Abilitanti");
         titleFile.put(PART_INSERT_F_R_P,                    "Fattore-Rischio-Processo");
@@ -307,6 +313,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         /* -------------------------------------------------------------------- *
          *                          Elenchi di Oggetti                          *
          * -------------------------------------------------------------------- */
+        // Dichiara elenco di inpput
+        ArrayList<ItemBean> inputs = new ArrayList<>();
         // Dichiara elenco di output
         AbstractList<ProcessBean> outputs = new ArrayList<>();
         // Dichiara elenco di fattori abilitanti
@@ -602,6 +610,16 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
+                        /* ------------------------------------------------ *
+                         *                  SELECT Input                    *
+                         * ------------------------------------------------ */ 
+                        } else if (part.equalsIgnoreCase(PART_INPUT)) {
+                            // Istanzia generica tabella in cui mettere le liste di items afferenti al processo
+                            processElements = new ConcurrentHashMap<>();
+                            // Recupera l'elenco degli output
+                            inputs = db.getInputs(user, survey);
+                            // Imposta nella tabella la lista ricavata
+                            retrieveProcess(user, inputs, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
                         /* ------------------------------------------------ *
                          *                  SELECT Output                   *
                          * ------------------------------------------------ */                            
