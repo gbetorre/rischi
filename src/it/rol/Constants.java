@@ -339,6 +339,10 @@ public interface Constants extends Serializable {
      * --------------------    FORMAT PARAMS    -------------------- 
      */
     /**
+     * <p>Costante per il parametro identificante parte applicazione legata ad input.</p>
+     */
+    public static final String PART_INPUT               = "int";
+    /**
      * <p>Costante per il parametro identificante parte applicazione legata ad output.</p>
      */
     public static final String PART_OUTPUT              = "out";
