@@ -5113,6 +5113,101 @@ public class DBWrapper extends QueryImpl {
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         }
     }
+
+    
+    /**
+     * <p>Restituisce una misurazione di dato id.</p>
+     * 
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param id        identificativo della misurazione cercata
+     * @param survey    oggetto contenente gli estremi della rilevazione
+     * @return <code>MeasurementBean</code> - la misurazione cercata
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public MeasurementBean getMeasurement(PersonBean user,
+                                          int id,
+                                          CodeBean survey)
+                                   throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs, rs1, rs2 = null;
+            MeasurementBean measurement = null;
+            IndicatorBean indicator = null;
+            ActivityBean phase = null;
+            // TODO: Controllare se user è superuser
+            try {
+                int nextParam = NOTHING;
+                pst = con.prepareStatement(GET_MEASUREMENT);
+                pst.clearParameters();
+                pst.setInt(++nextParam, id);
+                pst.setInt(++nextParam, survey.getId());
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    // Prepara il bean
+                    measurement = new MeasurementBean();
+                    // Valorizza il bean
+                    BeanUtil.populate(measurement, rs);
+                    // Recupera l'indicatore che ha misurato
+                    nextParam = NOTHING;
+                    pst = null;
+                    pst = con.prepareStatement(GET_INDICATOR);
+                    pst.clearParameters();
+                    pst.setInt(++nextParam, measurement.getOrdinale());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs1 = pst.executeQuery();
+                    if (rs1.next()) {
+                        // Crea l'indicatore vuoto
+                        indicator = new IndicatorBean();
+                        // Valorizza il bean
+                        BeanUtil.populate(indicator, rs1);
+                        // Recupera la fase cui l'indicatore è collegato
+                        nextParam = NOTHING;
+                        pst = null;
+                        pst = con.prepareStatement(GET_MEASURE_ACTIVITY);
+                        pst.clearParameters();
+                        pst.setInt(++nextParam, indicator.getOrdinale());
+                        pst.setInt(++nextParam, survey.getId());
+                        rs2 = pst.executeQuery();
+                        if (rs2.next()) {
+                            phase = new ActivityBean();
+                            BeanUtil.populate(phase, rs2);
+                            //indicator.setFase(phase);
+                        }
+                        // Arricchisce l'indicatore con gli altri dati
+                        indicator = getIndicatorByActivity(user, phase, survey);
+                        // Arricchisce la misurazione con l'indicatore
+                        measurement.setIndicatore(indicator);
+                    }                    
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return measurement;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di bean.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
     
 
     /* ********************************************************** *
