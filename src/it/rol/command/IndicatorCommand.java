@@ -194,6 +194,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_INSERT_MONITOR_DATA,      nomeFileInsertMisura);     
         nomeFile.put(PART_INSERT_INDICATOR,         nomeFileInsertIndicatore);
         nomeFile.put(PART_INSERT_MEASUREMENT,       nomeFileInsertMisurazione);
+        nomeFile.put(PART_SELECT_MEASUREMENT,       nomeFileMisurazione);
         //nomeFile.put(PART_INSERT_,  nomeFileResumeMeasure);
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         titleFile.put(COMMAND_INDICATOR,            "Registro misure monitorate");
@@ -202,7 +203,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         titleFile.put(PART_MONITOR,                 "Monitoraggi della misura");
         titleFile.put(PART_INSERT_MONITOR_DATA,     "Dettagli di monitoraggio");
         titleFile.put(PART_INSERT_INDICATOR,        "Nuovo indicatore");
-        titleFile.put(PART_INSERT_MEASUREMENT,      "Nuovo monitoraggio");
+        titleFile.put(PART_INSERT_MEASUREMENT,      "Nuova misurazione");
+        titleFile.put(PART_SELECT_MEASUREMENT,      "Dettagli misurazione");
     }
     
     
@@ -246,6 +248,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         MeasureBean measure = null;
         // Fase specifica di una misura specifica
         ActivityBean phase = null;
+        // Misurazione specifica
+        MeasurementBean measurement = null;
         // Elenco di misure di prevenzione monitorate
         ArrayList<MeasureBean> measures = null;
         // Elenco strutture collegate alla rilevazione
@@ -278,7 +282,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         // Recupera o inizializza 'id misura'
         String codeMis = parser.getStringParameter("mliv", DASH);
         // Recupera o inizializza 'id misurazione'
-        String codeMon = parser.getStringParameter("nliv", DASH);
+        int idMon = parser.getIntParameter("nliv", DEFAULT_ID);
         // Recupera o inizializza 'id fase di attuazione'
         int idFas = parser.getIntParameter("idF", DEFAULT_ID);
         // Recupera o inizializza 'id indicatore'
@@ -421,7 +425,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             measurements = decantMeasurements(measure);
                             // Imposta la pagina
                             fileJspT = nomeFile.get(part);
-                            
                         } else if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
                             /* ------------------------------------------------ *
                              * Form aggiunta dettagli monitoraggio a una misura *
@@ -436,10 +439,16 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
                             }
-                        //} else if (part.equalsIgnoreCase(VOID_STRING)) {
-                            /* ************************************************ *
-                             *  Pagina riepilogo dettagli monitoraggio inseriti *
-                             * ************************************************ */
+                        } else if (part.equalsIgnoreCase(PART_SELECT_MEASUREMENT)) {
+                            /* ------------------------------------------------ *
+                             *        Pagina riepilogo dettagli misurazione     *
+                             * ------------------------------------------------ */
+                            // Recupera gli estremi della misura, della fase e dell'indicatore
+                            measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                            // Recupera la misurazione cercata
+                            measurement = db.getMeasurement(user, idMon, survey);
+                            // Pagina
+                            fileJspT = nomeFile.get(part);
                         } else if (part.equalsIgnoreCase(PART_INSERT_INDICATOR)) {
                             /* ------------------------------------------------ *
                              *      Maschera inserimento nuovo Indicatore       *
@@ -522,6 +531,10 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         // Imposta in request elenco dei monitoraggi effettuati per una misura
         if (measurements != null) {
             req.setAttribute("monitoraggi", measurements);
+        }
+        // Imposta in request una specifica misurazione desiderata
+        if (measurement != null) {
+            req.setAttribute("misurazione", measurement);
         }
         // Imposta nella request specifica fase di attuazione di una misura
         if (phase != null) {
