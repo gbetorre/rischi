@@ -2,8 +2,8 @@ publiccodeYmlVersion: "0.2"
 name: ROL-RMS
 url: https://github.com/gbetorre/rischi
 landingURL: https://github.com/gbetorre/rischi/blob/main/rol/index.html
-softwareVersion: 2.1.7
-releaseDate: 2025-02-05
+softwareVersion: 2.3.0
+releaseDate: 2025-05-06
 logo: https://github.com/gbetorre/rischi/blob/main/rol/images/logo.png
 platforms:
   - web
@@ -499,7 +499,11 @@ maintenance:
   contacts:
     - name: Giovanroberto Torre
       email: gianroberto.torre@gmail.com
-      phone: "+398028506"
+      phone: "+390458028506"
+      affiliation: Università degli Studi di Verona
+    - name: Alberto Maria Arena Agostino
+      email: albertomaria.arenaagostino@univr.it
+      phone: "+390458028589"
       affiliation: Università degli Studi di Verona
 localisation:
   localisationReady: true
