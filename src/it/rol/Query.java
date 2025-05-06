@@ -1573,6 +1573,65 @@ public interface Query extends Serializable {
             "       AND MZ.id_rilevazione = ?" +
             "       AND (MZ.id = ? OR -1 = ?)" +
             "   ORDER BY MZ.data_ultima_modifica";
+
+    /**
+     * <p>Seleziona una misurazione di dato id, 
+     * nel contesto di una rilevazione di dato id</p>
+     */
+    public static final String GET_MEASUREMENT = 
+            "SELECT" +
+            "       MZ.id                               AS \"id\"" +
+            "   ,   MZ.valore                           AS \"valore\"" +
+            "   ,   MZ.azioni                           AS \"informativa\"" +
+            "   ,   MZ.motivazioni                      AS \"descrizione\"" +
+            "   ,   MZ.ultimo                           AS \"ultimo\"" +
+            "   ,   MZ.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   MZ.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   ,   MZ.id_indicatoremonitoraggio        AS \"ordinale\"" +  // piccolo abuso di notazione
+            "   FROM misurazione MZ" +
+            "       INNER JOIN rilevazione S ON MZ.id_rilevazione = S.id" +
+            "   WHERE MZ.id = ? " +
+            "       AND MZ.id_rilevazione = ?";
+    
+    /**
+     * <p>Seleziona un indicatore di dato id, 
+     * nel contesto di una rilevazione di dato id</p>
+     */
+    public static final String GET_INDICATOR = 
+            "SELECT" +
+            "       IND.id                              AS \"id\"" +
+            "   ,   IND.nome                            AS \"nome\"" +
+            "   ,   IND.descrizione                     AS \"descrizione\"" +
+            "   ,   IND.baseline                        AS \"baseline\"" +
+            "   ,   IND.databaseline                    AS \"dataBaseline\"" +
+            "   ,   IND.target                          AS \"target\"" +
+            "   ,   IND.datatarget                      AS \"dataTarget\"" +
+            "   ,   IND.data_ultima_modifica            AS \"dataUltimaModifica\"" +
+            "   ,   IND.ora_ultima_modifica             AS \"oraUltimaModifica\"" +
+            "   ,   IND.id_usr_ultima_modifica          AS \"autoreUltimaModifica\"" +
+            "   ,   IND.id_fase                         AS \"ordinale\"" +  // piccolo abuso di notazione
+            "   FROM indicatoremonitoraggio IND" +
+            "   WHERE IND.id = ?" +
+            "       AND IND.id_rilevazione = ?";
+    
+    /**
+    /**
+     * <p>Seleziona una fase di dato id, 
+     * nel contesto di una rilevazione di dato id</p>
+     */
+    public static final String GET_MEASURE_ACTIVITY = 
+            "SELECT" +
+            "       FA.id                               AS \"id\"" +
+            "   ,   FA.nome                             AS \"nome\"" +
+            "   ,   FA.cod_misura                       AS \"codice\"" +
+            "   ,   FA.ordinale                         AS \"ordinale\"" +
+            "   ,   FA.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   FA.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   ,   FA.id_rilevazione                   AS \"idRilevazione\"" +
+            "   FROM fase FA" +
+            "       INNER JOIN rilevazione S ON FA.id_rilevazione = S.id" +
+            "   WHERE FA.id = ?" +
+            "       AND FA.id_rilevazione = ?";        // pleonastica
     
     /* ************************************************************************ *
      *  Interfacce di metodi che costruiscono dinamicamente Query di Selezione  *
