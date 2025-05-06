@@ -39,20 +39,20 @@
             <c:out value="${fase.nome}" />
           </td>
           <td scope="row" id="nameColumn" class="success bgAct${ind.tipo.id}">
-            <a href="" title="">
+            <a href="${initParam.appName}/?q=ic&p=ind&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Vedi dettagli indicatore">
               <c:out value="${ind.nome}"/>
             </a>
           </td>
           <td scope="row" class="bgAct${ind.tipo.id} bgFade">
-            <c:out value="${ind.target}" />
-            
+            <a href="${initParam.appName}/?q=ic&p=ind&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Vedi dettagli indicatore">
+              <c:out value="${ind.target}" />
+            </a>
           </td>
-          
           <td scope="row">
-            <a href="" title="Consulta la misurazione">
+            <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Consulta la misurazione">
               <c:out value="${mon.valore}"/>
             </a>&nbsp;
-            <a class="smooth" href="#Allegati">
+            <a class="smooth" href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}">
               <span class="badge badge-primary" id="add-label" title="Clicca per aggiungere un Allegato alla misurazione (attualmente: ${mon.allegati.size()})">
                 <i class="fas fa-plus"></i> Allegato
               </span>
