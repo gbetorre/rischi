@@ -162,13 +162,13 @@ public class MeasurementBean extends CodeBean {
     
     /* ***************************************************************** *
      *  Metodi getter e setter per data misurazione (risultato attuale)  *
-     * ***************************************************************** */
+     * ***************************************************************** *
     /**
      * Restituisce la data di effettuazione della misurazione
      * 
      * @return <code>Date</code> - data misurazione
      * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (dovrebbe essere un dato obbligatorio)
-     */
+     *
     public Date getDataMisurazione() throws AttributoNonValorizzatoException {
         if (new Date(0).equals(dataMisurazione)) {
             throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo data non valorizzato! A quale data fa riferimento la misurazione? Specificare una data.");
@@ -178,9 +178,32 @@ public class MeasurementBean extends CodeBean {
 
     /**
      * @param dataMisurazione data misurazione da impostare
-     */
+     *
     public void setDataMisurazione(Date dataMisurazione) {
         this.dataMisurazione = dataMisurazione;
+    }*/
+	
+	
+    /**
+     * Restituisce la data di effettuazione della misurazione
+     * (che coincide con la data di ultima modifica della misurazione)
+     * 
+     * @return <code>Date</code> - data misurazione
+     * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (dato obbligatorio)
+     */
+    public Date getDataMisurazione() throws AttributoNonValorizzatoException {
+        if (new Date(0).equals(dataUltimaModifica)) {
+            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo data non valorizzato! A quale data fa riferimento la misurazione? Specificare una data.");
+        }
+        return dataUltimaModifica;
+    }
+
+    /**
+     * &Egrave; un wrapper di setDataUltimaModifica(date)
+     */
+    public void setDataMisurazione() {
+        //this.dataMisurazione = dataMisurazione;
+        dataMisurazione = dataUltimaModifica;
     }
     
     
