@@ -304,7 +304,11 @@ public interface Constants extends Serializable {
      * <p>Costante per il parametro identificante la funzione di aggiunta 
      * di una nuova misurazione relativamente all'applicazione di una misura.</p>
      */
-    public static final String PART_INSERT_MEASUREMENT  = "imm";
+    public static final String PART_INSERT_MEASUREMENT  = "imm";    /**
+     * <p>Costante per il parametro identificante la funzione di visualizzazione 
+     * di una misurazione.</p>
+     */
+    public static final String PART_SELECT_MEASUREMENT  = "smm";
     /**
      * <p>Costante per il parametro identificante la funzione di aggiunta 
      * di un nuovo processo o macroprocesso.</p>
