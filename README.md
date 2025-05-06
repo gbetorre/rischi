@@ -430,6 +430,7 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+- [2.3.0] (06/05/2025) Added measurement details page
 - [2.2.9] (02/04/2025) Added process input registry
 - [2.2.8] (26/03/2025) Added facility to insert new outputs and/or link an existing output to a process
 - [2.2.7] (25/03/2025) Landing page revision; revision of labels.

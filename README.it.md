@@ -510,6 +510,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.3.0] (06/05/2025) Implementata pagina di visualizzazione misurazione
 - [2.2.9] (02/04/2025) Implementato registro degli input di processo
 - [2.2.8] (26/03/2025) Implementata funzionalit&agrave; di inserimento output di processo
 - [2.2.7] (25/03/2025) Revisione pagina di landing; revisione di etichette
