@@ -7618,6 +7618,109 @@ public class DBWrapper extends QueryImpl {
         }
     }
     
+    
+    /**
+     * <p>Inserisce le informazioni relative ad un file, i cui 
+     * estremi vengono comunicati in un dictionary passato come argomento.</p>
+     * <p>Questo inserimento, una volta andato a buon fine, rappresenter&agrave;
+     * una rappresentazione logica, nel database, di un allegato fisico presente
+     * nel file system (del server).</p>
+     * <p>Notare che non esiste alcuna garanzia che la rappresentazione logica
+     * dell'allegato corrisponda effettivamente all'allegato fisico, nel senso
+     * che, una volta terminato il caricamento, un utente con accessi alla 
+     * directory degli upload potrebbe eliminare l'allegato fisico, mentre
+     * l'allegato logico, ovvero la tupla inserita dal presente metodo, potrebbe
+     * restare. Ci&ograve; porterebbe, a valle, alla generazione di un link che
+     * produce un errore di tipo 404.</p> 
+     * <p><small>Per evitare questo inconveniente,
+     * &egrave; possibile prevedere meccanismi di protezione delle directories
+     * e/o anche meccanismi di trigger che si riverberano sul db &ndash;
+     * la cui implementazione comunque non attiene alla natura applicativa
+     * dei sorgenti del presente software.</small></p>
+     * 
+     * @param params HashMap contenente gli estremi del file, al fine di inserire la tupla
+     * @return identificativo, calcolato, per la tupla che rappresentera' logicamente l'allegato fisico
+     * @throws WebStorageException se si verifica un problema SQL, nel recupero di attributi di bean, o in qualche altro puntamento
+     */
+    @SuppressWarnings("null")
+    public int setFileDoc(HashMap<String, Object> params)
+                   throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        String table = params.get("nomeEntita") + "_" + params.get("nomeAttributo");
+        assert(!table.equals("_"));
+        int nextId = DEFAULT_ID;
+        try {
+            // Campi passati da fuori
+            if (params.containsKey("id")) {
+                nextId = (Integer) params.get("id");
+            } else {
+                nextId = getMax(table) + 1;
+            }
+            String file = (String) params.get("file");
+            String ext = (String) params.get("ext");
+            String fileName = (String) params.get("nome");
+            int idBelongs = (Integer) params.get("belongs");
+            String title = (String) params.get("titolo");
+            long size = (Long) params.get("dimensione");
+            String mime = (String) params.get("mime");
+            PersonBean user = (PersonBean) params.get("usr");
+            // Campi calcolati al momento
+            String usr = user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome();
+            java.sql.Date today = Utils.convert(Utils.convert(Utils.getCurrentDate()));
+            Time now = Utils.getCurrentTime();
+            // BEGIN
+            con = rol_manager.getConnection();
+            con.setAutoCommit(false); 
+            String query =
+                    "INSERT INTO " + table +
+                    "   (   id" +
+                    "   ,   file" +
+                    "   ,   id_" + params.get("nomeEntita") +
+                    "   ,   titolo" +
+                    "   ,   dimensione" +
+                    "   ,   mime" +
+                    "   ,   estensione" +
+                    "   ,   data_ultima_modifica" +
+                    "   ,   ora_ultima_modifica" +
+                    "   ,   id_usr_ultima_modifica)" +
+                    "   VALUES (" + String.valueOf(nextId) +// id
+                    "   ,      '" + file + "'"  +           // file
+                    "   ,       " + idBelongs   +           // id belongs  
+                    "   ,      '" + title + "'" +           // titolo      
+                    "   ,       " + size        +           // dimensione
+                    "   ,      '" + mime + "'"  +           // MIME
+                    "   ,      '" + ext  + "'"  +           // file extension
+                    "   ,      '" + today + "'" +           // oggi in SQL date
+                    "   ,      '" + now + "'"   +           // ora in SQL time
+                    "   ,      '" + usr + "'"   +           // usr id
+                    ")" ;       
+            pst = con.prepareStatement(query);
+            pst.executeUpdate();
+            // END
+            con.commit();
+            return nextId;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema nella query di inserimento allegato.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Problema nel recupero di attributi del bean.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
     /* ********************************************************** *
      *                  Metodi di AGGIORNAMENTO                   *
      * ********************************************************** */
@@ -7914,6 +8017,93 @@ public class DBWrapper extends QueryImpl {
                 String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
                 LOG.severe(msg);
                 throw new WebStorageException(msg, e);
+        }
+    }
+    
+    
+    /**
+     * <p>Aggiorna le informazioni relative alla dimensione di un file, i cui 
+     * estremi vengono comunicati in un dictionary passato come argomento.</p>
+     * <p>Notare che, almeno nel contesto di <code>Java 7</code>, con cui 
+     * la presente applicazione &egrave; <cite>compliant</cite>, nel momento 
+     * in cui un file si trova ancora in memoria volatile, 
+     * cio&egrave; &ndash; in pratica &ndash; non in memoria di massa del server, 
+     * Java non &egrave; in grado di calcolarne la dimensione. 
+     * Per questo motivo, all'atto del caricamento
+     * di un file vengono eseguite le seguenti operazioni, in transazione:
+     * <ol>
+     * <li>lettura del file da client e sua memorizzazione in RAM;</li>
+     * <li>scrittura del file su server e salvataggio nel db della tupla che
+     * rappresenta il file da un punto di vista logico;</li>
+     * <li>lettura del file da disco (ovvero da file system del server); solo
+     * ora &egrave; possibile calcolare la dimensione del file;</li>
+     * <li>aggiornamento (postUpdate) della tupla che rappresenta il file
+     * nel db, con indicazione della dimensione e di eventuali altre informazioni
+     * non desumibili all'atto dell'upload.</li>
+     * </ol>
+     * Questo tipo di aggiornamento contestuale, anche se
+     * logicamente successivo, ad un'altra operazione di scrittura 
+     * prende il nome di <cite>meccanismo di post-update</cite> 
+     * o <cite>postUpdate hook</cite> 
+     * (nel caso specifico, si tratta di un <cite>post-insert</cite>).</p>
+     *
+     * @param params HashMap contenente gli estremi del file, al fine di aggiornare la tupla esatta e nel modo corretto
+     * @return <code>boolean</code> - true se l'operazione di aggiornamento e' andata a buon fine
+     * @throws WebStorageException se si verifica un problema SQL o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "static-method", "null" })
+    public boolean postUpdateFileDoc(HashMap<String, Object> params)
+                              throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        String table = params.get("nomeEntita") + "_" + params.get("nomeAttributo");
+        assert(!table.equals("_"));
+        try {
+            if (!params.containsKey("file")) {
+                String msg = FOR_NAME + "Problema nel recupero di attributi del file.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg);
+            }
+            String file = (String) params.get("file");
+            long size = (Long) params.get("dimensione");
+            PersonBean user = (PersonBean) params.get("usr");
+            // Campi calcolati al momento
+            String usr = user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome();
+            java.sql.Date today = Utils.convert(Utils.convert(Utils.getCurrentDate()));
+            Time now = Utils.getCurrentTime();
+            // BEGIN
+            con = rol_manager.getConnection();
+            con.setAutoCommit(false); 
+            String query =
+                    "UPDATE " + table +
+                    "   SET dimensione = " + size +
+                    "   ,   dataultimamodifica =    '" + today + "'" +
+                    "   ,   ora_ultima_modifica =     '"   + now + "'" + 
+                    "   WHERE file = '" + file + "'"
+                    ;
+            pst = con.prepareStatement(query);
+            pst.executeUpdate();
+            // END
+            con.commit();
+            return true;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema nella query di PostUpdate allegato.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Problema nel PostUpdate allegato.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
         }
     }
     
@@ -8475,6 +8665,66 @@ public class DBWrapper extends QueryImpl {
             } catch (NullPointerException npe) {
                 String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
                 LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un valore boolean <code>true</code> se esiste un file
+     * di dato nome, in data entit&agrave; e dato attributo, 
+     * tutti passati come argomenti.</p>
+     *
+     * @param nomeEntita prefisso del nome dell'entit&agrave; in cui verificare l'esistenza dell'allegato
+     * @param nomeAttributo suffisso del nome dell'entit&agrave; in cui verificare l'esistenza dell'allegato
+     * @param nomeFile nome del file di cui verificare la presenza nell'entit&agrave; di nome ricavabile dai parametri
+     * @return <code>boolean</code> - true se il nome del file &egrave; gi&agrave; presente, false altrimenti
+     * @throws WebStorageException se si verifica un problema di tipo SQL o in qualche puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public boolean existsFileName(String nomeEntita, 
+                                  String nomeAttributo,
+                                  String nomeFile)
+                           throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        String table = nomeEntita + "_" + nomeAttributo;        
+        String query =
+                "SELECT " +  table + ".*" +
+                "  FROM "  + table +
+                "   WHERE file = ?";
+        try {
+            con = rol_manager.getConnection();
+            try {
+                pst = con.prepareStatement(query);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nel puntamento della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            }
+            pst.clearParameters();
+            pst.setString(1, nomeFile);
+            rs = pst.executeQuery();
+            // Il nome esiste già
+            if (rs.next()) {
+                return true;
+            }
+            // Il nome non esiste
+            return false;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema nella query.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
                 throw new WebStorageException(msg + npe.getMessage());
             } catch (SQLException sqle) {
                 throw new WebStorageException(FOR_NAME + sqle.getMessage());
