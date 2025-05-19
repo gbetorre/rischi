@@ -121,20 +121,47 @@
         </div>
         <hr class="separatore" />
         <div class="centerlayout">
-          <button type="submit" class="btn btnNav" id="btn-save" value="Save">
+          <a href="#all-form" class="btn btnNav" id="add-all" rel="modal:open">
             <i class="fa-solid fa-paperclip"></i>&nbsp;  Aggiungi allegato 
-          </button>
+          </a>
         </div>
       </div>
     </form>
-    <div id="popup1" class="popup">
-      <div id="popup1Under" class="popupundertitle">
-        <div id="titolopopup1" class="popuptitle" ></div>
-        <div id="titolopopup1Under">
-          <a href="Javascript:popupWindow('','popup1',false,'');"><img src="web/img/close-icon.gif" border="0" width="15" height="15" alt="Chiudi" title="Chiudi" /></a>
+    <form accept-charset="ISO-8859-1" id="all-form" method="post" action="file?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${phas.id}&mliv=${meas.codice}&r=${param['r']}" enctype="multipart/form-data" class="modal" style="height:245px;">
+      <input type="hidden" id="prj-id" name="prj-id" value="${requestScope.progetto.id}" />
+      <input type="hidden" id="mis-id" name="mis-id" value="${misurazione.id}" />
+      <h3 class="heading bg-warning">&nbsp;
+        <i class="fa-solid fa-laptop-file"></i>
+        Aggiungi un allegato
+      </h3>
+      <br />
+      <div class="row">
+        <div class="col-sm-5">
+          <strong>
+            Titolo Documento
+            <sup>&#10039;</sup>:
+          </strong>
+        </div>
+        <div class="col-sm-5">  
+          <input type="text" class="form-control" id="doc-name" name="doc-name" value="" placeholder="Inserisci un titolo documento" required>
         </div>
       </div>
-      <div class="popupbody" id="popup1Text" ></div>
-    </div>
+      <hr class="separatore" />
+      <div class="row">
+        <div class="col-sm-5">
+          <strong>
+            Seleziona un file da caricare
+            <sup>&#10039;</sup>:
+          </strong>
+        </div>
+        <div class="col-sm-5">  
+          <input type="file" name="file" id="file" size="60" placeholder="Inserisci un file da caricare" required><br /><br /> 
+        </div>
+      </div>
+      <hr class="separatore" />
+      <div class="row">
+        <button type="submit" class="btn btn-warning text-dark" value="Upload"><i class="fas fa-file-upload"></i> Upload</button>
+      </div>
+    </form>
   </c:catch>
   <c:out value="${exception}" />
