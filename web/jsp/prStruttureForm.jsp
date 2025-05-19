@@ -9,6 +9,15 @@
 <c:set var="process" value="${requestScope.pat}" scope="page" />
 <c:set var="fasi" value="${requestScope.listaFasi}" scope="page" />
     <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <c:if test="${not empty param['msg']}">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <strong>ATTENZIONE: </strong>
+      <c:out value="${param['msg']}" />
+    </div>
+    </c:if>
     <div class="form-custom bg-note">
       <form accept-charset="ISO-8859-1" id="ias-form" action="" method="post">
         <input type="hidden" id="pat-id" name="pliv2" value="${process.id}" />
@@ -126,7 +135,24 @@
           </div>
           <hr class="separatore" />
       </c:forEach>
-          <%@ include file="btnSaveCont.jspf"%>
+          <hr class="separapoco" />
+          <div class="row">
+            <div class="col-sm-5">
+              <button type="submit" class="btn btnNav align-left" id="btn-save" name="action" value="save">
+                <i class="far fa-save"></i>  Salva ed esci &nbsp;<i class="fa-solid fa-arrow-up-from-bracket"></i>
+              </button>
+            </div>
+            <div class="col-sm-3">
+              <button type="submit" class="btn btnNav bgAct22 align-left" id="btn-save" name="action" value="load">
+                <i class="far fa-save"></i>  Salva &nbsp;<i class="fa-solid fa-repeat"></i>
+              </button>
+            </div>
+            <div class="col-sm-4">
+              <button type="submit" class="btn btnNav bgAct14 float-right" id="btn-save" name="action" value="cont">
+                <i class="far fa-save"></i>  Salva e continua  <i class="fa-solid fa-circle-chevron-right"></i>
+              </button>
+            </div>
+          </div>
         </div>
         <hr class="separatore" />
       </form>
