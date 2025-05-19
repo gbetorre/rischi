@@ -430,6 +430,7 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+- [2.3.1] (19/05/2025) Bug fix; presentation improvements (buttons, messages)
 - [2.3.0] (06/05/2025) Added measurement details page
 - [2.2.9] (02/04/2025) Added process input registry
 - [2.2.8] (26/03/2025) Added facility to insert new outputs and/or link an existing output to a process
@@ -681,6 +682,8 @@ This project is licensed under the terms of the GNU GPL-2.0 License. See <a href
 To learn more and gain access to the requirements analysis document, <a href="mailto:gianroberto.torre@gmail.com">contact the author</a>.
 
 Software Engineer: Giovanroberto Torre - [@GianroTorres](https://twitter.com/GianroTorres) - gianroberto.torre@gmail.com
+
+Corruptive risk Analyst: Alberto Maria Arena Agostino - [albertomaria.arenaagostino](https://www.univr.it/en/contacts/albertomaria.arenaagostino) - albertomaria.arenaagostino@univr.it
 
 Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/rischi)
 

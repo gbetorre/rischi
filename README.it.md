@@ -510,6 +510,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.3.1] (19/05/2025) Correzione di bug; miglioramenti nella presentazione (bottoni, messaggi)
 - [2.3.0] (06/05/2025) Implementata pagina di visualizzazione misurazione
 - [2.2.9] (02/04/2025) Implementato registro degli input di processo
 - [2.2.8] (26/03/2025) Implementata funzionalit&agrave; di inserimento output di processo
@@ -833,6 +834,8 @@ Consulta <a href="https://github.com/gbetorre/rischi/blob/main/LICENSE">`LICENSE
 Per approfondire ed ottenere accesso al documento di analisi dei requisiti, <a href="mailto:gianroberto.torre@gmail.com">contattare l'autore</a>.
 
 Software Engineer: Giovanroberto Torre - [@GianroTorres](https://twitter.com/GianroTorres) - gianroberto.torre@gmail.com
+
+Corruptive risk Analyst: Alberto Maria Arena Agostino - [albertomaria.arenaagostino](https://www.univr.it/it/contatti/albertomaria.arenaagostino) - albertomaria.arenaagostino@univr.it
 
 Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/rischi)
 
