@@ -548,15 +548,39 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                          *  INSERT Relation between Str/Subj and Activities *
                          * ------------------------------------------------ */ 
                         } else if (part.equalsIgnoreCase(PART_INSERT_ACT_STRUCTS)) {
-                            // Recupera dalla richiesta le relazioni da inserire
-                            ArrayList<ItemBean> activities = decantActivities(req);
-                            // Inserisce comunque le relazioni
-                            db.insertActivitiesStructures(user, activities, params);
+                            String msg = checkActivities(req);
+                            // Testa i parametri immessi nella form; se il check passa:
+                            if (msg == null) {
+                                // Recupera dalla richiesta le relazioni da inserire
+                                ArrayList<ItemBean> activities = decantActivities(req);
+                                // Inserisce comunque le relazioni
+                                db.insertActivitiesStructures(user, activities, params);
+                            } else {    
+                                // Se il check non passa forza il valore di action
+                                action = "err";
+                            }
                             // Differenzia i redirect in funzione del bottone cliccato
                             switch (action) {
+                                case "err":// C'è dell'errore nella ragione
+                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                           .put("p", PART_INSERT_ACT_STRUCTS)
+                                           .put("pliv", pliv)
+                                           .put("liv", ELEMENT_LEV_2)
+                                           .put(PARAM_SURVEY, codeSur)
+                                           .put(MESSAGE, msg);
+                                    redirect = dataUrl.getUrl();
+                                    break;
                                 case "cont":// Continua (-> Output)
                                     dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
                                            .put("p", PART_INSERT_OUTPUT)
+                                           .put("pliv", pliv)
+                                           .put("liv", ELEMENT_LEV_2)
+                                           .put(PARAM_SURVEY, codeSur);
+                                    redirect = dataUrl.getUrl();
+                                    break;
+                                case "load":// Salva (-> Reload)
+                                    dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                           .put("p", PART_INSERT_ACT_STRUCTS)
                                            .put("pliv", pliv)
                                            .put("liv", ELEMENT_LEV_2)
                                            .put(PARAM_SURVEY, codeSur);
@@ -1963,6 +1987,78 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             LOG.severe(msg);
             throw new CommandException(msg + " Verificare i valori ricevuti come parametro.\n");
         }        
+    }
+    
+    
+    /**
+     * Processa la richiesta per verificare se i parametri immessi sono corretti.
+     * 
+     * @param  req   la HttpServletRequest contenente la richiesta del client
+     * @return <code>boolean</code> -  true se i parametri immessi hanno passato i controlli, false altrimenti
+     * @throws CommandException se si verifica un puntamento a null, un problema nella conversione di tipi o altro tipo di problematica
+     */
+    private static String checkActivities(HttpServletRequest req)
+                                    throws CommandException {
+        String msg = null;
+        String ids = req.getParameter("ids");
+        String[] parts = ids.split("\\.");
+        for (int i = 0; i < parts.length; i++) {
+            String actId = parts[i];
+            if (!actId.equals(VOID_STRING)) {
+                boolean existsL1 = false;
+                boolean existsL2 = false;
+                boolean existsL3 = false;
+                boolean existsL4 = false;
+                boolean existsSj = false;
+                String liv1 = req.getParameter("liv1" + DASH + actId);
+                String liv2 = req.getParameter("liv2" + DASH + actId);
+                String liv3 = req.getParameter("liv3" + DASH + actId);
+                String liv4 = req.getParameter("liv4" + DASH + actId);
+                String subj = req.getParameter("sc" + DASH + actId);
+                // Valorizza i flag
+                if (liv1 != null && !liv1.equals(VOID_STRING)) {
+                    existsL1 = true;
+                }
+                if (liv2 != null && !liv2.equals(VOID_STRING)) {
+                    existsL2 = true;
+                }
+                if (liv3 != null && !liv3.equals(VOID_STRING)) {
+                    existsL3 = true;
+                }
+                if (liv4 != null && !liv4.equals(VOID_STRING)) {
+                    existsL4 = true;
+                }
+                // Soggetto
+                if (subj != null && !subj.equals(VOID_STRING)) {
+                    existsSj = true;
+                }
+                // Test: non possono essere presenti 2 strutture sulla stessa riga
+                if ((existsL1 && existsL2) || (existsL1 && existsL3) || (existsL1 && existsL4) || (existsL2 && existsL3) || (existsL2 && existsL4) || (existsL3 && existsL4)) {
+                    msg = "Selezionare soltanto una struttura alla volta!";
+                }
+                // Test: non possono essere presenti una struttura ed un soggetto
+                if ((existsL1 || existsL2 || existsL3 || existsL4) && existsSj) {
+                    msg = "Non selezionare contemporaneamente una struttura e un soggetto!";
+                }
+                // Test: la struttura selezionata deve avere un id valido
+                if (existsL1 && (liv1.indexOf(')') == DEFAULT_ID) ) {
+                    msg = "La struttura " + liv1 + " non ha un formato corretto!";
+                }
+                if (existsL2 && (liv2.indexOf(')') == DEFAULT_ID) ) {
+                    msg = "La struttura " + liv2 + " non ha un formato corretto!";
+                }
+                if (existsL3 && (liv3.indexOf(')') == DEFAULT_ID) ) {
+                    msg = "La struttura " + liv3 + " non ha un formato corretto!";
+                }
+                if (existsL4 && (liv4.indexOf(')') == DEFAULT_ID) ) {
+                    msg = "La struttura " + liv4 + " non ha un formato corretto!";
+                }
+                if (existsSj && (subj.indexOf(')') == DEFAULT_ID) ) {
+                    msg = "Il soggetto " + subj + " non ha un formato corretto!";
+                }
+            }
+        }
+        return msg;
     }
     
     
