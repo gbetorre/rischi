@@ -35,6 +35,16 @@
       <servlet-name>session</servlet-name>
       <url-pattern>/auth</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+      <description>Servlet per to manage file uploads</description>
+      <servlet-name>file</servlet-name>
+      <servlet-class>it.rol.manager.FileManager</servlet-class>
+    </servlet>
+    <servlet-mapping>
+      <servlet-name>file</servlet-name>
+      <url-pattern>/file</url-pattern>
+    </servlet-mapping>
 
     <servlet>
       <description>Servlet to cache configuration variables</description>        
@@ -49,6 +59,7 @@
       <servlet-class>it.rol.DBManager</servlet-class>
       <load-on-startup>1</load-on-startup>
     </servlet>
+    
       
     <!-- Note: All <servlet> elements MUST be grouped together and
          placed IN FRONT of the <servlet-mapping> elements -->     
@@ -57,6 +68,7 @@
       <servlet-name>default</servlet-name>
       <url-pattern>/web/*</url-pattern>
       <url-pattern>/documenti/json/*</url-pattern>
+      <url-pattern>/documenti/upload/indicatoregestione_all/*</url-pattern>
     </servlet-mapping>
     
    <!-- Note: Custom Error Pages -->
