@@ -430,6 +430,7 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+- [2.3.2] (20/05/2025) Revised algorithm for calculating probability of risk (P1 indicator) affecting a predominantly outsourced process
 - [2.3.1] (19/05/2025) Bug fix; presentation improvements (buttons, messages)
 - [2.3.0] (06/05/2025) Added measurement details page
 - [2.2.9] (02/04/2025) Added process input registry

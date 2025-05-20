@@ -510,6 +510,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.3.2] (20/05/2025) Revisionato algoritmo di calcolo dell'indicatore di probabilità P1
 - [2.3.1] (19/05/2025) Correzione di bug; miglioramenti nella presentazione (bottoni, messaggi)
 - [2.3.0] (06/05/2025) Implementata pagina di visualizzazione misurazione
 - [2.2.9] (02/04/2025) Implementato registro degli input di processo
