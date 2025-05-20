@@ -1466,7 +1466,7 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                     try {
                         int answerId21AsInt = Integer.parseInt(answerByQuestion.get(id21).getAnswer().getNome());
                         // Se vero 2° test
-                        if (answerId21AsInt < 100) {
+                        if (answerId21AsInt < 70) {
                             result = LIVELLI_RISCHIO[2];
                         } else {
                             result = LIVELLI_RISCHIO[3];
