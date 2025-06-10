@@ -46,17 +46,24 @@
           <hr class="separapoco" />
           <div class="row">
             <div class="content-holder col-sm-10" style="border:none;">
-            <nav class="navbar navbar-expand-sm bg-light justify-content-center">
-              <ul class="navbar-nav">
+              <nav class="navbar navbar-expand-sm bg-light justify-content-center">
+                <ul class="navbar-nav">
+                  <li class="nav-item"><a class="nav-link" href="#">  | </a></li>
             <c:set var="ids" value="" scope="page" />
             <c:forEach var="fase" items="${fasi}" varStatus="status">
               <c:set var="ids" value="${ids}.${fase.id}" scope="page" />
-                <li class="nav-item">
-                  <a class="nav-link" href="#fase${status.count}">fase ${status.count} &nbsp; | </a>
-                </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#fase${status.count}">fase ${status.count} &nbsp; | </a>
+                  </li>
             </c:forEach>
-              </ul>
-            </nav>
+                </ul>
+              </nav>
+              <hr class="separatore" />
+              <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btnNav bgAct22" id="btn-save" name="action" value="load">
+                  <i class="far fa-save"></i>  Salva &nbsp;<i class="fa-solid fa-repeat"></i>
+                </button>
+              </div>
             </div>
           </div>
           <input type="hidden" id="act-ids" name="ids" value="${ids}" />
