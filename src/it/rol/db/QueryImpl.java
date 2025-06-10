@@ -241,13 +241,99 @@ public class QueryImpl implements Query, Constants {
         return GET_MPSAT_BY_ID_OR_CODE;
     }
 
+
+    /* (non-Javadoc)
+     * @see it.rol.Query#getQueryAnswers(HashMap<String, LinkedHashMap<String, String>>, int, int, int, boolean);
+     */
+    @SuppressWarnings("javadoc")
     @Override
-    public String getQueryAnswers(HashMap<String, LinkedHashMap<String, String>> params, int idSurvey, int limit,
-            int idQuest, boolean getAll) {
-        // TODO Auto-generated method stub
-        return null;
+    public String getQueryAnswers(HashMap<String, LinkedHashMap<String, String>> params,
+                                  int idSurvey,
+                                  int numOfQuest,
+                                  int idQuest,
+                                  boolean getAll) {
+        // Dizionario dei parametri delle strutture scelte dall'utente
+        LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
+        // Dizionario dei parametri dei processi scelti dall'utente
+        LinkedHashMap<String, String> proc = params.get(PART_PROCESS);
+        // Dizionario dei parametri temporali
+        LinkedHashMap<String, String> surv = params.get(PARAM_SURVEY);
+        // Preparazione dei parametri
+        String idStrLiv1 = struct.get("liv1").substring(struct.get("liv1").indexOf('.') + 1, struct.get("liv1").indexOf('-'));
+        String idStrLiv2 = struct.get("liv2").substring(struct.get("liv2").indexOf('.') + 1, struct.get("liv2").indexOf('-'));
+        String idStrLiv3 = (!struct.get("liv3").equals(VOID_STRING) ? (struct.get("liv3").substring(struct.get("liv3").indexOf('.') + 1, struct.get("liv3").indexOf('-'))) : VOID_STRING);
+        String idStrLiv4 = (!struct.get("liv4").equals(VOID_STRING) ? (struct.get("liv4").substring(struct.get("liv4").indexOf('.') + 1, struct.get("liv4").indexOf('-'))) : VOID_STRING);
+        String idProLiv1 = proc.get("liv1").substring(NOTHING, proc.get("liv1").indexOf('.'));
+        String idProLiv2 = (!proc.get("liv2").equals(VOID_STRING) ? (proc.get("liv2").substring(NOTHING,proc.get("liv2").indexOf('.'))) : VOID_STRING);
+        String idProLiv3 = (!proc.get("liv3").equals(VOID_STRING) ? (proc.get("liv3").substring(NOTHING,proc.get("liv3").indexOf('.'))) : VOID_STRING);
+        String date = (!surv.get("d").equals(VOID_STRING) ? surv.get("d") : VOID_STRING);
+        String time = (!surv.get("t").equals(VOID_STRING) ? surv.get("t").replaceAll("_", ":") : VOID_STRING);
+        // Clausole
+        StringBuffer clause = new StringBuffer("R.id_rilevazione = " + idSurvey);
+        // Filtro per id quesito
+        String clauseOnQuestion = (getAll ? BLANK_SPACE + "OR -1 = " + GET_ALL_BY_CLAUSE + ")" : ")");
+        clause.append(BLANK_SPACE).append("AND (R.id_quesito = " + idQuest);
+        clause.append(clauseOnQuestion);
+        // Filtro per id struttura_*
+        if (!idStrLiv1.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv1 = " + idStrLiv1);
+        }
+        if (!idStrLiv2.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv2 = " + idStrLiv2);
+        }
+        if (!idStrLiv3.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv3 = " + idStrLiv3);
+        }
+        if (!idStrLiv4.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_struttura_liv4 = " + idStrLiv4);
+        }
+        // Filtro per id processo
+        if (!idProLiv1.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_macroprocesso_at = " + idProLiv1);
+        }
+        if (!idProLiv2.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_processo_at = " + idProLiv2);
+        }
+        if (!idProLiv3.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.id_sottoprocesso_at = " + idProLiv3);
+        }
+        // Filtro per data e ora
+        if (!date.equals(VOID_STRING)) {
+            clause.append(BLANK_SPACE).append("AND R.data_ultima_modifica = '" + date + "'");
+        }
+        if (!time.equals(VOID_STRING)) {
+            //String timeFormat = time.replaceAll("_", ":")
+            clause.append(BLANK_SPACE).append("AND R.ora_ultima_modifica = '" + time + "'");
+        }
+        // Query
+        final String GET_ANSWERS =
+                "SELECT DISTINCT" +
+                "       R.id                        AS \"id\"" +
+                "   ,   R.valore                    AS \"nome\"" +
+                "   ,   R.note                      AS \"informativa\"" +
+                "   ,   R.ordinale                  AS \"ordinale\"" +
+                "   ,   R.id_struttura_liv1         AS \"value1\"" +
+                "   ,   R.id_struttura_liv2         AS \"value2\"" +
+                "   ,   R.id_struttura_liv3         AS \"value3\"" +
+                "   ,   R.id_struttura_liv4         AS \"value4\"" +
+                "   ,   R.id_macroprocesso_at       AS \"cod1\""   +
+                "   ,   R.id_processo_at            AS \"cod2\""   +
+                "   ,   R.id_sottoprocesso_at       AS \"cod3\""   +
+                "   ,   R.id_rilevazione            AS \"cod4\"" + 
+                "   ,   R.id_quesito                AS \"livello\"" +
+                "   ,   R.data_ultima_modifica      AS \"extraInfo\"" +
+                "   ,   R.ora_ultima_modifica       AS \"labelWeb\"" +
+                "   ,   AM.id" +
+                "   FROM risposta R" +
+                "       INNER JOIN quesito Q ON R.id_quesito = Q.id" +
+                "       INNER JOIN ambito_analisi AM ON Q.id_ambito_analisi = AM.id" +
+                "   WHERE " + clause +
+                "   ORDER BY R.data_ultima_modifica DESC, R.ora_ultima_modifica DESC, AM.id"; 
+              //"   LIMIT " + numOfQuest;
+        return GET_ANSWERS;
     }
 
+    
     @Override
     public String getQueryAnswers(InterviewBean params, int idSurvey)
             throws AttributoNonValorizzatoException, WebStorageException {
