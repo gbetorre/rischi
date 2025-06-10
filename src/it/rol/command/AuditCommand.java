@@ -907,7 +907,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
     
     /**
      * <p>Prende in input una struttura vettoriale di QuestionBean 
-     * contenenti internamente le risposte e scarta le domande con risposte vuote.</p>
+     * contenenti internamente le risposte e scarta le domande aventi 
+     * risposta e note entrambe vuote.</p>
      *
      * @param questions ArrayList di QuestionBean da indicizzare per ambito
      * @return <code>ArrayList&lt;QuestionBean&gt;</code> - lista contenente solo le domande con risposte
@@ -918,7 +919,8 @@ public class AuditCommand extends ItemBean implements Command, Constants {
         ArrayList<QuestionBean> questionsWithAnswers = new ArrayList<>();
         try {
             for (QuestionBean q : questions) {
-                if (q.getAnswer().getNome() != null && !(q.getAnswer().getNome().equals(VOID_STRING))) {
+                if ((q.getAnswer().getNome() != null && !(q.getAnswer().getNome().equals(VOID_STRING))) || 
+                    (q.getAnswer().getInformativa() != null && !(q.getAnswer().getInformativa().equals(VOID_STRING)))) {
                     questionsWithAnswers.add(q);
                 }
             }
