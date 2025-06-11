@@ -612,6 +612,7 @@ public interface Query extends Serializable {
             "   ,   INPAT.id_processo_at        AS \"value2\"" +
             "   ,   INP.id_rilevazione          AS \"value3\"" +
             "   ,   PAT.nome                    AS \"labelWeb\"" +
+            "   ,   PAT.attivita                AS \"extraInfo\"" +
             "   ,   AR.nome                     AS \"nomeReale\"" +
             "   FROM input INP" +
             "       INNER JOIN input_processo_at INPAT ON INPAT.id_input = INP.id" +
