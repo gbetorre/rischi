@@ -181,6 +181,17 @@
           </a>
         </div>
       </div>
+      <c:if test="${not empty inputs.get(0).extraInfo}">
+      <hr class="separatore" />
+      <div class="p-3 p-md-4 border rounded-3 icon-demo-examples bgAct3">
+        <h3 class="bordo" id="outputs">
+          NOTE SUL PROCESSO &nbsp;
+        </h3>
+        <div class="subfields breadcrumb-item active">
+          <c:out value="${inputs.get(0).extraInfo}" />
+        </div>
+      </div>
+      </c:if>
       <hr class="separatore" />
       <section id="rischi-fattori-misure">
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples errorPwd">
