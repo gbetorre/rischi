@@ -430,6 +430,7 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+- [2.3.4] (11/06/2025) Implemented view note function to a process
 - [2.3.3] (10/06/2025) Presentation improvements
 - [2.3.2] (20/05/2025) Revised algorithm for calculating probability of risk (P1 indicator) affecting a predominantly outsourced process
 - [2.3.1] (19/05/2025) Bug fix; presentation improvements (buttons, messages)
