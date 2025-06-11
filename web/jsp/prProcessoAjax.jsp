@@ -187,8 +187,8 @@
         <h3 class="bordo" id="outputs">
           NOTE SUL PROCESSO &nbsp;
         </h3>
-        <div class="subfields breadcrumb-item active">
-          <c:out value="${inputs.get(0).extraInfo}" />
+        <div class="subfields active text-dark">
+          <c:out value="${inputs.get(0).extraInfo}" escapeXml="false" />
         </div>
       </div>
       </c:if>
