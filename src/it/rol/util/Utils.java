@@ -41,7 +41,7 @@
  *   37129 Verona (Italy)
  */
 
-package it.rol;
+package it.rol.util;
 
 import java.sql.Time;
 import java.text.DateFormat;
@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.logging.Logger;
 
+import it.rol.Constants;
 import it.rol.exception.CommandException;
 import it.rol.exception.NotFoundException;
 
@@ -744,7 +745,7 @@ public class Utils implements Constants {
      * <a href="http://stackoverflow.com/questions/1404210/java-date-vs-calendar">
      * (v.)</a></cite></p>
      * Siccome per motivi di retrocompatibilit&agrave; spesso non va bene
-     * usare un Calendar ma ci vuole una Date (la {@link DBWrapper} usa le Date),
+     * usare un Calendar ma ci vuole una Date (la {@link it.rol.DBWrapper} usa le Date),
      * viene messo a disposizione questo metodo, che implementa la semplice
      * trasformazione da {@link GregorianCalendar} a {@link Date}.
      *
