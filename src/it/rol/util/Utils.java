@@ -803,7 +803,12 @@ public class Utils implements Constants {
         int yearPosition = Calendar.YEAR;
         Calendar rightNow = Calendar.getInstance();
         int year = rightNow.get(yearPosition);
-        Integer yearWrapper = new Integer(year);
+        /* The constructor new Integer(int) is deprecated and marked for removal 
+         * because it always creates a new object, while Integer.valueOf(int) 
+         * can reuse cached instances for certain values (typically 
+         * from -128 to 127) and is more efficient.                             */
+        //Integer yearWrapper = new Integer(year);
+        Integer yearWrapper = Integer.valueOf(year);
         return yearWrapper.toString();
     }
 
@@ -818,7 +823,12 @@ public class Utils implements Constants {
         int hourPosition = Calendar.HOUR_OF_DAY;
         Calendar rightNow = Calendar.getInstance();
         int hour = rightNow.get(hourPosition);
-        Integer hourWrapper = new Integer(hour);
+        /* The constructor new Integer(int) is deprecated and marked for removal 
+         * because it always creates a new object, while Integer.valueOf(int) 
+         * can reuse cached instances for certain values (typically 
+         * from -128 to 127) and is more efficient.                             */
+        //Integer hourWrapper = new Integer(hour);
+        Integer hourWrapper = Integer.valueOf(hour);
         return hourWrapper.toString();
     }
 
@@ -843,7 +853,7 @@ public class Utils implements Constants {
         int minutePosition = Calendar.MINUTE;
         Calendar rightNow = Calendar.getInstance();
         int minutes = rightNow.get(minutePosition);
-        Integer minuteWrapper = new Integer(minutes);
+        Integer minuteWrapper = Integer.valueOf(minutes);
         StringBuffer minutesAsDynamicString = new StringBuffer(minuteWrapper.toString());
         if (minutes < 10) {
             minutesAsDynamicString.insert(0, "0");
