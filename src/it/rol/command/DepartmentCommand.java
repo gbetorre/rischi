@@ -59,7 +59,7 @@ import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Data;
 import it.rol.SessionManager;
-import it.rol.Utils;
+import it.rol.util.Utils;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.ItemBean;

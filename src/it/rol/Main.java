@@ -62,11 +62,12 @@ import it.rol.bean.ItemBean;
 import it.rol.command.Command;
 import it.rol.command.HomePageCommand;
 import it.rol.exception.CommandException;
+import it.rol.util.Utils;
 
 
 /**
  * <p>Main &egrave; la classe principale della web-application
- * <code>Process Mapping Software (pms)</code>.</p>
+ * <code>Risk Mapping Software (ROL-RMS)</code>.</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */

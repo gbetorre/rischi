@@ -66,7 +66,7 @@ import it.rol.Data;
 import it.rol.Main;
 import it.rol.Query;
 import it.rol.SessionManager;
-import it.rol.Utils;
+import it.rol.util.Utils;
 import it.rol.bean.ActivityBean;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;

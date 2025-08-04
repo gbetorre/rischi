@@ -45,7 +45,7 @@ package it.rol.bean;
 
 import java.io.Serializable;
 
-import it.rol.Utils;
+import it.rol.util.Utils;
 
 
 /**

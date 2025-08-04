@@ -61,7 +61,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Scanner;
-import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
@@ -79,12 +78,11 @@ import com.oreilly.servlet.ParameterParser;
 import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
-import it.rol.Utils;
-import it.rol.bean.DepartmentBean;
 import it.rol.bean.PersonBean;
 import it.rol.exception.CommandException;
 import it.rol.exception.NotFoundException;
 import it.rol.exception.WebStorageException;
+import it.rol.util.Utils;
 
 
 /**
