@@ -3,6 +3,7 @@
 <%@ include file="URL.jspf" %>
 <c:set var="meas" value="${requestScope.misura}" scope="page" />
 <c:set var="misurazioni" value="${requestScope.monitoraggi}" scope="page" />
+<c:set var="doubleQuote" value='"' scope="page" />
 <c:catch var="exception">
     <h5 class="p-2 bgAct17 rounded popupMenu heading">
       <i class="fa-solid fa-umbrella ico-home" title="misura di prevenzione"></i>&nbsp; 
@@ -23,10 +24,11 @@
           <th scope="col" width="15%">Fase</th>
           <th scope="col" width="20%">Indicatore</th>
           <th scope="col" width="5%">Target</th>
-          <th scope="col" width="10%">Risultato</th>
+          <th scope="col" width="7%">Risultato</th>
           <th scope="col" width="*">Azioni</th>
-          <th scope="col" width="15%">Motivazioni</th>
+          <th scope="col" width="10%">Motivazioni</th>
           <th scope="col" width="8%">Data Monitoraggio</th>
+          <th scope="col" width="8%">Domande</th>
           <th scope="col" width="5%">Ultimo Monitoraggio</th>
         </tr>
       </thead>
@@ -67,22 +69,52 @@
           <td scope="row">
             <fmt:formatDate value="${mon.dataUltimaModifica}"/>
           </td>
-<c:choose>
+          <td scope="row">
+          <c:if test="${not empty mon.domanda1}">
+            <c:set var="d1" value="${fn:replace(mon.domanda1, doubleQuote, \"\")}" scope="page" />
+            <div class="form-check text-center">
+              <span class="badge badge-success">
+                <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="text-white" title="<c:out value="${d1}" escapeXml="false" />">
+                  DOMANDA 1
+                </a>
+              </span>
+            </div>
+          </c:if>
+          <c:if test="${not empty mon.domanda2}">
+            <c:set var="d2" value="${fn:replace(mon.domanda2, doubleQuote, \"\")}" scope="page" />
+            <div class="form-check text-center">
+              <span class="badge badge-success">
+                <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="text-white" title="${d2}">
+                  DOMANDA 2
+                </a>
+              </span>
+            </div>
+          </c:if>
+          <c:if test="${not empty mon.domanda3}">
+            <c:set var="d3" value="${fn:replace(mon.domanda3, doubleQuote, \"\")}" scope="page" />
+            <div class="form-check text-center">
+              <span class="badge badge-success">
+                <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="text-white" title="${d3}">
+                  DOMANDA 3
+                </a>
+              </span>
+            </div>
+          </c:if>
+          </td>
+        <c:choose>
           <c:when test="${mon.ultimo}">
-            <td scope="row" class="bgAct21">
-              <div class="form-check text-center">
-                <span class="badge badge-success">
-                  SI
-                </span>
-              </div>
-            </td>
+          <td scope="row" class="bgAct21">
+            <div class="form-check text-center">
+              <span class="badge badge-success">SI</span>
+            </div>
+          </td>
           </c:when>
           <c:otherwise>
-            <td scope="row" class="bgAct4">
-              <div class="form-check text-center">
-                <span class="badge badge-light">NO</span>
-              </div>
-            </td>
+          <td scope="row" class="bgAct4">
+            <div class="form-check text-center">
+              <span class="badge badge-light">NO</span>
+            </div>
+          </td>
           </c:otherwise>
         </c:choose>
         </tr>
@@ -93,8 +125,16 @@
     </c:when>
     <c:otherwise>
     <div class="alert alert-danger">
+      <strong>Non sono state trovate misurazioni associate ad indicatori della misura corrente.</strong>
+      <hr class="separapoco" />
       <p>
-        Non sono state trovate misurazioni associate ad indicatori <strong><c:out value="${labelResult}" /></strong>.<br />
+        Se si desidera aggiungere una misurazione, entrare nella
+        <a href="${initParam.appName}/?q=ic&p=ind&mliv=${meas.codice}&r=${param['r']}">
+          pagina degli indicatori
+        </a>
+        della misura e cliccare sul bottone 
+        <strong>MISURA</strong> 
+        in corrispondenza dell'indicatore che si vuol misurare.
       </p>
     </div>
     </c:otherwise>
