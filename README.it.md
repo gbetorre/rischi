@@ -510,6 +510,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.3.5] (04/08/2025) Implementata gestione delle risposte alle 3 domande relative alla misurazione (monitoraggio)
 - [2.3.4] (11/06/2025) Implementata visualizzazione delle note al processo
 - [2.3.3] (10/06/2025) Miglioramenti nella presentazione (aggiunto bottone, rilassato vincolo)
 - [2.3.2] (20/05/2025) Revisionato algoritmo di calcolo dell'indicatore di probabilità P1
