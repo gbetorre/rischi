@@ -91,10 +91,15 @@ import it.rol.util.Utils;
 
 
 /**
- * <p><code>DBWrapper.java</code> &egrave; la classe che implementa
- * l'accesso ai database utilizzati dall'applicazione nonch&eacute;
- * l'esecuzione delle query e la gestione dei risultati restituiti,
- * che impacchetta in oggetti di tipo JavaBean e restituisce al chiamante.</p>
+ * <p><code>DBWrapper.java</code> &egrave; la classe che:<ul> 
+ * <li>implementa l'accesso al database utilizzato dall'applicazione
+ * <code>Risk Mapping Software (ROL-RMS)</code> nonch&eacute;</li>
+ * <li>l'esecuzione delle query di selezione e la gestione dei risultati 
+ * restituiti, che impacchetta in oggetti di tipo JavaBean e 
+ * restituisce al chiamante.</li>
+ * <li>Gestisce anche l'esecuzione delle query di scrittura (inserimento,
+ * aggiornamento, eliminazione) che effettua su valori ricevuti in input
+ * in strutture di tipo Map-Dictionary.</li></ul></p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
@@ -6563,6 +6568,33 @@ public class DBWrapper extends QueryImpl {
                     if (!mon.get("motivi").equals(VOID_STRING)) {
                         excuses = new String(mon.get("motivi"));
                         pst.setString(++nextParam, excuses);
+                    } else {
+                        // Dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    /* === Domanda 1 === */
+                    String question1 = null;
+                    if (!mon.get("domanda1").equals(VOID_STRING)) {
+                        question1 = new String(mon.get("domanda1"));
+                        pst.setString(++nextParam, question1);
+                    } else {
+                        // Dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    /* === Domanda 2 === */
+                    String question2 = null;
+                    if (!mon.get("domanda2").equals(VOID_STRING)) {
+                        question2 = new String(mon.get("domanda2"));
+                        pst.setString(++nextParam, question2);
+                    } else {
+                        // Dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    /* === Domanda 3 === */
+                    String question3 = null;
+                    if (!mon.get("domanda3").equals(VOID_STRING)) {
+                        question3 = new String(mon.get("domanda3"));
+                        pst.setString(++nextParam, question3);
                     } else {
                         // Dato facoltativo non inserito
                         pst.setNull(++nextParam, Types.NULL);
