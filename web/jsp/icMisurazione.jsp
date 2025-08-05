@@ -6,6 +6,7 @@
 <c:set var="mon" value="${requestScope.misurazione}" scope="page" />
 <c:set var="ind" value="${mon.indicatore}" scope="page" />
 <c:set var="phas" value="${ind.fase}" scope="page" />
+<c:set var="doubleQuote" value='"' scope="page" />
 <fmt:formatDate var="indLastMod" value="${ind.dataUltimaModifica}" pattern="dd/MM/yyyy" /> 
   <c:catch var="exception">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -117,6 +118,33 @@
           <div class="col-sm-4 bg-note"><br><strong>Motivazioni ritardo / mancato raggiungimento</strong></div>
           <div class="col-sm-6">
             <textarea class="form-control" id="mon-infos" name="mon-infos" placeholder="${mon.descrizione}" readonly></textarea>
+          </div>
+        </div>
+        <hr class="separatore">
+        <c:set var="d1" value="${fn:replace(mon.domanda1, doubleQuote, \"&rdquo;\")}" scope="page" />
+        <div class="row">
+          <div class="col-sm-1">&nbsp;</div>
+          <div class="col-sm-4 bg-note"><br><strong>Domanda 1</strong></div>
+          <div class="col-sm-6">
+            <textarea class="form-control" id="mon-quest1" name="mon-quest1" placeholder="<c:out value="${d1}" escapeXml="false" />" readonly></textarea>
+          </div>
+        </div>
+        <hr class="separatore">
+        <c:set var="d2" value="${fn:replace(mon.domanda2, doubleQuote, \"&rdquo;\")}" scope="page" />
+        <div class="row">
+          <div class="col-sm-1">&nbsp;</div>
+          <div class="col-sm-4 bg-note"><br><strong>Domanda 2</strong></div>
+          <div class="col-sm-6">
+            <textarea class="form-control" id="mon-quest2" name="mon-quest2" placeholder="<c:out value="${d2}" escapeXml="false" />" readonly></textarea>
+          </div>
+        </div>
+        <hr class="separatore">
+        <c:set var="d3" value="${fn:replace(mon.domanda3, doubleQuote, \"&rdquo;\")}" scope="page" />
+        <div class="row">
+          <div class="col-sm-1">&nbsp;</div>
+          <div class="col-sm-4 bg-note"><br><strong>Domanda 3</strong></div>
+          <div class="col-sm-6">
+            <textarea class="form-control" id="mon-quest3" name="mon-quest3" placeholder="<c:out value="${d3}" escapeXml="false" />" readonly></textarea>
           </div>
         </div>
         <hr class="separatore" />
