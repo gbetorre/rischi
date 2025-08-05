@@ -93,7 +93,13 @@ public class MeasurementBean extends CodeBean {
     private Time oraUltimaModifica;
     /** Autore ultima modifica */
     private String autoreUltimaModifica;
-    /** Ulteriori informazioni (id indicatore, domanda 1-2-3...) */
+    /** Domanda 1 */
+    private String domanda1;
+    /** Domanda 2 */
+    private String domanda2;
+    /** Domanda 3 */
+    private String domanda3;
+    /** Ulteriori informazioni (id indicatore...) */
     private ItemBean extraInfo;
     /** Vector di fileset, ciascuno rappresentante un riferimento logico ad un allegato fisico */
     private Vector<FileDocBean> allegati;
@@ -111,6 +117,7 @@ public class MeasurementBean extends CodeBean {
         dataUltimaModifica = new Date(0);
         oraUltimaModifica = null;
         autoreUltimaModifica = null;
+        domanda1 = domanda2 = domanda3 = null;
         extraInfo = null;
         allegati = null;
 	}
@@ -342,11 +349,76 @@ public class MeasurementBean extends CodeBean {
     
     
     /* ************************************************************** *
-     *        Metodi getter e setter per "domanda 1 2 3" etc.         *
+     *              Metodi getter e setter per domanda 1              *
+     * ************************************************************** */
+    /**
+     * Restituisce il contenuto della domanda 1
+     * 
+     * @return <code>domanda 1</code> - descrizione della domanda 1
+     */
+    public String getDomanda1() {
+        return domanda1;
+    }
+
+    /**
+     * Imposta il contenuto della domanda 1
+     * 
+     * @param domanda1 - descrizione da settare
+     */
+    public void setDomanda1(String domanda1) {
+        this.domanda1 = domanda1;
+    }
+    
+    
+    /* ************************************************************** *
+     *              Metodi getter e setter per domanda 2              *
+     * ************************************************************** */
+    /**
+     * Restituisce il contenuto della domanda 2
+     * 
+     * @return <code>domanda 2</code> - descrizione della domanda 2
+     */
+    public String getDomanda2() {
+        return domanda2;
+    }
+
+    /**
+     * Imposta il contenuto della domanda 2
+     * 
+     * @param domanda2 - descrizione da settare
+     */
+    public void setDomanda2(String domanda2) {
+        this.domanda2 = domanda2;
+    }
+    
+    
+    /* ************************************************************** *
+     *              Metodi getter e setter per domanda 3              *
+     * ************************************************************** */
+    /**
+     * Restituisce il contenuto della domanda 3
+     * 
+     * @return <code>domanda 3</code> - descrizione della domanda 3
+     */
+    public String getDomanda3() {
+        return domanda3;
+    }
+
+    /**
+     * Imposta il contenuto della domanda 3
+     * 
+     * @param domanda3 - descrizione da settare
+     */
+    public void setDomanda3(String domanda3) {
+        this.domanda3 = domanda3;
+    }
+    
+    
+    /* ************************************************************** *
+     *       Metodi getter e setter per ulteriori informazioni        *
      * ************************************************************** */
     /**
      * Restituisce un oggetto contenente ulteriori informazioni
-     * (p.es. il valore delle risposte a "domanda 1", "domanda 2" etc.)
      * 
      * @return <code>ItemBean</code> - un oggetto generico contenente informazioni
      */
