@@ -1544,6 +1544,9 @@ public interface Query extends Serializable {
             "   ,   MZ.valore                           AS \"valore\"" +
             "   ,   MZ.azioni                           AS \"informativa\"" +
             "   ,   MZ.motivazioni                      AS \"descrizione\"" +
+            "   ,   MZ.domanda1                         AS \"domanda1\"" +
+            "   ,   MZ.domanda2                         AS \"domanda2\"" +
+            "   ,   MZ.domanda3                         AS \"domanda3\"" +
             "   ,   MZ.ultimo                           AS \"ultimo\"" +
             "   ,   MZ.data_ultima_modifica             AS \"dataUltimaModifica\"" +
             "   ,   MZ.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
@@ -1564,6 +1567,9 @@ public interface Query extends Serializable {
             "   ,   MZ.valore                           AS \"valore\"" +
             "   ,   MZ.azioni                           AS \"informativa\"" +
             "   ,   MZ.motivazioni                      AS \"descrizione\"" +
+            "   ,   MZ.domanda1                         AS \"domanda1\"" +
+            "   ,   MZ.domanda2                         AS \"domanda2\"" +
+            "   ,   MZ.domanda3                         AS \"domanda3\"" +
             "   ,   MZ.ultimo                           AS \"ultimo\"" +
             "   ,   MZ.data_ultima_modifica             AS \"dataUltimaModifica\"" +
             "   ,   MZ.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
@@ -1585,6 +1591,9 @@ public interface Query extends Serializable {
             "   ,   MZ.valore                           AS \"valore\"" +
             "   ,   MZ.azioni                           AS \"informativa\"" +
             "   ,   MZ.motivazioni                      AS \"descrizione\"" +
+            "   ,   MZ.domanda1                         AS \"domanda1\"" +
+            "   ,   MZ.domanda2                         AS \"domanda2\"" +
+            "   ,   MZ.domanda3                         AS \"domanda3\"" +
             "   ,   MZ.ultimo                           AS \"ultimo\"" +
             "   ,   MZ.data_ultima_modifica             AS \"dataUltimaModifica\"" +
             "   ,   MZ.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
@@ -2215,6 +2224,9 @@ public interface Query extends Serializable {
             "   (   valore" +
             "   ,   azioni" +
             "   ,   motivazioni" +
+            "   ,   domanda1" +
+            "   ,   domanda2" +
+            "   ,   domanda3" +
             "   ,   ultimo" +
             "   ,   data_ultima_modifica" +
             "   ,   ora_ultima_modifica " +
@@ -2225,6 +2237,9 @@ public interface Query extends Serializable {
             "   VALUES (? " +       // valore
             "   ,       ? " +       // azioni
             "   ,       ? " +       // motivazioni
+            "   ,       ? " +       // domanda 1
+            "   ,       ? " +       // domanda 2
+            "   ,       ? " +       // domanda 3
             "   ,       ? " +       // ultimo
             "   ,       ? " +       // data ultima modifica
             "   ,       ? " +       // ora ultima modifica
