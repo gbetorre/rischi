@@ -152,6 +152,30 @@
             <textarea class="form-control" id="mon-infos" name="mon-infos" placeholder="Inserisci il motivo del mancato raggiungimento del target"></textarea>
           </div>
         </div>
+        <hr class="riga">
+        <div class="row">
+          <div class="col-sm-1">&nbsp;</div>
+          <div class="col-sm-4 bg-note"><br><strong>Domanda 1</strong></div>
+          <div class="col-sm-6">
+            <textarea class="form-control" id="mon-quest1" name="mon-quest1" placeholder="Inserisci la domanda 1"></textarea>
+          </div>
+        </div>
+        <hr class="separatore">
+        <div class="row">
+          <div class="col-sm-1">&nbsp;</div>
+          <div class="col-sm-4 bg-note"><br><strong>Domanda 2</strong></div>
+          <div class="col-sm-6">
+            <textarea class="form-control" id="mon-quest2" name="mon-quest2" placeholder="Inserisci la domanda 2"></textarea>
+          </div>
+        </div>
+        <hr class="separatore">
+        <div class="row">
+          <div class="col-sm-1">&nbsp;</div>
+          <div class="col-sm-4 bg-note"><br><strong>Domanda 3</strong></div>
+          <div class="col-sm-6">
+            <textarea class="form-control" id="mon-quest3" name="mon-quest3" placeholder="Inserisci la domanda 3"></textarea>
+          </div>
+        </div>
         <hr class="separatore" />
         <div class="centerlayout">
           <button type="submit" class="btn btnNav" id="btn-save" value="Save">
