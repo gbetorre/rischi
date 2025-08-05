@@ -645,6 +645,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
             measurement.put("valore",   parser.getStringParameter("mon-value", VOID_STRING));
             measurement.put("azioni",   parser.getStringParameter("mon-descr", VOID_STRING));
             measurement.put("motivi",   parser.getStringParameter("mon-infos", VOID_STRING));
+            measurement.put("domanda1", parser.getStringParameter("mon-quest1",VOID_STRING));
+            measurement.put("domanda2", parser.getStringParameter("mon-quest2",VOID_STRING));
+            measurement.put("domanda3", parser.getStringParameter("mon-quest3",VOID_STRING));
             measurement.put("ultima",   parser.getStringParameter("mon-miles", String.valueOf(NOTHING)));
             measurement.put("data",     parser.getStringParameter("mon-data", dateAsString));
             measurement.put("ind",      parser.getStringParameter("mon-ind", VOID_STRING));
