@@ -430,6 +430,7 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+- [2.3.6] (07/08/2025) Labels revision
 - [2.3.5] (04/08/2025) Implemented management of the answers to the 3 questions that one can ask during monitoring
 - [2.3.4] (11/06/2025) Implemented view note function to a process
 - [2.3.3] (10/06/2025) Presentation improvements
