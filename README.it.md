@@ -510,6 +510,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.3.7] (08/08/2025) Miglioramenti nella presentazione (etichette dei testi delle domande al monitoraggio)
 - [2.3.6] (07/08/2025) Revisione di etichette
 - [2.3.5] (04/08/2025) Implementata gestione delle risposte alle 3 domande relative alla misurazione (monitoraggio)
 - [2.3.4] (11/06/2025) Implementata visualizzazione delle note al processo
