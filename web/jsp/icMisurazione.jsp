@@ -124,7 +124,7 @@
         <c:set var="d1" value="${fn:replace(mon.domanda1, doubleQuote, \"&rdquo;\")}" scope="page" />
         <div class="row">
           <div class="col-sm-1">&nbsp;</div>
-          <div class="col-sm-4 bg-note"><br><strong>Domanda 1</strong></div>
+          <div class="col-sm-4 bg-note"><br><strong>Come valuti l'efficacia della misura di prevenzione della corruzione adottata?</strong></div>
           <div class="col-sm-6">
             <textarea class="form-control" id="mon-quest1" name="mon-quest1" placeholder="<c:out value="${d1}" escapeXml="false" />" readonly></textarea>
           </div>
@@ -133,7 +133,7 @@
         <c:set var="d2" value="${fn:replace(mon.domanda2, doubleQuote, \"&rdquo;\")}" scope="page" />
         <div class="row">
           <div class="col-sm-1">&nbsp;</div>
-          <div class="col-sm-4 bg-note"><br><strong>Domanda 2</strong></div>
+          <div class="col-sm-4 bg-note"><br><strong>Sono state riscontrate criticit&agrave; nell'attuazione della misura?</strong></div>
           <div class="col-sm-6">
             <textarea class="form-control" id="mon-quest2" name="mon-quest2" placeholder="<c:out value="${d2}" escapeXml="false" />" readonly></textarea>
           </div>
@@ -142,7 +142,7 @@
         <c:set var="d3" value="${fn:replace(mon.domanda3, doubleQuote, \"&rdquo;\")}" scope="page" />
         <div class="row">
           <div class="col-sm-1">&nbsp;</div>
-          <div class="col-sm-4 bg-note"><br><strong>Domanda 3</strong></div>
+          <div class="col-sm-4 bg-note"><br><strong>Proporre eventuali azioni di miglioramento dell'efficacia della misura.</strong></div>
           <div class="col-sm-6">
             <textarea class="form-control" id="mon-quest3" name="mon-quest3" placeholder="<c:out value="${d3}" escapeXml="false" />" readonly></textarea>
           </div>
