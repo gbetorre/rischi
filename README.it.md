@@ -102,7 +102,7 @@ Nell'analisi del software ROL-RMS si &egrave; considerato, tuttavia, che un appr
 Infatti:
 * gli elementi qualitativi (i giudizi sintetici) arricchiscono i dati numerici con una chiave di lettura interpretativa, che illumina meglio la scena e il contesto;
 * i valori quantitativi (indicatori di rischio, indici, monitoraggi...), dal canto loro, permettono di ottenere dati immediatamente comprensibili e comparabili, potenzialmente anche da un'amministrazione all'altra. 
-Inoltre, l'elevata automazione resa possibile dal linguaggio imperativo con cui il software &egrave; realizzato (Java), non obbliga a lunghe ricognizioni e pesature per ottenere i valori numerici, ma facilita enormemente il compito di calcolo.
+Inoltre, l'elevata automazione resa possibile dal potente linguaggio di programmazione con cui il software &egrave; realizzato (Java), non obbliga a lunghe ricognizioni e pesature per ottenere i valori numerici, ma facilita enormemente il compito di calcolo.
 
 Per questi motivi, l'approccio valutativo misto &egrave; stato ritenuto il migliore per lo sviluppo del software <code>ROL-RMS</code>.
 
@@ -825,7 +825,7 @@ In particolare:
 * Servlet, JSP ed Expression Language sono rilasciati con Apache License 
 * Le pagine di landing usano modeli di templatemo, che sono rilasciati sostanzialmente nel pubblico dominio (Public Domain)
 * Alcune pagine utilizzano immagini rilasciate con licenza libera da _[Pixabay](https://pixabay.com/it/service/terms/)_ che fa uso di Creative Commons in combinazione con altri termini
-* Svariate immagini sono prodotte con il modello generativo di intelligenza artificiale FLUX1-schnell, che utilizza _[Apache License 2.0](https://github.com/black-forest-labs/flux/blob/main/LICENSE)_
+* Svariate immagini sono prodotte con il modello generativo di intelligenza artificiale FLUX.1-Schnell 12 Billion, che utilizza _[Apache License 2.0](https://github.com/black-forest-labs/flux/blob/main/LICENSE)_
 
 A ogni modo, il Software fa uso esclusivamente di componenti con licenza libera e viene rilasciato "AS IS", come previsto dalla propria licenza.
 Consulta <a href="https://github.com/gbetorre/rischi/blob/main/LICENSE">`LICENSE.txt`</a> per ulteriori informazioni.
