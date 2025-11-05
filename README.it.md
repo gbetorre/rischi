@@ -182,7 +182,7 @@ Ovviamente l'applicazione <strong>Rischi On Line: Risk Mapping Software <code>(R
 
 [![DB representation, layout circular][schema-physical]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/DB-circular.png)
 <br>
-<strong>*Fig.9 - Rappresentazione grafica delle entit&agrave; e relazioni dello schema, Layout: Circular (powered by yFiles)*</strong>
+<strong>*Fig.9 - Rappresentazione grafica delle entit&agrave; e relazioni dello schema; Tabelle: 64, Riferimenti:206, Layout: Circular (powered by yFiles)*</strong>
 <br><br>
 
 ## Step 1: Individuazione del contesto (mappatura organizzativa)

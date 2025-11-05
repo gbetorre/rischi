@@ -149,7 +149,7 @@ relational database (version 12 and later), in which the questions that will be 
 
 [![DB representation, layout circular][schema-physical]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/DB-circular.png)
 <br>
-<strong>*Fig.8 - Graphic representation of the entities and relations of the database, Layout: Circular (powered by yFiles)*</strong>
+<strong>*Fig.8 - Graphic representation of the entities and relations of the database; Tables: 64, References: 206, Layout: Circular (powered by yFiles)*</strong>
 <br><br>
 
 ## Step 1: Context identification (organizational mapping)
