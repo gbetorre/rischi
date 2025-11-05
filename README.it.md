@@ -721,7 +721,7 @@ Inoltre, per stabilire la connessione al database, il sorgenti del Model usano:
 * postgresql-jdbc.
 
 Il database su cui l'applicazione si appoggia &egrave; un database relazionale PostgreSQL v. 12 e superiori.
-L'SQL con cui sono scritte le query &egrave; comunuque sostanzialmente standard e facilmente adattabile a qualunque DBMS.
+L'SQL con cui sono scritte le query &egrave; comunque sostanzialmente standard e facilmente adattabile a qualunque DBMS.
 
 Per far girare l'applicazione &egrave; quindi necessario come prerequisito generare prima un'istanza dello schema e valorizzarlo con una serie di elementi di base.
 A questo scopo, &egrave; possibile partire da uno script di creazione e successive query di inserimento, ma anche effettuare il restore di un dump gi&agrave; pronto.
