@@ -416,6 +416,7 @@ affinch&eacute; sia possibile iniziare la campagna di interviste e, conseguentem
 <br><br>
 
 ## Sviluppi futuri
+
 Vi sono, inoltre, alcune possibili evoluzioni, che potrebbero essere implementate in versioni successive:
 * Predisposizione di un cruscotto per i RAT (Referenti Anticorruzione e Trasparenza) per consentire loro di compilare autonomamente le risposte ai quesiti (certificando, automaticamente, i dati inseriti).
 * Predisposizione di monitoraggi e reportistica, anche in forma grafica (istogrammi, grafici a torta, etc.), per consentire alla <em>governance</em> di effettuare controlli sugli stati di avanzamento e sui risultati raggiunti tramite il progetto di mappatura dei rischi.
@@ -424,6 +425,7 @@ Vi sono, inoltre, alcune possibili evoluzioni, che potrebbero essere implementat
 * Implementazione di layer di sicurezza aggiuntivi.
 
 ### Internazionalizzazione
+
 Implementare una resa degli output in molte lingue diverse &egrave; un'operazione relativamente semplice da fare agendo su un software che si appoggia su un database relazionale ben strutturato e definito, come &egrave; nel caso di <code>ROL-RMS</code>.
 Un modello consolidato, adatto alla resa di testi e titoli in un numero non prefissato di lingue diverse, &egrave; facilmente implementabile estendendo il database tramite: 
 1. l'aggiunta di una tabella di traduzione per ogni tabella che contiene elementi testuali da tradurre e 
@@ -444,7 +446,34 @@ Si confida nella comprensione del contribuitore relativamente al fatto che, esse
 
 Gli aspetti di sicurezza possono certamente essere irrobustiti, ma l'investimento su questo versante &egrave; legato alla popolarit&agrave; del progetto: se questo &egrave; destinato a restare confinato entro i limiti di qualche ufficio anticorruzione e trasparenza, chiaramente non ha molto senso preoccuparsi di fornire strati aggiuntivi, essendo gi&agrave; implementata la sicurezza di base; in caso contrario, l'investimento anche su questo versante si arricchisce di senso.
 
-<br>
+### Customizzazione
+
+Il software <code>ROL-RMS</code> è ricco di potenzialità, di possibilità di espansione e di aggiunta di ulteriori funzionalità ma, 
+come detto più volte in questo documento, per poter essere adeguato a rappresentare la realtà organizzativa che si intende 
+di volta in volta esaminare, richiede anche una necessaria fase di customizzazione.
+
+Questo è inevitabile: infatti, se è vero che alcuni elenchi e "dizionari" (ad esempio le aree di rischio, i fattori abilitanti) 
+possono essere considerati invarianti da un'organizzazione all'altra, e mantenuti quindi costanti nelle possibili istanze 
+del software deployate presso le varie organizzazioni, ciò  non vale per gli aspetti strutturali e funzionali specifici 
+di ogni organizzazione, quale ad esempio la strutturazione degli uffici, i processi erogati ma anche gli stessi rischi
+corruttivi; a seconda delle caratteristiche e del campo di azione di ciascuna organizzazione, infatti, potranno esservi
+alcuni rischi più attinenti e realistici ed altri, che magari per altre organizzazioni sono centrali, che possono essere
+considerati sostanzialmente trascurabili.
+
+Se il problema dell'attinenza dei rischi - e anche dei quesiti - ad un'organizzazione piuttosto che a un'altra può essere
+in qualche misura affrontato espandendo la "batteria" di quesiti e rischi presenti nel database, includendo molti record,
+parecchi dei quali non saranno presi in considerazione da molte organizzazioni, vi sono ovviamente elementi che non possono 
+essere mappati a priori, come appunto la struttura ed i processi di ogni organizzazione.
+
+Per questo motivo, come è stato accennato più sopra in questo capitolo, è stata creata una procedura guidata che permette 
+di definire tutti i processi organizzativi direttamente tramite interfaccia (wizard) integrata nell'applicazione <code>ROL-RMS</code>. 
+A questo punto, un utile sviluppo futuro potrebbe essere: 
+
+* una procedura che semplifichi la creazione dell'organigramma, tramite il caricamento di un file csv o Excel, che viene letto dall'applicazione, la quale genera automaticamente gli inserimenti nelle apposite tabelle del db;
+* o, in alternativa, uno script che, partendo dalla lettura dell'Excel di cui sopra, generi quanto meno le query di inserimento che poi dovranno essere passate al database tramite script (si veda, ad esempio, <a href="https://github.com/gbetorre/ExcelToSQL/blob/master/README.it.md">questo progetto dello stesso autore</a>).
+
+---
+
 Naturalmente, nessuno strumento informatico &egrave; in grado da solo di ottenere risultati come l'abbassamento dei rischi corruttivi; pertanto ogni approfondimento analitico permesso dal software dovr&agrave; essere esaminato ed interpretato dagli esperti dell'anticorruzione.
 
 Ognuno pu&ograve; sentirsi libero di proporre miglioramenti ed evoluzioni.
