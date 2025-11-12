@@ -539,6 +539,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+- [2.3.8] (12/11/2025) Aggiunta directory contenente query per il popolamento e l'inizializzazione; correzione di bug
 - [2.3.7] (08/08/2025) Miglioramenti nella presentazione (etichette dei testi delle domande al monitoraggio)
 - [2.3.6] (07/08/2025) Revisione di etichette
 - [2.3.5] (04/08/2025) Implementata gestione delle risposte alle 3 domande relative alla misurazione (monitoraggio)
@@ -770,17 +771,41 @@ dove:
 
 _Di seguito un esempio dei passi necessari per installare ed eseguire il sistema software <code>ROL-RMS</code>._
 
-1. Ottenere un dump del database di produzione, con preimpostato un utente concordato pienamente in grado di consultarne e amministrarne i dati
+1. Ottenere un dump del database di produzione, con preimpostato un utente concordato, che sia pienamente in grado di consultarne e amministrarne i dati.
 
-2. Clonare il repo
+2. Effettuare un restore di tale dump; creare l'utente concordato di cui sopra; configurare i suoi permessi di accesso; definire il connettore verso il database.
+
+3. Registrare i componenti dello strato Controller nella relativa tabella (la tabella "command"); questo pu&ograve; essere fatto, ad esempio, utilizzando la seguente query di inserimento:
+```SQL
+INSERT INTO command (id, nome, token, jsp, labelweb, informativa) VALUES
+(1, 'HomePage', 'home', 'index.jsp', 'Home', 'Command che gestisce la home page'),
+(2, 'Process', 'pr', 'prElenco.jsp', 'Processi', 'Command che gestisce i processi'),
+(4, 'Department', 'st', 'stElenco.jsp', 'Strutture', 'Command che gestisce le strutture'),
+(5, 'Risk', 'ri', 'riElenco.jsp', 'Rischi', 'Command che gestisce i rischi corruttivi'),
+(3, 'Report', 'mu', 'muElenco.jsp', 'Report', 'Command che gestisce report, ricerche e statistiche'),
+(6, 'Audit', 'in', 'inElenco.jsp', 'Interviste', 'Command che gestisce le interviste'),
+(7, 'Measure', 'ms', 'msElenco.jsp', 'Misure', 'Command che gestisce le misure di calmierazione del rischio'),
+(8, 'Indicator', 'ic', 'icElenco.jsp', 'Indicatori', 'Command che gestisce gli indicatori di monitoraggio');
+```
+Tener conto che l'elenco dei componenti del Controller potrebbe variare nelle varie versioni del software.
+(La query riportata sopra va bene, ad esempio, per la versione 2.38).
+Per essere sicuri di registrare correttamente tutti i componenti, si pu&ograve; consultare il relativo script SQL pubblicato nell'omonima directory.
+Tutti i componenti da registrare si trovano nel package <a href="https://github.com/gbetorre/rischi/tree/main/src/it/rol/command">it.rol.command</a>
+e vanno registrati tutti tranne l'interfaccia Command stessa, che tutti implementano.
+Ogni componente del Controller risponde a un distinto token e ha abbinata una pagina iniziale, il cui naming &egrave;
+```
+token + "Elenco.jsp"
+```
+
+4. Clonare il repo
    ```sh
    git clone https://github.com/gbetorre/rischi.git
    ```
-3. Installare i packages necessari, compreso un web server dotato di container JSP
+5. Installare i packages necessari, compreso un web server dotato di container JSP.
 
-4. Configurare il server, compilare i sorgenti ed effettuare un deploy
+6. Configurare il server, compilare i sorgenti ed effettuare un deploy.
 
-5. Puntare il browser all'indirizzo configurato, ad esempio
+7. Puntare il browser all'indirizzo configurato, ad esempio.
    ```
    https://localhost:8080/rol/
    ```
