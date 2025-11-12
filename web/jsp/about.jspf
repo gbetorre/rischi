@@ -25,16 +25,18 @@
         </button>
       </div>
       <div class="toast-body">
-        Versione: 2.37
+        Versione: 2.38
         <fmt:setLocale value="it_IT"/>
-        <c:set var="deployDate" value="08-08-2025" scope="page" />
+        <c:set var="deployDate" value="12-11-2025" scope="page" />
         <fmt:parseDate var="releaseDate" value="${deployDate}" pattern="dd-MM-yyyy" scope="page" />
         <fmt:formatDate var="dataRilascio" value="${releaseDate}" pattern="dd MMMMM, yyyy" />
         <span class="float-right">
           <span class="btn-small">(data di rilascio: <c:out value="${dataRilascio}" />)</span>
         </span>
         <hr class="riga" />
-          <span class="copyleft">&copy;</span> 2022 &mdash; <c:out value="${requestScope.theCurrentYear}" />&nbsp;
+          <span class="copyleft">&copy;</span> 2022 &mdash; 
+          <c:out value="${requestScope.theCurrentYear}" />&nbsp; 
+          <a href="https://github.com/gbetorre/rischi">Giovanroberto Torre</a>
       </div>
     </div>
   </div>
