@@ -9,7 +9,7 @@
   </div>
 </c:if>
 <c:catch var="exception">
-  <form action="${initParam.appName}/auth" method="post">
+  <form accept-charset="ISO-8859-1" action="${initParam.appName}/auth" method="post">
     <br />
     <div class="row justify-content-center">
       <div class="col-3 text-center">
