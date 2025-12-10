@@ -29,7 +29,7 @@
           <th scope="col" width="10%">Motivazioni</th>
           <th scope="col" width="8%">Data Monitoraggio</th>
           <th scope="col" width="8%">Domande</th>
-          <th scope="col" width="5%">Ultimo Monitoraggio</th>
+          <th scope="col" width="5%">Misurazione Aggiuntiva</th>
         </tr>
       </thead>
       <tbody>
@@ -61,7 +61,9 @@
             </a>
           </td>
           <td scope="row" class="small">
-            <c:out value="${mon.informativa}"/>
+            <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="<c:out value="${d1}" escapeXml="false" />">
+              <c:out value="${mon.informativa}"/>
+            </a>
           </td>
           <td scope="row" class="small">
             <c:out value="${mon.descrizione}" />
@@ -101,22 +103,13 @@
             </div>
           </c:if>
           </td>
-        <c:choose>
-          <c:when test="${mon.ultimo}">
           <td scope="row" class="bgAct21">
-            <div class="form-check text-center">
-              <span class="badge badge-success">SI</span>
+            <div class="btn-group align-items-center border-basso">
+              <a href="${initParam.appName}/?q=ic&p=imm&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" type="button" class="badge bgAct11 btn-small lightTable text-black align-middle refresh" title="Clicca per aggiungere una misurazione a questo indicatore">
+                <i class="fa-regular fa-square-plus"></i> MISURA
+              </a>
             </div>
           </td>
-          </c:when>
-          <c:otherwise>
-          <td scope="row" class="bgAct4">
-            <div class="form-check text-center">
-              <span class="badge badge-light">NO</span>
-            </div>
-          </td>
-          </c:otherwise>
-        </c:choose>
         </tr>
       </c:forEach>
       </tbody>
