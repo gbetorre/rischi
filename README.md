@@ -430,6 +430,8 @@ in the case of the current application, in fact, version numbers have only the s
 </sub>
 
 ### 2025
+
+- [2.3.9] (10/12/2025) Added button to add further measurements
 - [2.3.8] (12/11/2025) Added directory to contain SQL queries; bug fix
 - [2.3.7] (08/08/2025) Presentation improvements (labels)
 - [2.3.6] (07/08/2025) Labels revision
@@ -459,6 +461,7 @@ in the case of the current application, in fact, version numbers have only the s
 - [2.1.2] (13/01/2025) Presentation improvements (badges, labels, colours)
 
 ### 2024
+
 - [2.1.1] (02/12/2024) Implemented client-side controls in measurement form
 - [2.1.0] (28/11/2024) Added facility to download process register in CSV format (extracts processes with PxI original and PxI mitigated after measures)
 - [2.0.9] (25/11/2024) Added page containing form to add a measurement for monitoring; bug fix
@@ -510,6 +513,7 @@ in the case of the current application, in fact, version numbers have only the s
 - [1.6.3] (08/01/2024) Refined CSV extraction relative to single interview; added sorting by name to process tree nodes; improved PxI report presentation of processes
 
 ### 2023
+
 - [1.6.2] (15/12/2023) Revised algorithm for calculating probability size; P; added style to highlight very high risk value
 - [1.6.1] (11/12/2023) Revised algorithm for calculating impact indicator I3; fixed bugs
 - [1.6.0] (07/12/2023) Implemented output to Rich Text Format file of tabular report summarizing risk and facilities; bug fixes
@@ -548,6 +552,7 @@ in the case of the current application, in fact, version numbers have only the s
 - [1.2.7] (30/01/2023) Implemented corrupt risk register; bug fixes
 
 ### 2022
+
 - [1.2.6] (12/21/2022) Added functionality to download specific process details in CSV format
 - [1.2.5] (13/12/2022) Added input, phase, output details in general process extraction CSV
 - [1.2.4] (01/12/2022) Showed details of a process in a separate window for pdf printing purposes

@@ -539,6 +539,8 @@ e fornirvi il relativo significato e la relativa motivazione.
 -->
 
 ### 2025
+
+- [2.3.9] (10/12/2025) Aggiunto bottone per inserimento misurazione aggiuntiva su indicatore di monitoraggio
 - [2.3.8] (12/11/2025) Aggiunta directory contenente query per il popolamento e l'inizializzazione; correzione di bug
 - [2.3.7] (08/08/2025) Miglioramenti nella presentazione (etichette dei testi delle domande al monitoraggio)
 - [2.3.6] (07/08/2025) Revisione di etichette
@@ -568,6 +570,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [2.1.2] (13/01/2025) Revisione grafica pagine; miglioramenti nella presentazione pagina iniziale monitoraggio (conteggio fasi, indicatori, misurazioni e completezza di ogni misura)
 
 ### 2024
+
 - [2.1.1] (02/12/2024) Implementati controlli lato client in form di aggiunta misurazione di indicatore
 - [2.1.0] (28/11/2024) Aggiunta funzionalit&agrave; di download processi con PxI mitigati (stima) in formato CSV (estrae processi, PxI iniziale e valore del PxI calmierato che si otterrebbe se tutte le misure previste venissero effettivamente applicate)
 - [2.0.9] (25/11/2024) Aggiunta pagina contenente form per inserire una nuova misurazione di indicatore; correzione di bug
@@ -619,6 +622,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.6.3] (08/01/2024) Raffinata estrazione CSV relativa a intervista singola; aggiunto ordinamento per nome a nodi albero processi; migliorata presentazione report PxI dei processi
 
 ### 2023
+
 - [1.6.2] (15/12/2023) Revisionato algoritmo di calcolo della dimensione di probabilit&agrave; P; aggiunto stile per evidenziare valore di rischio altissimo
 - [1.6.1] (11/12/2023) Revisionato algoritmo di calcolo dell'indicatore di impatto I3; correzione di bug
 - [1.6.0] (07/12/2023) Implementato output su file RTF del report tabellare riepilogante rischi e strutture; correzione di bug
@@ -657,6 +661,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.2.7] (30/01/2023) Implementato registro dei rischi corruttivi; correzione di bug
 
 ### 2022
+
 - [1.2.6] (21/12/2022) Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
 - [1.2.5] (13/12/2022) Aggiunti estremi input, fasi, output nel CSV di estrazione generale dei processi
 - [1.2.4] (01/12/2022) Mostrati dettagli di un processo in una finestra separata a fini di stampa in pdf
