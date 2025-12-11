@@ -3316,6 +3316,7 @@ public class DBWrapper extends QueryImpl {
             AbstractList<RiskBean> risks = new ArrayList<>();
             AbstractList<CodeBean> factors = null;
             AbstractList<MeasureBean> measures = null;
+            AbstractList<MeasureBean> measuresApplied = null;
             int nextParam = NOTHING;
             try {
                 // TODO: Controllare se user è superuser
@@ -3362,8 +3363,10 @@ public class DBWrapper extends QueryImpl {
                     pst = con.prepareStatement(getMeasureByRiskAndProcess(String.valueOf(risk.getId()), String.valueOf(process.getId()), String.valueOf(survey.getId()), getAll, GET_ALL_BY_CLAUSE));
                     pst.clearParameters();
                     rs2 = pst.executeQuery();
-                    // Prepara lista di misure per il rischio corrente
+                    // Prepara lista di misure previste per il rischio corrente
                     measures = new ArrayList<>();
+                    // Prepara lista di misure applicate al rischio corrente
+                    measuresApplied = new ArrayList<>();
                     // Carica la lista
                     while (rs2.next()) {
                         // Prepara la misura di calmierazione del rischio
