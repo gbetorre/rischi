@@ -79,8 +79,10 @@ public class RiskBean extends CodeBean {
     private AbstractList<ProcessBean> processi;
     /** Fattori abilitanti associati al rischio */
     private AbstractList<CodeBean> fattori;
-    /** Misure di prevenzione associate al rischio */
+    /** Misure di prevenzione previste per il rischio */
     private AbstractList<MeasureBean> misure;
+    /** Misure di prevenzione applicate al rischio */
+    private AbstractList<MeasureBean> misureApplicate;
     
 	
     /* ************************************************************************ *
@@ -96,7 +98,7 @@ public class RiskBean extends CodeBean {
     	urgente = false;
     	processi = null;
     	fattori = null;
-    	misure = null;
+    	misure = misureApplicate = null;
     }
 	
 	
@@ -253,22 +255,45 @@ public class RiskBean extends CodeBean {
      *        Metodi getter e setter per misure preventive       *
      * ********************************************************* */
     /**
-     * Restituisce una lista di misure preventive che risultano associate
+     * Restituisce una lista di misure preventive che risultano previste
      * al rischio corrente.
      *
-     * @return <code>misure</code> - lista di misure di prevenzione/calmierazione del rischio corruttivo associate al rischio corrente
+     * @return <code>misure</code> - lista di misure di prevenzione/calmierazione del rischio corruttivo previste per il rischio corrente
      */
     public AbstractList<MeasureBean> getMisure() {
         return misure;
     }
 
     /**
-     * Imposta le misure preventive associate al rischio corrente.
+     * Imposta le misure preventive previste per il rischio corrente.
      *
-     * @param misure - misure di prevenzione/calmierazione del rischio corruttivo associate al rischio corrente, da impostare
+     * @param misure - misure di prevenzione/calmierazione del rischio corruttivo previste per il rischio corrente, da impostare
      */
     public void setMisure(AbstractList<MeasureBean> misure) {
         this.misure = misure;
+    }
+    
+    
+    /* ********************************************************* *
+     *        Metodi getter e setter per misure applicate        *
+     * ********************************************************* */
+    /**
+     * Restituisce una lista di misure preventive che risultano applicate
+     * al rischio corrente.
+     *
+     * @return <code>misure</code> - lista di misure di prevenzione/calmierazione del rischio corruttivo applicate al rischio corrente
+     */
+    public AbstractList<MeasureBean> getMisureApplicate() {
+        return misureApplicate;
+    }
+
+    /**
+     * Imposta le misure preventive applicate al rischio corrente.
+     *
+     * @param misureApplicate - misure di prevenzione/calmierazione del rischio corruttivo effettivamente applicate al rischio corrente
+     */
+    public void setMisureApplicate(AbstractList<MeasureBean> misureApplicate) {
+        this.misureApplicate = misureApplicate;
     }
 	
 }
