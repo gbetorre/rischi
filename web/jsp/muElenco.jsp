@@ -7,7 +7,7 @@
         <li class="breadcrumb-item active">Report tabellari</li>
       </ol>
       <div class="row">
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-4">
           <div class="card bgAct20 text-dark mb-4">
             <div class="card-body">
               <i class="fa-solid fa-table fa-4x"></i>&nbsp;&nbsp;
@@ -20,15 +20,28 @@
             </div>
           </div>
         </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-4">
           <div class="card bgAct20 text-dark mb-4">
             <div class="card-body">
               <i class="fa-solid fa-table fa-4x"></i>&nbsp;&nbsp;
               <i class="fa-solid fa-umbrella fa-4x"></i>&nbsp;&nbsp;
-              P x I &nbsp; Misure
+              P x I &nbsp; Misure previste
             </div>
             <div class="card-footer d-flex align-items-center justify-content-between">
-              <a class="small stretched-link" href="${mes}">Report tabellare PxI mitigati</a>
+              <a class="small stretched-link" href="${mes}">Report tabellare PxI mitigati (stima)</a>
+              <div class="small"><i class="fas fa-angle-right"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-4">
+          <div class="card bgAct20 text-dark mb-4">
+            <div class="card-body">
+              <i class="fa-solid fa-table fa-4x"></i>&nbsp;&nbsp;
+              <i class="fa-solid fa-bullseye fa-4x"></i>&nbsp;&nbsp;
+              P x I &nbsp; Misure applicate
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+              <a class="small stretched-link" href="${mmo}">Report tabellare PxI mitigati (monitoraggio)</a>
               <div class="small"><i class="fas fa-angle-right"></i></div>
             </div>
           </div>
