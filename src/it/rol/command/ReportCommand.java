@@ -106,21 +106,25 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileElenco = "/jsp/muElenco.jsp";
     /**
-     * Pagina a cui la command fa riferimento per mostrare il report con processi e PxI
-     */
-    private static final String nomeFileProcessi = "/jsp/muProcessi.jsp";
-    /**
     * Pagina a cui la command fa riferimento per mostrare il report tabellare con processi, strutture e giudizio sintetico
      */
     private static final String nomeFileStrutture = "/jsp/muStrutture.jsp";
     /**
-     * Pagina a cui la command fa riferimento per mostrare il report tabellare con rischi e misure
-     */
-    private static final String nomeFileRischi = "/jsp/muRischi.jsp";
-    /**
     * Pagina a cui la command fa riferimento per mostrare il report tabellare con processi, misure e giudizio sintetico
      */
     private static final String nomeFileMisure = "/jsp/muMisure.jsp";
+    /**
+    * Pagina a cui la command fa riferimento per mostrare il report tabellare con processi, misure previste, misure applicate e giudizio sintetico
+     */
+    private static final String nomeFileMonitor = "/jsp/muMonitoraggi.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per mostrare il report con processi e PxI
+     */
+    private static final String nomeFileProcessi = "/jsp/muProcessi.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per mostrare il report tabellare con rischi e misure
+     */
+    private static final String nomeFileRischi = "/jsp/muRischi.jsp";
     /**
      * Pagina a cui la command fa riferimento per mostrare la form di ricerca
      */
@@ -168,6 +172,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_SELECT_STR,   nomeFileStrutture);
         nomeFile.put(PART_RISKS,        nomeFileRischi);
         nomeFile.put(PART_MEASURES,     nomeFileMisure);
+        nomeFile.put(PART_MONITOR,      nomeFileMonitor);
         nomeFile.put(PART_GRAPHICS,     nomeFileGraphics);
     }
 
@@ -266,14 +271,18 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                         bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report strutture");
                     } else if (part.equalsIgnoreCase(PART_RISKS) || part.equalsIgnoreCase(PART_MEASURES)) {
                         /* ************************************************ *
-                         *           Generate report risks-measure          *
+                         *         tabella MDM + PxI Mitigati (Stima)       *
                          * ************************************************ */
                         // Recupera i rischi indicizzati per identificativo di processo
-                        //risks = retrieveRisksByProcess(matsWithoutIndicators, user, codeSur, db);
                         risks = retrieveMitigatedRisksByProcess(matsWithoutIndicators, user, codeSur, db);
                         // Ha bisogno di personalizzare le breadcrumbs
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                         bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report misure");
+                    } else if (part.equalsIgnoreCase(PART_MONITOR)) {
+                        /* ************************************************ *
+                         *     tabella MDM + PxI Mitigati (Monitoraggio)    *
+                         * ************************************************ */
+                        risks = retrieveMonitoratedRisksByProcess(matsWithoutIndicators, user, codeSur, db);
                     }
                     // Imposta il valore della pagina abbinata al parametro 
                     fileJspT = nomeFile.get(part);
@@ -658,8 +667,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
       * associati a ciascun processo, indicizzata per il processo stesso,
       * e in cui il valore del PxI del processo, idealmente estensibile 
       * a tutti i rischi del processo stesso, viene mitigato, per ogni rischio, 
-      * tramite la verifica dell'esistenza di misure di mitigazione applicate al
-      * rischio stesso.</p>
+      * tramite la verifica dell'esistenza di misure di mitigazione previste
+      * per la mitigazione del rischio stesso.</p>
       * <p><strong>Attenzione:</strong> il ProcessBean viene utilizzato qui
       * come chiave grazie all'override, nella classe stessa,
       * dei metodi di comparazione nel bean del processo 
@@ -669,7 +678,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
       * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
       * @param codeSurvey    il codice della rilevazione
       * @param db            WebStorage per l'accesso ai dati
-      * @return <code>HashMap&lt;ProcessBean, ArrayList&lt;RiskBean&gt;&gt;</code> - lista di rischi, con PxI mitigato in funzione delle misure esistenti, collegati al processo_at incapsulato in chiave
+      * @return <code>HashMap&lt;ProcessBean, ArrayList&lt;RiskBean&gt;&gt;</code> - lista di rischi, con PxI mitigato in funzione delle misure previste, collegati al processo_at incapsulato in chiave
       * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
       */
       public static LinkedHashMap<ProcessBean, ArrayList<RiskBean>> retrieveMitigatedRisksByProcess(final ArrayList<ProcessBean> mats,
@@ -727,6 +736,84 @@ public class ReportCommand extends ItemBean implements Command, Constants {
           }
           return risksByPat;
       }
+      
+      
+      /**
+       * <p>Ricevuta una ArrayList (albero, vista gerarchica)
+       * di tutti macroprocessi censiti a fini anticorruttivi
+       * trovati in base a una rilevazione il cui identificativo 
+       * viene accettato come argomento, ma i cui figli non contengono
+       * al proprio interno i rischi, restituisce una mappa di rischi 
+       * associati a ciascun processo, indicizzata per il processo stesso,
+       * e in cui il valore del PxI del processo, idealmente estensibile 
+       * a tutti i rischi del processo stesso, viene mitigato, per ogni rischio, 
+       * tramite la verifica dell'esistenza di misure di mitigazione applicate al
+       * rischio stesso.</p>
+       * <p>Nel ProcessBean ho implementato i metodi
+       * che permettono di utilizzarlo come chiave nelle mappe.</p>
+       * 
+       * @param mats          struttura contenente tutti i macroprocessi - e relativi processi figli - privi di rischi associati
+       * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+       * @param codeSurvey    il codice della rilevazione
+       * @param db            WebStorage per l'accesso ai dati
+       * @return <code>HashMap&lt;ProcessBean, ArrayList&lt;RiskBean&gt;&gt;</code> - lista di rischi, con PxI mitigato in funzione delle misure applicate, collegati al processo_at incapsulato in chiave
+       * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+       */
+       public static LinkedHashMap<ProcessBean, ArrayList<RiskBean>> retrieveMonitoratedRisksByProcess(final ArrayList<ProcessBean> mats,
+                                                                                                     PersonBean user,
+                                                                                                     String codeSurvey,
+                                                                                                     DBWrapper db)
+                                                                                              throws CommandException {
+           ArrayList<RiskBean> risks, mitigatingRisks, monitoredRisks = null;
+           LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risksByPat = new LinkedHashMap<>();
+           try {
+               // Prepara l'oggetto rilevazione
+               CodeBean survey = ConfigManager.getSurvey(codeSurvey);
+               // Per ogni macroprocesso
+               for (ProcessBean mat : mats) {
+                   // Recupera i suoi processi
+                   for (ProcessBean pat : mat.getProcessi()) {
+                       // Estrae i rischi di un dato processo in una data rilevazione
+                       risks = db.getRisksByProcess(user, pat, survey);
+                       // Resetta il vettore dei rischi mitigati
+                       mitigatingRisks = new ArrayList<>();
+                       // Per ogni rischio
+                       for (RiskBean risk : risks) {
+                           if (risk.getMisure() != null) {
+                               InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), (ArrayList<MeasureBean>) risk.getMisure());
+                               risk.setLivello(mitigatedPI.getInformativa());
+                           } else {
+                               risk.setLivello(pat.getIndicatori().get(PI).getInformativa());
+                           }
+                           mitigatingRisks.add(risk);
+                       }
+                       // Passa la lista dei PxI mitigati al metodo che ricalcola il PxI mitigato
+                       InterviewBean pim = MeasureCommand.computePIMitigated(PIM, mitigatingRisks);
+                       // Recupera la lista degli indicatori caricati nel processo
+                       LinkedHashMap<String, InterviewBean>  indicatori = pat.getIndicatori();
+                       // Imposta il PxI ricalcolato come indicatore aggiuntivo nel processo corrente
+                       indicatori.put(PIM, pim);
+                       // Ricarica gli indicatori corredati del nuovo PxI mitigato
+                       pat.setIndicatori(indicatori);
+                       // Setta nella mappa la lista di rischi con PxI mitigati calcolata
+                       risksByPat.put(pat, mitigatingRisks);
+                   }
+               }
+           } catch (WebStorageException wse) {
+               String msg = FOR_NAME + "Si e\' verificato un problema nel recupero dei rischi calmierati.\n";
+               LOG.severe(msg);
+               throw new CommandException(msg + wse.getMessage(), wse);
+           } catch (NullPointerException npe) {
+               String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+               LOG.severe(msg);
+               throw new CommandException(msg + npe.getMessage(), npe);
+           } catch (Exception e) {
+               String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+               LOG.severe(msg);
+               throw new CommandException(msg + e.getMessage(), e);
+           }
+           return risksByPat;
+       }
 
     
     /* **************************************************************** *
