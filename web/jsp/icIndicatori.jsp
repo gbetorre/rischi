@@ -27,6 +27,7 @@
           <th scope="col" width="6%">Target</th>
           <th scope="col" width="9%">Data Target</th>
           <th scope="col" width="5%">Tipo Indicatore</th>
+          <th scope="col" width="5%">Indicatore Master</th>
           <th scope="col" width="5%"><div class="text-center">Misurato</div></th>
         </tr>
       </thead>
@@ -48,6 +49,9 @@
             <a href="${initParam.appName}/?q=ic&p=ind&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Modificato:${lastModified} ${fn:substring(fase.indicatore.oraUltimaModifica,0,5)}">
               <c:out value="${fase.indicatore.nome}"/>
             </a>
+            <c:if test="${fase.indicatore.master}">
+              <img src="${initParam.urlDirectoryImmagini}ind-master.png" class="imgTop" alt="icona master" title="Indicatore di riferimento ai fini del monitoraggio" /> &nbsp;
+            </c:if>
           </c:when>
           <c:otherwise>
             <div class="btn-group align-items-center">
@@ -74,6 +78,15 @@
             <span class="badge border-basso textcolormaroon">
               <c:out value="${fase.indicatore.tipo.nome}"/>
             </span>
+          </td>
+          <td scope="row" class="bgcolor-non">
+          <c:set var="master" value="NO" scope="page" />
+          <c:if test="${fase.indicatore.master}">
+            <c:set var="master" value="SI" scope="page" />
+          </c:if>
+            <div class="form-check text-center">
+              <strong><c:out value="${master}" /></strong>
+            </div>
           </td>
       <c:if test="${not empty fase.indicatore}">
         <c:choose>
