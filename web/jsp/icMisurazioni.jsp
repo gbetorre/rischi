@@ -44,6 +44,11 @@
             <a href="${initParam.appName}/?q=ic&p=ind&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Vedi dettagli indicatore">
               <c:out value="${ind.nome}"/>
             </a>
+            <c:if test="${ind.master}">
+            <span class="badge badge-danger" id="ind-master" title="Indicatore di riferimento ai fini del monitoraggio">
+              &nbsp;Master
+            </span>
+            </c:if>
           </td>
           <td scope="row" class="bgAct${ind.tipo.id} bgFade">
             <a href="${initParam.appName}/?q=ic&p=ind&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Vedi dettagli indicatore">
