@@ -1524,6 +1524,7 @@ public interface Query extends Serializable {
             "   ,   IND.databaseline                    AS \"dataBaseline\"" +
             "   ,   IND.target                          AS \"target\"" +
             "   ,   IND.datatarget                      AS \"dataTarget\"" +
+            "   ,   IND.master                          AS \"master\"" +
             "   ,   IND.data_ultima_modifica            AS \"dataUltimaModifica\"" +
             "   ,   IND.ora_ultima_modifica             AS \"oraUltimaModifica\"" +
             "   ,   IND.id_usr_ultima_modifica          AS \"autoreUltimaModifica\"" +
