@@ -45,6 +45,9 @@
                 <a href="${initParam.appName}/?q=ic&p=ind&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="" title="Visualizza dettagli indicatore">
                   <c:out value="${fase.indicatore.nome}" />
                 </a>&nbsp;
+                <c:if test="${fase.indicatore.master}">
+                  <img src="${initParam.urlDirectoryImmagini}ind-master.png" class="imgTop" alt="icona master" title="Indicatore di riferimento ai fini del monitoraggio" /> &nbsp;
+                </c:if>
               </div>
             </c:when>
             <c:otherwise>
