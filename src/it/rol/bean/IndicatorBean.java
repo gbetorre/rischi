@@ -54,6 +54,7 @@ import java.util.Vector;
 import it.rol.Constants;
 import it.rol.exception.AttributoNonValorizzatoException;
 
+
 /**
  * <p>Classe usata per rappresentare un indicatore di monitoraggio.</p>
  * 
@@ -119,6 +120,8 @@ public class IndicatorBean extends CodeBean {
     private int totMisurazioni;
     /** Elenco di misurazioni presenti per l'indicatore */
     private Vector<?> misurazioni;
+    /** Flag master */
+    private boolean master;
     
 	
     /**
@@ -139,6 +142,7 @@ public class IndicatorBean extends CodeBean {
         stato = null;
         totMisurazioni = Constants.NOTHING;
         misurazioni = null;
+        setMaster(false);
 	}
 
 
@@ -555,6 +559,38 @@ public class IndicatorBean extends CodeBean {
      */
     public void setMisurazioni(Vector<?> misurazioni) {
         this.misurazioni = misurazioni;
+    }
+
+
+    /* ********************************************************** *
+     *          Metodi getter e setter per master flag            *
+     * ********************************************************** */
+    /**
+     * Un indicatore (di monitoraggio) contrassegnato come master &egrave; 
+     * l'indicatore di riferimento ai fini del monitoraggio. 
+     * Se una misurazione dell'indicatore master ha raggiunto il target, 
+     * allora la misura pu&ograve; essere considerata applicata 
+     * ai fini del monitoraggio. 
+     * Regole di business:
+     * - una misura scomposta in fasi di attuazione pu&ograve; non avere
+     * un indicatore per ciascuna fase, ma per poter essere monitorata
+     * deve avere almeno una fase associata a uno e un solo indicatore
+     * - una misura deve avere uno e un solo indicatore master
+     * - la misurazione che fa fede ai fini del raggiungimento del target
+     * deve essere l'ultima misurazione effettuata cronologicamente
+     * @return master value
+     */
+    public boolean isMaster() {
+        return master;
+    }
+
+
+    /**
+     * Imposta il valore del flag master di un indicatore di monitoraggio
+     * @param master - il valore del flag master da impostare
+     */
+    public void setMaster(boolean master) {
+        this.master = master;
     }
 
 }
