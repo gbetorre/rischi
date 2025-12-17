@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2025
 
+- [2.4.0] (17/12/2025) Added flag master/slave on monitoring indicator
 - [2.3.9] (10/12/2025) Added button to add further measurements
 - [2.3.8] (12/11/2025) Added directory to contain SQL queries; bug fix
 - [2.3.7] (08/08/2025) Presentation improvements (labels)

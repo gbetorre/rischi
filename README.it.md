@@ -540,6 +540,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### 2025
 
+- [2.4.0] (17/12/2025) Aggiunta visualizzazione flag di indicatore master (indicatore di riferimento ai fini del monitoraggio)
 - [2.3.9] (10/12/2025) Aggiunto bottone per inserimento misurazione aggiuntiva su indicatore di monitoraggio
 - [2.3.8] (12/11/2025) Aggiunta directory contenente query per il popolamento e l'inizializzazione; correzione di bug
 - [2.3.7] (08/08/2025) Miglioramenti nella presentazione (etichette dei testi delle domande al monitoraggio)
