@@ -22,7 +22,7 @@
  *   and quantify how much that implementation of measures actually 
  *   reduced risk levels.
  *   
- *   Copyright (C) 2022-2025 Giovanroberto Torre
+ *   Copyright (C) 2022-2026 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify

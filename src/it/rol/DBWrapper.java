@@ -22,7 +22,7 @@
  *   and quantify how much that implementation of measures actually 
  *   reduced risk levels.
  *   
- *   Copyright (C) 2022-2025 Giovanroberto Torre
+ *   Copyright (C) 2022-2026 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -60,6 +60,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -3316,6 +3317,7 @@ public class DBWrapper extends QueryImpl {
             AbstractList<RiskBean> risks = new ArrayList<>();
             AbstractList<CodeBean> factors = null;
             AbstractList<MeasureBean> measures = null;
+            List<String> measuresCodes = new ArrayList<>();
             AbstractList<MeasureBean> measuresApplied = null;
             int nextParam = NOTHING;
             try {
@@ -3375,16 +3377,20 @@ public class DBWrapper extends QueryImpl {
                         BeanUtil.populate(mes, rs2);
                         // Il carattere si puo' ricavare dal codice:
                         String measureCode = mes.getCodice();
+                        // Nel codice della misura è iscritto il codice del carattere della misura stessa
                         String charCode = measureCode.substring(measureCode.indexOf(DOT) + ELEMENT_LEV_1, measureCode.lastIndexOf(DOT));
                         // Prepara il contenitore per il carattere della misura
                         CodeBean character = ConfigManager.getMeasureCharacters().get(charCode);
                         // Imposta il carattere
                         mes.setCarattere(character);
+                        // Aggiunge il codice alla lista dei codici delle misure previste
+                        measuresCodes.add(measureCode);
                         // Aggiunge la misura alla lista
                         measures.add(mes);
                     }
                     // Aggiunge la lista di misure al rischio
                     risk.setMisure(measures);
+                    
                     /* Finalmente, aggiunge il rischio alla lista dei rischi */
                     risks.add(risk);
                 }

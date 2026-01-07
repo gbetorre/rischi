@@ -18,7 +18,7 @@
  *   - also allowing monitoring to be carried out to see 
  *   which proposed mitigation measures were then actually implemented.
  *   
- *   Copyright (C) 2022-2025 Giovanroberto Torre
+ *   Copyright (C) 2022-2026 Giovanroberto Torre
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify
