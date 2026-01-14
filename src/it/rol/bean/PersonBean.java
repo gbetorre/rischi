@@ -43,6 +43,7 @@
 
 package it.rol.bean;
 
+import it.rol.Constants;
 import it.rol.exception.AttributoNonValorizzatoException;
 
 import java.io.Serializable;
@@ -150,6 +151,24 @@ public class PersonBean implements Serializable {
         dipartimento = urlDipartimento = null;
     }
 
+    
+    /* ************************************************************************ *
+     *                              Metodi Ovverride                            *
+    /* ************************************************************************ */
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String toString() {
+        return FOR_NAME + cognome + Constants.BLANK_SPACE + nome + Constants.BLANK_SPACE +  "[idPersona=" + id + ", idUtente=" + usrId + "]";
+    }
+        
+    
+    /* ************************************************************************ *
+     *                          Accessori e Mutatori                            *
+     * ************************************************************************ */
 
     //TODO COMMENTI
     /**
