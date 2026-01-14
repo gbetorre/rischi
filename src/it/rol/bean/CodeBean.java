@@ -49,6 +49,7 @@ package it.rol.bean;
 
 import java.io.Serializable;
 
+import it.rol.Constants;
 import it.rol.exception.AttributoNonValorizzatoException;
 
 
@@ -193,6 +194,25 @@ public class CodeBean implements Serializable {
         this.informativa = informativa;
         this.ordinale = ordinale;
     }
+    
+    
+    /* ************************************************************************ *
+     *                              Metodi Ovverride 
+    /* ************************************************************************ */
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String toString() {
+        return FOR_NAME + nome + Constants.BLANK_SPACE + "(" + id + ")";
+    }
+        
+    
+    /* ************************************************************************ *
+     *                          Accessori e Mutatori                            *
+     * ************************************************************************ */
 
     /* **************************************************** *
      *           Metodi getter e setter per id              *
