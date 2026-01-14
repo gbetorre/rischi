@@ -3313,12 +3313,12 @@ public class DBWrapper extends QueryImpl {
                                           throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
-            ResultSet rs, rs1, rs2 = null;
+            ResultSet rs, rs1, rs2, rs3 = null;
             AbstractList<RiskBean> risks = new ArrayList<>();
             AbstractList<CodeBean> factors = null;
             AbstractList<MeasureBean> measures = null;
             List<String> measuresCodes = new ArrayList<>();
-            AbstractList<MeasureBean> measuresApplied = null;
+            AbstractList<MeasureBean> measuresMonitored = null;
             int nextParam = NOTHING;
             try {
                 // TODO: Controllare se user è superuser
@@ -3367,8 +3367,6 @@ public class DBWrapper extends QueryImpl {
                     rs2 = pst.executeQuery();
                     // Prepara lista di misure previste per il rischio corrente
                     measures = new ArrayList<>();
-                    // Prepara lista di misure applicate al rischio corrente
-                    measuresApplied = new ArrayList<>();
                     // Carica la lista
                     while (rs2.next()) {
                         // Prepara la misura di calmierazione del rischio
@@ -3391,6 +3389,39 @@ public class DBWrapper extends QueryImpl {
                     // Aggiunge la lista di misure al rischio
                     risk.setMisure(measures);
                     
+                    /* Recupera le misure collegate al processo e al rischio e con flag master */
+                    nextParam = NOTHING;
+                    pst = null;
+                    // TODO: Gestire il caso dei sottoprocessi (al momento non ci sono)
+                    pst = con.prepareStatement(GET_MEASURES_BY_RISK_AND_PROCESS_AND_MASTER);
+                    pst.clearParameters();
+                    pst.setInt(++nextParam, process.getId());
+                    pst.setInt(++nextParam, risk.getId());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs3 = pst.executeQuery();
+                    // Prepara lista di misure monitorate da aggiungere al rischio corrente
+                    measuresMonitored = new ArrayList<>();
+                    // Carica la lista
+                    while (rs3.next()) {
+                        // Prepara il bean
+                        MeasureBean mes = new MeasureBean();
+                        // Valorizza il bean
+                        BeanUtil.populate(mes, rs3);
+                        // La misura con flag master indica il monitoraggio attivo
+                        if (measuresCodes.contains(mes.getCodice())) {
+                            // Il carattere si puo' ricavare dal codice:
+                            String measureCode = mes.getCodice();
+                            // Nel codice della misura è iscritto il codice del carattere della misura stessa
+                            String charCode = measureCode.substring(measureCode.indexOf(DOT) + ELEMENT_LEV_1, measureCode.lastIndexOf(DOT));
+                            // Prepara il contenitore per il carattere della misura
+                            CodeBean character = ConfigManager.getMeasureCharacters().get(charCode);
+                            // Imposta il carattere
+                            mes.setCarattere(character);
+                            measuresMonitored.add(mes);
+                        }
+                    }
+                    // Aggiunge la lista di misure monitorate al rischio
+                    risk.setMisureMonitorate(measuresMonitored);
                     /* Finalmente, aggiunge il rischio alla lista dei rischi */
                     risks.add(risk);
                 }
@@ -4250,7 +4281,6 @@ public class DBWrapper extends QueryImpl {
      * @return <code>ArrayList&lt;MeasureBean&gt;</code> - l'elenco di misure cercate
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings("static-method")
     public ArrayList<MeasureBean> getMeasures(PersonBean user,
                                               String code,
                                               int getAll,
