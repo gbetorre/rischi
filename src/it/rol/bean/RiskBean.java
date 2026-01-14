@@ -82,7 +82,7 @@ public class RiskBean extends CodeBean {
     /** Misure di prevenzione previste per il rischio */
     private AbstractList<MeasureBean> misure;
     /** Misure di prevenzione applicate al rischio */
-    private AbstractList<MeasureBean> misureApplicate;
+    private AbstractList<MeasureBean> misureMonitorate;
     
 	
     /* ************************************************************************ *
@@ -98,7 +98,7 @@ public class RiskBean extends CodeBean {
     	urgente = false;
     	processi = null;
     	fattori = null;
-    	misure = misureApplicate = null;
+    	misure = misureMonitorate = null;
     }
 	
 	
@@ -275,25 +275,24 @@ public class RiskBean extends CodeBean {
     
     
     /* ********************************************************* *
-     *        Metodi getter e setter per misure applicate        *
+     *        Metodi getter e setter per misure monitorate       *
      * ********************************************************* */
     /**
-     * Restituisce una lista di misure preventive che risultano applicate
-     * al rischio corrente.
+     * Restituisce una lista di misure preventive che risultano monitorate.
      *
-     * @return <code>misure</code> - lista di misure di prevenzione/calmierazione del rischio corruttivo applicate al rischio corrente
+     * @return <code>misure</code> - lista di misure di prevenzione/calmierazione del rischio corruttivo monitorate per il rischio corrente
      */
-    public AbstractList<MeasureBean> getMisureApplicate() {
-        return misureApplicate;
+    public AbstractList<MeasureBean> getMisureMonitorate() {
+        return misureMonitorate;
     }
 
     /**
-     * Imposta le misure preventive applicate al rischio corrente.
+     * Imposta le misure preventive monitorate per il rischio corrente.
      *
-     * @param misureApplicate - misure di prevenzione/calmierazione del rischio corruttivo effettivamente applicate al rischio corrente
+     * @param misureMonitorate - misure di prevenzione/calmierazione del rischio corruttivo considerate ai fini del monitoraggio del rischio corrente
      */
-    public void setMisureApplicate(AbstractList<MeasureBean> misureApplicate) {
-        this.misureApplicate = misureApplicate;
+    public void setMisureMonitorate(AbstractList<MeasureBean> misureMonitorate) {
+        this.misureMonitorate = misureMonitorate;
     }
 	
 }
