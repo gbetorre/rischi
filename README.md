@@ -429,6 +429,10 @@ in the case of the current application, in fact, version numbers have only the s
 <i>(The realease date is in Italian format: sorry, should writing a script to convert all the dates, still I can do without...)</i>
 </sub>
 
+### 2026
+
+- [2.4.1] (14/01/2026) First implementation of the monitoring algorithm
+
 ### 2025
 
 - [2.4.0] (17/12/2025) Added flag master/slave on monitoring indicator
