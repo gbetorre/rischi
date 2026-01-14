@@ -65,11 +65,14 @@ import it.rol.DBWrapper;
 import it.rol.Main;
 import it.rol.Query;
 import it.rol.SessionManager;
+import it.rol.bean.ActivityBean;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
+import it.rol.bean.IndicatorBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.MeasureBean;
+import it.rol.bean.MeasurementBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.RiskBean;
@@ -918,6 +921,127 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             //mitigatedPI.setProcesso(extraInfo);
             return mitigatedPI;
         } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+    
+    /**
+     * Implementa l'algoritmo di valutazione dell'applicazione delle misure
+     * in funzione del monitoraggio.
+     * L'algoritmo funziona nel seguente modo:<pre>
+     * Cicla sulle misure
+     * |_Per ogni misura...
+     *   |_Verifica se la misura ha fasi
+     *     |_Se ha fasi...
+     *       |_Verifica se le fasi hanno indicatori
+     *         |_Se hanno indicatori...
+     *           |_Verifica che ci sia uno e un solo indicatore master
+     *             |_Se c'&egrave; uno e un solo indicatore master...
+     *               |_Verifica se ci sono misurazioni associate
+     *                 |_Se ci sono misurazioni associate...
+     *                   |_Considera l'ultima misurazione
+     *                     |_Se l'ultima misurazione ha raggiunto il target dell'indicatore master...
+     *                       |-Allora la misura &egrave; applicata
+     *                       |-Altrimenti la misura non &egrave; applicata
+     * </pre>
+     * Regole di business. 
+     * Per poter valutare l'applicazione della misura: <ol>
+     * <li>deve esistere un indicatore master applicato a una fase della misura</li>
+     * <li>non possono esistere pi&uacute; indicatori master su una sola misura</li>
+     * <li>non pu&ograve; esistere una misura senza un indicatore master</li>
+     * <li>deve esistere almeno una misurazione sull'indicatore master</li>
+     * </ol>
+     * Per poter considerare la misura applicata: <ul>
+     * <li>il valore dell'ultima misurazione deve coincidere con (o superare) 
+     * il target dell'indicatore master</li>
+     * </ul>
+     * 
+     * @param measures  lista di misure applicate al rischio
+     * @return <code>ArrayList&lt;MeasureBean&gt;</code> - 
+     * @throws CommandException se si verifica un problema nel recupero di un attributo del bean o in qualche operazione o puntamento
+     */
+    public static ArrayList<MeasureBean> monitor(PersonBean user,  
+                                                 CodeBean survey, 
+                                                 DBWrapper db,
+                                                 final ArrayList<MeasureBean> measures)
+                                  throws CommandException {
+        try {
+            // Controllo sull'input
+            if (measures == null || measures.isEmpty()) {
+                // Se non sono state applicate misure, inutile continuare
+                return null;
+            }          
+            // Applied Measures
+            ArrayList<MeasureBean> appliedMeasures = new ArrayList<>();
+            // Cicla sulle misure previste 
+            for (MeasureBean measure : measures) {
+                // Ha bisogno di recuperare tutti i dettagli della misura
+                MeasureBean mes = retrieveMeasure(user, measure.getCodice(), survey, db);
+                // Per ogni misura... Verifica se la misura ha fasi
+                if (mes.getFasi() != null) {
+                    // Se ha fasi
+                    for (ActivityBean fase : mes.getFasi()) {
+                        // Verifica la presenza di un indicatore
+                        if (fase.getIndicatore() != null) {
+                            // Verifica che l'indicatore sia master
+                            if (fase.getIndicatore().isMaster()) {
+                                // Recupera l'indicatore master
+                                IndicatorBean master = fase.getIndicatore();
+                                CodeBean tipo = master.getTipo();
+                                // Recupera le sue misurazioni
+                                Vector<MeasurementBean> mbv = (Vector<MeasurementBean>) master.getMisurazioni();
+                                MeasurementBean.sort(mbv);
+                                MeasurementBean lastMon = mbv.firstElement();
+                                // A seconda del tipo valuta se il target è stato raggiunto
+                                if (tipo.getId() == ELEMENT_LEV_1) {
+                                    // Indicatore di tipo On/Off
+                                    String target = master.getTarget();
+                                    // Se l'ultima misurazione ha raggiunto il target dell'indicatore master
+                                    if (lastMon.getValore().equals(target)) {
+                                        // Allora la misura è applicata
+                                        appliedMeasures.add(mes);
+                                    }    // Altrimenti la misura non è applicata
+                                } else if (tipo.getId() == ELEMENT_LEV_2) {
+                                    // Indicatore di tipo Quantitativo
+                                    String targetAsString = master.getTarget();
+                                    int target = Integer.parseInt(targetAsString);
+                                    int measurement = Integer.parseInt(lastMon.getValore());
+                                    // Se l'ultima misurazione ha raggiunto o superato il target dell'indicatore master
+                                    if (measurement >= target) {
+                                        // Allora la misura è applicata
+                                        appliedMeasures.add(mes);
+                                    }    // Altrimenti la misura non è applicata
+                                } else if (tipo.getId() == ELEMENT_LEV_3) {
+                                    // Indicatore di tipo Quantitativo
+                                    String targetAsString = master.getTarget();
+                                    float target = Float.parseFloat(targetAsString);
+                                    float measurement = Float.parseFloat(lastMon.getValore());
+                                    // Se l'ultima misurazione ha raggiunto o superato il target dell'indicatore master
+                                    if (measurement >= target) {
+                                        // Allora la misura è applicata
+                                        appliedMeasures.add(mes);
+                                    }   // Altrimenti la misura non è applicata
+                                }
+                            }
+                            // Considera solo il primo master che trova
+                            break;   // (v. regole di business: "non possono esistere più indicatori master su una sola misura")
+                        }
+                    }
+                } else {
+                    String msg = FOR_NAME + "La misura non e\' articolata in fasi: impossibile monitorarla.\n";
+                    LOG.severe(msg);
+                    throw new CommandException(msg);
+                }
+            }
+            return appliedMeasures;
+        } catch (CommandException anve) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio dal bean.\n";
             LOG.severe(msg);
             throw new CommandException(msg + anve.getMessage(), anve);
