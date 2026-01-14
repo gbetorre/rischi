@@ -51,6 +51,7 @@ import java.sql.Time;
 import java.util.Date;
 import java.util.Vector;
 
+import it.rol.Constants;
 import it.rol.exception.AttributoNonValorizzatoException;
 
 
@@ -122,6 +123,51 @@ public class MeasurementBean extends CodeBean {
         allegati = null;
 	}
 
+	
+    /* ************************************************************************ *
+     *                              Metodi Ovverride 
+    /* ************************************************************************ */    
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String toString() {
+        int idSuper = BEAN_DEFAULT_ID;
+        try {
+            idSuper = super.getId();
+        } catch (AttributoNonValorizzatoException anve) {
+            return anve.getLocalizedMessage();
+        }
+        return FOR_NAME + valore + Constants.BLANK_SPACE + "(" + idSuper + ")";
+    }
+
+    
+    /**
+     * Sort the parametric Vector<MeasurementBean> by dataUltimaModifica 
+     * (newest first)
+     * 
+     * WARNING: this method does alter the original order of measurements of the current indicator
+     * Use Collections.sort((Vector)((Vector)measurements).clone(), comparator) or Java 8 streams instead:
+     * Java 8+ Streams (Recommended - Clean)
+     * public static Vector<MeasurementBean> sort(Vector<MeasurementBean> measurements) {
+     *     return measurements.stream()
+     *             .sorted((m1, m2) -> 
+     *             m2.getDataUltimaModifica().compareTo(m1.getDataUltimaModifica()))
+     *                     .collect(Collectors.toCollection(Vector::new));
+     * }
+     * 
+     * @param measurements
+     */
+    public static void sort(Vector<MeasurementBean> measurements) {
+        measurements.sort((m1, m2) -> m2.getDataUltimaModifica().compareTo(m1.getDataUltimaModifica()));
+    }
+    
+    
+    /* ************************************************************************ *  
+     *                          Accessori e Mutatori                            *
+     * ************************************************************************ */	
 
 	/* ********************************************************* *
      *  Metodi getter e setter per valore (risultato registrato) *
@@ -166,31 +212,11 @@ public class MeasurementBean extends CodeBean {
 		this.descrizione = descrizione;
 	}
     
-    
+
     /* ***************************************************************** *
      *  Metodi getter e setter per data misurazione (risultato attuale)  *
-     * ***************************************************************** *
-    /**
-     * Restituisce la data di effettuazione della misurazione
-     * 
-     * @return <code>Date</code> - data misurazione
-     * @throws it.rol.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (dovrebbe essere un dato obbligatorio)
-     *
-    public Date getDataMisurazione() throws AttributoNonValorizzatoException {
-        if (new Date(0).equals(dataMisurazione)) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo data non valorizzato! A quale data fa riferimento la misurazione? Specificare una data.");
-        }
-        return dataMisurazione;
-    }
+     * ***************************************************************** */
 
-    /**
-     * @param dataMisurazione data misurazione da impostare
-     *
-    public void setDataMisurazione(Date dataMisurazione) {
-        this.dataMisurazione = dataMisurazione;
-    }*/
-	
-	
     /**
      * Restituisce la data di effettuazione della misurazione
      * (che coincide con la data di ultima modifica della misurazione)
@@ -209,7 +235,6 @@ public class MeasurementBean extends CodeBean {
      * &Egrave; un wrapper di setDataUltimaModifica(date)
      */
     public void setDataMisurazione() {
-        //this.dataMisurazione = dataMisurazione;
         dataMisurazione = dataUltimaModifica;
     }
     
