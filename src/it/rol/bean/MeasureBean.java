@@ -237,13 +237,7 @@ public class MeasureBean extends CodeBean {
     @SuppressWarnings("javadoc")
     @Override
     public String toString() {
-        int idRilevazione = BEAN_DEFAULT_ID;
-        try {
-            idRilevazione = this.getRilevazione().getId();
-        } catch (AttributoNonValorizzatoException anve) {
-            return anve.getLocalizedMessage();
-        }
-        return FOR_NAME + "@" + this.codice + Constants.UNDERSCORE + idRilevazione;
+        return FOR_NAME + this.getDataMonitoraggio() + Constants.BLANK_SPACE + this.codice;
     }
         
     
@@ -806,21 +800,27 @@ public class MeasureBean extends CodeBean {
      * ********************************************************* */
 
     /**
-     * Restituisce la data di ultima modifica dei dettagli del monitoraggio
+     * Restituisce la data di ultima modifica dei DETTAGLI del monitoraggio
      * collegati alla misura corrente. Se i dettagli non sono stati mai 
      * aggiornati, la data &egrave; quella di inserimento dei dettagli;
      * altrimenti, la data &egrave; quella dell'ultimo aggiornamento 
      * dei dettagli stessi.
      * 
-     * @return <code>dataMonitoraggio</code> - la data di inserimento o ultima modifica dei dettagli del monitoraggio 
+     * @return <code>dataMonitoraggio</code> - la data di inserimento o ultima modifica dei DETTAGLI del monitoraggio 
      */
     public Date getDataMonitoraggio() {
-        return dataMonitoraggio;
+        return dataUltimaModifica;
     }
 
 
     /**
-     * Imposta la data di ultima modifica dei dettagli del monitoraggio trovata.
+     * Imposta la data di monitoraggio, che coincide con la data
+     * di ultima modifica della misura.
+     * ATTENZIONE: i dettagli del monitoraggio sono un prerequisito per la 
+     * misurazione ma non hanno niente altro a che vedere con la misurazione
+     * stessa. L'oggetto che incapsula i dati della misurazione &egrave;
+     * {@link MeasurementBean} non questo MeasureBean, che incapsula
+     * i dati della misura.
      * 
      * @param dataMonitoraggio - data in cui sono stati inseriti i dettagli del monitoraggio, da impostare
      */
@@ -955,6 +955,12 @@ public class MeasureBean extends CodeBean {
      * (o "non monitorabile"), ma possono essere sviluppati ulteriori 
      * strati di codice per intercettare a monte questo caso. 
      * (Per ulteriori dettagli, v. analisi dei requisiti). </li></ul><br>
+     * ATTENZIONE: questo calcolo indica solo se la misura ha misurazioni, non
+     * se i target sono stati raggiunti, quindi permette solo di stabilire se
+     * la misura &egrave; monitorata, non se &egrave; stata applicata. Pertanto,
+     * ha un'utilit&agrave; relativa e il calcolo delle misure applicate
+     * deve essere effettuato tramite diverso e pi&uagrave; raffinato
+     * algoritmo.
      * 
      * @return <code>boolean</code> - se vero la misura è monitorata, se falso è non monitorata
      */
