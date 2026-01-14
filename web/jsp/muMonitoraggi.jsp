@@ -18,10 +18,9 @@
               <th width="15%">Macroprocesso</th>
               <th width="15%">Processo</th>
               <th width="25%">Rischi Potenziali</th>
-              <th width="15%">Misure Previste</th>
-              <th width="10%">Giudizio sintetico</th>
-              <th width="10%">PxI mitigato (stima)</th>
-              <th width="10%">PxI mitigato (monitoraggio)</th>
+              <th width="15%">Misure</th>
+              <th width="15%">Giudizio sintetico</th>
+              <th width="15%">PxI mitigato (monitoraggio)</th>
             </tr>
           </thead>
           <tbody>
@@ -63,7 +62,7 @@
                 <ul class="list-group list-group-flush">
                  <c:set var="rsks" value="${risks.get(pat)}" scope="page" />
                  <c:forEach var="rsk" items="${rsks}">
-                   <c:forEach var="mes" items="${rsk.misure}">
+                   <c:forEach var="mes" items="${rsk.misureMonitorate}">
                   <li class="list-group-item">
                     <img src="${initParam.urlDirectoryImmagini}mis-${mes.carattere.informativa}.png" class="ico-small" alt="icona" title="Misura ${mes.carattere.nome}" /> 
                     <c:out value="${mes.nome}" />
@@ -72,7 +71,7 @@
                  </c:forEach>
                 </ul>
               </td>
-              <td width="10%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)}">
+              <td width="15%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)}">
                 <c:out value="${pat.indicatori.get('PxI').informativa}" />
                 <hr class="riga" />
                 <div class="lightTable subfields">
@@ -85,10 +84,7 @@
                   </span>
                 </div>
               </td>
-              <td width="10%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (stima)').informativa)}">
-                <c:out value="${pat.indicatori.get('PxI (stima)').informativa}" />
-              </td>
-              <td width="10%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (stima)').informativa)}">
+              <td width="15%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (stima)').informativa)}">
                 <c:out value="${pat.indicatori.get('PxI (stima)').informativa}" />
               </td>
             </tr>
