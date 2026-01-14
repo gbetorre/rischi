@@ -1323,6 +1323,7 @@ public interface Query extends Serializable {
             "   ,   MS.onerosa                          AS \"onerosa\"" +
             "   ,   MS.ordinale                         AS \"ordinale\"" +
             "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   MS.data_ultima_modifica             AS \"dataMonitoraggio\"" +
             "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
             "   ,   MS.id_rilevazione                   AS \"idRilevazione\"" +
             "   ,   count(MRPAT.id_rischio_corruttivo)::SMALLINT  AS \"uso\"" +
@@ -1643,17 +1644,27 @@ public interface Query extends Serializable {
             "   WHERE FA.id = ?" +
             "       AND FA.id_rilevazione = ?";        // pleonastica
     
-    /** Seleziona le misure monitorate articolate in fasi di attuazione, aventi un indicatore marcato come master
-    -- Se questo indicatore ha raggiunto il target, allora la misura è da considerare applicata 
-    -- (cioè il monitoraggio ha trovato un risultato in accordo con quanto previsto)
+    /** Seleziona le misure monitorate articolate in fasi di attuazione, 
+     * aventi un indicatore marcato come master.
+     * Se l'ultima misurazione di questo indicatore ha raggiunto il target,
+     * allora la misura è da considerare applicata 
+    
     TODO: CAMBIARE LA LOGICA: bisogna fare la selezione per misura, non per MRP
     */
     public static final String GET_MEASURES_BY_RISK_AND_PROCESS_AND_MASTER = 
             "SELECT DISTINCT" +
             "       MS.codice                           AS \"codice\"" +
+            "   ,   MS.nome                             AS \"nome\"" +
+            "   ,   MS.descrizione                      AS \"stato\"" +
+            "   ,   MS.onerosa                          AS \"onerosa\"" +
+            "   ,   MS.ordinale                         AS \"ordinale\"" +
+            "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
+            "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   ,   MS.id_rilevazione                   AS \"idRilevazione\"" +
             "   ,   IM.id                               AS \"cod1\"" +
             "   ,   MZ.id                               AS \"cod2\"" +
             "   ,   IM.id_tipo                          AS \"livello\"" +
+            
             "   FROM misura_rischio_processo_at MRP" +
             "       INNER JOIN misura MS ON (MRP.cod_misura = MS.codice AND MRP.id_rilevazione = MS.id_rilevazione)" +
             "       INNER JOIN misuramonitoraggio MM ON (MRP.cod_misura = MM.codice AND MRP.id_rilevazione = MM.id_rilevazione)" +
