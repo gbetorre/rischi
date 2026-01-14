@@ -764,7 +764,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                                                                                                      String codeSurvey,
                                                                                                      DBWrapper db)
                                                                                               throws CommandException {
-           ArrayList<RiskBean> risks, mitigatingRisks, monitoredRisks = null;
+           ArrayList<RiskBean> risks, mitigatingRisks = null;
            LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risksByPat = new LinkedHashMap<>();
            try {
                // Prepara l'oggetto rilevazione
@@ -779,8 +779,10 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                        mitigatingRisks = new ArrayList<>();
                        // Per ogni rischio
                        for (RiskBean risk : risks) {
-                           if (risk.getMisure() != null) {
-                               InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), (ArrayList<MeasureBean>) risk.getMisure());
+                           ArrayList<MeasureBean> appliedMeasures = null;
+                           if (risk.getMisure() != null && !risk.getMisure().isEmpty()) {
+                               appliedMeasures = MeasureCommand.monitor(user, survey, db, (ArrayList<MeasureBean>) risk.getMisure());
+                               InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), appliedMeasures);
                                risk.setLivello(mitigatedPI.getInformativa());
                            } else {
                                risk.setLivello(pat.getIndicatori().get(PI).getInformativa());
