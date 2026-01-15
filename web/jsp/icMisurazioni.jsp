@@ -8,6 +8,9 @@
     <h5 class="p-2 bgAct17 rounded popupMenu heading">
       <i class="fa-solid fa-umbrella ico-home" title="misura di prevenzione"></i>&nbsp; 
       <c:out value="${meas.nome}" />
+      <a class="float-right badge badge-pill text-dark" href="${initParam.appName}/?q=ic&p=mes&mliv=${meas.codice}&r=${param['r']}">
+        <c:out value="${meas.codice}" />
+      </a>
     </h5>
     <hr class="separatore" />
     <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
