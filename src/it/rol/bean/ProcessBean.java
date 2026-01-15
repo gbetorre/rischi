@@ -284,22 +284,6 @@ public class ProcessBean extends CodeBean {
     }
     
     
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @SuppressWarnings({ "javadoc", "unused" })
-    @Override
-    public String toString() {
-        int idSurvey = BEAN_DEFAULT_ID;
-        try {
-            idSurvey = this.getRilevazione().getId();
-        } catch (AttributoNonValorizzatoException anve) {
-            return null;
-        }
-        return FOR_NAME + "@" + this.codice + Constants.UNDERSCORE + idSurvey;
-    }
-    
-    
     /* ************************************************************************ *  
      *                          Accessori e Mutatori                            *
      * ************************************************************************ */
