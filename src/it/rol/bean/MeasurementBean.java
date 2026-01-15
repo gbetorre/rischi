@@ -50,8 +50,11 @@ package it.rol.bean;
 import java.sql.Time;
 import java.util.Date;
 import java.util.Vector;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import it.rol.Constants;
+import it.rol.Main;
 import it.rol.exception.AttributoNonValorizzatoException;
 
 
@@ -76,7 +79,10 @@ public class MeasurementBean extends CodeBean {
      *  Viene utilizzato per contestualizzare i messaggi di errore.
      */
     private final String FOR_NAME = "\n" + this.getClass().getName() + ": "; //$NON-NLS-1$
-    
+    /**
+     * Log per debug in produzione
+     */
+    protected static Logger LOG = Logger.getLogger(Main.class.getName());
     // Inherited from its parent: informativa -> "azioni svolte per raggiungere l'obiettivo"
     /** Dato  identificativo */
     private String valore;
@@ -157,11 +163,21 @@ public class MeasurementBean extends CodeBean {
      *             m2.getDataUltimaModifica().compareTo(m1.getDataUltimaModifica()))
      *                     .collect(Collectors.toCollection(Vector::new));
      * }
-     * 
+     * // TODO COMMENTO 
      * @param measurements
      */
-    public static void sort(Vector<MeasurementBean> measurements) {
-        measurements.sort((m1, m2) -> m2.getDataUltimaModifica().compareTo(m1.getDataUltimaModifica()));
+    public static Vector<MeasurementBean> sort(Vector<MeasurementBean> measurements) {
+        return measurements.stream()
+                           .sorted((m1, m2) -> {
+                                try {
+                                    return Integer.compare(m2.getId(), m1.getId());
+                                } catch (AttributoNonValorizzatoException anve) {
+                                    String msg = "Attributo id non valorizzato! Impossibile ordinare.\n";
+                                    LOG.severe(msg + anve.getLocalizedMessage());
+                                }
+                                return Constants.NOTHING;
+                            })  // m2.id > m1.id first
+                           .collect(Collectors.toCollection(Vector::new));
     }
     
     
