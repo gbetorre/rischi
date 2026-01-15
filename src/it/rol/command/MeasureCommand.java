@@ -79,6 +79,7 @@ import it.rol.bean.RiskBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
+import it.rol.util.Utils;
 
 
 /** 
@@ -994,11 +995,12 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             if (fase.getIndicatore().isMaster()) {
                                 // Recupera l'indicatore master
                                 IndicatorBean master = fase.getIndicatore();
+                                // Recupera il suo tipo
                                 CodeBean tipo = master.getTipo();
                                 // Recupera le sue misurazioni
                                 Vector<MeasurementBean> mbv = (Vector<MeasurementBean>) master.getMisurazioni();
-                                MeasurementBean.sort(mbv);
-                                MeasurementBean lastMon = mbv.firstElement();
+                                Vector<MeasurementBean> sortedMbv = MeasurementBean.sort(mbv);
+                                MeasurementBean lastMon = sortedMbv.firstElement();
                                 // A seconda del tipo valuta se il target è stato raggiunto
                                 if (tipo.getId() == ELEMENT_LEV_1) {
                                     // Indicatore di tipo On/Off
@@ -1012,7 +1014,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                                     // Indicatore di tipo Quantitativo
                                     String targetAsString = master.getTarget();
                                     int target = Integer.parseInt(targetAsString);
-                                    int measurement = Integer.parseInt(lastMon.getValore());
+                                    int measurement = Utils.safeParseInt(lastMon.getValore(), Constants.NOTHING);
                                     // Se l'ultima misurazione ha raggiunto o superato il target dell'indicatore master
                                     if (measurement >= target) {
                                         // Allora la misura è applicata
@@ -1031,7 +1033,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                                 }
                             }
                             // Considera solo il primo master che trova
-                            break;   // (v. regole di business: "non possono esistere più indicatori master su una sola misura")
+                            //break;   // (v. regole di business: "non possono esistere più indicatori master su una sola misura")
                         }
                     }
                 } else {
