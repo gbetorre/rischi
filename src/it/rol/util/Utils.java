@@ -180,28 +180,7 @@ public class Utils implements Constants {
         // Only got here if we didn't return false
         return true;
     }
-    
-
-    /**
-     * <p>Converte un valore di tipo primitivo float in uno di tipo primitivo
-     * int.</p>
-     *
-     * @param f il valore da convertire
-     * @return <code>int</code> il valore convertito, se tutto e' andato a buon fine
-     */
-    public static int parseInt(float f) {
-        int result = NOTHING;
-        try {
-            // I float possono avere una parte decimale significativa
-            result = Math.round(f);
-        } catch (NumberFormatException nfe) {
-            log.warning(": si e\' verificato un problema nella conversione da float a intero.\n" + nfe.getLocalizedMessage());
-        } catch (NullPointerException npe) {
-            log.warning(": si e\' verificato un problema in qualche puntamento.\n" + npe.getLocalizedMessage());
-        }
-        return result;
-    }
-    
+      
 
     /**
      * <p>Converte un valore di tipo primitivo int in un oggetto di tipo String
@@ -223,6 +202,55 @@ public class Utils implements Constants {
             log.warning(": si e\' verificato un problema nel metodo di conversione da intero a stringa formattata.\n" + e.getLocalizedMessage());
         }
         return result;
+    }
+    
+    
+    /**
+     * <p>Converte un valore di tipo primitivo float in uno di tipo primitivo
+     * int.</p>
+     *
+     * @param f il valore da convertire
+     * @return <code>int</code> il valore convertito, se tutto e' andato a buon fine
+     */
+    public static int parseInt(float f) {
+        int result = NOTHING;
+        try {
+            // I float possono avere una parte decimale significativa
+            result = Math.round(f);
+        } catch (NumberFormatException nfe) {
+            log.warning(": si e\' verificato un problema nella conversione da float a intero.\n" + nfe.getLocalizedMessage());
+        } catch (NullPointerException npe) {
+            log.warning(": si e\' verificato un problema in qualche puntamento.\n" + npe.getLocalizedMessage());
+        }
+        return result;
+    }
+    
+    
+    /**
+     * <p>Converte un valore di tipo String in uno di tipo primitivo
+     * int.</p>
+     *
+     * @param value il valore da convertire
+     * @param defaultValue valore di default in caso di conversione non possibile
+     * @return <code>int</code> il valore convertito, se tutto e' andato a buon fine
+     */
+    public static int safeParseInt(String value, 
+                                   int defaultValue) {
+        if (value == null || value.trim().isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException nfe) {
+            log.warning("Si e\' verificato un problema nella conversione da String a intero.\n" + nfe.getLocalizedMessage());
+            // For quantitative fields, try parsing as double then cast
+            try {
+                return (int) Double.parseDouble(value.trim());
+            } catch (NumberFormatException nfe2) {
+                log.warning("Non e\' possibile convertire " + value + " in intero, usando il default " + defaultValue + nfe2.getLocalizedMessage());
+                return defaultValue;
+            }
+        }
     }
 
     /* ************************************************************************ *
