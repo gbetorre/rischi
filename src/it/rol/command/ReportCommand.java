@@ -782,6 +782,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                            ArrayList<MeasureBean> appliedMeasures = null;
                            if (risk.getMisure() != null && !risk.getMisure().isEmpty()) {
                                appliedMeasures = MeasureCommand.monitor(user, survey, db, (ArrayList<MeasureBean>) risk.getMisure());
+                               risk.setMisureMonitorate(appliedMeasures);
                                InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), appliedMeasures);
                                risk.setLivello(mitigatedPI.getInformativa());
                            } else {
@@ -790,11 +791,11 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                            mitigatingRisks.add(risk);
                        }
                        // Passa la lista dei PxI mitigati al metodo che ricalcola il PxI mitigato
-                       InterviewBean pim = MeasureCommand.computePIMitigated(PIM, mitigatingRisks);
+                       InterviewBean pim = MeasureCommand.computePIMitigated(PIR, mitigatingRisks);
                        // Recupera la lista degli indicatori caricati nel processo
                        LinkedHashMap<String, InterviewBean>  indicatori = pat.getIndicatori();
                        // Imposta il PxI ricalcolato come indicatore aggiuntivo nel processo corrente
-                       indicatori.put(PIM, pim);
+                       indicatori.put(PIR, pim);
                        // Ricarica gli indicatori corredati del nuovo PxI mitigato
                        pat.setIndicatori(indicatori);
                        // Setta nella mappa la lista di rischi con PxI mitigati calcolata
