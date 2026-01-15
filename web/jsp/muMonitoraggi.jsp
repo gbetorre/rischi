@@ -18,7 +18,7 @@
               <th width="15%">Macroprocesso</th>
               <th width="15%">Processo</th>
               <th width="25%">Rischi Potenziali</th>
-              <th width="15%">Misure</th>
+              <th width="15%">Misure Applicate</th>
               <th width="15%">Giudizio sintetico</th>
               <th width="15%">PxI mitigato (monitoraggio)</th>
             </tr>
@@ -65,6 +65,7 @@
                    <c:forEach var="mes" items="${rsk.misureMonitorate}">
                   <li class="list-group-item">
                     <img src="${initParam.urlDirectoryImmagini}mis-${mes.carattere.informativa}.png" class="ico-small" alt="icona" title="Misura ${mes.carattere.nome}" /> 
+                    <a href="${initParam.appName}/?q=ic&p=mon&mliv=${mes.codice}&r=${param['r']}" title="Monitoraggio della misura ${mes.codice}">
                     <c:out value="${mes.nome}" />
                   </li>
                    </c:forEach>
@@ -84,8 +85,8 @@
                   </span>
                 </div>
               </td>
-              <td width="15%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (stima)').informativa)}">
-                <c:out value="${pat.indicatori.get('PxI (stima)').informativa}" />
+              <td width="15%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (reale)').informativa)}">
+                <c:out value="${pat.indicatori.get('PxI (reale)').informativa}" />
               </td>
             </tr>
             </c:forEach>
