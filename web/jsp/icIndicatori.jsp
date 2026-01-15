@@ -79,11 +79,13 @@
               <c:out value="${fase.indicatore.tipo.nome}"/>
             </span>
           </td>
-          <td scope="row" class="bgcolor-non">
           <c:set var="master" value="NO" scope="page" />
+          <c:set var="bgcolor" value="bgcolor-non" scope="page" />
           <c:if test="${fase.indicatore.master}">
             <c:set var="master" value="SI" scope="page" />
+            <c:set var="bgcolor" value="bgAct5" scope="page" />
           </c:if>
+          <td scope="row" class="${bgcolor}">
             <div class="form-check text-center">
               <strong><c:out value="${master}" /></strong>
             </div>
