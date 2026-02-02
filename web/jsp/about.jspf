@@ -25,9 +25,9 @@
         </button>
       </div>
       <div class="toast-body">
-        Versione: 2.42
+        Versione: 2.43
         <fmt:setLocale value="it_IT"/>
-        <c:set var="deployDate" value="15-01-2026" scope="page" />
+        <c:set var="deployDate" value="02-02-2026" scope="page" />
         <fmt:parseDate var="releaseDate" value="${deployDate}" pattern="dd-MM-yyyy" scope="page" />
         <fmt:formatDate var="dataRilascio" value="${releaseDate}" pattern="dd MMMMM, yyyy" />
         <span class="float-right">
@@ -36,7 +36,7 @@
         <hr class="riga" />
           <span class="copyleft">&copy;</span> 2022 &mdash; 
           <c:out value="${requestScope.theCurrentYear}" />&nbsp; 
-          <a href="https://github.com/gbetorre/rischi">Giovanroberto Torre</a>
+          Giovanroberto Torre
       </div>
     </div>
   </div>
