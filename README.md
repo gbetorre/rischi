@@ -142,7 +142,7 @@ Crossing the values obtained in the indicators of probability (P) with those obt
 
 By linking the risk to the (counter)measures, it is also possible to obtain a number of suggestions about the organizational actions to be implemented in order to reduce the specific corruption risk identified.
 
-# How the software works
+# How this software works
 
 Obviously, the <strong>Rischi On Line: Risk Mapping Software <code>(ROL-RMS)</code></strong> application relies on a database, specifically a PostgreSQL-type 
 relational database (version 12 and later), in which the questions that will be submitted to the facilities in the interviews are populated.
@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.4.3] (02/02/2026) Presentation improvements (reduced timeout on authentication error)
 - [2.4.2] (15/01/2026) Implemented monitoring algorithm
 - [2.4.1] (14/01/2026) First implementation of the monitoring algorithm
 
