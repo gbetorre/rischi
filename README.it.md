@@ -540,6 +540,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### 2026
 
+- [2.4.4] (03/02/2026) Correzione di bug
 - [2.4.3] (02/02/2026) Miglioramenti nella presentazione (ridotto timeout su redirect a login in caso di mancata autenticazione)
 - [2.4.2] (15/01/2026) Implementazione algoritmo del monitoraggio (algoritmo dell'applicazione delle misure previste)
 - [2.4.1] (14/01/2026) Prima bozza di implementazione algoritmo del monitoraggio (algoritmo dell'applicazione di una misura prevista)
