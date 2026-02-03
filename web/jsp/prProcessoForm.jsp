@@ -165,6 +165,7 @@
               break;
             </c:forEach>
             }
+            disableTextField();
         });
         
     });
@@ -173,11 +174,20 @@
         return "<option value='0'>-- AREA SENZA MACROPROCESSI --</option>";
     }
     
-    // Disable text field when select is void
+    /* 
+     * Disable text field when select is void.
+     * Watch out:
+     * const subtField = document.getElementById('btn-save')  // Returns ONLY FIRST button
+     * const subtField = document.querySelectorAll('#btn-save') // Returns NodeList [button1, button2]
+     */
     function disableTextField() {
         const selectElement = document.getElementById('pat-liv1');
-        const textField = document.getElementById('pat-nome');
         const selectedValue = selectElement.value;
+        const textField = document.getElementById('pat-nome');
+        // Select by multiple ids - works with multiple elements
+        document.querySelectorAll('#btn-save').forEach(button => {
+            button.disabled = (selectedValue === '0');
+        });
         if (selectedValue === '0') {
             textField.disabled = true;
         } else {
