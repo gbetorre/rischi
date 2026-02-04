@@ -47,7 +47,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import it.rol.Constants;
-import it.rol.Query;
 import it.rol.bean.InterviewBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.WebStorageException;
@@ -81,7 +80,7 @@ public class QueryImpl implements Query, Constants {
 
     /** 
      * {@link Query#getQueryStructures(int, int, int, int, int)} 
-     * @see it.rol.Query#getQueryStructures(int, int, int, int, int)
+     * @see it.rol.db.Query#getQueryStructures(int, int, int, int, int)
      */
     @Override
     public String getQueryStructures(int idR, 
@@ -150,7 +149,7 @@ public class QueryImpl implements Query, Constants {
 
     /**
      * {@link Query#getQueryStructure(int, byte)}
-     * @see it.rol.Query#getQueryStructure(int, byte)
+     * @see it.rol.db.Query#getQueryStructure(int, byte)
      */
     @Override
     public String getQueryStructure(int id,
@@ -201,7 +200,7 @@ public class QueryImpl implements Query, Constants {
     
     /**
      * {@link Query#getQueryMacroSubProcessAtByIdOrCode(int, byte, int)}
-     * @see it.rol.Query#getQueryMacroSubProcessAtByIdOrCode(int, String, byte, int)
+     * @see it.rol.db.Query#getQueryMacroSubProcessAtByIdOrCode(int, String, byte, int)
      */
     @Override
     public String getQueryMacroSubProcessAtByIdOrCode(int idO, 
@@ -243,7 +242,7 @@ public class QueryImpl implements Query, Constants {
 
 
     /* (non-Javadoc)
-     * @see it.rol.Query#getQueryAnswers(HashMap<String, LinkedHashMap<String, String>>, int, int, int, boolean);
+     * @see it.rol.db.Query#getQueryAnswers(HashMap<String, LinkedHashMap<String, String>>, int, int, int, boolean);
      */
     @SuppressWarnings("javadoc")
     @Override
@@ -350,7 +349,7 @@ public class QueryImpl implements Query, Constants {
     
     /**
      * {@link Query#getMeasuresByFactors(int, int, String)}
-     * @see it.rol.Query#getMeasuresByFactors(int, int, String)
+     * @see it.rol.db.Query#getMeasuresByFactors(int, int, String)
      */
     @Override
     public String getMeasuresByFactors(int idF, 
@@ -378,7 +377,7 @@ public class QueryImpl implements Query, Constants {
     
     /**
      * {@link Query#getMeasureByRiskAndProcess(String, String, String, String, int)}
-     * @see it.rol.Query#getMeasureByRiskAndProcess(String, String, String, String, int)
+     * @see it.rol.db.Query#getMeasureByRiskAndProcess(String, String, String, String, int)
      */
     @Override
     public String getMeasureByRiskAndProcess(String idR, 
@@ -412,7 +411,7 @@ public class QueryImpl implements Query, Constants {
     
     /**
      * {@link Query#getMeasuresByStruct(int, int, byte, String)}
-     * @see it.rol.Query#getMeasuresByStruct(int, int, byte, String)
+     * @see it.rol.db.Query#getMeasuresByStruct(int, int, byte, String)
      */
     @Override
     public String getMeasuresByStruct(int idR, 
