@@ -67,7 +67,7 @@ import it.rol.Constants;
 import it.rol.DBManager;
 import it.rol.DBWrapper;
 import it.rol.Main;
-import it.rol.Query;
+import it.rol.db.Query;
 import it.rol.util.Utils;
 import it.rol.bean.CodeBean;
 import it.rol.bean.ItemBean;
