@@ -62,6 +62,7 @@ import javax.servlet.http.HttpServletRequest;
 import it.rol.bean.CodeBean;
 import it.rol.bean.ItemBean;
 import it.rol.command.Command;
+import it.rol.db.Query;
 import it.rol.exception.WebStorageException;
 
 
