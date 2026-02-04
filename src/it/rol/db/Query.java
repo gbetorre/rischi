@@ -45,12 +45,13 @@
  *   37129 Verona (Italy)
  */
 
-package it.rol;
+package it.rol.db;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import it.rol.Constants;
 import it.rol.bean.InterviewBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.WebStorageException;
