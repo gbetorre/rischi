@@ -375,97 +375,107 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                         // Imposta il titolo pagina
                         tP = titleFile.get(part);
                         // Gestione rami
-                        if (part.equalsIgnoreCase(PART_MEASURES)) {
-                            // Controlla l'esistenza del codice di una misura
-                            if (codeMis.equals(DASH)) {
-                            /* ------------------------------------------------ *
-                             *      Elenco Misure raggruppate per struttura     *
-                             * ------------------------------------------------ */
-                                structs = db.getMeasuresByStructs(user, survey);
-                                // Aggiunge una foglia alle breadcrumbs
-                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Misure x Struttura");
+                        switch (part) {
+                            case PART_MEASURES:
+                                // Controlla l'esistenza del codice di una misura
+                                if (codeMis.equals(DASH)) {
+                                /* -------------------------------------------- *
+                                 *    Elenco Misure raggruppate per struttura   *
+                                 * -------------------------------------------- */
+                                    structs = db.getMeasuresByStructs(user, survey);
+                                    // Aggiunge una foglia alle breadcrumbs
+                                    bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Misure x Struttura");
+                                    // Imposta la pagina
+                                    fileJspT = nomeFile.get(part);
+                                } else {
+                                /* -------------------------------------------- *
+                                 *           Dettagli misura monitorata         *
+                                 * -------------------------------------------- */
+                                    // Recupera la misura di prevenzione/mitigazione
+                                    measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                    // Recupera i rischi cui è associata
+                                    risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
+                                    // Personalizza le breadcrumbs
+                                    bC = loadBreadCrumbs(breadCrumbs, part, survey); 
+                                    // Imposta la pagina
+                                    fileJspT = nomeFileMisura;
+                                }
+                                break;
+                            case PART_INDICATOR:
+                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                if (idInd > DEFAULT_ID) {
+                                /* -------------------------------------------- *
+                                 *     Dettagli di un indicatore di dato id     *
+                                 * -------------------------------------------- */
+                                    // Imposta la pagina
+                                    fileJspT = nomeFileDettaglio;
+                                } else {
+                                /* -------------------------------------------- *
+                                 *        Elenco indicatori di una misura       *
+                                 * -------------------------------------------- */
+                                    // Personalizza le breadcrumbs
+                                    bC = loadBreadCrumbs(breadCrumbs, part, survey);
+                                    // Imposta la pagina
+                                    fileJspT = nomeFile.get(part);
+                                }
+                                break;
+                            case PART_MONITOR:
+                                /* -------------------------------------------- *
+                                 *  Elenco Misurazioni di una misura monitorata *
+                                 * -------------------------------------------- */
+                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                measurements = decantMeasurements(measure);
                                 // Imposta la pagina
                                 fileJspT = nomeFile.get(part);
-                            } else {
-                            /* ------------------------------------------------ *
-                             *             Dettagli misura monitorata           *
-                             * ------------------------------------------------ */
-                                // Recupera la misura di prevenzione/mitigazione
+                                break;
+                            case PART_INSERT_MONITOR_DATA:
+                                /* ------------------------------------------------ *
+                                 * Form aggiunta dettagli monitoraggio a una misura *
+                                 * ------------------------------------------------ */
+                                if (!codeMis.equals(DASH)) {
+                                    // Recupera la misura di prevenzione/mitigazione
+                                    measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                    // Recupera i rischi cui è associata
+                                    risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
+                                    // Personalizza le breadcrumbs
+                                    bC = loadBreadCrumbs(breadCrumbs, part, survey); 
+                                    // Pagina
+                                    fileJspT = nomeFile.get(part);
+                                }
+                                break;
+                            case PART_SELECT_MEASUREMENT:
+                                /* -------------------------------------------- *
+                                 *      Pagina riepilogo dettagli misurazione   *
+                                 * -------------------------------------------- */
+                                // Recupera gli estremi della misura, della fase e dell'indicatore
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
-                                // Recupera i rischi cui è associata
-                                risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
-                                // Personalizza le breadcrumbs
-                                bC = loadBreadCrumbs(breadCrumbs, part, survey); 
-                                // Imposta la pagina
-                                fileJspT = nomeFileMisura;
-                            }
-                        } else if (part.equalsIgnoreCase(PART_INDICATOR)) {
-                            measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
-                            if (idInd > DEFAULT_ID) {
-                            /* ------------------------------------------------ *
-                             *       Dettagli di un indicatore di dato id       *
-                             * ------------------------------------------------ */
-                                // Imposta la pagina
-                                fileJspT = nomeFileDettaglio;
-                            } else {
-                            /* ------------------------------------------------ *
-                             *          Elenco indicatori di una misura         *
-                             * ------------------------------------------------ */
-                                // Personalizza le breadcrumbs
-                                bC = loadBreadCrumbs(breadCrumbs, part, survey);
-                                // Imposta la pagina
-                                fileJspT = nomeFile.get(part);
-                            }
-                        } else if (part.equalsIgnoreCase(PART_MONITOR)) {
-                            
-                            /* ------------------------------------------------ *
-                             *    Elenco Misurazioni di una misura monitorata   *
-                             * ------------------------------------------------ */
-                            measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
-                            measurements = decantMeasurements(measure);
-                            // Imposta la pagina
-                            fileJspT = nomeFile.get(part);
-                        } else if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
-                            /* ------------------------------------------------ *
-                             * Form aggiunta dettagli monitoraggio a una misura *
-                             * ------------------------------------------------ */
-                            if (!codeMis.equals(DASH)) {
-                                // Recupera la misura di prevenzione/mitigazione
-                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
-                                // Recupera i rischi cui è associata
-                                risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
-                                // Personalizza le breadcrumbs
-                                bC = loadBreadCrumbs(breadCrumbs, part, survey); 
+                                // Recupera la misurazione cercata
+                                measurement = db.getMeasurement(user, idMon, survey);
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
-                            }
-                        } else if (part.equalsIgnoreCase(PART_SELECT_MEASUREMENT)) {
-                            /* ------------------------------------------------ *
-                             *        Pagina riepilogo dettagli misurazione     *
-                             * ------------------------------------------------ */
-                            // Recupera gli estremi della misura, della fase e dell'indicatore
-                            measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
-                            // Recupera la misurazione cercata
-                            measurement = db.getMeasurement(user, idMon, survey);
-                            // Pagina
-                            fileJspT = nomeFile.get(part);
-                        } else if (part.equalsIgnoreCase(PART_INSERT_INDICATOR)) {
-                            /* ------------------------------------------------ *
-                             *      Maschera inserimento nuovo Indicatore       *
-                             * ------------------------------------------------ */
-                            // Recupera la fase cui si vuol aggiungere l'indicatore
-                            phase = db.getMeasureActivity(user, codeMis, idFas, survey);
-                            // Pagina
-                            fileJspT = nomeFile.get(part);
-                        } else if (part.equalsIgnoreCase(PART_INSERT_MEASUREMENT)) {
-                            /* ------------------------------------------------ *
-                             *       Maschera inserimento nuova Misurazione     *
-                             * ------------------------------------------------ */
-                            // Recupera l'indicatore cui si vuol aggiungere la misurazione
-                            measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
-                            // Breadcrumbs
-                            // Pagina
-                            fileJspT = nomeFile.get(part);
+                                break;
+                            case PART_INSERT_INDICATOR:
+                                /* -------------------------------------------- *
+                                 *    Maschera inserimento nuovo Indicatore     *
+                                 * -------------------------------------------- */
+                                // Recupera la fase cui si vuol aggiungere l'indicatore
+                                phase = db.getMeasureActivity(user, codeMis, idFas, survey);
+                                // Pagina
+                                fileJspT = nomeFile.get(part);
+                                break;
+                            case PART_INSERT_MEASUREMENT:
+                                /* -------------------------------------------- *
+                                 *     Maschera inserimento nuova Misurazione   *
+                                 * -------------------------------------------- */
+                                // Recupera l'indicatore cui si vuol aggiungere la misurazione
+                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                // Breadcrumbs
+                                // Pagina
+                                fileJspT = nomeFile.get(part);
+                                break;
+                            default:
+                                // Other values are not admitted
+                                break;
                         }
                     } else {
                         /* ------------------------------------------------ *
