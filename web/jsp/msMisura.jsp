@@ -20,7 +20,9 @@
     <hr class="riga"/>
     <h4 class="p-2 bgAct17 rounded popupMenu heading">
       <i class="fa-solid fa-umbrella ico-home" title="misura di prevenzione"></i>&nbsp; 
-      <c:out value="${meas.nome}" />
+      <a href="${initParam.appName}/?q=ms&p=mes&mliv=${meas.codice}&r=${param['r']}" title="Misura ${meas.codice}">
+        <c:out value="${meas.nome}" />
+      </a>
     </h4>
     <div class="form-custom bgAct28">
       <div class="content-holder bgAct">
