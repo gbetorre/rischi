@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.4.5] (05/02/2026) Presentation improvements; bug fix
 - [2.4.4] (03/02/2026) Bug fix
 - [2.4.3] (02/02/2026) Presentation improvements (reduced timeout on authentication error)
 - [2.4.2] (15/01/2026) Implemented monitoring algorithm
