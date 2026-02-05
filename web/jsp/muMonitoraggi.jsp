@@ -66,7 +66,8 @@
                   <li class="list-group-item">
                     <img src="${initParam.urlDirectoryImmagini}mis-${mes.carattere.informativa}.png" class="ico-small" alt="icona" title="Misura ${mes.carattere.nome}" /> 
                     <a href="${initParam.appName}/?q=ic&p=mon&mliv=${mes.codice}&r=${param['r']}" title="Monitoraggio della misura ${mes.codice}">
-                    <c:out value="${mes.nome}" />
+                      <c:out value="${mes.nome}" />
+                    </a>
                   </li>
                    </c:forEach>
                  </c:forEach>
