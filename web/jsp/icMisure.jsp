@@ -34,7 +34,7 @@
             <th width="40%" scope="col">Misura</th>
             <th width="40%" scope="col">Funzioni</th>
             <th width="10%" scope="col">&nbsp; Ruolo</th>
-            <th width="10%" scope="col" class="text-center">Monitorata</th>
+            <th width="10%" scope="col" class="text-center">Completezza</th>
           </tr>
         </thead>
         <tbody>
@@ -48,6 +48,14 @@
           <c:otherwise>
             <c:set var="badgeStyle" value="border-alto bg-warning" scope="page" />
           </c:otherwise>
+          </c:choose>
+          <c:choose>
+          <c:when test="${ms.monitorata}">
+            <c:set var="completezza" value="La misura ha ${ms.totIndicatori} indicatori e ciascuno ha ricevuto almeno una misurazione" scope="page" />
+          </c:when>
+          <c:when test="${not ms.monitorata}">
+            <c:set var="completezza" value="La misura ha ${ms.totIndicatori} indicatori e almeno uno di essi non e' stato misurato" scope="page" />
+          </c:when>
           </c:choose>
           <tr>
             <td scope="row" class="align-middle">
@@ -67,7 +75,7 @@
               </a>
               <a href="${initParam.appName}/?q=ic&p=mon&mliv=${ms.codice}&r=${param['r']}" class="btn bgAct11 btn-spacer text-black">
                 <i class="fas fa-bars"></i> Misurazioni &nbsp;
-                <span class="badge badge-pill badge-light">
+                <span class="badge badge-pill badge-light" title="Ci sono ${ms.totMisurazioni} misurazioni totali">
                   <c:out value="${ms.totMisurazioni}" />
                 </span>
               </a>              
@@ -79,7 +87,7 @@
               </span>
             </td>
             <td class="align-middle text-center">
-              <img src="${initParam.urlDirectoryImmagini}${ms.monitorata}.png" class="ico-small" alt="icona" title="Completezza del monitoraggio" /> &nbsp;
+              <img src="${initParam.urlDirectoryImmagini}${ms.monitorata}.png" class="ico-small" alt="icona" title="${completezza}" /> &nbsp;
             </td>
           </tr>
         </c:forEach>
