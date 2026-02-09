@@ -540,6 +540,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### 2026
 
+- [2.4.6] (09/02/2026) Prima bozza di implementazione funzionalit&agrave; per inserimento associazione tra processo e rischio
 - [2.4.5] (05/02/2026) Miglioramenti nella presentazione del monitoraggio (link, etichette); correzione di bug
 - [2.4.4] (03/02/2026) Correzione di bug
 - [2.4.3] (02/02/2026) Miglioramenti nella presentazione (ridotto timeout su redirect a login in caso di mancata autenticazione)
