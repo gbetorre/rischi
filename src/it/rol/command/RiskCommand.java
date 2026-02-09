@@ -47,15 +47,11 @@
 
 package it.rol.command;
 
-import java.sql.Time;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,7 +65,6 @@ import it.rol.DBWrapper;
 import it.rol.Main;
 import it.rol.SessionManager;
 import it.rol.bean.CodeBean;
-import it.rol.bean.DepartmentBean;
 import it.rol.bean.ItemBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
@@ -130,10 +125,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<>();
-    /**
-     *  Tabella chiave/valore contenente il numero di quesiti per ogni rilevazione
-     */
-    private static ConcurrentHashMap<String, Integer> questionAmounts; 
 
     
     /** 
@@ -187,28 +178,24 @@ public class RiskCommand extends ItemBean implements Command, Constants {
          * ******************************************************************** */
         // Databound
         DBWrapper db = null;
-        // Parser per la gestione assistita dei parametri di input
-        ParameterParser parser = new ParameterParser(req);
         // Dichiara la pagina a cui reindirizzare
         String fileJspT = null;
         // Utente loggato
         PersonBean user = null;
+        // Rilevazione
+        CodeBean survey = null;
+        // Processo organizzativo specifico
+        ProcessBean process = null;
         // Rischio corruttivo specifico
         RiskBean risk = null;
         // Elenco dei rischi corruttivi legati alla rilevazione
         ArrayList<RiskBean> risks = null;
-        // Elenco strutture collegate alla rilevazione
-        ArrayList<DepartmentBean> structs = null;
         // Elenco processi collegati alla rilevazione
         ArrayList<ProcessBean> macros = null;
-        // Elenco risposte ai quesiti collegati all'intervista
-        ArrayList<QuestionBean> answers = null;
-        // Elenco strutture collegate alla rilevazione indicizzate per codice
-        HashMap<String, Vector<DepartmentBean>> flatStructs = null;
-        // Elenco quesiti collegati alla rilevazione raggruppati per ambito
-        HashMap<ItemBean, ArrayList<QuestionBean>> flatQuestions = null;
         // Tabella che conterrà i valori dei parametri passati dalle form
         HashMap<String, LinkedHashMap<String, String>> params = null;
+        // Titolo pagina
+        String tP = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
         LinkedList<ItemBean> bC = null;
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
@@ -216,6 +203,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
+        // Parser per la gestione assistita dei parametri di input
+        ParameterParser parser = new ParameterParser(req);        
         // Recupera o inizializza 'codice rilevazione' (Survey)
         String codeSur = parser.getStringParameter(PARAM_SURVEY, DASH);
         // Recupera o inizializza 'tipo pagina'   
@@ -223,11 +212,10 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Flag di scrittura
         Boolean writeAsObject = (Boolean) req.getAttribute("w");
         boolean write = writeAsObject.booleanValue();
-        // Dichiara data ed ora di una intervista cercata
-        Date questDate = null;
-        Time questTime = null;
         // Recupera o inizializza 'id rischio'
         int idRk = parser.getIntParameter("idR", DEFAULT_ID);
+        // Recupera o inizializza 'id processo'
+        int idP = parser.getIntParameter("pliv", DEFAULT_ID);
         /* ******************************************************************** *
          *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
          * ******************************************************************** */
@@ -252,7 +240,9 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         try {
             // Controllo sull'input
             if (!codeSur.equals(DASH)) {
-                // Creazione della tabella che conterrà i valori dei parametri passati dalle form
+                // Genera l'oggetto rilevazione a partire dal suo codice
+                survey =  ConfigManager.getSurvey(codeSur);
+                // Tabella che conterrà i valori dei parametri passati dalle form
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
                 loadParams(part, parser, params);
@@ -332,43 +322,54 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                      *                  Manage Risk Part                *
                      * ------------------------------------------------ */
                     if (nomeFile.containsKey(part)) {
-                        // Recupera le strutture della rilevazione corrente
-                        structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
-                        macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
+                        // Recupera le breadcrumbs
+                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                         fileJspT = nomeFile.get(part);
                         switch (part) {
-                            /* -----     SHOWS Form to INSERT new Risk    ----- */
+                            /* -----     SHOW Form to INSERT new Risk     ----- */
                             case PART_INSERT_RISK:
-                                // Ha bisogno di personalizzare le breadcrumbs
-                                LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuovo Rischio");
+                                // Customize labels
+                                tP = "Nuovo Rischio";
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, tP);
                                 break;                           
-                            /* ---- SHOWS Form to link a Process to a Risk ---- */
+                            /* ----  SHOW Form to link a Process to a Risk ---- */
                             case PART_INSERT_RISK_PROCESS:
-                                risk = db.getRisk(user, idRk, ConfigManager.getSurvey(codeSur));
-                                // Ha bisogno di personalizzare le breadcrumbs
-                                breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuovo legame R-P");
+                                risk = db.getRisk(user, idRk, survey);
+                                macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
+                                // Customize labels
+                                tP =  "Nuovo legame R-P";
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1,tP);
                                 break;
-                            /* ---- SHOWS Form to link a Risk to a Process ---- */
+                            /* ----  SHOW Form to link a Risk to a Process ---- */
                              case PART_INSERT_PROCESS_RISK:
-                                // TODO
+                                // Retrieve the process which the risk has to be assigned
+                                process = db.getProcessById(user, idP, survey);
+                                // Retrieve the already assigned risks
+                                ArrayList<RiskBean> risksByProcess = db.getRisksByProcess(user, process, survey);
+                                process.setRischi(risksByProcess);
+                                // Retrieve all the risks
+                                risks = db.getRisks(user, survey.getId(), survey);
+                                // Customize labels
+                                tP = "Nuovo legame P-R";
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, tP);
                                 break;
                         }
                     } else {
                         /* ------------------------------------------------ *
-                         *          SELECT and SHOWS a Specific Risk        *
+                         *          SELECT and SHOW a Specific Risk         *
                          * ------------------------------------------------ */
                         if (idRk > DEFAULT_ID) {
-                            risk = db.getRisk(user, idRk, ConfigManager.getSurvey(codeSur));
+                            risk = db.getRisk(user, idRk, survey);
+                            tP = "Rischio";
                             // Ha bisogno di personalizzare le breadcrumbs perché sull'indirizzo non c'è il parametro 'p'
-                            bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), "Rischio");
+                            bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), tP);
                             fileJspT = nomeFileDettaglio;
                         } else {
                             /* ------------------------------------------------ *
-                             *                SELECT List of Risks              *
+                             *      SELECT and SHOW the full List of Risks      *
                              * ------------------------------------------------ */
-                            risks = db.getRisks(user, ConfigManager.getSurvey(codeSur).getId(), ConfigManager.getSurvey(codeSur));
+                            risks = db.getRisks(user, survey.getId(), survey);
+                            tP = "Registro dei rischi";
                             fileJspT = nomeFileElenco;                            
                         }
                     }
@@ -409,33 +410,29 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         if (risks != null) {
             req.setAttribute("rischi", risks);
         }
-        // Imposta nella request elenco completo strutture
-        if (structs != null) {
-            req.setAttribute("strutture", structs);
-        }
-        // Imposta nella request elenco completo strutture sotto forma di dictionary
-        if (flatStructs != null) {
-            req.setAttribute("elencoStrutture", flatStructs);
-        }
         // Imposta nella request elenco completo processi
         if (macros != null) {
             req.setAttribute("processi", macros);
         }
-        // Imposta nella request elenco completo domande e risposte di un'intervista
-        if (answers != null) {
-            req.setAttribute("elencoRisposte", answers);
+        // Imposta nella request oggetto rischio corruttivo specifico
+        if (risk != null) {
+            req.setAttribute("rischio", risk);
         }
-        // Imposta l'eventuale indirizzo a cui redirigere
-        if (redirect != null) {
-            req.setAttribute("redirect", redirect);
+        // Imposta nella request oggetto processo specifico
+        if (process != null) {
+            req.setAttribute("processo", process);
         }
         // Imposta struttura contenente tutti i parametri di navigazione già estratti
         if (!params.isEmpty()) {
             req.setAttribute("params", params);
         }
-        // Imposta nella request oggetto rischio corruttivo specifico
-        if (risk != null) {
-            req.setAttribute("rischio", risk);
+        // Imposta l'eventuale indirizzo a cui redirigere
+        if (redirect != null) {
+            req.setAttribute("redirect", redirect);
+        }
+        // Titolo pagina in caso sia significativo
+        if (tP != null && !tP.equals(VOID_STRING)) {
+            req.setAttribute("tP", tP);
         }
         // Imposta nella request le breadcrumbs in caso siano state personalizzate
         if (bC != null) {
@@ -558,24 +555,31 @@ public class RiskCommand extends ItemBean implements Command, Constants {
          * ---------------------------------------------------- */
         if (part.equals(PART_INSERT_RISK)) {
             // Recupera gli estremi del rischio da inserire
-            risk.put("risk",    parser.getStringParameter("r-name", VOID_STRING));
-            risk.put("desc",    parser.getStringParameter("r-descr", VOID_STRING));
+            risk.put("risk", parser.getStringParameter("r-name", VOID_STRING));
+            risk.put("desc", parser.getStringParameter("r-descr", VOID_STRING));
+            formParams.put(part, risk);
+        /* ---------------------------------------------------- *
+         *  Caricamento parametri Associazione Rischio-Processo *
+         * ---------------------------------------------------- */
+        } else if (part.equals(PART_INSERT_RISK_PROCESS)) {
+            // Recupera gli estremi del rischio da inserire
+            risk.put("risk", parser.getStringParameter("r-id", VOID_STRING));
             formParams.put(part, risk);
         /* ---------------------------------------------------- *
          *  Caricamento parametri Associazione Processo-Rischio *
          * ---------------------------------------------------- */
-        } else if (part.equals(PART_INSERT_RISK_PROCESS)) {
+        } else if (part.equals(PART_INSERT_PROCESS_RISK)) {
             // Recupera gli estremi del rischio da inserire
-            risk.put("risk",    parser.getStringParameter("r-id", VOID_STRING));
+            risk.put("risk", parser.getStringParameter("r-id", VOID_STRING));
             formParams.put(part, risk);
         /* ---------------------------------------------------- *
          *     Caricamento parametri Fattore-Processo-Rischio   *
          * ---------------------------------------------------- */
         } else if (part.equals(PART_INSERT_F_R_P)) {
             // Recupera gli estremi del rischio da inserire
-            risk.put("risk",    parser.getStringParameter("r-id", VOID_STRING));
-            risk.put("fact",    parser.getStringParameter("fliv1", VOID_STRING));
-            risk.put("proc",    parser.getStringParameter("pliv", VOID_STRING));
+            risk.put("risk", parser.getStringParameter("r-id", VOID_STRING));
+            risk.put("fact", parser.getStringParameter("fliv1", VOID_STRING));
+            risk.put("proc", parser.getStringParameter("pliv", VOID_STRING));
             formParams.put(part, risk);
         /* ---------------------------------------------------- *
          *    Caricamento parametri Aggiornamento Nota al PxI   *
@@ -583,14 +587,14 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         } else if (part.equals(PART_PI_NOTE)) {
             // Recupera gli estremi della nota da aggiornare
             //String note = parser.getStringParameter("pi-note", VOID_STRING);
-            risk.put("note",    parser.getStringParameter("pi-note", VOID_STRING));
+            risk.put("note", parser.getStringParameter("pi-note", VOID_STRING));
             formParams.put(part, risk);
         /* ---------------------------------------------------- *
          *      Parametri inserimento nuovo Macro/Processo      *
          * ---------------------------------------------------- */
         } else if (part.equals(PART_INSERT_PROCESS)) {
             // Il nome del Macro o Processo è stato già recuperato sopra
-            proat.put("liv0",    parser.getStringParameter("pliv0", VOID_STRING));
+            proat.put("liv0", parser.getStringParameter("pliv0", VOID_STRING));
         }
         formParams.put(PART_PROCESS, proat);
     }
