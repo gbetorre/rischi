@@ -270,6 +270,11 @@
           </tr>
           </c:forEach>
         </table>
+        <div class="col-sm-12 centerlayout">
+          <a href="${initParam.appName}/?q=ri&p=adk&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-danger btn-lg" title="Mappa un rischio aggiuntivo sul processo corrente">
+            <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Rischio
+          </a>
+        </div>    
       </div>
       </section>
       <hr class="separatore" />
