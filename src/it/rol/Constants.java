@@ -271,6 +271,10 @@ public interface Constants extends Serializable {
      */
     public static final String PART_INSERT_RISK_PROCESS = "adp";
     /**
+     * <p>Costante per il parametro identificante la funzione di associazione tra un processo e un rischio.</p>
+     */
+    public static final String PART_INSERT_PROCESS_RISK = "adk";
+    /**
      * <p>Costante per il parametro identificante la funzione di associazione tra 
      * un rischio e un fattore abilitante nel contesto di un processo.</p>
      */
