@@ -34,7 +34,9 @@
             <th width="40%" scope="col">Misura</th>
             <th width="40%" scope="col">Funzioni</th>
             <th width="10%" scope="col">&nbsp; Ruolo</th>
-            <th width="10%" scope="col" class="text-center">Completezza</th>
+            <th width="10%" scope="col" class="text-center" title="La completezza del monitoraggio &egrave; piena se tutti gli indicatori definiti per la misura hanno ottenuto almeno una misurazione (indipendentemente dal fatto che siano indicatore master o meno) mentre &egrave; parziale negli altri casi.">
+              Completezza
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -54,7 +56,7 @@
             <c:set var="completezza" value="La misura ha ${ms.totIndicatori} indicatori e ciascuno ha ricevuto almeno una misurazione" scope="page" />
           </c:when>
           <c:when test="${not ms.monitorata}">
-            <c:set var="completezza" value="La misura ha ${ms.totIndicatori} indicatori e almeno uno di essi non e' stato misurato" scope="page" />
+            <c:set var="completezza" value="La misura ha ${ms.totIndicatori} indicatori ma almeno uno di essi non e' stato misurato" scope="page" />
           </c:when>
           </c:choose>
           <tr>
