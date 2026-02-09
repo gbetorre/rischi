@@ -45,6 +45,7 @@ package it.rol.bean;
 
 import java.sql.Time;
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
@@ -141,6 +142,8 @@ public class ProcessBean extends CodeBean {
     private AbstractList<ActivityBean> attivita;
     /** Output collegati al processo corrente */
     private AbstractList<ItemBean> outputs;
+    /** Rischi collegati al processo corrente */
+    private ArrayList<RiskBean> rischi;
     /* ------------------------------------------------------------------------ *
      *                   Dati descrittivi dell'ultima modifica                  *
      * ------------------------------------------------------------------------ */
@@ -183,6 +186,7 @@ public class ProcessBean extends CodeBean {
         indicatori = null;
         inputs = outputs = null;
         attivita = null;
+        setRischi(null);
     }
 
     
@@ -896,6 +900,30 @@ public class ProcessBean extends CodeBean {
      */
     public void setOutputs(AbstractList<ItemBean> outputs) {
         this.outputs = outputs;
+    }
+
+
+    /* *************************************************** *
+     *           Metodi getter e setter per rischi         *
+     * *************************************************** */
+    
+    /**
+     * Resituisce una lista di rischi collegati al processo corrente
+     * 
+     * @return <code>ArrayList&lt;RiskBean&gt;</code> - lista di rischi collegati
+     */
+    public ArrayList<RiskBean> getRischi() {
+        return rischi;
+    }
+
+
+    /**
+     * Imposta una lista di rischi collegati al processo corrente
+     * 
+     * @param rischi - i rischi da impostare
+     */
+    public void setRischi(ArrayList<RiskBean> rischi) {
+        this.rischi = rischi;
     }
 
 }
