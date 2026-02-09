@@ -123,6 +123,10 @@ public class RiskCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileAddProcess = "/jsp/riProcessoForm.jsp";
     /**
+     * Pagina a cui la command fa riferimento per mostrare la form di aggiunta di un rischio a un processo
+     */
+    private static final String nomeFileAddRisk = "/jsp/riRischioProcessoForm.jsp";
+    /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<>();
@@ -163,6 +167,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         nomeFile.put(COMMAND_RISK,              nomeFileElenco);
         nomeFile.put(PART_INSERT_RISK,          nomeFileInsertRisk);
         nomeFile.put(PART_INSERT_RISK_PROCESS,  nomeFileAddProcess);
+        nomeFile.put(PART_INSERT_PROCESS_RISK,  nomeFileAddRisk);
     }  
   
     
@@ -330,35 +335,29 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                         // Recupera le strutture della rilevazione corrente
                         structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
                         macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
-                        if (part.equalsIgnoreCase(PART_CONFIRM_QST)) {
-                            /* ------------------------------------------------ *
-                             *                   Confirm Part                   *
-                             * ------------------------------------------------ */
-                            // TODO IMPLEMENTARE
-                            //answers = retrieveAnswers(user, codeSur, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, db);
-                            answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSur));
-                            //ArrayList<ItemBean> ambits = db.getAmbits(user);
-                            //flatQuestions = decantQuestions(questions, ambits);
-                        } else if (part.equalsIgnoreCase(PART_INSERT_RISK)) {
-                            /* ------------------------------------------------ *
-                             *          SHOWS Form to INSERT new Risk           *
-                             * ------------------------------------------------ */
-                            // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuovo Rischio");
-                        } else if (part.equalsIgnoreCase(PART_INSERT_RISK_PROCESS)) {
-                            /* ------------------------------------------------ *
-                             *       SHOWS Form to LINK A PROCESS TO A Risk     *
-                             * ------------------------------------------------ */
-                            risk = db.getRisk(user, idRk, ConfigManager.getSurvey(codeSur));
-                            // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuovo legame R-P");
+                        fileJspT = nomeFile.get(part);
+                        switch (part) {
+                            /* -----     SHOWS Form to INSERT new Risk    ----- */
+                            case PART_INSERT_RISK:
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuovo Rischio");
+                                break;                           
+                            /* ---- SHOWS Form to link a Process to a Risk ---- */
+                            case PART_INSERT_RISK_PROCESS:
+                                risk = db.getRisk(user, idRk, ConfigManager.getSurvey(codeSur));
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuovo legame R-P");
+                                break;
+                            /* ---- SHOWS Form to link a Risk to a Process ---- */
+                             case PART_INSERT_PROCESS_RISK:
+                                // TODO
+                                break;
                         }
-                        fileJspT = nomeFile.get(part);//
                     } else {
                         /* ------------------------------------------------ *
-                         *              SELECT a Specific Risk              *
+                         *          SELECT and SHOWS a Specific Risk        *
                          * ------------------------------------------------ */
                         if (idRk > DEFAULT_ID) {
                             risk = db.getRisk(user, idRk, ConfigManager.getSurvey(codeSur));
