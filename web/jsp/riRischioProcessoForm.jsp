@@ -57,7 +57,7 @@
     </c:if>
     <!-- Form -->
     <form id="add-pat-form" class="form-horizontal" action="" method="post">
-      <input type="hidden" id="pat-id" name="pliv2" value="${process.id}" />
+      <input type="hidden" id="pat-id" name="pliv2" value="${process.id}.${process.codice}" />
       <div class="form-custom form-group" id="adp-form">
         <h4 class="btn-lightgray">Rischio corruttivo da collegare al processo (verr&agrave; aggiunto all'elenco dei rischi cui il processo e' esposto)</h4>
         <div class="panel-body form-group">
