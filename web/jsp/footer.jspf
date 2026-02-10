@@ -1,11 +1,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <hr class="separatore" />
       <p id="ragSociale"> 
-        &copy; <!-- 2018 &ndash; --> <c:out value="${requestScope.theCurrentYear}" />&nbsp;
-        Universit&agrave; degli studi di Verona
+        &copy; 2022 &ndash; <c:out value="${requestScope.theCurrentYear}" />&nbsp;
+        Giovanroberto Torre c/o
+        Universit&agrave; degli studi di Verona &nbsp;|&nbsp; 
         Via dell'Artigliere 8, 37129 Verona &nbsp;|&nbsp; 
-        Partita IVA IT01541040232 &nbsp;|&nbsp; 
-        Codice Fiscale 93009870234 
       </p>
       <div id="footer">
         &nbsp;
