@@ -87,7 +87,7 @@ import it.rol.util.Utils;
 
 
 /**
- * <p><code>Data</code> &egrave; la servlet della web-application rol
+ * <p><code>Data</code> &egrave; la servlet della web-application <code>ROL</code>
  * che pu&ograve; essere utilizzata in pi&uacute; contesti:<ol>
  * <li>su una richiesta sincrona: per produrre output con contentType differenti da
  * 'text/html'</li>
@@ -103,9 +103,8 @@ import it.rol.util.Utils;
  * la formattazione, che per&ograve; verr&agrave; invocata asincronamente.</li>
  * </ul></p>
  * <p>Questa servlet estrae l'azione dall'URL, ne verifica la
- * correttezza, quindi in base al valore del parametro <code>'entToken'</code> ricevuto
- * (qui chiamato 'qToken' per motivi storici, ma non importa)
- * richiama le varie Command che devono eseguire i comandi specifici.
+ * correttezza, quindi in base al valore del parametro <code>'entToken'</code> 
+ * ricevuto, richiama le varie Command che devono eseguire i comandi specifici.
  * Infine, recupera l'output dai metodi delle Command stesse richiamati
  * e li restituisce a sua volta al cliente sotto forma non necessariamente di outputstream
  * 'text/html' (come nel funzionamento standard delle applicazioni web),
@@ -121,25 +120,10 @@ import it.rol.util.Utils;
  * Command e, dopo aver eseguito le azioni necessarie, restituire
  * un set di risultati che dovr&agrave; essere utilizzato per
  * visualizzare i dati all'interno dei files serviti, ai quali
- * sarà fatto un forward.
- * </p>
- * L'azione presente nell'URL deve avere il seguente formato:
- * <pre>&lt;entToken&gt;=&lt;nome&gt;</pre>
- * dove 'nome' è il valore del parametro 'entToken' che identifica
- * l'azione da compiere al fine di generare i record.<br />
- * Oltre al parametro <code>'entToken'</code> possono essere presenti anche
- * eventuali altri parametri, ma essi non hanno interesse nel contesto
- * della presente classe, venendo incapsulati nella HttpServletRequest
- * e quindi inoltrati alla classe Command che deve fare il lavoro di
- * estrazione. Normalmente, tali altri parametri possono essere presenti
- * sotto forma di parametri sulla querystring, ma anche direttamente
- * settati nella request; ci&ograve; non interessa alcunch&eacute; ai fini
- * del funzionamento della presente classe.
- * </p>
- * <p>
- * Altre modalit&agrave; di generazione di output differenti da 'text/html'
+ * sarà fatto un forward.</p>
+ * <p>Altre modalit&agrave; di generazione di output differenti da 'text/html'
  * (chiamate a pagine .jsp che incorporano la logica di preparazione del CSV,
- * chiamate a pagina .jsp che si occupano di presentare il metadato...)
+ * chiamate a pagine .jsp che si occupano di presentare il metadato...)
  * sono deprecate da tempo e vanno assolutamente evitate 
  * in favore dell'uso di questa servlet.
  * </p>
@@ -246,7 +230,11 @@ public class Data extends HttpServlet implements Constants {
         "010101010101010101010101010101010101010101010101010102030302010101010101010101\n" + 
         "010101010101010101010101010101010101010101010101010101010101010101010101010400\n" + 
         "00002701ffff030000000000\n";
-
+        /** 
+         * List contenente i soli valori di entToken abilitati a generare CSV
+         */
+        private static LinkedList<String> csvCommands = getAllowedCSVCommand();    
+    
 
     /**
      * Inizializza (staticamente) le variabili globali e i parametri di inizializzazione.
@@ -282,8 +270,6 @@ public class Data extends HttpServlet implements Constants {
         format = req.getParameter(ConfigManager.getOutToken());
         // Recupera o inizializza parametro per identificare la pagina
         String part = req.getParameter("p");
-        // Dictonary contenente i soli valori di entToken abilitati a generare CSV
-        LinkedList<String> csvCommands = new LinkedList<>();
         // Struttura da restituire in Request
         AbstractList<?> lista = null;
         // Mappa da restituire in Request
@@ -292,12 +278,6 @@ public class Data extends HttpServlet implements Constants {
         log.info("===> Log su servlet Data. <===");
         // Decodifica la richiesta
         try {
-            // Lista delle Command abilitate a servire un output csv
-            csvCommands.add(COMMAND_PROCESS);   //Estrazione processi   ("data?q=pr")
-            csvCommands.add(COMMAND_STRUCTURES);//Estrazione strutture  ("data?q=st")
-            csvCommands.add(COMMAND_AUDIT);     //Estrazione interviste ("data?q=in")
-            csvCommands.add(COMMAND_RISK);      //Estrazione rischi     ("data?q=ri")
-            csvCommands.add(COMMAND_REPORT);    //Estrazione rischi     ("data?q=mu")
             // Verifica se deve servire un output su file
             if (format != null && !format.isEmpty()) {
                 // Output è Comma Separated Values
@@ -391,6 +371,23 @@ public class Data extends HttpServlet implements Constants {
         RequestDispatcher dispatcher = servletContext.getRequestDispatcher(fileJsp);
         dispatcher.forward(req, res);
     }
+    
+    
+    /**
+     * Getter su variabile di classe
+     * 
+     * @return <code>LinkedList&lt;String&gt;</code> - Elenco delle Command abilitate a generare output CSV 
+     */
+    public static LinkedList<String> getAllowedCSVCommand() {
+        LinkedList<String> allowedCommands = new LinkedList<>();
+        // Lista delle Command abilitate a servire un output csv
+        allowedCommands.add(COMMAND_PROCESS);   // Estrazione processi   ("data?q=pr")
+        allowedCommands.add(COMMAND_STRUCTURES);// Estrazione strutture  ("data?q=st")
+        allowedCommands.add(COMMAND_AUDIT);     // Estrazione interviste ("data?q=in")
+        allowedCommands.add(COMMAND_RISK);      // Estrazione rischi     ("data?q=ri")
+        allowedCommands.add(COMMAND_REPORT);    // Generazione report    ("data?q=mu")
+        return allowedCommands;
+    }
 
     /* **************************************************************** *
      *       Metodi per generare tuple prive di presentazione (CSV)     *
@@ -431,102 +428,108 @@ public class Data extends HttpServlet implements Constants {
         try {
             // Istanzia nuovo Databound
             DBWrapper db = new DBWrapper();
-            // "data?q=in"
-            if (qToken.equalsIgnoreCase(COMMAND_AUDIT)) {
-                // "&p=sqs"
-                if (part.equalsIgnoreCase(PART_SELECT_QSS)) {
-                    // Recupera dal Databound elenco di interviste in base a rilevazione
-                    ArrayList<InterviewBean> interviews = db.getInterviewsBySurvey(user, ConfigManager.getSurvey(codeSurvey));
-                    // Dichiara elenco di interviste corredate di risposte
-                    ArrayList<InterviewBean> interviewsWithAnswer = new ArrayList<>();
-                    // Per ogni intervista
-                    for (InterviewBean interview : interviews) {
+            // Controlla il valore di q
+            switch(qToken.toLowerCase()) {  // Switch with separate scopes
+                case COMMAND_AUDIT: {       // <- "data?q=in"
+                    if (part.equalsIgnoreCase(PART_SELECT_QSS)) {       // <- "&p=sqs"
+                        // Recupera dal Databound elenco di interviste in base a rilevazione
+                        ArrayList<InterviewBean> interviews = db.getInterviewsBySurvey(user, ConfigManager.getSurvey(codeSurvey));
+                        // Dichiara elenco di interviste corredate di risposte
+                        ArrayList<InterviewBean> interviewsWithAnswer = new ArrayList<>();
+                        // Per ogni intervista
+                        for (InterviewBean interview : interviews) {
+                            // Recupera tutti i parametri identificanti l'intervista
+                            HashMap<String, LinkedHashMap<String, String>> interviewParams = AuditCommand.loadInterviewParams(codeSurvey, interview);
+                            // Recupera tutte le risposte identificate in base ai parametri dell'intervista
+                            ArrayList<QuestionBean> answers = db.getAnswers(user, interviewParams, ConfigManager.getSurvey(codeSurvey));
+                            // Imposta le risposte dell'intervista corrente 
+                            interview.setRisposte(answers);
+                            // Calcola quanti quesiti hanno ricevuto effettivamente risposta
+                            interview.setInformativa(String.valueOf(db.getQuestionsAmountWithAnswerByInterview(interviewParams, ConfigManager.getSurvey(codeSurvey))));
+                            // Aggiunge l'intervista completa di risposte alla lista di interviste corredate di risposte
+                            interviewsWithAnswer.add(interview);
+                        }
+                        list = interviewsWithAnswer;
+                    } else if (part.equalsIgnoreCase(PART_RESUME_QST)) {// <- "&p=rqs"
+                        // Tabella dei parametri
+                        HashMap<String, LinkedHashMap<String, String>> params = new HashMap<>();
                         // Recupera tutti i parametri identificanti l'intervista
-                        HashMap<String, LinkedHashMap<String, String>> interviewParams = AuditCommand.loadInterviewParams(codeSurvey, interview);
-                        // Recupera tutte le risposte identificate in base ai parametri dell'intervista
-                        ArrayList<QuestionBean> answers = db.getAnswers(user, interviewParams, ConfigManager.getSurvey(codeSurvey));
-                        // Imposta le risposte dell'intervista corrente 
+                        RiskCommand.loadParams(part, parser, params);
+                        // Recupera l'ora del sondaggio
+                        String questTimeAsString = params.get(PARAM_SURVEY).get("t").replaceAll(String.valueOf(UNDERSCORE), String.valueOf(COLON));
+                        Time questTime = Utils.format(questTimeAsString, TIME_SQL_PATTERN);
+                        // Crea una lista (di una)
+                        ArrayList<InterviewBean> interviews = new ArrayList<>();
+                        // Crea un'intervista per fare da contenitore alle risposte
+                        InterviewBean interview = new InterviewBean(DEFAULT_ID, VOID_STRING, VOID_STRING, Utils.format(params.get(PARAM_SURVEY).get("d")), Utils.format(params.get(PARAM_SURVEY).get("d")), questTime);
+                        // Elenco risposte ai quesiti collegati all'intervista
+                        ArrayList<QuestionBean> answers = null;
+                        // Recupera dal Databound elenco di risposte in base a intervista
+                        answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSurvey));
+                        // Scarta le domande con risposte vuote
+                        answers = AuditCommand.filter(answers);
+                        // Imposta le risposte nell'intervista
                         interview.setRisposte(answers);
-                        // Calcola quanti quesiti hanno ricevuto effettivamente risposta
-                        interview.setInformativa(String.valueOf(db.getQuestionsAmountWithAnswerByInterview(interviewParams, ConfigManager.getSurvey(codeSurvey))));
-                        // Aggiunge l'intervista completa di risposte alla lista di interviste corredate di risposte
-                        interviewsWithAnswer.add(interview);
+                        // Aggiunge l'intervista alla lista (di una)
+                        interviews.add(interview);
+                        // Casta elenco di risposte a lista generica
+                        list = interviews;
+                    } else {                                            // <- 'p'=null
+                        // Chiamata di sola in senza parametri
                     }
-                    list = interviewsWithAnswer;
-                // "&p=rqs"
-                } else if (part.equalsIgnoreCase(PART_RESUME_QST)) {
-                    // Tabella dei parametri
-                    HashMap<String, LinkedHashMap<String, String>> params = new HashMap<>();
-                    // Recupera tutti i parametri identificanti l'intervista
-                    RiskCommand.loadParams(part, parser, params);
-                    // Recupera l'ora del sondaggio
-                    String questTimeAsString = params.get(PARAM_SURVEY).get("t").replaceAll(String.valueOf(UNDERSCORE), String.valueOf(COLON));
-                    Time questTime = Utils.format(questTimeAsString, TIME_SQL_PATTERN);
-                    // Crea una lista (di una)
-                    ArrayList<InterviewBean> interviews = new ArrayList<>();
-                    // Crea un'intervista per fare da contenitore alle risposte
-                    InterviewBean interview = new InterviewBean(DEFAULT_ID, VOID_STRING, VOID_STRING, Utils.format(params.get(PARAM_SURVEY).get("d")), Utils.format(params.get(PARAM_SURVEY).get("d")), questTime);
-                    // Elenco risposte ai quesiti collegati all'intervista
-                    ArrayList<QuestionBean> answers = null;
-                    // Recupera dal Databound elenco di risposte in base a intervista
-                    answers = db.getAnswers(user, params, ConfigManager.getSurvey(codeSurvey));
-                    // Scarta le domande con risposte vuote
-                    answers = AuditCommand.filter(answers);
-                    // Imposta le risposte nell'intervista
-                    interview.setRisposte(answers);
-                    // Aggiunge l'intervista alla lista (di una)
-                    interviews.add(interview);
-                    // Casta elenco di risposte a lista generica
-                    list = interviews;
-                // Non c'è il parametro 'p'
-                } else {
-                    // chiamata di sola in senza parametri
+                    break;
                 }
-            // "data?q=ri"
-            } else if (qToken.equalsIgnoreCase(COMMAND_RISK)) {
-                // Recupera tutti i rischi della rilevazione corrente
-                ArrayList<RiskBean> risks = db.getRisks(user, ConfigManager.getSurvey(codeSurvey).getId(), ConfigManager.getSurvey(codeSurvey));
-                // Prepara una lista di rischi contenenti ciascuno l'elenco dei processi che sono esposti al rischio stesso
-                ArrayList<RiskBean> risksWithProcess = new ArrayList<>();
-                // Per ogni rischio trovato...
-                for (RiskBean risk : risks) {
-                    // ...Ne recupera i processi esposti e li carica nel rischio stesso
-                    risk.setProcessi(db.getProcessByRisk(user, risk, ConfigManager.getSurvey(codeSurvey)));
-                    // Carica il rischio valorizzato con i processi alla lista dei rischi
-                    risksWithProcess.add(risk);
+                case COMMAND_RISK: {        // <- "data?q=ri"
+                    // Recupera tutti i rischi della rilevazione corrente
+                    ArrayList<RiskBean> risks = db.getRisks(user, ConfigManager.getSurvey(codeSurvey).getId(), ConfigManager.getSurvey(codeSurvey));
+                    // Prepara una lista di rischi contenenti ciascuno l'elenco dei processi che sono esposti al rischio stesso
+                    ArrayList<RiskBean> risksWithProcess = new ArrayList<>();
+                    // Per ogni rischio trovato...
+                    for (RiskBean risk : risks) {
+                        // ...Ne recupera i processi esposti e li carica nel rischio stesso
+                        risk.setProcessi(db.getProcessByRisk(user, risk, ConfigManager.getSurvey(codeSurvey)));
+                        // Carica il rischio valorizzato con i processi alla lista dei rischi
+                        risksWithProcess.add(risk);
+                    }
+                    // In questo modo restituisce solo i rischi aventi processi esposti, ma per le regole di business, non devono esserci rischi nel registro non associati a processi
+                    list = risksWithProcess;
+                    break;
                 }
-                // In questo modo restituisce solo i rischi aventi processi esposti, ma per le regole di business, non devono esserci rischi nel registro non associati a processi
-                list = risksWithProcess;
-            // "data?q=pr"
-            } else if (qToken.equalsIgnoreCase(COMMAND_PROCESS)) {
-                // Cerca l'identificativo del processo anticorruttivo
-                int idP = parser.getIntParameter("pliv", DEFAULT_ID);
-                // Cerca la granularità del processo anticorruttivo
-                byte liv = parser.getByteParameter("liv", NOTHING);
-                // Deve recuperare uno specifico sottoinsieme di processi identificato dai parametri di navigazione oppure tutti i macro_at con relativi figli e nipoti
-                ArrayList<ItemBean> mats = db.getMacroSubProcessAtBySurvey(user, idP, liv, ConfigManager.getSurvey(codeSurvey));
-                // Restituisce la lista gerarchica di processi trovati in base alla rilevazione
-                list = mats;
-            // "data?q=st"
-            } else if (qToken.equalsIgnoreCase(COMMAND_STRUCTURES)) {
-                // Fa la stessa query della navigazione per strutture
-                ArrayList<DepartmentBean> structures = DepartmentCommand.retrieveStructures(codeSurvey, user, db);
-                // Restituisce la lista gerarchica di strutture trovate in base alla rilevazione
-                list = structures;
-             // "data?q=mu"    
-            } else if (qToken.equalsIgnoreCase(COMMAND_REPORT)) {
-             // "&p=mes"
-                if (part.equalsIgnoreCase(PART_MEASURES)) {
-                    // Fa la query della navigazione per reportistica
-                    ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSurvey, db);
-                    
-                    ArrayList<ProcessBean> matsWithIndicators = ReportCommand.retrieveIndicators(matsWithoutIndicators, user, codeSurvey, NOTHING, db);
-                    // Recupera i rischi indicizzati per identificativo di processo
-                    LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risks = ReportCommand.retrieveMitigatedRisksByProcess(matsWithIndicators, user, codeSurvey, db);
+                case COMMAND_PROCESS: {     // <- "data?q=pr"
+                    // Cerca l'identificativo del processo anticorruttivo
+                    int idP = parser.getIntParameter("pliv", DEFAULT_ID);
+                    // Cerca la granularità del processo anticorruttivo
+                    byte liv = parser.getByteParameter("liv", NOTHING);
+                    // Deve recuperare uno specifico sottoinsieme di processi identificato dai parametri di navigazione oppure tutti i macro_at con relativi figli e nipoti
+                    ArrayList<ItemBean> mats = db.getMacroSubProcessAtBySurvey(user, idP, liv, ConfigManager.getSurvey(codeSurvey));
+                    // Restituisce la lista gerarchica di processi trovati in base alla rilevazione
+                    list = mats;
+                    break;
+                }
+                case COMMAND_STRUCTURES: {  // <- "data?q=st"
+                    // Fa la stessa query della navigazione per strutture
+                    ArrayList<DepartmentBean> structures = DepartmentCommand.retrieveStructures(codeSurvey, user, db);
                     // Restituisce la lista gerarchica di strutture trovate in base alla rilevazione
-                    java.util.Set listAsSet = risks.keySet();
-                    list = new ArrayList<ProcessBean>(listAsSet);
+                    list = structures;
+                    break;
                 }
+                case COMMAND_REPORT: {      // <- "data?q=mu"  
+                    if (part.equalsIgnoreCase(PART_MEASURES)) {// "&p=mes"
+                        // Fa la query della navigazione per reportistica
+                        ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSurvey, db);
+                        
+                        ArrayList<ProcessBean> matsWithIndicators = ReportCommand.retrieveIndicators(matsWithoutIndicators, user, codeSurvey, NOTHING, db);
+                        // Recupera i rischi indicizzati per identificativo di processo
+                        LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risks = ReportCommand.retrieveMitigatedRisksByProcess(matsWithIndicators, user, codeSurvey, db);
+                        // Restituisce la lista gerarchica di strutture trovate in base alla rilevazione
+                        java.util.Set listAsSet = risks.keySet();
+                        list = new ArrayList<ProcessBean>(listAsSet);
+                    }
+                    break;
+                }
+                default:
+                    // TODO
+                    break;
             }
         } catch (CommandException ce) {
             String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + ce.getLocalizedMessage();
