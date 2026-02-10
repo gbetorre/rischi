@@ -1920,7 +1920,7 @@ public class DBWrapper extends QueryImpl {
 
     
     /* (non-Javadoc)
-     * @see it.rol.Query#getQueryMacroByStruct(int, byte, java.lang.String)
+     * @see Query#getQueryMacroByStruct(int, byte, java.lang.String)
      */
     @SuppressWarnings("javadoc")
     @Override
@@ -2465,7 +2465,7 @@ public class DBWrapper extends QueryImpl {
     
     
     /* (non-Javadoc)
-     * @see it.rol.Query#getQueryAnswers(ItemBean, int);
+     * @see Query#getQueryAnswers(ItemBean, int);
      */
     @SuppressWarnings("javadoc")
     @Override
@@ -2818,7 +2818,7 @@ public class DBWrapper extends QueryImpl {
     
     
     /* (non-Javadoc)
-     * @see it.rol.Query#getQueryStructureBySurvey(int, int, int, int, int)
+     * @see Query#getQueryStructureBySurvey(int, int, int, int, int)
      */
     @SuppressWarnings("javadoc")
     @Override
@@ -2878,7 +2878,7 @@ public class DBWrapper extends QueryImpl {
     
     
     /* (non-Javadoc)
-     * @see it.rol.Query#getQueryProcessBySurvey(int, int, int, int)
+     * @see Query#getQueryProcessBySurvey(int, int, int, int)
      */
     @SuppressWarnings("javadoc")
     @Override
@@ -3536,7 +3536,7 @@ public class DBWrapper extends QueryImpl {
                 // TODO: Controllare se user è superuser
                 String query = (!proc.get("liv3").equals(VOID_STRING) ? GET_RISK_SUBPROCESS : GET_RISK_PROCESS);
                 String procCode = (!proc.get("liv3").equals(VOID_STRING) ? proc.get("liv3") : proc.get("liv2"));
-                String procId = procCode.substring(NOTHING, procCode.indexOf(DOT)); 
+                String procId = procCode.contains(DOT) ? procCode.substring(NOTHING, procCode.indexOf(DOT)) : procCode;
                 pst = con.prepareStatement(query);
                 pst.clearParameters();
                 pst.setInt(++nextParam, Integer.parseInt(procId));
