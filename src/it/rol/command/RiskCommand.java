@@ -236,85 +236,86 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         /* ******************************************************************** *
          *                           Corpo del metodo                           *
          * ******************************************************************** */
-        // Decide il valore della pagina
         try {
-            // Controllo sull'input
+            // Input check
             if (!codeSur.equals(DASH)) {
-                // Genera l'oggetto rilevazione a partire dal suo codice
+                // The survey code is valid, retrieve the whole survey object
                 survey =  ConfigManager.getSurvey(codeSur);
-                // Tabella che conterrà i valori dei parametri passati dalle form
+                // Map of parameters passed by the forms
                 params = new HashMap<>();
-                // Carica in ogni caso i parametri di navigazione
+                // Load the forms actual values
                 loadParams(part, parser, params);
                 /* ======================= @PostMapping ======================= */
                 if (write) {
-                    // Controlla quale azione vuole fare l'utente
+                    // Check the action
                     if (nomeFile.containsKey(part)) {
-                        // Stringa dinamica per contenere i parametri di scelta strutture
-                        StringBuffer paramsStruct = new StringBuffer();
-                        // Dizionario dei parametri delle strutture scelte dall'utente
-                        LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
-                        // Cicla sul dizionario dei parametri per ricostruire l'URL
-                        for (Map.Entry<String, String> set : struct.entrySet()) {
-                            // Printing all elements of a Map
-                            paramsStruct.append(AMPERSAND);
-                            paramsStruct.append("s" + set.getKey() + EQ + set.getValue());
-                        }
-                        // Controlla quale richiesta deve gestire
-                        if (part.equalsIgnoreCase(PART_SELECT_STR)) {
-                            /* ------------------------------------------------ *
-                             *              CHOOSING Structure Part             *
-                             * ------------------------------------------------ */
-                            // Prepara la redirect 
-                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_PROCESS + paramsStruct.toString() + "&r=" + codeSur;
-                        } else if (part.equalsIgnoreCase(PART_PROCESS)) {
-                            /* ------------------------------------------------ *
-                             *               CHOOSING Process Part              *
-                             * ------------------------------------------------ */
-                            // Dizionario dei parametri dei processi scelti dall'utente
-                            LinkedHashMap<String, String> macro = params.get(PART_PROCESS);
-                            // Stringa dinamica per contenere i parametri di scelta processi
-                            StringBuffer paramsProc = new StringBuffer();
-                            for (Map.Entry<String, String> set : macro.entrySet()) {
-                                // Printing all elements of a Map
-                                paramsProc.append(AMPERSAND);
-                                paramsProc.append("p" + set.getKey() + EQ + set.getValue());
-                            }
-                            redirect = "q=" + COMMAND_RISK + "&p=" + PART_SELECT_QST + paramsStruct.toString() + paramsProc.toString() + "&r=" + codeSur;
-                        } else if (part.equalsIgnoreCase(PART_INSERT_RISK)) {
-                            /* ------------------------------------------------ *
-                             *               INSERT new Risk Part               *
-                             * ------------------------------------------------ */
-                            // Inserisce nel DB nuovo rischio corruttivo definito dall'utente
-                            db.insertRisk(user, params);
-                            // Prepara la redirect 
-                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
-                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;
-                        } else if (part.equalsIgnoreCase(PART_INSERT_RISK_PROCESS)) {
-                            /* ------------------------------------------------ *
-                             *   INSERT new relation between Risk and Process   *
-                             * ------------------------------------------------ */
-                            // Controlla che non sia già presente l'associazione 
-                            int check = db.getRiskProcess(user, params);
-                            if (check > NOTHING) {  // Genera un errore
-                                // Duplicate key value violates unique constraint 
-                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
-                                           AMPERSAND + "p" + EQ + PART_INSERT_RISK_PROCESS +
-                                           AMPERSAND + "idR" + EQ + parser.getStringParameter("r-id", VOID_STRING) + 
-                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur +
-                                           AMPERSAND + MESSAGE + EQ + "dupKey";
-                            } else {
-                                // Inserisce nel DB nuova associazione tra rischio e processo
-                                db.insertRiskProcess(user, params);
+                        // Switch with separate scopes
+                        switch (part.toLowerCase()) {
+                            /* -----            INSERT new Risk           ----- */
+                            case PART_INSERT_RISK: {
+                                // Inserisce nel DB nuovo rischio corruttivo definito dall'utente
+                                db.insertRisk(user, params);
                                 // Prepara la redirect 
                                 redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
-                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur +
-                                           AMPERSAND + MESSAGE + EQ + "newRel";
+                                           AMPERSAND + 
+                                           PARAM_SURVEY + EQ + codeSur;
+                                break;
                             }
+                            /* - INSERT new relation between Risk and Process - */
+                            case PART_INSERT_RISK_PROCESS: {
+                                // Check if there already is the relationship
+                                int check = db.getRiskProcess(user, params);
+                                // Duplicate key value violates unique constraint 
+                                if (check > NOTHING) {
+                                    // Generate an error
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
+                                               AMPERSAND + "p" + EQ + PART_INSERT_RISK_PROCESS +
+                                               AMPERSAND + "idR" + EQ + parser.getStringParameter("r-id", VOID_STRING) + 
+                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur +
+                                               AMPERSAND + MESSAGE + EQ + "dupKey";
+                                } else {
+                                    // Insert the relationship in db table
+                                    db.insertRiskProcess(user, params);
+                                    // Redirect 
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
+                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur +
+                                               AMPERSAND + MESSAGE + EQ + "newRel";
+                                }
+                                break;
+                            }
+                            /* - INSERT new relation between Process and Risk - */
+                            // Contains the same actions of the case PART_INSERT_RISK_PROCESS: (different only for redirects)
+                            case PART_INSERT_PROCESS_RISK: {
+                                // Check if there already is the relationship
+                                int check = db.getRiskProcess(user, params);
+                                // Duplicate key value violates unique constraint 
+                                if (check > NOTHING) {
+                                    // Generate an error
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_RISK + 
+                                               AMPERSAND + "p" + EQ + part +
+                                               AMPERSAND + "liv" + EQ + parser.getStringParameter("liv", VOID_STRING) + 
+                                               AMPERSAND + "pliv" + EQ + idP + 
+                                               AMPERSAND + "pliv1" + EQ + parser.getStringParameter("pliv1", VOID_STRING) +
+                                               AMPERSAND + "pliv0" + EQ + parser.getStringParameter("pliv0", VOID_STRING) +
+                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur +
+                                               AMPERSAND + MESSAGE + EQ + "dupKey";
+                                } else {
+                                    // Insert the relationship in db table
+                                    db.insertRiskProcess(user, params);
+                                    // Redirect 
+                                    redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
+                                               AMPERSAND + "p" + EQ + PART_PROCESS +
+                                               AMPERSAND + "pliv" + EQ + idP +
+                                               AMPERSAND + "liv" + EQ + parser.getStringParameter("liv", VOID_STRING) + 
+                                               AMPERSAND + PARAM_SURVEY + EQ + codeSur +
+                                               AMPERSAND + MESSAGE + EQ + "newRel#rischi-fattori-misure";
+                                }
+                                break;
+                            }
+                            default:
+                            // Azione di default
+                            // do delete?
                         }
-                    } else {
-                        // Azione di default
-                        // do delete?
                     }
                 /* ======================== @GetMapping ======================= */
                 } else {
@@ -325,27 +326,32 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                         // Recupera le breadcrumbs
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                         fileJspT = nomeFile.get(part);
-                        switch (part) {
+                        switch (part.toLowerCase()) {
                             /* -----     SHOW Form to INSERT new Risk     ----- */
-                            case PART_INSERT_RISK:
+                            case PART_INSERT_RISK: {
                                 // Customize labels
                                 tP = "Nuovo Rischio";
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, tP);
-                                break;                           
+                                break;
+                            }
                             /* ----  SHOW Form to link a Process to a Risk ---- */
-                            case PART_INSERT_RISK_PROCESS:
+                            case PART_INSERT_RISK_PROCESS: {
+                                // Retrieve the whole risk which a process has to be assigned
                                 risk = db.getRisk(user, idRk, survey);
+                                // Retrieve all the processes
                                 macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
                                 // Customize labels
                                 tP =  "Nuovo legame R-P";
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1,tP);
                                 break;
+                            }
                             /* ----  SHOW Form to link a Risk to a Process ---- */
-                             case PART_INSERT_PROCESS_RISK:
+                             case PART_INSERT_PROCESS_RISK: {
                                 // Retrieve the process which the risk has to be assigned
                                 process = db.getProcessById(user, idP, survey);
-                                // Retrieve the already assigned risks
+                                // Retrieve its already assigned risks...
                                 ArrayList<RiskBean> risksByProcess = db.getRisksByProcess(user, process, survey);
+                                // ...and set them into the retrieved process
                                 process.setRischi(risksByProcess);
                                 // Retrieve all the risks
                                 risks = db.getRisks(user, survey.getId(), survey);
@@ -353,6 +359,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                 tP = "Nuovo legame P-R";
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, tP);
                                 break;
+                             }
                         }
                     } else {
                         /* ------------------------------------------------ *
@@ -360,9 +367,10 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                          * ------------------------------------------------ */
                         if (idRk > DEFAULT_ID) {
                             risk = db.getRisk(user, idRk, survey);
+                            // Customize labels
                             tP = "Rischio";
-                            // Ha bisogno di personalizzare le breadcrumbs perché sull'indirizzo non c'è il parametro 'p'
                             bC = HomePageCommand.makeBreadCrumbs(ConfigManager.getAppName(), req.getQueryString(), tP);
+                            // Page
                             fileJspT = nomeFileDettaglio;
                         } else {
                             /* ------------------------------------------------ *
@@ -390,10 +398,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
             String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
             LOG.severe(msg);
             throw new CommandException(msg + ise.getMessage(), ise);
-        } catch (ClassCastException cce) {
-            String msg = FOR_NAME + "Si e\' verificato un problema in una conversione di tipo.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + cce.getMessage(), cce);
         } catch (NullPointerException npe) {
             String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
             LOG.severe(msg);
@@ -561,17 +565,17 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         /* ---------------------------------------------------- *
          *  Caricamento parametri Associazione Rischio-Processo *
          * ---------------------------------------------------- */
-        } else if (part.equals(PART_INSERT_RISK_PROCESS)) {
-            // Recupera gli estremi del rischio da inserire
+        } else if (part.equals(PART_INSERT_RISK_PROCESS) || part.equals(PART_INSERT_PROCESS_RISK)) {
+            // Recupera l'id del rischio cui associare il processo (proat)
             risk.put("risk", parser.getStringParameter("r-id", VOID_STRING));
-            formParams.put(part, risk);
+            formParams.put(PART_INSERT_RISK_PROCESS, risk);
         /* ---------------------------------------------------- *
          *  Caricamento parametri Associazione Processo-Rischio *
-         * ---------------------------------------------------- */
+         * ---------------------------------------------------- *
         } else if (part.equals(PART_INSERT_PROCESS_RISK)) {
-            // Recupera gli estremi del rischio da inserire
+            // Recupera l'id del rischio da associare al processo
             risk.put("risk", parser.getStringParameter("r-id", VOID_STRING));
-            formParams.put(part, risk);
+            formParams.put(part, risk);*/
         /* ---------------------------------------------------- *
          *     Caricamento parametri Fattore-Processo-Rischio   *
          * ---------------------------------------------------- */
