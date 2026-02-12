@@ -188,9 +188,9 @@ public class ReportCommand extends ItemBean implements Command, Constants {
     @Override
     public void execute(HttpServletRequest req)
                  throws CommandException {
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *           Crea e inizializza le variabili locali comuni              *
-         * ******************************************************************** */
+         * -------------------------------------------------------------------- */
         // Databound
         DBWrapper db = null;
         // Parser per la gestione assistita dei parametri di input
@@ -215,30 +215,30 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risks = null;
         // Preprara BreadCrumbs
         LinkedList<ItemBean> bC = null;
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
-         * ******************************************************************** */
+         * -------------------------------------------------------------------- */
         try {
             db = new DBWrapper();
         } catch (WebStorageException wse) {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *         Previene il rischio di attacchi di tipo Garden Gate          *
-         * ******************************************************************** */
+         * -------------------------------------------------------------------- */
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             user = SessionManager.checkSession(req.getSession(IF_EXISTS_DONOT_CREATE_NEW));
         } catch (RuntimeException re) {
             throw new CommandException(FOR_NAME + "Problema a livello dell\'autenticazione utente!\n" + re.getMessage(), re);
         }
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *                   Decide il valore della pagina                      *
-         * ******************************************************************** */
+         * -------------------------------------------------------------------- */
         try {
             // Il parametro di navigazione 'rilevazione' è obbligatorio
             if (!codeSur.equals(DASH)) {
-                /* @GetMapping */
+                /* ======================== @GetMapping ======================= */
                 if (nomeFile.containsKey(part)) {
                     // Qualunque report si voglia generare, bisogna recuperare processi e indicatori
                     ArrayList<ProcessBean> matsWithoutIndicators = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
@@ -248,41 +248,41 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                         refreshIndicators(mats, user, codeSur, db);
                     }
                     matsWithIndicators = retrieveIndicators(matsWithoutIndicators, user, codeSur, NOTHING, db);
-                    if (part.equalsIgnoreCase(PART_PROCESS)) {
-                        /* ************************************************ *
-                         *           Generate report process-risks          *
-                         * ************************************************ */
-                        // Ha bisogno di personalizzare le breadcrumbs
-                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report PxI");
-                    }
-                    else if (part.equalsIgnoreCase(PART_SELECT_STR)) {
-                        /* ************************************************ *
-                         *   Generate report structures-PxI (tabella MDM)   *
-                         * ************************************************ */
-                        // Recupera le strutture indicizzate per identificativo di processo
-                        structs = retrieveStructures(matsWithoutIndicators, user, codeSur, db);
-                        // Recupera i soggetti indicizzati per identificativo di processo
-                        subjects = retrieveSubjects(matsWithoutIndicators, user, codeSur, db);
-                        // Recupera i rischi indicizzati per identificativo di processo
-                        risks = retrieveRisksByProcess(matsWithoutIndicators, user, codeSur, db);
-                        // Ha bisogno di personalizzare le breadcrumbs
-                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report strutture");
-                    } else if (part.equalsIgnoreCase(PART_RISKS) || part.equalsIgnoreCase(PART_MEASURES)) {
-                        /* ************************************************ *
-                         *         tabella MDM + PxI Mitigati (Stima)       *
-                         * ************************************************ */
-                        // Recupera i rischi indicizzati per identificativo di processo
-                        risks = retrieveMitigatedRisksByProcess(matsWithoutIndicators, user, codeSur, db);
-                        // Ha bisogno di personalizzare le breadcrumbs
-                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                        bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report misure");
-                    } else if (part.equalsIgnoreCase(PART_MONITOR)) {
-                        /* ************************************************ *
-                         *     tabella MDM + PxI Mitigati (Monitoraggio)    *
-                         * ************************************************ */
-                        risks = retrieveMonitoratedRisksByProcess(matsWithoutIndicators, user, codeSur, db);
+                    // Recupera le breadcrumbs
+                    LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                    // Decide il valore di p
+                    switch (part.toLowerCase()) {
+                        /* -------   SHOW Report Analitico Indicatori   ------- */
+                        case PART_PROCESS: {
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report PxI");
+                            break;
+                        }
+                        /* -------  SHOW Report Sintetico tabella MDM   ------- */
+                        case PART_SELECT_STR: {
+                            // Recupera le strutture indicizzate per identificativo di processo
+                            structs = retrieveStructures(matsWithoutIndicators, user, codeSur, db);
+                            // Recupera i soggetti indicizzati per identificativo di processo
+                            subjects = retrieveSubjects(matsWithoutIndicators, user, codeSur, db);
+                            // Recupera i rischi indicizzati per identificativo di processo
+                            risks = retrieveRisksByProcess(matsWithoutIndicators, user, codeSur, db);
+                            // Breadcrumbs
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report strutture");
+                            break;
+                        }
+                        /* ----- SHOW tabella MDM + PxI Mitigati (Stima)  ----- */
+                        case PART_RISKS:
+                        case PART_MEASURES: {
+                            // Recupera i rischi indicizzati per identificativo di processo
+                            risks = retrieveMitigatedRisksByProcess(matsWithoutIndicators, user, codeSur, db);
+                            // Ha bisogno di personalizzare le breadcrumbs
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report misure");                            
+                            break;
+                        }
+                        /* -- SHOW tabella MDM + PxI Mitigati (Monitoraggio) -- */
+                        case PART_MONITOR: {
+                            risks = retrieveMonitoratedRisksByProcess(matsWithoutIndicators, user, codeSur, db);
+                            break;
+                        }
                     }
                     // Imposta il valore della pagina abbinata al parametro 
                     fileJspT = nomeFile.get(part);
@@ -667,8 +667,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
       * associati a ciascun processo, indicizzata per il processo stesso,
       * e in cui il valore del PxI del processo, idealmente estensibile 
       * a tutti i rischi del processo stesso, viene mitigato, per ogni rischio, 
-      * tramite la verifica dell'esistenza di misure di mitigazione previste
-      * per la mitigazione del rischio stesso.</p>
+      * tramite la verifica dell'esistenza di misure di mitigazione 
+      * <strong>previste</strong> per la mitigazione del rischio stesso.</p>
       * <p><strong>Attenzione:</strong> il ProcessBean viene utilizzato qui
       * come chiave grazie all'override, nella classe stessa,
       * dei metodi di comparazione nel bean del processo 
@@ -697,28 +697,31 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                   for (ProcessBean pat : mat.getProcessi()) {
                       // Estrae i rischi di un dato processo in una data rilevazione
                       risks = db.getRisksByProcess(user, pat, survey);
-                      // Resetta il vettore dei rischi mitigati
-                      mitigatingRisks = new ArrayList<>();
-                      // Per ogni rischio
-                      for (RiskBean risk : risks) {
-                          if (risk.getMisure() != null) {
-                              InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), (ArrayList<MeasureBean>) risk.getMisure());
-                              risk.setLivello(mitigatedPI.getInformativa());
-                          } else {
-                              risk.setLivello(pat.getIndicatori().get(PI).getInformativa());
+                      // Gestisce il caso di un processo a cui non sono ancora stati collegati i rischi
+                      if (risks != null && !risks.isEmpty()) {
+                          // Resetta il vettore dei rischi mitigati
+                          mitigatingRisks = new ArrayList<>();
+                          // Per ogni rischio
+                          for (RiskBean risk : risks) {
+                              if (risk.getMisure() != null) {
+                                  InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), (ArrayList<MeasureBean>) risk.getMisure());
+                                  risk.setLivello(mitigatedPI.getInformativa());
+                              } else {
+                                  risk.setLivello(pat.getIndicatori().get(PI).getInformativa());
+                              }
+                              mitigatingRisks.add(risk);
                           }
-                          mitigatingRisks.add(risk);
+                          // Passa la lista dei PxI mitigati al metodo che ricalcola il PxI mitigato
+                          InterviewBean pim = MeasureCommand.computePIMitigated(PIM, mitigatingRisks);
+                          // Recupera la lista degli indicatori caricati nel processo
+                          LinkedHashMap<String, InterviewBean>  indicatori = pat.getIndicatori();
+                          // Imposta il PxI ricalcolato come indicatore aggiuntivo nel processo corrente
+                          indicatori.put(PIM, pim);
+                          // Ricarica gli indicatori corredati del nuovo PxI mitigato
+                          pat.setIndicatori(indicatori);
+                          // Setta nella mappa la lista di rischi con PxI mitigati calcolata
+                          risksByPat.put(pat, mitigatingRisks);
                       }
-                      // Passa la lista dei PxI mitigati al metodo che ricalcola il PxI mitigato
-                      InterviewBean pim = MeasureCommand.computePIMitigated(PIM, mitigatingRisks);
-                      // Recupera la lista degli indicatori caricati nel processo
-                      LinkedHashMap<String, InterviewBean>  indicatori = pat.getIndicatori();
-                      // Imposta il PxI ricalcolato come indicatore aggiuntivo nel processo corrente
-                      indicatori.put(PIM, pim);
-                      // Ricarica gli indicatori corredati del nuovo PxI mitigato
-                      pat.setIndicatori(indicatori);
-                      // Setta nella mappa la lista di rischi con PxI mitigati calcolata
-                      risksByPat.put(pat, mitigatingRisks);
                   }
               }
           } catch (WebStorageException wse) {
@@ -747,8 +750,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
        * associati a ciascun processo, indicizzata per il processo stesso,
        * e in cui il valore del PxI del processo, idealmente estensibile 
        * a tutti i rischi del processo stesso, viene mitigato, per ogni rischio, 
-       * tramite la verifica dell'esistenza di misure di mitigazione applicate al
-       * rischio stesso.</p>
+       * tramite la verifica dell'esistenza di misure di mitigazione 
+       * <strong>applicate</strong> al rischio stesso.</p>
        * <p>Nel ProcessBean ho implementato i metodi
        * che permettono di utilizzarlo come chiave nelle mappe.</p>
        * 
@@ -775,31 +778,34 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                    for (ProcessBean pat : mat.getProcessi()) {
                        // Estrae i rischi di un dato processo in una data rilevazione
                        risks = db.getRisksByProcess(user, pat, survey);
-                       // Resetta il vettore dei rischi mitigati
-                       mitigatingRisks = new ArrayList<>();
-                       // Per ogni rischio
-                       for (RiskBean risk : risks) {
-                           ArrayList<MeasureBean> appliedMeasures = null;
-                           if (risk.getMisure() != null && !risk.getMisure().isEmpty()) {
-                               appliedMeasures = MeasureCommand.monitor(user, survey, db, (ArrayList<MeasureBean>) risk.getMisure());
-                               risk.setMisureMonitorate(appliedMeasures);
-                               InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), appliedMeasures);
-                               risk.setLivello(mitigatedPI.getInformativa());
-                           } else {
-                               risk.setLivello(pat.getIndicatori().get(PI).getInformativa());
+                       // Gestisce il caso di un processo a cui non sono ancora stati collegati i rischi
+                       if (risks != null && !risks.isEmpty()) {
+                           // Resetta il vettore dei rischi mitigati
+                           mitigatingRisks = new ArrayList<>();
+                           // Per ogni rischio
+                           for (RiskBean risk : risks) {
+                               ArrayList<MeasureBean> appliedMeasures = null;
+                               if (risk.getMisure() != null && !risk.getMisure().isEmpty()) {
+                                   appliedMeasures = MeasureCommand.monitor(user, survey, db, (ArrayList<MeasureBean>) risk.getMisure());
+                                   risk.setMisureMonitorate(appliedMeasures);
+                                   InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), appliedMeasures);
+                                   risk.setLivello(mitigatedPI.getInformativa());
+                               } else {
+                                   risk.setLivello(pat.getIndicatori().get(PI).getInformativa());
+                               }
+                               mitigatingRisks.add(risk);
                            }
-                           mitigatingRisks.add(risk);
+                           // Passa la lista dei PxI mitigati al metodo che ricalcola il PxI mitigato
+                           InterviewBean pim = MeasureCommand.computePIMitigated(PIR, mitigatingRisks);
+                           // Recupera la lista degli indicatori caricati nel processo
+                           LinkedHashMap<String, InterviewBean>  indicatori = pat.getIndicatori();
+                           // Imposta il PxI ricalcolato come indicatore aggiuntivo nel processo corrente
+                           indicatori.put(PIR, pim);
+                           // Ricarica gli indicatori corredati del nuovo PxI mitigato
+                           pat.setIndicatori(indicatori);
+                           // Setta nella mappa la lista di rischi con PxI mitigati calcolata
+                           risksByPat.put(pat, mitigatingRisks);
                        }
-                       // Passa la lista dei PxI mitigati al metodo che ricalcola il PxI mitigato
-                       InterviewBean pim = MeasureCommand.computePIMitigated(PIR, mitigatingRisks);
-                       // Recupera la lista degli indicatori caricati nel processo
-                       LinkedHashMap<String, InterviewBean>  indicatori = pat.getIndicatori();
-                       // Imposta il PxI ricalcolato come indicatore aggiuntivo nel processo corrente
-                       indicatori.put(PIR, pim);
-                       // Ricarica gli indicatori corredati del nuovo PxI mitigato
-                       pat.setIndicatori(indicatori);
-                       // Setta nella mappa la lista di rischi con PxI mitigati calcolata
-                       risksByPat.put(pat, mitigatingRisks);
                    }
                }
            } catch (WebStorageException wse) {
