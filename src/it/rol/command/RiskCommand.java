@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -173,9 +172,9 @@ public class RiskCommand extends ItemBean implements Command, Constants {
     @Override
     public void execute(HttpServletRequest req) 
                  throws CommandException {
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *              Dichiara e inizializza variabili locali                 *
-         * ******************************************************************** */
+         * -------------------------------------------------------------------- */
         // Databound
         DBWrapper db = null;
         // Dichiara la pagina a cui reindirizzare
@@ -200,9 +199,9 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         LinkedList<ItemBean> bC = null;
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
         String redirect = null;
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *                    Recupera parametri e attributi                    *
-         * ******************************************************************** */
+         * -------------------------------------------------------------------- */
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);        
         // Recupera o inizializza 'codice rilevazione' (Survey)
@@ -216,17 +215,17 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         int idRk = parser.getIntParameter("idR", DEFAULT_ID);
         // Recupera o inizializza 'id processo'
         int idP = parser.getIntParameter("pliv", DEFAULT_ID);
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
-         * ******************************************************************** */
+         * -------------------------------------------------------------------- */
         try {
             db = new DBWrapper();
         } catch (WebStorageException wse) {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *         Previene il rischio di attacchi di tipo Garden Gate          *
-         * ******************************************************************** */
+         * -------------------------------------------------------------------- */
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             user = SessionManager.checkSession(req.getSession(IF_EXISTS_DONOT_CREATE_NEW));
@@ -251,7 +250,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                     if (nomeFile.containsKey(part)) {
                         // Switch with separate scopes
                         switch (part.toLowerCase()) {
-                            /* -----            INSERT new Risk           ----- */
+                            /*                  INSERT new Risk                 */
                             case PART_INSERT_RISK: {
                                 // Inserisce nel DB nuovo rischio corruttivo definito dall'utente
                                 db.insertRisk(user, params);
@@ -261,7 +260,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                            PARAM_SURVEY + EQ + codeSur;
                                 break;
                             }
-                            /* - INSERT new relation between Risk and Process - */
+                            /* INSERT new relationship between Risk and Process */
                             case PART_INSERT_RISK_PROCESS: {
                                 // Check if there already is the relationship
                                 int check = db.getRiskProcess(user, params);
@@ -283,7 +282,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                 }
                                 break;
                             }
-                            /* - INSERT new relation between Process and Risk - */
+                            /* INSERT new relationship between Process and Risk */
                             // Contains the same actions of the case PART_INSERT_RISK_PROCESS: (different only for redirects)
                             case PART_INSERT_PROCESS_RISK: {
                                 // Check if there already is the relationship
