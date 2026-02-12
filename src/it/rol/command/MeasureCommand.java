@@ -196,7 +196,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
     @Override
     public void execute(HttpServletRequest req) 
                  throws CommandException {
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *              Dichiara e inizializza variabili locali                 *
          * ******************************************************************** */
         // Databound
@@ -237,7 +237,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         String tP = null;
         // Variabile contenente l'indirizzo per la redirect da una chiamata POST a una chiamata GET
         String redirect = null;
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
         // Recupera o inizializza 'codice rilevazione' (Survey)
@@ -254,7 +254,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         int idP = parser.getIntParameter("pliv", DEFAULT_ID);
         // Recupera o inizializza 'id rischio' (cui si deve applicare una misura)
         int idR = parser.getIntParameter("idR", DEFAULT_ID);
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
          * ******************************************************************** */
         try {
@@ -262,7 +262,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         } catch (WebStorageException wse) {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *         Previene il rischio di attacchi di tipo Garden Gate          *
          * ******************************************************************** */
         try {
@@ -271,7 +271,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         } catch (RuntimeException re) {
             throw new CommandException(FOR_NAME + "Problema a livello dell\'autenticazione utente!\n" + re.getMessage(), re);
         }
-        /* ******************************************************************** *
+        /* -------------------------------------------------------------------- *
          *                          Corpo del programma                         *
          * ******************************************************************** */
         // Decide il valore della pagina
@@ -288,7 +288,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
                 loadParams(part, req, params);
-                /* @PostMapping */
+                /* ======================= @PostMapping ======================= */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
@@ -331,7 +331,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                         // Azione di default
                         // do delete?
                     }
-                /* @GetMapping */
+                /* ======================== @GetMapping ======================= */
                 } else {
                     /* ************************************************ *
                      *                Manage Measure Part               *
