@@ -540,6 +540,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### 2026
 
+- [2.4.9] (18/02/2026) Prima parte di implementazione funzionalit&agrave; per inserimento allegati a una misurazione
 - [2.4.8] (12/02/2026) Correzione di bug
 - [2.4.7] (10/02/2026) Implementazione funzionalit&agrave; di inserimento associazione tra processo e rischio
 - [2.4.6] (09/02/2026) Prima bozza di implementazione funzionalit&agrave; per inserimento associazione tra processo e rischio

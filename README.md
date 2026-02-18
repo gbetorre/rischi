@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.4.9] (18/02/2026) Implemented function to upload documents related to a measurement
 - [2.4.8] (12/02/2026) Bug fix
 - [2.4.7] (10/02/2026) Implemented function to assign a risk to the current process
 - [2.4.6] (09/02/2026) First implementation function to assign a risk to the current process
