@@ -7610,8 +7610,9 @@ public class DBWrapper extends QueryImpl {
             long size = (Long) params.get("dimensione");
             String mime = (String) params.get("mime");
             PersonBean user = (PersonBean) params.get("usr");
+            int usr = user.getUsrId();
             // Campi calcolati al momento
-            String usr = user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome();
+            //String usr = user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome();
             java.sql.Date today = Utils.convert(Utils.convert(Utils.getCurrentDate()));
             Time now = Utils.getCurrentTime();
             // BEGIN
@@ -7621,6 +7622,7 @@ public class DBWrapper extends QueryImpl {
                     "INSERT INTO " + table +
                     "   (   id" +
                     "   ,   file" +
+                    "   ,   original" +
                     "   ,   id_" + params.get("nomeEntita") +
                     "   ,   titolo" +
                     "   ,   dimensione" +
@@ -7631,6 +7633,7 @@ public class DBWrapper extends QueryImpl {
                     "   ,   id_usr_ultima_modifica)" +
                     "   VALUES (" + String.valueOf(nextId) +// id
                     "   ,      '" + file + "'"  +           // file
+                    "   ,      '" + fileName + "'"  +       // original file name
                     "   ,       " + idBelongs   +           // id belongs  
                     "   ,      '" + title + "'" +           // titolo      
                     "   ,       " + size        +           // dimensione
@@ -7649,10 +7652,6 @@ public class DBWrapper extends QueryImpl {
             String msg = FOR_NAME + "Problema nella query di inserimento allegato.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Problema nel recupero di attributi del bean.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + anve.getMessage(), anve);
         } finally {
             try {
                 con.close();
@@ -8015,14 +8014,14 @@ public class DBWrapper extends QueryImpl {
             // Campi calcolati al momento
             String usr = user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome();
             java.sql.Date today = Utils.convert(Utils.convert(Utils.getCurrentDate()));
-            Time now = Utils.getCurrentTime();
+            Time now = Utils.getCurrentTimeExactly();
             // BEGIN
             con = rol_manager.getConnection();
             con.setAutoCommit(false); 
             String query =
                     "UPDATE " + table +
                     "   SET dimensione = " + size +
-                    "   ,   dataultimamodifica =    '" + today + "'" +
+                    "   ,   data_ultima_modifica =    '" + today + "'" +
                     "   ,   ora_ultima_modifica =     '"   + now + "'" + 
                     "   WHERE file = '" + file + "'"
                     ;
