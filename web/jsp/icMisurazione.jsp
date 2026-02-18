@@ -156,8 +156,8 @@
       </div>
     </form>
     <form accept-charset="ISO-8859-1" id="all-form" method="post" action="file?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${phas.id}&mliv=${meas.codice}&r=${param['r']}" enctype="multipart/form-data" class="modal" style="height:245px;">
-      <input type="hidden" id="prj-id" name="prj-id" value="${requestScope.progetto.id}" />
-      <input type="hidden" id="mis-id" name="mis-id" value="${misurazione.id}" />
+      <input type="hidden" id="mon-id" name="mon-id" value="${mon.id}" />
+      <input type="hidden" id="ind-id" name="ind-id" value="${ind.id}" />
       <h3 class="heading bg-warning">&nbsp;
         <i class="fa-solid fa-laptop-file"></i>
         Aggiungi un allegato
