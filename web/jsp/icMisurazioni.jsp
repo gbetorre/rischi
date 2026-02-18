@@ -57,12 +57,12 @@
           </td>
           <td scope="row" class="bgAct${ind.tipo.id} bgFade">
             <a href="${initParam.appName}/?q=ic&p=ind&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Vedi dettagli indicatore">
-              <c:out value="${ind.target}" />
+              <c:out value="${ind.getLabel(ind.target)}" />
             </a>
           </td>
           <td scope="row">
             <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Consulta la misurazione">
-              <c:out value="${mon.valore}"/>
+              <c:out value="${ind.getLabel(mon.valore)}"/>
             </a>&nbsp;
             <a class="smooth" href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}">
               <span class="badge badge-primary" id="add-label" title="Clicca per aggiungere un Allegato alla misurazione (attualmente: ${mon.allegati.size()})">
@@ -124,7 +124,9 @@
       </c:forEach>
       </tbody>
     </table>
-    <div class="avvisiTot text-right">Tot monitoraggi: <c:out value="${misurazioni.size()}" /></div>
+    <div class="avvisiTot text-right">
+      Tot monitoraggi: <c:out value="${misurazioni.size()}" />&nbsp;
+    </div>
     </c:when>
     <c:otherwise>
     <div class="alert alert-danger">
@@ -142,15 +144,5 @@
     </div>
     </c:otherwise>
   </c:choose>
-  <%--
-    <script type="text/javascript">
-      $(document).ready(function() {
-        $('#listMes').DataTable({
-          "columnDefs": [
-            { /*"orderable": false, "targets": -1*/ }
-          ]
-        });
-      });
-    </script> --%>
 </c:catch>
 <c:out value="${exception}" />
