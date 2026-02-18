@@ -65,13 +65,13 @@
           </c:choose>          
           </td>
           <td scope="row">
-            <c:out value="${fase.indicatore.baseline}" />
+            <c:out value="${fase.indicatore.getLabel(fase.indicatore.baseline)}" />
           </td>
           <td scope="row">
             <fmt:formatDate value="${fase.indicatore.dataBaseline}" pattern="dd/MM/yyyy" />
           </td>
           <td scope="row">
-            <c:out value="${fase.indicatore.target}" />
+            <c:out value="${fase.indicatore.getLabel(fase.indicatore.target)}" />
           </td>
           <td scope="row">
             <fmt:formatDate value="${fase.indicatore.dataTarget}" pattern="dd/MM/yyyy" />
@@ -126,7 +126,9 @@
       </c:forEach>
       </tbody>
     </table>
-    <div class="avvisiTot text-right">Tot indicatori: <c:out value="${totI}" /></div>
+    <div class="avvisiTot text-right">
+      Tot indicatori: <c:out value="${totI}" />&nbsp;
+    </div>
     </c:when>
     <c:otherwise>
     <div class="alert alert-danger">
