@@ -95,8 +95,6 @@ public class IndicatorBean extends CodeBean {
     private Date dataRevisione;
     /** Autore ultima revisione */
     private String autoreUltimaRevisione;
-    /** Human-readable display value based on indicator type */
-    private String displayValue;
     /* ******************************************************** *
      *          Dati descrittivi dell'ultima modifica           *
      * ******************************************************** */
@@ -145,7 +143,6 @@ public class IndicatorBean extends CodeBean {
         totMisurazioni = Constants.NOTHING;
         misurazioni = null;
         setMaster(false);
-        displayValue = null;
 	}
 
 
@@ -245,26 +242,7 @@ public class IndicatorBean extends CodeBean {
     public void setTargetRivisto(String targetRivisto) {
         this.targetRev = targetRivisto;
     }
-    
-    
-    /* ********************************************************* *
-     *              Metodo getter per valore parlante            *
-     * ********************************************************* */
-    /**
-     * Restituisce il valore parlante se indicatore di tipo On/Off
-     * 
-     * @param valore un valore da etichettare se talune condizioni sono rispettate
-     * @return <code>String</code> - valore parlante del valore numerico
-     * @throws AttributoNonValorizzatoException se non &egrave; possibile accedere al tipo indicatore
-     */
-    public String getLabel(String valore) throws AttributoNonValorizzatoException {
-        if (this.tipo.getNome().equalsIgnoreCase("On/Off")) {
-            String value = valore.equalsIgnoreCase("0") ? "Off" : "On"; 
-            return value;
-        }
-        return valore;
-    }
-    
+      
     
     /* ***************************************************************** *
      *    Metodi getter e setter per data baseline (risultati attuali)   *
@@ -603,22 +581,20 @@ public class IndicatorBean extends CodeBean {
     
     /**
      * Returns human-readable display value based on indicator type
+     * Restituisce il valore parlante se indicatore di tipo On/Off
      * On/Off type: "Off" (0) / "On" (1)  
-     * Numeric type: raw value as-is
+     * Numeric type: raw value as-is 
      * 
-     * @param rawValue the parameter to make human-readable
-     * @return <code>String</code> - Display-ready string for JSP/frontend
-     * @throws AttributoNonValorizzatoException if the name of the indicator type is not available 
+     * @param valore un valore da etichettare se talune condizioni sono rispettate | the parameter to make human-readable
+     * @return <code>String</code> - valore parlante del valore numerico | Display-ready string for JSP/frontend
+     * @throws AttributoNonValorizzatoException se non &egrave; possibile accedere al tipo indicatore | if the name of the indicator type is not available 
      */
-    public String getDisplayValue(String rawValue)  throws AttributoNonValorizzatoException {
-        if ("On/Off".equals(this.getTipo().getNome())) {
-            if (rawValue.equals(String.valueOf(Constants.NOTHING))) {
-                return "Off";
-            } else if (rawValue.equals(String.valueOf(Constants.ELEMENT_LEV_1))) {
-                return "On";
-            }
+    public String getLabel(String valore) throws AttributoNonValorizzatoException {
+        if (this.tipo.getNome().equalsIgnoreCase("On/Off")) {
+            String value = valore.equalsIgnoreCase("0") ? "Off" : "On"; 
+            return value;
         }
-        return rawValue;  // Numeric or other → raw
+        return valore;  // Numeric or other → raw
     }
 
 }
