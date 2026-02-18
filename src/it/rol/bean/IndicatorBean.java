@@ -95,6 +95,8 @@ public class IndicatorBean extends CodeBean {
     private Date dataRevisione;
     /** Autore ultima revisione */
     private String autoreUltimaRevisione;
+    /** Human-readable display value based on indicator type */
+    private String displayValue;
     /* ******************************************************** *
      *          Dati descrittivi dell'ultima modifica           *
      * ******************************************************** */
@@ -143,6 +145,7 @@ public class IndicatorBean extends CodeBean {
         totMisurazioni = Constants.NOTHING;
         misurazioni = null;
         setMaster(false);
+        displayValue = null;
 	}
 
 
@@ -591,6 +594,31 @@ public class IndicatorBean extends CodeBean {
      */
     public void setMaster(boolean master) {
         this.master = master;
+    }
+    
+    
+    /* ************************************************************************ *
+     *                      Metodi di calcolo e rielaborazione                  *
+     * ************************************************************************ */
+    
+    /**
+     * Returns human-readable display value based on indicator type
+     * On/Off type: "Off" (0) / "On" (1)  
+     * Numeric type: raw value as-is
+     * 
+     * @param rawValue the parameter to make human-readable
+     * @return <code>String</code> - Display-ready string for JSP/frontend
+     * @throws AttributoNonValorizzatoException if the name of the indicator type is not available 
+     */
+    public String getDisplayValue(String rawValue)  throws AttributoNonValorizzatoException {
+        if ("On/Off".equals(this.getTipo().getNome())) {
+            if (rawValue.equals(String.valueOf(Constants.NOTHING))) {
+                return "Off";
+            } else if (rawValue.equals(String.valueOf(Constants.ELEMENT_LEV_1))) {
+                return "On";
+            }
+        }
+        return rawValue;  // Numeric or other → raw
     }
 
 }
