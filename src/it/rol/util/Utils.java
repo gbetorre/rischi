@@ -888,6 +888,18 @@ public class Utils implements Constants {
         }
         return minutesAsDynamicString.toString();
     }
+    
+    
+    /**
+     * Returns current second within the minute (0-59)
+     * Perfect for real-time clocks, status updates
+     * 
+     * @return <code>int</code> - Second component (e.g., 15:30:45 → 45)
+     */
+    public static int getCurrentSeconds() {
+        Calendar cal = Calendar.getInstance();
+        return cal.get(Calendar.SECOND);
+    }
 
 
     /**
@@ -903,6 +915,20 @@ public class Utils implements Constants {
      */
     public static Time getCurrentTime() {
         return Time.valueOf(getCurrentHour() + ":" + getCurrentMinutes() + ":00");
+    }
+    
+    
+    /**
+     * <p>Restituisce l'orario corrente sotto forma di oggetto
+     * {@link java.sql.Time Time}.</p>
+     * <p>L'orario restituito avr&agrave; il formato <code>"hh:mm:ss"</code>
+     * dove i secondi saranno gli effettivi secondi correnti.</p>
+     *
+     * @return <code>Time</code> - l'ora corrente, in formato "hh:mm:ss"
+     * @see java.sql.Time
+     */
+    public static Time getCurrentTimeExactly() {
+        return Time.valueOf(getCurrentHour() + ":" + getCurrentMinutes() + ":" + getCurrentSeconds());
     }
 
 
