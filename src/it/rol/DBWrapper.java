@@ -75,6 +75,7 @@ import it.rol.bean.ActivityBean;
 import it.rol.bean.BeanUtil;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
+import it.rol.bean.FileDocBean;
 import it.rol.bean.IndicatorBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
@@ -4938,7 +4939,6 @@ public class DBWrapper extends QueryImpl {
      * @return <code>IndicatorBea</code> - l'indicatore di monitoraggio collegato alla fase
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings({ "static-method" })
     public IndicatorBean getIndicatorByActivity(PersonBean user,
                                                 ActivityBean fase,
                                                 CodeBean survey)
@@ -4996,6 +4996,8 @@ public class DBWrapper extends QueryImpl {
                         while (rs2.next()) {
                             MeasurementBean measurement = new MeasurementBean();
                             BeanUtil.populate(measurement, rs2);
+                            Vector<FileDocBean> attachments = getFileDoc("misurazione", "all", measurement.getId(), measurement.getId());
+                            measurement.setAllegati(attachments);
                             measurement.setIndicatore(indicator);
                             measurements.add(measurement);
                         }
@@ -5095,7 +5097,16 @@ public class DBWrapper extends QueryImpl {
                         indicator = getIndicatorByActivity(user, phase, survey);
                         // Arricchisce la misurazione con l'indicatore
                         measurement.setIndicatore(indicator);
-                    }                    
+                    }
+                    // Aggiunge gli allegati
+                    //Vector<FileDocBean> attachments = getFileDoc("misurazione", "all", measurement.getId(), measurement.getId());
+                    Vector<?> misurazioni = measurement.getIndicatore().getMisurazioni();
+                    for (MeasurementBean mes : (Vector<MeasurementBean>) misurazioni) {
+                        if (mes.getId() == measurement.getId()) {
+                            measurement.setAllegati(mes.getAllegati());
+                            break;
+                        }
+                    }
                 }
                 // Just tries to engage the Garbage Collector
                 pst = null;
@@ -8672,6 +8683,76 @@ public class DBWrapper extends QueryImpl {
                 throw new WebStorageException(msg + npe.getMessage());
             } catch (SQLException sqle) {
                 throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di FileDocBean estratti da data entit&agrave;
+     * e dato attributo, entrambi passati come argomenti.</p>
+     * <p>In particolare, potrebbero esistere pi&uacute; tabelle di allegati
+     * per ciascuna entit&agrave; referenziata (p.es. 'dipartimento_all',
+     * 'dipartimento_logo' etc.), per cui il suffisso della tabella potrebbe
+     * variare ed &egrave; stato parametrizzato.</p>
+     *
+     * @param nomeEntita nome dell'entit&agrave; da cui estrarre gli allegati
+     * @param nomeAttributo suffisso del nome della tabella dei fileset referenzianti
+     * @param idBelongs identificativo dell'entita' cui gli allegati fanno riferimento
+     * @param getAll intero usato come clausola in OR in funzione del cui valore vengono estratti solo gli allegati di una data entita' oppure di tutte
+     * @return <code>Vector&lt;FileDocBean&gt;</code> - Vector di fileset (riferimenti) agli allegati caricati
+     * @throws WebStorageException se si verifica un problema SQL o in qualche puntamento
+     */
+    @SuppressWarnings("static-method")
+    public Vector<FileDocBean> getFileDoc(String nomeEntita, 
+                                          String nomeAttributo,
+                                          int idBelongs,
+                                          int getAll)
+                                   throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        FileDocBean fileDoc = null;
+        Vector<FileDocBean> vD = new Vector<>();
+        String query =
+                "SELECT  " +  nomeEntita + "_" + nomeAttributo + ".*," +
+                "   data_ultima_modifica AS \"data\"" +
+                "  FROM "   + nomeEntita + "_" + nomeAttributo + 
+                " WHERE id_" + nomeEntita   + " = ? OR -1 = ? " +
+                " ORDER BY data_ultima_modifica, ora_ultima_modifica";
+        try {
+            con = rol_manager.getConnection();
+            try {
+                pst = con.prepareStatement(query);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nel puntamento alla connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            }
+            pst = con.prepareStatement(query);
+            pst.clearParameters();
+            pst.setInt(1, idBelongs);
+            pst.setInt(2, getAll);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                fileDoc = new FileDocBean();
+                BeanUtil.populate(fileDoc, rs);
+                vD.add(fileDoc);
+            }
+            return vD;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema nella query dei fileset.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                if ( con != null ) con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());                
+            } catch (SQLException sqle) {
+                throw new WebStorageException(sqle.getMessage());
             }
         }
     }
