@@ -37,7 +37,7 @@
     </servlet-mapping>
     
     <servlet>
-      <description>Servlet per to manage file uploads</description>
+      <description>Servlet to manage file uploads</description>
       <servlet-name>file</servlet-name>
       <servlet-class>it.rol.manager.FileManager</servlet-class>
     </servlet>
@@ -68,7 +68,7 @@
       <servlet-name>default</servlet-name>
       <url-pattern>/web/*</url-pattern>
       <url-pattern>/documenti/json/*</url-pattern>
-      <url-pattern>/documenti/upload/indicatoregestione_all/*</url-pattern>
+      <url-pattern>/documenti/upload/misurazione_all/*</url-pattern>
     </servlet-mapping>
     
    <!-- Note: Custom Error Pages -->
