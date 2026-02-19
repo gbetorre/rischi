@@ -147,6 +147,35 @@
             <textarea class="form-control" id="mon-quest3" name="mon-quest3" placeholder="<c:out value="${d3}" escapeXml="false" />" readonly></textarea>
           </div>
         </div>
+      <c:if test="${not empty mon.allegati}">
+        <hr class="separatore" />
+        <div class="row">
+          <div class="col-sm-1">&nbsp;</div>
+          <div class="col-sm-4 bordo bg-note">
+            <br><strong>Allegati della misurazione</strong>
+          </div>
+          <div class="col-sm-6 lightTable">
+            <ul class="list-unstyled">
+            <c:forEach var="all" items="${mon.allegati}" varStatus="loop">
+              <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
+              <li>
+                <span>
+                  <img src="${initParam.urlDirectoryImmagini}ico/ico_${ext}.png" border="0" alt="${all.estensione}">
+                </span>
+                <a href="${initParam.urlDirectoryDocumenti}/upload/misurazione_all/${mon.id}/${all.file}${all.estensione}" class="transition">
+                  <c:out value="${all.titolo}" escapeXml="false" />
+                </a>
+                <span class="file-data monospace">
+                  (<c:out value="${ext}" />,&nbsp;
+                   <fmt:formatNumber type="number" value="${all.dimensione/1024}" maxFractionDigits ="2" />&nbsp;KB,&nbsp;
+                   <fmt:formatDate value="${all.data}" pattern="dd/MM/yyyy" />)
+                </span>
+              </li>
+            </c:forEach>
+            </ul>
+          </div>
+        </div>
+      </c:if>
         <hr class="separatore" />
         <div class="centerlayout">
           <a href="#all-form" class="btn btnNav" id="add-all" rel="modal:open">
