@@ -1,6 +1,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
+<fmt:setLocale value="it_IT"/>
 <c:set var="meas" value="${requestScope.misura}" scope="page" />
 <c:set var="misurazioni" value="${requestScope.monitoraggi}" scope="page" />
 <c:set var="doubleQuote" value='"' scope="page" />
@@ -29,11 +30,12 @@
           <th scope="col" width="15%">Fase</th>
           <th scope="col" width="20%">Indicatore</th>
           <th scope="col" width="5%">Target</th>
-          <th scope="col" width="7%">Risultato</th>
+          <th scope="col" width="5%">Risultato</th>
           <th scope="col" width="*">Azioni</th>
           <th scope="col" width="10%">Motivazioni</th>
           <th scope="col" width="8%">Data Monitoraggio</th>
-          <th scope="col" width="8%">Domande</th>
+          <th scope="col" width="5%">Domande</th>
+          <th scope="col" width="5%">Allegati</th>
           <th scope="col" width="5%">Misurazione Aggiuntiva</th>
         </tr>
       </thead>
@@ -50,6 +52,7 @@
               <c:out value="${ind.nome}"/>
             </a>
             <c:if test="${ind.master}">
+            <br>
             <span class="badge badge-danger" id="ind-master" title="Indicatore di riferimento ai fini del monitoraggio">
               &nbsp;Master
             </span>
@@ -64,11 +67,6 @@
             <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Consulta la misurazione">
               <c:out value="${ind.getLabel(mon.valore)}"/>
             </a>&nbsp;
-            <a class="smooth" href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}">
-              <span class="badge badge-primary" id="add-label" title="Clicca per aggiungere un Allegato alla misurazione (attualmente: ${mon.allegati.size()})">
-                <i class="fas fa-plus"></i> Allegato
-              </span>
-            </a>
           </td>
           <td scope="row" class="small">
             <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="<c:out value="${d1}" escapeXml="false" />">
@@ -79,12 +77,12 @@
             <c:out value="${mon.descrizione}" />
           </td>
           <td scope="row">
-            <fmt:formatDate value="${mon.dataUltimaModifica}"/>
+            <fmt:formatDate value="${mon.dataUltimaModifica}" pattern="dd MMMMM yyyy"/>
           </td>
           <td scope="row">
           <c:if test="${not empty mon.domanda1}">
             <c:set var="d1" value="${fn:replace(mon.domanda1, doubleQuote, \"\")}" scope="page" />
-            <div class="form-check text-center">
+            <div class="text-center">
               <span class="badge badge-success">
                 <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="text-white" title="<c:out value="${d1}" escapeXml="false" />">
                   DOMANDA 1
@@ -94,7 +92,7 @@
           </c:if>
           <c:if test="${not empty mon.domanda2}">
             <c:set var="d2" value="${fn:replace(mon.domanda2, doubleQuote, \"\")}" scope="page" />
-            <div class="form-check text-center">
+            <div class="text-center">
               <span class="badge badge-success">
                 <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="text-white" title="${d2}">
                   DOMANDA 2
@@ -104,7 +102,7 @@
           </c:if>
           <c:if test="${not empty mon.domanda3}">
             <c:set var="d3" value="${fn:replace(mon.domanda3, doubleQuote, \"\")}" scope="page" />
-            <div class="form-check text-center">
+            <div class="text-center">
               <span class="badge badge-success">
                 <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="text-white" title="${d3}">
                   DOMANDA 3
@@ -113,6 +111,28 @@
             </div>
           </c:if>
           </td>
+          <!-- allegati -->
+          <td scope="row">
+            <ol class="textcolormaroon form-custom">
+            <c:forEach var="all" items="${mon.allegati}" varStatus="status">
+              <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
+              <li class="small">
+                <a href="${initParam.urlDirectoryDocumenti}/upload/misurazione_all/${mon.id}/${all.file}${all.estensione}" class="transition" title="${all.titolo}">
+                  <c:out value="file${all.estensione}" />
+                </a>
+              </li>
+            </c:forEach>
+            <c:if test="${empty mon.allegati}">
+              <span class="small">nessuno</span>
+            </c:if>
+            </ol>
+            <a class="smooth" href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}">
+              <span class="badge badge-primary" id="add-label" title="Clicca per aggiungere un Allegato alla misurazione (attualmente: ${mon.allegati.size()})">
+                <i class="fas fa-plus"></i> Allegato
+              </span>
+            </a>
+          </td>
+          <!-- misura aggiuntiva -->
           <td scope="row" class="bgAct21">
             <div class="btn-group align-items-center border-basso">
               <a href="${initParam.appName}/?q=ic&p=imm&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" type="button" class="badge bgAct11 btn-small lightTable text-black align-middle refresh" title="Clicca per aggiungere una misurazione a questo indicatore">
