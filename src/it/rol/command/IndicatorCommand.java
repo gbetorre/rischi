@@ -64,9 +64,7 @@ import it.rol.ConfigManager;
 import it.rol.Constants;
 import it.rol.DBWrapper;
 import it.rol.Main;
-import it.rol.db.Query;
 import it.rol.SessionManager;
-import it.rol.util.Utils;
 import it.rol.bean.ActivityBean;
 import it.rol.bean.CodeBean;
 import it.rol.bean.DepartmentBean;
@@ -75,9 +73,11 @@ import it.rol.bean.ItemBean;
 import it.rol.bean.MeasureBean;
 import it.rol.bean.MeasurementBean;
 import it.rol.bean.PersonBean;
+import it.rol.db.Query;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
+import it.rol.util.Utils;
 
 
 /** 
@@ -380,7 +380,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 // Controlla l'esistenza del codice di una misura
                                 if (codeMis.equals(DASH)) {
                                 /* -------------------------------------------- *
-                                 *    Elenco Misure raggruppate per struttura   *
+                                 *    ELENCO Misure raggruppate per struttura   *
                                  * -------------------------------------------- */
                                     structs = db.getMeasuresByStructs(user, survey);
                                     // Aggiunge una foglia alle breadcrumbs
@@ -389,7 +389,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                     fileJspT = nomeFile.get(part);
                                 } else {
                                 /* -------------------------------------------- *
-                                 *           Dettagli misura monitorata         *
+                                 *           DETTAGLI misura monitorata         *
                                  * -------------------------------------------- */
                                     // Recupera la misura di prevenzione/mitigazione
                                     measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
@@ -405,13 +405,13 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 if (idInd > DEFAULT_ID) {
                                 /* -------------------------------------------- *
-                                 *     Dettagli di un indicatore di dato id     *
+                                 *     DETTAGLI di un indicatore di dato id     *
                                  * -------------------------------------------- */
                                     // Imposta la pagina
                                     fileJspT = nomeFileDettaglio;
                                 } else {
                                 /* -------------------------------------------- *
-                                 *        Elenco indicatori di una misura       *
+                                 *        ELENCO indicatori di una misura       *
                                  * -------------------------------------------- */
                                     // Personalizza le breadcrumbs
                                     bC = loadBreadCrumbs(breadCrumbs, part, survey);
@@ -419,19 +419,15 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                     fileJspT = nomeFile.get(part);
                                 }
                                 break;
+                            /* ELENCO Misurazioni di una misura monitorata      */
                             case PART_MONITOR:
-                                /* -------------------------------------------- *
-                                 *  Elenco Misurazioni di una misura monitorata *
-                                 * -------------------------------------------- */
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 measurements = decantMeasurements(measure);
                                 // Imposta la pagina
                                 fileJspT = nomeFile.get(part);
                                 break;
+                            /* FORM aggiunta dettagli monitoraggio a una misura */
                             case PART_INSERT_MONITOR_DATA:
-                                /* ------------------------------------------------ *
-                                 * Form aggiunta dettagli monitoraggio a una misura *
-                                 * ------------------------------------------------ */
                                 if (!codeMis.equals(DASH)) {
                                     // Recupera la misura di prevenzione/mitigazione
                                     measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
@@ -443,10 +439,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                     fileJspT = nomeFile.get(part);
                                 }
                                 break;
+                            /* DETTAGLIO misurazione                            */
                             case PART_SELECT_MEASUREMENT:
-                                /* -------------------------------------------- *
-                                 *      Pagina riepilogo dettagli misurazione   *
-                                 * -------------------------------------------- */
                                 // Recupera gli estremi della misura, della fase e dell'indicatore
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Recupera la misurazione cercata
@@ -454,27 +448,24 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
                                 break;
+                            /* FORM inserimento nuovo Indicatore                */
                             case PART_INSERT_INDICATOR:
-                                /* -------------------------------------------- *
-                                 *    Maschera inserimento nuovo Indicatore     *
-                                 * -------------------------------------------- */
                                 // Recupera la fase cui si vuol aggiungere l'indicatore
                                 phase = db.getMeasureActivity(user, codeMis, idFas, survey);
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
                                 break;
+                            /* FORM inserimento nuova Misurazione               */
                             case PART_INSERT_MEASUREMENT:
-                                /* -------------------------------------------- *
-                                 *     Maschera inserimento nuova Misurazione   *
-                                 * -------------------------------------------- */
                                 // Recupera l'indicatore cui si vuol aggiungere la misurazione
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Breadcrumbs
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
                                 break;
+                            /* Other values are not admitted                    */
                             default:
-                                // Other values are not admitted
+                                // TODO log
                                 break;
                         }
                     } else {
