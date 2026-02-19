@@ -25,7 +25,7 @@
           <c:out value="${d.prefisso} ${d.nome}" />
         </h6>
         <div class="avvisiTot text-right">
-          <c:out value="Tot misure: ${d.misure.size()}" />
+          <c:out value="Tot misure: ${d.misure.size()}" />&nbsp;
         </div>
       </section>
       <table class="table table-hover">
