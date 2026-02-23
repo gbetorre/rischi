@@ -67,6 +67,7 @@ import com.oreilly.servlet.ParameterParser;
 
 import it.rol.bean.CodeBean;
 import it.rol.bean.PersonBean;
+import it.rol.db.DBWrapper;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.NotFoundException;

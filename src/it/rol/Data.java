@@ -81,6 +81,7 @@ import it.rol.command.DepartmentCommand;
 import it.rol.command.ProcessCommand;
 import it.rol.command.ReportCommand;
 import it.rol.command.RiskCommand;
+import it.rol.db.DBWrapper;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.util.Utils;
