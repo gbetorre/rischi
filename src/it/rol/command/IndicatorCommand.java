@@ -355,7 +355,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             db.insertMeasurement(user, params);
                             // Prepara la redirect 
                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + 
-                                       AMPERSAND + "p" + EQ + PART_INDICATOR +
+                                       AMPERSAND + "p" + EQ + PART_MONITOR +
                                        AMPERSAND + "mliv" + EQ + codeMis + 
                                        AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                                        //+AMPERSAND + MESSAGE + EQ + "newRel#rischi-fattori-misure";
@@ -383,8 +383,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                  *    ELENCO Misure raggruppate per struttura   *
                                  * -------------------------------------------- */
                                     structs = db.getMeasuresByStructs(user, survey);
-                                    // Aggiunge una foglia alle breadcrumbs
-                                    bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Misure x Struttura");
+                                    // Sostituisce "Indicatori" con Monitoraggio
+                                    bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Monitoraggio");
                                     // Imposta la pagina
                                     fileJspT = nomeFile.get(part);
                                 } else {
@@ -420,12 +420,15 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 }
                                 break;
                             /* ELENCO Misurazioni di una misura monitorata      */
-                            case PART_MONITOR:
+                            case PART_MONITOR: {
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 measurements = decantMeasurements(measure);
+                                // Personalizza le breadcrumbs
+                                bC = loadBreadCrumbs(breadCrumbs, part, survey);
                                 // Imposta la pagina
                                 fileJspT = nomeFile.get(part);
                                 break;
+                            }
                             /* FORM aggiunta dettagli monitoraggio a una misura */
                             case PART_INSERT_MONITOR_DATA:
                                 if (!codeMis.equals(DASH)) {
@@ -445,6 +448,11 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Recupera la misurazione cercata
                                 measurement = db.getMeasurement(user, idMon, survey);
+                                // Personalizza le breadcrumbs
+                                bC = loadBreadCrumbs(breadCrumbs, PART_MONITOR, survey);
+                                // Aggiunta inoltre di una foglia
+                                bC = HomePageCommand.makeBreadCrumbs(bC, ELEMENT_LEV_1, "Misurazione");
+                                //bc
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
                                 break;
@@ -654,24 +662,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
             measurement.put("ind",      parser.getStringParameter("mon-ind", VOID_STRING));
             formParams.put(part, measurement);
         }
-
-        /* ******************************************************** *
-         *  Ramo di UPDATE di ulteriori informazioni da aggiungere  *
-         *      a un Indicatore (p.es.: target rivisto, etc.)       *
-         * ******************************************************** *
-        else if (part.equalsIgnoreCase(Query.UPDATE_PART)) {
-            GregorianCalendar date = Utils.getUnixEpoch();
-            String dateAsString = Utils.format(date, Query.DATA_SQL_PATTERN);
-            HashMap<String, String> ind = new HashMap<String, String>();
-            ind.put("ind-id",           parser.getStringParameter("ind-id", Utils.VOID_STRING));
-            ind.put("prj-id",           parser.getStringParameter("prj-id", Utils.VOID_STRING));
-            ind.put("ext-target",       parser.getStringParameter("modext-target", Utils.VOID_STRING));
-            ind.put("ext-datatarget",   parser.getStringParameter("ext-datatarget", dateAsString));
-            ind.put("ext-annotarget",   parser.getStringParameter("ext-annotarget",  Utils.VOID_STRING));
-            ind.put("ext-note",         parser.getStringParameter("modext-note", Utils.VOID_STRING));
-            ind.put("modext-auto",      parser.getStringParameter("modext-auto", dateAsString));
-            formParams.put(Query.UPDATE_PART, ind);
-        }*/
     }
     
     
@@ -708,6 +698,15 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
                 // Aggiunta inoltre di una foglia
                 bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Indicatori");
+            } else if (part.equalsIgnoreCase(PART_MONITOR)) {
+                // Url da sostituire al posto di quello di una breadcrumb esistente
+                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + AMPERSAND + "p" + EQ + PART_MEASURES + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
+                // Preparazione nuova breadcrumb per puntare sulla command delle misure
+                ItemBean crumb = new ItemBean("Monitoraggio", "Monitoraggio", url, SUB_MENU);
+                // Sostituzione di una breadcrumb esistente con la nuova
+                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
+                // Aggiunta inoltre di una foglia
+                bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Misurazioni");
             } else if (part.equalsIgnoreCase(PART_INSERT_MONITOR_DATA)) {
                 // Url da sostituire al posto di quello di una breadcrumb esistente
                 String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
