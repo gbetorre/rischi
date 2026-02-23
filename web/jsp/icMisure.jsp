@@ -49,18 +49,19 @@
           </c:when>
           <c:otherwise>
             <c:set var="badgeStyle" value="border-alto bg-warning" scope="page" />
+            <c:set var="completezza" value="La misura ha 0 Indicatori e quindi non puo' avere misurazioni" scope="page" />
           </c:otherwise>
           </c:choose>
           <c:choose>
           <c:when test="${ms.monitorata}">
             <c:set var="completezza" value="La misura ha ${ms.totIndicatori} indicatori e ciascuno ha ricevuto almeno una misurazione" scope="page" />
           </c:when>
-          <c:when test="${not ms.monitorata}">
+          <c:when test="${not ms.monitorata and ms.totIndicatori gt zero}">
             <c:set var="completezza" value="La misura ha ${ms.totIndicatori} indicatori ma almeno uno di essi non e' stato misurato" scope="page" />
           </c:when>
           </c:choose>
           <tr>
-            <td scope="row" class="align-middle">
+            <td scope="row" class="align-middle" id="${ms.codice}">
               <%-- <img src="${initParam.urlDirectoryImmagini}${ms.dettagli}.png" class="ico-small" alt="icona" title="${details} Dettagli Monitoraggio" /> &nbsp; --%>
               <a href="${initParam.appName}/?q=ic&p=mes&mliv=${ms.codice}&r=${param['r']}" title="${ms.codice}">
                 <c:out value="${ms.nome}" escapeXml="false" />
