@@ -45,7 +45,7 @@
  *   37129 Verona (Italy)
  */
 
-package it.rol;
+package it.rol.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,6 +71,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import it.rol.ConfigManager;
+import it.rol.DBManager;
 import it.rol.bean.ActivityBean;
 import it.rol.bean.BeanUtil;
 import it.rol.bean.CodeBean;
