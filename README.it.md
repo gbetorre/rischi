@@ -540,6 +540,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### 2026
 
+- [2.5.1] (23/02/2026) Miglioramenti nella presentazione del monitoraggio (link, etichette)
 - [2.5.0] (19/02/2026) Completamento implementazione funzionalit&agrave; per inserimento allegati a una misurazione
 - [2.4.9] (18/02/2026) Prima parte di implementazione funzionalit&agrave; per inserimento allegati a una misurazione
 - [2.4.8] (12/02/2026) Correzione di bug
