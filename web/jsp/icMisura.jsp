@@ -19,7 +19,9 @@
       <div class="panel-heading bgAct19" id="details">
         <h5 class="fw-bold text-dark">
           <i class="fa-solid fa-file-circle-plus"></i>
-          <c:out value="Dettagli monitoraggio" />
+          <a href="${initParam.appName}/?q=ic&p=mes&r=${param['r']}#${meas.codice}" title="Vai al monitoraggio">
+            <c:out value="Dettagli monitoraggio" />
+          </a>
         </h5>
       </div>
       <div class="panel-body">
