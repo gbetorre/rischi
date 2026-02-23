@@ -56,7 +56,7 @@ import com.oreilly.servlet.ParameterParser;
 
 import it.rol.ConfigManager;
 import it.rol.Constants;
-import it.rol.DBWrapper;
+import it.rol.db.DBWrapper;
 import it.rol.Data;
 import it.rol.SessionManager;
 import it.rol.util.Utils;
