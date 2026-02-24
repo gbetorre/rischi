@@ -102,41 +102,45 @@ public class ReportCommand extends ItemBean implements Command, Constants {
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
     /**
-     * Pagina a cui la command reindirizza per mostrare la pagina iniziale della Command
+     * Pagina iniziale della Command
      */
     private static final String nomeFileElenco = "/jsp/muElenco.jsp";
     /**
-    * Pagina a cui la command fa riferimento per mostrare il report tabellare con processi, strutture e giudizio sintetico
+    * Pagina per mostrare il report tabellare con processi, strutture e giudizio sintetico
      */
     private static final String nomeFileStrutture = "/jsp/muStrutture.jsp";
     /**
-    * Pagina a cui la command fa riferimento per mostrare il report tabellare con processi, misure e giudizio sintetico
+    * Pagina per mostrare il report tabellare con processi, misure e giudizio sintetico
      */
     private static final String nomeFileMisure = "/jsp/muMisure.jsp";
     /**
-    * Pagina a cui la command fa riferimento per mostrare il report tabellare con processi, misure previste, misure applicate e giudizio sintetico
+    * Pagina per mostrare il report tabellare con processi, misure previste, misure applicate e giudizio sintetico
      */
     private static final String nomeFileMonitor = "/jsp/muMonitoraggi.jsp";
     /**
-     * Pagina a cui la command fa riferimento per mostrare il report con processi e PxI
+     * Pagina per mostrare il report analitico con processi e PxI
      */
     private static final String nomeFileProcessi = "/jsp/muProcessi.jsp";
     /**
-     * Pagina a cui la command fa riferimento per mostrare il report tabellare con rischi e misure
+     * Pagina per mostrare il report analitico con rischi e misure
      */
     private static final String nomeFileRischi = "/jsp/muRischi.jsp";
     /**
-     * Pagina a cui la command fa riferimento per mostrare la form di ricerca
+     * Pagina per mostrare la form di ricerca
      */
     private static final String nomeFileSearch = "/jsp/muRicerca.jsp";
     /**
-     * Pagina a cui la command fa riferimento per mostrare la  home dei grafici
+     * Pagina per mostrare la  home dei grafici
      */
     private static final String nomeFileGraphics = "/jsp/muGrafici.jsp";
     /**
      * Struttura contenente le pagine a cui la Command fa riferimento
      */
     private static final HashMap<String, String> nomeFile = new HashMap<>();
+    /**
+     * Struttura a cui la command fa riferimento per generare i titoli pagina
+     */    
+    private static final HashMap<String, String> titleFile = new HashMap<>();
 
 
     /**
@@ -174,6 +178,14 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_MEASURES,     nomeFileMisure);
         nomeFile.put(PART_MONITOR,      nomeFileMonitor);
         nomeFile.put(PART_GRAPHICS,     nomeFileGraphics);
+        // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
+        titleFile.put(PART_SEARCH,      "Ricerca personalizzata");
+        titleFile.put(PART_PROCESS,     "Report analitico PxI");
+        titleFile.put(PART_RISKS,       "Report PxI mitigati");
+        titleFile.put(PART_SELECT_STR,  "Report tabellare PxI");
+        titleFile.put(PART_MEASURES,    "Report misure stimate");
+        titleFile.put(PART_MONITOR,     "Report misure applicate");
+        titleFile.put(PART_GRAPHICS,    "Grafici");
     }
 
 
@@ -215,6 +227,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risks = null;
         // Preprara BreadCrumbs
         LinkedList<ItemBean> bC = null;
+        // Titolo pagina
+        String tP = null;
         /* -------------------------------------------------------------------- *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * -------------------------------------------------------------------- */
@@ -281,11 +295,17 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                         /* -- SHOW tabella MDM + PxI Mitigati (Monitoraggio) -- */
                         case PART_MONITOR: {
                             risks = retrieveMonitoratedRisksByProcess(matsWithoutIndicators, user, codeSur, db);
+                            // Ha bisogno di personalizzare le breadcrumbs
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report monitoraggio"); 
                             break;
                         }
+                        default :
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report grafici"); 
                     }
                     // Imposta il valore della pagina abbinata al parametro 
                     fileJspT = nomeFile.get(part);
+                    // Imposta il titolo della pagina
+                    tP = titleFile.get(part);
                 } else {
                 /* *********************************************************** *
                  *  Viene richiesta la visualizzazione della pagina di report  *
@@ -324,6 +344,10 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         // Imposta in request, se ci sono, lista di rischi indicizzati per processo
         if (risks != null) {
             req.setAttribute("rischi", risks);
+        }
+        // Titolo pagina in caso sia significativo
+        if (tP != null && !tP.equals(VOID_STRING)) {
+            req.setAttribute("tP", tP);
         }
         // Imposta nella request breadcrumbs in caso siano state personalizzate
         if (bC != null) {
@@ -763,10 +787,10 @@ public class ReportCommand extends ItemBean implements Command, Constants {
        * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
        */
        public static LinkedHashMap<ProcessBean, ArrayList<RiskBean>> retrieveMonitoratedRisksByProcess(final ArrayList<ProcessBean> mats,
-                                                                                                     PersonBean user,
-                                                                                                     String codeSurvey,
-                                                                                                     DBWrapper db)
-                                                                                              throws CommandException {
+                                                                                                       PersonBean user,
+                                                                                                       String codeSurvey,
+                                                                                                       DBWrapper db)
+                                                                                                throws CommandException {
            ArrayList<RiskBean> risks, mitigatingRisks = null;
            LinkedHashMap<ProcessBean, ArrayList<RiskBean>> risksByPat = new LinkedHashMap<>();
            try {
