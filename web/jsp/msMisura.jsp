@@ -28,14 +28,14 @@
       <div class="content-holder bgAct">
         <dl class="sezioneElenco custom-dl marginBottom">
           <dt class="text-primary">Carattere</dt>
-          <dd><c:out value="${meas.carattere.nome}" /></dd>
+          <dd><strong><c:out value="${meas.carattere.nome}" /></strong></dd>
           <dt class="text-primary">Comporta Spese?</dt>
-          <dd><c:out value="${fn:toUpperCase(meas.getOnerosa(meas.onerosa))}" /></dd>
+          <dd><strong><c:out value="${fn:toUpperCase(meas.getOnerosa(meas.onerosa))}" /></strong></dd>
           <dt class="text-primary">Codice</dt>
           <dd><strong><c:out value="${meas.codice}" /></strong></dd>
           <dt class="text-primary">Monitorata</dt>
           <dd>
-            <c:out value="${dets}" />&nbsp;
+            <strong><c:out value="${dets}" />&nbsp;</strong>
           <c:choose> 
             <c:when test="${meas.dettagli}">&nbsp; 
             <a href="${initParam.appName}/?q=ic&p=mes&mliv=${meas.codice}&r=${param['r']}#details" class="badge badge-pill border-basso">
