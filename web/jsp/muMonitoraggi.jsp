@@ -6,31 +6,31 @@
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
     <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/2.1.5/features/searchHighlight/dataTables.searchHighlight.css">
     <h3 class="mt-1 m-0 font-weight-bold float-left">Report misure monitorate</h3>
-    <!-- a href="${mesCSV}" class="float-right badge badge-pill lightTable bgAct20" title="Scarica il dataset dei processi organizzativi con PxI iniziale e PxI mitigato (stima)">
-      <i class="fas fa-download"></i>Scarica i dati
-    </a-->
     <hr class="riga"/>
     <div class="col-md-offset-1">
       <div class="table-responsive">
         <table class="table table-striped table-bordered table-hover" id="listMis">
           <thead class="thead-light">
             <tr class="thin">
-              <th width="15%">Macroprocesso</th>
+              <th width="10%">Macroprocesso</th>
               <th width="15%">Processo</th>
-              <th width="25%">Rischi Potenziali</th>
+              <th width="20%">Rischi Potenziali</th>
+              <th width="15%">Misure Previste</th>
               <th width="15%">Misure Applicate</th>
-              <th width="15%">Giudizio sintetico</th>
-              <th width="15%">PxI mitigato (monitoraggio)</th>
+              <th width="13%">Giudizio Sintetico</th>
+              <th width="12%">PxI mitigato (monitoraggio)</th>
             </tr>
           </thead>
           <tbody>
           <c:forEach var="mat" items="${mats}">
             <c:forEach var="pat" items="${mat.processi}" varStatus="status">
+              <c:set var="misStima" value="" scope="page" />
+              <c:set var="misMonit" value="" scope="page" />
             <tr class="active thin">
-              <td width="15%" class="verticalCenter reportRow">
+              <td class="verticalCenter reportRow">
                 <c:out value="${mat.nome}" />
               </td>
-              <td width="15%" class="verticalCenter reportRow">
+              <td class="verticalCenter reportRow">
                 <a href="${initParam.appName}/?q=pr&p=pro&pliv=${pat.id}&liv=${pat.livello}&r=${param['r']}" title="Vedi dettagli Processo">
                   <c:out value="${pat.nome}" />
                 </a>
@@ -42,7 +42,7 @@
                   </span>
                 </div>
               </td>
-              <td width="25%">
+              <td>
                 <ul class="list-group list-group-flush">
                   <c:set var="rsks" value="${risks.get(pat)}" scope="page" />
                   <c:forEach var="rsk" items="${rsks}">
@@ -58,7 +58,23 @@
                   </c:forEach>
                 </ul>
               </td>
-              <td width="15%">
+              <td>
+                <ul class="list-group list-group-flush">
+                 <c:set var="rsks" value="${risks.get(pat)}" scope="page" />
+                 <c:forEach var="rsk" items="${rsks}" varStatus="outerStatus">
+                   <c:forEach var="mes" items="${rsk.misure}" varStatus="innerStatus">
+                  <li class="list-group-item">
+                    <img src="${initParam.urlDirectoryImmagini}mis-${mes.carattere.informativa}.png" class="ico-small" alt="icona" title="Misura ${mes.carattere.nome}" />
+                    <a href="${initParam.appName}/?q=ic&p=mes&mliv=${mes.codice}&r=${param['r']}" title="Dettagli della misura ${mes.codice}">
+                      <c:out value="${mes.nome}" />
+                    </a>
+                  </li>
+                   </c:forEach>
+                   <c:set var="misStima" value="${misStima + rsk.misure.size()}" scope="page" />
+                 </c:forEach>
+                </ul>
+              </td>
+              <td>
                 <ul class="list-group list-group-flush">
                  <c:set var="rsks" value="${risks.get(pat)}" scope="page" />
                  <c:forEach var="rsk" items="${rsks}">
@@ -70,10 +86,11 @@
                     </a>
                   </li>
                    </c:forEach>
+                   <c:set var="misMonit" value="${misMonit + rsk.misureMonitorate.size()}" scope="page" />
                  </c:forEach>
                 </ul>
               </td>
-              <td width="15%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)}">
+              <td class="text-center reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)}">
                 <c:out value="${pat.indicatori.get('PxI').informativa}" />
                 <hr class="riga" />
                 <div class="lightTable subfields">
@@ -86,8 +103,24 @@
                   </span>
                 </div>
               </td>
-              <td width="15%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (reale)').informativa)}">
+              <td class="text-center reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (reale)').informativa)}">
                 <c:out value="${pat.indicatori.get('PxI (reale)').informativa}" />
+                <c:if test="${misStima gt zero}">
+                <hr class="riga" />
+                <div class="lightTable subfields file-data">
+                  Misure previste &nbsp;<c:out value="${misStima}" /><br>
+                  Misure applicate <c:out value="${misMonit}" />
+                  <hr class="separapoco" />
+                <c:choose>  
+                  <c:when test="${misMonit lt misStima}">
+                  <img src="${initParam.urlDirectoryImmagini}thumb_down.png" class="ico-small" alt="icona" title="Misure non applicate: ${misStima - misMonit}" /> 
+                  </c:when>
+                  <c:otherwise>
+                  <img src="${initParam.urlDirectoryImmagini}thumb_up.png" class="ico-small" alt="good job" title="Tutte le misure previste sono state applicate" /> 
+                  </c:otherwise>
+                </c:choose>
+                </div>
+                </c:if>
               </td>
             </tr>
             </c:forEach>
@@ -110,12 +143,7 @@
               },
           "aaSorting": [[ 1, "asc" ]],
           "searchHighlight": true
-        });/*
-        table.on('draw', function () {
-            var body = $( table.table().body() );
-            body.unhighlight();
-            body.highlight( table.search() );  
-        });*/
+        });
       });
     </script>
     <script src="https://cdn.datatables.net/plug-ins/2.1.5/features/searchHighlight/dataTables.searchHighlight.min.js"></script>
