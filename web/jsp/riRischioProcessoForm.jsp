@@ -65,7 +65,7 @@
           <div class="row alert">
             <div class="content-holder col-sm-12">
               <div class="column">
-                <div class="mandatory-thin"><strong> &nbsp;Rischio da associare</strong></div>
+                <div class="mandatory-thin bgAct30"><strong> &nbsp;Rischio da associare</strong></div>
                 <div class="text-center"><div id="custom-error-location-2"></div></div>
               </div>
               <div class="row">
