@@ -340,8 +340,8 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                 // Retrieve all the processes
                                 macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
                                 // Customize labels
-                                tP =  "Nuovo legame R-P";
-                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1,tP);
+                                tP =  "Collegamento Processo";
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, tP);
                                 break;
                             }
                             /* ----  SHOW Form to link a Risk to a Process ---- */
@@ -355,7 +355,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                 // Retrieve all the risks
                                 risks = db.getRisks(user, survey.getId(), survey);
                                 // Customize labels
-                                tP = "Nuovo legame P-R";
+                                tP = "Collegamento Rischio";
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, tP);
                                 break;
                              }
