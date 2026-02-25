@@ -77,63 +77,76 @@
                 &nbsp;<c:out value="${fase.nome}" />
               </div>
               <hr class="separapoco" />
-              <div class="bgAct26 text-white form-custom">
+              <div class="bgAct26 text-white form-custom marginNarrow">
                 <strong> 
                   &nbsp;Strutture
                   <span class="badge badge-pill float-right"><c:out value="${fase.strutture.size()}" /> </span>
                 </strong>
               </div>
-              <ul class="line">
-              <c:forEach var="str" items="${fase.strutture}">
-                <li class="reportAct bg-note">
-                  <span class="marginLeft">
-                    <img src="${initParam.urlDirectoryImmagini}str-l${str.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${str.livello}" />
-                    <c:out value="${str.prefisso}" escapeXml="false" />&nbsp; 
-                    <c:out value="${str.nome}" escapeXml="false" />
-                  </span>
-                </li>
-              </c:forEach>
-              </ul>
+              <div class="content-holder bgAct31">Strutture di organigramma gi&agrave; associate:
+                <ul class="list-group">
+                <c:forEach var="str" items="${fase.strutture}">
+                  <li class="list-group-item reportAct bg-note">
+                    <span class="marginLeft">
+                      <img src="${initParam.urlDirectoryImmagini}str-l${str.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${str.livello}" />
+                      <c:out value="${str.prefisso}" escapeXml="false" />&nbsp; 
+                      <c:out value="${str.nome}" escapeXml="false" />
+                    </span>
+                  </li>
+                </c:forEach>
+                <c:if test="${empty fase.strutture}">
+                   <li class="list-group-item"><em>Nessuna</em></li>
+                </c:if>
+                </ul>
+              </div>
               <div class="content-holder bgAct19">(Inserire solo una struttura, scelta tra i 4 livelli)
-              <div id="callable-row">
-                <div class="row">
-                  <div class="col-3 large-4 ui-widget">
-                    <input class="sLiv1" name="liv1-${fase.id}" type="text" placeholder="Struttura I livello">
-                  </div>
-                  <div class="col-3 large-4 ui-widget">
-                    <input class="sLiv2" name="liv2-${fase.id}" type="text" placeholder="Struttura II livello">
-                  </div>
-                  <div class="col-3 large-4 ui-widget">
-                    <input class="sLiv3" name="liv3-${fase.id}" type="text" placeholder="Struttura III livello">
-                  </div>
-                  <div class="col-3 large-4 ui-widget">
-                    <input class="sLiv4" name="liv4-${fase.id}" type="text" placeholder="Struttura IV livello">
+                <div id="callable-row">
+                  <div class="row">
+                    <div class="col-3 large-4 ui-widget">
+                      <input class="sLiv1" name="liv1-${fase.id}" type="text" placeholder="Struttura I livello">
+                    </div>
+                    <div class="col-3 large-4 ui-widget">
+                      <input class="sLiv2" name="liv2-${fase.id}" type="text" placeholder="Struttura II livello">
+                    </div>
+                    <div class="col-3 large-4 ui-widget">
+                      <input class="sLiv3" name="liv3-${fase.id}" type="text" placeholder="Struttura III livello">
+                    </div>
+                    <div class="col-3 large-4 ui-widget">
+                      <input class="sLiv4" name="liv4-${fase.id}" type="text" placeholder="Struttura IV livello">
+                    </div>
                   </div>
                 </div>
-              </div></div>
+              </div>
               <hr class="separatore" />
             </div>
             <div class="str-container">
-              <div class="bgAct26 text-white form-custom">
+              <div class="bgAct26 text-white form-custom marginNarrow">
                 <strong> 
                   &nbsp;Soggetti
                   <span class="badge badge-pill float-right"><c:out value="${fase.soggetti.size()}" /> </span>
                 </strong>
               </div>
-              <ul class="line">
-              <c:forEach var="sub" items="${fase.soggetti}">
-                <li class="reportAct bg-note" title="${sub.informativa}">
-                  <span class="marginLeft">
-                    <img src="${initParam.urlDirectoryImmagini}person-fill.png" class="ico-small" alt="icona" title="Soggetto contingente" /> 
-                    <c:out value="${sub.nome}" escapeXml="false" />
-                  </span>
-                </li>
-              </c:forEach>
-              </ul>
-              <div id="callable-row">
-                <div class="row">
-                  <div class="col-12 large-4 ui-widget">
-                    <input class="sCont" name="sc-${fase.id}" type="text" placeholder="Soggetto Contingente">
+              <div class="content-holder bgAct31">Soggetti contingenti gi&agrave; associati:
+                <ul class="list-group">
+                <c:forEach var="sub" items="${fase.soggetti}">
+                  <li class="list-group-item" title="${sub.informativa}">
+                    <span class="marginLeft">
+                      <img src="${initParam.urlDirectoryImmagini}person-fill.png" class="ico-small" alt="icona" title="Soggetto contingente" /> 
+                      <c:out value="${sub.nome}" escapeXml="false" />
+                    </span>
+                  </li>
+                </c:forEach>
+                <c:if test="${empty fase.soggetti}">
+                   <li class="list-group-item"><em>Nessuno</em></li>
+                </c:if>
+                </ul>
+              </div>
+              <div class="content-holder bgAct">Nuova associazione con soggetto contingente:
+                <div id="callable-row">
+                  <div class="row">
+                    <div class="col-12 large-4 ui-widget">
+                      <input class="sCont" name="sc-${fase.id}" type="text" placeholder="Inserisci uno spazio per visualizzare i soggetti esistenti">
+                    </div>
                   </div>
                 </div>
               </div>
