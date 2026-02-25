@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.5.3] (25/02/2026) [Presentation improvements](https://github.com/gbetorre/rischi/commits/main/?since=2026-02-25&until=2026-02-25) 
 - [2.5.2] (24/02/2026) Addition of non-applied measures display in the monitoring summary report 
 - [2.5.1] (23/02/2026) Presentation improvements
 - [2.5.0] (19/02/2026) Finalisation function to upload documents related to a measurement
