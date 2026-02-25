@@ -47,16 +47,12 @@
 
 package it.rol.util;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import it.rol.ConfigManager;
 import it.rol.Constants;
-import it.rol.exception.CommandException;
 
 
 /**
@@ -81,12 +77,23 @@ import it.rol.exception.CommandException;
  * (<em>in primis</em>, la eventuale lingua, che, nelle applicazioni
  * multilingua, &egrave; esplicitata facoltativamente - se non esplicitata
  * viene solitamente ricavata dalla lingua del sistema operativo, 
- * dalla localizzazione del client o da un valore di default).</p> 
- * 
+ * dalla localizzazione del client o da un valore di default).</p><hr>
+ * <p>DataUrl generates correctly formatted URLs for the Italian servlet application.
+ * Supports root paths and relative paths with mandatory parameters 
+ * (entToken, commandName, survey code, 'p' parameter) 
+ * plus optional additional parameters.
+ * All constructors validate input parameters and build query strings 
+ * according to app conventions.
+ * Example usage:
+ * <pre>
+ * DataUrl url1 = new DataUrl("server");                    // /server/appname/
+ * DataUrl url2 = new DataUrl("ENT1", "LIST", survey);     // /entToken=ENT1&cmd=LIST&r=123
+ * DataUrl url3 = new DataUrl("ENT1", "LIST", "part1", survey); // /entToken=ENT1&cmd=LIST&p=part1&r=123
+ * </pre>
+ * </p>
  * <p>Created on  Thu 27 Feb 2025 12:45:24 PM CET 2025</p>
  * 
- * @author Roberto Posenato
- * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
+ * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
 public class DataUrl implements Constants {
 
@@ -97,74 +104,61 @@ public class DataUrl implements Constants {
      * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione). 
      */
     private static final long serialVersionUID = 1413064779905762448L;
-    /**
-     * Token per riconoscere la lingua
-     */
-    private static String langToken = "lang";
-    /**
-     * ContextPath dell'applicazione privato dello '/' iniziale.<br>
-     * Si ricorda che il context path inizia sempre con / e non termina mai con
-     * /.<br>
-     * Il valore da porre in questa variabile &egrave;
-     * <code>
-     * javax.servlet.GenericServlet.getServletContext().getContextPath()
-     * </code>
-     */
-    private static String contextPathToken = VOID_STRING;
-    /**
-     * Token per definire la servlet centrale
-     */
+    /** Token javax.servlet.GenericServlet.getServletContext().getContextPath() */
+    private static String contextPathToken = ConfigManager.getContextPathToken();
+    /**     * Token per definire la servlet centrale                            */
     private static String servletToken = ConfigManager.getAppName();
-    /**
-     * Token per la classe command
-     */
+    /**     * Token per la classe command                                       */
     private static String commandToken = ConfigManager.getEntToken();
-
-    /**
-     * Token per la classe command con '=' attaccato in fondo.
-     */
-    private static String commandTokenEquals = commandToken + "=";
-    
-    /**
-     * Token derivato composto da servletToken + '?' + commandTokenEquals
-     */
-    private static String contextPathAndservletTokenAndCommandTokenEquals = contextPathToken + 
-                                                                            "/" + 
-                                                                            servletToken + 
-                                                                            "?" + 
-                                                                            commandTokenEquals;
-    
-    /**
-     * Rappresenta la lingua che deve essere esplicitata nell'url. Va sempre
-     * propagato se esiste. Viene gestito in modo separato rispetto agli altri
-     * parametri e non compare mai in {@link #mappa}.
-     */
-    private String lang;
-
-    /**
-     * Mappa dei parametri della query string
-     */
+    /**     * Token per la classe command con '=' attaccato in fondo.           */
+    private static String commandTokenEquals = commandToken + EQ;
+    /**   * Token derivato composto da servletToken + '?' + commandTokenEquals  */
+    private static String contextPathEquals = contextPathToken + 
+                                              SLASH +  
+                                              servletToken + 
+                                              QM + 
+                                              commandTokenEquals;
+    /** Base server path (e.g., "server/appname/")                              */
+    private String rootPath = servletToken;
+    /** Entity token (mandatory for relative paths)                             */
+    private String entToken = commandToken;
+    /** Command name (mandatory for relative paths)                             */
+    private String commandName;
+    /** Survey code (mandatory when survey provided)                            */
+    private String surveyCode;
+    /** 'p' parameter (part identifier)                                         */
+    private String part;
+    /**   * Mappa dei parametri della query string                              */
     private LinkedHashMap<String, String> mappa;
+    /** Additional optional parameters                                          */
+    private final Map<String, String> additionalParams;
+    /** Application name constant                                               */
+    private static final String APP_NAME = ConfigManager.getAppName();
+    /** Valid parameter name patterns                                           */
+    private static final String ENT_TOKEN_PATTERN = "^[A-Z0-9]{3,10}$";
+    private static final String CMD_PATTERN = "^[A-Z_]{2,20}$";
+    private static final String PART_PATTERN = "^[a-zA-Z0-9_-]{1,20}$";
+    private static final String SURVEY_CODE_PATTERN = "^[0-9]{1,10}$";
 
     
     /* **************************************************** *
      *                      Costruttori                     *
      * **************************************************** */
+    
     /**
      * <p>Costruttore senza argomenti.</p>
      * <ul>
      * <li>Istanzia la mappa che conterr&agrave; i parametri della query string</li>
-     * <li>Inizializza la lingua a stringa vuota</li>
      * </ul> 
      */
     public DataUrl() {
+        this.additionalParams = null;
         mappa = new LinkedHashMap<>();
-        lang = VOID_STRING;
     }
 
     
     /**
-     * Costruttore:<br /> 
+     * Costruttore parametro/valore:<br /> 
      * <cite id="howTo">Inserisci il parametro <code>'parametro'</code> 
      * con il valore <code>'valore'</code> nel
      * formato parametro '&amp;parametro=valore'</cite>
@@ -177,80 +171,314 @@ public class DataUrl implements Constants {
      * valorizza la lingua stessa, cio&egrave; dereferenzia la stringa vuota e
      * valorizza questo parametro con il valore passato come secondo argomento.
      * 
-     * @param parametro il nome del parametro di cui deve essere valutato il valore ai fini del parsing
-     * @param valore il valore da impostare come valore del parametro
+     * @param param il nome del parametro di cui deve essere valutato il valore ai fini del parsing
+     * @param value il valore da impostare come valore del parametro
      */
-    public DataUrl(final String parametro, 
-                   final String valore) {
+    public DataUrl(final String param, 
+                   final String value) {
+        this.additionalParams = null;
         mappa = new LinkedHashMap<>();
-        lang = new String("");
-        if (parametro.equalsIgnoreCase(langToken)) {
-            lang = valore;
-        } else {
-            mappa.put(DataUrl.encodeURL(parametro), DataUrl.encodeURL(valore));
-        }
+        mappa.put(DataUrl.encodeURL(param), DataUrl.encodeURL(value));
     }
-
+    
     
     /**
-     * <p>Costruttore da query string.</p>
-     * Costruisce l'oggetto prendendo i parametri e i valori dalla queryString, 
-     * eliminando, eventualmente, la sottostringa iniziale 'ent=*&'
+     * Constructor 3: Root path only
+     * Generates: server/appname/
      * 
-     * @param queryString la query string completa 'as is'
+     * @param root Server name (e.g., "localhost", "server01")
+     * @throws IllegalArgumentException if root is invalid
      */
-    public DataUrl(String queryString) {
-        mappa = new LinkedHashMap<>();
-        lang = "";
-        int i = 0, j = -1;
-        String nome, valore;
-        // Controllo sull'input
-        if (queryString != null) {
-            try {
-                queryString = java.net.URLDecoder.decode(queryString, "UTF-8");
-            } catch (final java.io.UnsupportedEncodingException ignored) {
-                /* questa eccezione è ignorata in quanto impossibile 
-                 * dal momento che UTF-8 è una codifica obbligatoria    */
+    public DataUrl(String root) {
+        validateRoot(root);
+        this.rootPath = normalizePath(root) + APP_NAME + SLASH;
+        this.entToken = null;
+        this.commandName = null;
+        this.surveyCode = null;
+        this.part = null;
+        this.additionalParams = new LinkedHashMap<>();
+    }
+    
+    
+    /**
+     * Constructor 4: Relative path with entToken, commandName, survey
+     * Generates: /entToken=XXX&cmd=YYY&r=ZZZ
+     * 
+     * @param entToken Entity token (3-10 uppercase alphanum)
+     * @param commandName Command name (uppercase letters/underscores)
+     * @param survey Survey bean containing code
+     * @throws IllegalArgumentException if any parameter invalid
+     */
+    public DataUrl(String entToken, String commandName, CodeBean survey) {
+        this(null, entToken, commandName, null, survey);
+    }
+    
+    
+    /**
+     * Constructor 5: Relative path with entToken, commandName, part, survey  
+     * Generates: /entToken=XXX&cmd=YYY&p=ZZZ&r=WWW
+     * 
+     * @param entToken Entity token
+     * @param commandName Command name
+     * @param part Part identifier
+     * @param survey Survey bean
+     */
+    public DataUrl(String entToken, String commandName, String part, CodeBean survey) {
+        this(null, entToken, commandName, part, survey);
+    }
+    
+    
+    /**
+     * Constructor 6: Relative path with entToken, commandName, part, extra param, survey
+     * Generates: /entToken=XXX&cmd=YYY&p=ZZZ&extra=AAA&r=WWW
+     * 
+     * @param entToken Entity token
+     * @param commandName Command name
+     * @param part Part identifier
+     * @param extra Additional parameter name
+     * @param survey Survey bean
+     */
+    public DataUrl(String entToken, String commandName, String part, 
+                   String extraParam, String extraValue, CodeBean survey) {
+        this(null, entToken, commandName, part, survey);
+        if (!extraParam.matches(PART_PATTERN) || extraValue == null) {
+            throw new IllegalArgumentException("Invalid extra parameter: " + extraParam);
+        }
+        additionalParams.put(extraParam, extraValue);
+    }
+    
+    
+    /**
+     * Constructor 7: Relative path with entToken, commandName, part, two extra params, survey
+     * Generates: /entToken=XXX&cmd=YYY&p=ZZZ&extra1=AAA&extra2=BBB&r=WWW
+     */
+    public DataUrl(String entToken, String commandName, String part, 
+                   String extra1, String extra1Value, 
+                   String extra2, String extra2Value, CodeBean survey) {
+        this(null, entToken, commandName, part, survey);
+        validateExtraParam(extra1, extra1Value);
+        validateExtraParam(extra2, extra2Value);
+        additionalParams.put(extra1, extra1Value);
+        additionalParams.put(extra2, extra2Value);
+    }
+    
+    
+    /**
+     * Constructor 8: Full relative path with root prefix
+     * Internal constructor used by other relative constructors
+     */
+    private DataUrl(String root, String entToken, String commandName, 
+                   String part, CodeBean survey) {
+        if (root != null) {
+            validateRoot(root);
+            this.rootPath = normalizePath(root) + APP_NAME + "/";
+        } else {
+            this.rootPath = "/";
+        }
+        validateEntToken(entToken);
+        validateCommand(commandName);
+        validateSurvey(survey);
+        validatePart(part);
+        this.entToken = entToken;
+        this.commandName = commandName;
+        this.part = part;
+        this.surveyCode = survey.getCode();
+        this.additionalParams = new LinkedHashMap<>();
+    }
+    
+    
+    public String getUrl() {
+        // Definisce una stringa dinamica da costruire tramite il contenuto della mappa
+        StringBuffer url = new StringBuffer();
+        // Cicla sui parametri da restituire
+        Iterator<Map.Entry<String, String>> iterator = mappa.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            // Chiave e valore
+            String key = entry.getKey();
+            String value = entry.getValue();
+            url.append(key)
+               .append(EQ)
+               .append(value);
+            // Check if there are more elements
+            if (iterator.hasNext()) {
+                url.append(AMPERSAND);
             }
         }
-        if (queryString != null && queryString.length() > 0) {
-            if (queryString.startsWith(commandTokenEquals)) {
-                i = queryString.indexOf('&'); // vado al primo parametro dopo ent=*
+        return url.toString();
+    }
+    
+    
+    /**
+     * Generates the complete URL path string
+     * 
+     * @return Formatted URL (absolute or relative based on constructor used)
+     */
+    public String getUrl(String rootPath) {
+        StringBuilder url = new StringBuilder(rootPath);
+        
+        // Relative path components
+        if (entToken != null) {
+            appendParam(url, "entToken", entToken);
+            appendParam(url, "cmd", commandName);
+            if (part != null) {
+                appendParam(url, "p", part);
             }
-            if (i != -1) {  // ci sono parametri da usare!
-                if (i > 0)
-                    i++;    // mi posiziono al primo carattere utile.
-                while ((j = queryString.indexOf('=', i)) != -1) { // c'e` un
-                    // parametro
-                    // (string=string)
-                    // System.err.println("Valori per nome di i, j "+i+", "+j);
-                    nome = queryString.substring(i, j);
-                    i = j + 1;
-                    j = queryString.indexOf('&', i);
-                    if (j == -1)
-                        j = queryString.length();// e' l'ultimo
-                    // parametro
-                    // System.err.println("Valori per valore di i, j "+i+", "+j);
-                    valore = queryString.substring(i, j);
-                    i = j + 1;
-                    if (nome.startsWith("?")) {
-                        // Capita che un URL sia stato formato accodando due
-                        // queryString (che iniziano con ?) per errore.
-                        // Per esempio: URL che torna dalla banca per la
-                        // notifica di pagamento con carta di credito.
-                        // Aggiusto per semplificare il resto del codice.
-                        // [24/05/2014] Posenato
-                        nome = nome.substring(1);
-                    }
-                    nome = encodeURL(nome);
-                    valore = encodeURL(valore);
-                    if (nome.equalsIgnoreCase(langToken)) {
-                        lang = valore;
-                    } else {
-                        mappa.put(nome, valore);
-                    }
-                }
+            appendParam(url, "r", surveyCode);
+            
+            // Additional parameters
+            for (Map.Entry<String, String> entry : additionalParams.entrySet()) {
+                appendParam(url, entry.getKey(), entry.getValue());
             }
+        }
+        
+        return url.toString();
+    }
+    
+    
+    /**
+     * Adds an additional parameter to existing URL
+     * 
+     * @param param Parameter name (must match PART_PATTERN)
+     * @param value Parameter value (non-null)
+     * @throws IllegalArgumentException if parameters invalid
+     */
+    public void add(final String param, 
+                    final String value) {
+        validateExtraParam(param, value);
+        this.put(param, value);
+        additionalParams.put(param, value);
+    }
+         
+    
+    /**
+     * <p>Rimuove il parametro <code>'parametro'</code> se esiste, 
+     * nulla altrimenti.</p>
+     * 
+     * @param parametro il parametro che deve essere eliminato
+     * @return <code>DataUrl</code> - dataUrl depurato del parametro indicato
+     */
+    public DataUrl remove(final String parametro) {
+        if (parametro != null) {
+            mappa.remove(parametro);
+        }
+        return this;
+    }
+    
+    
+    /**
+     * Clears all additional parameters
+     */
+    public void clearAdditionalParams() {
+        additionalParams.clear();
+    }
+    
+    
+    /**
+     * Validates root server name
+     */
+    private void validateRoot(String root) {
+        if (root == null || root.trim().isEmpty() || !root.matches("^[a-zA-Z0-9.-]+$")) {
+            throw new IllegalArgumentException("Invalid root: " + root);
+        }
+    }
+    
+    
+    /**
+     * Validates entity token format
+     */
+    private void validateEntToken(String entToken) {
+        if (!entToken.matches(ENT_TOKEN_PATTERN)) {
+            throw new IllegalArgumentException("Invalid entToken: " + entToken + 
+                " (must be 3-10 uppercase alphanum)");
+        }
+    }
+    
+    
+    /**
+     * Validates command name format
+     */
+    private void validateCommand(String commandName) {
+        if (!commandName.matches(CMD_PATTERN)) {
+            throw new IllegalArgumentException("Invalid command: " + commandName + 
+                " (must be uppercase letters/underscores)");
+        }
+    }
+    
+    
+    /**
+     * Validates survey bean
+     */
+    private void validateSurvey(CodeBean survey) {
+        if (survey == null || survey.getCode() == null || 
+            !survey.getCode().matches(SURVEY_CODE_PATTERN)) {
+            throw new IllegalArgumentException("Invalid survey code: " + survey);
+        }
+    }
+    
+    
+    /**
+     * Validates part parameter (nullable)
+     */
+    private void validatePart(String part) {
+        if (part != null && !part.matches(PART_PATTERN)) {
+            throw new IllegalArgumentException("Invalid part: " + part);
+        }
+    }
+    
+    
+    /**
+     * Validates additional parameter name/value
+     */
+    private void validateExtraParam(String name, String value) {
+        if (!name.matches(PART_PATTERN) || value == null) {
+            throw new IllegalArgumentException("Invalid extra param: " + name + "=" + value);
+        }
+    }
+    
+    
+    /**
+     * Appends parameter to URL in correct format
+     */
+    private void appendParam(StringBuilder url, String name, String value) {
+        if (url.length() > 1) { // Not first param
+            url.append("&");
+        }
+        url.append(name).append("=").append(encodeValue(value));
+    }
+    
+    
+    /**
+     * Normalizes and encodes URL path component
+     */
+    private String normalizePath(String path) {
+        return path.replaceAll("[/\\\\]+", "/").replaceAll("/+$", "");
+    }
+    
+    
+    /**
+     * URL-encodes parameter values (simplified for Italian charset)
+     */
+    private String encodeValue(String value) {
+        return value.replace("&", "%26").replace("=", "%3D").replace(" ", "+");
+    }
+    
+    
+    /**
+     * Required CodeBean interface/class for survey codes
+     */
+    public static class CodeBean {
+        private String code;
+        
+        public CodeBean(String code) {
+            if (!code.matches("^[0-9]{1,10}$")) {
+                throw new IllegalArgumentException("Invalid code: " + code);
+            }
+            this.code = code;
+        }
+        
+        public String getCode() {
+            return code;
         }
     }
 
@@ -258,6 +486,7 @@ public class DataUrl implements Constants {
     /* **************************************************** *
      *                  Getter  e  Setter                   *
      * **************************************************** */
+    
     /**
      * <p>Getter per il token usato per rappresentare la Main servlet</p>
      * 
@@ -289,7 +518,7 @@ public class DataUrl implements Constants {
             String s = DataUrl.contextPathToken + DataUrl.servletToken;
             if (s.equals("//")) // Sanity check
                 s = "/";
-            DataUrl.contextPathAndservletTokenAndCommandTokenEquals = s + "?" + DataUrl.commandTokenEquals;
+            DataUrl.contextPathEquals = s + "?" + DataUrl.commandTokenEquals;
         }
     }
 
@@ -334,6 +563,7 @@ public class DataUrl implements Constants {
     /* **************************************************** *
      *      Metodi per la manipolazione dei caratteri       *
      * **************************************************** */
+    
     /**
      * <p>Metodo statico per convertire i caratteri IS0-8859-1 nel formato adatto
      * per gli URL.</p>
@@ -418,6 +648,7 @@ public class DataUrl implements Constants {
     /* **************************************************** *
      *      Metodi per la manipolazione dei parametri       *
      * **************************************************** */
+    
     /**
      * <p>Inserisce la coppia 
      * <pre>'parametro'='valore'</pre> sostituendo eventualmente il valore del
@@ -429,12 +660,8 @@ public class DataUrl implements Constants {
      */
     public DataUrl put(final String parametro, 
                        final String valore) {
-        if (parametro != null && parametro.equalsIgnoreCase(langToken)) {
-            lang = valore;
-        } else {
-            if (parametro != null)
-                mappa.put(encodeURL(parametro), encodeURL(valore));
-        }
+        if (parametro != null)
+            mappa.put(encodeURL(parametro), encodeURL(valore));
         return this;
     }
     
@@ -454,23 +681,6 @@ public class DataUrl implements Constants {
                        final int valore) {
         if (parametro != null)
             mappa.put(encodeURL(parametro), Integer.toString(valore));
-        return this;
-    }
-
-    
-    /**
-     * <p>Aggiunge la coppia <pre>'parametro'='valore'</pre></p>
-     * <p>
-     * Facade di
-     * {@link #put(String, String)}</p>
-     * 
-     * @param parametro il parametro il cui valore deve essere aggiunto
-     * @param valore    il valore da inserire nel parametro indicato
-     * @return <code>DataUrl</code> - dataUrl modificato nel valore del parametro indicato
-     */
-    public DataUrl add(final String parametro, 
-                       final String valore) {
-        this.put(parametro, valore);
         return this;
     }
 
@@ -530,66 +740,6 @@ public class DataUrl implements Constants {
 
     
     /**
-     * <p>Rimuove il parametro <code>'parametro'</code> se esiste, 
-     * nulla altrimenti.</p>
-     * 
-     * @param parametro il parametro che deve essere eliminato
-     * @return <code>DataUrl</code> - dataUrl depurato del parametro indicato
-     */
-    public DataUrl remove(final String parametro) {
-        if (parametro != null) {
-            if (parametro.equalsIgnoreCase(langToken))
-                lang = new String("");
-            else
-                mappa.remove(parametro);
-        }
-        return this;
-    }
-
-    
-    /**
-     * <p>Restituisce il parametro <code>'parametro'</code> se esiste, 
-     * stringa "" (vuota) altrimenti.</p> 
-     * <p>Il formato della stringa restituita &egrave; pari a quello restituito da
-     * {@link java.net.URLEncoder}.</p>
-     * 
-     * @param parametro
-     *            da ricercare. Se null, ritorna "";
-     * @return <code>String</code> - il valore di 'parametro' se esiste, stringa "" altrimenti.
-     */
-    public String getEncoded(final String parametro) {
-        if (parametro == null)
-            return "";
-        if (parametro.equalsIgnoreCase(langToken))
-            return lang;
-        String value = mappa.get(parametro);
-        if (value == null)
-            return "";
-        return value;
-    }
-    
-
-    /**
-     * <p>Restituisce il parametro <code>'parametro'</code> se esiste, 
-     * stringa "" (vuota) altrimenti.</p>
-     * 
-     * @param parametro
-     *            da ricercare. Se null, ritorna "";
-     * @return <code>String</code> - il valore di 'parametro' se esiste, stringa "" altrimenti.
-     */
-    public String get(final String parametro) {
-        String value = this.getEncoded(parametro);
-        if (value.isEmpty())
-            return value;
-        try {
-            return java.net.URLDecoder.decode(value, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return "";
-        }
-    }
-
-    
-    /**
      * <p>merge(DataUrl d) restituisce un DataUrl dato dall'unione del DataUrl 'd'
      * con i valori presenti nel data url attuale.</p> 
      * <p>Lo stato interno sia di <code><strong>this</strong></code>
@@ -606,561 +756,12 @@ public class DataUrl implements Constants {
         nuovo.mappa = temp;
         return nuovo;
     }
-  
+
 
     /* **************************************************** *
-     *         Metodi per la generazione degli URL          *
+     *         Altri Metodi  *
      * **************************************************** */
-    /*
-     * <p>Questo metodo viene deprecato perch&eacute; 
-     * il nome &egrave; sbagliato.</p> 
-     * <p>Usare {@link #getQueryString()}.</p>
-     * 
-     * @see #getQueryString
-     * @return vedi {@link #getQueryString()}
-     *
-    @Deprecated
-    public String getUrl() {
-        return this.getQueryString();
-    }*/
-    
-    public String getUrl() {
-        // Definisce una stringa dinamica da costruire tramite il contenuto della mappa
-        StringBuffer url = new StringBuffer();
-        // Cicla sui parametri da restituire
-        
-        Iterator<Map.Entry<String, String>> iterator = mappa.entrySet().iterator();
-
-
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
-            // Chiave e valore
-            String key = entry.getKey();
-            String value = entry.getValue();
-            url.append(key)
-               .append(EQ)
-               .append(value);
-            // Check if there are more elements
-            if (iterator.hasNext()) {
-                url.append(AMPERSAND);
-            }
-            
-        }
-        /*
-        for (java.util.Map.Entry<String, String> entry : mappa.entrySet()) {
-            // Chiave e valore
-            String key = entry.getKey();
-            String value = entry.getValue();
-            url.append(key)
-               .append(EQ)
-               .append(value);
-            if (mappa.)
-        }*/
-        return url.toString();
-    }
-
-
-    /**
-     * <p>Restituisce il contenuto di questo oggetto in codifica html:
-     * <pre>param1=value1&amp;param2=value2&...</pre>
-     * Se non ci sono parametri, restituisce stringa vuota ("").</p>
-     * 
-     * @return <code>DataUrl</code> - DataUrl corrente in formato HTML senza '?' inziale.
-     */
-    public String getQueryString() {
-        final StringBuffer buffer = new StringBuffer();
-        for (Entry<String, String> entry : mappa.entrySet()) {
-            buffer.append(entry.getKey() + "=" + entry.getValue() + "&amp;");
-        }
-        // Il ciclo while ha aggiunto un &amp; di troppo
-        if (mappa.size() > 0)
-            buffer.setLength(buffer.length() - 5);
-        buffer.append(this.printLang());
-        return buffer.toString();
-    }
-
-
-    /**
-     * <p>Restituisce l'url: 
-     * <pre>DataUrl.contextPathAndservletTokenAndCommandTokenEquals + 
-     *        valore di 'ent'</pre>
-     * senza modificare lo stato interno.</p>
-     * <p>In altri termini, genera link del tipo:
-     * <pre>/main?ent=persona</pre>
-     * che vanno a invocare la ServletCommand senza passarle ulteriori valori.</p>
-     * 
-     * @param ent valore del 'Token', cio&egrave; della ServletCommand richiesta
-     * @return <code>String</code> - l'url: DataUrl.contextPathAndservletTokenAndCommandTokenEquals + 'ent' senza modificare lo stato interno
-     */
-    public String getUrl(final String ent) {
-        return this.getUrl(ent, false);
-    }
-
-
-    /**
-     * <p>Restituisce l'url 
-     * <pre>DataUrl.contextPathAndservletTokenAndCommandTokenEquals +
-     *        valore di 'ent' +
-     *        valore di &quot;parametri interni&quot;</pre> 
-     * senza modificare lo stato interno se 'ext' &egrave; <code>true</code>,<br />
-     * <strong><em>oppure</em></strong> l'url 
-     * <pre>DataUrl.contextPathAndservletTokenAndCommandTokenEquals + 
-     *       'ent'</pre> 
-     * altrimenti.</p>
-     * <p>Esempio:
-     * <ul>
-     * <li>se contextPathToken = new String("");</li>
-     * <li>e servletToken = "main"; //(Token per definire la servlet centrale)</li>
-     * <li>e commandTokenEquals = "ent" + "="; //(Token per la classe command con '=' attaccato in fondo)</li>
-     * <li>allora contextPathAndservletTokenAndCommandTokenEquals = "" + "/" + "main" + "?" + ent=;</li>
-     * </ul>
-     * cio&egrave; vale: <pre>/main?ent=</pre>
-     * A questo campo, questo metodo aggiunge valore di 'ent' e valore 
-     * di parametri interni se 'ext' &egrave; 'true'; quindi, nell'esempio, 
-     * posti ent a "persona" e parmetri interni a "id=100", si avr&agrave; 
-     * come valore di ritorno:
-     * <pre>/main?ent=persona&amp;id=100</pre></p>
-     * 
-     * @param ent valore del 'Token', cio&egrave; della ServletCommand richiesta
-     * @param ext boolean flag che specifica se aggiungere tutti i parametri aggiuntivi o meno
-     * @return <code>String</code> - valore di un link ipertestuale costruito sulla base degli argomenti passati, da stampare come valore di un attributo html <code>href</code>
-     */
-    public String getUrl(final String ent, 
-                         final boolean ext) {
-        final StringBuffer temp = new StringBuffer(new String(""));
-        if ((ent != null) && (ent.length() > 0)) {
-            temp.append(contextPathAndservletTokenAndCommandTokenEquals);
-            temp.append(encodeURL(ent));
-            if (ext) {
-                if (mappa.size() > 0) {
-                    temp.append("&amp;");
-                    temp.append(this.getQueryString());
-                } else {
-                    temp.append(this.printLang());
-                }
-            } else {
-                temp.append(this.printLang());
-            }
-        }
-        return temp.toString();
-    }
-
-
-    /**
-     * <p>Restituisce la stringa: 
-     * <pre>DataUrl.contextPathAndservletTokenAndCommandTokenEquals +
-     *        valore di 'ent' +
-     *        &quot;&amp;&quot; +
-     *        'data' (valore di &quot;parametri interni&quot;)</pre>
-     * in codifica html, senza modificare lo stato interno.</p>
-     * 
-     * @param ent valore del 'Token', cio&egrave; della ServletCommand richiesta
-     * @param data
-     *            una sequenza di parametro=valore separati da & (singolo
-     *            carattere)
-     * @return <code>String</code> - valore di un link ipertestuale costruito sulla base degli argomenti passati, da stampare come valore di un attributo html <code>href</code>
-     */
-    public String getUrl(final String ent, 
-                         final String data) {
-        final DataUrl tempData = new DataUrl(data);
-        // tempData viene utilizzato per gestire data ignorando la lang
-        // (se data ha lang al suo interno ora viene gestito in tempData.lang)
-        tempData.remove(langToken);
-        if ((ent != null) && (ent.length() > 0)) {
-            if ((data != null) && (data.length() > 0))
-                return DataUrl.contextPathAndservletTokenAndCommandTokenEquals
-                        + encodeURL(ent) + "&amp;" + tempData.getQueryString()
-                        + this.printLang();
-            return DataUrl.contextPathAndservletTokenAndCommandTokenEquals
-                    + encodeURL(ent) + this.printLang();
-        }
-        if ((data != null) && (data.length() > 0))
-            return tempData.getQueryString() + this.printLang();
-        return new String("");
-    }
-
-
-    /**
-     * <p>Restituisce la stringa: 
-     * <pre>DataUrl.contextPathAndservletTokenAndCommandTokenEquals +
-     *        valore di 'ent' +
-     *        &quot;&amp;&quot; +
-     *        'data' (valore di &quot;parametri interni&quot;) +
-     *        &quot;buffer interno&quot;
-     *        </pre>
-     * senza modificare lo stato interno se
-     * <pre>'ext' &egrave; true</pre> 
-     * <strong><em>oppure</em></strong> la string 
-     * <pre>DataUrl.contextPathAndservletTokenAndCommandTokenEquals +
-     *        valore di 'ent' +
-     *        &quot;&amp;&quot; +
-     *        'data' (valore di &quot;parametri interni&quot;)</pre>
-     * altrimenti.</p>
-     * 
-     * @param ent valore del 'Token', cio&egrave; della ServletCommand richiesta
-     * @param data
-     *            una sequenza di parametro=valore separati da & (singolo
-     *            carattere).
-     * @param ext boolean flag che specifica se aggiungere tutti i parametri aggiuntivi o meno
-     * @return <code>String</code> - valore di un link ipertestuale costruito sulla base degli argomenti passati, da stampare come valore di un attributo html <code>href</code>
-     */
-    public String getUrl(final String ent, 
-                         final String data, 
-                         final boolean ext) {
-        if (ext) {
-            final DataUrl temp = this.merge(new DataUrl(data));
-            temp.lang = lang;
-            return temp.getUrl(ent, true);
-        }
-        return this.getUrl(ent, data);
-    }
-
-
-    /**
-     * <p>Restituisce la stringa: 
-     * <pre>DataUrl.servletToken +
-     *        &quot;?&quot; +
-     * DataUrl.commandToken +
-     *        encodeURL(ent) + 
-     *        &quot;parametri interni&quot;</pre>
-     * senza modificare lo stato interno se
-     * <pre>'ext' &egrave; true</pre> 
-     * <strong><em>oppure</em></strong> la string 
-     * <pre>DataUrl.servletToken +
-     *        &quot;?&quot; +
-     * DataUrl.commandToken +
-     *        encodeURL(ent) + 
-     *        &quot;ent&quot;</pre>
-     * altrimenti.</p>
-     * 
-     * @param ent valore del 'Token', cio&egrave; della ServletCommand richiesta
-     * @param ext boolean flag che specifica se aggiungere tutti i parametri aggiuntivi o meno
-     * @return <code>String</code> - l'url DataUrl.servletToken + "?" + DataUrl.commandToken + "=" +
-     *         encodeURL(ent) + "parametri interni" senza modificare lo stato
-     *         interno se 'ext' è true, l'url DataUrl.servletToken + "?" +
-     *         DataUrl.commandToken + "=" + encodeURL(ent) + 'ent' altrimenti
-     */
-    public String getUrlWithoutContext(final String ent, 
-                                       final boolean ext) {
-        final StringBuffer temp = new StringBuffer("");
-        if ((ent != null) && (ent.length() > 0)) {
-            temp.append(DataUrl.servletToken + "?" + DataUrl.commandToken + "="
-                    + encodeURL(ent));
-            if (ext) {
-                if (mappa.size() > 0) {
-                    temp.append("&amp;" + this.getQueryString());
-                } else {
-                    temp.append(this.printLang());
-                }
-            } else {
-                temp.append(this.printLang());
-            }
-        }
-        return temp.toString();
-    }
-
-
-    /**
-     * <p>Restituisce la stringa: 
-     * <pre>DataUrl.servletToken +
-     *        &quot;?&quot; +
-     * DataUrl.commandToken +
-     *        &quot;=&quot; +
-     *        encodeURL(ent) +
-     *        &quot;&amp;&quot; +   
-     *        &quot;data&quot;</pre>
-     * in codifica html senza modificare lo stato interno.</p>
-     * 
-     * @param ent valore del 'Token', cio&egrave; della ServletCommand richiesta
-     * @param data
-     *            una sequenza di parametro=valore separati da & (singolo
-     *            carattere).
-     * @return <code>String</code> - la stringa DataUrl.servletToken + "?" + DataUrl.commandToken +
-     *         "=" + encodeURL(ent) + "&" + 'data' in codifica html, senza
-     *         modificare lo stato interno.
-     */
-    public String getUrlWithoutContext(final String ent, 
-                                       final String data) {
-        final DataUrl tempData = new DataUrl(data);
-        // tempData viene utilizzato per gestire data ignorando la lang
-        // (se data ha lang al suo interno ora viene gestito in tempData.lang)
-        tempData.remove(langToken);
-        if ((ent != null) && (ent.length() > 0)) {
-            if ((data != null) && (data.length() > 0))
-                return DataUrl.servletToken + "?" + DataUrl.commandToken + "="
-                        + encodeURL(ent) + "&amp;" + tempData.getQueryString()
-                        + this.printLang();
-            return DataUrl.servletToken + "?" + DataUrl.commandToken + "="
-                    + encodeURL(ent) + this.printLang();
-        }
-        if ((data != null) && (data.length() > 0))
-            return tempData.getQueryString() + this.printLang();
-        return new String("");
-    }
-
-    
-    /**
-     * <p>Restituisce la stringa: 
-     * <pre>DataUrl.servletToken +
-     *        &quot;?&quot; +
-     * DataUrl.commandToken +
-     *        &quot;=&quot; +
-     *        encodeURL(ent) + 
-     *        &quot;&amp;&quot; +
-     *        &quot;data&quot; +
-     *        &quot;buffer interno&quot;</pre>
-     * senza modificare lo stato interno se
-     * <pre>'ext' &egrave; true</pre> 
-     * <strong><em>oppure</em></strong> la string 
-     * <pre>DataUrl.servletToken +
-     *        &quot;?&quot; +
-     * DataUrl.commandToken +
-     *        &quot;=&quot; +
-     *        encodeURL(ent) + 
-     *        &quot;ent&quot; +
-     *        &quot;&amp;&quot; +
-     *        &quot;data&quot;</pre>
-     * altrimenti.</p>
-     * 
-     * @param ent valore del 'Token', cio&egrave; della ServletCommand richiesta
-     * @param data
-     *            una sequenza di parametro=valore separati da & (singolo
-     *            carattere).
-     * @param ext boolean flag che specifica se aggiungere tutti i parametri aggiuntivi o meno
-     * @return <code>String</code> - DataUrl.servletToken + "?" + DataUrl.commandToken + "=" +
-     *         encodeURL(ent) + "&" + 'data' + "buffer interno" senza modificare
-     *         lo stato interno se 'ext' è true, la string DataUrl.servletToken
-     *         + "?" + DataUrl.commandToken + "=" + encodeURL(ent) + 'ent' +
-     *         "&" + 'data' altrimenti.
-     */
-    public String getUrlWithoutContext(final String ent, 
-                                       final String data,
-                                       final boolean ext) {
-        if (ext) {
-            final DataUrl temp = this.merge(new DataUrl(data));
-            temp.lang = lang;
-            return temp.getUrlWithoutContext(ent, true);
-        }
-        return this.getUrlWithoutContext(ent, data);
-    }
-
-  
-    /**
-     * NON pu' usare setContextPath o setServletToken altrimenti cambierebbe
-     * lo stato interno del dataurl, che se venisse usato da quel momento
-     * in poi genererebbe link con una logica diversa da quella usata 
-     * fino a prima della chiamata di questo metodo.
-     * Per questo motivo, questo metodo non è proprio elegantissimo
-     * (diciamo pure che è un po' "tarocco") perché si basa sull'
-     * assunto che servletToken sia già stata inizializzata a / e per essere
-     * sicuro che la navigazione vada in main la cabla (d'altra parte, se la
-     * va a prendere dal web.xml, sotto dol e fol, che non usano più "main", 
-     * non funzionerebbe; se la va a prendere dalla variabile statica
-     * della presente classe, siccome esiste un setter per tale variabile, 
-     * non è detto che il valore non ne sia stato alterato: per questo cambiamo
-     * la logica, e nel momento in cui cambieranno le regole di navigazione
-     * di aol, cambieremo di nuovo il corpo del metodo!
-     * 
-     * @param ent
-     * @param ext
-     * @param contextPathAndservletTokenAndCommandTokenEquals
-     * @return
-     */
-    private String getUrl(final String ent, 
-                          final boolean ext,
-                          final String contextPathAndservletTokenAndCommandTokenEquals) {
-        final StringBuffer temp = new StringBuffer(new String(""));
-        if ((ent != null) && (ent.length() > 0)) {
-            temp.append(contextPathAndservletTokenAndCommandTokenEquals);
-            temp.append(encodeURL(ent));
-            if (ext) {
-                if (mappa.size() > 0) {
-                    temp.append("&amp;");
-                    temp.append(this.getQueryString());
-                } else {
-                    temp.append(this.printLang());
-                }
-            } else {
-                temp.append(this.printLang());
-            }
-        }
-        return temp.toString();
-    }
-
-    
-    private String getUrl(final String ent, 
-                          final String data, 
-                          final String contextPathAndservletTokenAndCommandTokenEquals) {
-        final DataUrl tempData = new DataUrl(data);
-        // tempData viene utilizzato per gestire data ignorando la lang
-        // (se data ha lang al suo interno ora viene gestito in tempData.lang)
-        tempData.remove(langToken);
-        if ((ent != null) && (ent.length() > 0)) {
-            if ((data != null) && (data.length() > 0))
-                return contextPathAndservletTokenAndCommandTokenEquals +
-                       encodeURL(ent) + 
-                       "&amp;" + 
-                       tempData.getQueryString() + 
-                       this.printLang();
-            return contextPathAndservletTokenAndCommandTokenEquals + 
-                   encodeURL(ent) + 
-                   this.printLang();
-        }
-        if ((data != null) && (data.length() > 0))
-            return tempData.getQueryString() + this.printLang();
-        return new String("");
-    }
-
-
-    /**
-     * 
-     * 
-     * @param ent
-     * @param ext
-     * @param scheme
-     * @return
-     * @throws CommandException
-     */
-    public String getAbsoluteAolUrl(final String ent, 
-                                    final boolean ext,
-                                    String scheme) 
-                             throws CommandException {
-        String protocol = null;
-        // Controllo sull'input
-        try {
-            protocol = parseScheme(scheme);
-        } catch (IllegalArgumentException iae) {
-            throw new CommandException(iae.getMessage(), iae);
-        }
-        String contextPathAolToken = protocol + "://";
-        String contextPathAndservletTokenAndCommandTokenEquals = contextPathAolToken + 
-                                                                 "/" +
-                                                                 "main" + 
-                                                                 "?" + 
-                                                                 commandTokenEquals;
-        return this.getUrl(ent, ext, contextPathAndservletTokenAndCommandTokenEquals);
-    }
-
-    
-    public String getAbsoluteAolUrl(final String ent, 
-                                    final String data,
-                                    String scheme) 
-                             throws CommandException {
-        String protocol = null;
-        // Controllo sull'input
-        try {
-        	protocol = parseScheme(scheme);
-        } catch (IllegalArgumentException iae) {
-            throw new CommandException(iae.getMessage(), iae);
-        }
-        String contextPathAolToken = protocol + "://";
-        String contextPathAndservletTokenAndCommandTokenEquals = contextPathAolToken + 
-                                                                 "/" +
-                                                                 "main" + 
-                                                                 "?" + 
-                                                                 commandTokenEquals;
-        return this.getUrl(ent, data, contextPathAndservletTokenAndCommandTokenEquals);
-    }
-
-    
-    public String getAbsoluteFolUrl(final String ent, 
-                                    final boolean ext,
-                                    String scheme,
-                                    String domain) 
-                             throws CommandException {
-        String protocol = null;
-        // Controllo sull'input
-        try {
-        	protocol = parseScheme(scheme);
-        } catch (IllegalArgumentException iae) {
-            throw new CommandException(iae.getMessage(), iae);
-        }
-        String contextPathFolToken = protocol + "://" + parseDomain(domain);
-        String contextPathAndservletTokenAndCommandTokenEquals = contextPathFolToken + 
-                                                                 "/" +
-                                                                 "?" + 
-                                                                 commandTokenEquals;
-        return this.getUrl(ent, ext, contextPathAndservletTokenAndCommandTokenEquals);
-    }
-
-
-    public String getAbsoluteFolUrl(final String ent, 
-                                    final String data,
-                                    String scheme, 
-                                    String domain) 
-                             throws CommandException {
-        String protocol = null;
-        // Controllo sull'input
-        try {
-        	protocol = parseScheme(scheme);
-        } catch (IllegalArgumentException iae) {
-            throw new CommandException(iae.getMessage(), iae);
-        }
-        String contextPathFolToken = protocol + "://" + parseDomain(domain);
-        String contextPathAndservletTokenAndCommandTokenEquals = contextPathFolToken + 
-                                                                 "/" +
-                                                                 "?" + 
-                                                                 commandTokenEquals;
-        return this.getUrl(ent, data, contextPathAndservletTokenAndCommandTokenEquals);
-    }
-
-
-    public String getAbsoluteDolUrl(final String ent, 
-                                    final boolean ext,
-                                    String scheme,
-                                    String domain) 
-                             throws CommandException {
-        String protocol = null;
-        // Controllo sull'input
-        try {
-        	protocol = parseScheme(scheme);
-        } catch (IllegalArgumentException iae) {
-            throw new CommandException(iae.getMessage(), iae);
-        }
-        String contextPathDolToken = protocol + "://" + parseDomain(domain);
-        String contextPathAndservletTokenAndCommandTokenEquals = contextPathDolToken + 
-                                                                 "/" +
-                                                                 "?" + 
-                                                                 commandTokenEquals;
-        return this.getUrl(ent, ext, contextPathAndservletTokenAndCommandTokenEquals);
-    }
-
-
-    public String getAbsoluteDolUrl(final String ent, 
-                                    final String data,
-                                    String scheme, 
-                                    String domain) 
-                             throws CommandException {
-        String protocol = null;
-        // Controllo sull'input
-        try {
-        	protocol = parseScheme(scheme);
-        } catch (IllegalArgumentException iae) {
-            throw new CommandException(iae.getMessage(), iae);
-        }
-        String contextPathDolToken = protocol + "://" + parseDomain(domain);
-        String contextPathAndservletTokenAndCommandTokenEquals = contextPathDolToken + 
-                                                                 "/" +
-                                                                 "?" + 
-                                                                 commandTokenEquals;
-        return this.getUrl(ent, data, contextPathAndservletTokenAndCommandTokenEquals);
-    }
-
-    
-    /**
-     * Restituisce la stringa formata dalla coppia 
-     * <pre>&quot;&amp;langToken=lang&quot;</pre> se
-     * l'attributo lang &egrave; !=null e !="", 
-     * <strong><em>oppure</em></strong> la string "" altrimenti.
-     * 
-     * @return <code>String</code> - valore calcolato del parametro "lang", se esiste nella GET
-     */
-    private String printLang() {
-        return (lang != null && !lang.equals("") ? "&amp;" + langToken + "="
-                + lang : "");
-    }
-    
-    
+      
     /**
      * 
      * @param scheme
