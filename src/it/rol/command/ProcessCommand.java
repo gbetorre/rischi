@@ -85,7 +85,9 @@ import it.rol.util.DataUrl;
 /**
  * <p><code>ProcessCommand.java</code><br />
  * Implementa la logica per la gestione dei processi censiti dall'anticorruzione
- * ai fini della valutazione del rischio corruttivo, on line (ROL).</p>
+ * ai fini della valutazione del rischio corruttivo, on line (ROL).<hr>
+ * Implements the logic for managing processes 
+ * for the purposes of assessing corruption risk online (ROL).</p>
  *
  * @author <a href="mailto:gianroberto.torre@gmail.com">Giovanroberto Torre</a>
  */
@@ -96,88 +98,96 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * identificativa della versione seriale.
      * (Se questo dato non fosse inserito, verrebbe calcolato in maniera automatica
      * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione).
+     * <hr>     
+     * Serialization requires declaring a constant of type long
+     * identifying the serial version.
      */
     private static final long serialVersionUID = 4356663206440110257L;
     /**
      *  Nome di questa classe
      *  (utilizzato per contestualizzare i messaggi di errore)
+     *  <hr>
+     *  Name of this
      */
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
-    /**
-     * Log per debug in produzione
-     */
+    /**     * Log                                                               */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
-    /**
-     * Pagina a cui la command reindirizza per mostrare i macroprocessi
-     */
-    private static final String nomeFileElenco = "/jsp/prElenco.jsp";
-    /**
-     * Pagina per mostrare il dettaglio di un processo
-     */
-    private static final String nomeFileDettaglio = "/jsp/prProcessoAjax.jsp";
-    /**
-     * Pagina per mostrare l'elenco degli input
-     */
-    private static final String nomeFileInputs = "/jsp/prInputs.jsp";
-    /**
-     * Pagina per mostrare l'elenco degli output
-     */
-    private static final String nomeFileOutputs = "/jsp/prOutputs.jsp";
-    /**
-     * Pagina per mostrare il dettaglio di un output
-     */
-    private static final String nomeFileOutput = "/jsp/prOutput.jsp";
-    /**
-     * Pagina per mostrare elenco dei fattori abilitanti
-     */
-    private static final String nomeFileFattori = "/jsp/prFattori.jsp";
-    /**
+    /**     * Page to show macroprocess tree                                    */
+    private static final String nomeFileElenco =        "/jsp/prElenco.jsp";
+    /**     * Page to show details of a given process                           */
+    private static final String nomeFileDettaglio =     "/jsp/prProcessoAjax.jsp";
+    /**     * Page to show list of inputs                                       */
+    private static final String nomeFileInputs =        "/jsp/prInputs.jsp";
+    /**     * Pagina to show list of outputs                                    */
+    private static final String nomeFileOutputs =       "/jsp/prOutputs.jsp";
+    /**     * Page to show details of a given output                            */
+    private static final String nomeFileOutput =        "/jsp/prOutput.jsp";
+    /**     * Page to show list of enabling factors                             */
+    private static final String nomeFileFattori =       "/jsp/prFattori.jsp";
+    /** 
      * Pagina a cui la command inoltra per mostrare la form di aggiunta di un 
      * fattore abilitante a un rischio entro il contesto del processo corrente
+     * <hr>
+     * Form for adding an enabling factor to a risk within a specific process  
      */
-    private static final String nomeFileAddFactor = "/jsp/prFattoreForm.jsp";
+    private static final String nomeFileAddFactor =     "/jsp/prFattoreForm.jsp";
     /**
      * Pagina a cui la command inoltra per mostrare la form di aggiunta/modifica 
      * di una nota (giudizio sintetico) ad un indice PxI
+     * <hr>
+     * Form for adding/editing a note (summary assessment) to a PxI index
      */
-    private static final String nomeFileNote = "/jsp/prNotaForm.jsp";
+    private static final String nomeFileNote =          "/jsp/prNotaForm.jsp";
     /** 
      * Pagina di scelta del tipo di nuovo elemento da aggiungere
      * (Macroprocesso  | Processo | Sottoprocesso)
+     * <hr>
+     * Form for selecting the type of new element to add 
+     * (Macroprocess | Process | Subprocess)
      */
-    private static final String nomeFileSceltaTipo = "/jsp/prTipoForm.jsp";
+    private static final String nomeFileSceltaTipo =    "/jsp/prTipoForm.jsp";
     /** 
      * Pagina contenente la form per inserimento macro/processo
      * (Macroprocesso  | Processo | Sottoprocesso)
      */
-    private static final String nomeFileAddProcess = "/jsp/prProcessoForm.jsp";
+    private static final String nomeFileAddProcess =    "/jsp/prProcessoForm.jsp";
     /** 
      * Pagina contenente la form per inserimento input di processo_at
      */
-    private static final String nomeFileAddInput = "/jsp/prInputForm.jsp";
+    private static final String nomeFileAddInput =      "/jsp/prInputForm.jsp";
     /** 
      * Pagina contenente la form per inserimento fasi di processo_at
+     * <hr>
+     * Form for entering process stages_at
      */
-    private static final String nomeFileAddActivity = "/jsp/prFasiForm.jsp";
+    private static final String nomeFileAddActivity =   "/jsp/prFasiForm.jsp";
     /** 
      * Pagina contenente la form per assegnazione strutture/soggetti a fasi
+     * <hr>
+     * Form for assigning structures/subjects to phases
      */
-    private static final String nomeFileAddStructs = "/jsp/prStruttureForm.jsp";
+    private static final String nomeFileAddStructs =    "/jsp/prStruttureForm.jsp";
     /** 
      * Pagina contenente la form per inserimento output di processo_at
+     * <hr>
+     * Form for entering process output
      */
-    private static final String nomeFileAddOutput = "/jsp/prOutputForm.jsp";
+    private static final String nomeFileAddOutput =     "/jsp/prOutputForm.jsp";
     /**
      * Nome del file json della Command (dipende dalla pagina di default)
+     * <hr>
+     * Name of the Command json file (depends on the default page)
      */
     private String nomeFileJson = nomeFileElenco.substring(nomeFileElenco.lastIndexOf(SLASH), nomeFileElenco.indexOf(DOT));
     /**
-     * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
+     * Struttura contenente le pagina a cui la command fa riferimento 
+     * per mostrare tutte le funzioni gestite da questa Command
+     * <hr>
+     * Structure containing the pages referenced by the command 
+     * to display all the functions managed by this Command 
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<>();
-    /**
-     * Struttura a cui la command fa riferimento per generare i titoli pagina
-     */    
+    /**     * Title pages dictionary                                            */    
     private static final HashMap<String, String> titleFile = new HashMap<>();
 
 
@@ -208,7 +218,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
           String msg = FOR_NAME + "La voce menu' " + this.getNome() + " non ha il campo paginaJsp. Impossibile visualizzare i risultati.\n";
           throw new CommandException(msg);
         }
-        // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
+        /* Load the hashmap containing the pages to be invoked dynamically      */
         nomeFile.put(PART_PROCESS,              nomeFileDettaglio);
         nomeFile.put(PART_INPUT,                nomeFileInputs);
         nomeFile.put(PART_OUTPUT,               nomeFileOutputs);
@@ -220,7 +230,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_INSERT_ACTIVITY,      nomeFileAddActivity);
         nomeFile.put(PART_INSERT_ACT_STRUCTS,   nomeFileAddStructs);
         nomeFile.put(PART_INSERT_OUTPUT,        nomeFileAddOutput);
-        // Carica la hashmap contenente i titoli pagina
+        /* Load the hashmap containing the titles of the pages                  */
         titleFile.put(PART_PROCESS,                         "Dettagli Processo");
         titleFile.put(PART_INPUT,                           "Input Processo");
         titleFile.put(PART_OUTPUT,                          "Output Processo");
@@ -238,9 +248,14 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
 
 
     /**
-     * <p>Gestisce il flusso principale.</p>
-     * <p>Prepara i bean.</p>
-     * <p>Passa nella Request i valori che verranno utilizzati dall'applicazione.</p>
+     * <ul>
+     * <li>Gestisce il flusso principale.</li>
+     * <li>Prepara i bean.</li>
+     * <li>Passa nella Request i valori che verranno utilizzati dall'applicazione.</li>
+     * </ul><hr>
+     * <p>Manages the main flow.</p>
+     * <p>Prepares the beans.</p>
+     * <p>Passes the values that will be used by the application to the Request.</p>
      *
      * @param req la HttpServletRequest contenente la richiesta del client
      * @throws CommandException se si verifica un problema, tipicamente nell'accesso a campi non accessibili o in qualche altro tipo di puntamento
@@ -616,189 +631,207 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                     }
                 /* ======================== @GetMapping ======================= */
                 } else {
-                    // Il parametro di navigazione 'p' permette di addentrarsi nelle funzioni
+                    // The ‘p’ parameter allows you to delve deeper
                     if (nomeFile.containsKey(part)) {
-                        // Definisce un  default per la pagina jsp
+                        // Retrieve the breadcrumbs
+                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                        // Define a default for the page to serve
                         fileJspT = nomeFile.get(part);
-                        // Titolo pagina
+                        // Title of the HTML page
                         tP = titleFile.get(part);
-                        /* ------------------------------------------------ *
-                         * Viene richiesta la visualizzazione del dettaglio * 
-                         *         di un processo [SELECT Process]          *
-                         * ------------------------------------------------ */                       
-                        if (part.equalsIgnoreCase(PART_PROCESS)) {
-                            // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
-                            processElements = new ConcurrentHashMap<>();
-                            // Valorizza tali liste necessarie a visualizzare  i dettagli di un processo, restituendo gli indicatori corredati con le note al PxI
-                            indicators = retrieveProcess(user, idP, liv, processElements, codeSur, db);
-                            // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
-                        /* ------------------------------------------------ *
-                         *                  SELECT Input                    *
-                         * ------------------------------------------------ */ 
-                        } else if (part.equalsIgnoreCase(PART_INPUT)) {
-                            // Istanzia generica tabella in cui mettere le liste di items afferenti al processo
-                            processElements = new ConcurrentHashMap<>();
-                            // Recupera l'elenco degli output
-                            inputs = db.getInputs(user, survey);
-                            // Imposta nella tabella la lista ricavata
-                            retrieveProcess(user, inputs, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
-                        /* ------------------------------------------------ *
-                         *                  SELECT Output                   *
-                         * ------------------------------------------------ */                            
-                        } else if (part.equalsIgnoreCase(PART_OUTPUT)) {
-                            if (idO > DEFAULT_ID) {
-                                // Recupera un output specifico
-                                output = db.getOutput(user, idO, survey);
-                               /* Sovrascrive la jsp con un valore ad hoc!
-                                * This approach utilizes string literals instead using constructor String() with the new operator.
-                                * String literals are stored in the string pool. 
-                                * This method is more memory-efficient because if the string fileJspT already exists in the pool, 
-                                * it will reuse that reference instead of creating a new object.
-                                * Both methods acknowledge that strings in Java are immutable. 
-                                * However, using new String() does not change this fact; it merely creates 
-                                * a new instance rather than modifying the existing one.  
-                                * The first method is generally faster because it can take advantage of the string pool and avoids unnecessary object creation.
-                                * The second method incurs overhead from creating a new object and is slower due to this additional allocation.
-                                * The second approach (fileJspT = new String(nomeFileOutput)) explicitly creates a new String object in the heap memory, 
-                                * which is less efficient as it always creates a new instance, regardless of whether an equivalent string already exists.
-                                * Using string literals allows Java to optimize memory usage through the string pool, 
-                                * making code cleaner and more efficient. In summary, always prefer reassigning with string literals over creating new instances 
-                                * unless having a specific reason to use new String(). */
-                                fileJspT = nomeFileOutput;
-                            } else {
-                                // Deve recuperare l'elenco degli output
-                                outputs = db.getOutputs(user, survey);
-                            }
-                        /* ------------------------------------------------ *
-                         *                  SELECT Factors                  *
-                         * ------------------------------------------------ */                          
-                        } else if (part.equalsIgnoreCase(PART_FACTORS)) {
-                            // Deve recuperare l'elenco dei fattori abilitanti
-                            factors = db.getFactors(user, survey);
-                            // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Fattori abilitanti");
-                        /* ------------------------------------------------ *
-                         *  SHOWS Form to LINK Factor TO Risk INTO Process  *
-                         * ------------------------------------------------ */                           
-                        } else if (part.equalsIgnoreCase(PART_INSERT_F_R_P)) {
-                            // Deve recuperare l'elenco completo dei fattori abilitanti
-                            factors = db.getFactors(user, survey);
-                            // Prepara un ProcessBean di cui recuperare tutti i rischi
-                            output = db.getProcessById(user, idP, survey);
-                            // Recupera tutti i rischi del processo; tra questi ci sarà quello cui si vuole aggiungere il fattore
-                            ArrayList<RiskBean> risks = db.getRisksByProcess(user, output, survey);
-                            // Individua il rischio specifico a cui si vuole aggiungere il fattore abilitante
-                            risk = decant(risks, idR);
-                            // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-F");
-                        /* ------------------------------------------------ *
-                         * SHOWS Form to INSERT or UPDATE a note about PxI  *
-                         * ------------------------------------------------ */  
-                        } else if (part.equalsIgnoreCase(PART_PI_NOTE)) {
-                            // Deve recuperare e mostrare la nota al giudizio sintetico PxI
-                            pxi = db.getIndicatorPI(user, idP, survey);
-                            // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nota");
-                        /* ------------------------------------------------ *
-                         *             SHOWS Form Macro/Process             *
-                         * ------------------------------------------------ */                            
-                        } else if (part.equalsIgnoreCase(PART_INSERT_PROCESS)) {
-                            // Controlla che esista il livello
-                            if (liv > DEFAULT_ID) {
-                                aree = db.getAree(user, survey);
-                                processIndexed = decant((ArrayList<ProcessBean>) aree);
-                                // Se c'è un id macroprocesso vuol dire che bisogna aggiungere un processo
-                                if (!idM.equals(DASH)) {
-                                    int idMat = Integer.parseInt(idM.substring(NOTHING, idM.indexOf(DOT)));
-                                    String areaRischio = parser.getStringParameter("pliv0", DASH);
-                                    macro = db.getMacroSubProcessAtByIdOrCode(user, idMat, VOID_STRING, ELEMENT_LEV_1, survey);
-                                    macro.setAreaRischio(areaRischio);
+                        // Decide which function to activate
+                        switch (part.toLowerCase()) {
+                        /* ---------------------------------------------------- *
+                         *                   LIST and DETAILS                   *
+                         * ---------------------------------------------------- */   
+                            /* -------      DETAILS: Process    -------         */
+                            case PART_PROCESS:
+                                // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                                processElements = new ConcurrentHashMap<>();
+                                // Valorizza tali liste necessarie a visualizzare  i dettagli di un processo, restituendo gli indicatori corredati con le note al PxI
+                                indicators = retrieveProcess(user, idP, liv, processElements, codeSur, db);
+                                // Customize the breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
+                                break;
+                            /* -------      LIST: Inputs    -------             */    
+                            case PART_INPUT:
+                                // Istanzia generica tabella in cui mettere le liste di items afferenti al processo
+                                processElements = new ConcurrentHashMap<>();
+                                // Recupera l'elenco degli input
+                                inputs = db.getInputs(user, survey);
+                                // Imposta nella tabella la lista ricavata
+                                retrieveProcess(user, inputs, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
+                                // Customize the breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Lista Input");
+                                break;
+                            /* -------   Deal with: Outputs   -------           */   
+                            case PART_OUTPUT:
+                                /* -------  DETAILS: Output   -------           */
+                                if (idO > DEFAULT_ID) {
+                                    // Recupera un output specifico
+                                    output = db.getOutput(user, idO, survey);
+                                   /* Sovrascrive la jsp con un valore ad hoc!
+                                    * This approach utilizes string literals instead using constructor String() with the new operator.
+                                    * String literals are stored in the string pool. 
+                                    * This method is more memory-efficient because if the string fileJspT already exists in the pool, 
+                                    * it will reuse that reference instead of creating a new object.
+                                    * Both methods acknowledge that strings in Java are immutable. 
+                                    * However, using new String() does not change this fact; it merely creates 
+                                    * a new instance rather than modifying the existing one.  
+                                    * The first method is generally faster because it can take advantage of the string pool and avoids unnecessary object creation.
+                                    * The second method incurs overhead from creating a new object and is slower due to this additional allocation.
+                                    * The second approach (fileJspT = new String(nomeFileOutput)) explicitly creates a new String object in the heap memory, 
+                                    * which is less efficient as it always creates a new instance, regardless of whether an equivalent string already exists.
+                                    * Using string literals allows Java to optimize memory usage through the string pool, 
+                                    * making code cleaner and more efficient. In summary, always prefer reassigning with string literals over creating new instances 
+                                    * unless having a specific reason to use new String(). */
+                                    fileJspT = nomeFileOutput;
+                                    // Url da sostituire al posto di quello di una breadcrumb esistente
+                                    String url = ConfigManager.getAppName() + ROOT_QM + 
+                                                 ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
+                                                 AMPERSAND + "p" + EQ + PART_OUTPUT + 
+                                                 AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
+                                    // Preparazione nuova breadcrumb per puntare sulla command delle misure
+                                    ItemBean crumb = new ItemBean("Outputs", "Lista Output", url, SUB_MENU);
+                                    // Sostituzione di una breadcrumb esistente con la nuova
+                                    bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, crumb);
+                                    // Aggiunta inoltre di una foglia
+                                    bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Output");
+                                /* -------   LIST: Outputs   -------            */
+                                } else {
+                                    // Deve recuperare l'elenco degli output
+                                    outputs = db.getOutputs(user, survey);
+                                    // Customize the breadcrumbs
+                                    bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Lista Output");
                                 }
-                                // Sovrascrive Titolo pagina
-                                tP = titleFile.get(String.valueOf(liv));
-                                // Form to insert data of the process
-                                fileJspT = nomeFileAddProcess;
-                            }
-                            // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
-                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo Elemento");
-                        /* ------------------------------------------------ *
-                         *                 SHOWS Form Input                 *
-                         * ------------------------------------------------ */                           
-                        } else if (part.equalsIgnoreCase(PART_INSERT_INPUT)) {
-                             // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
-                             processElements = new ConcurrentHashMap<>();
-                             // Recupera tutti gli Input
-                             ArrayList<ItemBean> listaInput = db.getInputs(user, survey);
-                             // Se c'è un id processo
-                             if (idP > NOTHING) {
-                                 // Controlla che il processo esista
-                                 pat = db.getProcessById(user, idP, survey);
-                                 // Recupera Input estratti in base al processo
-                                 ArrayList<ItemBean> inputsByPat = db.getInputs(user, idP, ELEMENT_LEV_2, survey);
-                                 // Visto che ci sono, ne approfitta per impostare gli input nel processo
-                                 pat.setInputs(inputsByPat);
-                                 // Scarta dalla lista degli input quelli già collegati al processo corrente
-                                 listaInput = filter(listaInput, inputsByPat);
-                             }
-                             // Imposta nella tabella la lista ricavata
-                             retrieveProcess(user, listaInput, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
-                        /* ------------------------------------------------ *
-                         *              SHOWS Form Activities               *
-                         * ------------------------------------------------ */                           
-                        } else if (part.equalsIgnoreCase(PART_INSERT_ACTIVITY)) {
-                            // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
-                            processElements = new ConcurrentHashMap<>();
-                            // Recupera il processo corrente
-                            pat = db.getProcessById(user, idP, survey);
-                            // Recupera Attività estratte in base al processo
-                            ArrayList<ActivityBean> activitiesByPat = db.getActivities(user, idP, ELEMENT_LEV_2, survey);
-                            // Imposta nella tabella la lista ricavata
-                            retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
-                        /* ------------------------------------------------ *
-                         * SHOWS Form to Link Structures to Empty Activities*
-                         * ------------------------------------------------ */                           
-                        } else if (part.equalsIgnoreCase(PART_INSERT_ACT_STRUCTS)) {
-                            // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
-                            processElements = new ConcurrentHashMap<>();
-                            // Recupera il processo corrente
-                            pat = db.getProcessById(user, idP, survey);
-                            // Recupera Attività estratte in base al processo
-                            ArrayList<ActivityBean> activitiesByPat = db.getActivities(user, idP, ELEMENT_LEV_2, survey);
-                            // Imposta nella tabella la lista ricavata
-                            retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
-                            // Recupera le strutture della rilevazione corrente
-                            structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
-                            // Recupera solo i soggetti contingenti di tipo master
-                            subjects = db.getSubjects(user, true, !Query.GET_ALL, survey);
-                        /* ------------------------------------------------ *
-                         *                 SHOWS Form Output                *
-                         * ------------------------------------------------ */    
-                        } else if (part.equalsIgnoreCase(PART_INSERT_OUTPUT)) {
-                            // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
-                            processElements = new ConcurrentHashMap<>();
-                            // Recupera tutti gli Output
-                            ArrayList<ProcessBean> listaOutput = db.getOutputs(user, survey);
-                            // Li travasa in una lista di oggetti generici
-                            ArrayList<ItemBean> listaItems = decantOutputs(listaOutput);
-                            // Se c'è un id processo
-                            if (idP > NOTHING) {
-                                // Controlla che il processo esista
+                                break;
+                            /* -------   LIST: Fattori Abilitanti  -------      */        
+                            case PART_FACTORS:
+                                // Deve recuperare l'elenco dei fattori abilitanti
+                                factors = db.getFactors(user, survey);
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Fattori abilitanti");
+                                break;
+                        /* ---------------------------------------------------- *
+                         *                         FORMS                        *
+                         * ---------------------------------------------------- */
+                            /* -------  FORM: Factor-Risk-Process   -------     */
+                            case PART_INSERT_F_R_P:
+                                // Deve recuperare l'elenco completo dei fattori abilitanti
+                                factors = db.getFactors(user, survey);
+                                // Prepara un ProcessBean di cui recuperare tutti i rischi
+                                output = db.getProcessById(user, idP, survey);
+                                // Recupera tutti i rischi del processo; tra questi ci sarà quello cui si vuole aggiungere il fattore
+                                ArrayList<RiskBean> risks = db.getRisksByProcess(user, output, survey);
+                                // Individua il rischio specifico a cui si vuole aggiungere il fattore abilitante
+                                risk = decant(risks, idR);
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-F");
+                                break;
+                            /* ------   FORM: INSERT or UPDATE a PxI note ----- */
+                            case PART_PI_NOTE:
+                                // Deve recuperare e mostrare la nota al giudizio sintetico PxI
+                                pxi = db.getIndicatorPI(user, idP, survey);
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nota");
+                                break;
+                            /* -----    FORM: New Macro/Process  -----          */
+                            case PART_INSERT_PROCESS:
+                                // Controlla che esista il livello
+                                if (liv > DEFAULT_ID) {
+                                    aree = db.getAree(user, survey);
+                                    processIndexed = decant((ArrayList<ProcessBean>) aree);
+                                    // Se c'è un id macroprocesso vuol dire che bisogna aggiungere un processo
+                                    if (!idM.equals(DASH)) {
+                                        int idMat = Integer.parseInt(idM.substring(NOTHING, idM.indexOf(DOT)));
+                                        String areaRischio = parser.getStringParameter("pliv0", DASH);
+                                        macro = db.getMacroSubProcessAtByIdOrCode(user, idMat, VOID_STRING, ELEMENT_LEV_1, survey);
+                                        macro.setAreaRischio(areaRischio);
+                                    }
+                                    // Sovrascrive Titolo pagina
+                                    tP = titleFile.get(String.valueOf(liv));
+                                    // Form to insert data of the process
+                                    fileJspT = nomeFileAddProcess;
+                                }
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo Elemento");
+                                break;
+                            /* -----    FORM: Link/Create Input  -----          */
+                            case PART_INSERT_INPUT:
+                                // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                                processElements = new ConcurrentHashMap<>();
+                                // Recupera tutti gli Input
+                                ArrayList<ItemBean> listaInput = db.getInputs(user, survey);
+                                // Se c'è un id processo
+                                if (idP > NOTHING) {
+                                    // Controlla che il processo esista
+                                    pat = db.getProcessById(user, idP, survey);
+                                    // Recupera Input estratti in base al processo
+                                    ArrayList<ItemBean> inputsByPat = db.getInputs(user, idP, ELEMENT_LEV_2, survey);
+                                    // Visto che ci sono, ne approfitta per impostare gli input nel processo
+                                    pat.setInputs(inputsByPat);
+                                    // Scarta dalla lista degli input quelli già collegati al processo corrente
+                                    listaInput = filter(listaInput, inputsByPat);
+                                }
+                                // Imposta nella tabella la lista ricavata
+                                retrieveProcess(user, listaInput, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Aggiunta Input");
+                                break;
+                            /* -----    FORM: New Activity  -----               */
+                            case PART_INSERT_ACTIVITY: {
+                                // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                                processElements = new ConcurrentHashMap<>();
+                                // Recupera il processo corrente
                                 pat = db.getProcessById(user, idP, survey);
-                                // Recupera Output estratti in base al processo
-                                ArrayList<ItemBean> outputsByPat = db.getOutputs(user, idP, ELEMENT_LEV_2, survey);
-                                // Visto che ci sono, ne approfitta per impostare gli output nel processo
-                                pat.setOutputs(outputsByPat);
-                                // Scarta dalla lista degli output quelli già collegati al processo corrente
-                                listaItems = filter(listaItems, outputsByPat);
+                                // Recupera Attività estratte in base al processo
+                                ArrayList<ActivityBean> activitiesByPat = db.getActivities(user, idP, ELEMENT_LEV_2, survey);
+                                // Imposta nella tabella la lista ricavata
+                                retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Aggiunta Fasi");
+                                break;
                             }
-                            // Imposta nella tabella la lista ricavata
-                            retrieveProcess(user, new ArrayList<>(), new ArrayList<>(), listaItems, new ArrayList<>(), new ArrayList<>(), processElements, survey);
+                            /* ---    FORM: Link Structures to Activities  ---  */
+                            case PART_INSERT_ACT_STRUCTS: {
+                                // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                                processElements = new ConcurrentHashMap<>();
+                                // Recupera il processo corrente
+                                pat = db.getProcessById(user, idP, survey);
+                                // Recupera Attività estratte in base al processo
+                                ArrayList<ActivityBean> activitiesByPat = db.getActivities(user, idP, ELEMENT_LEV_2, survey);
+                                // Imposta nella tabella la lista ricavata
+                                retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
+                                // Recupera le strutture della rilevazione corrente
+                                structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
+                                // Recupera solo i soggetti contingenti di tipo master
+                                subjects = db.getSubjects(user, true, !Query.GET_ALL, survey);
+                                break;
+                            }
+                            /* -----    FORM: Link/Create Output  -----         */
+                            case PART_INSERT_OUTPUT:
+                                // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                                processElements = new ConcurrentHashMap<>();
+                                // Recupera tutti gli Output
+                                ArrayList<ProcessBean> listaOutput = db.getOutputs(user, survey);
+                                // Li travasa in una lista di oggetti generici
+                                ArrayList<ItemBean> listaItems = decantOutputs(listaOutput);
+                                // Se c'è un id processo
+                                if (idP > NOTHING) {
+                                    // Controlla che il processo esista
+                                    pat = db.getProcessById(user, idP, survey);
+                                    // Recupera Output estratti in base al processo
+                                    ArrayList<ItemBean> outputsByPat = db.getOutputs(user, idP, ELEMENT_LEV_2, survey);
+                                    // Visto che ci sono, ne approfitta per impostare gli output nel processo
+                                    pat.setOutputs(outputsByPat);
+                                    // Scarta dalla lista degli output quelli già collegati al processo corrente
+                                    listaItems = filter(listaItems, outputsByPat);
+                                }
+                                // Imposta nella tabella la lista ricavata
+                                retrieveProcess(user, new ArrayList<>(), new ArrayList<>(), listaItems, new ArrayList<>(), new ArrayList<>(), processElements, survey);
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Aggiunta Output");
+                                break;
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
