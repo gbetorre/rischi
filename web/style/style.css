@@ -779,6 +779,19 @@ textarea {
 	margin-top: 20px; /* margin-top: 25px; */
 }
 
+.form-custom {
+  background: #E8E6D8;
+  border: 1px solid #DFDAB7;
+  padding: 0.5em 1em;
+  border-radius: 3px;
+  margin-bottom: 1em;
+}
+
+.form-control-custom {
+  background:transparent;
+  border:none;
+}
+
 /* ----------------- Scroll bar ---------------- */
 .scrollX {
 	overflow-x: scroll; 
@@ -804,6 +817,10 @@ textarea {
 .marginBoth {
 	margin-left: 20px;
 	margin-right: 20px;
+}
+
+.marginNarrow {
+	margin-bottom: 0;
 }
 
 /* -------- Page header and footer styles -------- */
@@ -874,19 +891,6 @@ textarea {
   background-repeat: no-repeat;
  	background-position: center center;
   background-image: url(../img/ico-save.png);
-}
-
-.form-custom {
-  background: #E8E6D8;
-  border: 1px solid #DFDAB7;
-  padding: 0.5em 1em;
-  border-radius: 3px;
-  margin-bottom: 1em;
-}
-
-.form-control-custom {
-	background:transparent;
-	border:none;
 }
 
 .bordo {
