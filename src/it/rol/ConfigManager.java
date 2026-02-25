@@ -197,6 +197,10 @@ public class ConfigManager extends HttpServlet {
      */
     private static String appName;
     /**
+     * <code>javax.servlet.GenericServlet.getServletContext().getContextPath()</code>
+     */
+    private static String contextPathToken;
+    /**
      * <p>Nome del parametro di inizializzazione, valorizzato nel
      * descrittore di deploy, che identifica la command cui la Servlet che risponde
      * (Main, Data, etc.) deve girare la richiesta. </p>
@@ -268,6 +272,14 @@ public class ConfigManager extends HttpServlet {
          *    Lettura dei parametri di configurazione dell'applicazione POL     *
          * ******************************************************************** */
         /*
+         * ContextPath dell'applicazione privato dello '/' iniziale.
+         * Si ricorda che il context path inizia sempre con / e non termina mai con /
+         */
+        contextPathToken = getServletContext().getContextPath();
+        if (contextPathToken == null) {
+            throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'getContextPath'!\n\n");
+        }        
+        /*
          * Nome della pagina di errore
          */
         errorJsp = getServletContext().getInitParameter("errorJsp");
@@ -281,6 +293,7 @@ public class ConfigManager extends HttpServlet {
         if (appName == null) {
             throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'appName'!\n\n");
         }
+
         /*
          * Nome del parametro che identifica la Command da interpellare
          */
@@ -511,7 +524,7 @@ public class ConfigManager extends HttpServlet {
     /* ************************************************************************ *
      *                    Getters sulle variabili di classe                     *
      * ************************************************************************ */
-
+     
     /**
      * <p>Restituisce il nome del parametro identificante la Root dell'applicazione web.</p>
      * <p>Metodo getter sulla variabile privata di classe.</p>
@@ -520,6 +533,22 @@ public class ConfigManager extends HttpServlet {
      */
     public static String getAppName() {
         return new String(appName);
+    }
+    
+    
+    /**
+     * <p>Restituisce il ContextPath dell'applicazione privato dello '/' iniziale.<br>
+     * Si ricorda che il context path inizia sempre con / e non termina mai con
+     * /.<br>
+     * Il valore da porre in questa variabile &egrave;
+     * <code>
+     * javax.servlet.GenericServlet.getServletContext().getContextPath()
+     * </code>
+     * 
+     * @return <code>String</code> - il contextPath dell'applicazione
+     */
+    public static String getContextPathToken() {
+        return new String(contextPathToken);
     }
 
 
