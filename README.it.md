@@ -540,6 +540,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### 2026
 
+- [2.5.4] (26/02/2026) Prima parte di implementazione funzionalit&agrave; per inserimento nuovo soggetto contingente
 - [2.5.3] (25/02/2026) Miglioramenti nella presentazione delle form (workflow aggiunta/aggiornamento processo)
 - [2.5.2] (24/02/2026) Aggiunta visualizzazione misure non applicate nel report sintetico del monitoraggio
 - [2.5.1] (23/02/2026) Miglioramenti nella presentazione del monitoraggio (link, etichette)
