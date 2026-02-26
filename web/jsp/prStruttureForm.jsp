@@ -60,6 +60,10 @@
               </nav>
               <hr class="separatore" />
               <div class="d-flex justify-content-center">
+                <button type="button" class="btn btnNav bgAct11 text-dark" id="btn-subj" name="add-subj" value="subj" onclick="showSubjForm()">
+                  <i class="fa-solid fa-user-plus"></i> &nbsp; Crea Soggetto
+                </button>
+                &nbsp;
                 <button type="submit" class="btn btnNav bgAct22" id="btn-save" name="action" value="load">
                   <i class="far fa-save"></i>  Salva &nbsp;<i class="fa-solid fa-repeat"></i>
                 </button>
@@ -76,14 +80,14 @@
                 <span class="bgAct">&nbsp;Fase <c:out value="${status.count}" />:</span>
                 &nbsp;<c:out value="${fase.nome}" />
               </div>
-              <hr class="separapoco" />
               <div class="bgAct26 text-white form-custom marginNarrow">
                 <strong> 
                   &nbsp;Strutture
                   <span class="badge badge-pill float-right"><c:out value="${fase.strutture.size()}" /> </span>
                 </strong>
               </div>
-              <div class="content-holder bgAct31">Strutture di organigramma gi&agrave; associate:
+              <div class="content-holder bgAct31">&nbsp;
+                Strutture di organigramma gi&agrave; associate:
                 <ul class="list-group">
                 <c:forEach var="str" items="${fase.strutture}">
                   <li class="list-group-item reportAct bg-note">
@@ -103,21 +107,21 @@
                 <div id="callable-row">
                   <div class="row">
                     <div class="col-3 large-4 ui-widget">
-                      <input class="sLiv1" name="liv1-${fase.id}" type="text" placeholder="Struttura I livello">
+                      <input type="text" class="sLiv1" name="liv1-${fase.id}" placeholder="Struttura I livello" onchange="markFormChanged()">
                     </div>
                     <div class="col-3 large-4 ui-widget">
-                      <input class="sLiv2" name="liv2-${fase.id}" type="text" placeholder="Struttura II livello">
+                      <input type="text" class="sLiv2" name="liv2-${fase.id}" placeholder="Struttura II livello" onchange="markFormChanged()">
                     </div>
                     <div class="col-3 large-4 ui-widget">
-                      <input class="sLiv3" name="liv3-${fase.id}" type="text" placeholder="Struttura III livello">
+                      <input type="text" class="sLiv3" name="liv3-${fase.id}" placeholder="Struttura III livello" onchange="markFormChanged()">
                     </div>
                     <div class="col-3 large-4 ui-widget">
-                      <input class="sLiv4" name="liv4-${fase.id}" type="text" placeholder="Struttura IV livello">
+                      <input type="text" class="sLiv4" name="liv4-${fase.id}" placeholder="Struttura IV livello" onchange="markFormChanged()">
                     </div>
                   </div>
                 </div>
               </div>
-              <hr class="separatore" />
+              <hr class="separapoco" />
             </div>
             <div class="str-container">
               <div class="bgAct26 text-white form-custom marginNarrow">
@@ -126,7 +130,8 @@
                   <span class="badge badge-pill float-right"><c:out value="${fase.soggetti.size()}" /> </span>
                 </strong>
               </div>
-              <div class="content-holder bgAct31">Soggetti contingenti gi&agrave; associati:
+              <div class="content-holder bgAct31">&nbsp;
+                Soggetti contingenti gi&agrave; associati:
                 <ul class="list-group">
                 <c:forEach var="sub" items="${fase.soggetti}">
                   <li class="list-group-item" title="${sub.informativa}">
@@ -145,7 +150,7 @@
                 <div id="callable-row">
                   <div class="row">
                     <div class="col-12 large-4 ui-widget">
-                      <input class="sCont" name="sc-${fase.id}" type="text" placeholder="Inserisci uno spazio per visualizzare i soggetti esistenti">
+                      <input type="text" class="sCont" name="sc-${fase.id}" placeholder="Inserisci uno spazio per visualizzare i soggetti esistenti" onchange="markFormChanged()">
                     </div>
                   </div>
                 </div>
@@ -178,6 +183,29 @@
       </form>
     </div>
     <script>
+    /* Dichiarazione e inizializzazione flag che verrà modificato solo in caso di modifica stato form */
+    /* Flag modified if the form status changes */
+    let formChanged = false;
+    /* Cambia il valore di un flag in caso lo stato dei campi della form sia diverso da quello iniziale (apertura pagina) */
+    /* Change the value of a flag if the status of the form fields is different from the initial one 
+    (which means that we have when the page has finished loading) */
+    function markFormChanged() {
+        formChanged = true;
+    }
+    /* Protegge dalla perdita di dati immessi ma non salvati */
+    /* Protects against the loss of data that has been entered but not saved */
+    function showSubjForm() {
+        var url = "${initParam.appName}/?q=pr&p=isu&r=${param['r']}";
+        if(formChanged) {
+            if (confirm('Dati non salvati. Continuare?')) {
+                window.location.href = url;
+            }
+            // Cancel = stays on page (no else needed)
+        } else {
+            window.location.href = url;
+        }
+    }
+    
     function blank() {
         return "<option value=''>-- Nessuna --</option>";
     }
