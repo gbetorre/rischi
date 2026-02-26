@@ -173,6 +173,12 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * Form for entering process output
      */
     private static final String nomeFileAddOutput =     "/jsp/prOutputForm.jsp";
+    /** 
+     * Pagina contenente la form per inserimento di un soggetto contingente
+     * <hr>
+     * Form for entering a new subject
+     */
+    private static final String nomeFileAddSubject =    "/jsp/prSoggettoForm.jsp";
     /**
      * Nome del file json della Command (dipende dalla pagina di default)
      * <hr>
@@ -230,6 +236,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_INSERT_ACTIVITY,      nomeFileAddActivity);
         nomeFile.put(PART_INSERT_ACT_STRUCTS,   nomeFileAddStructs);
         nomeFile.put(PART_INSERT_OUTPUT,        nomeFileAddOutput);
+        nomeFile.put(PART_INSERT_SUBJECT,       nomeFileAddSubject);
         /* Load the hashmap containing the titles of the pages                  */
         titleFile.put(PART_PROCESS,                         "Dettagli Processo");
         titleFile.put(PART_INPUT,                           "Input Processo");
@@ -244,6 +251,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         titleFile.put(PART_INSERT_ACTIVITY,                 "Gestione Fasi");
         titleFile.put(PART_INSERT_ACT_STRUCTS,              "Assegnazione Strutture/Soggetti");
         titleFile.put(PART_INSERT_OUTPUT,                   "Aggiunta Output");
+        titleFile.put(PART_INSERT_SUBJECT,                  "Nuovo Soggetto");
     }
 
 
