@@ -129,7 +129,7 @@ public class DataUrl implements Constants {
     /** 'p' parameter (part identifier)                                         */
     private String part;
     /**   * Mappa dei parametri della query string                              */
-    private LinkedHashMap<String, String> mappa;
+    private LinkedHashMap<String, String> map;
     /** Additional optional parameters                                          */
     private final Map<String, String> additionalParams;
     /** Application name constant                                               */
@@ -153,7 +153,7 @@ public class DataUrl implements Constants {
      */
     public DataUrl() {
         this.additionalParams = null;
-        mappa = new LinkedHashMap<>();
+        map = new LinkedHashMap<>();
     }
 
     
@@ -177,8 +177,8 @@ public class DataUrl implements Constants {
     public DataUrl(final String param, 
                    final String value) {
         this.additionalParams = null;
-        mappa = new LinkedHashMap<>();
-        mappa.put(DataUrl.encodeURL(param), DataUrl.encodeURL(value));
+        map = new LinkedHashMap<>();
+        map.put(DataUrl.encodeURL(param), DataUrl.encodeURL(value));
     }
     
     
@@ -209,7 +209,9 @@ public class DataUrl implements Constants {
      * @param survey Survey bean containing code
      * @throws IllegalArgumentException if any parameter invalid
      */
-    public DataUrl(String entToken, String commandName, CodeBean survey) {
+    public DataUrl(String entToken, 
+                   String commandName, 
+                   CodeBean survey) {
         this(null, entToken, commandName, null, survey);
     }
     
@@ -223,7 +225,10 @@ public class DataUrl implements Constants {
      * @param part Part identifier
      * @param survey Survey bean
      */
-    public DataUrl(String entToken, String commandName, String part, CodeBean survey) {
+    public DataUrl(String entToken, 
+                   String commandName, 
+                   String part, 
+                   CodeBean survey) {
         this(null, entToken, commandName, part, survey);
     }
     
@@ -235,11 +240,17 @@ public class DataUrl implements Constants {
      * @param entToken Entity token
      * @param commandName Command name
      * @param part Part identifier
+     * @param extraParam 
+     * @param extraValue 
      * @param extra Additional parameter name
      * @param survey Survey bean
      */
-    public DataUrl(String entToken, String commandName, String part, 
-                   String extraParam, String extraValue, CodeBean survey) {
+    public DataUrl(String entToken, 
+                   String commandName, 
+                   String part, 
+                   String extraParam, 
+                   String extraValue, 
+                   CodeBean survey) {
         this(null, entToken, commandName, part, survey);
         if (!extraParam.matches(PART_PATTERN) || extraValue == null) {
             throw new IllegalArgumentException("Invalid extra parameter: " + extraParam);
@@ -251,10 +262,24 @@ public class DataUrl implements Constants {
     /**
      * Constructor 7: Relative path with entToken, commandName, part, two extra params, survey
      * Generates: /entToken=XXX&cmd=YYY&p=ZZZ&extra1=AAA&extra2=BBB&r=WWW
+     * 
+     * @param entToken 
+     * @param commandName 
+     * @param part 
+     * @param extra1 
+     * @param extra1Value 
+     * @param extra2 
+     * @param extra2Value 
+     * @param survey 
      */
-    public DataUrl(String entToken, String commandName, String part, 
-                   String extra1, String extra1Value, 
-                   String extra2, String extra2Value, CodeBean survey) {
+    public DataUrl(String entToken, 
+                   String commandName, 
+                   String part, 
+                   String extra1, 
+                   String extra1Value, 
+                   String extra2, 
+                   String extra2Value, 
+                   CodeBean survey) {
         this(null, entToken, commandName, part, survey);
         validateExtraParam(extra1, extra1Value);
         validateExtraParam(extra2, extra2Value);
@@ -266,9 +291,18 @@ public class DataUrl implements Constants {
     /**
      * Constructor 8: Full relative path with root prefix
      * Internal constructor used by other relative constructors
+     * 
+     * @param root 
+     * @param entToken 
+     * @param commandName 
+     * @param part 
+     * @param survey 
      */
-    private DataUrl(String root, String entToken, String commandName, 
-                   String part, CodeBean survey) {
+    private DataUrl(String root, 
+                    String entToken, 
+                    String commandName, 
+                    String part, 
+                    CodeBean survey) {
         if (root != null) {
             validateRoot(root);
             this.rootPath = normalizePath(root) + APP_NAME + "/";
@@ -284,6 +318,7 @@ public class DataUrl implements Constants {
         this.part = part;
         this.surveyCode = survey.getCode();
         this.additionalParams = new LinkedHashMap<>();
+        //map.put(entToken, part);
     }
     
     
@@ -291,7 +326,7 @@ public class DataUrl implements Constants {
         // Definisce una stringa dinamica da costruire tramite il contenuto della mappa
         StringBuffer url = new StringBuffer();
         // Cicla sui parametri da restituire
-        Iterator<Map.Entry<String, String>> iterator = mappa.entrySet().iterator();
+        Iterator<Map.Entry<String, String>> iterator = map.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, String> entry = iterator.next();
             // Chiave e valore
@@ -360,7 +395,7 @@ public class DataUrl implements Constants {
      */
     public DataUrl remove(final String parametro) {
         if (parametro != null) {
-            mappa.remove(parametro);
+            map.remove(parametro);
         }
         return this;
     }
@@ -661,7 +696,7 @@ public class DataUrl implements Constants {
     public DataUrl put(final String parametro, 
                        final String valore) {
         if (parametro != null)
-            mappa.put(encodeURL(parametro), encodeURL(valore));
+            map.put(encodeURL(parametro), encodeURL(valore));
         return this;
     }
     
@@ -680,7 +715,7 @@ public class DataUrl implements Constants {
     public DataUrl put(final String parametro, 
                        final int valore) {
         if (parametro != null)
-            mappa.put(encodeURL(parametro), Integer.toString(valore));
+            map.put(encodeURL(parametro), Integer.toString(valore));
         return this;
     }
 
@@ -750,10 +785,10 @@ public class DataUrl implements Constants {
      * @return <code>DataUrl</code> - DataUrl modificato
      */
     public DataUrl merge(final DataUrl dataU) {
-        final LinkedHashMap<String, String> temp = new LinkedHashMap<>(mappa);
-        temp.putAll(dataU.mappa);
+        final LinkedHashMap<String, String> temp = new LinkedHashMap<>(map);
+        temp.putAll(dataU.map);
         final DataUrl nuovo = new DataUrl();
-        nuovo.mappa = temp;
+        nuovo.map = temp;
         return nuovo;
     }
 
