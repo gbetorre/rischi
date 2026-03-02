@@ -146,7 +146,7 @@
                 </c:if>
                 </ul>
               </div>
-              <div class="content-holder bgAct">Nuova associazione con soggetto contingente:
+              <div class="content-holder bgAct">Nuova associazione con soggetto contingente (da selezionare tra i soggetti esistenti):
                 <div id="callable-row">
                   <div class="row">
                     <div class="col-12 large-4 ui-widget">
