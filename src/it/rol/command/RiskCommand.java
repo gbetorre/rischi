@@ -87,50 +87,46 @@ public class RiskCommand extends ItemBean implements Command, Constants {
     /**
      * La serializzazione necessita di dichiarare una costante di tipo long
      * identificativa della versione seriale. 
-     * (Se questo dato non fosse inserito, verrebbe calcolato in maniera automatica
-     * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione). 
+     * <hr>     
+     * Serialization requires declaring a constant of type long
+     * identifying the serial version.
      */
     private static final long serialVersionUID = 6619103818860851921L;
     /**
-     *  Nome di questa classe 
-     *  (utilizzato per contestualizzare i messaggi di errore)
+     *  Nome di questa classe per contestualizzare i messaggi
+     *  <hr>
+     *  Name of this
      */
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
-    /**
-     * Log per debug in produzione
-     */
+    /**     * Logger                                                            */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
-    /**
-     * Pagina a cui la command reindirizza per mostrare la lista dei rischi corruttivi
-     */
+    /**     * Page to SHOW list of risks                                        */
     private static final String nomeFileElenco = "/jsp/riElenco.jsp";
-    /**
-     * Pagina a cui la command reindirizza per mostrare i dettagli di un rischio
-     */
+    /**     * Page to SHOW details of a given risk                              */
     private static final String nomeFileDettaglio = "/jsp/riRischio.jsp";
-    /**
-     * Pagina a cui la command fa riferimento per mostrare la form di ricerca
-     */
+    /**     * Form to INSERT a new risk                                         */
     private static final String nomeFileInsertRisk = "/jsp/riRischioForm.jsp";
-    /**
-     * Pagina a cui la command fa riferimento per mostrare la form di aggiunta di un processo a un rischio
-     */
+    /**     * Form to link a process to a given risk                            */
     private static final String nomeFileAddProcess = "/jsp/riProcessoForm.jsp";
-    /**
-     * Pagina a cui la command fa riferimento per mostrare la form di aggiunta di un rischio a un processo
-     */
+    /**     * Form to link a risk to a given process                            */
     private static final String nomeFileAddRisk = "/jsp/riRischioProcessoForm.jsp";
     /**
-     * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutte le pagine gestite da questa Command
+     * Struttura contenente le pagina a cui la command fa riferimento 
+     * per mostrare tutte le pagine gestite da questa Command
+     * <hr>
+     * Map containing the pages referenced by the command 
+     * to display all the functions managed by this Command 
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<>();
-
+    /**     * Title pages dictionary                                            */    
+    private static final HashMap<String, String> titleFile = new HashMap<>();
+    
     
     /** 
      * Crea una nuova istanza di WbsCommand 
      */
     public RiskCommand() {
-        /*;*/   // It doesn't anything
+        /*;*/   // It doesn't do anything
     }
   
     
@@ -153,11 +149,16 @@ public class RiskCommand extends ItemBean implements Command, Constants {
           String msg = FOR_NAME + "La voce menu' " + this.getNome() + " non ha il campo paginaJsp. Impossibile visualizzare i risultati.\n";
           throw new CommandException(msg);
         }
-        // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
+        /* Load the hashmap containing the pages to be invoked dynamically      */
         nomeFile.put(COMMAND_RISK,              nomeFileElenco);
         nomeFile.put(PART_INSERT_RISK,          nomeFileInsertRisk);
         nomeFile.put(PART_INSERT_RISK_PROCESS,  nomeFileAddProcess);
         nomeFile.put(PART_INSERT_PROCESS_RISK,  nomeFileAddRisk);
+        /* Load the hashmap containing the titles of the pages                  */
+        titleFile.put(COMMAND_RISK,             "Registro dei rischi");
+        titleFile.put(PART_INSERT_RISK,         "Nuovo Rischio");
+        titleFile.put(PART_INSERT_RISK_PROCESS, "Collegamento Processo");
+        titleFile.put(PART_INSERT_PROCESS_RISK, "Collegamento Rischio");
     }  
   
     
@@ -216,7 +217,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         // Recupera o inizializza 'id processo'
         int idP = parser.getIntParameter("pliv", DEFAULT_ID);
         /* -------------------------------------------------------------------- *
-         *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
+         *                          DataBound instance                          *
          * -------------------------------------------------------------------- */
         try {
             db = new DBWrapper();
@@ -322,14 +323,17 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                      *                  Manage Risk Part                *
                      * ------------------------------------------------ */
                     if (nomeFile.containsKey(part)) {
-                        // Recupera le breadcrumbs
+                        // Retrieve the breadcrumbs
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                        // Define a default for the page to serve
                         fileJspT = nomeFile.get(part);
+                        // Title of the HTML page
+                        tP = titleFile.get(part);
+                        // Decide which function to activate
                         switch (part.toLowerCase()) {
                             /* -----     SHOW Form to INSERT new Risk     ----- */
                             case PART_INSERT_RISK: {
                                 // Customize labels
-                                tP = "Nuovo Rischio";
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, tP);
                                 break;
                             }
@@ -340,7 +344,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                 // Retrieve all the processes
                                 macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
                                 // Customize labels
-                                tP =  "Collegamento Processo";
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, tP);
                                 break;
                             }
@@ -355,7 +358,6 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                                 // Retrieve all the risks
                                 risks = db.getRisks(user, survey.getId(), survey);
                                 // Customize labels
-                                tP = "Collegamento Rischio";
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, tP);
                                 break;
                              }
@@ -376,7 +378,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
                              *      SELECT and SHOW the full List of Risks      *
                              * ------------------------------------------------ */
                             risks = db.getRisks(user, survey.getId(), survey);
-                            tP = "Registro dei rischi";
+                            tP = titleFile.get(COMMAND_RISK);
                             fileJspT = nomeFileElenco;                            
                         }
                     }
