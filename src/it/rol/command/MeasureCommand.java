@@ -178,7 +178,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
      * Crea una nuova istanza di  questa Command 
      */
     public MeasureCommand() {
-        /*;*/   // It doesn't anything
+        /*;*/   // It doesn't do anything
     }
   
     
@@ -964,6 +964,9 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
      * il target dell'indicatore master</li>
      * </ul>
      * 
+     * @param user      utente loggato
+     * @param survey    estremi della rilevazione di interesse
+     * @param db        istanza di DataBound
      * @param measures  lista di misure applicate al rischio
      * @return <code>ArrayList&lt;MeasureBean&gt;</code> - 
      * @throws CommandException se si verifica un problema nel recupero di un attributo del bean o in qualche operazione o puntamento
