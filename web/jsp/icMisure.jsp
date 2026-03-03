@@ -17,6 +17,15 @@
     </style>
   <c:catch var="exception">
     <h3 class="mt-1 m-0 font-weight-bold float-left">Monitoraggio</h3>
+    <span class="form-custom float-right">
+      <select id="myPlans" class="wide">
+        <option value="2026" >2026</option>
+        <option value="2025" >2025</option>
+        <option value="2024" >2024</option>
+        <option value="2023" >2023</option>
+        <option value="2022" >2022</option>
+      </select>
+    </span>
     <hr class="riga"/>
     <c:forEach var="d" items="${structs}">
     <div class="module">
