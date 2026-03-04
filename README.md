@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.5.5] (04/03/2026) [Implementation function to create a new subject](https://github.com/gbetorre/rischi/commits/main/?since=2026-03-04&until=2026-03-04) 
 - [2.5.4] (26/02/2026) [First implementation function to create a new subject](https://github.com/gbetorre/rischi/commits/main/?since=2026-02-26&until=2026-02-26) 
 - [2.5.3] (25/02/2026) [Presentation improvements](https://github.com/gbetorre/rischi/commits/main/?since=2026-02-25&until=2026-02-25) 
 - [2.5.2] (24/02/2026) Addition of non-applied measures display in the monitoring summary report 
