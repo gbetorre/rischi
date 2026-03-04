@@ -7578,6 +7578,148 @@ public class DBWrapper extends QueryImpl {
     
     
     /**
+     * <p>Metodo per fare l'inserimento di un soggetto contingente.</p>
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    public void insertSubject(PersonBean user, 
+                              HashMap<String, LinkedHashMap<String, String>> params) 
+                       throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri del soggetto contingente
+            LinkedHashMap<String, String> subject = params.get(PART_INSERT_SUBJECT);
+            // Prepara data e ora (potrebbero cambiare da una query all'altra se calcolate in itinere)
+            java.sql.Date lastModifiedDate = Utils.convert(Utils.convert(Utils.getCurrentDate()));
+            // Inoltre, la memorizzazione è più efficiente del ricalcolo
+            Time lastModifiedTime = Utils.getCurrentTime();
+            // Definisce un indice per il numero di parametro da passare alla query
+            int nextParam = NOTHING;
+            try {
+                // Begin: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                try {
+                    pst = con.prepareStatement(INSERT_SUBJECT);
+                    pst.clearParameters();
+                    /* === ID === */
+                    int newId = getMax("soggetto_contingente") + ELEMENT_LEV_1;
+                    pst.setInt(++nextParam, newId);
+                    /* === Nome === */
+                    pst.setString(++nextParam, subject.get("nome"));
+                    /* === Descrizione === */
+                    String descr = null;
+                    if (!subject.get("desc").equals(VOID_STRING)) {
+                        descr = new String(subject.get("desc"));
+                        pst.setString(++nextParam, descr);
+                    } else {
+                        // Dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    /* === Ordinale === */
+                    pst.setInt(++nextParam, 100);
+                    /* === Soggetto Master (!master = archiviato) === */
+                    pst.setBoolean(++nextParam, true);
+                    /* === Struttura (si inserisce solo la foglia) === */
+                    String strL1 = subject.get("str-1");
+                    String strL2 = subject.get("str-2");
+                    String strL3 = subject.get("str-3");
+                    String strL4 = subject.get("str-4");
+                    // Parte dal livello 4
+                    if (!strL4.equals(VOID_STRING)) {
+                        String idAsString = strL4.substring(strL4.indexOf(DOT) + ELEMENT_LEV_1, strL4.indexOf(DASH));
+                        int id = Integer.parseInt(idAsString);
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 1
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 2
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 3
+                        pst.setInt(++nextParam,  id);           // struttura liv 4
+                    // Se non c'è livello 4 cerca la struttura di livello 3    
+                    } else if (!strL3.equals(VOID_STRING)) {
+                        String idAsString = strL3.substring(strL3.indexOf(DOT) + ELEMENT_LEV_1, strL3.indexOf(DASH));
+                        int id = Integer.parseInt(idAsString);
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 1
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 2
+                        pst.setInt(++nextParam,  id);           // struttura liv 3
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 4
+                    // Se non c'è livello 3 cerca la struttura di livello 2    
+                    } else if (!strL2.equals(VOID_STRING)) {
+                        String idAsString = strL2.substring(strL2.indexOf(DOT) + ELEMENT_LEV_1, strL2.indexOf(DASH));
+                        int id = Integer.parseInt(idAsString);
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 1
+                        pst.setInt(++nextParam,  id);           // struttura liv 2                            
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 3
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 4
+                    // Se non c'è livello 2 non ha senso cercare il livello 1
+                    } else {
+                        // Dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 1
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 2                            
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 3
+                        pst.setNull(++nextParam, Types.NULL);   // struttura liv 4
+                    }
+                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                    pst.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                    pst.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                    pst.setInt(++nextParam, user.getUsrId());
+                    /* === Tipo === */
+                    pst.setInt(++nextParam, 17);
+                    /* === Stato === */
+                    pst.setInt(++nextParam, ELEMENT_LEV_1);
+                    /* === Collegamento a rilevazione === */
+                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                    // Execute the batch updates
+                    int updateCounts = pst.executeUpdate();
+                    LOG.info(updateCounts + " in transazione.\n");
+                } catch (SQLException sqle) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella query di inserimento soggetto.\n" + sqle.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, sqle);
+                } catch (NumberFormatException nfe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, nfe);
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, npe);
+                } catch (Exception e) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
+                // End: <==
+                con.commit();
+                pst.close();
+                pst = null;
+                LOG.info("Transazione committata.\n");
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }    
+    
+    
+    /**
      * <p>Inserisce le informazioni relative ad un file, i cui 
      * estremi vengono comunicati in un dictionary passato come argomento.</p>
      * <p>Questo inserimento, una volta andato a buon fine, rappresenter&agrave;
