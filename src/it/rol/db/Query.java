@@ -832,6 +832,7 @@ public interface Query extends Serializable {
             "   ,   SC.id_struttura_liv2        AS \"cod2\"" +
             "   ,   SC.id_struttura_liv3        AS \"cod3\"" +
             "   ,   SC.id_struttura_liv4        AS \"cod4\"" +
+            "   ,   SC.master                   AS \"urlInterno\"" + 
             "   FROM soggetto_contingente SC" +
             "   WHERE (SC.id = ? OR -1 = ?)" +
             "       AND (SC.master = ? OR true = ?)" +
@@ -2474,6 +2475,44 @@ public interface Query extends Serializable {
             "   ,       ? " +       // data ultima modifica
             "   ,       ? " +       // ora ultima modifica
             "   ,       ? " +       // autore ultima modifica
+            "          )" ;
+
+    /**
+     * <p>Query per inserimento di un soggetto contingente.</p>
+     */
+    public static final String INSERT_SUBJECT =
+            "INSERT INTO soggetto_contingente" +
+            "   (   id" +
+            "   ,   nome" +
+            "   ,   descrizione" +
+            "   ,   ordinale" +
+            "   ,   master" +
+            "   ,   id_struttura_liv1" +
+            "   ,   id_struttura_liv2" +
+            "   ,   id_struttura_liv3" +
+            "   ,   id_struttura_liv4" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   ,   id_tipo" +
+            "   ,   id_stato" +
+            "   ,   id_rilevazione" +
+            "   )" +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // nome
+            "   ,       ? " +       // descrizione
+            "   ,       ? " +       // ordinale
+            "   ,       ? " +       // master
+            "   ,       ? " +       // struttura liv 1
+            "   ,       ? " +       // struttura liv 2
+            "   ,       ? " +       // struttura liv 3
+            "   ,       ? " +       // struttura liv 4
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "   ,       ? " +       // id_tipo
+            "   ,       ? " +       // id_stato
+            "   ,       ? " +       // id_rilevazione
             "          )" ;
 
     /* ********************************************************************** *
