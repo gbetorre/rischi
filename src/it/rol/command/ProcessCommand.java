@@ -350,6 +350,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         LinkedHashMap<ProcessBean, ArrayList<ProcessBean>> processIndexed = null;
         // Dichiara elenco gerarchico strutture collegate alla rilevazione
         ArrayList<DepartmentBean> structs = null;
+        // Elenco strutture collegate alla rilevazione indicizzate per codice
+        HashMap<String, Vector<DepartmentBean>> flatStructs = null;
         // Dichiara elenco di soggetti contingenti
         ArrayList<ItemBean> subjects = null;
         // Predispone le BreadCrumbs personalizzate per la Command corrente
@@ -409,25 +411,26 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Controlla che non sia già presente l'associazione 
                             int check = db.getFactorRiskProcess(user, params);
                             if (check > NOTHING) {  // Genera un errore
-                                // Duplicate key value violates unique constraint 
-                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
-                                           AMPERSAND + "p" + EQ + PART_INSERT_F_R_P +
-                                           AMPERSAND + "idR" + EQ + parser.getStringParameter("r-id", VOID_STRING) + 
-                                           AMPERSAND + "pliv" + EQ + pliv + 
-                                           AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur +
-                                           AMPERSAND + MESSAGE + EQ + "dupKey";
-                                
+                                // Duplicate key value violates unique constraint
+                                dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                       .put("p", PART_INSERT_F_R_P)
+                                       .put("idR", parser.getStringParameter("r-id", VOID_STRING))
+                                       .put("pliv", pliv)
+                                       .put("liv", ELEMENT_LEV_2)
+                                       .put(PARAM_SURVEY, codeSur)
+                                       .put(MESSAGE, "dupKey");
+                                redirect = dataUrl.getUrl();
                             } else {
                                 // Inserisce nel DB nuova associazione pxrxf
                                 db.insertFactorRiskProcess(user, params);
-                                // Prepara la redirect 
-                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
-                                           AMPERSAND + "p" + EQ + PART_PROCESS +
-                                           AMPERSAND + "pliv" + EQ + pliv + 
-                                           AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur +
-                                           AMPERSAND + MESSAGE + EQ + "newRel#rischi";
+                                // Prepara la redirect
+                                dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                       .put("p", PART_PROCESS)
+                                       .put("pliv", pliv)
+                                       .put("liv", ELEMENT_LEV_2)
+                                       .put(PARAM_SURVEY, codeSur)
+                                       .put(MESSAGE, "newRel#rischi");
+                                redirect = dataUrl.getUrl();
                             }
                         /* ------------------------------------------------ *
                          *                UPDATE a note to PxI              *
@@ -437,15 +440,17 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             db.updateNote(user, params);
                             // Prepara la redirect 
                             if (ref.equalsIgnoreCase(PART_PROCESS)) {
-                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_PROCESS + 
-                                           AMPERSAND + "p" + EQ + PART_PROCESS +
-                                           AMPERSAND + "pliv" + EQ + pliv + 
-                                           AMPERSAND + "liv" + EQ + ELEMENT_LEV_2 +
-                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur;     
+                                dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                       .put("p", PART_PROCESS)
+                                       .put("pliv", pliv)
+                                       .put("liv", ELEMENT_LEV_2)
+                                       .put(PARAM_SURVEY, codeSur);
+                                redirect =  dataUrl.getUrl();
                             } else if (ref.equalsIgnoreCase(PART_SELECT_STR)) {
-                                redirect = ConfigManager.getEntToken() + EQ + COMMAND_REPORT + 
-                                           AMPERSAND + "p" + EQ + PART_SELECT_STR +
-                                           AMPERSAND + PARAM_SURVEY + EQ + codeSur;  
+                                dataUrl.put(ConfigManager.getEntToken(), COMMAND_REPORT)
+                                       .put("p", PART_SELECT_STR)
+                                       .put(PARAM_SURVEY, codeSur);
+                                redirect =  dataUrl.getUrl();
                             }
                         /* ------------------------------------------------ *
                          *        INPUT new process - type and data         *
@@ -635,6 +640,21 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     redirect = prProcessoAjax;
                                     break;
                             }
+                        /* ------------------------------------------------ *
+                         *                 INSERT Subject                   *
+                         * ------------------------------------------------ */      
+                        } else if (part.equalsIgnoreCase(PART_INSERT_SUBJECT)) {
+                            // Deve aggiungere al dizionario dei parametri quelli di subject
+                            loadParams(part, req, params);
+                            // Inserimento soggetto contingente (Salva...)
+                            db.insertSubject(user, params);
+                            // Torna a pagina assegnazione strutture
+                            dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                   .put("p", PART_INSERT_ACT_STRUCTS)
+                                   .put("pliv", pliv)
+                                   .put("liv", ELEMENT_LEV_2)
+                                   .put(PARAM_SURVEY, codeSur);
+                            redirect = dataUrl.getUrl();
                         }
                     }
                 /* ======================== @GetMapping ======================= */
@@ -840,6 +860,18 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 // Ha bisogno di personalizzare le breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Aggiunta Output");
                                 break;
+                            /* ---    FORM: Create Subject  ---  */
+                            case PART_INSERT_SUBJECT: {
+                                // Recupera le strutture della rilevazione corrente
+                                structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
+                                // Travasa le strutture in una mappa piatta indicizzata per codice
+                                flatStructs = AuditCommand.decantStructs(structs);
+                                // Recupera tutti i soggetti contingenti 
+                                subjects = db.getSubjects(user, !Query.GET_ALL, Query.GET_ALL, survey);
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, titleFile.get(part));
+                                break;
+                            }    
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
@@ -896,6 +928,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Imposta nella request elenco completo strutture
         if (structs != null) {
             req.setAttribute("strutture", structs);
+        }
+        // Imposta nella request elenco completo strutture sotto forma di dictionary
+        if (flatStructs != null) {
+            req.setAttribute("elencoStrutture", flatStructs);
         }
         // Imposta nella request elenco soggetti contingenti
         if (subjects != null) {
@@ -982,9 +1018,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
         // Estrae l'azione dal parametro 'p'
-        switch (part) {
+        switch (part.toLowerCase()) {
             /* ---------------------------------------------------- *
-             *              Parametri inserimento Input             *
+             *                INSERT Inputs Parameters              *
              * ---------------------------------------------------- */
             case (PART_INSERT_INPUT): {
                 LinkedHashMap<String, String> input = new LinkedHashMap<>();
@@ -1012,7 +1048,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 break;
             }
             /* ---------------------------------------------------- *
-             *       Parametri aggiornamento/inserimento Fasi       *
+             *        INSERT | UPDATE Activities Parameters         *
              * ---------------------------------------------------- */
             case (PART_INSERT_ACTIVITY): { 
                 LinkedHashMap<String, String> activities = new LinkedHashMap<>();
@@ -1042,7 +1078,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 break;
             }
             /* ---------------------------------------------------- *
-             *             Parametri inserimento Output             *
+             *               INSERT Outputs Parameters              *
              * ---------------------------------------------------- */
             case (PART_INSERT_OUTPUT): {
                 LinkedHashMap<String, String> output = new LinkedHashMap<>();
@@ -1067,6 +1103,23 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 output.put("oue", outputToLink);
                 // Aggiunge tutti i parametri degli output ai parametri della richiesta
                 formParams.put(part, output);
+                break;
+            }
+            /* ---------------------------------------------------- *
+             *                INSERT Subject Parameters             *
+             * ---------------------------------------------------- */
+            case (PART_INSERT_SUBJECT): {
+                LinkedHashMap<String, String> subject = new LinkedHashMap<>();
+                // Nome e descrizione soggetto
+                subject.put("nome", parser.getStringParameter("su-name", VOID_STRING));
+                subject.put("desc", parser.getStringParameter("su-desc", VOID_STRING));
+                // Struttura collegata
+                subject.put("str-1",  parser.getStringParameter("sliv1", VOID_STRING));
+                subject.put("str-2",  parser.getStringParameter("sliv2", VOID_STRING));
+                subject.put("str-3",  parser.getStringParameter("sliv3", VOID_STRING));
+                subject.put("str-4",  parser.getStringParameter("sliv4", VOID_STRING));
+                // Aggiunge la struttura coi valori alla mappa generale dei parametri
+                formParams.put(part, subject);
                 break;
             }
         }
