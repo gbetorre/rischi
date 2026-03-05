@@ -109,7 +109,7 @@
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory bgAct13"><strong>Azioni svolte per raggiungere l'obiettivo</strong></div>
           <div class="col-sm-6">
-            <textarea class="form-control" id="mon-descr" name="mon-descr" placeholder="${mon.informativa}" readonly></textarea>
+            <textarea class="form-control" id="mon-descr" name="mon-descr" placeholder="${fn:replace(mon.informativa, doubleQuote, '&quot;')}" readonly></textarea>
           </div>
         </div>
         <hr class="separatore">
