@@ -195,7 +195,7 @@
     /* Protegge dalla perdita di dati immessi ma non salvati */
     /* Protects against the loss of data that has been entered but not saved */
     function showSubjForm() {
-        var url = "${initParam.appName}/?q=pr&p=isu&r=${param['r']}";
+        var url = "${initParam.appName}/?q=pr&p=isu&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=${param['pliv1']}&pliv0=${param['pliv0']}&r=${param['r']}";
         if(formChanged) {
             if (confirm('Dati non salvati. Continuare?')) {
                 window.location.href = url;
