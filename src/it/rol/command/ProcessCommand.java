@@ -651,8 +651,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Torna a pagina assegnazione strutture
                             dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
                                    .put("p", PART_INSERT_ACT_STRUCTS)
-                                   .put("pliv", pliv)
                                    .put("liv", ELEMENT_LEV_2)
+                                   .put("pliv", idP)
+                                   .put("pliv1", parser.getStringParameter("pliv1", VOID_STRING))
+                                   .put("pliv0", parser.getStringParameter("pliv0", VOID_STRING))
                                    .put(PARAM_SURVEY, codeSur);
                             redirect = dataUrl.getUrl();
                         }
