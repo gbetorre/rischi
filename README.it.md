@@ -540,6 +540,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### 2026
 
+- [2.5.6] (05/03/2026) Completamento implementazione funzionalit&agrave; per inserimento nuovo soggetto contingente
 - [2.5.5] (04/03/2026) Implementazione funzionalit&agrave; per inserimento nuovo soggetto contingente
 - [2.5.4] (26/02/2026) Prima parte di implementazione funzionalit&agrave; per inserimento nuovo soggetto contingente
 - [2.5.3] (25/02/2026) Miglioramenti nella presentazione delle form (workflow aggiunta/aggiornamento processo)
