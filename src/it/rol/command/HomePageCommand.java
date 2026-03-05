@@ -249,7 +249,7 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
             throw new CommandException(msg + e.getMessage(), e);
         }
         /* ******************************************************************** *
-         *                          Recupera i parametri                        *
+         *                        Settaggi in application                       *
          * ******************************************************************** */
         /* Imposta una variabile di applicazione, se non è già stata valorizzata (singleton).
          * Il contenuto in sé della variabile è stato sicuramente creato, altrimenti
@@ -267,6 +267,11 @@ public class HomePageCommand extends ItemBean implements Command, Constants {
             // Attenzione: crea una variabile di APPLICAZIONE
             req.getServletContext().setAttribute("db", dbName);
         }
+        /* ******************************************************************** *
+         *                          Settaggi in request                         *
+         * ******************************************************************** */
+        // Titolo pagina
+        req.setAttribute("tP", getLabelWeb());
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
         if (error != null) {
