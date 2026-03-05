@@ -310,6 +310,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                 /* *********************************************************** *
                  *  Viene richiesta la visualizzazione della pagina di report  *
                  * *********************************************************** */
+                    tP = getLabelWeb();
                     fileJspT = nomeFileElenco;
                 }
             } else {    // Manca il codice rilevazione
