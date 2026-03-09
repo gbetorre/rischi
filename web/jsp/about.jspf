@@ -25,18 +25,20 @@
         </button>
       </div>
       <div class="toast-body">
-        Versione: 2.56
+        Versione: 2.57
         <fmt:setLocale value="it_IT"/>
-        <c:set var="deployDate" value="05-03-2026" scope="page" />
+        <c:set var="deployDate" value="09-03-2026" scope="page" />
         <fmt:parseDate var="releaseDate" value="${deployDate}" pattern="dd-MM-yyyy" scope="page" />
         <fmt:formatDate var="dataRilascio" value="${releaseDate}" pattern="dd MMMMM, yyyy" />
         <span class="float-right">
           <span class="btn-small">(data di rilascio: <c:out value="${dataRilascio}" />)</span>
         </span>
         <hr class="riga" />
+        <div class="text-center">
           <span class="copyleft">&copy;</span> 2022 &mdash; 
           <c:out value="${requestScope.theCurrentYear}" />&nbsp; 
-          Giovanroberto Torre
+          <!-- Giovanroberto Torre -->
+        </div>
       </div>
     </div>
   </div>
