@@ -93,7 +93,7 @@
         </ul>
         <hr class="separapoco" />
         <div class="col-sm-12 centerlayout">
-          <a href="${initParam.appName}/?q=pr&p=inp&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg" title="Aggiungi un nuovo input al processo corrente">
+          <a href="${initParam.appName}/?q=pr&p=inp&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg" title="Aggiungi un nuovo input al processo corrente">
             <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Input
           </a>
         </div>
@@ -121,7 +121,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-circle" viewBox="0 0 16 16"  title="${fase.id}">
                 <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
               </svg>
-              <c:out value="${fase.nome}" />
+              <a href="${initParam.appName}/?q=pr&p=uac&aliv=${fase.id}&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="" title="Aggiungi/Modifica descrizione fase">
+                <c:out value="${fase.nome}" />
+              </a> &nbsp;
             </td>
             <td width="40%">
             <c:forEach var="struttura" items="${fase.strutture}">
@@ -140,10 +142,10 @@
           </c:forEach>
         </table>
         <div class="col-sm-12 centerlayout">
-          <a href="${initParam.appName}/?q=pr&p=iac&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg" title="Aggiungi una nuova fase al processo corrente">
+          <a href="${initParam.appName}/?q=pr&p=iac&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg" title="Aggiungi una nuova fase al processo corrente">
             <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Fase
           </a> &nbsp;
-          <a href="${initParam.appName}/?q=pr&p=iac&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}&ref=pro" class="btn btn-warning btn-lg text-dark text-decoration-none" id="resort" title="Modifica l'ordine delle fasi">
+          <a href="${initParam.appName}/?q=pr&p=iac&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}&ref=pro" class="btn btn-warning btn-lg text-dark text-decoration-none" id="resort" title="Modifica l'ordine delle fasi">
             <i class="fa-solid fa-sort"></i>    &nbsp;    Modifica Ordine
           </a>&nbsp;&nbsp;
           <a href="${initParam.appName}/?q=pr&p=ias&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-primary btn-lg" title="Aggiungi una nuova struttura/soggetto alle fasi del processo corrente">
@@ -176,7 +178,7 @@
         </ul>
         <hr class="separapoco" />
         <div class="col-sm-12 centerlayout">
-          <a href="${initParam.appName}/?q=pr&p=ino&liv=${param['pliv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg" title="Aggiungi un nuovo output al processo corrente">
+          <a href="${initParam.appName}/?q=pr&p=ino&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg" title="Aggiungi un nuovo output al processo corrente">
             <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Output
           </a>
         </div>
@@ -415,7 +417,7 @@
             </div>
             </c:when>
             <c:otherwise>
-            Processo non oggetto di intervista: indicatori non calcolabili!
+            Processo non oggetto di intervista <span class="badge heading bgAct5 textcolormaroon">recente</span>: indicatori non calcolabili!
             </c:otherwise>
           </c:choose>
           </div><br />
