@@ -88,9 +88,12 @@
               </div>
               <div class="content-holder bgAct31">&nbsp;
                 Strutture di organigramma gi&agrave; associate:
+                <c:if test="${empty fase.strutture}">
+                  <span class="textcolormaroon"><em>Nessuna</em></span>
+                </c:if>
                 <ul class="list-group">
                 <c:forEach var="str" items="${fase.strutture}">
-                  <li class="list-group-item reportAct bg-note">
+                  <li class="list-group-item reportAct bgAct28">
                     <span class="marginLeft">
                       <img src="${initParam.urlDirectoryImmagini}str-l${str.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${str.livello}" />
                       <c:out value="${str.prefisso}" escapeXml="false" />&nbsp; 
@@ -98,10 +101,7 @@
                     </span>
                   </li>
                 </c:forEach>
-                <c:if test="${empty fase.strutture}">
-                   <li class="list-group-item"><em>Nessuna</em></li>
-                </c:if>
-                </ul>
+                </ul>                
               </div>
               <div class="content-holder bgAct19">(Inserire solo una struttura, scelta tra i 4 livelli)
                 <div id="callable-row">
@@ -132,18 +132,18 @@
               </div>
               <div class="content-holder bgAct31">&nbsp;
                 Soggetti contingenti gi&agrave; associati:
+                <c:if test="${empty fase.soggetti}">
+                  <span class="textcolormaroon"><em>Nessuno</em></span>
+                </c:if>                
                 <ul class="list-group">
                 <c:forEach var="sub" items="${fase.soggetti}">
-                  <li class="list-group-item" title="${sub.informativa}">
+                  <li class="list-group-item bgAct29" title="${sub.informativa}">
                     <span class="marginLeft">
                       <img src="${initParam.urlDirectoryImmagini}person-fill.png" class="ico-small" alt="icona" title="Soggetto contingente" /> 
                       <c:out value="${sub.nome}" escapeXml="false" />
                     </span>
                   </li>
                 </c:forEach>
-                <c:if test="${empty fase.soggetti}">
-                   <li class="list-group-item"><em>Nessuno</em></li>
-                </c:if>
                 </ul>
               </div>
               <div class="content-holder bgAct">Nuova associazione con soggetto contingente (da selezionare tra i soggetti esistenti):
