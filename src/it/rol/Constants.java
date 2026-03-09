@@ -344,6 +344,11 @@ public interface Constants extends Serializable {
      */
     public static final String PART_INSERT_SUBJECT      = "isu";
     /**
+     * <p>Costante per il parametro identificante la funzione di aggiornamento 
+     * di una fase collegata ad un processo.</p>
+     */
+    public static final String PART_UPDATE_ACTIVITY     = "uac";
+    /**
      * <p>Costante per il parametro identificante la parte di 
      * aggiunta/aggiornamento nota PxI (giudizio sintetico).</p>
      */
