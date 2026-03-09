@@ -82,8 +82,16 @@
                     <div class="col-sm-7">
                       <input type="text" class="form-control sAct" id="at-nome" name="ac-name" placeholder="Inserisci fase...">
                     </div>
-                    <hr class="separatore" />
                   </div>
+                  <hr class="separatore" />
+                  <%--
+                  <div class="row">
+                    <div class="col-sm-4 bgAct28 marginLeftSmall"><strong>Descrizione</strong></div>
+                    <div class="col-7 large-4">
+                      <textarea class="form-control" id="at-desc" name="ac-desc" placeholder="Inserisci una descrizione"></textarea>
+                    </div>
+                    <hr class="separatore" />
+                  </div>--%>
                 </div>
               </div>
               <div class="row lblca">
@@ -97,14 +105,14 @@
               </div>
             </div>
           </div>
-          <br />
+          <br>
         </c:if>
           <hr class="separatore" />
-        </div>
         <c:if test="${(empty param['ref']) or (param['ref'] ne 'pro')}">
         <%@ include file="btnSaveCont.jspf"%>
-        <hr class="separatore" />
+          <hr class="separatore" />
         </c:if>
+        </div>
       </form>
     </div>
     <script>
