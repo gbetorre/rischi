@@ -179,6 +179,12 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * Form for entering a new subject
      */
     private static final String nomeFileAddSubject =    "/jsp/prSoggettoForm.jsp";
+    /** 
+     * Pagina contenente la form per aggiornamento attivit&agrave;
+     * <hr>
+     * Form to update an activity
+     */
+    private static final String nomeFileUpdActivity =   "/jsp/prFaseForm.jsp";
     /**
      * Nome del file json della Command (dipende dalla pagina di default)
      * <hr>
@@ -237,6 +243,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_INSERT_ACT_STRUCTS,   nomeFileAddStructs);
         nomeFile.put(PART_INSERT_OUTPUT,        nomeFileAddOutput);
         nomeFile.put(PART_INSERT_SUBJECT,       nomeFileAddSubject);
+        nomeFile.put(PART_UPDATE_ACTIVITY,      nomeFileUpdActivity);
         /* Load the hashmap containing the titles of the pages                  */
         titleFile.put(PART_PROCESS,                         "Dettagli Processo");
         titleFile.put(PART_INPUT,                           "Input Processo");
@@ -252,6 +259,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         titleFile.put(PART_INSERT_ACT_STRUCTS,              "Assegnazione Strutture/Soggetti");
         titleFile.put(PART_INSERT_OUTPUT,                   "Aggiunta Output");
         titleFile.put(PART_INSERT_SUBJECT,                  "Nuovo Soggetto");
+        titleFile.put(PART_UPDATE_ACTIVITY,                 "Aggiornamento Fase");
     }
 
 
@@ -836,6 +844,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
                                 // Recupera solo i soggetti contingenti di tipo master
                                 subjects = db.getSubjects(user, true, !Query.GET_ALL, survey);
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, titleFile.get(part));
                                 break;
                             }
                             /* -----    FORM: Link/Create Output  -----         */
@@ -1062,6 +1072,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                     String[] dbActs = req.getParameterValues("ac-ordb");
                     // Abbina gli id ai numeri d'ordine scelti dall'utente
                     decantActivities(idActs, dbActs, activities);
+                // Se non deve fare l'aggiornamento, deve fare l'inserimento
                 } else {
                     // Ordinale di partenza
                     String dbAct = parser.getStringParameter("ac-ordb", "100");
