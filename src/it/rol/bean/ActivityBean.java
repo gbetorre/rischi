@@ -47,6 +47,7 @@
 
 package it.rol.bean;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Vector;
@@ -75,9 +76,9 @@ public class ActivityBean extends CodeBean {
     /* $NON-NLS-1$ silence a warning that Eclipse emits when it encounters string literals
         The idea is that UI messages should not be embedded as string literals, 
         but rather sourced from a resource file (so that they can be translated, proofed, etc).*/
-    /* ************************************************************************ *  
+    /* ------------------------------------------------------------------------ *  
      *                     Dati descrittivi dell'attività                       *
-     * ************************************************************************ */
+     * ------------------------------------------------------------------------ */
     /** Descrizione dell'attivit&agrave; */
     private String descrizione;
     /** Codice dell'attivit&agrave; */
@@ -98,22 +99,22 @@ public class ActivityBean extends CodeBean {
     private int guPrevisti;
     /** Giorni uomo effettivi per l'attivit&agrave; */
     private int guEffettivi;
-    /** Giorni uomo rimanenti per l'attivit&agrave; */
-    private int guRimanenti;
+    /** Ora ultima modifica */
+    private Time oraUltimaModifica;
     /** Obbligatoriet&agrave; della fase */
     private boolean mandatory;
     /** Milestone attivit&agrave; */
     private boolean milestone;
-    /* *********************************************** *
+    /* ----------------------------------------------- *
      *            Strutture dell'attività              *
-     * *********************************************** */
+     * ----------------------------------------------- */
     /** Vector di strutture che partecipano all'attivit&agrave; */
     private ArrayList<DepartmentBean> strutture;
     /** Vector di soggetti/enti esterni che partecipano all'attivit&agrave; */
     private Vector<DepartmentBean> soggetti;
-    /* *********************************************** *
+    /* ----------------------------------------------- *
      *           Riferimenti ad altre entità           *
-     * *********************************************** */
+     * ----------------------------------------------- */
     /** Riferimento al livello di complessit&agrave; dell'attivit&agrave; */
     private int idComplessita;
     /** Riferimento allo stato in cui si trova l'attivit&agrave; */
@@ -124,6 +125,10 @@ public class ActivityBean extends CodeBean {
     private IndicatorBean indicatore;
     
     
+    /* ************************************************************* *
+     *                          Costruttori                          *
+     * ************************************************************* */
+    
     /**
      * <p>Costruttore: inizializza i campi a valori di default.</p>
      */
@@ -131,7 +136,8 @@ public class ActivityBean extends CodeBean {
         super();
     	descrizione = codice = null;
     	dataInizio = dataFine = dataInizioAttesa = dataFineAttesa = dataInizioEffettiva = dataFineEffettiva = new Date(0);
-    	guPrevisti = guEffettivi = guRimanenti = -2;
+    	guPrevisti = guEffettivi = -2;
+    	oraUltimaModifica = null;
     	mandatory = milestone = false;
     	strutture = null; 
     	soggetti = null;
@@ -163,7 +169,7 @@ public class ActivityBean extends CodeBean {
         this.dataFineEffettiva = old.getDataFineEffettiva();
         this.guPrevisti = old.getGuPrevisti();
         this.guEffettivi = old.getGuEffettivi();
-        this.guRimanenti = old.getGuRimanenti();
+        this.oraUltimaModifica = old.getOraUltimaModifica();
         this.mandatory = old.isMandatory();
         this.milestone = old.isMilestone();
         this.strutture = old.getStrutture();
@@ -397,27 +403,27 @@ public class ActivityBean extends CodeBean {
 		this.guEffettivi = guEffettivi;
 	}
 
-
-	/* ********************************************************* *
-     *         Metodi getter e setter per guRimanenti            *
-     * ********************************************************* */
-	/**
-	 * Restituisce i giorni uomo rimanenti per l'attivit&agrave;
-	 * 
-	 * @return <code>guRimanenti</code> - giorni uomo rimanenti per l'attivit&agrave;
-	 */
-	public int getGuRimanenti() {
-		return guRimanenti;
-	}
-
-	/**
-	 * Imposta i giorni uomo rimanenti per l'attivit&agrave;
-	 * 
-	 * @param guRimanenti - giorni uomo rimanenti da impostare
-	 */
-	public void setGuRimanenti(int guRimanenti) {
-		this.guRimanenti = guRimanenti;
-	}
+    
+    /* *********************************************************** *
+     *       Metodi getter e setter per ora ultima modifica        *
+     * *********************************************************** */
+    /**
+     * Restituisce l'ora dell'ultima modifica 
+     * 
+     * @return <code>java.sql.Time</code> - ora dell'ultima modifica
+     */
+    public Time getOraUltimaModifica() {
+        return oraUltimaModifica;
+    }
+    
+    /**
+     * Imposta l'ora dell'ultima modifica 
+     * 
+     * @param oraUltimaModifica ora ultima modifica da impostare
+     */
+    public void setOraUltimaModifica(Time oraUltimaModifica) {
+        this.oraUltimaModifica = oraUltimaModifica;
+    }
 
 	
     /* ********************************************************* *
