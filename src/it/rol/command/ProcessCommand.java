@@ -665,6 +665,23 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                    .put("pliv0", parser.getStringParameter("pliv0", VOID_STRING))
                                    .put(PARAM_SURVEY, codeSur);
                             redirect = dataUrl.getUrl();
+                        /* ------------------------------------------------ *
+                         *           UPDATE an activity description         *
+                         * ------------------------------------------------ */                            
+                        } else if (part.equalsIgnoreCase(PART_UPDATE_ACTIVITY)) {
+                            // Deve aggiungere al dizionario dei parametri quelli di activity
+                            loadParams(part, req, params);
+                            // Aggiorna la fase di processo (attività)
+                            db.updateActivity(user, params);
+                            // Prepara la redirect 
+                            dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                   .put("p", PART_PROCESS)
+                                   .put("liv", ELEMENT_LEV_2)
+                                   .put("pliv", idP)
+                                   .put("pliv1", parser.getStringParameter("pliv1", VOID_STRING))
+                                   .put("pliv0", parser.getStringParameter("pliv0", VOID_STRING))
+                                   .put(PARAM_SURVEY, codeSur);
+                            redirect =  dataUrl.getUrl();
                         }
                     }
                 /* ======================== @GetMapping ======================= */
@@ -683,7 +700,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                          *                   LIST and DETAILS                   *
                          * ---------------------------------------------------- */   
                             /* -------      DETAILS: Process    -------         */
-                            case PART_PROCESS:
+                            case PART_PROCESS: {
                                 // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                                 processElements = new ConcurrentHashMap<>();
                                 // Valorizza tali liste necessarie a visualizzare  i dettagli di un processo, restituendo gli indicatori corredati con le note al PxI
@@ -691,8 +708,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 // Customize the breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_4, "Processo");
                                 break;
+                            }
                             /* -------      LIST: Inputs    -------             */    
-                            case PART_INPUT:
+                            case PART_INPUT: {
                                 // Istanzia generica tabella in cui mettere le liste di items afferenti al processo
                                 processElements = new ConcurrentHashMap<>();
                                 // Recupera l'elenco degli input
@@ -702,8 +720,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 // Customize the breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Lista Input");
                                 break;
+                            }
                             /* -------   Deal with: Outputs   -------           */   
-                            case PART_OUTPUT:
+                            case PART_OUTPUT: {
                                 /* -------  DETAILS: Output   -------           */
                                 if (idO > DEFAULT_ID) {
                                     // Recupera un output specifico
@@ -743,18 +762,20 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Lista Output");
                                 }
                                 break;
+                            }
                             /* -------   LIST: Fattori Abilitanti  -------      */        
-                            case PART_FACTORS:
+                            case PART_FACTORS: {
                                 // Deve recuperare l'elenco dei fattori abilitanti
                                 factors = db.getFactors(user, survey);
                                 // Ha bisogno di personalizzare le breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Fattori abilitanti");
                                 break;
+                            }
                         /* ---------------------------------------------------- *
                          *                         FORMS                        *
                          * ---------------------------------------------------- */
                             /* -------  FORM: Factor-Risk-Process   -------     */
-                            case PART_INSERT_F_R_P:
+                            case PART_INSERT_F_R_P: {
                                 // Deve recuperare l'elenco completo dei fattori abilitanti
                                 factors = db.getFactors(user, survey);
                                 // Prepara un ProcessBean di cui recuperare tutti i rischi
@@ -766,15 +787,17 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 // Ha bisogno di personalizzare le breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-F");
                                 break;
+                            }
                             /* ------   FORM: INSERT or UPDATE a PxI note ----- */
-                            case PART_PI_NOTE:
+                            case PART_PI_NOTE: {
                                 // Deve recuperare e mostrare la nota al giudizio sintetico PxI
                                 pxi = db.getIndicatorPI(user, idP, survey);
                                 // Ha bisogno di personalizzare le breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nota");
                                 break;
+                            }
                             /* -----    FORM: New Macro/Process  -----          */
-                            case PART_INSERT_PROCESS:
+                            case PART_INSERT_PROCESS: {
                                 // Controlla che esista il livello
                                 if (liv > DEFAULT_ID) {
                                     aree = db.getAree(user, survey);
@@ -794,8 +817,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 // Ha bisogno di personalizzare le breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo Elemento");
                                 break;
+                            }
                             /* -----    FORM: Link/Create Input  -----          */
-                            case PART_INSERT_INPUT:
+                            case PART_INSERT_INPUT: {
                                 // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                                 processElements = new ConcurrentHashMap<>();
                                 // Recupera tutti gli Input
@@ -816,7 +840,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 // Ha bisogno di personalizzare le breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Aggiunta Input");
                                 break;
-                            /* -----    FORM: New Activity  -----               */
+                            }
+                            /* -----    FORM: New/Update Activity  -----        */
+                            case PART_UPDATE_ACTIVITY:   
                             case PART_INSERT_ACTIVITY: {
                                 // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                                 processElements = new ConcurrentHashMap<>();
@@ -827,7 +853,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 // Imposta nella tabella la lista ricavata
                                 retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
                                 // Ha bisogno di personalizzare le breadcrumbs
-                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Aggiunta Fasi");
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, titleFile.get(part));
                                 break;
                             }
                             /* ---    FORM: Link Structures to Activities  ---  */
@@ -849,7 +875,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 break;
                             }
                             /* -----    FORM: Link/Create Output  -----         */
-                            case PART_INSERT_OUTPUT:
+                            case PART_INSERT_OUTPUT: {
                                 // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                                 processElements = new ConcurrentHashMap<>();
                                 // Recupera tutti gli Output
@@ -872,6 +898,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 // Ha bisogno di personalizzare le breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, "Aggiunta Output");
                                 break;
+                            }
                             /* ---    FORM: Create Subject  ---  */
                             case PART_INSERT_SUBJECT: {
                                 // Recupera le strutture della rilevazione corrente
@@ -883,7 +910,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 // Ha bisogno di personalizzare le breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, titleFile.get(part));
                                 break;
-                            }    
+                            }
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
@@ -1088,6 +1115,19 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 }
                 // Aggiunge i parametri attività ai parametri della richiesta
                 formParams.put(part, activities);
+                break;
+            }
+            /* ---------------------------------------------------- *
+             *               UPDATE Activity Description            *
+             * ---------------------------------------------------- */
+            case (PART_UPDATE_ACTIVITY): {
+                LinkedHashMap<String, String> activity = new LinkedHashMap<>();
+                // ID attività
+                activity.put("id", parser.getStringParameter("ac-id", VOID_STRING));
+                // Descrizione attività
+                activity.put("desc", parser.getStringParameter("ac-desc", VOID_STRING));
+                // Aggiunge la struttura coi valori alla mappa generale dei parametri
+                formParams.put(part, activity);
                 break;
             }
             /* ---------------------------------------------------- *
