@@ -5,11 +5,21 @@
 <c:set var="fasi" value="${requestScope.listaFasi}" scope="page" />
     <style>
         .form-control::placeholder {
-            color: #6c757d; /* Default placeholder color */
-            opacity: 1; /* Ensure full opacity by default */
+            color: #6c757d;           /* Default placeholder color */
+            opacity: 1;                 /* Ensure full opacity by default */
         }
         .form-control:focus::placeholder {
-            visibility: hidden; /* Hide placeholder on focus */
+            visibility: hidden;         /* Hide placeholder on focus */
+        }
+        .modified-text {
+            white-space: nowrap;        /* Prevents text wrap */
+            min-width: 130px;           /* Exact width for dates */
+            display: inline-block;
+        }
+        .act-item:hover .modified-text {
+            background-color: #ffeb3b !important;
+            color: #333;
+            font-weight: 700;
         }
     </style>
     <div class="form-custom bg-note">
@@ -50,7 +60,24 @@
               <c:forEach var="act" items="${fasi}">
                 <c:set var="lastOrdb" value="${act.ordinale}" scope="page" />
                 <c:set var="lastCode" value="${act.codice}" scope="page" />
-                <li><c:out value="${act.nome}" escapeXml="false" /></li>
+                <c:choose>
+                  <c:when test="${not empty act.descrizione}">
+                    <c:set var="desc" value="${act.descrizione}" scope="page" />
+                  </c:when>
+                  <c:otherwise>
+                    <c:set var="desc" value="Nessuna" scope="page" />
+                  </c:otherwise>
+                </c:choose>
+                <li class="act-item" id="act-${act.id}">
+                  <a href="${initParam.appName}/?q=pr&p=uac&aliv=${act.id}&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="" title="Clicca per inserire/modificare la descrizione">
+                    <c:out value="${act.nome}" escapeXml="false" />
+                  </a>
+                  <div class="float-right modified-text">
+                    modificata 
+                    <fmt:formatDate value="${act.dataInizioEffettiva}" pattern="dd/MM/yyyy" /> 
+                    <fmt:formatDate value="${act.oraUltimaModifica}" pattern="HH:mm" />
+                  </div>
+                </li>
               </c:forEach>
               </ul>
               <div class="col-sm-12 centerlayout">
@@ -99,9 +126,9 @@
                 <div class="large-4 column">
                   <a href="javascript:void(0);" type="button" class="js-add-row btn bgAct14" title="Aggiungi una fase del processo">+ Aggiungi</a>
                 </div>
-                <div class="large-4 column">
-                  <a href="javascript:void(0);" type="button" class="js-remove-row btn bgAct25" title="Elimina l'ultima fase aggiunta">- Elimina</a>
-                </div>
+<!--            <div class="large-4 column"> -->
+<!--              <a href="javascript:void(0);" type="button" class="js-remove-row btn bgAct25" title="Elimina l'ultima fase aggiunta">- Elimina</a> -->
+<!--            </div> -->
               </div>
             </div>
           </div>
