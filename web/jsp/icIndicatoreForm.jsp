@@ -43,7 +43,7 @@
             <label for="ind-tipo"><strong>Tipo Indicatore</strong></label>
           </div>
           <div class="col-sm-6">
-            <select class="form-custom large-4" id="ind-tipo" name="ind-tipo">
+            <select class="form-custom large-4" id="ind-tipo" name="ind-tipo" required>
               <option value=''>-- seleziona un tipo --</option>
             <c:forEach var="tipo" items="${requestScope.tipi}" varStatus="status">
               <option value="${tipo.id}"><c:out value="${tipo.nome}" /></option>
@@ -56,7 +56,7 @@
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory-thin bgAct13"><strong>Nome Indicatore</strong></div>
           <div class="col-sm-6">
-            <input type="text" class="form-control" id="ind-nome" name="ind-nome" placeholder="Inserisci nome dell'indicatore">
+            <input type="text" class="form-control" id="ind-nome" name="ind-nome" placeholder="Inserisci nome dell'indicatore" required>
           </div>
         </div>
         <hr class="separatore">
@@ -72,7 +72,7 @@
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory-thin bgAct13"><strong>Baseline</strong></div>
           <div class="col-sm-5" id="displayBase">
-            <input type="text" class="form-control" id="ind-baseline" name="ind-baseline" placeholder="Inserisci valore baseline">
+            <input type="text" class="form-control" id="ind-baseline" name="ind-baseline" placeholder="Inserisci valore baseline" required>
           </div>
         </div>
         <hr class="separatore">
@@ -80,7 +80,7 @@
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory-thin bgAct13"><strong>Data Baseline</strong></div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="ind-database" name="ind-database" placeholder="Inserisci data baseline">
+            <input type="text" class="form-control calendarData" id="ind-database" name="ind-database" placeholder="Inserisci data baseline" required>
           </div>
         </div>
         <hr class="separatore">
@@ -88,7 +88,7 @@
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory-thin bgAct13"><strong>Target</strong></div>
           <div class="col-sm-5" id="displayTarget">
-            <input type="text" class="form-control" id="ind-target" name="ind-target" placeholder="Inserisci valore target">
+            <input type="text" class="form-control" id="ind-target" name="ind-target" placeholder="Inserisci valore target" required>
           </div>
         </div>
         <hr class="separatore">
@@ -96,7 +96,19 @@
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory-thin bgAct13"><strong>Data Target</strong></div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="ind-datatarget" name="ind-datatarget" placeholder="Inserisci data target">
+            <input type="text" class="form-control calendarData" id="ind-datatarget" name="ind-datatarget" placeholder="Inserisci data target" required>
+          </div>
+        </div>
+        <hr class="separatore">
+        <div class="row">
+          <div class="col-sm-1">&nbsp;</div>
+          <div class="col-sm-4 mandatory-thin bgAct13"><strong>Indicatore Master</strong></div>
+          <div class="col-sm-5">
+            <select class="form-custom large-4" id="ind-master" name="ind-master" required>
+              <option value="">-- seleziona un valore --</option>
+              <option value="0">semplice</option>
+              <option value="1">master</option>
+            </select>
           </div>
         </div>
         <hr class="separatore" />
@@ -141,11 +153,14 @@
             },
             'ind-datatarget': {
                 required: true
+            },
+            'ind-master': {
+                required: true
             }
           }, 
           messages: {
             'ind-tipo':       "Inserire il tipo dell'indicatore",
-            'ind-nome':       "Inserire almeno " + offsetcharacter + " caratteri.",
+            'ind-nome':       "Inserire almeno " + offsetcharacter + " caratteri",
             'ind-baseline': {  
               required:       "Inserire il valore baseline",
               checkNumber:    "Inserire un numero",
@@ -157,7 +172,8 @@
               checkNumber:    "Inserire un numero",
               checkPercent:   "Inserire una percentuale nel formato ##.##"
             },
-            'ind-datatarget': "Inserire la data target"
+            'ind-datatarget': "Inserire la data target",
+            'ind-master':     "Indicare se trattasi di indicatore master"
           },
           submitHandler: function (form) {
             return true;
