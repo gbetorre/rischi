@@ -11,12 +11,25 @@
   <c:set var="cacheSQLDate" value="${pxi.extraInfo4}" scope="page" />
   <fmt:parseDate var="cacheDate" value="${cacheSQLDate}" pattern="yyyy-MM-dd" scope="page" />
   <fmt:formatDate var="dataRicalcolo" value="${cacheDate}" pattern="dd/MM/yyyy" />
-  <c:set var="idP" value="${pxi.cod1}" scope="page" />
-  <c:if test="${pxi.cod1 eq -2}">
-    <c:set var="idP" value="${param['pliv']}" scope="page" />
-  </c:if> 
+  <c:choose>
+    <c:when test="${empty pxi or pxi.cod1 eq -2}">
+    <%@ include file="URL.jspf" %>
+    <div class="alert alert-danger">
+      <strong>Il ricalcolo non &egrave; rilevabile o non &egrave; ancora stato effettuato.</strong>
+      <hr class="separapoco" />
+      <p>
+        Dati carenti: non &egrave; ancora possibile inserire una motivazione.<br/>
+        Se il processo esiste, effettuare almeno 
+        <a href="${mtr}&msg=refresh_ce" type="button" class="badge bg-primary btn-small lightTable text-white marginLeft align-middle refresh" id="refresh" title="Effettua un ricalcolo dei valori di rischio di tutti i processi e li memorizza come nuovi valori cache">
+          <i class="fa-solid fa-arrow-rotate-right"></i>
+          un ricalcolo.
+        </a>&nbsp;&nbsp;
+      </p>
+    </div>
+    </c:when>
+    <c:otherwise>
     <form accept-charset="ISO-8859-1" id="not-form" class="panel subfields" action="" method="post">
-      <input type="hidden" id="pat-id" name="pliv2" value="${pageScope.idP}" />
+      <input type="hidden" id="pat-id" name="pliv2" value="${pxi.cod1}" />
       <div class="panel-heading bgAct1">
         <div class="noHeader">
           <i class="fa-solid fa-file-circle-plus"></i>
@@ -63,9 +76,7 @@
             <div class="charNum text-center"></div>
           </div>
         </div>
-        <br />
-        <br />
-        &nbsp;
+        <br><br>&nbsp;
         <div class="centerlayout">
           <button type="submit" class="btn btn-success" value="Save">
             <i class="far fa-save"></i> Salva
@@ -95,4 +106,6 @@
           $(this).next('div').text(chars + ' caratteri inseriti');
         });
       });
-    </script> 
+    </script>
+    </c:otherwise>
+  </c:choose>
