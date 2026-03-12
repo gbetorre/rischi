@@ -2198,6 +2198,7 @@ public interface Query extends Serializable {
             "   ,   databaseline" +
             "   ,   target" +
             "   ,   datatarget" +
+            "   ,   master" +
             "   ,   data_ultima_modifica" +
             "   ,   ora_ultima_modifica " +
             "   ,   id_usr_ultima_modifica" +
@@ -2211,7 +2212,8 @@ public interface Query extends Serializable {
             "   ,       ? " +       // baseline
             "   ,       ? " +       // databaseline
             "   ,       ? " +       // target
-            "   ,       ? " +       // datatarget         
+            "   ,       ? " +       // datatarget
+            "   ,       ? " +       // master
             "   ,       ? " +       // data ultima modifica
             "   ,       ? " +       // ora ultima modifica
             "   ,       ? " +       // autore ultima modifica
