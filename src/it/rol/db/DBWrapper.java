@@ -6486,6 +6486,15 @@ public class DBWrapper extends QueryImpl {
                     java.util.Date dataTarg = Utils.format(indicator.get("datatarg"), "dd/MM/yyyy", DATA_SQL_PATTERN);
                     dateAsSqlDate = Utils.convert(dataTarg);
                     pst.setDate(++nextParam, dateAsSqlDate);
+                    /* === Indicatore Semplice/Master === */
+                    String masterAsString = new String(indicator.get("master"));
+                    // The application can legitimately return: "1" | "0" | ""
+                    boolean master = false;
+                    // "1".equals(masterAsString)
+                    if (String.valueOf(ELEMENT_LEV_1).equals(masterAsString)) {
+                        master = true;  //   -> true for "1"
+                    }
+                    pst.setBoolean(++nextParam, master);
                     /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
                     pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
                     pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
