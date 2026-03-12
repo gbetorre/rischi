@@ -126,10 +126,8 @@
               <span class="small">nessuno</span>
             </c:if>
             </ol>
-            <a class="smooth" href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}">
-              <span class="badge badge-primary" id="add-label" title="Clicca per aggiungere un Allegato alla misurazione (attualmente: ${mon.allegati.size()})">
-                <i class="fas fa-plus"></i> Allegato
-              </span>
+            <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="badge bg-primary btn-small lightTable text-white align-middle" title="Clicca per aggiungere un allegato alla misurazione (attualmente: ${mon.allegati.size()})">
+              <i class="fas fa-plus"></i> Allegato
             </a>
           </td>
           <!-- misura aggiuntiva -->
