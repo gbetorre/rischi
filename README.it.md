@@ -8,8 +8,8 @@
 -->
 
 ### Lingue
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/gbetorre/rischi/blob/master/README.md)
-[![it](https://img.shields.io/badge/lang-it-yellow.svg)](https://github.com/gbetorre/rischi/blob/master/README.it.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/gbetorre/rischi/blob/main/README.md)
+[![it](https://img.shields.io/badge/lang-it-yellow.svg)](https://github.com/gbetorre/rischi/blob/main/README.it.md)
 
 ---
 
@@ -540,6 +540,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### 2026
 
+- [2.5.9] (12/03/2026) Implementazione gestione attributo "master" su inserimento nuovo indicatore di monitoraggio
 - [2.5.8] (10/03/2026) Completamento implementazione funzionalit&agrave; per aggiornamento fase (attivit&agrave;) di processo
 - [2.5.7] (09/03/2026) Prima parte di implementazione funzionalit&agrave; per aggiornamento fase (attivit&agrave;) di processo
 - [2.5.6] (05/03/2026) Completamento implementazione funzionalit&agrave; per inserimento nuovo soggetto contingente

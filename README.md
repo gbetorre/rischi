@@ -1,8 +1,8 @@
 <a name="readme-top"></a>
 
 ### 2 languages found
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/gbetorre/rischi/blob/master/README.md)
-[![it](https://img.shields.io/badge/lang-it-yellow.svg)](https://github.com/gbetorre/rischi/blob/master/README.it.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/gbetorre/rischi/blob/main/README.md)
+[![it](https://img.shields.io/badge/lang-it-yellow.svg)](https://github.com/gbetorre/rischi/blob/main/README.it.md)
 
 ---
 
@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.5.9] (12/03/2026) [Revised mask for inserting new monitoring indicator by adding "master" flag management](https://github.com/gbetorre/rischi/commits/main/?since=2026-03-12&until=2026-03-12) 
 - [2.5.8] (10/03/2026) [Finalisation function to update an activity](https://github.com/gbetorre/rischi/commits/main/?since=2026-03-10&until=2026-03-10) 
 - [2.5.7] (09/03/2026) [First implementation function to update an activity](https://github.com/gbetorre/rischi/commits/main/?since=2026-03-09&until=2026-03-09) 
 - [2.5.6] (05/03/2026) [Finalisation function to create a new subject](https://github.com/gbetorre/rischi/commits/main/?since=2026-03-05&until=2026-03-05) 
