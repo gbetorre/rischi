@@ -11,8 +11,12 @@
   <c:set var="cacheSQLDate" value="${pxi.extraInfo4}" scope="page" />
   <fmt:parseDate var="cacheDate" value="${cacheSQLDate}" pattern="yyyy-MM-dd" scope="page" />
   <fmt:formatDate var="dataRicalcolo" value="${cacheDate}" pattern="dd/MM/yyyy" />
+  <c:set var="idP" value="${pxi.cod1}" scope="page" />
+  <c:if test="${pxi.cod1 eq -2}">
+    <c:set var="idP" value="${param['pliv']}" scope="page" />
+  </c:if> 
     <form accept-charset="ISO-8859-1" id="not-form" class="panel subfields" action="" method="post">
-      <input type="hidden" id="pat-id" name="pliv2" value="${pxi.cod1}" />
+      <input type="hidden" id="pat-id" name="pliv2" value="${pageScope.idP}" />
       <div class="panel-heading bgAct1">
         <div class="noHeader">
           <i class="fa-solid fa-file-circle-plus"></i>
