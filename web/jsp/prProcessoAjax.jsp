@@ -410,10 +410,10 @@
                   </tr>
                 </c:forEach>
                   <tr class="selected">
-                    <td colspan="4" class="center text-center verticalCenter reportRow" align="center" title="Aggiungi/modifica motivazione">
+                    <td colspan="4" class="center text-center verticalCenter reportRow" align="center">
                       <div class="lightTable subfields">
                         Motivazione:<br /><span class="textcolormaroon"><c:out value="${ind.note}" escapeXml="false" />
-                          <a href="${initParam.appName}/?q=pr&p=pin&pliv=${param['pliv']}&liv=2&pxi=${indics.get('PxI').informativa}&r=${param['r']}&ref=pro" class="" title="Modifica motivazione PxI">
+                          <a href="${initParam.appName}/?q=pr&p=pin&pliv=${param['pliv']}&liv=2&pxi=${indics.get('PxI').informativa}&r=${param['r']}&ref=pro" class="" title="Aggiungi/Modifica motivazione PxI">
                             <i class="fa-regular fa-pen-to-square"></i>
                           </a>
                         </span>
@@ -426,9 +426,15 @@
             </c:when>
             <c:otherwise>
             Processo non oggetto di intervista <span class="badge heading bgAct5 textcolormaroon">recente</span>: indicatori non calcolabili!
+            <hr class="riga" />
+            <div class="col-sm-12 centerlayout">
+              <a href="${initParam.appName}/?q=in&p=str&r=${param['r']}" class="btn btn-info btn-lg" title="Intervista una struttura riguardo questo processo">
+                <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Intervista
+              </a>
+            </div> 
             </c:otherwise>
           </c:choose>
-          </div><br />
+          </div><br>
         </section>
       </div>
     </div>
