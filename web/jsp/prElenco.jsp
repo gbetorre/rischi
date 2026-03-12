@@ -7,7 +7,7 @@
     <span class="float-right">
       <a href="${ppr}" type="button" class="badge bg-success btn-small lightTable text-white marginLeft align-middle refresh" id="insert" title="Aggiungi un macro/processo">
         <i class="fa-solid fa-square-plus"></i>
-        Aggiungi
+        Aggiungi Nuovo
       </a>&nbsp;&nbsp;
     </span>
     <hr class="riga"/>
