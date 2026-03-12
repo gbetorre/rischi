@@ -89,7 +89,7 @@
                       <strong>Input</strong>
                     </div>
                     <div class="col-sm-7">
-                      <input type="search" class="form-control sInp" id="in-nome" name="in-name" placeholder="Cerca Input...">
+                      <input type="search" class="form-control sInp" id="in-nome" name="in-name" placeholder="Cerca Input... (Inserisci uno spazio per visualizzare gli Input esistenti)">
                     </div>
                     <hr class="separatore" />
                   </div>
