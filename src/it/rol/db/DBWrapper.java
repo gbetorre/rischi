@@ -7137,8 +7137,10 @@ public class DBWrapper extends QueryImpl {
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
             // Dizionario dei parametri contenente gli estremi dell'area di rischio
             LinkedHashMap<String, String> proat = params.get(PART_PROCESS);
-            // Dizionario dei parametri contenente gli estremi degli input
+            // Dizionario dei parametri contenente gli estremi delle attività
             LinkedHashMap<String, String> activities = params.get(PART_INSERT_ACTIVITY);
+            // Dizionario dei parametri contenente le descrizioni delle attività
+            LinkedHashMap<String, String> descriptions = params.get("desc");
             // Dizionario delle attività ha certamente una entry
             if (activities.size() == ELEMENT_LEV_1) {
                 ; // Se ce n'è una sola, gestire qui la situazione di invio form vuota
@@ -7190,6 +7192,8 @@ public class DBWrapper extends QueryImpl {
                     pst.setString(++nextParam, key);
                     // === Nome === //
                     pst.setString(++nextParam, value);
+                    // === Descrizione === //
+                    pst.setString(++nextParam, descriptions.get(key));
                     // === Ordinale === //
                     pst.setInt(++nextParam, ordinale);
                     // === Campi automatici: id utente, ora ultima modifica, data ultima modifica === *
