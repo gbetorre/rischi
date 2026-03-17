@@ -540,6 +540,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### 2026
 
+- [2.6.0] (17/03/2026) Miglioramenti nella funzionalit&agrave; di inserimento fasi di processo: gestione attributo "descrizione" su inserimento multiplo di attivit&agrave;
 - [2.5.9] (12/03/2026) Implementazione gestione attributo "master" su inserimento nuovo indicatore di monitoraggio
 - [2.5.8] (10/03/2026) Completamento implementazione funzionalit&agrave; per aggiornamento fase (attivit&agrave;) di processo
 - [2.5.7] (09/03/2026) Prima parte di implementazione funzionalit&agrave; per aggiornamento fase (attivit&agrave;) di processo
