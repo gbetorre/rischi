@@ -73,7 +73,7 @@
       </div>
     </div>
     <div class="subfields errorPwd">
-      Area di rischio: 
+      <strong>Area di rischio:</strong> 
       <span class="badge lightTable bgAct25 text-dark"><c:out value="${arearischio}" /></span>
       <hr class="separatore" />
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples info">
