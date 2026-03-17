@@ -103,32 +103,57 @@
               <div class="fas-container">
                 <div class="reportRow">&nbsp;&nbsp;Inserimento Fasi</div>
                 <hr class="separapoco" />
-                <div id="callable-row">
+                 <!-- FIRST ROW VISIBLE ON LOAD -->
+        <div id="first-row" class="row-group">
+            <div class="row">
+                <div class="col-sm-4 mandatory-thin marginLeftSmall"><strong>Fase</strong></div>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control sAct" name="ac-name" placeholder="Inserisci fase...">
+                </div>
+            </div>
+            <hr class="separapoco" />
+            <div class="row">
+                <div class="col-sm-4 bgAct28 marginLeftSmall"><strong>Descrizione</strong></div>
+                <div class="col-7 large-4">
+                    <textarea class="form-control" name="ac-desc" placeholder="Inserisci una descrizione"></textarea>
+                </div>
+                <hr class="separatore" />
+            </div>
+        </div>
+                
+                <!-- Template row (hidden) -->
+                <div id="callable-row" style="display:none;">
                   <div class="row">
-                    <div class="col-sm-4 mandatory-thin marginLeftSmall"><strong>Fase</strong></div>
+                    <div class="col-sm-4 mandatory-thin marginLeftSmall">
+                      <strong>Fase</strong>
+                    </div>
                     <div class="col-sm-7">
                       <input type="text" class="form-control sAct" id="at-nome" name="ac-name" placeholder="Inserisci fase...">
                     </div>
                   </div>
-                  <hr class="separatore" />
-                  <%--
+                  <hr class="separapoco" />
                   <div class="row">
                     <div class="col-sm-4 bgAct28 marginLeftSmall"><strong>Descrizione</strong></div>
                     <div class="col-7 large-4">
                       <textarea class="form-control" id="at-desc" name="ac-desc" placeholder="Inserisci una descrizione"></textarea>
                     </div>
                     <hr class="separatore" />
-                  </div>--%>
+                  </div>
                 </div>
+                        <!-- First visible row -->
+        <div class="initial-row">
+            <!-- Clone of callable-row content -->
+        </div>
+
               </div>
               <div class="row lblca">
                 <div class="col-sm-1">&nbsp;</div>
                 <div class="large-4 column">
                   <a href="javascript:void(0);" type="button" class="js-add-row btn bgAct14" title="Aggiungi una fase del processo">+ Aggiungi</a>
                 </div>
-<!--            <div class="large-4 column"> -->
-<!--              <a href="javascript:void(0);" type="button" class="js-remove-row btn bgAct25" title="Elimina l'ultima fase aggiunta">- Elimina</a> -->
-<!--            </div> -->
+               <div class="large-4 column">
+                 <a href="javascript:void(0);" type="button" class="js-remove-row btn bgAct25" title="Elimina l'ultima fase aggiunta">- Elimina</a>
+               </div>
               </div>
             </div>
           </div>
@@ -144,17 +169,30 @@
     </div>
     <script>
     $(document).ready(function() {
-        $('.js-add-row').on('click', function () {
-            $('.fas-container').append($('#callable-row').html());
+        // Add new row (both fields together)
+        $(document).on('click', '.js-add-row', function () {
+            var newRow = $('#callable-row').clone().html();
+            $('.fas-container').append(newRow);
         });
-        $('.js-remove-row').on('click', function () {
-            var LastSiblings = $('#callable-row').siblings('.row:last-child');
-            if (LastSiblings.length != 0) {
-                LastSiblings.remove();
+        
+        // REMOVE ENTIRE ROW (input + textarea + hr together) but the first one
+        $(document).on('click', '.js-remove-row', function () {
+            // Find LAST complete row group (Fase + Descrizione + hr)
+            var $lastCompleteRow = $('.fas-container > .row').last().prev('hr').prev('.row').addBack().add($('.fas-container > .row').last().next('hr'));
+            
+            // Simpler: Remove last 3 direct children (row1 + hr + row2)
+            var $fasContainer = $('.fas-container');
+            var totalRows = $fasContainer.children('.row').length;
+            
+            if (totalRows > 1) {  // Keep original 
+                // Remove LAST row + hr + LAST textarea row
+                $fasContainer.children('.row').slice(-2).remove();
+                $fasContainer.children('hr').last().remove();
             } else {
                 alert('Occorre prima aggiungere un campo');
             }
         });
+        
         $('#btn-save').click(function (e){
             e.preventDefault;
           });
