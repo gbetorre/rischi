@@ -246,7 +246,7 @@ public interface Query extends Serializable {
             "   FROM rilevazione R" +
             "   WHERE (R.id = ? OR -1 = ?)" +
             "       AND R.chiusa = true" +
-            "   ORDER BY data_rilevazione DESC";    
+            "   ORDER BY data_rilevazione DESC";
     
     /**
      * <p>Estrae tutte le aree di rischio censite e storicizzate in base
@@ -2388,6 +2388,7 @@ public interface Query extends Serializable {
             "   (   id" +
             "   ,   codice" +        
             "   ,   nome" +
+            "   ,   descrizione" +
             "   ,   ordinale" +
             "   ,   data_ultima_modifica" +
             "   ,   ora_ultima_modifica " +
@@ -2398,6 +2399,7 @@ public interface Query extends Serializable {
             "   VALUES (? " +       // id
             "   ,       ? " +       // codice
             "   ,       ? " +       // nome
+            "   ,       ? " +       // descrizione
             "   ,       ? " +       // ordinale
             "   ,       ? " +       // data ultima modifica
             "   ,       ? " +       // ora ultima modifica
