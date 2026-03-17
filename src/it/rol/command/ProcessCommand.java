@@ -412,9 +412,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                         String prElenco =       ConfigManager.getEntToken() + EQ + COMMAND_PROCESS +
                                                 AMPERSAND + PARAM_SURVEY + EQ + codeSur;
                         // Estrae l'azione dal parametro 'p'
-                        /* ------------------------------------------------ *
-                         * INSERT new relation between Risk Process Factor  *
-                         * ------------------------------------------------ */                       
+                        /* ---------------------------------------------------- *
+                         * @PM::INSERT new relation between Risk Process Factor *
+                         * ---------------------------------------------------- */                       
                         if (part.equalsIgnoreCase(PART_INSERT_F_R_P)) {
                             // Controlla che non sia già presente l'associazione 
                             int check = db.getFactorRiskProcess(user, params);
@@ -441,7 +441,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 redirect = dataUrl.getUrl();
                             }
                         /* ------------------------------------------------ *
-                         *                UPDATE a note to PxI              *
+                         *  @PostMapping::UPDATE a note to PxI              *
                          * ------------------------------------------------ */                            
                         } else if (part.equalsIgnoreCase(PART_PI_NOTE)) {
                             // Aggiorna la nota
@@ -461,7 +461,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 redirect =  dataUrl.getUrl();
                             }
                         /* ------------------------------------------------ *
-                         *        INPUT new process - type and data         *
+                         *  @PostMapping::INPUT new process: type and data  *
                          * ------------------------------------------------ */                            
                         } else if (part.equalsIgnoreCase(PART_INSERT_PROCESS)) {
                             // Dizionario dei parametri contenente gli estremi dell'area di rischio
@@ -519,7 +519,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     break;
                             }
                         /* ------------------------------------------------ *
-                         *                  INSERT Inputs                   *
+                         *   @PostMapping:: INSERT Inputs                   *
                          * ------------------------------------------------ */                            
                         } else if (part.equalsIgnoreCase(PART_INSERT_INPUT)) {
                             // Deve aggiungere al dizionario dei parametri quelli di input
@@ -543,7 +543,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     break;
                             }
                         /* ------------------------------------------------ *
-                         *                 INSERT Activities                *
+                         *   @PostMapping:: INSERT Activities               *
                          * ------------------------------------------------ */ 
                         } else if (part.equalsIgnoreCase(PART_INSERT_ACTIVITY)) {
                             // Deve aggiungere al dizionario dei parametri quelli delle fasi
@@ -580,9 +580,9 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     redirect = prProcessoAjax;
                                     break;
                             }
-                        /* ------------------------------------------------ *
-                         *  INSERT Relation between Str/Subj and Activities *
-                         * ------------------------------------------------ */ 
+                        /* ---------------------------------------------------- *
+                         * @PM::INSERT Relation between Str/Subj and Activities *
+                         * ---------------------------------------------------- */ 
                         } else if (part.equalsIgnoreCase(PART_INSERT_ACT_STRUCTS)) {
                             String msg = checkActivities(req);
                             // Testa i parametri immessi nella form; se il check passa:
@@ -627,7 +627,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     break;
                             }
                         /* ------------------------------------------------ *
-                         *                 INSERT Outputs                   *
+                         *  @PostMapping:: INSERT Outputs                   *
                          * ------------------------------------------------ */                            
                         } else if (part.equalsIgnoreCase(PART_INSERT_OUTPUT)) {
                             // Deve aggiungere al dizionario dei parametri quelli di output
@@ -649,7 +649,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                     break;
                             }
                         /* ------------------------------------------------ *
-                         *                 INSERT Subject                   *
+                         *  @PostMapping:: INSERT Subject                   *
                          * ------------------------------------------------ */      
                         } else if (part.equalsIgnoreCase(PART_INSERT_SUBJECT)) {
                             // Deve aggiungere al dizionario dei parametri quelli di subject
@@ -666,7 +666,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                    .put(PARAM_SURVEY, codeSur);
                             redirect = dataUrl.getUrl();
                         /* ------------------------------------------------ *
-                         *           UPDATE an activity description         *
+                         *  @PostMapping:: UPDATE an activity description   *
                          * ------------------------------------------------ */                            
                         } else if (part.equalsIgnoreCase(PART_UPDATE_ACTIVITY)) {
                             // Deve aggiungere al dizionario dei parametri quelli di activity
@@ -1091,6 +1091,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
              * ---------------------------------------------------- */
             case (PART_INSERT_ACTIVITY): { 
                 LinkedHashMap<String, String> activities = new LinkedHashMap<>();
+                LinkedHashMap<String, String> descriptions = new LinkedHashMap<>();
                 String action = parser.getStringParameter("action", DASH);
                 // Controlla se deve fare l'aggiornamento delle fasi
                 if (action.equals("ordb")) {
@@ -1105,16 +1106,19 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                     String dbAct = parser.getStringParameter("ac-ordb", "100");
                     // Codice ultima fase inserita (se non ci sono fasi = COD.PROD.00)
                     String defaultCode = req.getParameter("pat-code") + DOT + "10";
+                    // Codice da cui partire per generare i successivi (se non c'è usa il default code)
                     String cdAct = parser.getStringParameter("ac-code", defaultCode);
                     // Fasi da inserire
                     String[] acts = req.getParameterValues("ac-name");
+                    String[] desc = req.getParameterValues("ac-desc");
                     // Genera i codici e li abbina ai nomi scelti dall'utente
-                    decantActivities(cdAct, acts, activities);
+                    descriptions = decantActivities(cdAct, acts, desc, activities);
                     // Aggiunge alla mappa l'ordinale di partenza
                     activities.put("ordb", dbAct);
                 }
                 // Aggiunge i parametri attività ai parametri della richiesta
                 formParams.put(part, activities);
+                formParams.put("desc", descriptions);
                 break;
             }
             /* ---------------------------------------------------- *
@@ -2076,15 +2080,21 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * per riferimento (ByRef).
      * 
      * @param currentCode   codice da cui partire per generare i successivi
-     * @param attivita      attivita' da inserire, definite dall'utente
+     * @param actNames      attivita' da inserire, definite dall'utente
+     * @param actDescr      descrizioni delle attivita' da inserire, definite dall'utente
      * @param params        mappa dei parametri della richiesta
+     * @return <code>LinkedHashMap&lt;String, String&gt;</code> - Mappa delle descrizioni delle attivita'
      * @throws CommandException se l'ordinale da cui partire e/o le attivita' non sono in formato corretto
      */
-    private static void decantActivities(String currentCode,
-                                         String[] attivita,
-                                         LinkedHashMap<String, String> params)
-                                  throws CommandException {
-        if (attivita != null && currentCode != null) { // <- Controllo sull'input
+    private static LinkedHashMap<String, String> decantActivities(String currentCode,
+                                                                  String[] actNames,
+                                                                  String[] actDescr,
+                                                                  LinkedHashMap<String, String> params)
+                                                           throws CommandException {
+        // Definisce la mappa delle descrizioni
+        LinkedHashMap<String, String> descrs = new LinkedHashMap<>();
+        // Controllo sull'input
+        if (actNames != null && currentCode != null) { 
             try {
                 //String progAsString = lastActCode.substring(lastActCode.lastIndexOf(DOT) + ELEMENT_LEV_1);
                 //int prog = Integer.parseInt(progAsString);
@@ -2102,10 +2112,10 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 String actPart = parts[ELEMENT_LEV_3];  // come sopra
                 int number = Integer.parseInt(actPart);
                 // Cicla sui nomi delle nuove attività
-                if (attivita.length > NOTHING) {
-                    for (int i = 0; i < attivita.length; i++) {
+                if (actNames.length > NOTHING) {
+                    for (int i = 0; i < actNames.length; i++) {
                         // Non considera i campi vuoti
-                        if (attivita[i].equals(VOID_STRING)) {
+                        if (actNames[i].equals(VOID_STRING)) {
                             continue;
                         }
                         // Incrementa la parte numerica                 
@@ -2117,7 +2127,11 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                         // Genera il nuovo codice
                         String nextCode = prefix + DOT + matPart + DOT + patPart + DOT + newNumberPart;
                         // Abbina il nuovo codice al nome definito dall'utente
-                        params.put(nextCode,  attivita[i]);
+                        params.put(nextCode,  actNames[i]);
+                        // Recupera la descrizione corrispondente alla fase da inserire
+                        String descr = actDescr[i];
+                        // Memorizza la descrizione in una mappa separata
+                        descrs.put(nextCode, descr);
                     }
                 } else {
                     String msg = FOR_NAME + "Attenzione: attivita\' da inserire non definite!\n";
@@ -2133,7 +2147,8 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             String msg = FOR_NAME + "Attenzione: parametri di input non accettati!\n";
             LOG.severe(msg);
             throw new CommandException(msg + " Verificare i valori ricevuti come parametro.\n");
-        }        
+        }
+        return descrs;
     }
     
     
