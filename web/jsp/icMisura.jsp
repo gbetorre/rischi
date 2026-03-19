@@ -28,7 +28,11 @@
         <div class="row">
           <dl class="sezioneElenco custom-dl marginBottom">
             <dt class="text-primary">Data inserimento:</dt>
-            <dd><fmt:formatDate value="${meas.dataMonitoraggio}" pattern="dd/MM/yyyy" /></dd>
+            <dd>
+              <strong>
+                <fmt:formatDate value="${meas.dataMonitoraggio}" pattern="dd MMMMM yyyy" />
+              </strong>
+            </dd>
             <dt class="text-primary">Obiettivo PIAO:</dt>
             <dd><c:out value="${piao}" escapeXml="false" /></dd>
             <dt class="text-primary">Fasi di attuazione:</dt>
