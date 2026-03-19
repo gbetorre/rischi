@@ -1329,6 +1329,7 @@ public interface Query extends Serializable {
             "   ,   MS.data_ultima_modifica             AS \"dataUltimaModifica\"" +
             "   ,   MS.data_ultima_modifica             AS \"dataMonitoraggio\"" +
             "   ,   MS.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
+            "   ,   MS.data_scadenza                    AS \"dataScadenza\"" +
             "   ,   MS.id_rilevazione                   AS \"idRilevazione\"" +
             "   ,   count(MRPAT.id_rischio_corruttivo)::SMALLINT  AS \"uso\"" +
             "   ,   CASE" +
