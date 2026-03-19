@@ -407,6 +407,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 /* -------------------------------------------- *
                                  *     DETTAGLI di un indicatore di dato id     *
                                  * -------------------------------------------- */
+                                    // Personalizza le breadcrumbs
+                                    bC = loadBreadCrumbs(breadCrumbs, part, survey);
                                     // Imposta la pagina
                                     fileJspT = nomeFileDettaglio;
                                 } else {
