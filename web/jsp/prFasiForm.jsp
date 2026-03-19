@@ -103,24 +103,23 @@
               <div class="fas-container">
                 <div class="reportRow">&nbsp;&nbsp;Inserimento Fasi</div>
                 <hr class="separapoco" />
-                 <!-- FIRST ROW VISIBLE ON LOAD -->
-        <div id="first-row" class="row-group">
-            <div class="row">
-                <div class="col-sm-4 mandatory-thin marginLeftSmall"><strong>Fase</strong></div>
-                <div class="col-sm-7">
-                    <input type="text" class="form-control sAct" name="ac-name" placeholder="Inserisci fase...">
+                <!-- FIRST ROW VISIBLE ON LOAD -->
+                <div id="first-row" class="row-group">
+                  <div class="row">
+                      <div class="col-sm-4 mandatory-thin marginLeftSmall"><strong>Fase</strong></div>
+                      <div class="col-sm-7">
+                          <input type="text" class="form-control sAct" name="ac-name" placeholder="Inserisci fase...">
+                      </div>
+                  </div>
+                  <hr class="separapoco" />
+                  <div class="row">
+                    <div class="col-sm-4 bgAct28 marginLeftSmall"><strong>Descrizione</strong></div>
+                    <div class="col-7 large-4">
+                      <textarea class="form-control" name="ac-desc" placeholder="Inserisci una descrizione"></textarea>
+                    </div>
+                    <hr class="separatore" />
+                  </div>
                 </div>
-            </div>
-            <hr class="separapoco" />
-            <div class="row">
-                <div class="col-sm-4 bgAct28 marginLeftSmall"><strong>Descrizione</strong></div>
-                <div class="col-7 large-4">
-                    <textarea class="form-control" name="ac-desc" placeholder="Inserisci una descrizione"></textarea>
-                </div>
-                <hr class="separatore" />
-            </div>
-        </div>
-                
                 <!-- Template row (hidden) -->
                 <div id="callable-row" style="display:none;">
                   <div class="row">
@@ -140,20 +139,19 @@
                     <hr class="separatore" />
                   </div>
                 </div>
-                        <!-- First visible row -->
-        <div class="initial-row">
-            <!-- Clone of callable-row content -->
-        </div>
-
+                <!-- First visible row -->
+                <div class="initial-row">
+                  <!-- Clone of callable-row content -->
+                </div>
               </div>
               <div class="row lblca">
                 <div class="col-sm-1">&nbsp;</div>
                 <div class="large-4 column">
                   <a href="javascript:void(0);" type="button" class="js-add-row btn bgAct14" title="Aggiungi una fase del processo">+ Aggiungi</a>
                 </div>
-               <div class="large-4 column">
-                 <a href="javascript:void(0);" type="button" class="js-remove-row btn bgAct25" title="Elimina l'ultima fase aggiunta">- Elimina</a>
-               </div>
+                <div class="large-4 column">
+                  <a href="javascript:void(0);" type="button" class="js-remove-row btn bgAct25" title="Elimina l'ultima fase aggiunta">- Elimina</a>
+                </div>
               </div>
             </div>
           </div>
@@ -169,7 +167,7 @@
     </div>
     <script>
     $(document).ready(function() {
-        // Add new row (both fields together)
+        // ADD NEW ROW (both fields together)
         $(document).on('click', '.js-add-row', function () {
             var newRow = $('#callable-row').clone().html();
             $('.fas-container').append(newRow);
@@ -179,11 +177,9 @@
         $(document).on('click', '.js-remove-row', function () {
             // Find LAST complete row group (Fase + Descrizione + hr)
             var $lastCompleteRow = $('.fas-container > .row').last().prev('hr').prev('.row').addBack().add($('.fas-container > .row').last().next('hr'));
-            
             // Simpler: Remove last 3 direct children (row1 + hr + row2)
             var $fasContainer = $('.fas-container');
             var totalRows = $fasContainer.children('.row').length;
-            
             if (totalRows > 1) {  // Keep original 
                 // Remove LAST row + hr + LAST textarea row
                 $fasContainer.children('.row').slice(-2).remove();
@@ -224,11 +220,8 @@
         </div>
         <hr class="riga">
       </c:forEach>
-          
       </div>
-
       <hr class="separatore" />
-      
       <div class="row">
         <div class="col-sm-5">
           &nbsp;
