@@ -8,17 +8,19 @@
     <c:set var="ind" value="${fase.indicatore}" scope="page" />
   </c:if>
 </c:forEach>
+<c:set var="master" value="NO" scope="page" />
   <c:catch var="exception">
     <h3 class="mt-1 m-0 font-weight-bold">Indicatore di monitoraggio</h3>
     <hr class="riga"/>
     <h4 class="p-2 bgAct15 rounded popupMenu heading"> 
       <i class="fa-solid fa-pen-ruler"></i>&nbsp;
       <c:out value="${ind.nome}" />
-      <c:if test="${ind.master}">
+    <c:if test="${ind.master}">
+      <c:set var="master" value="SI" scope="page" />
       <span class="float-right">
         <img src="${initParam.urlDirectoryImmagini}ind-master.png" class="ico-func" alt="icona master" title="Indicatore di riferimento ai fini del monitoraggio" /> &nbsp;
       </span>
-      </c:if>
+    </c:if>
     </h4>
     <div class="form-custom bgAct28">
       <dl class="sezioneElenco custom-dl">
@@ -37,7 +39,11 @@
         <dt class="text-primary">Data Target</dt>
         <dd><fmt:formatDate value="${ind.dataTarget}" pattern="dd/MM/yyyy" /></dd>
         <dt class="text-primary">Indicatore Master</dt>
-        <dd><c:out value="${ind.master}" /></dd>
+        <dd>
+          <span class="badge badge-success">
+            <c:out value="${master}" />
+          </span>
+        </dd>
       </dl>
       <h5 class="fw-bold text-dark border-bottom border-2 border-secondary">&nbsp;
         <i class="fa-solid fa-scroll"></i>&nbsp;&nbsp; 
