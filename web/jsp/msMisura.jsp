@@ -1,11 +1,17 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<fmt:setLocale value="it_IT"/>
 <%@ include file="URL.jspf" %>
 <c:set var="meas" value="${requestScope.misura}" scope="page" />
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
 <c:set var="dets" value="NO" scope="page" />
 <c:if test="${meas.dettagli}">
   <c:set var="dets" value="SI" scope="page" />
+</c:if>
+<c:set var="expires" value="Non Definita" scope="page" />
+<c:if test="${not empty meas.dataScadenza}">
+  <fmt:formatDate var="expires" value="${meas.dataScadenza}" pattern="dd MMMMM yyyy" />
 </c:if>
     <style>
     section {
@@ -49,6 +55,8 @@
             </c:otherwise>
           </c:choose>
           </dd>
+          <dt class="text-primary">Scadenza</dt>
+          <dd><strong><c:out value="${expires}" /></strong></dd>
         </dl>
       </div>
       <hr class="separatore" />
