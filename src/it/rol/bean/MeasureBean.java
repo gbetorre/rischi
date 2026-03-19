@@ -108,6 +108,8 @@ public class MeasureBean extends CodeBean {
     private boolean dettagli;
     /** Data Monitoraggio */
     private Date dataMonitoraggio;
+    /** Data scadenza */
+    private Date dataScadenza;
     /** Fasi di attuazione */
     private ArrayList<ActivityBean> fasi;
     
@@ -126,6 +128,7 @@ public class MeasureBean extends CodeBean {
         onerosa = null;
         uso = BEAN_DEFAULT_ID;
         dataUltimaModifica = dataMonitoraggio = new Date(0);
+        dataScadenza = null;
         oraUltimaModifica = null;
         autoreUltimaModifica = BEAN_DEFAULT_ID;
         carattere = null;
@@ -805,11 +808,16 @@ public class MeasureBean extends CodeBean {
      * aggiornati, la data &egrave; quella di inserimento dei dettagli;
      * altrimenti, la data &egrave; quella dell'ultimo aggiornamento 
      * dei dettagli stessi.
+     * Se i dettagli non sono mai stati inseriti, la data &egrave; quella
+     * di inserimento/ultima modifica della misura stessa.
      * 
      * @return <code>dataMonitoraggio</code> - la data di inserimento o ultima modifica dei DETTAGLI del monitoraggio 
      */
     public Date getDataMonitoraggio() {
-        return dataUltimaModifica;
+        if (dataMonitoraggio == null || dataMonitoraggio.equals(new Date(0)) || dataMonitoraggio.equals(dataUltimaModifica )) {
+            return dataUltimaModifica;
+        }
+        return dataMonitoraggio;
     }
 
 
@@ -826,6 +834,30 @@ public class MeasureBean extends CodeBean {
      */
     public void setDataMonitoraggio(Date dataMonitoraggio) {
         this.dataMonitoraggio = dataMonitoraggio;
+    }
+    
+    
+    /* *********************************************************** *
+     *       Metodi getter e setter per data scadenza misura       *
+     * *********************************************************** */
+
+    /**
+     * Restituisce la data di scadenza della misura
+     *
+     * @return <code>java.util.Date</code> - data di scadenza della misura
+     */
+    public Date getDataScadenza() {
+        return dataScadenza;
+    }
+
+    
+    /**
+     * Imposta la data di scadenza della misura
+     *
+     * @param dataScadenza data scadenza da impostare
+     */
+    public void setDataScadenza(Date dataScadenza) {
+        this.dataScadenza = dataScadenza;
     }
     
     
