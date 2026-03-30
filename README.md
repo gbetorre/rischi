@@ -440,9 +440,9 @@ in the case of the current application, in fact, version numbers have only the s
 - [2.5.5] (04/03/2026) [Implementation function to create a new subject](https://github.com/gbetorre/rischi/commits/main/?since=2026-03-04&until=2026-03-04) 
 - [2.5.4] (26/02/2026) [First implementation function to create a new subject](https://github.com/gbetorre/rischi/commits/main/?since=2026-02-26&until=2026-02-26) 
 - [2.5.3] (25/02/2026) [Presentation improvements](https://github.com/gbetorre/rischi/commits/main/?since=2026-02-25&until=2026-02-25) 
-- [2.5.2] (24/02/2026) Addition of non-applied measures display in the monitoring summary report 
-- [2.5.1] (23/02/2026) Presentation improvements
-- [2.5.0] (19/02/2026) Finalisation function to upload documents related to a measurement
+- [2.5.2] (24/02/2026) [Addition of non-applied measures display in the monitoring summary report ](https://github.com/gbetorre/rischi/commits/main/?since=2026-02-24&until=2026-02-24)
+- [2.5.1] (23/02/2026) [Presentation improvements](https://github.com/gbetorre/rischi/commits/main/?since=2026-02-23&until=2026-02-23)
+- [2.5.0] (19/02/2026) [Finalisation function to upload documents related to a measurement](https://github.com/gbetorre/rischi/commits/main/?since=2026-02-19&until=2026-02-19)
 - [2.4.9] (18/02/2026) Implemented function to upload documents related to a measurement
 - [2.4.8] (12/02/2026) Bug fix
 - [2.4.7] (10/02/2026) Implemented function to assign a risk to the current process
