@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026
+### 2026 (22 versioni)
 
+- [2.6.2] (22/04/2026) Implementazione visualizzazione attributo "data scadenza" su pagina elenco (registro) misure
 - [2.6.1] (19/03/2026) Implementazione visualizzazione attributo "data scadenza" su pagina dettagli misura
 - [2.6.0] (17/03/2026) Miglioramenti nella funzionalit&agrave; di inserimento fasi di processo: gestione attributo "descrizione" su inserimento multiplo di attivit&agrave;
 - [2.5.9] (12/03/2026) Implementazione gestione attributo "master" su inserimento nuovo indicatore di monitoraggio
@@ -562,7 +563,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [2.4.2] (15/01/2026) Implementazione algoritmo del monitoraggio (algoritmo dell'applicazione delle misure previste)
 - [2.4.1] (14/01/2026) Prima bozza di implementazione algoritmo del monitoraggio (algoritmo dell'applicazione di una misura prevista)
 
-### 2025
+### 2025 (29 versioni)
 
 - [2.4.0] (17/12/2025) Aggiunta visualizzazione flag di indicatore master (indicatore di riferimento ai fini del monitoraggio)
 - [2.3.9] (10/12/2025) Aggiunto bottone per inserimento misurazione aggiuntiva su indicatore di monitoraggio
@@ -594,7 +595,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [2.1.3] (20/01/2025) Implementata pagina iniziale inserimento processo
 - [2.1.2] (13/01/2025) Revisione grafica pagine; miglioramenti nella presentazione pagina iniziale monitoraggio (conteggio fasi, indicatori, misurazioni e completezza di ogni misura)
 
-### 2024
+### 2024 (49 versioni)
 
 - [2.1.1] (02/12/2024) Implementati controlli lato client in form di aggiunta misurazione di indicatore
 - [2.1.0] (28/11/2024) Aggiunta funzionalit&agrave; di download processi con PxI mitigati (stima) in formato CSV (estrae processi, PxI iniziale e valore del PxI calmierato che si otterrebbe se tutte le misure previste venissero effettivamente applicate)
@@ -646,7 +647,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.6.4] (15/01/2024) Modificato ordinamento strutture; cambiata presentazione valore di rischio altissimo; correzione di bug
 - [1.6.3] (08/01/2024) Raffinata estrazione CSV relativa a intervista singola; aggiunto ordinamento per nome a nodi albero processi; migliorata presentazione report PxI dei processi
 
-### 2023
+### 2023 (36 versioni)
 
 - [1.6.2] (15/12/2023) Revisionato algoritmo di calcolo della dimensione di probabilit&agrave; P; aggiunto stile per evidenziare valore di rischio altissimo
 - [1.6.1] (11/12/2023) Revisionato algoritmo di calcolo dell'indicatore di impatto I3; correzione di bug
@@ -685,7 +686,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 - [1.2.8] (06/02/2023) Ampliato dettaglio processo anticorruttivo: mostrati i rischi cui il processo &egrave; esposto
 - [1.2.7] (30/01/2023) Implementato registro dei rischi corruttivi; correzione di bug
 
-### 2022
+### 2022 (27 versioni)
 
 - [1.2.6] (21/12/2022) Aggiunta funzionalit&agrave; di download dettagli specifico processo in formato CSV
 - [1.2.5] (13/12/2022) Aggiunti estremi input, fasi, output nel CSV di estrazione generale dei processi
