@@ -63,10 +63,11 @@
           <tr>
             <th width="20%">Misura</th>
             <th width="6%">Carattere</th>
-            <th width="5%">Comporta spese?</th>
+            <th width="3%">Comporta spese?</th>
+            <th width="7%">Scadenza</th>
             <th width="20%">Tipologie</th>
             <th width="20%">Struttura Capofila</th>
-            <th width="20%">Strutture Coinvolte</th>
+            <th width="15%">Strutture Coinvolte</th>
             <th width="4%">Usi</th>
             <th width="5%">Funzioni</th>
           </tr>
@@ -74,19 +75,28 @@
         <tbody>
         <c:forEach var="ms" items="${measures}" varStatus="status">
           <tr>
+            <!-- Misura -->
             <td>
               <img src="${initParam.urlDirectoryImmagini}mis-${ms.carattere.informativa}.png" class="ico-small" alt="icona" title="Misura ${ms.carattere.nome}" /> &nbsp;
               <a href="${initParam.appName}/?q=${param['q']}&p=mes&mliv=${ms.codice}&r=${param['r']}" title="${ms.codice}">
                 <c:out value="${ms.nome}" />
               </a>
             </td>
+            <!-- Carattere -->
             <td><c:out value="${ms.carattere.nome}" /></td>
+            <!-- Comporta Spese? -->
             <td><c:out value="${fn:toUpperCase(ms.getOnerosa(ms.onerosa))}" /></td>
-            <td><ul class="list-group">
-            <c:forEach var="tm" items="${ms.tipologie}" varStatus="innerStatus">
-              <li><c:out value="${tm.nome}" /></li>
-            </c:forEach>
-            </ul></td>
+            <!-- Data di scadenza -->
+            <td><c:out value="${ms.dataScadenza}" /></td>
+            <!-- Tipologie -->
+            <td>
+              <ul class="list-group">
+              <c:forEach var="tm" items="${ms.tipologie}" varStatus="innerStatus">
+                <li><c:out value="${tm.nome}" /></li>
+              </c:forEach>
+              </ul>
+            </td>
+            <!-- Strutture Capofila -->
             <td>
               <ul class="list-group">
             <c:forEach var="cp" items="${ms.capofila}" varStatus="innerStatus">
@@ -115,6 +125,7 @@
             </c:forEach>
               </ul>
             </td>
+            <!-- Strutture Gregarie -->
             <td>
               <ul class="list-group">
             <c:forEach var="gr" items="${ms.gregarie}" varStatus="innerStatus">
@@ -125,7 +136,9 @@
             </c:forEach>
               </ul>
             </td>
+            <!-- # Usi -->
             <td class="text-center"><c:out value="${ms.uso}" /></td>
+            <!-- Funzioni -->
             <c:choose>
             <c:when test="${ms.dettagli}">
               <c:set var="bg" value="bgAct14" scope="page" />
