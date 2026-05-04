@@ -1,8 +1,49 @@
+![en](https://img.shields.io/badge/lang-en-red.svg)
+
+# Security Policy 
+
+## Intended Use
+
+This software is currently being developed for internal use by the Public Administration.
+
+Although the source code is publicly available for transparency and specifically in accordance with the “open source first” principle, the operational instance resides within a protected network perimeter and is not accessible from the outside.
+
+## Supported Versions
+
+Currently, security is actively monitored on the following versions:
+
+
+| Version | Supported | Notes |
+| :--- | :--- | :--- |
+| JakartaEE (Latest) | ✅ Under review | Recommended for deployment on Tomcat 10+ |
+| JavaEE (Legacy) | ⚠️ Critical patches only | In migration phase |
+
+## Reporting a Vulnerability
+
+If you encounter a vulnerability in the code or configuration, please **do not open a public issue**.
+
+Instead, use one of the following channels for secure reporting (Coordinated Vulnerability Disclosure):
+
+*   **Email:** [giovanroberto.torre@univr.it]
+*   **Subject:** Vulnerability Report - [ROL-RMS]
+
+Please include a detailed description of the issue and, if possible, the steps to reproduce the problem. 
+We will respond as soon as possible to confirm receipt and discuss next steps.
+
+## Dependency Management
+
+We are adopting automated scanning tools (such as GitHub Dependabot and CodeQL) to continuously monitor any vulnerability in third-party libraries (supply chain security) in accordance with the requirements of the NIS2 Directive.
+
+
+---
+
+![it](https://img.shields.io/badge/lang-it-yellow.svg)
+
 # Policy di Sicurezza
 
 ## Destinazione d'uso
 
-Questo software è sviluppato ad uso interno per la Pubblica Amministrazione.
+Questo software &egrave; attualmente sviluppato ad uso interno per la Pubblica Amministrazione.
 
 Sebbene il codice sorgente sia disponibile pubblicamente per trasparenza e in accordo con quanto previsto dal  Codice dell'Amministrazione Digitale (CAD), in particolare dagli artt. 68 e 69 (principio "open source first"), l'istanza operativa risiede in un perimetro di rete protetto e non accessibile dall'esterno.
 
