@@ -46,3 +46,4 @@ rol_compile.bat
 
 .classpath
 /bin/
+/target/
