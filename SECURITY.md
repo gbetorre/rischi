@@ -34,8 +34,17 @@ We will respond as soon as possible to confirm receipt and discuss next steps.
 
 We are adopting automated scanning tools (such as GitHub Dependabot and CodeQL) to continuously monitor any vulnerability in third-party libraries (supply chain security) in accordance with the requirements of the NIS2 Directive.
 
+## NIS 2 Regulation
+
+The project addresses three critical issues identified by the ACN’s audits:
+
+* **Article 21 (_Supply Chain Security_):** automatic dependency inventory.
+* **Vulnerability management:** Dependabot sends notifications (along with ready-to-apply patches) as soon as a vulnerability is discovered in a library.
+* **Traceability:** Every security update will be documented via a [Pull Request](https://github.com/gbetorre/rischi/pulls?q=is%3Apr+is%3Aclosed), facilitating compliance audits.
+
 
 ---
+
 
 ![it](https://img.shields.io/badge/lang-it-yellow.svg)
 
@@ -71,4 +80,13 @@ Ti risponderemo il prima possibile per confermare la ricezione e discutere i pas
 
 ## Gestione delle Dipendenze
 
-Sono in adozione strumenti di scansione automatica (come GitHub Dependabot e CodeQL) per monitorare costantemente le vulnerabilità nelle librerie di terze parti (Supply Chain Security) in conformità con i requisiti della direttiva NIS2.
+Vengono adottati strumenti di scansione automatica (come GitHub Dependabot e CodeQL) per monitorare costantemente le vulnerabilità nelle librerie di terze parti (Supply Chain Security) in conformità con i requisiti della direttiva NIS2.
+
+## Regolamentazione NIS 2
+
+Il progetto risolve tre punti critici richiesti dai controlli dell'ACN:
+
+* **Articolo 21 (_Sicurezza della catena di approvvigionamento_):** inventario automatico delle dipendenze.
+* **Gestione delle vulnerabilità:** Dependabot invia notifiche (e relative patch pronte) appena scoperta una falla in una libreria.
+* **Tracciabilità:** agni aggiornamento di sicurezza sarà documentato tramite una [Pull Request](https://github.com/gbetorre/rischi/pulls?q=is%3Apr+is%3Aclosed), agevolando gli audit di conformità.
+
