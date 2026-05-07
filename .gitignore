@@ -41,6 +41,7 @@ rol_compile.bat
 
 # Settings
 /.settings
+.project
 
 #.gitattributes
 
