@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (22 versioni)
+### 2026 (23 versioni)
 
+- [2.6.3] (03/06/2026) Miglioramenti nella presentazione dell'attributo "data scadenza" misure
 - [2.6.2] (22/04/2026) Implementazione visualizzazione attributo "data scadenza" su pagina elenco (registro) misure
 - [2.6.1] (19/03/2026) Implementazione visualizzazione attributo "data scadenza" su pagina dettagli misura
 - [2.6.0] (17/03/2026) Miglioramenti nella funzionalit&agrave; di inserimento fasi di processo: gestione attributo "descrizione" su inserimento multiplo di attivit&agrave;
