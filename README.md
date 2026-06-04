@@ -431,7 +431,8 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
-- [2.6.3] (03/06/2026) [Presentation improvements](https://github.com/gbetorre/rischi/commits/main/?since=2026-06-03&until=2026-06-03)
+- [2.6.4] (04/06/2026) [Implementation insert measure expiration date](https://github.com/gbetorre/rischi/commits/main/?since=2026-06-04&until=2026-06-04)
+- [2.6.3] (29/05/2026) [Presentation improvements](https://github.com/gbetorre/rischi/commits/main/?since=2026-06-03&until=2026-06-03)
 - [2.6.2] (22/04/2026) [Added visualization of measure expiration date](https://github.com/gbetorre/rischi/commits/main/?since=2026-04-22&until=2026-04-22) 
 - [2.6.1] (19/03/2026) [Added measure expiration date](https://github.com/gbetorre/rischi/commits/main/?since=2026-03-19&until=2026-03-19) 
 - [2.6.0] (17/03/2026) [Revised function for inserting multiple activities through a single submission: added descriptions management](https://github.com/gbetorre/rischi/commits/main/?since=2026-03-17&until=2026-03-17) 
