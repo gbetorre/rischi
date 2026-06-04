@@ -5810,6 +5810,16 @@ public class DBWrapper extends QueryImpl {
                     }
                     /* === Misura onerosa === */
                     pst.setString(++nextParam, measure.get("econ"));
+                    /* === Data di scadenza === */
+                    String expirationDateAsString = null;
+                    if (!measure.get("data").equals(VOID_STRING)) {
+                        expirationDateAsString = new String(measure.get("data"));
+                        Date expirationDate = Utils.format(expirationDateAsString, "dd/MM/yyyy", DATA_SQL_PATTERN);
+                        pst.setDate(++nextParam, Utils.convert(expirationDate));
+                    } else {
+                        // Dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
                     /* === Ordinale === */
                     pst.setInt(++nextParam, suffix*10);
                     /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
