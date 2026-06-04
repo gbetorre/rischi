@@ -61,9 +61,7 @@ import com.oreilly.servlet.ParameterParser;
 
 import it.rol.ConfigManager;
 import it.rol.Constants;
-import it.rol.db.DBWrapper;
 import it.rol.Main;
-import it.rol.db.Query;
 import it.rol.SessionManager;
 import it.rol.bean.ActivityBean;
 import it.rol.bean.CodeBean;
@@ -76,6 +74,8 @@ import it.rol.bean.MeasurementBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.RiskBean;
+import it.rol.db.DBWrapper;
+import it.rol.db.Query;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
@@ -536,7 +536,9 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             // Carattere misura
             measure.put("char", parser.getStringParameter("ms-char", VOID_STRING));
             // Sostenibilità economica
-            measure.put("econ", parser.getStringParameter("ms-eco", VOID_STRING));
+            measure.put("econ", parser.getStringParameter("ms-eco",  VOID_STRING));
+            // Data di scadenza misura
+            measure.put("data", parser.getStringParameter("ms-data", VOID_STRING));
             // Tipologie misura
             for (CodeBean type : types) {
                 measure.put("tip-" + type.getId(), parser.getStringParameter("ms-type" + type.getId(), VOID_STRING));
