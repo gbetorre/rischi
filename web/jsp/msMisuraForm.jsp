@@ -29,7 +29,7 @@
         <br />
         <div class="row">
           <div class="col-sm-1">&nbsp;</div>
-          <div class="col-sm-4 bgAct26 text-white form-custom">Descrizione misura</div>
+          <div class="col-sm-4 bgAct26 text-white form-custom"><strong>Descrizione misura</strong></div>
           <div class="col-sm-6">
             <textarea class="form-control" id="ms-desc" name="ms-desc" placeholder="Inserisci una descrizione della nuova misura"></textarea>
             <div class="charNum"></div>
@@ -59,6 +59,14 @@
               <option value="NO">NO</option>
               <option value="ND">Non Determinabile (al momento)</option>
             </select>
+          </div>
+        </div>
+        <br />
+        <div class="row">
+          <div class="col-sm-1">&nbsp;</div>
+          <div class="col-sm-4 bgAct26 text-white form-custom"><strong>Data di scadenza</strong></div>
+          <div class="col-sm-3">
+            <input type="text" class="form-control calendarData" id="ms-data" name="ms-data" placeholder="Inserisci data scadenza">
           </div>
         </div>
         <br />
@@ -517,6 +525,8 @@ $(document).ready(function() {
         </c:forEach>
         }
     });
+    $('input[type="text"].calendarData').datepicker();        
+    
     $('#btn-save').click(function (e){
         e.preventDefault;
       });
