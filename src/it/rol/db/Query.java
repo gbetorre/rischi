@@ -2030,6 +2030,7 @@ public interface Query extends Serializable {
             "   ,   nome" +
             "   ,   descrizione" +
             "   ,   onerosa" +
+            "   ,   data_scadenza" +
             "   ,   ordinale" +
             "   ,   data_ultima_modifica" +
             "   ,   ora_ultima_modifica " +
@@ -2040,6 +2041,7 @@ public interface Query extends Serializable {
             "   ,       ? " +       // nome
             "   ,       ? " +       // descrizione
             "   ,       ? " +       // onerosa
+            "   ,       ? " +       // data scadenza
             "   ,       ? " +       // ordinale
             "   ,       ? " +       // data ultima modifica
             "   ,       ? " +       // ora ultima modifica
