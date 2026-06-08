@@ -2590,6 +2590,18 @@ public interface Query extends Serializable {
             "   WHERE id = ?" +
             "       AND id_processo_at = ?" +
             "       AND id_rilevazione = ?";
+    
+    /**
+     * <p>Query per aggiornamento di una misura di mitigazione.</p>
+     */
+    public static final String UPDATE_MEASURE =
+            "UPDATE misura" +
+            "   SET data_scadenza  = ?" +
+            "   ,  data_ultima_modifica =   ?" +
+            "   ,  ora_ultima_modifica =    ?" +
+            "   ,  id_usr_ultima_modifica = ?" +
+            "   WHERE codice = ?" +
+            "       AND id_rilevazione = ?";
 
     /* ********************************************************************** *
      *                         Query di eliminazione                          *
