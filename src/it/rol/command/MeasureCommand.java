@@ -125,6 +125,10 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileInsertMeasure = "/jsp/msMisuraForm.jsp";
     /**
+     * Pagina a cui la command fa riferimento per mostrare la form di aggiornamento misura
+     */
+    private static final String nomeFileUpdateMeasure = "/jsp/msUpdMisuraForm.jsp";
+    /**
      * Pagina a cui la command fa riferimento per mostrare la form di aggiunta di una misura a un rischio
      */
     private static final String nomeFileAssignMeasure = "/jsp/msPRMisuraForm.jsp";
@@ -167,6 +171,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         nomeFile.put(COMMAND_MEASURE,       nomeFileElenco);
         nomeFile.put(PART_INSERT_MEASURE,   nomeFileInsertMeasure);
+        nomeFile.put(PART_UPDATE_MEASURE,   nomeFileUpdateMeasure);
         nomeFile.put(PART_INSERT_M_R_P,     nomeFileAssignMeasure);
     }
     
@@ -326,7 +331,17 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                                            AMPERSAND + PARAM_SURVEY + EQ + codeSur +
                                            AMPERSAND + MESSAGE + EQ + "newRel#rischi-fattori-misure";
                             }
-                        }
+                        } else if (part.equalsIgnoreCase(PART_UPDATE_MEASURE)) {
+                            /* ************************************************ *
+                             *         PROCESS Form to UPDATE a Measure         *
+                             * ************************************************ */
+                            db.updateMeasure(user, params);
+                            // Prepara la redirect 
+                            redirect = ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + 
+                                       AMPERSAND + "p" + EQ + PART_MEASURES +
+                                       AMPERSAND + "mliv" + EQ + parser.getStringParameter("mliv", VOID_STRING) + 
+                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;
+                        } 
                     } else {
                         // Azione di default
                         // do delete?
@@ -337,7 +352,6 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                      *                Manage Measure Part               *
                      * ************************************************ */
                     if (nomeFile.containsKey(part)) {
-                        //macros = ProcessCommand.retrieveMacroAtBySurvey(user, codeSur, db);
                         if (part.equalsIgnoreCase(PART_INSERT_MEASURE)) {
                             /* ************************************************ *
                              *            BUILD UP Form for new Measure         *
@@ -372,6 +386,17 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             // Ha bisogno di personalizzare le breadcrumbs
                             LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-M");
+                        } else if (part.equalsIgnoreCase(PART_UPDATE_MEASURE)) {
+                            /* ************************************************ *
+                             *    BUILD UP Form to update a specific Measure    *
+                             * ************************************************ */
+                            // Recupera la misura di prevenzione/mitigazione
+                            measure = retrieveMeasure(user, codeMis, survey, db);
+                            // Recupera i rischi cui è associata
+                            risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
+                            // Ha bisogno di personalizzare le breadcrumbs
+                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                            bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Aggiorna Misura");
                         }
                         // Imposta la jsp
                         fileJspT = nomeFile.get(part);
@@ -592,6 +617,18 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             measure.put("meas",    parser.getStringParameter("mrp", VOID_STRING));
             // Ammontare complessivo misure per la rilevazione corrente
             measure.put("size",    String.valueOf(allMeasures.size()));
+            formParams.put(part, measure);
+        /* ****       Aggiornamento data di scadenza       **** */
+        } else if (part.equals(PART_UPDATE_MEASURE)) {
+            /* Nome e descrizione misura
+            measure.put("nome", parser.getStringParameter("ms-name", VOID_STRING));
+            measure.put("desc", parser.getStringParameter("ms-desc", VOID_STRING));
+            // Carattere misura
+            measure.put("char", parser.getStringParameter("ms-char", VOID_STRING));*/
+            // Codice misura
+            measure.put("code", parser.getStringParameter("mliv",   VOID_STRING));
+            // Data di scadenza misura
+            measure.put("data", parser.getStringParameter("ms-data", VOID_STRING));
             formParams.put(part, measure);
         }
     }
