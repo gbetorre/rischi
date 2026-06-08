@@ -13,14 +13,6 @@
 <c:if test="${not empty meas.dataScadenza}">
   <fmt:formatDate var="expires" value="${meas.dataScadenza}" pattern="dd MMMMM yyyy" />
 </c:if>
-    <style>
-    section {
-      margin-top: 20px;
-      padding: 20px;
-      background-color: #f1f1f1;
-      border-radius: 10px;
-    }
-    </style>
 <c:catch var="exception">
     <h3 class="mt-1 m-0 font-weight-bold">Misura di prevenzione / mitigazione del rischio corruttivo</h3>
     <hr class="riga"/>
@@ -56,7 +48,12 @@
           </c:choose>
           </dd>
           <dt class="text-primary">Scadenza</dt>
-          <dd><strong><c:out value="${expires}" /></strong></dd>
+          <dd>
+            <strong><c:out value="${expires}" /></strong>
+            <a href="${initParam.appName}/?q=ms&p=upm&mliv=${meas.codice}&r=${param['r']}#details" class="badge bg-success btn-small lightTable text-white  align-middle refresh" title="Aggiungi/Modifica data scadenza">
+              <strong><i class="fa-solid fa-square-plus"></i> Modifica</strong>
+            </a>&nbsp;
+          </dd>
         </dl>
       </div>
       <hr class="separatore" />
