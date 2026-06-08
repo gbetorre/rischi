@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.6.5] (08/06/2026) [Implementation update measure expiration date](https://github.com/gbetorre/rischi/commits/main/?since=2026-06-08&until=2026-06-08)
 - [2.6.4] (04/06/2026) [Implementation insert measure expiration date](https://github.com/gbetorre/rischi/commits/main/?since=2026-06-04&until=2026-06-04)
 - [2.6.3] (29/05/2026) [Presentation improvements](https://github.com/gbetorre/rischi/commits/main/?since=2026-06-03&until=2026-06-03)
 - [2.6.2] (22/04/2026) [Added visualization of measure expiration date](https://github.com/gbetorre/rischi/commits/main/?since=2026-04-22&until=2026-04-22) 

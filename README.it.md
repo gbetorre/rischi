@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (24 versioni)
+### 2026 (25 versioni)
 
+- [2.6.5] (08/06/2026) Implementazione aggiornamento data di scadenza misura
 - [2.6.4] (04/06/2026) Implementazione inserimento data di scadenza misura
 - [2.6.3] (29/05/2026) Miglioramenti nella presentazione dell'attributo "data scadenza" misure
 - [2.6.2] (22/04/2026) Implementazione visualizzazione attributo "data scadenza" su pagina elenco (registro) misure
