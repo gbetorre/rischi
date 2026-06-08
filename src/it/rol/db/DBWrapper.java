@@ -8230,6 +8230,90 @@ public class DBWrapper extends QueryImpl {
     
     
     /**
+     * <p>Metodo per fare l'aggiornamento di un misura di mitigazione.</p> 
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public void updateMeasure(PersonBean user, 
+                              HashMap<String, LinkedHashMap<String, String>> params) 
+                       throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri del processo a cui è relativo il PxI
+            LinkedHashMap<String, String> meas = params.get(PART_UPDATE_MEASURE);
+            try {
+                // BEGIN: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                // === Se siamo qui vuol dire che ok   === //
+                // Recupera l'identificativo della misura
+                String code = meas.get("code");
+                // Recupera la data da aggiornare
+                java.util.Date expirationDate = Utils.format(meas.get("data"), "dd/MM/yyyy", DATA_SQL_PATTERN);
+                java.sql.Date  expirationDateAsSqlDate = Utils.convert(expirationDate);
+                // Prepara la query
+                pst = con.prepareStatement(UPDATE_MEASURE);
+                // Prepara i parametri per l'inserimento
+                pst.clearParameters();
+                // Definisce l'indice del parametro da passare
+                int nextParam = NOTHING;
+                // === Data di scadenza === //
+                pst.setDate(++nextParam, Utils.convert(expirationDateAsSqlDate));
+                // === Campi automatici: id utente, ora ultima modifica, data ultima modifica === *
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                pst.setInt(++nextParam, user.getUsrId());
+                // === Codice misura da aggiornare === //
+                pst.setString(++nextParam, code);
+                // === Riferimento a rilevazione === //
+                pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                // Invio
+                pst.executeUpdate();
+                // END: <==
+                con.commit();
+                pst.close();
+                pst = null;
+            } catch (ClassCastException cce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di oggetti.\n" + cce.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, cce);
+            } catch (CommandException ce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nel processamento di informazioni.\n" + ce.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, ce);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, npe);
+        } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+        }
+    }
+
+    
+    /**
      * <p>Aggiorna le informazioni relative alla dimensione di un file, i cui 
      * estremi vengono comunicati in un dictionary passato come argomento.</p>
      * <p>Notare che, almeno nel contesto di <code>Java 7</code>, con cui 
