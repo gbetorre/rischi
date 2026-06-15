@@ -47,6 +47,7 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -438,6 +439,23 @@ public class Utils implements Constants {
 
 
     /**
+     * <p>Dato un anno in input, restituisce la data del 1° gennaio 
+     * dell'anno stesso sotto forma di
+     * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/GregorianCalendar.html">
+     * GregorianCalendar</a>.</p>
+     *
+     * @param year intero corrispondente a un anno
+     * @return <code>GregorianCalendar</code> - la data corrispondente al 1° gennaio di quell'anno
+     */
+    public static GregorianCalendar getFirstDayOfYear(int year) {
+        // Costruisce il primo giorno dell'anno passato, sotto forma di GregorianCalendar
+        GregorianCalendar dateConverted = new GregorianCalendar(year, 0, 1);
+        // Restituisce al chiamante la data di default
+        return dateConverted;
+    }
+    
+    
+    /**
      * <p>Dato un anno in input, restituisce la data del 31 dicembre 
      * dell'anno stesso sotto forma di
      * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/GregorianCalendar.html">
@@ -803,6 +821,30 @@ public class Utils implements Constants {
     public static java.sql.Date convert(java.util.Date date) {
         return new java.sql.Date(date.getTime());
     }
+    
+    
+    /**
+     * <p>Converte un'istanza di <code>java.util.Date</code>
+     * in un'istanza di <code>java.util.GregorianCalendar</code></p>
+     * <p>
+     * Per estrarre l'anno da una java.util.Date
+     * nelle interrogazioni SQL standard non va bene
+     * un'istanza di {@link java.util.Date}
+     * ma ci vuole piuttosto un'istanza di {@link java.sql.Date}.</p>
+     *
+     * @param date una java.util.Date da trasformare in una java.sql.Date
+     * @return <code>java.sql.Date</code> - una java.sql.Date in cui la java.util.Date passata come argomento e' stato trasformata
+     * @see java.util.Date
+     */
+    public static GregorianCalendar convertToCalendar(java.util.Date date) {
+        if (date == null) {
+            return null; // Programmazione difensiva
+        }
+        // 1. Converte l'istanza Date in un Instant (punto preciso nel tempo)
+        // 2. Associa il fuso orario di sistema (o uno specifico, es. ZoneId.of("Europe/Rome"))
+        // 3. Genera direttamente il GregorianCalendar nativo senza casting rischiosi
+        return GregorianCalendar.from(date.toInstant().atZone(ZoneId.systemDefault()));
+    }
 
 
     /**
@@ -810,7 +852,7 @@ public class Utils implements Constants {
      * <p>Questo metodo pu&ograve; essere utilizzato ad esempio nei footer,
      * per l'indicazione del copyright (&copy;).</p>
      *
-     * @return <code>String</code> - l'anno corrente sotto forma di intero primitivo
+     * @return <code>int</code> - l'anno corrente sotto forma di intero primitivo
      */
     public static int getCurrentYearAsInt() {
         int yearPosition = Calendar.YEAR;
@@ -838,6 +880,23 @@ public class Utils implements Constants {
         //Integer yearWrapper = new Integer(year);
         Integer yearWrapper = Integer.valueOf(year);
         return yearWrapper.toString();
+    }
+    
+    
+    /**
+     * <p>Estrae l'anno da una java.util.Date che accetta come argomento.</p>
+     *
+     * @return <code>int</code> - l'anno corrente sotto forma di intero primitivo
+     */
+    public static int getYear(java.util.Date date) {
+        if (date == null) {
+            throw new IllegalArgumentException("La data non può essere null");
+        }
+        // Ritorna l'anno esatto (es. 2026)
+        return date.toInstant()
+                   .atZone(ZoneId.systemDefault())
+                   .toLocalDate()
+                   .getYear();
     }
 
 
