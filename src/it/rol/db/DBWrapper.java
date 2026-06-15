@@ -4240,6 +4240,8 @@ public class DBWrapper extends QueryImpl {
      * <dd>restituisce una lista vettoriale contenente la misura avente il codice ricevuto (se esiste), oppure una lista vuota (se non esiste)</dd>
      * <dt>se si passa una stringa SQL vuota sul II parametro e -1 sul III parametro</dt>
      * <dd>restituisce l'elenco completo delle misure di prevenzione trovate nella rilevazione passata sul IV parametro</dd>
+     * <dt>se si passa UNIX_EPOCH (1° gennaio 1970) o una data molto vecchia sul 4° parametro</dt>
+     * <dd>restituisce tutte le misure di mitigazione; altrimenti, restituisce solo le misure con data scadenza successiva (strettamente maggiore) della data passata</dd> 
      * </dl></p>
      * 
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
@@ -4763,6 +4765,7 @@ public class DBWrapper extends QueryImpl {
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     public ArrayList<DepartmentBean> getMeasuresByStructs(PersonBean user,
+                                                          java.util.Date date,
                                                           CodeBean survey)
                                                    throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
@@ -4792,7 +4795,7 @@ public class DBWrapper extends QueryImpl {
                     // Differenzia in base al livello
                     nextParam = NOTHING;
                     pst = null;
-                    pst = con.prepareStatement(getMeasuresByStruct(survey.getId(), capofila.getId(), (byte) capofila.getLivello(), capofilaLabel));
+                    pst = con.prepareStatement(getMeasuresByStruct(survey.getId(), capofila.getId(), (byte) capofila.getLivello(), capofilaLabel, Utils.convert(date)));
                     pst.clearParameters();
                     rs1 = pst.executeQuery();
                     while (rs1.next()) {
