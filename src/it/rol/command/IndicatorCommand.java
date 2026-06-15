@@ -268,6 +268,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         String redirect = null;
         // Data di oggi sotto forma di oggetto Date
         java.util.Date today = Utils.convert(Utils.getCurrentDate());
+        // Anno corrente estratto a partire dalla data di oggi
+        int currentYear = Utils.getYear(today);
         /* ******************************************************************** *
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
@@ -287,6 +289,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         int idFas = parser.getIntParameter("idF", DEFAULT_ID);
         // Recupera o inizializza 'id indicatore'
         int idInd = parser.getIntParameter("idI", DEFAULT_ID);
+        // Recupera o inizializza 'anno'
+        int year = parser.getIntParameter("y", currentYear);
         /* ******************************************************************** *
          *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
          * ******************************************************************** */
@@ -382,9 +386,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 /* -------------------------------------------- *
                                  *    ELENCO Misure raggruppate per struttura   *
                                  * -------------------------------------------- */
-                                    structs = db.getMeasuresByStructs(user, survey);
+                                    structs = db.getMeasuresByStructs(user, Utils.convert(Utils.getFirstDayOfYear(year)), survey);
                                     // Sostituisce "Indicatori" con Monitoraggio
-                                    bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Monitoraggio");
+                                    bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Monitoraggio");
                                     // Imposta la pagina
                                     fileJspT = nomeFile.get(part);
                                 } else {
@@ -610,7 +614,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         ParameterParser parser = new ParameterParser(req);
         /* ---------------------------------------------------- *
          *     Caricamento parametro di Codice Rilevazione      *
-         * ---------------------------------------------------- */      
+         * ---------------------------------------------------- */
         // Recupera o inizializza 'codice rilevazione' (Survey)
         String codeSur = parser.getStringParameter("r", DASH);
         // Recupera l'oggetto rilevazione a partire dal suo codice
