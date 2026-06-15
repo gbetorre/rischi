@@ -249,6 +249,14 @@ label.profileLabel {
 	margin-bottom: 10px !important;
 }
 
+.module {
+  background-image: linear-gradient(to top, #ccff66, white);
+  border-style: groove;
+  border-radius: 10px 10px 10px 10px;
+  padding: 10px 10px 0px 10px;
+  margin-bottom: 15px;
+}
+
 div.actstate{
 	float: right;
 	position: relative;
