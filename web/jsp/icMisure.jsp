@@ -3,27 +3,44 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
 <c:set var="structs" value="${requestScope.strutture}" scope="page" />
+<c:set var="selectedYear" value="${param['y']}" />
+<c:if test="${empty selectedYear}">
+  <c:set var="selectedYear" value="${requestScope.theCurrentYear}" />
+</c:if>
+<c:choose>
+  <c:when test="${selectedYear eq '2026'}">
+    <c:set var="sel2026" value="selected" scope="page" />
+  </c:when>
+  <c:when test="${selectedYear eq '2025'}">
+    <c:set var="sel2025" value="selected" scope="page" />
+  </c:when>
+  <c:when test="${selectedYear eq '2024'}">
+    <c:set var="sel2024" value="selected" scope="page" />
+  </c:when>
+  <c:when test="${selectedYear eq '2023'}">
+    <c:set var="sel2023" value="selected" scope="page" />
+  </c:when>
+  <c:when test="${selectedYear eq '2022'}">
+    <c:set var="sel2022" value="selected" scope="page" />
+  </c:when>
+</c:choose>
     <style>
-    .module {
-      background-image: linear-gradient(to top, #ccff66, white);
-      border-style: groove;
-      border-radius: 10px 10px 10px 10px;
-      padding: 10px 10px 0px 10px;
-      margin-bottom: 15px;
-    }
     .table td {
         padding-bottom: 0;
     }
     </style>
   <c:catch var="exception">
-    <h3 class="mt-1 m-0 font-weight-bold float-left">Monitoraggio</h3>
+    <h3 class="mt-1 m-0 font-weight-bold float-left">
+      Monitoraggio <c:out value="${selectedYear}" />
+    </h3>
+    
     <span class="form-custom float-right">
-      <select id="myPlans" class="wide">
-        <option value="2026" >2026</option>
-        <option value="2025" >2025</option>
-        <option value="2024" >2024</option>
-        <option value="2023" >2023</option>
-        <option value="2022" >2022</option>
+      <select id="myPlans" class="wide" onchange="viewPlan()">
+        <option value="2026" ${sel2026}>2026</option>
+        <option value="2025" ${sel2025}>2025</option>
+        <option value="2024" ${sel2024}>2024</option>
+        <option value="2023" ${sel2023}>2023</option>
+        <option value="2022" ${sel2022}>2022</option>
       </select>
     </span>
     <hr class="riga"/>
@@ -107,6 +124,13 @@
       </table>
     </div>
     </c:forEach>
+    <script>
+    function viewPlan() {
+      var y = document.getElementById("myPlans");
+      //y.value = x.value.toUpperCase();
+      window.self.location.href = '${initParam.appName}/?q=ic&p=mes&r=${param['r']}&y=' + y.value;
+    }
+    </script>
   </c:catch>
   <c:if test= "${not empty exception}">
     <div class= "alert alert-danger alert-dismissible" role= "alert">
