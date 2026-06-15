@@ -410,14 +410,15 @@ public class QueryImpl implements Query, Constants {
     
     
     /**
-     * {@link Query#getMeasuresByStruct(int, int, byte, String)}
-     * @see it.rol.db.Query#getMeasuresByStruct(int, int, byte, String)
+     * {@link Query#getMeasuresByStruct(int, int, byte, String, date)}
+     * @see it.rol.db.Query#getMeasuresByStruct(int, int, byte, String, java.util.Date)
      */
     @Override
     public String getMeasuresByStruct(int idR, 
                                       int idS,
                                       byte level,
-                                      String role) {
+                                      String role,
+                                      java.sql.Date date) {
         String clause = null;
         switch(level) {
         case (ELEMENT_LEV_1) :
@@ -464,6 +465,7 @@ public class QueryImpl implements Query, Constants {
                         clause +
                 "       AND MST.ruolo ILIKE '" + role + "'" +
                 "       AND MST.id_rilevazione = " + idR +
+                "       AND (MS.data_scadenza IS NULL OR MS.data_scadenza > '" + date + "')" +
                 "   ORDER BY MST.ruolo, MS.nome";
         return GET_MEASURE_BY_STRUCT;
     }
