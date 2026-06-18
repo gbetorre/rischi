@@ -45,6 +45,7 @@
     </span>
     <hr class="riga"/>
     <c:forEach var="d" items="${structs}">
+    <c:if test="${d.misure.size() gt zero}">
     <div class="module">
       <section id="${d.id}">
         <h6 class="mt-md-1 m-1 font-weight-bold">
@@ -123,6 +124,7 @@
         </tbody>
       </table>
     </div>
+    </c:if>
     </c:forEach>
     <script>
     function viewPlan() {
