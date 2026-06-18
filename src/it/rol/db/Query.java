@@ -1831,10 +1831,11 @@ public interface Query extends Serializable {
      * @param idS   identificativo della struttura
      * @param level livello della struttura
      * @param role  ruolo della struttura rispetto alla misura
-     * @param date  data al di sopra della quale la misura non deve essere considerata
+     * @param since  data al di sopra della quale la misura non deve essere considerata (&egrave; scaduta)
+     * @param until  data al di sotto della quale la misura non deve essere considerata (non era ancora stata dettagliata)
      * @return <code>String</code> - la query che seleziona le misure cercate
      */
-    public String getMeasuresByStruct(int idR, int idS, byte level, String role, java.sql.Date date);
+    public String getMeasuresByStruct(int idR, int idS, byte level, String role, java.sql.Date since, java.sql.Date until);
     
     /* ********************************************************************** *
      *                         Query di inserimento                           *
