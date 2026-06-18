@@ -410,15 +410,16 @@ public class QueryImpl implements Query, Constants {
     
     
     /**
-     * {@link Query#getMeasuresByStruct(int, int, byte, String, date)}
-     * @see it.rol.db.Query#getMeasuresByStruct(int, int, byte, String, java.util.Date)
+     * {@link Query#getMeasuresByStruct(int, int, byte, String, date, date)}
+     * @see it.rol.db.Query#getMeasuresByStruct(int, int, byte, String, java.sql.Date, java.sql.Date)
      */
     @Override
     public String getMeasuresByStruct(int idR, 
                                       int idS,
                                       byte level,
                                       String role,
-                                      java.sql.Date date) {
+                                      java.sql.Date date1,
+                                      java.sql.Date date2) {
         String clause = null;
         switch(level) {
         case (ELEMENT_LEV_1) :
@@ -458,14 +459,15 @@ public class QueryImpl implements Query, Constants {
                 "           ELSE false " +
                 "       END                                                         AS \"dettagli\"" +
                 "   FROM misura MS" +
-                "       LEFT JOIN misuramonitoraggio MM ON (MS.codice = MM.codice AND MS.id_rilevazione = MM.id_rilevazione)" +
+                "       INNER JOIN misuramonitoraggio MM ON (MS.codice = MM.codice AND MS.id_rilevazione = MM.id_rilevazione)" +
                 "       INNER JOIN misura_struttura MST ON (MS.codice = MST.cod_misura AND MS.id_rilevazione = MST.id_rilevazione)" +
                 "       INNER JOIN rilevazione S ON MS.id_rilevazione = S.id" +
                 "   WHERE MST.id_struttura_liv" + level + " = " + idS +
                         clause +
                 "       AND MST.ruolo ILIKE '" + role + "'" +
                 "       AND MST.id_rilevazione = " + idR +
-                "       AND (MS.data_scadenza IS NULL OR MS.data_scadenza > '" + date + "')" +
+                "       AND (MS.data_scadenza IS NULL OR MS.data_scadenza > '" + date1 + "')" +
+                "       AND MM.data_ultima_modifica < '" + date2 + "'" +
                 "   ORDER BY MST.ruolo, MS.nome";
         return GET_MEASURE_BY_STRUCT;
     }
