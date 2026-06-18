@@ -386,7 +386,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 /* -------------------------------------------- *
                                  *    ELENCO Misure raggruppate per struttura   *
                                  * -------------------------------------------- */
-                                    structs = db.getMeasuresByStructs(user, Utils.convert(Utils.getFirstDayOfYear(year)), survey);
+                                    structs = db.getMeasuresByStructs(user, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey);
                                     // Sostituisce "Indicatori" con Monitoraggio
                                     bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Monitoraggio");
                                     // Imposta la pagina
