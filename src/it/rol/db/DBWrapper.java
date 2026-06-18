@@ -4758,14 +4758,32 @@ public class DBWrapper extends QueryImpl {
      * di misure, con all'interno le misure stesse.
      * Le capofila possono essere di vario sottotipo (capofila 1, capofila 2,
      * capofila 3) ma non di tipo gregarie.</p>
+     * <p>Il metodo prende in input due date, dateAfter e dateBefore.
+     * Per comprendere il significato di questi parametri, bisogna capire come questi
+     * vengono macinati dalla query: p.es., se si seleziona l'anno 2025, la query
+     * lo interpreta nel seguente modo:<pre>
+     * SELECT MS.codice, data_scadenza FROM misura MS 
+     * INNER JOIN misuramonitoraggio MM ON MS.codice = MM.codice
+     * WHERE (MS.data_scadenza IS NULL OR MS.data_scadenza > '2025-01-01')
+     * AND MM.data_ultima_modifica < '2025-12-31';</pre>
+     * In questo modo, vengono selezionate solo le misure che NON risultano
+     * scadute in date che precedono il primo giorno del 2025, e che quindi 
+     * nel 2025 erano valide (p.es. si considera una misura con scadenza il 
+     * 2 gennaio 2025 ma non si considera una misura scaduta il 30 dicembre 2024)
+     * AND che NON risultano create dopo il 31 dicembre 2025 (p.es., se una
+     * misura era stata dettagliata il 2 gennaio 2026 selezionando l'anno 2025
+     * non esce, perch&eacute; nel 2025 non esisteva ancora).</p>
      *
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param dateAfter primo giorno dell'anno a partire dal quale la misura non si considera scaduta (p.es. '2026-01-01')  
+     * @param dateBefore ultimo giorno dell'anno che rappresenta la soglia oltre la quale la misura non si considera esistente (p.es. '2026-12-31')
      * @param survey    oggetto contenente gli estremi della rilevazione
      * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - un vettore ordinato di DepartmentBean, che rappresentano le capofila delle misure
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     public ArrayList<DepartmentBean> getMeasuresByStructs(PersonBean user,
-                                                          java.util.Date date,
+                                                          java.util.Date dateAfter,
+                                                          java.util.Date dateBefore,
                                                           CodeBean survey)
                                                    throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
@@ -4795,7 +4813,7 @@ public class DBWrapper extends QueryImpl {
                     // Differenzia in base al livello
                     nextParam = NOTHING;
                     pst = null;
-                    pst = con.prepareStatement(getMeasuresByStruct(survey.getId(), capofila.getId(), (byte) capofila.getLivello(), capofilaLabel, Utils.convert(date)));
+                    pst = con.prepareStatement(getMeasuresByStruct(survey.getId(), capofila.getId(), (byte) capofila.getLivello(), capofilaLabel, Utils.convert(dateAfter), Utils.convert(dateBefore)));
                     pst.clearParameters();
                     rs1 = pst.executeQuery();
                     while (rs1.next()) {
