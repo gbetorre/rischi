@@ -38,6 +38,7 @@ rol_compile.bat
 # Classes
 /classes/
 /classes/it
+/bin/util
 
 # Settings
 /.settings
