@@ -40,6 +40,12 @@ rol_compile.bat
 /classes/it
 /bin/util
 
+# Python Stuff
+__pycache__
+
+# pandoc stuff
+/Documentazione/output/site-build/tmp/
+
 # Settings
 /.settings
 .project
