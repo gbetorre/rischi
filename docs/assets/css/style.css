@@ -1,0 +1,38 @@
+body{
+	font-family:Arial,sans-serif;
+	max-width:1200px;
+	margin:0 auto;
+	padding:0
+}
+	
+header{
+	background:#0b3d91;
+	color:#fff;
+	padding:20px
+}.layout{
+	display:flex
+}.sidebar{
+	width:260px;
+	background:#f4f4f4;
+	padding:20px;
+	height:100vh;
+	position:sticky;
+	top:0;
+	overflow:auto
+}.content{
+	 flex:1;
+	 padding:30px
+}
+
+a{
+	text-decoration:none
+}
+
+ul{
+	padding-left:20px
+}.card{
+	border:1px solid #ddd;
+	padding:15px;
+	margin:10px 0;
+	border-radius:8px
+}
