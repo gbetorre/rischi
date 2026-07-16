@@ -210,7 +210,7 @@ quesito 21;</p>
 <p>Se il valore di tale risposta è inferiore al 100%, allora il rischio
 è medio,</p>
 <p>Altrimenti, se è 100% il rischio diventa alto.</p>
-<p><img src="assets/media/media/image13.wmf" style="width:3.57917in;height:1.70278in"/></p>
+<p><img src="assets/media/media/image13.png" style="width:3.57917in;height:1.70278in"/></p>
 <p><img src="assets/media/media/image14.png" style="width:3.44236in;height:5.75069in"/></p>
 <p>Alcuni algoritmi sono più complessi da calcolare (e quindi
 implementare) che altri.</p>
@@ -269,5 +269,116 @@ calcolo del P x I.</p></li>
 matematicamente il calcolo degli incroci dei valori di P e dei valori di
 I è il calcolo delle disposizioni (con ripetizione) di 3 elementi presi
 a 2 a 2.</p>
+<hr>
+<h4 id="disposizioni-con-ripetizione---dnk">Disposizioni con ripetizione
+- D’(n,k)</h4>
+<p><strong>Definizione</strong>.</p>
+<p>Dati <em>n</em> elementi distinti e un numero <em>k&lt;=n</em> si
+dicono disposizioni con ripetizione di questi <em>n</em> elementi, presi
+a <em>k</em> a <em>k</em> (o di classe <em>k</em>),
+<strong>D’(n,k)</strong>, tutti i gruppi che si possono formare con gli
+elementi dati, in modo che:</p>
+<ul>
+<li><p>ogni gruppo contenga <em>k</em> elementi non necessariamente
+distinti</p></li>
+<li><p>ogni elemento possa trovarsi ripetuto nel gruppo fino a
+<em>k</em> volte</p></li>
+<li><p>due gruppi qualunque differiscano fra loro per qualche elemento
+oppure per l’ordine in cui gli elementi sono disposti</p></li>
+</ul>
+<p><strong>Esempi</strong>.</p>
+<p>Le disposizioni con ripetizione di 3 elementi (abc) presi a 2 a 2
+sono:</p>
+<p>aa ab ac ba bb bc ca cb cc</p>
+<p><strong>Calcolo delle disposizioni con ripetizione</strong>.</p>
+<p>D’(<em>n</em>,<em>k</em>) = <em>nk</em></p>
+<hr>
+<br>
+<p>Nel nostro caso abbiamo 3 elementi (alto, medio, basso) presi a 2 a
+2, da cui:</p>
+<p><em>D’(3,2) = 3<sup>2</sup> = 9</em></p>
+<p>Di seguito viene riportata la tabella di decisione dell’algoritmo per
+il calcolo del PxI, con i 9 valori possibili derivanti dalle
+disposizioni con ripetizione dei 3 valori possibili del P e dei 3 valori
+possibili di I.</p>
+<table>
+<thead>
+<tr class="header">
+<th>P</th>
+<th>I</th>
+<th>P x I</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ALTO</td>
+<td>ALTO</td>
+<td>ALTISSIMO</td>
+</tr>
+<tr class="even">
+<td>ALTO</td>
+<td>MEDIO</td>
+<td>ALTO</td>
+</tr>
+<tr class="odd">
+<td>ALTO</td>
+<td>BASSO</td>
+<td>MEDIO</td>
+</tr>
+<tr class="even">
+<td>MEDIO</td>
+<td>ALTO</td>
+<td>ALTO</td>
+</tr>
+<tr class="odd">
+<td>MEDIO</td>
+<td>MEDIO</td>
+<td>MEDIO</td>
+</tr>
+<tr class="even">
+<td>MEDIO</td>
+<td>BASSO</td>
+<td>BASSO</td>
+</tr>
+<tr class="odd">
+<td>BASSO</td>
+<td>ALTO</td>
+<td>MEDIO</td>
+</tr>
+<tr class="even">
+<td>BASSO</td>
+<td>MEDIO</td>
+<td>BASSO</td>
+</tr>
+<tr class="odd">
+<td>BASSO</td>
+<td>BASSO</td>
+<td>MINIMO</td>
+</tr>
+</tbody>
+</table>
+<p>Siccome abbiamo visto che su uno stesso processo possono essere
+effettuate più interviste, come è possibile assumere che i risultati dei
+vari indicatori siano univoci per il singolo processo?</p>
+<p>In base a quanto analizzato finora, siamo consapevoli che un processo
+potrebbe essere in carico a più strutture e ciò potrebbe portare a più
+interviste distinte che investigano lo stesso processo.</p>
+<p>Ora, potrebbe accadere che in un’intervista relativa al processo 1
+effettuata con la struttura A il valore di un indicatore, p.es. P1,
+risulti ALTO mentre in un’altra intervista, relativa sempre al processo
+1, ma effettuata stavolta con la struttura B, il valore dell’indicatore
+P1 risulti MEDIO (o anche BASSO)…</p>
+<p>Siccome questo può accadere – ed è perfettamente plausibile che
+accada – in questo caso, si adotta, come accennato in precedenza,
+l’algoritmo “In dubio pro peior” (nel dubbio si sceglie il caso
+peggiore, ovvero il valore di rischio più alto); quindi, nell’esempio,
+si considera che il valore complessivo di P1 per il processo 1 è ALTO
+(non si effettua una ponderazione ma si prende il valore di rischio più
+elevato).</p>
+<p>Più sotto viene riportato il diagramma di flusso dell’algoritmo
+adottato in caso di risultati contrastanti <em>per uno stesso
+processo</em> attraverso varie interviste (risultati contrastanti da
+un’intervista all’altra).</p>
+<p><img src="assets/media/media/image16.png" style="width:6.925in;height:8.63472in"/></p>
 </body>
 </html>
