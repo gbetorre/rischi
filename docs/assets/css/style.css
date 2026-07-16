@@ -26,6 +26,8 @@ header{
 
 a{
 	text-decoration:none
+}.home{
+   color: #ccff66;
 }
 
 ul{
@@ -35,4 +37,9 @@ ul{
 	padding:15px;
 	margin:10px 0;
 	border-radius:8px
+}
+
+ul.nav li.current {
+  border-color: red;
+  background: #ffbe6f;
 }
