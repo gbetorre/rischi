@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>section-41</title>
+<style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body><p><a href="index.html">Home</a></p>
+<h4 id="report-pxi-dei-rischi-e-delle-misure">3. REPORT PxI DEI RISCHI
+(E DELLE MISURE)</h4>
+<p>Il report PxI basato sui processi, rilasciato nel software dalla
+versione 1.50, prevede la generazione di una tabella a doppia entrata,
+avente in riga i processi ed in colonna gli indicatori di rischio. La
+confluenza tra il processo (riga) e l’indicatore (colonna) identifica la
+cella con il valore di rischio cercato. Questo report è chiamato
+semplicemente “Report PxI” (o “Report probabilità x impatto”):</p>
+<p><img src="assets/media/media/image28.png" style="width:6.925in;height:4.17778in"/></p>
+<p>Si prevede di implementare una nuova tabella a doppia entrata,
+recante in riga i rischi contestuali ai processi ed in colonna i valori
+del PxI stimati in funzione della mitigazione prevista. Lo schema del
+report è riportato nella tabella seguente:</p>
+<table>
+<colgroup>
+<col style="width: 12%"/>
+<col style="width: 10%"/>
+<col style="width: 11%"/>
+<col style="width: 9%"/>
+<col style="width: 12%"/>
+<col style="width: 10%"/>
+<col style="width: 10%"/>
+<col style="width: 10%"/>
+<col style="width: 10%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>
+</th>
+<th>
+<p>
+<strong>PxI</strong>
+</p>
+<p>
+processo
+</p>
+</th>
+<th>
+<p>
+<strong>PxI</strong>
+</p>
+<p>
+“spalmato” (distribuito)
+</p>
+</th>
+<th>
+<strong>Misure previste</strong>
+</th>
+<th>
+Mitigazione stimata
+</th>
+<th>
+<strong>PxI</strong> mitigato (<sub>stima</sub>)
+</th>
+<th>
+<strong>Misure applicate</strong> (monitoraggio)
+</th>
+<th>
+Mitigazione effettiva
+</th>
+<th>
+<strong>PxI</strong> (monito-raggio)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>
+PROCESSO 1
+</td>
+<td rowspan="4">
+ALTO
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td rowspan="4">
+MEDIO
+</td>
+<td>
+</td>
+<td>
+</td>
+<td rowspan="4">
+ALTO
+</td>
+</tr>
+<tr class="even">
+<td>
+Rischio 1
+</td>
+<td>
+ALTO
+</td>
+<td>
+2G
+</td>
+<td>
+MEDIO
+</td>
+<td>
+SI + SI
+</td>
+<td>
+MEDIO
+</td>
+</tr>
+<tr class="odd">
+<td>
+Rischio 2
+</td>
+<td>
+ALTO
+</td>
+<td>
+1S
+</td>
+<td>
+MEDIO
+</td>
+<td>
+NO
+</td>
+<td>
+ALTO
+</td>
+</tr>
+<tr class="even">
+<td>
+Rischio 3
+</td>
+<td>
+ALTO
+</td>
+<td>
+1G + 1S
+</td>
+<td>
+MEDIO
+</td>
+<td>
+SI + NO
+</td>
+<td>
+ALTO
+</td>
+</tr>
+<tr class="odd">
+<td>
+PROCESSO 2
+</td>
+<td rowspan="3">
+MEDIO
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td rowspan="3">
+BASSO
+</td>
+<td>
+</td>
+<td>
+</td>
+<td rowspan="3">
+BASSO
+</td>
+</tr>
+<tr class="even">
+<td>
+Rischio 4
+</td>
+<td>
+MEDIO
+</td>
+<td>
+3G
+</td>
+<td>
+BASSO
+</td>
+<td>
+NO+SI+SI
+</td>
+<td>
+BASSO
+</td>
+</tr>
+<tr class="odd">
+<td>
+Rischio 5
+</td>
+<td>
+MEDIO
+</td>
+<td>
+1G + 1S
+</td>
+<td>
+BASSO
+</td>
+<td>
+NO + SI
+</td>
+<td>
+BASSO
+</td>
+</tr>
+<tr class="even">
+<td>
+…
+</td>
+<td>
+(a)
+</td>
+<td>
+(b)
+</td>
+<td>
+(c)
+</td>
+<td>
+(d)
+</td>
+<td>
+(e)
+</td>
+<td>
+(f)
+</td>
+<td>
+(g)
+</td>
+<td>
+(h)
+</td>
+</tr>
+<tr class="odd">
+<td colspan="6">
+← REGISTRO ← |
+</td>
+<td colspan="3">
+→ MONITORAGGIO →
+</td>
+</tr>
+</tbody>
+</table>
+<p>La prima colonna (non etichettata), al posto dei macroprocessi e
+processi del Report PxI, elenca rispettivamente i processi e i loro
+rischi.</p>
+<p>Ogni processo ha già un valore calcolato del PxI (colonna
+<strong>a</strong>).</p>
+<p>Questo, effettuando un’assunzione legittima, viene assegnato ad ogni
+rischio; in altre parole, dal momento che il PxI complessivo del
+processo è TOT, si assume che ogni rischio del processo stesso sia pari
+a TOT; non si determina cioè un PxI specifico di ogni rischio, ma
+inizialmente si parte dal PxI generale, assumendo, in modo leggermente
+forzato ma comunque logicamente sensato, che il valore PxI di ogni
+rischio specifico sia pari al PxI generale. Questo valore viene
+chiamato, nella tabella, <strong>“PxI spalmato” (o
+distribuito)</strong>. La regola è quindi che ogni valore del PxI
+distribuito dev’essere uguale al PxI generale del processo.</p>
+<p>Successivamente, si ricavano le misure assegnate sul rischio nel
+contesto del processo. Nell’esempio, è stato previsto di assegnare 2
+misure generiche sul Rischio 1, 1 misura specifica sul Rischio 2 e 1
+misura generica e 1 specifica sul Rischio 3 (colonna <strong>“Misure
+previste”</strong>, o colonna <strong>c</strong>).</p>
+<p>Sulla base degli algoritmi già definiti nei paragrafi precedenti,
+queste misure comportano una riduzione del rischio, pari a 0,5 per ogni
+misura generica e pari a 1 per ogni misura specifica. Ciò si concretizza
+in una riduzione prevista del rischio (chiamata <strong>“Mitigazione
+stimata”</strong>) dipendente dalla quantità e dal tipo delle misure
+stesse (colonna <strong>d</strong>).</p>
+<p>A partire dai valori di mitigazione stimata di ogni rischio, si
+ricalcola un <strong>PxI mitigato (stimato)</strong> tramite un
+algoritmo di ricalcolo (v. relativo paragrafo).</p>
+<p>Tutte queste colonne (<strong>a – e</strong>) sono relative alla
+parte di registrazione delle misure e assegnazione ai relativi rischi e
+processi.</p>
+<p>A seguire, nel report, possono essere previste colonne di
+monitoraggio (colonne <strong>f – h</strong>).</p>
+<p>In particolare, per ogni misura prevista, il monitoraggio risponde
+alla domanda: la misura prevista è stata applicata? Per ognuna di queste
+domande possono esservi 3 valori: vero, falso, indecidibile. Il terzo
+valore (indecidibile, o non determinabile) significa che non è stato
+possibile determinare se la misura sia stata applicata o meno, in quanto
+mancano alcune informazioni essenziali per la determinazione della
+risposta. Laddove le informazioni siano sufficienti, però, la risposta
+dev’essere: VERO, cioè la misura è stata applicata; oppure FALSO, cioè
+la misura non è stata applicata. Si valuterà in seguito come trattare
+eventuali applicazioni parziali della misura (Misura parzialmente
+applicata).</p>
+<p>La parte di monitoraggio, comunque, richiederà una sezione di analisi
+specifica, per cui al momento si rimanda a questo sviluppo ulteriore
+l’analisi dettagliata dei singoli casi.</p>
+</body>
+</html>

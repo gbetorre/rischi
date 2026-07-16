@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>section-30</title>
+<style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body><p><a href="index.html">Home</a></p>
+<h4 id="relazione-verso-la-struttura">RELAZIONE VERSO LA STRUTTURA</h4>
+<p>Una misura deve avere una <strong>struttura responsabile</strong>
+della messa in atto della misura stessa, quindi la misura è in relazione
+con la struttura:</p>
+<p><img src="assets/media/media/image17.png" style="width:4.59375in;height:1.52083in"/></p>
+<p>Una misura di sicurezza ha almeno una struttura organizzativa e può
+averne più di una; mentre una struttura ha zero o più misure di
+sicurezza (relazione molti-a-molti).</p>
+<p>Il ruolo della struttura rispetto alla misura è un attributo della
+relazione tra la misura e la struttura.</p>
+<p>Prima di entrare nel merito dello schema E-R atto a tradurre questa
+parte del modello, è opportuno fare un esempio, in modo da capire
+esattamente qual è la situazione che dobbiamo rappresentare.</p>
+<p>Poniamo di dover esaminare una misura di sicurezza in rapporto allo
+scenario.</p>
+<p>Per poter fare un’analisi del genere, è necessario esaminare gli
+attori coinvolti, che nel caso specifico sono: <em>processo, rischio,
+fattore abilitante, misura di sicurezza e tipologia di misura.</em></p>
+<p><em>Esempio:</em></p>
+<table>
+<colgroup>
+<col style="width: 16%"/>
+<col style="width: 21%"/>
+<col style="width: 31%"/>
+<col style="width: 11%"/>
+<col style="width: 18%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>PROCESSO</th>
+<th>RISCHIO</th>
+<th>FATTORE ABILITANTE</th>
+<th>MISURA</th>
+<th>TIPOLOGIA DI MISURA</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Concorsi per PTA</td>
+<td>Conflitto di interesse</td>
+<td>Inadeguata cultura della legalità</td>
+<td>Linee guida</td>
+<td>Regolamentazione</td>
+</tr>
+</tbody>
+</table>
+<p>Quella riportata sopra è la soluzione che bisogna ingegnerizzare: un
+processo (CONCORSI) è connesso a una serie di rischi (p.es. CONFLITTO DI
+INTERESSE), i quali sono a loro volta connessi a una serie di fattori
+abilitanti… prima di procedere oltre, ricordiamo infatti che il processo
+organizzativo, censito a fini anticorruttivi, è legato sia al rischio
+sia al fattore abilitante attraverso una relazione ternaria:</p>
+<p><img src="assets/media/media/image18.png" style="width:5.36528in;height:2.39306in"/></p>
+<p>Quindi il processo è associato a uno o più rischi, che a loro volta
+sono associati a uno o più fattori abilitanti; ma ogni rischio, nel
+contesto di un dato processo, deve poter essere associato anche a una o
+più misure di prevenzione, ciascuna delle quali ha una sua tipologia ed
+un suo carattere.</p>
+<p>Ciò delinea una ulteriore relazione ternaria tra processo_at, rischio
+e misura di prevenzione/riduzione:</p>
+<p><img src="assets/media/media/image19.png" style="width:5.24861in;height:2.46181in"/></p>
+<p>Pertanto, la relazione diretta tra rischio e misura va specializzata
+con una relazione ternaria tra il rischio, il processo e la misura
+stessa.</p>
+<p>Ciò significa che, da qualunque entità si parta accedendo alla
+relazione, sarà possibile risalire alle altre entità coinvolte.</p>
+<p><strong>NOTA BENE</strong></p>
+<p>In realtà quelle descritte nell’analisi come relazioni semplici sono
+già relazioni ternarie e quelle descritte come ternarie nel nostro
+schema sono tutte relazioni n-arie, in quanto quasi ogni entità dello
+schema è debole dipendendo dalla rilevazione, e così pure le relazioni
+stesse.</p>
+<p>Tuttavia, nell’analisi trattiamo tutte le relazioni semplici tra
+entità come se fossero binarie (piuttosto che ternarie come sono in
+realtà) in quanto l’esistenza di un ulteriore ramo verso la rilevazione
+è un elemento ricorrente nello schema, cioè comune a tutte le relazioni,
+e quindi può essere spostato in background nell’analisi descrittiva e,
+in definitiva, dato per scontato.</p>
+<p>Nell’analisi descrittiva, pertanto, il riferimento alla rilevazione
+normalmente verrà omesso, mentre i vari passaggi daranno evidenza a
+entità specifiche, per cui si parlerà di relazioni semplici, relazioni
+ternarie, relazioni 4-arie etc. piuttosto che di relazioni ternarie,
+relazioni 4-arie, relazioni n-arie.</p>
+<p>In questa fase dell’analisi, ci basti dire che anche la misura
+presenta un ramo verso la rilevazione, in quanto <strong>anche le misure
+possono essere storicizzate in una rilevazione.</strong></p>
+<p>Il fattore abilitante, dal canto suo, viene associato alla misura
+tramite la tipologia della misura stessa, che è in relazione diretta con
+il fattore abilitante stesso.</p>
+<p><img src="assets/media/media/image20.png" style="width:4.85069in;height:1.25in"/></p>
+<p>Riepilogando: oltre alle normali relazioni con le entità forti
+(tipologia, carattere) abbiamo:</p>
+<ul>
+<li><p>due relazioni ternarie indipendenti ma collegate tra loro tramite
+il rischio corruttivo;</p></li>
+<li><p>una relazione indiretta tra la misura ed il fattore abilitante
+tramite la tipologia della misura;</p></li>
+<li><p>una relazione diretta tra la misura e la struttura, che ha un
+attributo specificante il ruolo {capofila | gregaria} che la struttura
+ha rispetto alla misura.</p></li>
+</ul>
+<p><img src="assets/media/media/image21.png" style="width:5.55069in;height:4.88611in"/></p>
+</body>
+</html>

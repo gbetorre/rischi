@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>section-38</title>
+<style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body><p><a href="index.html">Home</a></p>
+<h4 id="lalgoritmo-di-contenimento-o-mitigazione-del-rischio">L’ALGORITMO DI
+CONTENIMENTO (O MITIGAZIONE) DEL RISCHIO</h4>
+<p>L’algoritmo di contenimento (o mitigazione, o riduzione…) del rischio
+corruttivo permette di ottenere un valore del PxI di uno specifico
+rischio ridotto in funzione dell’applicazione di una o più misure di
+mitigazione.</p>
+<p>Per determinare questo algoritmo, si procede nel seguente modo:</p>
+<ol type="1">
+<li><p>si quantificano, tramite una funzione di codifica, i valori del
+PxI del rischio facendo corrispondere ad ogni valore un numero intero,
+variabile da 0 per il rischio MINIMO a 4 per il rischio MOLTO
+ALTO;</p></li>
+<li><p>- per ogni misura di carattere generale si sottrae 0.5 dal valore
+del PxI del rischio;</p>
+<ul>
+<li>per ogni misura di carattere specifico si sottrae 1.0 dal valore del
+PxI del rischio</li>
+</ul></li>
+<li><p>nei calcoli vengono effettuati solo arrotondamenti per eccesso;
+quindi per considerare un PxI ridotto di un livello bisogna che le
+misure abbiano determinato almeno una riduzione di 1 (da 1.0 a
+1.9).</p></li>
+</ol>
+<p><img src="assets/media/media/image26.png" style="width:4.91667in;height:2.20833in"/></p>
+<p>I valori assegnati ai livelli dei PxI possono essere ricavati dalla
+seguente tabella:</p>
+<table>
+<thead>
+<tr class="header">
+<th><strong>PxI su scala ordinale</strong></th>
+<th><strong>PxI su scala a intervalli</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>MINIMO</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>BASSO</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>MEDIO</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td>ALTO</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td>MASSIMO</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<p><strong>NOTA BENE</strong></p>
+<p>Da un punto di vista statistico, l’operazione di trasformare valori
+chiaramente su scala ordinale in valori su scala a intervalli uguali
+(anzi, su scala di rapporti, perché è stato determinato uno zero in modo
+univoco) è sicuramente un abuso di notazione, perché fornisce
+un’impressione di precisione che nei dati non esiste; ad esempio,
+sicuramente un PxI MOLTO ALTO (o Massimo) sarà maggiore di un PxI medio,
+ma non si può dire che MOLTO ALTO sia esattamente il doppio di MEDIO,
+cosa che invece la trasformazione numerica dà l’impressione di poter
+concludere (perché 4 è il doppio di 2). Analogamente, neppure si può
+dire che un PxI ALTO valga esattamente come 3 PxI BASSI.</p>
+<p>Pertanto, a prescindere da qualunque conversione arbitraria, bisogna
+considerare che i dati relativi ai PxI (livelli di rischio) sono e
+resteranno sempre misurati su scala ordinale, non su scala a intervalli
+o di rapporti.</p>
+<p>D’altro canto, la conversione numerica permette di determinare i
+livelli di mitigazione in maniera molto più pratica rispetto a una
+“mitigazione ordinale”. L’importante è ricordarsi che l’apparente
+precisione non corrisponde ad una precisione effettiva nei dati.</p>
+<p>Per fare un esempio, riprendiamo la tabella precedente:</p>
+<table>
+<colgroup>
+<col style="width: 30%"/>
+<col style="width: 17%"/>
+<col style="width: 12%"/>
+<col style="width: 13%"/>
+<col style="width: 13%"/>
+<col style="width: 13%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="6">
+<strong>Concessione agevolazioni e incentivi agli studenti</strong>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>
+<p>
+<strong>RISCHI</strong>
+</p>
+<p>
+<strong>(a)</strong>
+</p>
+</td>
+<td>
+<p>
+<strong>PxI</strong>
+</p>
+<p>
+<strong>Processo</strong>
+</p>
+<p>
+<strong>(b)</strong>
+</p>
+</td>
+<td>
+<p>
+<strong>PxI</strong>
+</p>
+<p>
+<strong>Rischi</strong>
+</p>
+<p>
+<strong>(c)</strong>
+</p>
+</td>
+<td>
+<p>
+<strong>PxI Rischi (d)</strong> (dopo l’applicazione delle misure)
+</p>
+<p>
+<strong><sub>STIMA</sub></strong>
+</p>
+</td>
+<td>
+<strong>PxI Rischi (e)</strong> (dopo aver effettuato il
+<strong>monitoraggio</strong> delle misure)
+</td>
+<td>
+<strong>PxI Processo (f)</strong> (dopo applicazione misure
+<strong>E</strong> monitoraggio)
+</td>
+</tr>
+<tr class="even">
+<td>
+<img src="assets/media/media/image25.wmf" style="width:0.2in;height:0.2in"/>
+Assenza di adeguata pubblicità della selezione
+</td>
+<td rowspan="6">
+<p>
+<mark>MEDIO</mark>
+</p>
+<p>
+Il processo è mediamente esposto a rischio corruttivo in quanto trattasi
+di un processo che coinvolge molteplici soggetti, sia interni che
+esterni all’Ateneo. La presenza di segnalazioni da parte degli utenti
+aumenta l’esposizione al rischio.
+</p>
+</td>
+<td>
+MEDIO
+</td>
+<td>
+BASSO {1S}
+</td>
+<td>
+MEDIO (0)
+</td>
+<td rowspan="6">
+<mark>MEDIO</mark>
+</td>
+</tr>
+<tr class="odd">
+<td>
+<img src="assets/media/media/image25.wmf" style="width:0.2in;height:0.2in"/>
+Assenza di controlli sulle autodichiarazioni rese dai richiedenti
+</td>
+<td>
+MEDIO
+</td>
+<td>
+MEDIO {1G}
+</td>
+<td>
+BASSO (1S)
+</td>
+</tr>
+<tr class="even">
+<td>
+<img src="assets/media/media/image25.wmf" style="width:0.2in;height:0.2in"/>
+Agevolazioni indebite favorite dalla modifica frequente del piano di
+studi
+</td>
+<td>
+MEDIO
+</td>
+<td>
+<p>
+BASSO
+</p>
+<p>
+{1G + 1S}
+</p>
+</td>
+<td>
+BASSO (1S)
+</td>
+</tr>
+<tr class="odd">
+<td>
+<img src="assets/media/media/image25.wmf" style="width:0.2in;height:0.2in"/>
+Inosservanza delle regole in materia di trasparenza
+</td>
+<td>
+MEDIO
+</td>
+<td>
+MINIMO {4G}
+</td>
+<td>
+BASSO (3G)
+</td>
+</tr>
+<tr class="even">
+<td>
+<img src="assets/media/media/image25.wmf" style="width:0.2in;height:0.2in"/>
+Mancato recupero dei crediti
+</td>
+<td>
+MEDIO
+</td>
+<td>
+MEDIO {1G}
+</td>
+<td>
+MEDIO (0)
+</td>
+</tr>
+<tr class="odd">
+<td>
+<img src="assets/media/media/image25.wmf" style="width:0.2in;height:0.2in"/>
+Riconoscimento indebito del contributo a soggetti non in possesso dei
+requisiti previsti dal bando
+</td>
+<td>
+MEDIO
+</td>
+<td>
+BASSO {1S}
+</td>
+<td>
+MEDIA (1G)
+</td>
+</tr>
+</tbody>
+</table>
+<p>Come leggiamo questa tabella?</p>
+<p>Colonna <strong>b</strong> : Anzitutto, le interviste hanno permesso
+di determinare un rischio MEDIO per questo processo</p>
+<p>Colonna <strong>c</strong> : Prima dell’applicazione delle misure,
+quindi, il valore di rischio di ogni rischio del processo è stato
+assegnato a MEDIO</p>
+<p>Colonna <strong>d</strong> : Sulla base delle informazioni a sua
+disposizione, e dei dati raccolti contestualmente alle interviste,
+l’esperto di valutazione del rischio corruttivo ha stimato che:</p>
+<ul>
+<li><p>al RISCHIO 1 dovessero essere applicate: 1 misura specifica ({1
+S} vale -1)</p></li>
+<li><p>al RISCHIO 2 dovessero essere applicate: 1 misura generica ({1 G}
+vale -0.5)</p></li>
+<li><p>al RISCHIO 3 dovessero essere applicate: 2 misure: 1 specifica e
+1 generica ({1G + 1S} valgono -1.5)</p></li>
+<li><p>al RISCHIO 4 dovessero essere applicate 4 misure generiche ({4G}
+valgono 4x-0.5 = -2)</p></li>
+<li><p>al RISCHIO 5 dovessero essere applicate 1 misura generica ({1G}
+vale -0.5)</p></li>
+<li><p>al RISCHIO 6 dovessero essere applicate 1 misura specifica ( {1S}
+vale -1)</p></li>
+</ul>
+<p>Conseguentemente, i livelli di PxI dei rischi si sarebbero dovuti
+ridurre come segue:</p>
+<ul>
+<li><p>RISCHIO 1: 2 (cioè MEDIO) – 1.0 = 1 = BASSO</p></li>
+<li><p>RISCHIO 2: 2 – 0.5 = 1.5 → pari a 2 = MEDIO</p></li>
+<li><p>RISCHIO 3: 2 – 1.5 = 0.5 → pari a 1 = BASSO</p></li>
+<li><p>RISCHIO 4: 2 – 2 = 0 → pari a 0 = MINIMO</p></li>
+<li><p>RISCHIO 5: 2 – 0.5 = 1.5 → pari a 2 = MEDIO</p></li>
+<li><p>RISCHIO 6: 2 – 1 = 1 → pari a 1 = BASSO</p></li>
+</ul>
+<p>Colonna <strong>e</strong> : A seguito dell’effettuazione del
+monitoraggio, l’esperto ha trovato la seguente situazione:</p>
+<ul>
+<li><p>RISCHIO 1: nessuna misura applicata → 2 – 0 = 2 = MEDIO</p></li>
+<li><p>RISCHIO 2: una misura specifica applicata → 2 – 1 = 1 =
+BASSO</p></li>
+<li><p>RISCHIO 3: una misura specifica applicata → 2 – 1 = 1 =
+BASSO</p></li>
+<li><p>RISCHIO 4: 3 misure generiche applicate → 2 – 1.5 = 0.5 → pari a
+1 = BASSO</p></li>
+<li><p>RISCHIO 5: nessuna misura applicata → 2 – 0 = 2 = MEDIO</p></li>
+<li><p>RISCHIO 6: una misura generica applicata → 2 – 0.5 = 1.5 → pari a
+2 = MEDIO</p></li>
+</ul>
+<p>Si può concludere che, nella maggior parte dei casi, la situazione
+monitorata è risultata peggiore di quella prevista. Solo rispetto al
+RISCHIO 2, siccome la struttura è riuscita ad introdurre una misura
+specifica piuttosto che quella generica raccomandata, la situazione è
+risultata migliore dopo il monitoraggio (anche se sarà da valutare se
+l’arbitrio della struttura nel cambiare la misura è stato giustificato).
+Nel caso del rischio 3, la situazione è risultata essere uguale a quella
+prevista negli effetti però peggiore nella modalità perché
+l’applicazione di una misura specifica, avendo tolto 1, è stata
+sufficiente per ridurre il PxI da MEDIO a BASSO, come era stato
+richiesto e stimato prima del monitoraggio; ciò nonostante, era previsto
+che venissero applicate 2 misure: una generica + una specifica, per cui
+la struttura, pur avendo ottenuto una riduzione effettiva del PxI sul
+rischio, è risultata comunque parzialmente inadempiente rispetto alle
+aspettative.</p>
+<p>Insomma, esiste anche una valutazione qualitativa da considerare,
+oltre a quella della dimensione puramente quantitativa dovuta alle
+misure applicate.</p>
+<p><strong>NOTA BENE</strong></p>
+<p>Una delle ipotesi che erano state considerate, nel valutare come
+dovesse essere calcolato l’apporto di mitigazione delle misure, era di
+applicare un algoritmo che seguisse una scala logaritmica</p>
+<p><img src="assets/media/media/image27.png" style="width:3.23819in;height:2.60694in"/></p>
+<p>dove funzione logaritmica <em>f(x) = log<sub>a</sub>(x)</em> è una
+funzione definita in <strong>ℝ</strong> e con a&gt;0, a≠1 (qui
+a&gt;1).</p>
+<p>Ciò avrebbe significato che l’apporto mitigante di ogni misura
+sarebbe stato via via minore quanto più venivano aggiunte misure. Per
+esempio, la prima misura specifica vale -1, la seconda vale -0.95, la
+terza vale -0.92 e così via; analogamente la prima misura generica vale
+-0.5, la seconda vale -0.48, la terza -0.45 etc. In questo modo, dopo
+una certa soglia, aggiungere ulteriori misure non avrebbe avuto senso
+perché quelle aggiunte non avrebbero sortito un effetto significativo.
+Il criterio generale sarebbe stato valido anche per serie alternate di
+misure generiche e specifiche.</p>
+<p>Tuttavia, la decisione di smussare l’effetto delle misure man mano
+che vengono applicate dopo altre misure è risultata troppo arbitraria,
+oltre che macchinosa; inoltre, non è detto che misure applicate dopo
+altre misure debbano avere un effetto ridotto, perché potrebbe anche
+essere vero il contrario: magari applicare una misura dopo che un’altra
+ha già “lavorato” su alcuni aspetti è più efficace, non meno.</p>
+<p>Per questi motivi, l’effetto mitigante delle misure è stato alla fine
+considerato come lineare, non logaritmico.</p>
+<p>Colonna <strong>f</strong> : Nonostante le riduzioni dei PxI dei
+rischi ottenute, i valori ottenuti non sono sufficienti, dopo il
+monitoraggio, per sancire che ci sia stata una riduzione del PxI
+complessivo del processo, da MEDIO a BASSO.</p>
+<p>Quest’ultima conclusione dipende dall’applicazione di uno specifico
+algoritmo di ricalcolo.</p>
+</body>
+</html>

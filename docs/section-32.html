@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>section-32</title>
+<style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body><p><a href="index.html">Home</a></p>
+<h4 id="registro-delle-misure">1. REGISTRO DELLE MISURE</h4>
+<p>Il registro delle misure è composto da una pagina di elenco delle
+misure già inserite; se non è stata ancora inserita alcuna misura, la
+pagina è vuota.</p>
+<p>Nella pagina c’è un bottone che permette di accedere alla
+funzionalità di inserimento di una nuova misura.</p>
+<p>Il clic su tale bottone aprirà una nuova pagina, contenente la form
+di inserimento di una misura.</p>
+<p>In questa form sono presenti campi obbligatori e un campo
+facoltativo. Nel mockup riportato in figura 21, i dati obbligatori sono
+indicati dal grassetto e dall’asterisco; inoltre, nelle scelte da
+casella a discesa, se una dropdown list è obbligatoria, specifica già
+Option 1, mentre se è facoltativa di default specifica “– Nessuna
+–”.</p>
+<p>Per inserire una nuova misura bisogna specificare anzitutto un nome,
+un carattere ed almeno un tipo; le tipologie della misura possono essere
+più d’una per una sola misura (cioè una singola misura può riguardare
+più aspetti e quindi più tipologie).</p>
+<p>Quantunque la struttura capofila sia obbligatoria, è possibile per
+l’utente specificare anche soltanto una struttura di livello 1
+(Amministrazione | Dipartimenti | Centri) senza specificare
+sotto-strutture (direzione, area, uo…); in tal caso, la misura si
+intende relativa non solo alla struttura specificata, ma anche a tutte
+le strutture figlie della struttura specificata.</p>
+<p>Siccome però la granularità dell’associazione tra la misura e la
+struttura è molto fine, deve essere possibile collegare una misura anche
+a sottostrutture di strutture diverse, e il numero di queste
+associazioni non è vincolato in partenza. Per questo motivo, è presente
+il pulsante “+ Struttura” che permette di specificare una ulteriore
+struttura associata alla misura.</p>
+<p>Il funzionamento della struttura gregaria è identico a quello della
+struttura capofila, con la differenza che non è obbligatorio specificare
+questo campo.</p>
+<p>Al salvataggio della funzione, verrà ricaricato l’elenco delle
+misure, in cui sarà visibile la nuova misura appena aggiunta.</p>
+<p>La domanda “[La misura] comporta spese?” è relativa alla
+sostenibilità economica, e prevede una scelta obbligatoria tra 3 valori:
+{ SI | NO | ND } dove ND sta per “Non Determinabile” (ovvero, non è
+possibile stabilirlo per chi sta inserendo la misura al momento
+dell’inserimento della stessa).</p>
+<p><img src="assets/media/media/image22.png" style="width:5.48958in;height:8.24722in"/></p>
+<p>Cliccando sul nome di una misura in elenco, nel registro delle
+misure, sarà anche possibile visualizzare una pagina dei dettagli di una
+misura.</p>
+<p><img src="assets/media/media/image23.png" style="width:6.925in;height:6.56458in"/></p>
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>section-39</title>
+<style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body><p><a href="index.html">Home</a></p>
+<h4 id="lalgoritmo-di-ricalcolo">L’ALGORITMO DI RICALCOLO</h4>
+<p>Il valore complessivo del PxI del processo a seguito
+dell’applicazione e del monitoraggio delle misure può essere determinato
+calcolando <em>la media</em> dei valori finali, certificati dal
+monitoraggio stesso.</p>
+<p>Certo, torna qui il problema della scala di misura. Essendo i valori
+originari su scala ordinale e non su scala a intervalli, la media non
+potrebbe essere a rigore calcolata, ma dovrebbe essere utilizzata, al
+più, la mediana. Tuttavia, persistendo nella forzatura, si può provare
+ad ottenere un algoritmo basato sulla media aritmetica dei valori
+convertiti.</p>
+<p>Nel caso preso in esame, la situazione <strong>stimata</strong> era
+la seguente:</p>
+<table>
+<colgroup>
+<col style="width: 12%"/>
+<col style="width: 12%"/>
+<col style="width: 13%"/>
+<col style="width: 14%"/>
+<col style="width: 15%"/>
+<col style="width: 18%"/>
+<col style="width: 13%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>
+<strong>PxI del Processo</strong>
+</th>
+<th>
+<p>
+<strong>Valori ricavati dal</strong>
+</p>
+<p>
+<strong>PxI del Processo (c)</strong>
+</p>
+</th>
+<th>
+<p>
+Misure richieste
+</p>
+<p>
+<strong>(d)</strong>
+</p>
+<p>
+<strong><sub>STIMA</sub></strong>
+</p>
+</th>
+<th>
+<p>
+<strong>Quantifica-zione (d1)</strong>
+</p>
+<p>
+<strong><sub>STIMA</sub></strong>
+</p>
+</th>
+<th>
+<p>
+<strong>Valori calmierati (d2)</strong> (non arrotondati)
+</p>
+<p>
+<strong><sub>STIMA</sub></strong>
+</p>
+</th>
+<th>
+<p>
+<strong>Valori calmierati (d3)</strong> (arrotondati per eccesso)
+</p>
+<p>
+<strong><sub>STIMA</sub></strong>
+</p>
+</th>
+<th>
+<strong>PxI ricalcolato (d4)</strong> a seguito dell’ applicazione delle
+misure <strong><sub>STIMA</sub></strong>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td rowspan="6">
+MEDIO
+</td>
+<td>
+MEDIO (2)
+</td>
+<td>
+{1S}
+</td>
+<td>
+-1
+</td>
+<td>
+1
+</td>
+<td>
+BASSO
+</td>
+<td rowspan="6">
+BASSO
+</td>
+</tr>
+<tr class="even">
+<td>
+MEDIO (2)
+</td>
+<td>
+{1G}
+</td>
+<td>
+-0.5
+</td>
+<td>
+1.5
+</td>
+<td>
+MEDIO
+</td>
+</tr>
+<tr class="odd">
+<td>
+MEDIO (2)
+</td>
+<td>
+{1G + 1S}
+</td>
+<td>
+-1.5
+</td>
+<td>
+0.5
+</td>
+<td>
+BASSO
+</td>
+</tr>
+<tr class="even">
+<td>
+MEDIO (2)
+</td>
+<td>
+{4G}
+</td>
+<td>
+-2
+</td>
+<td>
+0
+</td>
+<td>
+MINIMO
+</td>
+</tr>
+<tr class="odd">
+<td>
+MEDIO (2)
+</td>
+<td>
+{1G}
+</td>
+<td>
+-0.5
+</td>
+<td>
+1.5
+</td>
+<td>
+MEDIO
+</td>
+</tr>
+<tr class="even">
+<td>
+MEDIO (2)
+</td>
+<td>
+{1S}
+</td>
+<td>
+-1
+</td>
+<td>
+1
+</td>
+<td>
+BASSO
+</td>
+</tr>
+</tbody>
+</table>
+<p>Se per effettuare la media ci basassimo sui valori già arrotondati
+per eccesso (colonna d3) perderemmo l’apporto delle misure che sono
+state applicate ma che non sono riuscite ad ottenere una variazione di
+almeno 1 (nell’analisi di dettaglio sono riportate varie SOLUZIONI prese
+in esame ma poi scartate, a questo proposito).</p>
+<p>Siccome, però, vogliamo considerare solo l’effetto delle misure che
+effettivamente hanno prodotto una riduzione del livello di rischio, nel
+ricalcolo di un PxI generale del processo, effettuiamo tale ricalcolo
+sui valori calmierati <strong>arrotondati</strong> (colonna d3).</p>
+<p>Pertanto, si ha:</p>
+<p>Il valore ottenuto x è &lt; 2 e &gt; 1 (cioè è compreso tra uno e
+due: 1 &lt; x &lt; 2) ma, seguendo le normali regole di arrotondamento
+<em>(arrotondamento per eccesso se la cifra decimale è superiore a 5,
+per difetto se è inferiore a 5, per eccesso se la cifra decimale è 5 e
+la cifra che la precede è dispari etc.),</em> va arrotondato, per
+difetto, al primo valore intero successivo, in questo caso 1, quindi il
+PxI ricalcolato è pari a BASSO, in questo esempio.</p>
+<p>Tutta questa situazione viene riassunta dalla tabella presentata di
+seguito, che corrisponde alla tabella precedente a cui sono state
+aggiunte altre 4 colonne, che presentano in dettaglio la situazione che
+si è riscontrata a seguito del monitoraggio. Il significato delle
+colonne aggiunte è lo stesso delle colonne corrispondenti nelle stime,
+con la differenza che i dati sono differenti, in questo caso specifico
+(ma potrebbe anche verificarsi il caso in cui il monitoraggio riscontra
+che l’applicazione delle misure abbia effettivamente ricalcato quanto
+stimato in precedenza).</p>
+<table>
+<colgroup>
+<col style="width: 7%"/>
+<col style="width: 7%"/>
+<col style="width: 8%"/>
+<col style="width: 9%"/>
+<col style="width: 9%"/>
+<col style="width: 8%"/>
+<col style="width: 11%"/>
+<col style="width: 9%"/>
+<col style="width: 8%"/>
+<col style="width: 8%"/>
+<col style="width: 8%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>
+<strong>PxI del Processo</strong>
+</th>
+<th>
+<p>
+<strong>Valori ricavati dal</strong>
+</p>
+<p>
+<strong>PxI del Processo (c)</strong>
+</p>
+</th>
+<th>
+<p>
+Misure richieste
+</p>
+<p>
+<strong>(d)</strong>
+</p>
+<p>
+<strong><sub>STIMA</sub></strong>
+</p>
+</th>
+<th>
+<p>
+<strong>Quantificazione misure (d1)</strong>
+</p>
+<p>
+<strong><sub>STIMA</sub></strong>
+</p>
+</th>
+<th>
+<p>
+<strong>Valori calmierati (d2)</strong> (non arrotondati)
+</p>
+<p>
+<strong><sub>STIMA</sub></strong>
+</p>
+</th>
+<th>
+<p>
+<strong>Valori calmierati (d3)</strong> (arrotondati per eccesso)
+</p>
+<p>
+<strong><sub>STIMA</sub></strong>
+</p>
+</th>
+<th>
+<strong>PxI ricalcolato (d4)</strong> a seguito dell’ applicazione delle
+misure <strong><sub>STIMA</sub></strong>
+</th>
+<th>
+<strong>Misure effettivamente applicate</strong>
+<sub>MONITO-RAGGIO</sub>
+</th>
+<th>
+<p>
+<strong>Quantificazione misure (d5)</strong>
+</p>
+<p>
+<strong><sub>MONITORAGGIO</sub></strong>
+</p>
+</th>
+<th>
+<p>
+<strong>Valori calmierati (d6)</strong> (non arrotondati)
+</p>
+<p>
+<strong><sub>MONITORAGGIO</sub></strong>
+</p>
+</th>
+<th>
+<strong>PxI ricalcolato</strong> <sub>MONITORAGGIO</sub>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td rowspan="6">
+MEDIO
+</td>
+<td>
+MEDIO (2)
+</td>
+<td>
+{1S}
+</td>
+<td>
+-1
+</td>
+<td>
+1
+</td>
+<td>
+BASSO
+</td>
+<td rowspan="6">
+BASSO
+</td>
+<td>
+(-)
+</td>
+<td>
+0
+</td>
+<td>
+2
+</td>
+<td rowspan="6">
+MEDIO
+</td>
+</tr>
+<tr class="even">
+<td>
+MEDIO (2)
+</td>
+<td>
+{1G}
+</td>
+<td>
+-0.5
+</td>
+<td>
+1.5
+</td>
+<td>
+MEDIO
+</td>
+<td>
+(1S)
+</td>
+<td>
+-1
+</td>
+<td>
+1
+</td>
+</tr>
+<tr class="odd">
+<td>
+MEDIO (2)
+</td>
+<td>
+{1G + 1S}
+</td>
+<td>
+-1.5
+</td>
+<td>
+0.5
+</td>
+<td>
+BASSO
+</td>
+<td>
+(1S)
+</td>
+<td>
+-1
+</td>
+<td>
+1
+</td>
+</tr>
+<tr class="even">
+<td>
+MEDIO (2)
+</td>
+<td>
+{4G}
+</td>
+<td>
+-2
+</td>
+<td>
+0
+</td>
+<td>
+MINIMO
+</td>
+<td>
+(3G)
+</td>
+<td>
+-1.5
+</td>
+<td>
+0.5
+</td>
+</tr>
+<tr class="odd">
+<td>
+MEDIO (2)
+</td>
+<td>
+{1G}
+</td>
+<td>
+-0.5
+</td>
+<td>
+1.5
+</td>
+<td>
+MEDIO
+</td>
+<td>
+(-)
+</td>
+<td>
+0
+</td>
+<td>
+2
+</td>
+</tr>
+<tr class="even">
+<td>
+MEDIO (2)
+</td>
+<td>
+{1S}
+</td>
+<td>
+-1
+</td>
+<td>
+1
+</td>
+<td>
+BASSO
+</td>
+<td>
+(1G)
+</td>
+<td>
+-0.5
+</td>
+<td>
+1.5
+</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
