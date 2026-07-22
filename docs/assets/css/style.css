@@ -66,3 +66,8 @@ ul.nav li.current {
   margin-left: auto;
   margin-right: auto;
 }
+
+ .copyleft {
+   display:inline-block;
+   transform: rotate(180deg);
+ }
