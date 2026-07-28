@@ -1539,6 +1539,28 @@ public interface Query extends Serializable {
             "       AND IND.id_rilevazione = ?";        // pleonastica
     
     /**
+     * <p>Estrae i valori di un indicatore associato a una fase di attuazione
+     * di dato id.</p>
+     */
+    public static final String GET_INDICATOR_BY_ACTIVITY_AND_YEAR = 
+            "SELECT DISTINCT" +
+            "       IND.id                              AS \"id\"" +
+            "   ,   IND.nome                            AS \"nome\"" +
+            "   ,   IND.descrizione                     AS \"descrizione\"" +
+            "   ,   IND.baseline                        AS \"baseline\"" +
+            "   ,   IND.databaseline                    AS \"dataBaseline\"" +
+            "   ,   IND.target                          AS \"target\"" +
+            "   ,   IND.datatarget                      AS \"dataTarget\"" +
+            "   ,   IND.master                          AS \"master\"" +
+            "   ,   IND.data_ultima_modifica            AS \"dataUltimaModifica\"" +
+            "   ,   IND.ora_ultima_modifica             AS \"oraUltimaModifica\"" +
+            "   ,   IND.id_usr_ultima_modifica          AS \"autoreUltimaModifica\"" +
+            "   FROM indicatoremonitoraggio IND" +
+            "   WHERE IND.id_fase = ?" +
+            "       AND IND.datatarget >= ? AND IND.datatarget <= ?" +
+            "       AND IND.id_rilevazione = ?";        // pleonastica
+    
+    /**
      * <p><ul><li>Seleziona l'elenco di tutte le misurazioni collegate a un 
      * indicatore di dato id, nel contesto di una rilevazione di dato id<br>
      * OPPURE</li>
