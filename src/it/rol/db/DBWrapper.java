@@ -4404,6 +4404,170 @@ public class DBWrapper extends QueryImpl {
      
     
     /**
+     * <p>Dato un codice e una finestra temporale, restituisce 
+     * una specifica misura, in funzione dei parametri ricevuti.<br />
+     * In particolare: il target di almeno un indicatore deve trovarsi 
+     * in una data maggiore o uguale ad after e minore o uguale a before.</p>
+     * 
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param code      il codice di una misura cercata oppure una stringa vuota in linguaggio SQL
+
+     * @param survey    oggetto contenente gli estremi della rilevazione
+     * @return <code>ArrayList&lt;MeasureBean&gt;</code> - l'elenco di misure cercate
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public MeasureBean getMeasure(PersonBean user,
+                                             String code,
+                                             java.util.Date after,
+                                             java.util.Date before,
+                                             CodeBean survey)
+                                      throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs, rs1, rs2, rs3 = null;
+            int nextParam = NOTHING;
+            MeasureBean measure = null; 
+            ArrayList<CodeBean> types = null; 
+            // TODO: Controllare se user è superuser
+            try {
+                pst = con.prepareStatement(GET_MEASURES);
+                pst.clearParameters();
+                pst.setInt(++nextParam, survey.getId());
+                pst.setString(++nextParam, code);
+                pst.setInt(++nextParam, NOTHING);
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    measure = new MeasureBean();
+                    types = new ArrayList<>();
+                    BeanUtil.populate(measure, rs);
+                    /* === Carattere === */
+                    // Il carattere si puo' ricavare dal codice:
+                    String measureCode = measure.getCodice();
+                    String charCode = measureCode.substring(measureCode.indexOf(DOT) + 1, measureCode.lastIndexOf(DOT));
+                    CodeBean character = ConfigManager.getMeasureCharacters().get(charCode);
+                    measure.setCarattere(character);
+                    /* === Tipologie === */
+                    // Le tipologie invece si devono ricavare tramite una query
+                    nextParam = NOTHING;
+                    pst = null;
+                    pst = con.prepareStatement(GET_MEASURE_TYPE);
+                    pst.clearParameters();
+                    pst.setString(++nextParam, measure.getCodice());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs1 = pst.executeQuery();
+                    while (rs1.next()) {
+                        // Crea una tipologia vuota
+                        CodeBean type = new CodeBean();
+                        // Lo valorizza col risultato della query
+                        BeanUtil.populate(type, rs1);
+                        // La aggiunge alla lista delle tipologie della misura corrente
+                        types.add(type);
+                    }
+                    measure.setTipologie(types);
+                    /* === Strutture === */
+                    nextParam = NOTHING;
+                    pst = null;
+                    ArrayList<DepartmentBean> capofila1 = new ArrayList<>();
+                    ArrayList<DepartmentBean> capofila2 = new ArrayList<>();
+                    ArrayList<DepartmentBean> capofila3 = new ArrayList<>();
+                    ArrayList<DepartmentBean> gregarie = new ArrayList<>();
+                    pst = con.prepareStatement(GET_STRUCTS_BY_MEASURE);
+                    pst.clearParameters();
+                    pst.setString(++nextParam, measure.getCodice());
+                    pst.setString(++nextParam, String.valueOf(PER_CENT));
+                    pst.setInt(++nextParam, survey.getId());
+                    rs2 = pst.executeQuery();
+                    while (rs2.next()) {
+                        // Crea una struttura generica
+                        ItemBean st = new ItemBean();
+                        // La valorizza col risultato della query
+                        BeanUtil.populate(st, rs2);
+                        // Trasforma la capofila/gregaria da ItemBean a DepartmentBean
+                        DepartmentBean struttura = measure.getStruttura(st);
+                        // Smista le strutture trovate
+                        if (st.getExtraInfo().equals(CP1)) {
+                            // Trasforma la capofila da DepartmentBean a ArrayList
+                            capofila1 = measure.getCapofila(struttura);
+                        } else if (st.getExtraInfo().equals(CP2)) {
+                            capofila2 = measure.getCapofila(struttura);
+                        } else if (st.getExtraInfo().equals(CP3)) {
+                            capofila3 = measure.getCapofila(struttura);
+                        } else if (st.getExtraInfo().equals(GR)) {
+                            gregarie.add(struttura);
+                        } else {
+                            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del ruolo di una struttura.\n";
+                            LOG.severe(msg);
+                            throw new WebStorageException(msg);
+                        }
+                    }
+                    measure.setCapofila(capofila1);
+                    measure.setCapofila2(capofila2);
+                    measure.setCapofila3(capofila3);
+                    measure.setGregarie(gregarie);
+                    /* === Fasi di attuazione della misura === */
+                    nextParam = NOTHING;
+                    pst = null;
+                    ArrayList<ActivityBean> fasi = new ArrayList<>();
+                    pst = con.prepareStatement(GET_MEASURE_ACTIVITIES);
+                    pst.clearParameters();
+                    pst.setString(++nextParam, measure.getCodice());
+                    pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                    pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                    pst.setInt(++nextParam, survey.getId());
+                    rs3 = pst.executeQuery();
+                    while (rs3.next()) {
+                        // Crea una fase vuota
+                        ActivityBean fs = new ActivityBean();
+                        // La valorizza col risultato della query
+                        BeanUtil.populate(fs, rs3);
+                        // Cerca l'indicatore collegato eventualmente alla fase
+                        IndicatorBean ind = getIndicatorByActivity(user, fs, after, before, survey);
+                        // Aggiunge l'indicatore alla fase se significativo
+                        if (ind != null) {
+                            fs.setIndicatore(ind);
+                        }
+                        // Aggiunge la fase alla lista delle fasi di attuazione
+                        fasi.add(fs);
+                    }
+                    measure.setFasi(fasi);
+                    measure.setRilevazione(survey);
+                }
+                // Just to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return measure;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Oggetto non valorizzato; problema nel metodo di recupero misure.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in una conversione in numero.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + nfe.getMessage(), nfe);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }        
+    }
+    
+    
+    /**
      * <p>Restituisce un elenco di rischi, sotto forma di oggetti generici,
      * cui una data misura di prevenzione del rischio corruttivo &egrave;
      * applicata.</p>
@@ -4838,7 +5002,7 @@ public class DBWrapper extends QueryImpl {
                             // La valorizza col risultato della query
                             BeanUtil.populate(fs, rs2);
                             // Cerca l'indicatore collegato eventualmente alla fase
-                            IndicatorBean ind = getIndicatorByActivity(user, fs, survey);
+                            IndicatorBean ind = getIndicatorByActivity(user, fs, dateAfter, dateBefore, survey);
                             // Aggiunge l'indicatore alla fase se significativo
                             if (ind != null) {
                                 fs.setIndicatore(ind);
@@ -4992,6 +5156,117 @@ public class DBWrapper extends QueryImpl {
                     pst = con.prepareStatement(GET_INDICATOR_BY_ACTIVITY);
                     pst.clearParameters();
                     pst.setInt(++nextParam, fase.getId());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs1 = pst.executeQuery();
+                    if (rs1.next()) {
+                        // Crea l'indicatore vuoto
+                        indicator = new IndicatorBean();
+                        // Valorizza il bean
+                        BeanUtil.populate(indicator, rs1);
+                        // Vi aggiunge il tipo
+                        indicator.setTipo(tipo);
+                        // Vi aggiunge lo stato
+                        indicator.setStato(stato);
+                        // Vi aggiunge la fase
+                        indicator.setFase(fase);
+                        // Cerca le misurazioni
+                        Vector<MeasurementBean> measurements = new Vector<>();
+                        nextParam = NOTHING;
+                        pst = null;
+                        pst = con.prepareStatement(GET_MEASUREMENTS_BY_INDICATOR);
+                        pst.clearParameters();
+                        pst.setInt(++nextParam, indicator.getId());
+                        pst.setInt(++nextParam, survey.getId());
+                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                        rs2 = pst.executeQuery();
+                        while (rs2.next()) {
+                            MeasurementBean measurement = new MeasurementBean();
+                            BeanUtil.populate(measurement, rs2);
+                            Vector<FileDocBean> attachments = getFileDoc("misurazione", "all", measurement.getId(), measurement.getId());
+                            measurement.setAllegati(attachments);
+                            measurement.setIndicatore(indicator);
+                            measurements.add(measurement);
+                        }
+                        indicator.setMisurazioni(measurements);
+                    }                    
+                }
+                // Just tries to engage the Garbage Collector
+                pst = null;
+                // Get out
+                return indicator;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di bean.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un indicatore di monitoraggio collegato ad una specifica
+     * fase di attuazione passata come parametro ed avente la data target
+     * non precedente a since e non successiva a to.</p>
+     * 
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param fase      la fase di attuazione cui l'indicatore cercato puo' essere collegato
+     * @param survey    oggetto contenente gli estremi della rilevazione
+     * @return <code>IndicatorBea</code> - l'indicatore di monitoraggio collegato alla fase
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public IndicatorBean getIndicatorByActivity(PersonBean user,
+                                                ActivityBean fase,
+                                                java.util.Date since,
+                                                java.util.Date to,
+                                                CodeBean survey)
+                                         throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs, rs1, rs2 = null;
+            IndicatorBean indicator = null;
+            // TODO: Controllare se user è superuser
+            try {
+                int nextParam = NOTHING;
+                pst = con.prepareStatement(GET_INDICATOR_BY_ACTIVITY_RAW);
+                pst.clearParameters();
+                pst.setInt(++nextParam, fase.getId());
+                rs = pst.executeQuery();
+                if (rs.next()) {
+                    // Prepara il bean contenente i riferimenti
+                    ItemBean data = new ItemBean();
+                    // Valorizza il bean
+                    BeanUtil.populate(data, rs);
+                    // Recupera il tipo
+                    CodeBean tipo = ConfigManager.getIndicatorTypesAsMap().get(new Integer(data.getCod3()));
+                    // Recupera lo stato
+                    CodeBean stato = new CodeBean(data.getCod4(), STATI_STRUTTURA[data.getCod4()], VOID_STRING, NOTHING);
+                    // Recupera l'indicatore
+                    nextParam = NOTHING;
+                    pst = null;
+                    pst = con.prepareStatement(GET_INDICATOR_BY_ACTIVITY_AND_YEAR);
+                    pst.clearParameters();
+                    pst.setInt(++nextParam, fase.getId());
+                    pst.setDate(++nextParam, Utils.convert(since));
+                    pst.setDate(++nextParam, Utils.convert(to));
                     pst.setInt(++nextParam, survey.getId());
                     rs1 = pst.executeQuery();
                     if (rs1.next()) {
