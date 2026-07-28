@@ -28,12 +28,62 @@
     .table td {
         padding-bottom: 0;
     }
+    
+    .loader,
+    .loader:after {
+        border-radius: 50%;
+        width: 10em;
+        height: 10em;
+    }
+    .loader {            
+        margin: 60px auto;
+        font-size: 10px;
+        position: relative;
+        text-indent: -9999em;
+        border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+        border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+        border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+        border-left: 1.1em solid #ffffff;
+        -webkit-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-animation: load8 1.1s infinite linear;
+        animation: load8 1.1s infinite linear;
+    }
+    @-webkit-keyframes load8 {
+        0% {
+            -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+        }
+        100% {
+            -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+        }
+    }
+    @keyframes load8 {
+        0% {
+            -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+        }
+        100% {
+            -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+        }
+    }
+    #loadingDiv {
+        position:absolute;;
+        top:0;
+        left:0;
+        width:100%;
+        height:150%;
+        background-color: rgba(0, 0, 0, .25);
+    }
     </style>
   <c:catch var="exception">
     <h3 class="mt-1 m-0 font-weight-bold float-left">
       Monitoraggio <c:out value="${selectedYear}" />
     </h3>
-    
+    <!-- TODO: make dynamic -->
     <span class="form-custom float-right">
       <select id="myPlans" class="wide" onchange="viewPlan()">
         <option value="2026" ${sel2026}>2026</option>
@@ -44,8 +94,10 @@
       </select>
     </span>
     <hr class="riga"/>
+    <c:set var="flag" value="false" scope="page" />
     <c:forEach var="d" items="${structs}">
     <c:if test="${d.misure.size() gt zero}">
+    <c:set var="flag" value="true" scope="page" />
     <div class="module">
       <section id="${d.id}">
         <h6 class="mt-md-1 m-1 font-weight-bold">
@@ -95,7 +147,7 @@
               </a>
             </td>
             <td scope="row">
-              <a href="${initParam.appName}/?q=ic&p=ind&mliv=${ms.codice}&r=${param['r']}" class="btn bgAct14 btn-spacer">
+              <a href="${initParam.appName}/?q=ic&p=ind&mliv=${ms.codice}&r=${param['r']}&y=${selectedYear}" class="btn bgAct14 btn-spacer">
                 <i class="fas fa-ruler-combined"></i> Indicatori &nbsp;
                 <span class="badge badge-pill badge-light ${badgeStyle}" title="${ms.totIndicatori} Indicatori su ${ms.fasi.size()} Fasi">
                   <c:out value="${ms.totIndicatori}" />
@@ -126,12 +178,37 @@
     </div>
     </c:if>
     </c:forEach>
+    <c:if test="${not flag}">
+    <div class="alert alert-danger">
+      <h4>Attenzione</h4>
+      <p>
+        Non sono stati trovate misure monitorate per l'anno:
+        <strong><c:out value="${selectedYear}" /></strong>
+      </p>
+      <br>
+    </div>
+    </c:if>
     <script>
     function viewPlan() {
       var y = document.getElementById("myPlans");
-      //y.value = x.value.toUpperCase();
+      showLoader();
       window.self.location.href = '${initParam.appName}/?q=ic&p=mes&r=${param['r']}&y=' + y.value;
     }
+      
+    function showLoader(){
+        $('body').append('<div style="" id="loadingDiv"><div class="loader">Loading...</div></div>');
+    }
+
+    $(window).on('load', function(){
+        setTimeout(removeLoader, 200); //wait for page load PLUS two seconds.
+    });
+
+    function removeLoader(){
+        $( "#loadingDiv" ).fadeOut(500, function() {
+          // fadeOut complete. Remove the loading div
+          $( "#loadingDiv" ).remove(); //makes page more lightweight 
+        });  
+      }
     </script>
   </c:catch>
   <c:if test= "${not empty exception}">
