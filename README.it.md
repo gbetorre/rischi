@@ -49,7 +49,7 @@
 
 
 <!-- TABLE OF CONTENTS -->
-<!-- Insert TOC here -->
+<!-- TODO: Insert TOC here -->
 
 # Software di Mappatura dei Rischi corruttivi [ROL-RMS]
 
@@ -77,7 +77,7 @@ Tutte queste quantit&agrave; (livello di rischio iniziale, stimato ed effettivo)
 
 In altri termini, dato un livello di rischio iniziale, applicando determinate misure si otterra <i>sempre</i> una determinata riduzione del livello di rischio e sar&agrave; anche ricostruibile il processo tramite cui &egrave; stata determinata tale riduzione. In tal senso, l'explainability di tutto questo software &egrave; completa (e anche accessibile tramite la lettura degli stessi sorgenti pubblicati in questo repository).
 
-Gli algoritmi di mitigazione - come peraltro tutti gli algoritmi di calcolo del rischio, di calcolo del <code>PxI</code> (quest'ultimo verr&agrave; definito [nel prossimo capitolo](#overview)), etc. - sono stati disegnati in base al know-how di personale esperto del rischio corruttivo e sono stati formalizzati completamente in fase di analisi prima di passare alla fase di implementazione. 
+Gli algoritmi di mitigazione - come peraltro tutti gli algoritmi di calcolo del rischio, di calcolo del <code>PxI</code> (quest'ultimo verr&agrave; definito [nel prossimo capitolo](#overview)), etc. - sono stati disegnati in base al know-how di personale esperto del rischio corruttivo e sono stati formalizzati completamente [in fase di analisi](Documentazione/Analisi.pdf) prima di passare alla fase di implementazione. 
 
 [![Dashboard Graphics][dashboard-graph]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-graphics.png)
 <br>
@@ -98,7 +98,7 @@ Nell'allegato 1 al Piano Nazionale Anticorruzione del 2019, l'Autorit&agrave; Na
 * carenza di risultati positivi in sede di monitoraggio.
 
 In estrema sintesi, quindi, dopo il 2019 l'ottica di ANAC si &egrave; spostata da una valutazione puramente quantitativa ad una principalmente qualitativa.
-Nell'analisi del software ROL-RMS si &egrave; considerato, tuttavia, che un approccio di tipo misto permettesse di fruire dei pregi dei due mondi: quello qualitativo e quello quantitativo. 
+Nell'[analisi del software ROL-RMS](Documentazione/Analisi.pdf) si &egrave; considerato, tuttavia, che un approccio di tipo misto permettesse di fruire dei pregi dei due mondi: quello qualitativo e quello quantitativo. 
 Infatti:
 * gli elementi qualitativi (i giudizi sintetici) arricchiscono i dati numerici con una chiave di lettura interpretativa, che illumina meglio la scena e il contesto;
 * i valori quantitativi (indicatori di rischio, indici, monitoraggi...), dal canto loro, permettono di ottenere dati immediatamente comprensibili e comparabili, potenzialmente anche da un'amministrazione all'altra. 
@@ -283,7 +283,7 @@ vale a dire: <ul>
 <li> se il rischio di un processo &egrave; ridotto da una certa azione, allora quell'azione &egrave; una misura di mitigazione : rr &rarr; M</li></ul> 
 da cui <code>M &harr; rr</code>).<br><br>
 
-Senza entrare nei dettagli implementativi dell'entit&agrave; misura, i cui attributi e riferimenti vengono approfonditi nell'<a href="#readme-contact">analisi dei requisiti</a>, basti tener conto che la misura di mitigazione &egrave; un oggetto complesso, avente uno o pi&uacute; tipologie, parecchie relazioni con le strutture organizzative e una serie di propriet&agrave; specifiche (la sostenibilit&agrave; economica, il carattere, il numero di fasi di attuazione, etc.)</p>
+Senza entrare nei dettagli implementativi dell'entit&agrave; misura, i cui attributi e riferimenti vengono approfonditi nell'[analisi dei requisiti](Documentazione/Analisi.pdf), basti tener conto che la misura di mitigazione &egrave; un oggetto complesso, avente uno o pi&uacute; tipologie, parecchie relazioni con le strutture organizzative e una serie di propriet&agrave; specifiche (la sostenibilit&agrave; economica, il carattere, il numero di fasi di attuazione, etc.)</p>
 
 [![Form to insert new measure][add-measure]](https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/form-measure.png)
 <br>
@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (27 versioni)
+### 2026 (28 versioni)
 
+- [2.6.8] (28/07/2026) Prima bozza di implementazione della storicizzazione indicatori di monitoraggio
 - [2.6.7] (18/06/2026) Implementazione storicizzazione monitoraggio (aggiunta clausola di esclusione misure non ancora dettagliate nell'anno selezionato)
 - [2.6.6] (15/06/2026) Implementazione storicizzazione monitoraggio (prima parte)
 - [2.6.5] (08/06/2026) Implementazione aggiornamento data di scadenza misura
@@ -927,7 +928,8 @@ Consulta <a href="https://github.com/gbetorre/rischi/blob/main/LICENSE">`LICENSE
 <!-- CONTACT -->
 
 ## Contatti
-Per approfondire ed ottenere accesso al documento di analisi dei requisiti, <a href="mailto:gianroberto.torre@gmail.com">contattare l'autore</a>.
+Il documento di [analisi dei requisiti](Documentazione/Analisi.pdf) &egrave; stato reso disponibile in una versione semplificata.
+Per approfondire ed ottenere accesso alla documentazione di analisi completa, <a href="mailto:gianroberto.torre@gmail.com">contattare l'autore</a>.
 
 Software Engineer: Giovanroberto Torre - [@GianroTorres](https://twitter.com/GianroTorres) - gianroberto.torre@gmail.com
 

@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.6.8] (28/07/2026) [First implementation of different behaviour indicators by target date](https://github.com/gbetorre/rischi/commits/main/?since=2026-07-28&until=2026-07-28)
 - [2.6.7] (18/06/2026) [Implementation of creation dates on monitoring](https://github.com/gbetorre/rischi/commits/main/?since=2026-06-18&until=2026-06-18)
 - [2.6.6] (15/06/2026) [Implementation of expiration dates on monitoring](https://github.com/gbetorre/rischi/commits/main/?since=2026-06-15&until=2026-06-15)
 - [2.6.5] (08/06/2026) [Implementation update measure expiration date](https://github.com/gbetorre/rischi/commits/main/?since=2026-06-08&until=2026-06-08)
