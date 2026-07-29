@@ -406,11 +406,12 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 }
                                 break;
                             case PART_INDICATOR:
-                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 if (idInd > DEFAULT_ID) {
                                 /* -------------------------------------------- *
                                  *     DETTAGLI di un indicatore di dato id     *
                                  * -------------------------------------------- */
+                                    // Recupera l'indicatore (incapsulato nella misura) in modo astorico
+                                    measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                     // Personalizza le breadcrumbs
                                     bC = loadBreadCrumbs(breadCrumbs, part, survey);
                                     // Imposta la pagina
@@ -419,6 +420,8 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 /* -------------------------------------------- *
                                  *        ELENCO indicatori di una misura       *
                                  * -------------------------------------------- */
+                                    // Recupera gli indicatori (nella misura) storicizzando in un dato anno solare
+                                    measure = retrieveMeasure(user, codeMis, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
                                     // Personalizza le breadcrumbs
                                     bC = loadBreadCrumbs(breadCrumbs, part, survey);
                                     // Imposta la pagina
@@ -471,8 +474,10 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 break;
                             /* ------  FORM inserimento nuovo Indicatore  ----- */
                             case PART_INSERT_INDICATOR:
+                                // Recupera la misura di prevenzione/mitigazione
+                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                 // Recupera la fase cui si vuol aggiungere l'indicatore
-                                phase = db.getMeasureActivity(user, codeMis, idFas, survey);
+                                phase = db.getMeasureActivity(user, codeMis, idFas, year, survey);
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
                                 break;
@@ -480,7 +485,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             case PART_INSERT_MEASUREMENT:
                                 // Recupera l'indicatore cui si vuol aggiungere la misurazione
                                 measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
-                                // Breadcrumbs
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
                                 break;
@@ -746,9 +750,10 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
      * **************************************************************** */
     
     /**
-     * <p>Estrae i dettagli di una misura del registro (quindi priva 
-     * dei dettagli necessari al monitoraggio) dato il codice 
-     * e la rilevazione.</p>
+     * <p>Estrae i dettagli di una misura contenente al suo interno i
+     * dettagli necessari al monitoraggio, quindi fasi e indicatori) 
+     * dato il codice, la rilevazione e una finestra temporale entro la quale
+     * gli indicatori devono far ricadere il proprio target.</p>
      * 
      * @param user      utente loggato
      * @param code      codice della misura cercata
