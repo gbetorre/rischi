@@ -123,6 +123,8 @@ public class ActivityBean extends CodeBean {
     private CodeBean stato;
     /** Indicatore di monitoraggio collegato alla fase di attuazione della misura */
     private IndicatorBean indicatore;
+    /** Indicatore di monitoraggio precedente collegato alla fase di attuazione della misura */
+    private IndicatorBean indicatoreOld;
     
     
     /* ************************************************************* *
@@ -143,7 +145,7 @@ public class ActivityBean extends CodeBean {
     	soggetti = null;
     	idComplessita = idStato = -2;
     	stato = null;
-    	indicatore = null;
+    	indicatore = indicatoreOld = null;
     }
     
     
@@ -649,5 +651,31 @@ public class ActivityBean extends CodeBean {
             return true;
         return false;
     }
+    
+    
+    /* ********************************************************* *
+     *      Metodi getter e setter per l'indicatore precedente   *
+     * ********************************************************* */
 
+    /**
+     * <p>Restituisce l'eventuale indicatore di monitoraggio collegato 
+     * in precedenza alla fase di attuazione di una misura.</p>
+     * 
+     * @return <code>IndicatorBean</code> - l'indicatore precedente
+     */
+    public IndicatorBean getIndicatoreOld() {
+        return indicatoreOld;
+    }
+
+    /**
+     * <p>Imposta l'eventuale indicatore di monitoraggio collegato alla
+     * fase corrente nel contesto di una certa misura di mitigazione 
+     * monitorata.</p>
+     * 
+     * @param indicatoreOld - l'indicatore precedente da impostare
+     */
+    public void setIndicatoreOld(IndicatorBean indicatoreOld) {
+        this.indicatoreOld = indicatoreOld;
+    }
+    
 }
