@@ -23,7 +23,7 @@
       <thead class="thead-light">
         <tr>
           <th scope="col" width="20%">Fase</th>
-          <th scope="col" width="*">Nome Indicatore</th>
+          <th scope="col" width="*">Indicatore ${param['y']}</th>
           <th scope="col" width="6%">Baseline</th>
           <th scope="col" width="9%">Data Baseline</th>
           <th scope="col" width="6%">Target</th>
@@ -57,7 +57,7 @@
           </c:when>
           <c:otherwise>
             <div class="btn-group align-items-center">
-              <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" type="button" class="badge bg-success btn-small lightTable text-white  align-middle refresh" title="Aggiungi un indicatore alla misura &quot;${fn:substring(meas.nome, 0, 22)}...&quot; nel contesto della fase &quot;${fase.nome}&quot;">
+              <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" type="button" class="badge bg-success btn-small lightTable text-white  align-middle refresh" title="Aggiungi un indicatore alla misura &quot;${fn:substring(meas.nome, 0, 22)}...&quot; nel contesto della fase &quot;${fase.nome}&quot;">
                 <i class="fa-solid fa-square-plus"></i> INDICATORE
               </a>&nbsp;
             </div>
