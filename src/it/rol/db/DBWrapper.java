@@ -5060,10 +5060,10 @@ public class DBWrapper extends QueryImpl {
      * @return <code>ActivityBean</code> - la fase di attuazione cercata
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings({ "static-method" })
     public ActivityBean getMeasureActivity(PersonBean user,
                                            String code,
                                            int idF,
+                                           int year,
                                            CodeBean survey)
                                     throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
@@ -5071,6 +5071,9 @@ public class DBWrapper extends QueryImpl {
             ResultSet rs = null;
             int nextParam = NOTHING;
             ActivityBean fs = null;
+            int previousYear = year - ELEMENT_LEV_1;
+            Date from = Utils.convert(Utils.getFirstDayOfYear(previousYear));
+            Date to = Utils.convert(Utils.getLastDayOfYear(previousYear));
             try {
                 pst = con.prepareStatement(GET_MEASURE_ACTIVITIES);
                 pst.clearParameters();
@@ -5084,6 +5087,13 @@ public class DBWrapper extends QueryImpl {
                     fs = new ActivityBean();
                     // La valorizza col risultato della query
                     BeanUtil.populate(fs, rs);
+                    // Controlla se l'anno prima c'erano indicatori su questa fase
+                    IndicatorBean oldInd = getIndicatorByActivity(user, fs, from, to, survey);
+                    if (oldInd != null) {
+                        oldInd.setTargetRivisto(String.valueOf(previousYear));
+                        // Salva l'indicatore
+                        fs.setIndicatoreOld(oldInd);
+                    }
                 }
                 // Just tries to engage the Garbage Collector
                 pst = null;
