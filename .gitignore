@@ -40,8 +40,11 @@ rol_compile.bat
 /classes/it
 /bin/util
 
-# Python Stuff
+# Python stuff
 __pycache__
+
+# Jupyter Notebook stuff
+.ipynb_checkpoints
 
 # pandoc stuff
 /Documentazione/output/site-build/tmp/
@@ -55,3 +58,4 @@ __pycache__
 .classpath
 /bin/
 /target/
+
