@@ -25,10 +25,13 @@
   </c:when>
 </c:choose>
     <style>
-    .table td {
-        padding-bottom: 0;
+    /* Overwrite bootstrap 4 behaviour */
+    .card:hover {
+      box-shadow: none !important;
+      transform: none !important;
+      background-color: inherit !important;
     }
-    
+    /* Loader */
     .loader,
     .loader:after {
         border-radius: 50%;
@@ -94,90 +97,105 @@
       </select>
     </span>
     <hr class="riga"/>
+    <!-- Accordions -->
+    <div id="structsAccordion">
     <c:set var="flag" value="false" scope="page" />
-    <c:forEach var="d" items="${structs}">
-    <c:if test="${d.misure.size() gt zero}">
-    <c:set var="flag" value="true" scope="page" />
-    <div class="module">
-      <section id="${d.id}">
-        <h6 class="mt-md-1 m-1 font-weight-bold">
-          <c:out value="${d.prefisso} ${d.nome}" />
-        </h6>
-        <div class="avvisiTot text-right">
-          <c:out value="Tot misure: ${d.misure.size()}" />&nbsp;
-        </div>
-      </section>
-      <table class="table table-hover">
-        <thead class="thead-light">
-          <tr>
-            <th width="40%" scope="col">Misura</th>
-            <th width="40%" scope="col">Funzioni</th>
-            <th width="10%" scope="col">&nbsp; Ruolo</th>
-            <th width="10%" scope="col" class="text-center" title="La completezza del monitoraggio &egrave; piena se tutti gli indicatori definiti per la misura hanno ottenuto almeno una misurazione (indipendentemente dal fatto che siano indicatore master o meno) mentre &egrave; parziale negli altri casi.">
-              Completezza
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-        <c:forEach var="ms" items="${d.misure}" varStatus="loop">
-          <c:set var="bgActDigit" value="${fn:substring(ms.ruolo, fn:length(ms.ruolo)-1, fn:length(ms.ruolo))+3}" scope="page" />
-          <c:set var="bgAct" value="bgAct${bgActDigit}" scope="page" />
-          <c:choose>
-          <c:when test="${ms.totIndicatori gt zero}">
-            <c:set var="badgeStyle" value="border-basso bgAct8" scope="page" />
-          </c:when>
-          <c:otherwise>
-            <c:set var="badgeStyle" value="border-alto bg-warning" scope="page" />
-            <c:set var="completezza" value="La misura ha 0 Indicatori e quindi non puo' avere misurazioni" scope="page" />
-          </c:otherwise>
-          </c:choose>
-          <c:choose>
-          <c:when test="${ms.monitorata}">
-            <c:set var="completezza" value="La misura ha ${ms.totIndicatori} indicatori e ciascuno ha ricevuto almeno una misurazione" scope="page" />
-          </c:when>
-          <c:when test="${not ms.monitorata and ms.totIndicatori gt zero}">
-            <c:set var="completezza" value="La misura ha ${ms.totIndicatori} indicatori ma almeno uno di essi non e' stato misurato" scope="page" />
-          </c:when>
-          </c:choose>
-          <tr>
-            <td scope="row" class="align-middle" id="${ms.codice}">
-              <%-- <img src="${initParam.urlDirectoryImmagini}${ms.dettagli}.png" class="ico-small" alt="icona" title="${details} Dettagli Monitoraggio" /> &nbsp; --%>
-              <a href="${initParam.appName}/?q=ic&p=mes&mliv=${ms.codice}&r=${param['r']}" title="${ms.codice}">
-                <c:out value="${ms.nome}" escapeXml="false" />
-              </a>
-            </td>
-            <td scope="row">
-              <a href="${initParam.appName}/?q=ic&p=ind&mliv=${ms.codice}&r=${param['r']}&y=${selectedYear}" class="btn bgAct14 btn-spacer">
-                <i class="fas fa-ruler-combined"></i> Indicatori &nbsp;
-                <span class="badge badge-pill badge-light ${badgeStyle}" title="${ms.totIndicatori} Indicatori su ${ms.fasi.size()} Fasi">
-                  <c:out value="${ms.totIndicatori}" />
-                  &#47;
-                  <c:out value="${ms.fasi.size()}" />
-                </span>
-              </a>
-              <a href="${initParam.appName}/?q=ic&p=mon&mliv=${ms.codice}&r=${param['r']}" class="btn bgAct11 btn-spacer text-black">
-                <i class="fas fa-bars"></i> Misurazioni &nbsp;
-                <span class="badge badge-pill badge-light" title="Ci sono ${ms.totMisurazioni} misurazioni totali">
-                  <c:out value="${ms.totMisurazioni}" />
-                </span>
-              </a>              
-              <%-- <a href="" class="btn bgAct22 btn-spacer"><i class="fas fa-chart-line"></i> Report</a> --%>
-            </td>
-            <td class="align-middle">
-              <span class="align-middle badge-pill ${bgAct} btn-small lightTable" title="La struttura &quot;${d.nome}&quot; &egrave; ${fn:toUpperCase(ms.ruolo)} della misura &quot;${ms.nome}&quot;">
-                <c:out value="${ms.ruolo}" />
+    <c:forEach var="d" items="${structs}" varStatus="status">
+      <c:if test="${d.misure.size() gt zero}">
+      <c:set var="flag" value="true" scope="page" />
+      <!-- Card -->
+      <div class="card module">
+        <!-- OuterCard -->
+        <div class="card-header p-0" id="heading-${d.id}">
+          <h6 class="mb-0">
+            <a class="d-block text-decoration-none text-dark p-2" data-toggle="collapse" href="#collapse-${d.id}" role="button" aria-expanded="false" aria-controls="collapse-${d.id}">
+              <span class="mt-md-1 m-1 font-weight-bold">
+                <c:out value="${d.prefisso} ${d.nome}" />
               </span>
-            </td>
-            <td class="align-middle text-center">
-              <img src="${initParam.urlDirectoryImmagini}${ms.monitorata}.png" class="ico-small" alt="icona" title="${completezza}" /> &nbsp;
-            </td>
-          </tr>
-        </c:forEach>
-        </tbody>
-      </table>
-    </div>
-    </c:if>
+              <span class="float-right avvisiTot text-right">
+                <c:out value="Tot misure: ${d.misure.size()}" />&nbsp;
+              </span>
+            </a>
+          </h6>
+        </div>
+        <!-- InnerCard -->
+        <div id="collapse-${d.id}" class="collapse" aria-labelledby="heading-${d.id}" data-parent="#structsAccordion">
+          <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+              <thead class="thead-light">
+                <tr>
+                  <th width="40%" scope="col">Misura</th>
+                  <th width="40%" scope="col">Funzioni</th>
+                  <th width="10%" scope="col">&nbsp; Ruolo</th>
+                  <th width="10%" scope="col" class="text-center" title="La completezza del monitoraggio &egrave; piena se tutti gli indicatori definiti per la misura hanno ottenuto almeno una misurazione (indipendentemente dal fatto che siano indicatore master o meno) mentre &egrave; parziale negli altri casi.">
+                    Completezza
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+              <c:forEach var="ms" items="${d.misure}" varStatus="loop">
+                <c:set var="bgActDigit" value="${fn:substring(ms.ruolo, fn:length(ms.ruolo)-1, fn:length(ms.ruolo))+3}" scope="page" />
+                <c:set var="bgAct" value="bgAct${bgActDigit}" scope="page" />
+                <!-- Conditional formatting -->
+                <c:choose>
+                  <c:when test="${ms.totIndicatori gt zero}">
+                    <c:set var="badgeStyle" value="border-basso bgAct8" scope="page" />
+                  </c:when>
+                  <c:otherwise>
+                    <c:set var="badgeStyle" value="border-alto bg-warning" scope="page" />
+                    <c:set var="completezza" value="La misura ha 0 Indicatori e quindi non puo' avere misurazioni" scope="page" />
+                  </c:otherwise>
+                </c:choose>
+                <!-- Conditional labels -->
+                <c:choose>
+                  <c:when test="${ms.monitorata}">
+                    <c:set var="completezza" value="La misura ha ${ms.totIndicatori} indicatori e ciascuno ha ricevuto almeno una misurazione" scope="page" />
+                  </c:when>
+                  <c:when test="${not ms.monitorata and ms.totIndicatori gt zero}">
+                    <c:set var="completezza" value="La misura ha ${ms.totIndicatori} indicatori ma almeno uno di essi non e' stato misurato" scope="page" />
+                  </c:when>
+                </c:choose>
+                <!-- Card row -->
+                <tr>
+                  <td scope="row" class="align-middle" id="${ms.codice}">
+                    <a href="${initParam.appName}/?q=ic&p=mes&mliv=${ms.codice}&r=${param['r']}" title="${ms.codice}">
+                      <c:out value="${ms.nome}" escapeXml="false" />
+                    </a>
+                  </td>
+                  <td scope="row">
+                    <a href="${initParam.appName}/?q=ic&p=ind&mliv=${ms.codice}&r=${param['r']}&y=${selectedYear}" class="btn bgAct14 btn-spacer">
+                      <i class="fas fa-ruler-combined"></i> Indicatori &nbsp;
+                      <span class="badge badge-pill badge-light ${badgeStyle}" title="${ms.totIndicatori} Indicatori su ${ms.fasi.size()} Fasi">
+                        <c:out value="${ms.totIndicatori}" />
+                        &#47;
+                        <c:out value="${ms.fasi.size()}" />
+                      </span>
+                    </a>
+                    <a href="${initParam.appName}/?q=ic&p=mon&mliv=${ms.codice}&r=${param['r']}" class="btn bgAct11 btn-spacer text-black">
+                      <i class="fas fa-bars"></i> Misurazioni &nbsp;
+                      <span class="badge badge-pill badge-light" title="Ci sono ${ms.totMisurazioni} misurazioni totali">
+                        <c:out value="${ms.totMisurazioni}" />
+                      </span>
+                    </a>
+                  </td>
+                  <td class="align-middle">
+                    <span class="align-middle badge-pill ${bgAct} btn-small lightTable" title="La struttura &quot;${d.nome}&quot; &egrave; ${fn:toUpperCase(ms.ruolo)} della misura &quot;${ms.nome}&quot;">
+                      <c:out value="${ms.ruolo}" />
+                    </span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <img src="${initParam.urlDirectoryImmagini}${ms.monitorata}.png" class="ico-small" alt="icona" title="${completezza}" /> &nbsp;
+                  </td>
+                </tr>
+              </c:forEach>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      </c:if>
     </c:forEach>
+    </div>
     <c:if test="${not flag}">
     <div class="alert alert-danger">
       <h4>Attenzione</h4>
