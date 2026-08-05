@@ -9,3 +9,7 @@ Photos by
 http://unsplash.com
 
 http://pixabay.com
+
+Images by
+
+FLUX.1 [schnell] (via huggingface.co)
