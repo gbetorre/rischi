@@ -1,0 +1,44 @@
+MODEL: FLUX.1 [schnell]
+Engine: FLUX.1 [schnell] (via huggingface.co)
+11:04 27/01/2025
+
+RESULT: ~/git/rischi/web/img/wallpaper3.png
+PROMPT: beautiful asian female programmer on a desk with several monitors, looking at one of those, profile view, ponytail,age of 27,coding and debugging, realisitc, photographic, ultra-details, wearing headphones, deep dive atmosphere,  neon light, semishade, half-light, volumetric, lighting effects, lens effects
+
+RESULT: ~/git/rischi/web/img/wallpaper2.png, wallpaper4.png
+PROMPT: beautiful asian female programmer on a desk with several monitors, looking at one of those, profile view, ponytail,age of 30,coding and debugging, realisitc, photographic, ultra-details, wearing headphones, deep dive atmosphere,  neon light, semishade, half-light, underexposure, volumetric, lighting effects, lens effects ,monitor with warm light in room background
+
+RESULT: ~/git/rischi/web/img/wallpaper5.png
+PROMPT: handsome black male programmer on a desk with several monitors, looking at one of those, profile view,age of 50,coding and debugging, realisitc, photographic, ultra-details, wearing headphones, deep dive atmosphere,  neon light, semishade, half-light, underexposure, volumetric, lighting effects, lens effects ,monitor with warm light in room background and the bit string "ROL" fuchsiawritten into one of those
+
+----------------------------
+
+MODEL: FLUX.1 [schnell]
+Engine: FLUX.1 [schnell] (via huggingface.co)
+12:20 12/02/2025
+
+RESULT: ../home-bg3.jpg
+PROMPT: beautiful asian ponytail woman, age of  27-30, very distinguished and understated, professional, in profile, standing over a peinted dark blue wall, holding a tablet in her right hand and scrolling something on the tablet with the left hand,  looking at the tablet with a quiet expression, just an hint of smile, wearing a lavender blouse and a dark blue skirt, realisitc, photographic, ultra-details, wearing earring pearl,, relaxed but working atmosphere,  wall semishade, half-light, volumetric, lighting effects, sharpened background
+
+RESULT: ../home-bg2.jpg
+PROMPT: beautiful asian ponytail woman, age of  27-30, very distinguished and understated, professional, in profile with a very slight three-quarter face, standing over a painted dark blue wall with painting marks, holding a tablet in her right hand and scrolling something on the tablet with the left hand,  looking at the tablet with a quiet expression, wearing a lavender blouse and a dark blue skirt, realisitc, photographic, ultra-details, wearing earring pearl,, relaxed but working atmosphere,  wall semishade, half-light, volumetric, lighting effects, sharpened background
+
+RESULT: ../home-bg5.jpg
+PROMPT: beautiful asian ponytail woman, age of  27-30, very distinguished and understated, professional, in profile with a very slight three-quarter face, standing over a painted dark blue wall with painting marks, holding a tablet in her right hand and scrolling something on the tablet with the left hand,  looking at the tablet with a quiet expression, wearing a lavender blouse and a dark blue skirt, on the rear of the tablet the brand "ROL", realisitc, photographic, ultra-details, wearing earring pearl,, relaxed but working atmosphere,  wall semishade, half-light, volumetric, lighting effects, sharpened background
+
+RESULT: ../home-bg8.jpg
+PROMPT: beautiful asian ponytail woman, age of 30, very distinguished and understated, professional, in profile, standing over a painted dark blue wall with painted in rough texture tecnique, subject placed not in the center of the image but in the first third of the frame applying rule of thirds, holding a tablet in her right hand and scrolling something on the tablet with the left hand,  looking at the tablet with a quiet expression, wearing a lavender blouse and a dark blue skirt, realisitc, photographic, ultra-details, wearing earring pearl,, relaxed but working atmosphere,  wall semishade, half-light, volumetric, lighting effects, sharpened background
+
+RESULT: ../home-bg9.jpg
+PROMPT: handsome black gentleman, age of 26, very distinguished and understated, professional, in profile, standing over a painted dark yellow wall with painted in rough texture tecnique, subject placed not in the center of the image but in the first third of the frame applying rule of thirds, holding a tablet in her right hand and scrolling something on the tablet with the left hand,  looking at the tablet with an interested expression, wearing a shirt and a dark blue tie, with sleeves rolled up, realisitc, photographic, ultra-details, wearing earring pearl,, relaxed but working atmosphere,  wall semishade, half-light, volumetric, lighting effects, sharpened background
+
+RESULT: ../home-bg12.jpg
+PROMPT: white male old programmer, age of 56, light overweight, dense hair, very pleasant and wise, professional, in profile, standing over a painted lime green wall with painted in rough texture tecnique, subject placed not in the center of the image but in the first third of the frame applying rule of thirds, holding a tablet in her right hand and scrolling something on the tablet with the left hand,  looking at the tablet with an interested expression, wearing a plaid shirt with sleeves rolled up, wearing glesses and bluetooth headphones, with a badge on the neck, realisitc, photographic, ultra-details, relaxed but working atmosphere,  wall semishade, half-light, volumetric, lighting effects, sharpened background
+
+RESULT: ../home-bg11.jpg
+PROMPT: white male programmer, age of 50, light overweight, dense hair, beard, very pleasant and wise, professional, in profile, standing over a painted maroon wall with painted in rough texture tecnique, subject placed not in the center of the image but in the first third of the frame applying rule of thirds, holding a tablet in her right hand and scrolling something on the tablet with the left hand,  looking at the tablet with an interested expression, wearing a plaid shirt with sleeves rolled up, wearing glesses and bluetooth headphones,  badge with ribbon on the neck, realisitc, photographic, ultra-details, relaxed but working atmosphere,  wall semishade, half-light, volumetric, lighting effects, sharpened background
+
+RESULT: ../home-bg13.jpg
+handsome indian male programmer, age of 26, very professional and polite, in profile, standing over a painted dark lime and yellow wall with painted in rough texture tecnique, subject placed not in the center of the image but in the first or last third of the frame applying rule of thirds, holding a tablet in her right hand and scrolling something on the tablet with the left hand,  looking at the tablet with an interested expression, wearing a shirt no tie, realisitc, photographic, ultra-details, relaxed but working atmosphere,  wall semishade, half-light, volumetric, lighting effects, sharpened background
+
+
