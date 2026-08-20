@@ -1701,6 +1701,17 @@ public interface Query extends Serializable {
     public String getQueryStructure(int idS, byte level);
     
     /**
+     * <p>Costruisce dinamicamente la query che seleziona una struttura parent
+     * sulla base dell'identificativo della struttura child, dato il livello 
+     * identificante l'insieme entro cui cercarla.</p>
+     *
+     * @param idS   identificativo della struttura child
+     * @param level marcatore dell'insieme entro cui effettuare la ricerca
+     * @return <code>String</code> - la query che seleziona il parent della struttura desiderata
+     */
+    public String getQueryStructureParent(int idS, byte level);
+    
+    /**
      * <p>Costruisce dinamicamente la query che seleziona una struttura 
      * di qualsivoglia livello (tupla di struttura_liv1 oppure di struttura_liv2...
      * etc.) in base ai parametri ricevuti.</p>
