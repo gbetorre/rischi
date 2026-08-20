@@ -168,6 +168,9 @@ public class QueryImpl implements Query, Constants {
             case 4:
                 table = "struttura_liv4";
                 break;
+            default:
+                // NO-OP (No Operation): Livello non gestito o non soggetto a gerarchia superiore
+                break;     
         }
         final String GET_STRUCTURE_BY_ID =
                 "SELECT " +
@@ -182,6 +185,47 @@ public class QueryImpl implements Query, Constants {
                 "   WHERE D.id = " + id +
                 "   ORDER BY D.ordinale";
         return GET_STRUCTURE_BY_ID;
+    }
+    
+    
+    /**
+     * {@link Query#getQueryStructureParent(int, byte)}
+     * @see it.rol.db.Query#getQueryStructureParent(int, byte)
+     */
+    @Override
+    public String getQueryStructureParent(int id,
+                                          byte level) {
+        String table, child = null;
+        switch(level) {
+            case 2:
+                table = "struttura_liv1";
+                child = "struttura_liv2";
+                break;
+            case 3:
+                table = "struttura_liv2";
+                child = "struttura_liv3";
+                break;
+            case 4:
+                table = "struttura_liv3";
+                child = "struttura_liv4";
+                break;
+            default:
+                table = child = VOID_STRING;
+                break;    
+        }
+        final String GET_PARENT_BY_STRUCTURE =
+                "SELECT " +
+                "       DP.id        AS \"id\"" +
+                "   ,   DP.nome      AS \"nome\"" +
+                "   ,   DP.codice    AS \"informativa\"" +
+                "   ,   DP.prefisso  AS \"prefisso\"" +
+                "   ,   DP.acronimo  AS \"acronimo\"" +
+                "   ,   DP.ordinale  AS \"ordinale\"" +
+                "   ," + (level - ELEMENT_LEV_1) +  " AS \"livello\"" + 
+                "   FROM " + table + " DP" +
+                "   WHERE DP.id = " +
+                "       (SELECT id_" + table + " FROM " + child + " WHERE " + child + ".id = " + id + ")";
+        return GET_PARENT_BY_STRUCTURE;
     }
 
 
