@@ -4952,7 +4952,7 @@ public class DBWrapper extends QueryImpl {
                                                    throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
-            ResultSet rs, rs1, rs2 = null;
+            ResultSet rs, rs1, rs2, rs3, rs4 = null;
             int nextParam = NOTHING;
             AbstractList<DepartmentBean> structs = new ArrayList<>();
             AbstractList<MeasureBean> measures = null;
@@ -4970,11 +4970,50 @@ public class DBWrapper extends QueryImpl {
                 while (rs.next()) {
                     // Inizializza elenco misure
                     measures = new ArrayList<>();
-                    // Prepara il tipo
+                    // Prepara la capofila
                     DepartmentBean capofila = new DepartmentBean();
-                    // Valorizza il tipo
+                    // Valorizza la capofila
                     BeanUtil.populate(capofila, rs);
-                    // Differenzia in base al livello
+                    // Recupera il padre (solo livelli 4 e 3)
+                    switch (capofila.getLivello()) {
+                        case ELEMENT_LEV_4:
+                            pst = null;
+                            pst = con.prepareStatement(getQueryStructureParent(capofila.getId(), ELEMENT_LEV_4));
+                            pst.clearParameters();
+                            rs4 = pst.executeQuery();
+                            if (rs4.next()) {
+                                // Recupera il parent
+                                DepartmentBean parent = new DepartmentBean();
+                                BeanUtil.populate(parent, rs4);
+                                capofila.setPadre(parent);
+                                // Recupera il "grandparent"
+                                pst.close();    // Non puo' essere null
+                                pst = null;
+                                rs4.close();    // Non puo' essere null
+                                rs4 = null;
+                                pst = con.prepareStatement(getQueryStructureParent(parent.getId(), ELEMENT_LEV_3));
+                                pst.clearParameters();
+                                rs4 = pst.executeQuery();
+                                if (rs4.next()) {
+                                    DepartmentBean grandparent = new DepartmentBean();
+                                    BeanUtil.populate(grandparent, rs4);
+                                    parent.setPadre(grandparent);
+                                }
+                            }
+                            break;
+                        case ELEMENT_LEV_3:
+                            pst = null;
+                            pst = con.prepareStatement(getQueryStructureParent(capofila.getId(), ELEMENT_LEV_3));
+                            pst.clearParameters();
+                            rs3 = pst.executeQuery();
+                            if (rs3.next()) {
+                                DepartmentBean parent = new DepartmentBean();
+                                BeanUtil.populate(parent, rs3);
+                                capofila.setPadre(parent);
+                            }
+                            break; 
+                    }
+                    // Recupera le misure di ogni struttura
                     nextParam = NOTHING;
                     pst = null;
                     pst = con.prepareStatement(getMeasuresByStruct(survey.getId(), capofila.getId(), (byte) capofila.getLivello(), capofilaLabel, Utils.convert(dateAfter), Utils.convert(dateBefore)));
