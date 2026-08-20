@@ -46,6 +46,9 @@ package it.rol.bean;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import it.rol.Constants;
+import it.rol.exception.AttributoNonValorizzatoException;
+
 
 /**
  * <p>Classe usata per rappresentare un dipartimento o, pi&uacute; 
@@ -337,4 +340,36 @@ public class DepartmentBean extends CodeBean {
         this.misure = misure;
     }
 
+    
+    /* ************************************************************************ *
+     *                    Metodi helper, di calcolo, di utilità                 *
+     * ************************************************************************ */    
+    
+    /**
+     * Restituisce la stringa gerarchica completa (es. "Nonno - Padre - Figlio")
+     * basandosi sulla catena dei padri impostati.
+     * 
+     * @return String - il nome completamente qualificato
+     * @throws AttributoNonValorizzatoException se il nome dell'oggetto non e' valorizzato!
+     */
+    public String getNomeGerarchicoCompleto() 
+                                     throws AttributoNonValorizzatoException {
+        StringBuilder sb = new StringBuilder();
+        // Costruisce la stringa per l'elemento corrente
+        String corrente = (this.getPrefisso() != null ? this.getPrefisso() + Constants.BLANK_SPACE : Constants.VOID_STRING) + 
+                          (this.getNome() != null ? this.getNome() : Constants.VOID_STRING);
+        // Se c'è un padre, calcola prima la gerarchia del padre (approccio ricorsivo)
+        if (this.getPadre() != null) {
+            String parentPath = this.getPadre().getNomeGerarchicoCompleto();
+            if (!parentPath.isEmpty()) {
+                sb.append(parentPath)
+                  .append(Constants.BLANK_SPACE)
+                  .append(Constants.DASH)
+                  .append(Constants.BLANK_SPACE);
+            }
+        }
+        sb.append(corrente);
+        return sb.toString().trim();
+    }
+    
 }
