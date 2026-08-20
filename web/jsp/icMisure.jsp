@@ -103,6 +103,15 @@
     <c:forEach var="d" items="${structs}" varStatus="status">
       <c:if test="${d.misure.size() gt zero}">
       <c:set var="flag" value="true" scope="page" />
+      <c:set var="label" value="${d.prefisso} ${d.nome}" scope="page" />
+      <c:choose>
+        <c:when test="${not empty d.padre.padre}">
+          <c:set var="label" value="${d.padre.padre.prefisso} ${d.padre.padre.nome} - ${d.padre.prefisso} ${d.padre.nome} &ndash; ${d.prefisso} ${d.nome}" scope="page" />
+        </c:when>     
+        <c:when test="${not empty d.padre}">
+          <c:set var="label" value="${d.padre.prefisso} ${d.padre.nome} &ndash; ${d.prefisso} ${d.nome}" scope="page" />
+        </c:when>
+      </c:choose>
       <!-- Card -->
       <div class="card module">
         <!-- OuterCard -->
@@ -110,7 +119,7 @@
           <h6 class="mb-0">
             <a class="d-block text-decoration-none text-dark p-2" data-toggle="collapse" href="#collapse-${d.id}" role="button" aria-expanded="false" aria-controls="collapse-${d.id}">
               <span class="mt-md-1 m-1 font-weight-bold">
-                <c:out value="${d.prefisso} ${d.nome}" />
+                <c:out value="${label}" escapeXml="false" />
               </span>
               <span class="float-right avvisiTot text-right">
                 <c:out value="Tot misure: ${d.misure.size()}" />&nbsp;
