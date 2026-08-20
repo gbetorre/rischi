@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (30 versioni)
+### 2026 (31 versioni)
 
+- [2.7.1] (20/08/2026) Aggiunta gerarchia delle strutture nella pagina iniziale del monitoraggio
 - [2.7.0] (03/08/2026) Miglioramenti nella presentazione della pagina iniziale del monitoraggio
 - [2.6.9] (29/07/2026) Continuazione implementazione della storicizzazione degli indicatori di monitoraggio
 - [2.6.8] (28/07/2026) Prima bozza di implementazione della storicizzazione indicatori di monitoraggio
