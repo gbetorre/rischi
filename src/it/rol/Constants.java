@@ -639,6 +639,14 @@ public interface Constants extends Serializable {
      */
     public static final String DASH = String.valueOf(HYPHEN);
     /**
+     * <p>Trattino lungo</p>
+     */
+    public static final String NDASH = "\u2013";
+    /**
+     * <p>Trattino lunghissimo</p>
+     */
+    public static final String MDASH = "\u2014";
+    /**
      * Costante per l'uso del separatore semicolon 
      */
     public static final String SEPARATOR = String.valueOf(SEMICOLON);
