@@ -2820,118 +2820,6 @@ public class DBWrapper extends QueryImpl {
     }
     
     
-    /* (non-Javadoc)
-     * @see Query#getQueryStructureBySurvey(int, int, int, int, int)
-     */
-    @SuppressWarnings("javadoc")
-    @Override
-    public String getQueryStructureBySurvey(int idR, int idl4, int idl3, int idl2, int idl1) {
-        String tableFrom = null;
-        String idD = null;
-        byte level = (byte) DEFAULT_ID;
-        // Verifica se l'id di livello 4 è non impostato
-        if (idl4 == BEAN_DEFAULT_ID) { // it means Liv 4 is null
-            // Verifica se l'id di livello 3 non è impostato
-            if (idl3 == BEAN_DEFAULT_ID) { // it means Liv 3 is null
-                // Verifica se l'id di livello 3 non è impostato
-                if (idl2 == BEAN_DEFAULT_ID) { // it means Liv 2 is null
-                    // Verifica se c'è un errore (almeno una struttura di Liv 1 dev'esserci)
-                    if (idl1 == BEAN_DEFAULT_ID) { // it means Liv 1 is null! Something's wrong
-                        return DASH; // "ERR!";
-                    }
-                    // Clausole per recuperare la struttura di Liv 1
-                    level = (byte) 1;
-                    tableFrom = "struttura_liv1";
-                    idD = String.valueOf(idl1);
-                // Clausole per recuperare la struttura di Liv 2
-                } else {       
-                    level = (byte) 2;
-                    tableFrom = "struttura_liv2";
-                    idD = String.valueOf(idl2);
-                }
-            // Clausole per recuperare la struttura di Liv 3
-            } else {
-                level = (byte) 3;
-                tableFrom = "struttura_liv3";
-                idD = String.valueOf(idl3);
-            }
-        // Clausole per recuperare la struttura di Liv 4
-        } else {
-            level = (byte) 4;
-            tableFrom = "struttura_liv4";
-            idD = String.valueOf(idl4);
-        }
-        final String GET_STRUCTURE_BY_INTERVIEW =
-                "SELECT " +
-                "       D.id                AS \"id\"" +
-                "   ,   D.nome              AS \"nome\"" +
-                "   ,   concat('0.',D.id::VARCHAR,'-'," + level + ")" +
-                "                           AS \"informativa\"" +
-                "   ,   D.ordinale          AS \"ordinale\"" +
-                "   ,   D.prefisso          AS \"prefisso\"" +
-                "   ,   D.acronimo          AS \"acronimo\"" +
-                "   ,   D.indirizzo_sede    AS \"indirizzo\"" +
-                "   ," + level + "::SMALLINT AS \"livello\"" +
-                "   FROM " + tableFrom + " D" +
-                "   WHERE D.id_rilevazione = " + idR +
-                "       AND D.id = " + idD +
-                "   ORDER BY D.nome";
-        return GET_STRUCTURE_BY_INTERVIEW;
-    }
-    
-    
-    /* (non-Javadoc)
-     * @see Query#getQueryProcessBySurvey(int, int, int, int)
-     */
-    @SuppressWarnings("javadoc")
-    @Override
-    public String getQueryProcessBySurvey(int idR, int idS, int idP, int idM) {
-        String tableFrom = null;
-        String idD = null;
-        byte level = (byte) DEFAULT_ID;
-        // Verifica se l'id di sottoprocesso non è impostato
-        if (idS == BEAN_DEFAULT_ID) { // it means sub is null
-            // Verifica se l'id di processo non è impostato
-            if (idP == BEAN_DEFAULT_ID) { // it means proc is null
-                // Verifica se c'è un errore (almeno un macroprocesso dev'esserci)
-                if (idM == BEAN_DEFAULT_ID) { // it means Liv 1 is null! Something's wrong
-                    return DASH; // "ERR!";
-                }
-                // Clausole per recuperare il macroprocesso anticorruttivo
-                level = (byte) 1;
-                tableFrom = "macroprocesso_at";
-                idD = String.valueOf(idM);
-            // Clausole per recuperare il processo anticorruttivo
-            } else {       
-                level = (byte) 2;
-                tableFrom = "processo_at";
-                idD = String.valueOf(idP);
-            }
-        // Clausole per recuperare il sottoprocesso anticorruttivo
-        } else {
-            level = (byte) 3;
-            tableFrom = "sottoprocesso_at";
-            idD = String.valueOf(idS);
-        }
-        final String GET_PROCESS_BY_INTERVIEW =
-                "SELECT " +
-                "       PAT.id                  AS \"id\"" +
-                "   ,   PAT.nome                AS \"nome\"" +
-                "   ,   PAT.codice              AS \"codice\"" +
-                "   ,   concat(PAT.id::VARCHAR,'.',PAT.codice)" +
-                "                               AS \"informativa\"" +
-                "   ,   PAT.ordinale            AS \"ordinale\"" +
-                "   ,   PAT.smartworking        AS \"smartWorking\"" +
-                "   ,   PAT.attivita            AS \"descrizione\"" +
-                "   ," + level + "::SMALLINT    AS \"livello\"" +
-                "   FROM " + tableFrom + " PAT" +
-                "   WHERE PAT.id_rilevazione = " + idR +
-                "       AND PAT.id = " + idD +
-                "   ORDER BY PAT.nome";
-        return GET_PROCESS_BY_INTERVIEW;
-    }
-    
-    
     /**
      * <p>Estrae un elenco di interviste definita ciascuna come un insieme 
      * di riposte a quesiti associati a una data rilevazione.<br />
@@ -5011,7 +4899,11 @@ public class DBWrapper extends QueryImpl {
                                 BeanUtil.populate(parent, rs3);
                                 capofila.setPadre(parent);
                             }
-                            break; 
+                            break;
+                        default:
+                            String msg = FOR_NAME + "Trovato un livello struttura imprevisto: " + capofila.getLivello();
+                            LOG.warning(msg);
+                            break;
                     }
                     // Recupera le misure di ogni struttura
                     nextParam = NOTHING;
@@ -5057,8 +4949,13 @@ public class DBWrapper extends QueryImpl {
                     capofila.setMisure((ArrayList<MeasureBean>) measures);
                     structs.add(capofila);
                 }
-                // Just tries to engage the Garbage Collector
-                pst = null;
+                // === ORDINAMENTO ALFABETICO GERARCHICO ===
+                // Ordina considerando l'intera catena: Grandparent -> Parent -> Figlio
+                structs.sort(java.util.Comparator.comparing(
+                                                            DepartmentBean::getNomeGerarchicoCompleto, 
+                                                            java.util.Comparator.nullsLast(java.lang.String.CASE_INSENSITIVE_ORDER)
+                                                            )
+                        );
                 // Get out
                 return (ArrayList<DepartmentBean>) structs;
             } catch (SQLException sqle) {
