@@ -350,26 +350,30 @@ public class DepartmentBean extends CodeBean {
      * basandosi sulla catena dei padri impostati.
      * 
      * @return String - il nome completamente qualificato
-     * @throws AttributoNonValorizzatoException se il nome dell'oggetto non e' valorizzato!
      */
-    public String getNomeGerarchicoCompleto() 
-                                     throws AttributoNonValorizzatoException {
-        StringBuilder sb = new StringBuilder();
-        // Costruisce la stringa per l'elemento corrente
-        String corrente = (this.getPrefisso() != null ? this.getPrefisso() + Constants.BLANK_SPACE : Constants.VOID_STRING) + 
-                          (this.getNome() != null ? this.getNome() : Constants.VOID_STRING);
-        // Se c'è un padre, calcola prima la gerarchia del padre (approccio ricorsivo)
-        if (this.getPadre() != null) {
-            String parentPath = this.getPadre().getNomeGerarchicoCompleto();
-            if (!parentPath.isEmpty()) {
-                sb.append(parentPath)
-                  .append(Constants.BLANK_SPACE)
-                  .append(Constants.DASH)
-                  .append(Constants.BLANK_SPACE);
+    public String getNomeGerarchicoCompleto() {
+        String fullName = null;
+        try {
+            StringBuilder sb = new StringBuilder();
+            // Costruisce la stringa per l'elemento corrente
+            String corrente = (this.getPrefisso() != null ? this.getPrefisso() + Constants.BLANK_SPACE : Constants.VOID_STRING) + 
+                              (this.getNome() != null ? this.getNome() : Constants.VOID_STRING);
+            // Se c'è un padre, calcola prima la gerarchia del padre (approccio ricorsivo)
+            if (this.getPadre() != null) {
+                String parentPath = this.getPadre().getNomeGerarchicoCompleto();
+                if (!parentPath.isEmpty()) {
+                    sb.append(parentPath)
+                      .append(Constants.BLANK_SPACE)
+                      .append(Constants.NDASH)
+                      .append(Constants.BLANK_SPACE);
+                }
             }
+            sb.append(corrente);
+            fullName = sb.toString().trim();
+        } catch (AttributoNonValorizzatoException anve) {
+            fullName = Constants.DASH + anve.getMessage();
         }
-        sb.append(corrente);
-        return sb.toString().trim();
+        return fullName;
     }
     
 }
