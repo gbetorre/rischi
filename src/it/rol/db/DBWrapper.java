@@ -4244,10 +4244,10 @@ public class DBWrapper extends QueryImpl {
                         // La valorizza col risultato della query
                         BeanUtil.populate(fs, rs3);
                         // Cerca l'indicatore collegato eventualmente alla fase
-                        IndicatorBean ind = getIndicatorByActivity(user, fs, survey);
+                        ArrayList<IndicatorBean> inds = getIndicatorsByActivity(user, fs, survey);
                         // Aggiunge l'indicatore alla fase se significativo
-                        if (ind != null) {
-                            fs.setIndicatore(ind);
+                        if (inds != null) {
+                            fs.setIndicatori(inds);
                         }
                         // Aggiunge la fase alla lista delle fasi di attuazione
                         fasi.add(fs);
@@ -4299,7 +4299,8 @@ public class DBWrapper extends QueryImpl {
      * 
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param code      il codice di una misura cercata oppure una stringa vuota in linguaggio SQL
-
+     * @param after     estremo inferiore dell'intervallo entro cui deve ricadere il target dell'indicatore per essere estratto
+     * @param before    estremo superiore dell'intervallo entro cui deve ricadere il target dell'indicatore per essere estratto
      * @param survey    oggetto contenente gli estremi della rilevazione
      * @return <code>ArrayList&lt;MeasureBean&gt;</code> - l'elenco di misure cercate
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
@@ -4901,7 +4902,7 @@ public class DBWrapper extends QueryImpl {
                             }
                             break;
                         default:
-                            String msg = FOR_NAME + "Trovato un livello struttura imprevisto: " + capofila.getLivello();
+                            String msg = FOR_NAME + "Trovato un livello struttura (" + capofila.getLivello() +  ") di cui non interessa il padre." ;
                             LOG.warning(msg);
                             break;
                     }
@@ -5069,7 +5070,7 @@ public class DBWrapper extends QueryImpl {
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param fase      la fase di attuazione cui l'indicatore cercato puo' essere collegato
      * @param survey    oggetto contenente gli estremi della rilevazione
-     * @return <code>IndicatorBea</code> - l'indicatore di monitoraggio collegato alla fase
+     * @return <code>IndicatorBean</code> - l'indicatore di monitoraggio collegato alla fase
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     public IndicatorBean getIndicatorByActivity(PersonBean user,
@@ -5169,12 +5170,119 @@ public class DBWrapper extends QueryImpl {
     
     
     /**
+     * <p>Restituisce elenco di indicatori di monitoraggio collegati 
+     * ad una specifica fase di attuazione passata come parametro.</p>
+     * 
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param fase      la fase di attuazione cui l'indicatore cercato puo' essere collegato
+     * @param survey    oggetto contenente gli estremi della rilevazione
+     * @return <code>ArrayList&lt;IndicatorBean&gt;</code> - l'indicatore di monitoraggio collegato alla fase
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public ArrayList<IndicatorBean> getIndicatorsByActivity(PersonBean user,
+                                                            ActivityBean fase,
+                                                            CodeBean survey)
+                                                     throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            ResultSet rs, rs1, rs2 = null;
+            ArrayList<IndicatorBean> indicators = new ArrayList<>();
+            // TODO: Controllare se user è superuser
+            try {
+                int nextParam = NOTHING;
+                pst = con.prepareStatement(GET_INDICATOR_BY_ACTIVITY_RAW);
+                pst.clearParameters();
+                pst.setInt(++nextParam, fase.getId());
+                rs = pst.executeQuery();
+                while (rs.next()) {
+                    // Prepara il bean contenente i riferimenti
+                    ItemBean data = new ItemBean();
+                    // Valorizza il bean
+                    BeanUtil.populate(data, rs);
+                    // Recupera il tipo
+                    CodeBean tipo = ConfigManager.getIndicatorTypesAsMap().get(new Integer(data.getCod3()));
+                    // Recupera lo stato
+                    CodeBean stato = new CodeBean(data.getCod4(), STATI_STRUTTURA[data.getCod4()], VOID_STRING, NOTHING);
+                    // Recupera l'indicatore
+                    nextParam = NOTHING;
+                    pst = null;
+                    pst = con.prepareStatement(GET_INDICATOR);
+                    pst.clearParameters();
+                    pst.setInt(++nextParam, data.getCod1());
+                    pst.setInt(++nextParam, survey.getId());
+                    rs1 = pst.executeQuery();
+                    if (rs1.next()) {
+                        // Crea l'indicatore vuoto
+                        IndicatorBean indicator = new IndicatorBean();
+                        // Valorizza il bean
+                        BeanUtil.populate(indicator, rs1);
+                        // Vi aggiunge il tipo
+                        indicator.setTipo(tipo);
+                        // Vi aggiunge lo stato
+                        indicator.setStato(stato);
+                        // Vi aggiunge la fase
+                        indicator.setFase(fase);
+                        // Cerca le misurazioni
+                        Vector<MeasurementBean> measurements = new Vector<>();
+                        nextParam = NOTHING;
+                        pst = null;
+                        pst = con.prepareStatement(GET_MEASUREMENTS_BY_INDICATOR);
+                        pst.clearParameters();
+                        pst.setInt(++nextParam, indicator.getId());
+                        pst.setInt(++nextParam, survey.getId());
+                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                        rs2 = pst.executeQuery();
+                        while (rs2.next()) {
+                            MeasurementBean measurement = new MeasurementBean();
+                            BeanUtil.populate(measurement, rs2);
+                            Vector<FileDocBean> attachments = getFileDoc("misurazione", "all", measurement.getId(), measurement.getId());
+                            measurement.setAllegati(attachments);
+                            measurement.setIndicatore(indicator);
+                            measurements.add(measurement);
+                        }
+                        indicator.setMisurazioni(measurements);
+                        indicators.add(indicator);
+                    }
+                }
+                // Get out
+                return indicators;
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di bean.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }    
+    
+    
+    /**
      * <p>Restituisce un indicatore di monitoraggio collegato ad una specifica
      * fase di attuazione passata come parametro ed avente la data target
      * non precedente a since e non successiva a to.</p>
      * 
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param fase      la fase di attuazione cui l'indicatore cercato puo' essere collegato
+     * @param since     data di inizio validita' del target (l'indicatore sara' estratto se ha data target successiva a since)
+     * @param to        data di fine validita' del target (l'indicatore sara' estratto se ha data target precedente a to)
      * @param survey    oggetto contenente gli estremi della rilevazione
      * @return <code>IndicatorBea</code> - l'indicatore di monitoraggio collegato alla fase
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
