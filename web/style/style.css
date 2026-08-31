@@ -1215,6 +1215,10 @@ li.line {
   width:310px;
 }
 
+.half-wide {
+  width:50%;
+}
+
 .total-wide {
   width:100%;
 }
