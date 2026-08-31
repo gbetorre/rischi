@@ -490,8 +490,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 break;
                             /* Other values are not admitted                    */
                             default:
-                                // TODO log
-                                break;
+                                String msg = FOR_NAME + "Valore di 'p' non valido!.\n";
+                                LOG.severe(msg);
+                                throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
                         }
                     } else {
                         /* ------------------------------------------------ *
@@ -753,10 +754,13 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
      * <p>Estrae i dettagli di una misura contenente al suo interno i
      * dettagli necessari al monitoraggio, quindi fasi e indicatori) 
      * dato il codice, la rilevazione e una finestra temporale entro la quale
-     * gli indicatori devono far ricadere il proprio target.</p>
+     * gli indicatori devono far ricadere il proprio target (in caso contrario
+     * anche se soddisfano gli altri criteri non verranno estratti).</p>
      * 
      * @param user      utente loggato
      * @param code      codice della misura cercata
+     * @param after     estremo inferiore dell'intervallo entro cui deve ricadere il target
+     * @param before    estremo superiore dell'intervallo entro cui deve ricadere il target
      * @param survey    oggetto rilevazione
      * @param db        databound gia' istanziato
      * @return <code>MeasureBean</code> - misura, da registro, desiderata
