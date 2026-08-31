@@ -1540,7 +1540,8 @@ public interface Query extends Serializable {
     
     /**
      * <p>Estrae i valori di un indicatore associato a una fase di attuazione
-     * di dato id.</p>
+     * di dato id con una restrizione temporale: l'indicatore deve avere la
+     * data del target compresa tra due parametri passati come argomento.</p>
      */
     public static final String GET_INDICATOR_BY_ACTIVITY_AND_YEAR = 
             "SELECT DISTINCT" +
@@ -1648,6 +1649,7 @@ public interface Query extends Serializable {
             "   ,   IND.data_ultima_modifica            AS \"dataUltimaModifica\"" +
             "   ,   IND.ora_ultima_modifica             AS \"oraUltimaModifica\"" +
             "   ,   IND.id_usr_ultima_modifica          AS \"autoreUltimaModifica\"" +
+            "   ,   IND.master                          AS \"master\"" +
             "   ,   IND.id_fase                         AS \"ordinale\"" +  // piccolo abuso di notazione
             "   FROM indicatoremonitoraggio IND" +
             "   WHERE IND.id = ?" +
