@@ -110,7 +110,7 @@
           <div class="col-sm-1">&nbsp;</div>
           <div class="col-sm-4 mandatory-thin bgAct13"><strong>Nome Indicatore</strong></div>
           <div class="col-sm-6">
-            <input type="text" class="form-control" id="ind-nome" name="ind-nome" value="${fase.indicatoreOld.nome}" placeholder="Inserisci una nome per l`indicatore" required>
+            <input type="text" class="form-control" id="ind-nome" name="ind-nome" value="${fase.indicatoreOld.nome} (${param['y']})" placeholder="Inserisci una nome per l`indicatore" required>
           </div>
         </div>
         <hr class="separatore">
@@ -156,7 +156,7 @@
         <hr class="separatore">
         <div class="row">
           <div class="col-sm-1">&nbsp;</div>
-          <div class="col-sm-4 mandatory-thin bgAct13"><strong>Indicatore Master</strong></div>
+          <div class="col-sm-4 mandatory-thin bgAct13"><strong>Indicatore Semplice/Master</strong></div>
           <div class="col-sm-5">
             <select class="form-custom large-4" id="ind-master" name="ind-master" required>
               <option value="">-- seleziona un valore --</option>
