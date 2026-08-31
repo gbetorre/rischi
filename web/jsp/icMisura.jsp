@@ -45,16 +45,20 @@
             </c:if>
             <li class="list-group-item bordo ${color}"><c:out value="${fase.nome}" />
             <c:choose>
-            <c:when test="${not empty fase.indicatore}">
-              <div class="ico-func float-right">
+            <c:when test="${not empty fase.indicatori}">
+            <ul class="list-group half-wide float-right">
+              <c:forEach var="indicatore" items="${fase.indicatori}" varStatus="statu">
+              <li class="list-group-item ico-func">
                 <strong>Indicatore: </strong>
-                <a href="${initParam.appName}/?q=ic&p=ind&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="" title="Visualizza dettagli indicatore">
-                  <c:out value="${fase.indicatore.nome}" />
+                <a href="${initParam.appName}/?q=ic&p=ind&idI=${indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="" title="Visualizza dettagli indicatore">
+                  <c:out value="${indicatore.nome}" />
                 </a>&nbsp;
-                <c:if test="${fase.indicatore.master}">
+                <c:if test="${indicatore.master}">
                   <img src="${initParam.urlDirectoryImmagini}ind-master.png" class="imgTop" alt="icona master" title="Indicatore di riferimento ai fini del monitoraggio" /> &nbsp;
                 </c:if>
-              </div>
+              </li>
+              </c:forEach> 
+            </ul>
             </c:when>
             <c:otherwise>
               <div class="btn-group ico-func float-right">
