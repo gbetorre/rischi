@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.7.3] (28/08/2026) [Presentation improvements](https://github.com/gbetorre/rischi/commits/main/?since=2026-08-28&until=2026-08-28)
 - [2.7.2] (26/08/2026) [Revised visualization of monitoring initial page](https://github.com/gbetorre/rischi/commits/main/?since=2026-08-26&until=2026-08-26)
 - [2.7.1] (20/08/2026) [Revised visualization of monitoring initial page](https://github.com/gbetorre/rischi/commits/main/?since=2026-08-20&until=2026-08-20)
 - [2.7.0] (03/08/2026) [Revised visualization of monitoring initial page](https://github.com/gbetorre/rischi/commits/main/?since=2026-08-03&until=2026-08-03)
