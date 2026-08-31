@@ -125,6 +125,8 @@ public class ActivityBean extends CodeBean {
     private IndicatorBean indicatore;
     /** Indicatore di monitoraggio precedente collegato alla fase di attuazione della misura */
     private IndicatorBean indicatoreOld;
+    /** Indicatori di monitoraggio collegati alla fase di attuazione della misura */
+    private ArrayList<IndicatorBean> indicatori;
     
     
     /* ************************************************************* *
@@ -146,6 +148,7 @@ public class ActivityBean extends CodeBean {
     	idComplessita = idStato = -2;
     	stato = null;
     	indicatore = indicatoreOld = null;
+    	indicatori = null;
     }
     
     
@@ -676,6 +679,28 @@ public class ActivityBean extends CodeBean {
      */
     public void setIndicatoreOld(IndicatorBean indicatoreOld) {
         this.indicatoreOld = indicatoreOld;
+    }
+    
+    
+    /* ***********************************************************  *
+     * Metodi getter e setter per tutti gli indicatori della fase   *
+     * ***********************************************************  */
+    /**
+     * Restituisce struttura vettoriale contenente gli indicatori
+     * 
+     * @return <code>indicatori</code> - ArrayList contenente gli indicatori definiti per la fase
+     */
+    public ArrayList<IndicatorBean> getIndicatori() {
+        return indicatori;
+    }
+
+    /**
+     * Imposta struttura vettoriale contenente gli indicatori
+     * 
+     * @param indicatori - ArrayList da impostare
+     */
+    public void setIndicatori(ArrayList<IndicatorBean> indicatori) {
+        this.indicatori = indicatori;
     }
     
 }
