@@ -292,7 +292,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                 // Creazione della tabella che conterrà i valori dei parametri passati dalle form
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
-                loadParams(part, req, params);
+                String c1l1id = loadParams(part, req, params);
                 /* ======================= @PostMapping ======================= */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
@@ -302,6 +302,15 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             /* ************************************************ *
                              *        PROCESS Form to INSERT new Measure        *
                              * ************************************************ */
+                            // Se il codice della Capofila1 Livello1 (C1L1) è significativo
+                            if (!c1l1id.equals(DASH)) {
+                                // Recupera le strutture della rilevazione corrente
+                                structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
+                                // Travasa le strutture in una mappa piatta indicizzata per codice
+                                flatStructs = AuditCommand.decantStructs(structs);
+                                // Per ogni figlia di L2 della C1L1
+                                    // Genera una misura associandola alla figlia
+                            }
                             db.insertMeasure(user, params);
                             // Prepara la redirect 
                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + 
@@ -524,22 +533,34 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
     /**
      * Valorizza per riferimento una mappa contenente tutti i valori 
      * parametrici riscontrati sulla richiesta.
+     * Nel caso si stia gestendo i parametri della misura, la Capofila1 Livello1
+     * resta obbligatoria; qualora per&ograve; la Capofila1 Livello2 sia vuota,
+     * l'utente sta comunicando che vuole che la misura di cui ha valorizzato 
+     * gli estremi venga ricreata per tutte le strutture Livello2 sottostanti 
+     * alla Capofila1 Livello1 stessa. In tal caso, il metodo restituisce l'id
+     * della Capofila1 Livello1 (nel formato thruId.id-codice) in modo che, 
+     * a valle del richiamo, avvenga l'opportuna duplicazione delle
+     * occorrenze delle misure; se invece la misura deve essere associata a 
+     * una Capofila1 Livello2 specifica (e singola) il metodo restituisce -1. 
      * 
      * @param part          la sezione corrente del sito
      * @param req           la HttpServletRequest contenente la richiesta del client
      * @param formParams    mappa da valorizzare per riferimento (ByRef)
+     * @return <code>String</code> - il valore dell'ID della Capofila1 Liv1 (se Liv2 e' vuota) oppure -1 se C1 Liv2 e' valorizzata
      * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
      * @throws AttributoNonValorizzatoException se si fa riferimento a un attributo obbligatorio di bean che non viene trovato
      */
-    public static void loadParams(String part, 
-                                  HttpServletRequest req,
-                                  HashMap<String, LinkedHashMap<String, String>> formParams)
-                           throws CommandException, 
-                                  AttributoNonValorizzatoException {
+    public static String loadParams(String part, 
+                                 HttpServletRequest req,
+                                 HashMap<String, LinkedHashMap<String, String>> formParams)
+                          throws CommandException, 
+                                 AttributoNonValorizzatoException {
         LinkedHashMap<String, String> survey = new LinkedHashMap<>();
         LinkedHashMap<String, String> measure = new LinkedHashMap<>();
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
+        // Valore restituito
+        String sc1Id = parser.getStringParameter("sliv1id", DASH);
         /* **************************************************** *
          *     Caricamento parametro di Codice Rilevazione      *
          * **************************************************** */      
@@ -631,6 +652,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
             measure.put("data", parser.getStringParameter("ms-data", VOID_STRING));
             formParams.put(part, measure);
         }
+        return sc1Id;
     }
     
     
@@ -640,9 +662,8 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
      * **************************************************************** */
     
     /**
-     * <p>Estrae i dettagli di una misura del registro (quindi priva 
-     * dei dettagli necessari al monitoraggio) dato il codice 
-     * e la rilevazione.</p>
+     * <p>Estrae i dettagli di una misura (compresi i dettagli 
+     * necessari al monitoraggio) dato il codice e la rilevazione.</p>
      * 
      * @param user      utente loggato
      * @param code      codice della misura cercata
