@@ -95,6 +95,7 @@
             <div class="text-center"><div id="custom-error-location-2"></div></div>
           </div>
           <div class="row">
+            <input type="hidden" id="c1-liv1-id" name="sliv1id" value="">
             <div class="text-center lastMenuContent">
               <select id="str-liv1" name="sliv1">
                 <option value="">-- scelta tipologia struttura -- </option>
@@ -354,13 +355,22 @@ $(document).ready(function() {
         var child2 = "#str-liv2";
         var child3 = "#str-liv3";
         var child4 = "#str-liv4";
+        // Rimuove il banner precedente (se esisteva)
+        $("#warning-capofila").remove();
+        // Annulla il campo contenente l'id della Capofila1-Liv1 selezionata (se esisteva)
+        $('#c1-liv1-id').val(""); // L'id della C1L1 deve esserci solo se C1L2 === ''
+        // Riabilita gli accordion (casomai fossero stati disabilitati per aver scelto C1L2 = --Nessuna--)
+        $('.accordion').css({ 'opacity': '1', 'pointer-events': 'auto' }); 
+        // Riabilita le select interne
+        $('.accordion').find('select').prop('disabled', false);
+        // Continua
         $(child2).html(blank());
         $(child3).html(blank());
         $(child4).html(blank());
         switch (parent) {
         <c:forEach var="l1" items="${structs}">
         case "${l1.extraInfo.codice}":
-            $(child2).html("<c:forEach var="l2" items="${l1.figlie}"><c:set var="l2nome" value="${fn:replace(l2.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l2.extraInfo.codice}'>${l2.prefisso} ${fn:replace(l2nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach>");
+            $(child2).html("<c:forEach var="l2" items="${l1.figlie}"><c:set var="l2nome" value="${fn:replace(l2.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l2.extraInfo.codice}'>${l2.prefisso} ${fn:replace(l2nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach><option value=''>-- Nessuna --</option>");
             $(child3).html("<c:forEach var="l2" items="${l1.figlie}" begin="0" end="0"><c:forEach var="l3" items="${l2.figlie}"><c:set var="l3nome" value="${fn:replace(l3.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l3.extraInfo.codice}'>${l3.prefisso} ${fn:replace(l3nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach><option value=''>-- Nessuna --</option>");
             $(child4).html("<c:forEach var="l2" items="${l1.figlie}" begin="0" end="0"><c:forEach var="l3" items="${l2.figlie}" begin="0" end="0"><c:forEach var="l4" items="${l3.figlie}"><c:set var="l4nome" value="${fn:replace(l4.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l4.extraInfo.codice}'>${l4.prefisso} ${fn:replace(l4nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach></c:forEach></c:forEach><option value=''>-- Nessuna --</option>");
             break;
@@ -369,6 +379,48 @@ $(document).ready(function() {
     });
     $("#str-liv2").change(function() {
         var parent = $(this).val();
+        // -----------------------------------
+        // 1. Rimuove il banner precedente se esisteva (v. qui sotto)
+        $("#warning-capofila").remove();
+        // 2. Controlla se è stata scelta l'opzione "--Nessuna--"
+        if (parent === "") {
+            // Recupera il valore/ID selezionato nella dropdown di 1° livello
+            var idCapofilaL1 = $('#str-liv1').val();
+            // Valorizza il campo hidden con questo ID
+            $('#c1-liv1-id').val(idCapofilaL1);
+            // Inietta un banner di avviso di Bootstrap subito sotto il contenitore della dropdown
+            var alertHtml = '<div id="warning-capofila" class="alert alert-warning mt-2 text-start" role="alert">' +
+                            '<strong>Attenzione:</strong> hai selezionato solo una struttura capofila generica: ciò comporterà la creazione di tante misure quante sono le strutture di secondo livello collegate alla capofila selezionata!' +
+                            '</div>';
+            $(this).closest('.lastMenuContent').after(alertHtml);
+            // 3. DISABILITA GLI ACCORDION SOTTOSTANTI (seleziona tutti gli accordion successivi o specifici)
+            // Se si ha solo #accordion1 si usa $('#accordion1'), se se ne ha molti si può usare $('.accordion')
+            // Chiude l'accordion se è aperto
+            $('.accordion .collapse').collapse('hide'); 
+            // Lo rende grigio e non cliccabile
+            $('.accordion').css({ 'opacity': '0.5', 'pointer-events': 'none' }); 
+            // Disabilita tutte le select interne
+            $('.accordion').find('select').prop('disabled', true); 
+        }
+        // 4. Se l'utente cambia idea e seleziona una struttura valida...
+        else {
+           // Svuotiamo il campo hidden perché la selezione ora è specifica su L2
+            $('#c1-liv1-id').val("");
+            // Ripristina l'aspetto e i click
+            $('.accordion').css({ 'opacity': '1', 'pointer-events': 'auto' }); 
+            // Riabilita le select interne
+            $('.accordion').find('select').prop('disabled', false);
+            // Espande l'accordion se era stata selezionata una struttura
+            // Controlla il VALORE realmente selezionato nella dropdown del primo accordion
+            if ($('#str-liv6').val() !== "") {
+                $('#accordion1 .collapse').collapse('show');
+            }
+            // Stessa cosa per il secondo accordion
+            if ($('#str-liv10').val() !== "") {
+                $('#accordion2 .collapse').collapse('show');
+            }
+        }
+        // -----------------------------------
         var child3 = "#str-liv3";
         var child4 = "#str-liv4";
         $(child3).html(blank());
@@ -387,7 +439,7 @@ $(document).ready(function() {
               $(child4).html("<c:forEach var="l4" items="${entry.value}"><c:set var="l4nome" value="${fn:replace(l4.nome, singleQuote, singleQuoteEsc)}" scope="page" /><option value='${l4.extraInfo.codice}'>${l4.prefisso} ${fn:replace(l4nome, doubleQuote, doubleQuoteEsc)}</option></c:forEach><option value=''>-- Nessuna --</option>");
               break;
           </c:when>
-          </c:choose>
+        </c:choose>
         </c:forEach>
         }
     });
