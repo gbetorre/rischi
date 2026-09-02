@@ -6096,6 +6096,9 @@ public class DBWrapper extends QueryImpl {
     /**
      * <p>Metodo per fare l'inserimento di una nuova misura di prevenzione
      * o mitigazione del rischio corruttivo.</p>
+     * <p>Oltre a quelli soliti, accetta come argomento anche un id di una
+     * struttura di secondo livello, che viene preso in considerazione solo
+     * se il parametro della capofila di 2° livello risulta nullo.</p>
      * <p>About reusing the same PrepraredStatement across multiple updates 
      * (into the same transaction), Perplexity.ai said:<br /> 
      * <cite>&quot;There is a discussion about reusing a single 
@@ -6113,10 +6116,12 @@ public class DBWrapper extends QueryImpl {
      *
      * @param user      utente loggato
      * @param params    mappa contenente i parametri di navigazione
+     * @param c1l2Id    stringa contenente l'id di una struttura di 2° livello su cui generare la misura
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
     public void insertMeasure(PersonBean user, 
-                              HashMap<String, LinkedHashMap<String, String>> params) 
+                              HashMap<String, LinkedHashMap<String, String>> params,
+                              int c1l2Id) 
                        throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement ps, pst, pst1, ps1, ps2, ps3, pstm = null;
@@ -6228,7 +6233,7 @@ public class DBWrapper extends QueryImpl {
                     ps1.setString(++nextParam, CP1);
                     // === Collegamento a struttura_liv1 ===
                     String sc1L1 = measure.get("sc1-1");
-                    // La capofila1-struttura_liv1 è obbligatoria
+                    // La capofila1-struttura_liv1 è obbligatoria (non puo' mai essere null)
                     String idC1L1AsString = sc1L1.substring(sc1L1.indexOf(DOT) + 1, sc1L1.indexOf('-'));
                     int idC1L1 = Integer.parseInt(idC1L1AsString);
                     ps1.setInt(++nextParam, idC1L1);
@@ -6239,8 +6244,8 @@ public class DBWrapper extends QueryImpl {
                         int id = Integer.parseInt(idAsString);
                         ps1.setInt(++nextParam, id);
                     } else {
-                        // Se la C1L2 è vuota vuol dire che la misura dev'essere propagata su tutte le C1L2
-                        ps1.setNull(++nextParam, Types.NULL);
+                        // Se la C1L2 è vuota vuol dire che deve usare il parametro ricevuto come argomento
+                        ps1.setInt(++nextParam, c1l2Id);
                     }
                     // === Collegamento a struttura_liv3 === 
                     String sc1L3 = measure.get("sc1-3");
