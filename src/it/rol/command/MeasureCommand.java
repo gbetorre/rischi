@@ -292,7 +292,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                 // Creazione della tabella che conterrà i valori dei parametri passati dalle form
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
-                String c1l1id = loadParams(part, req, params);
+                String c1l1IdAsString = loadParams(part, req, params);
                 /* ======================= @PostMapping ======================= */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
@@ -303,15 +303,21 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                              *        PROCESS Form to INSERT new Measure        *
                              * ************************************************ */
                             // Se il codice della Capofila1 Livello1 (C1L1) è significativo
-                            if (!c1l1id.equals(DASH)) {
+                            if (!c1l1IdAsString.equals(DASH)) {
                                 // Recupera le strutture della rilevazione corrente
                                 structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
                                 // Travasa le strutture in una mappa piatta indicizzata per codice
                                 flatStructs = AuditCommand.decantStructs(structs);
+                                // Recupera elenco strutture figlie di C1L1
+                                Vector<DepartmentBean> l2s = flatStructs.get(c1l1IdAsString);
                                 // Per ogni figlia di L2 della C1L1
-                                    // Genera una misura associandola alla figlia
+                                for (DepartmentBean c1l2 : l2s) {
+                                    // Genera una misura associandola alla figlia corrente
+                                    db.insertMeasure(user, params, c1l2.getId());
+                                }
+                            } else {
+                                db.insertMeasure(user, params, DEFAULT_ID);
                             }
-                            db.insertMeasure(user, params);
                             // Prepara la redirect 
                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_MEASURE + 
                                        AMPERSAND + PARAM_SURVEY + EQ + codeSur +
