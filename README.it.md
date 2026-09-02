@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (33 versioni)
+### 2026 (34 versioni)
 
+- [2.7.4] (02/09/2026) Adeguamento form di inserimento misura di mitigazione per gestire la creazione automatica di misure selezionando solo la capofila generica
 - [2.7.3] (28/08/2026) Visualizzazione di tutti gli indicatori di monitoraggio definiti per ciascuna fase
 - [2.7.2] (26/08/2026) Ordinate le strutture nella pagina iniziale del monitoraggio in base alla loro gerarchia
 - [2.7.1] (20/08/2026) Aggiunta gerarchia delle strutture nella pagina iniziale del monitoraggio
