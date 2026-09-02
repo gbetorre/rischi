@@ -6228,13 +6228,10 @@ public class DBWrapper extends QueryImpl {
                     ps1.setString(++nextParam, CP1);
                     // === Collegamento a struttura_liv1 ===
                     String sc1L1 = measure.get("sc1-1");
-                    if (!sc1L1.equals(VOID_STRING)) {
-                        String idAsString = sc1L1.substring(sc1L1.indexOf(DOT) + 1, sc1L1.indexOf('-'));
-                        int id = Integer.parseInt(idAsString);
-                        ps1.setInt(++nextParam, id);
-                    } else {
-                        ps1.setNull(++nextParam, Types.NULL);
-                    }
+                    // La capofila1-struttura_liv1 è obbligatoria
+                    String idC1L1AsString = sc1L1.substring(sc1L1.indexOf(DOT) + 1, sc1L1.indexOf('-'));
+                    int idC1L1 = Integer.parseInt(idC1L1AsString);
+                    ps1.setInt(++nextParam, idC1L1);
                     // === Collegamento a struttura_liv2 === 
                     String sc1L2 = measure.get("sc1-2");
                     if (!sc1L2.equals(VOID_STRING)) {
@@ -6242,6 +6239,7 @@ public class DBWrapper extends QueryImpl {
                         int id = Integer.parseInt(idAsString);
                         ps1.setInt(++nextParam, id);
                     } else {
+                        // Se la C1L2 è vuota vuol dire che la misura dev'essere propagata su tutte le C1L2
                         ps1.setNull(++nextParam, Types.NULL);
                     }
                     // === Collegamento a struttura_liv3 === 
