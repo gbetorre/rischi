@@ -787,8 +787,6 @@ public class AuditCommand extends ItemBean implements Command, Constants {
                                 throws CommandException {
         if (part.equals(PART_SELECT_STR)) {
             return decantStructs((ArrayList<DepartmentBean>) objects);
-        /*} else if(part.equals(PART_SELECT_QST)) {
-            return decantQuestions((ArrayList<QuestionBean>) objects);*/
         }
         String msg = FOR_NAME + "Valore di \'part\' non gestito.\n";
         LOG.severe(msg);
@@ -803,6 +801,16 @@ public class AuditCommand extends ItemBean implements Command, Constants {
      * in cui le chiavi sono rappresentate da oggetti String e i valori
      * sono rappresentati dalle figlie del nodo avente codice corrispondente
      * alla chiave.</p>
+     * Esempio:<pre>
+     * {1.9-1=[
+     * it.rol.bean.DepartmentBean: OFFERTA FORMATIVA, SERVIZI E SEGRETERIE STUDENTI (84),
+     * it.rol.bean.DepartmentBean: RISORSE FINANZIARIE (92),
+     * it.rol.bean.DepartmentBean: TECNICA, GARE-ACQUISTI E LOGISTICA (108),
+     * ...]}</pre>
+     * dove 1.9-1 (nell'esempio) &egrave; il codice della struttura che fa 
+     * da chiave della mappa ed &egrave; ricavato come segue:<pre>
+     * idThru + DOT + s1.getId() + DASH + s1.getLivello(); </pre> ovvero <pre>
+     * contatore . id_struttura - livello_struttura</pre>. 
      * <p>&Egrave; utile per un accesso pi&uacute; diretto alle figlie
      * di ogni struttura, evitando di dover ogni volta ciclare la struttura
      * matriciale fino al nodo di cui si vogliono ottenere le strutture figlie.</p>
