@@ -106,11 +106,6 @@
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.5.0</version>
         </plugin>
-        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_war_packaging -->
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>3.5.0</version>
-        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
@@ -135,6 +130,44 @@
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>3.1.4</version>
+        </plugin>
+        <!--1. Generazione Javadoc-->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.11.2</version> <!-- Usa l'ultima versione stabile -->
+          <configuration>
+            <!-- Imposta la cartella di destinazione sotto docs/javadoc -->
+            <outputDirectory>${project.basedir}/docs/javadoc</outputDirectory>
+            <!-- Nota: Maven concatena reportOutputDirectory + destDir, creando docs/javadoc -->
+            <!-- Rimuove la creazione automatica della cartella "apidocs" -->
+            <useStandardDocletOptions>false</useStandardDocletOptions>
+          </configuration>
+        </plugin>
+        <!-- 2. Spostamento automatico dei file per eliminare l'ingombro di apidocs -->
+        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_war_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.5.0</version>
+          <executions>
+              <execution>
+                  <id>copia-javadoc-corretto</id>
+                  <!-- Si attiva automaticamente subito dopo la generazione del javadoc -->
+                  <phase>process-resources</phase> 
+                  <goals>
+                      <goal>copy-resources</goal>
+                  </goals>
+                  <configuration>
+                      <outputDirectory>${project.basedir}/docs/javadoc</outputDirectory>
+                      <resources>
+                          <resource>
+                              <directory>${project.basedir}/docs/javadoc/apidocs</directory>
+                              <filtering>false</filtering>
+                          </resource>
+                      </resources>
+                  </configuration>
+              </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
