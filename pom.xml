@@ -140,6 +140,9 @@
             <!-- Imposta la cartella di destinazione sotto docs/javadoc -->
             <outputDirectory>${project.basedir}/docs/javadoc</outputDirectory>
             <!-- Nota: Maven concatena reportOutputDirectory + destDir, creando docs/javadoc -->
+            <!-- Personalizzazione dei titoli -->
+            <doctitle>Rischi On Line (ROL-RMS)</doctitle>
+            <windowtitle>Documentazione di ROL</windowtitle>
             <!-- Rimuove la creazione automatica della cartella "apidocs" -->
             <useStandardDocletOptions>false</useStandardDocletOptions>
           </configuration>
