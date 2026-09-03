@@ -135,7 +135,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.11.2</version> <!-- Usa l'ultima versione stabile -->
+          <version>3.12.0</version> <!-- Usa l'ultima versione stabile -->
           <configuration>
             <!-- Imposta la cartella di destinazione sotto docs/javadoc -->
             <outputDirectory>${project.basedir}/docs/javadoc</outputDirectory>
