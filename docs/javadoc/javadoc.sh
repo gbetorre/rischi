@@ -1,0 +1,1 @@
+/home/trrgnr59/.p2/pool/plugins/org.eclipse.justj.openjdk.hotspot.jre.full.linux.x86_64_21.0.7.v20250502-0916/jre/bin/javadoc -J-Duser.language= -J-Duser.country= @options @packages

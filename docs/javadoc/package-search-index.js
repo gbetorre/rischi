@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"it.rol"},{"l":"it.rol.bean"},{"l":"it.rol.command"},{"l":"it.rol.db"},{"l":"it.rol.exception"},{"l":"it.rol.manager"},{"l":"it.rol.util"}];updateSearchResults();
