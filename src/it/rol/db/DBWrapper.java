@@ -4122,7 +4122,7 @@ public class DBWrapper extends QueryImpl {
     
     /**
      * <p>Data una rilevazione, restituisce un elenco di misure di prevenzione 
-     * trovate, oppure una specifica misura, in funzione dei parametri ricevuti.<br />
+     * trovate, oppure una specifica misura, in funzione dei parametri ricevuti.</p>
      * In particolare: <dl>
      * <dt>se si passa il codice della misura sul II parametro e 0 sul III parametro </dt>
      * <dd>restituisce una lista vettoriale contenente la misura avente il codice ricevuto (se esiste), oppure una lista vuota (se non esiste)</dd>
@@ -4130,7 +4130,7 @@ public class DBWrapper extends QueryImpl {
      * <dd>restituisce l'elenco completo delle misure di prevenzione trovate nella rilevazione passata sul IV parametro</dd>
      * <dt>se si passa UNIX_EPOCH (1° gennaio 1970) o una data molto vecchia sul 4° parametro</dt>
      * <dd>restituisce tutte le misure di mitigazione; altrimenti, restituisce solo le misure con data scadenza successiva (strettamente maggiore) della data passata</dd> 
-     * </dl></p>
+     * </dl>
      * 
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param code      il codice di una misura cercata oppure una stringa vuota in linguaggio SQL
@@ -4849,6 +4849,8 @@ public class DBWrapper extends QueryImpl {
                 String capofilaLabel = CP1.substring(NOTHING, CP1.indexOf(BLANK_SPACE)) + PER_CENT;
                 pst = con.prepareStatement(GET_STRUCTS_BY_ROLE);
                 pst.clearParameters();
+                pst.setString(++nextParam, capofilaLabel);
+                pst.setInt(++nextParam, survey.getId());
                 pst.setString(++nextParam, capofilaLabel);
                 pst.setInt(++nextParam, survey.getId());
                 pst.setString(++nextParam, capofilaLabel);
