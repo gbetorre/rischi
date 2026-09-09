@@ -1474,21 +1474,6 @@ public interface Query extends Serializable {
             "       AND MST.id_struttura_liv4 IS NULL" +
             "       AND MST.id_rilevazione = ?" +
             "   GROUP BY (S2.id, S2.prefisso, S2.nome)" +
-            "UNION" +
-            "   SELECT" +
-            "       S1.id                               AS \"id\"" +
-            "   ,   1                                   AS \"livello\"" +
-            "   ,   S1.prefisso                         AS \"prefisso\"" +  
-            "   ,   S1.nome                             AS \"nome\"" +
-            "   ,   count(MST.cod_misura)::SMALLINT     AS \"fte\"" +
-            "   FROM struttura_liv1 S1" +
-            "       INNER JOIN misura_struttura MST ON S1.id = MST.id_struttura_liv1" +
-            "   WHERE   MST.ruolo ILIKE ?" +
-            "       AND MST.id_struttura_liv2 IS NULL" +
-            "       AND MST.id_struttura_liv3 IS NULL" +
-            "       AND MST.id_struttura_liv4 IS NULL" +
-            "       AND MST.id_rilevazione = ?" +
-            "   GROUP BY (S1.id, S1.prefisso, S1.nome)" +
             "   ORDER BY livello, prefisso, id";
     
     /**
