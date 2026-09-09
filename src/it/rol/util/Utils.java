@@ -284,7 +284,7 @@ public class Utils implements Constants {
      * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/Date.html">
      * java.util.Date</a>.<br />
      * Il motivo per cui &egrave; preferito un GregorianCalendar a una Date
-     * &egrave, che la
+     * &egrave; che la
      * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/Date.html">
      * java.util.Date</a>
      * <cite id="stackoverflow">ha molti metodi di trasformazione deprecati,
@@ -351,7 +351,7 @@ public class Utils implements Constants {
      * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/Date.html">
      * java.util.Date</a>.<br />
      * Il motivo per cui &egrave; preferito un GregorianCalendar a una Date
-     * &egrave, che la
+     * &egrave; che la
      * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/Date.html">
      * java.util.Date</a>
      * <cite id="stackoverflow">ha molti metodi di trasformazione deprecati,
@@ -408,7 +408,7 @@ public class Utils implements Constants {
      * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/Date.html">
      * java.util.Date</a>.<br />
      * Il motivo per cui &egrave; preferito un GregorianCalendar a una Date
-     * &egrave, che la
+     * &egrave; che la
      * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/Date.html">
      * java.util.Date</a>
      * <cite id="stackoverflow">ha molti metodi di trasformazione deprecati,
@@ -422,7 +422,7 @@ public class Utils implements Constants {
      * <pre>
      * java.util.Date enddate = getDefaultEndDate(10).getTime();
      * </pre>
-     * dove 10 &egrave, in questo caso, ovviamente, un valore arbitrario
+     * dove 10 &egrave; in questo caso, ovviamente, un valore arbitrario
      * (sta per un intervallo di ricerca di 10 anni!).</p>
      *
      * @param shift intero corrispondente al numero di anni da sommare all'anno di inizio ricerca per ottenere l'anno di fine ricerca

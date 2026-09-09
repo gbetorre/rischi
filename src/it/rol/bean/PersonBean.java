@@ -334,8 +334,8 @@ public class PersonBean implements Serializable {
     /**
      * @param cognome
      */
-    public void setCognome(String string) {
-        cognome = string;
+    public void setCognome(String cognome) {
+        this.cognome = cognome;
     }
 
     /**
