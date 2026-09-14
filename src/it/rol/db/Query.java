@@ -1381,6 +1381,35 @@ public interface Query extends Serializable {
             "   ,       MST.id_struttura_liv4";
         
     /**
+     * <p>Verifica se a una struttura di livello 1 (L1) sono collegate molteplici
+     * strutture di livello 2.</p> 
+     * <p>La logica &egrave; la seguente:<br><b>
+     * Se MAX(id_struttura_liv3) &egrave; null AND count(DISTINCT id_struttura_liv2) > 1
+     * allora vuol dire che sotto la L1 ci sono tutte le sue figlie L2 collegate
+     * in qualit&agrave; di strutture capofila</b> (fino a un massimo di 3
+     * strutture L1 con tutte le figlie che fanno da capofila 1, capofila 2 
+     * e capofila 3).
+     * In tutti gli altri casi si avrà una sola struttura capofila 1
+     * (con una eventuale capofila 2 e una eventuale capofila 3) - che &egrave;
+     * il funzionamento classico dell'associazione con la capofila·</p>
+     */
+    public static final String GET_STRUCTS_SIZE_BY_MEASURE = 
+            "SELECT " +
+            "       MST.ruolo                               AS \"extraInfo\"" +
+            "   ,   MST.id_struttura_liv1                   AS \"cod1\"" +
+            "   ,   count(DISTINCT MST.id_struttura_liv2)   AS \"cod2\"" +
+            "   ,   MAX(MST.id_struttura_liv3)              AS \"cod3\"" +
+            "   ,   MAX(MST.id_struttura_liv4)              AS \"cod4\"" +
+            "   ,   MST.id_rilevazione                      AS \"value3\"" +
+            "   FROM misura_struttura MST" +
+            "   WHERE   MST.cod_misura = ?" +
+            "       AND MST.ruolo ILIKE ?" + 
+            "       AND MST.id_rilevazione = ?" +
+            "   GROUP BY MST.ruolo " +
+            "   ,       MST.id_struttura_liv1" +
+            "   ,       MST.id_rilevazione";
+ 
+    /**
      * <p>Estrae i rischi corruttivi a cui &egrave; stata applicata 
      * una specifica misura di prevenzione, il cui codice viene 
      * passato come parametro, nel contesto di una specifica rilevazione, 
@@ -2132,7 +2161,6 @@ public interface Query extends Serializable {
      */
     public static final String INSERT_MEASURE_STRUCT =
             "INSERT INTO misura_struttura" +
-            //"   (   id" +
             "   (   ruolo" +
             "   ,   id_struttura_liv1" +
             "   ,   id_struttura_liv2" +
@@ -2144,7 +2172,6 @@ public interface Query extends Serializable {
             "   ,   ora_ultima_modifica " +
             "   ,   id_usr_ultima_modifica" +
             "   )" +
-            //"   VALUES (? " +       // id
             "   VALUES (? " +       // ruolo
             "   ,       ? " +       // id_struttura_liv1
             "   ,       ? " +       // id_struttura_liv2
