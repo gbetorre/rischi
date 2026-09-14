@@ -100,6 +100,12 @@ public class MeasureBean extends CodeBean {
     private ArrayList<DepartmentBean> capofila3;
     /** Lista di strutture gregarie che sovrintendono alla misura */
     private ArrayList<DepartmentBean> gregarie;
+    /** Flag di capofila 1 multiple */
+    private boolean capofilaMultiple;
+    /** Flag di capofila 2 multiple */
+    private boolean capofila2Multiple;
+    /** Flag di capofila 3 multiple */
+    private boolean capofila3Multiple;
     /** Obiettivo PIAO  */
     private String obiettivo;
     /** Ruolo  */
@@ -135,6 +141,7 @@ public class MeasureBean extends CodeBean {
         rilevazione = null;
         tipologie = null;
         capofila = capofila2 = capofila3 = gregarie = null;
+        capofilaMultiple = capofila2Multiple = capofila3Multiple = false;
         obiettivo = ruolo = null;
         dettagli = false;
         fasi = null;
@@ -529,7 +536,7 @@ public class MeasureBean extends CodeBean {
      * restituita corrisponder&agrave; ad una semplice conversione di tipo, 
      * con relativo travaso semplice dei valori degli attributi.</li> 
      * 
-     * @param struttura - struttura destrutturata da travasare
+     * @param struttura struttura destrutturata da travasare
      * @return <code>DepartmentBean</code> - struttura travasata, contenente anche la gerarchia delle strutture figlie se capofila
      */
     @SuppressWarnings("static-method")
@@ -621,7 +628,7 @@ public class MeasureBean extends CodeBean {
      * significativo,la "reale" capofila, rappresentando i nodi precedenti 
      * soltanto la memorizzazione della sua gerarchia.
      * 
-     * @param capofilaTree - la struttura gerarchica di struttura capofila  
+     * @param capofilaTree  la struttura gerarchica di struttura capofila  
      * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - la struttura capofila in cui i nodi sono stati trasformati in elementi di una lista
      */
     @SuppressWarnings("static-method")
@@ -647,6 +654,60 @@ public class MeasureBean extends CodeBean {
         return capofilaAsList;
     }
     
+    
+    /**
+     * Trasforma una struttura capofila (che può contenere associazioni multiple ad ogni livello)
+     * in una lista piatta di tutte le strutture coinvolte nella gerarchia.
+     * Gestisce le associazioni multiple (uno-a-molti) introdotte con le nuove feature,
+     * evitando la perdita di nodi causata dal vecchio approccio basato su .firstElement().
+     * 
+     * @param capofilaTree  la struttura gerarchica radice
+     * @param getAll        flag specificante se devono essere recuperate tutte le capofila1, capofila2 etc (true) o solo le prime figlie (false) 
+     * @return <code>ArrayList&lt;DepartmentBean&gt;</code> - Tutti i nodi dell'albero appiattiti in una lista
+     */
+    public ArrayList<DepartmentBean> getCapofila(DepartmentBean capofilaTree, 
+                                                 boolean getAll) {
+        // Se non vuole tutti, restituisce solo le "prime figlie" di ogni ramo
+        if (!getAll) {
+            return this.getCapofila(capofilaTree);
+        }
+        // Altrimenti, restituisce tutte le capofila
+        ArrayList<DepartmentBean> capofilaAsList = new ArrayList<>();
+        if (capofilaTree == null) {
+            return capofilaAsList;
+        }
+        // Sfrutta una funzione ricorsiva interna o un'esplorazione per accumulare i nodi
+        appiattisciAlbero(capofilaTree, capofilaAsList);
+        return capofilaAsList;
+    }
+    
+    
+    /**
+     * <p>Metodo ricorsivo di supporto che esplora l'intero albero delle strutture
+     * partendo da un nodo radice e ne accumula tutti i componenti.</p>
+     * <p>A differenza dei vecchi approcci basati sul recupero del singolo ramo, 
+     * questo metodo cicla su tutte le ramificazioni disponibili ad ogni livello, 
+     * permettendo il corretto recupero e l'appiattimento anche in caso di 
+     * associazioni multiple (uno-a-molti).</p>
+     *
+     * @param nodoCorrente il nodo dell'albero (struttura) attualmente in fase di scansione
+     * @param accumulatore la lista piatta all'interno della quale vengono memorizzati tutti i nodi intercettati durante l'esplorazione ricorsiva
+     */
+    private void appiattisciAlbero(DepartmentBean nodoCorrente, 
+                                   ArrayList<DepartmentBean> accumulatore) {
+        if (nodoCorrente == null) {
+            return;
+        }
+        // Aggiunge il nodo corrente (che sia L1, L2, L3 o L4)
+        accumulatore.add(nodoCorrente);
+        // Se il nodo ha dei figli (Vector di DepartmentBean), li esplora TUTTI, non solo il primo!
+        if (nodoCorrente.getFiglie() != null && !nodoCorrente.getFiglie().isEmpty()) {
+            for (DepartmentBean figlio : nodoCorrente.getFiglie()) {
+                appiattisciAlbero(figlio, accumulatore);
+            }
+        }
+    }
+
     
     /* ********************************************************* *
      *      Metodi getter e setter per strutture capofila 2      *
@@ -772,6 +833,81 @@ public class MeasureBean extends CodeBean {
     
     
     /* ********************************************************* *
+     *   Metodi getter e setter per contenente capofila multiple *
+     * ********************************************************* */
+
+    /**
+     * Restituisce <code>true</code> se la misura corrente contiene 
+     * capofila multiple.
+     * 
+     * @return <code>capofilaMultiple</code> - true se la misura contiene multiple capofila 1
+     */
+    public boolean isCapofilaMultiple() {
+        return capofilaMultiple;
+    }
+
+
+    /**
+     * Imposta il flag specificante se la misura ha capofila 1 multiple.
+     * 
+     * @param capofilaMultiple - flag specificante la presenza di multiple capofila 1
+     */
+    public void setCapofilaMultiple(boolean capofilaMultiple) {
+        this.capofilaMultiple = capofilaMultiple;
+    }
+    
+    
+    /* ********************************************************* *
+     * Metodi getter e setter per contenente capofila 2 multiple *
+     * ********************************************************* */
+
+    /**
+     * Restituisce <code>true</code> se la misura corrente contiene 
+     * capofila 2 multiple.
+     * 
+     * @return <code>capofila2Multiple</code> - true se la misura contiene multiple capofila 2
+     */
+    public boolean isCapofila2Multiple() {
+        return capofila2Multiple;
+    }
+
+
+    /**
+     * Imposta il flag specificante se la misura ha capofila 2 multiple.
+     * 
+     * @param capofila2Multiple - flag specificante la presenza di multiple capofila 2
+     */
+    public void setCapofila2Multiple(boolean capofila2Multiple) {
+        this.capofila2Multiple = capofila2Multiple;
+    }
+    
+    
+    /* ********************************************************* *
+     * Metodi getter e setter per contenente capofila 3 multiple *
+     * ********************************************************* */
+
+    /**
+     * Restituisce <code>true</code> se la misura corrente contiene 
+     * capofila 3 multiple.
+     * 
+     * @return <code>capofila3Multiple</code> - true se la misura contiene multiple capofila 3
+     */
+    public boolean isCapofila3Multiple() {
+        return capofila3Multiple;
+    }
+
+
+    /**
+     * Imposta il flag specificante se la misura ha capofila 3 multiple.
+     * 
+     * @param capofila3Multiple - flag specificante la presenza di multiple capofila 3
+     */
+    public void setCapofila3Multiple(boolean capofila3Multiple) {
+        this.capofila3Multiple = capofila3Multiple;
+    }
+    
+    
+    /* ********************************************************* *
      *      Metodi getter e setter per dettagli monitoraggio     *
      * ********************************************************* */
 
@@ -799,7 +935,7 @@ public class MeasureBean extends CodeBean {
     
     
     /* ********************************************************* *
-     *      Metodi getter e setter per dettagli monitoraggio     *
+     *        Metodi getter e setter per data monitoraggio       *
      * ********************************************************* */
 
     /**
