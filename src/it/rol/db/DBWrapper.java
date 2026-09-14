@@ -575,6 +575,77 @@ public class DBWrapper extends QueryImpl {
 
 
     /**
+     * <p>Data una rilevazione e una struttura di primo livello, restituisce
+     * i suoi nodi subordinati.</p>
+     * <p><strong>NOTE:</strong></p><dl>
+     * <dt>Scomparsa del blocco finally:</dt> 
+     * <dd>Connection, PreparedStatement e ResultSet implementano tutti 
+     * l'interfaccia AutoCloseable. Java garantisce la loro chiusura sicura 
+     * al termine del blocco try, anche in caso di eccezioni.</dd>
+     * <dt>Rimozione di @SuppressWarnings({ "null" }):</dt>
+     * <dd>Non avendo più variabili inizializzate a null fuori dal blocco 
+     * (come con = null), il compilatore non genererà più falsi allarmi 
+     * sui potenziali puntatori nulli.</dd>
+     * <dt>Rimozione del NullPointerException fittizio:</dt> 
+     * <dd>Nel finally veniva catturata una NullPointerException nel caso in cui 
+     * la connessione fosse fallita in partenza. Con il try-with-resources, 
+     * se rol_manager.getConnection() fallisce o restituisce errore, 
+     * il blocco non viene nemmeno avviato e le risorse successive 
+     * non vengono allocate, eliminando alla radice il problema.</dd>
+     * <dt>Ottimizzazione delle stringhe:</dt> 
+     * <dd>Rimosso l'uso ridondante di StringBuffer e String.valueOf(query). 
+     * La stringa SQL viene estratta direttamente in una variabile String queryStr.</dd>
+     * <dt>Javadoc corretto:</dt> 
+     * <dd>Rimossi i tag HTML malformati ed aggiunto il parametro 
+     * s1 mancante, per evitare da parte del plugin Maven 
+     * errori in fase di build.</dd></dl>
+     *
+     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param s1        oggetto della struttura di primo livello
+     * @param survey    oggetto contenente i dati della rilevazione rispetto a cui si vogliono recuperare le strutture
+     * @return <code>Vector&lt;DepartmentBean&gt;</code> - Vector di strutture di livello 2 figlie di s1 (livello 1)
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    public Vector<DepartmentBean> getStructuresByStructure(PersonBean user,
+                                                           DepartmentBean s1,
+                                                           CodeBean survey)
+                                                    throws WebStorageException {
+        // TODO: Controllare se user è superuser
+        Vector<DepartmentBean> vS2 = new Vector<>();
+        try {
+            String queryStr = getQueryStructures(survey.getId(), NOTHING, NOTHING, NOTHING, s1.getId());
+            // Le risorse vengono aperte e gestite automaticamente in ordine di dichiarazione
+            try (Connection con = rol_manager.getConnection();
+                 PreparedStatement pst = con.prepareStatement(queryStr);
+                 ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {               
+                    // Crea una struttura di II livello vuota
+                    DepartmentBean s2 = new DepartmentBean();
+                    // Valorizza la struttura di II livello tramite la query
+                    BeanUtil.populate(s2, rs);
+                    // Ne imposta il livello
+                    s2.setLivello((byte) 2);
+                    // Ne imposta il padre
+                    s2.setPadre(s1);
+                    // Aggiunge il II livello all'elenco dei II livello
+                    vS2.add(s2);
+                }
+                s1.setFiglie(vS2);
+                return vS2;
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e' verificato un problema nell'accesso ad un attributo obbligatorio di un bean.\n";
+            LOG.severe(msg + anve.getMessage());
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto DepartmentBean non valorizzato; problema nella query delle strutture.\n";
+            LOG.severe(msg + sqle.getMessage());
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        }
+    }
+
+    
+    /**
      * <p>Dato un id e un livello, restituisce una struttura selezionata 
      * in base a quell'id nella tabella identificata in base al livello.</p>
      *
@@ -4146,7 +4217,7 @@ public class DBWrapper extends QueryImpl {
                                        throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
-            ResultSet rs, rs1, rs2, rs3 = null;
+            ResultSet rs, rs1, rs2, rs3, rs4 = null;
             int nextParam = NOTHING;
             MeasureBean measure = null;
             AbstractList<MeasureBean> measures = new ArrayList<>(); 
@@ -4194,35 +4265,69 @@ public class DBWrapper extends QueryImpl {
                     ArrayList<DepartmentBean> capofila2 = new ArrayList<>();
                     ArrayList<DepartmentBean> capofila3 = new ArrayList<>();
                     ArrayList<DepartmentBean> gregarie = new ArrayList<>();
-                    pst = con.prepareStatement(GET_STRUCTS_BY_MEASURE);
+                    pst = con.prepareStatement(GET_STRUCTS_SIZE_BY_MEASURE);
                     pst.clearParameters();
                     pst.setString(++nextParam, measure.getCodice());
-                    pst.setString(++nextParam, String.valueOf(PER_CENT));
+                    pst.setString(++nextParam, CP1);
                     pst.setInt(++nextParam, survey.getId());
                     rs2 = pst.executeQuery();
                     while (rs2.next()) {
-                        // Crea una struttura generica
-                        ItemBean st = new ItemBean();
-                        // La valorizza col risultato della query
-                        BeanUtil.populate(st, rs2);
-                        // Trasforma la capofila/gregaria da ItemBean a DepartmentBean
-                        DepartmentBean struttura = measure.getStruttura(st);
-                        // Smista le strutture trovate
-                        if (st.getExtraInfo().equals(CP1)) {
-                            // Trasforma la capofila da DepartmentBean a ArrayList
-                            capofila1 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(CP2)) {
-                            capofila2 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(CP3)) {
-                            capofila3 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(GR)) {
-                            gregarie.add(struttura);
+                        // Questo oggetto contiene i dati per determinare la situazione
+                        ItemBean count = new ItemBean();
+                        BeanUtil.populate(count, rs2);
+                        // Controlla se esiste una struttura livello 3
+                        if (count.getCod3() == NOTHING) {
+                            // Se è NOTHING (null) esaminiamo il conteggio L2
+                            if (count.getCod2() > ELEMENT_LEV_1) {
+                                // Se il conteggio L2 è > 1 allora tutte le L2 di L1 sono capofila
+                                DepartmentBean c1 = new DepartmentBean();
+                                c1.setId(count.getCod1());
+                                // Ottiene tutte le figlie L2 di L1
+                                Vector<DepartmentBean> vS2 = this.getStructuresByStructure(user, c1, survey);
+                                // Smista le strutture trovate
+                                if (count.getExtraInfo().equals(CP1)) {
+                                    // Trasforma la capofila da DepartmentBean a ArrayList
+                                    capofila1 = new ArrayList<>(vS2);
+                                    // Traccia la situazione
+                                    measure.setCapofilaMultiple(true);
+                                }
+                            }
                         } else {
-                            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del ruolo di una struttura.\n";
-                            LOG.severe(msg);
-                            throw new WebStorageException(msg);
+                            // Se non è null, siamo nella situazione della catena profonda
+                            nextParam = NOTHING;
+                            pst = con.prepareStatement(GET_STRUCTS_BY_MEASURE);
+                            pst.clearParameters();
+                            pst.setString(++nextParam, measure.getCodice());
+                            pst.setString(++nextParam, String.valueOf(PER_CENT));
+                            pst.setInt(++nextParam, survey.getId());
+                            rs3 = pst.executeQuery();
+                            while (rs3.next()) {
+                                // Crea una struttura generica
+                                ItemBean st = new ItemBean();
+                                // La valorizza col risultato della query
+                                BeanUtil.populate(st, rs3);
+                                // Trasforma la capofila/gregaria da ItemBean a DepartmentBean
+                                DepartmentBean struttura = measure.getStruttura(st);
+                                // Smista le strutture trovate
+                                if (st.getExtraInfo().equals(CP1)) {
+                                    // Trasforma la capofila da DepartmentBean a ArrayList
+                                    capofila1 = measure.getCapofila(struttura);
+                                } else if (st.getExtraInfo().equals(CP2)) {
+                                    capofila2 = measure.getCapofila(struttura);
+                                } else if (st.getExtraInfo().equals(CP3)) {
+                                    capofila3 = measure.getCapofila(struttura);
+                                } else if (st.getExtraInfo().equals(GR)) {
+                                    gregarie.add(struttura);
+                                } else {
+                                    String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del ruolo di una struttura.\n";
+                                    LOG.severe(msg);
+                                    throw new WebStorageException(msg);
+                                }
+                            }
                         }
                     }
+                    
+                    
                     measure.setCapofila(capofila1);
                     measure.setCapofila2(capofila2);
                     measure.setCapofila3(capofila3);
@@ -4237,12 +4342,12 @@ public class DBWrapper extends QueryImpl {
                     pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
                     pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
                     pst.setInt(++nextParam, survey.getId());
-                    rs3 = pst.executeQuery();
-                    while (rs3.next()) {
+                    rs4 = pst.executeQuery();
+                    while (rs4.next()) {
                         // Crea una fase vuota
                         ActivityBean fs = new ActivityBean();
                         // La valorizza col risultato della query
-                        BeanUtil.populate(fs, rs3);
+                        BeanUtil.populate(fs, rs4);
                         // Cerca l'indicatore collegato eventualmente alla fase
                         ArrayList<IndicatorBean> inds = getIndicatorsByActivity(user, fs, survey);
                         // Aggiunge l'indicatore alla fase se significativo
@@ -6223,52 +6328,85 @@ public class DBWrapper extends QueryImpl {
                     LOG.info(updateCounts.length + " tipologie di misura in transazione attiva.\n");
                     /* ******************************************************************************
                     ** === 4. QUERY contestuale di inserimento in misura_struttura (capofila 1) === */
-                    nextParam = NOTHING;
+                    
                     ps1 = con.prepareStatement(INSERT_MEASURE_STRUCT);
-                    ps1.setString(++nextParam, CP1);
                     // === Collegamento a struttura_liv1 ===
                     String sc1L1 = measure.get("sc1-1");
-                    // La capofila1-struttura_liv1 è obbligatoria
-                    String idC1L1AsString = sc1L1.substring(sc1L1.indexOf(DOT) + 1, sc1L1.indexOf('-'));
-                    int idC1L1 = Integer.parseInt(idC1L1AsString);
-                    ps1.setInt(++nextParam, idC1L1);
                     // === Collegamento a struttura_liv2 === 
                     String sc1L2 = measure.get("sc1-2");
-                    if (!sc1L2.equals(VOID_STRING)) {
-                        String idAsString = sc1L2.substring(sc1L2.indexOf(DOT) + 1, sc1L2.indexOf('-'));
-                        int id = Integer.parseInt(idAsString);
-                        ps1.setInt(++nextParam, id);
+                    // Se la L2 è "tutte" deve fare molte query
+                    if (sc1L2.equals("*")) {
+                        // Se la C1L2 è "tutte" (*) vuol dire che la misura dev'essere propagata su tutte le C1L2
+
+                        // La capofila1-struttura_liv1 è obbligatoria
+                        String idC1L1AsString = sc1L1.substring(sc1L1.indexOf(DOT) + 1, sc1L1.indexOf('-'));
+                        int idC1L1 = Integer.parseInt(idC1L1AsString);
+                        // Rilevazione
+                        CodeBean surveyAsBean = new CodeBean();
+                        surveyAsBean.setId(Integer.parseInt(survey.get(PARAM_SURVEY)));
+                        // Capofila 1
+                        DepartmentBean c1 = new DepartmentBean();
+                        c1.setId(idC1L1);
+                        // Ottiene tutte le figlie L2 di L1
+                        Vector<DepartmentBean> vS2 = this.getStructuresByStructure(user, c1, surveyAsBean);
+                        for (int i = 0; i < vS2.size(); i++) {
+                            nextParam = NOTHING;
+                            DepartmentBean s2 = vS2.get(i);
+                            int s2id = s2.getId();
+                            ps1.setString(++nextParam, CP1);
+                            ps1.setInt(++nextParam, idC1L1);        // id capofila 1 livello 1
+                            ps1.setInt(++nextParam, s2id);          // id capofila 1 livello 2
+                            ps1.setNull(++nextParam, Types.NULL);   // id capofila 1 livello 3
+                            ps1.setNull(++nextParam, Types.NULL);   // id capofila 1 livello 4
+                            ps1.setString(++nextParam, code);       // codice misura
+                            /* === Collegamento a rilevazione === */
+                            ps1.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                            /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                            ps1.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                            ps1.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                            ps1.setInt(++nextParam, user.getUsrId());
+                            ps1.addBatch();
+                        }
+                        updateCounts = ps1.executeBatch();                        
                     } else {
-                        // Se la C1L2 è vuota vuol dire che la misura dev'essere propagata su tutte le C1L2
-                        ps1.setNull(++nextParam, Types.NULL);
+                        // Altrimenti la C1L2 dev'essere su una struttura specifica
+                        ps1.setString(++nextParam, CP1);
+                        // La capofila1-struttura_liv1 è obbligatoria
+                        String idC1L1AsString = sc1L1.substring(sc1L1.indexOf(DOT) + 1, sc1L1.indexOf('-'));
+                        int idC1L1 = Integer.parseInt(idC1L1AsString);
+                        ps1.setInt(++nextParam, idC1L1);
+                        // Qui c'è una sola C1L2 (a questo punto anch'essa obbligatoria)
+                        String idC1L2AsString = sc1L2.substring(sc1L2.indexOf(DOT) + 1, sc1L2.indexOf('-'));
+                        int idC1L2 = Integer.parseInt(idC1L2AsString);
+                        ps1.setInt(++nextParam, idC1L2);
+                        // === Collegamento a struttura_liv3 === 
+                        String sc1L3 = measure.get("sc1-3");
+                        if (!sc1L3.equals(VOID_STRING)) {
+                            String idAsString = sc1L3.substring(sc1L3.indexOf(DOT) + 1, sc1L3.indexOf('-'));
+                            int id = Integer.parseInt(idAsString);
+                            ps1.setInt(++nextParam, id);
+                        } else {
+                            ps1.setNull(++nextParam, Types.NULL);
+                        }
+                        // === Collegamento a struttura_liv4 === 
+                        String sc1L4 = measure.get("sc1-4");
+                        if (!sc1L4.equals(VOID_STRING)) {
+                            String idAsString = sc1L4.substring(sc1L4.indexOf(DOT) + 1, sc1L4.indexOf('-'));
+                            int id = Integer.parseInt(idAsString);
+                            ps1.setInt(++nextParam, id);
+                        } else {
+                            ps1.setNull(++nextParam, Types.NULL);
+                        }
+                        ps1.setString(++nextParam, code);
+                        /* === Collegamento a rilevazione === */
+                        ps1.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                        /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                        ps1.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                        ps1.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                        ps1.setInt(++nextParam, user.getUsrId());
+                        // INVIO
+                        ps1.executeUpdate();
                     }
-                    // === Collegamento a struttura_liv3 === 
-                    String sc1L3 = measure.get("sc1-3");
-                    if (!sc1L3.equals(VOID_STRING)) {
-                        String idAsString = sc1L3.substring(sc1L3.indexOf(DOT) + 1, sc1L3.indexOf('-'));
-                        int id = Integer.parseInt(idAsString);
-                        ps1.setInt(++nextParam, id);
-                    } else {
-                        ps1.setNull(++nextParam, Types.NULL);
-                    }
-                    // === Collegamento a struttura_liv4 === 
-                    String sc1L4 = measure.get("sc1-4");
-                    if (!sc1L4.equals(VOID_STRING)) {
-                        String idAsString = sc1L4.substring(sc1L4.indexOf(DOT) + 1, sc1L4.indexOf('-'));
-                        int id = Integer.parseInt(idAsString);
-                        ps1.setInt(++nextParam, id);
-                    } else {
-                        ps1.setNull(++nextParam, Types.NULL);
-                    }
-                    ps1.setString(++nextParam, code);
-                    /* === Collegamento a rilevazione === */
-                    ps1.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
-                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
-                    ps1.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
-                    ps1.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
-                    ps1.setInt(++nextParam, user.getUsrId());
-                    // INVIO
-                    ps1.executeUpdate();
                     /* ******************************************************************************
                     ** === 5. QUERY contestuale di inserimento in misura_struttura (capofila 2) === */
                     nextParam = NOTHING;
