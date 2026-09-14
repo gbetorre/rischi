@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (36 versioni)
+### 2026 (37 versioni)
 
+- [2.7.7] (14/09/2026) Inizio implementazione rivista facility di creazione di associazioni multiple a molte capofila L2 dato il suo parent L1
 - [2.7.6] (09/09/2026) Revert facility di creazione di misure multiple
 - [2.7.5] (02/09/2026) Implementazione facility di creazione di misure multiple
 - [2.7.4] (01/09/2026) Adeguamento form di inserimento misura di mitigazione per gestire la creazione automatica di misure selezionando solo la capofila generica
