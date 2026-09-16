@@ -109,22 +109,32 @@
                 </li>
               </c:when>
               <c:otherwise>
-              <c:if test="${innerStatus.count eq ms.capofila.size()}">
+                <c:if test="${innerStatus.count eq ms.capofila.size()}">
                 <li>
                   <img src="${initParam.urlDirectoryImmagini}str-l${cp.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp.livello}" /> 
                   <c:out value="${cp.prefisso}" /> <c:out value="${cp.nome}" />
                 </li>
-              </c:if>
+                </c:if>
               </c:otherwise>
             </c:choose>
             </c:forEach>
             <c:forEach var="cp2" items="${ms.capofila2}" varStatus="innerStatus">
-              <c:if test="${innerStatus.count eq ms.capofila2.size()}">
+            <c:choose>
+              <c:when test="${ms.capofila2Multiple}">
                 <li>
                   <img src="${initParam.urlDirectoryImmagini}str-l${cp2.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp2.livello}" /> 
                   <c:out value="${cp2.prefisso}" /> <c:out value="${cp2.nome}" />
                 </li>
-              </c:if>
+              </c:when>
+              <c:otherwise>
+                <c:if test="${innerStatus.count eq ms.capofila2.size()}">
+                <li>
+                  <img src="${initParam.urlDirectoryImmagini}str-l${cp2.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp2.livello}" /> 
+                  <c:out value="${cp2.prefisso}" /> <c:out value="${cp2.nome}" />
+                </li>
+                </c:if>
+              </c:otherwise>
+            </c:choose>
             </c:forEach>
             <c:forEach var="cp3" items="${ms.capofila3}" varStatus="innerStatus">
               <c:if test="${innerStatus.count eq ms.capofila3.size()}">
