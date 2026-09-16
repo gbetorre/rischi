@@ -100,22 +100,44 @@
         </h5>
         <ul class="line">
         <c:forEach var="cp" items="${meas.capofila}" varStatus="innerStatus">
-          <c:if test="${innerStatus.count eq meas.capofila.size()}">
+        <c:choose>
+          <c:when test="${meas.capofilaMultiple}">
+            <li>
+              <span class="badge badge-pill bg-primary btn-small lightTable marginLeft align-middle">&nbsp;CAPOFILA&nbsp;</span>
+              <img src="${initParam.urlDirectoryImmagini}str-l${cp.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp.livello}" /> 
+              <c:out value="${cp.prefisso}" /> <c:out value="${cp.nome}" />
+            </li>
+          </c:when>
+          <c:otherwise>
+            <c:if test="${innerStatus.count eq meas.capofila.size()}">
             <li class="line">
               <img src="${initParam.urlDirectoryImmagini}str-l${cp.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp.livello}" /> 
               <c:out value="${cp.prefisso}" /> <c:out value="${cp.nome}" />
-              <span class="badge badge-pill bg-primary btn-small lightTable marginLeft align-middle">CAPOFILA</span>
+              <span class="badge badge-pill bg-primary btn-small lightTable marginLeft align-middle">&nbsp;CAPOFILA&nbsp;</span>
             </li>
-          </c:if>
+            </c:if>
+          </c:otherwise>
+        </c:choose>
         </c:forEach>
         <c:forEach var="cp2" items="${meas.capofila2}" varStatus="innerStatus">
-          <c:if test="${innerStatus.count eq meas.capofila2.size()}">
+        <c:choose>
+          <c:when test="${meas.capofilaMultiple}">
+            <li>
+              <span class="badge badge-pill bg-warning text-black btn-small lightTable marginLeft align-middle">CAPOFILA 2</span>
+              <img src="${initParam.urlDirectoryImmagini}str-l${cp2.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp2.livello}" /> 
+              <c:out value="${cp2.prefisso}" /> <c:out value="${cp2.nome}" />
+            </li>
+          </c:when>
+          <c:otherwise>
+            <c:if test="${innerStatus.count eq meas.capofila2.size()}">
             <li class="line">
               <img src="${initParam.urlDirectoryImmagini}str-l${cp2.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp2.livello}" /> 
               <c:out value="${cp2.prefisso}" /> <c:out value="${cp2.nome}" />
               <span class="badge badge-pill bg-warning text-black btn-small lightTable marginLeft align-middle">CAPOFILA 2</span>
             </li>
-          </c:if>
+            </c:if>
+          </c:otherwise>
+        </c:choose>
         </c:forEach>
         <c:forEach var="cp3" items="${meas.capofila3}" varStatus="innerStatus">
           <c:if test="${innerStatus.count eq meas.capofila3.size()}">
