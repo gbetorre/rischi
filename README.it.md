@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (37 versioni)
+### 2026 (38 versioni)
 
+- [2.7.8] (16/09/2026) Continuazione implementazione rivista facility di creazione di associazioni multiple a molte capofila L2 dato il suo ascendente L1
 - [2.7.7] (14/09/2026) Inizio implementazione rivista facility di creazione di associazioni multiple a molte capofila L2 dato il suo parent L1
 - [2.7.6] (09/09/2026) Revert facility di creazione di misure multiple
 - [2.7.5] (02/09/2026) Implementazione facility di creazione di misure multiple
