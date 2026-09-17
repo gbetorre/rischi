@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.7.9] (17/09/2026) [Continued implementation facility to link a measure to all l2 structures belonging to an l1](https://github.com/gbetorre/rischi/commits/main/?since=2026-09-17&until=2026-09-17)
 - [2.7.8] (16/09/2026) [Continued implementation facility to link a measure to all l2 structures belonging to an l1](https://github.com/gbetorre/rischi/commits/main/?since=2026-09-16&until=2026-09-16)
 - [2.7.7] (14/09/2026) [First implementation facility to link a measure to all l2 structures belonging to an l1](https://github.com/gbetorre/rischi/commits/main/?since=2026-09-14&until=2026-09-14)
 - [2.7.6] (09/09/2026) [Revert facility to generate a measure for each l2 structure belonging to an l1](https://github.com/gbetorre/rischi/commits/main/?since=2026-09-09&until=2026-09-09)
