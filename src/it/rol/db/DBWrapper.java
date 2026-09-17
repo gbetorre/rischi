@@ -4352,7 +4352,7 @@ public class DBWrapper extends QueryImpl {
                         String msg = FOR_NAME + "Si e\' verificato un problema durante la chiusura delle risorse: " + e.getMessage();
                         LOG.severe(msg);
                     }
-                    // Se ci sono capofila 1 L2 multiple, deve sostituire la C1L2 trovata
+                    // Se ci sono capofila 2 L2 multiple, deve sostituire la C2L2 trovata
                     nextParam = NOTHING;
                     pst = null;
                     pst = con.prepareStatement(GET_STRUCTS_SIZE_BY_MEASURE);
@@ -4369,16 +4369,16 @@ public class DBWrapper extends QueryImpl {
                         if (count.getCod3() == NOTHING) {
                             // Se è NOTHING (cioè NULL) esaminiamo il conteggio L2
                             if (count.getCod2() > ELEMENT_LEV_1) {
-                                // Se il conteggio L2 è > 1 allora tutte le L2 di L1 sono capofila
+                                // Se il conteggio L2 è > 1 allora tutte le L2 di L1 sono capofila 2
                                 DepartmentBean c2 = new DepartmentBean();
-                                // Quindi, rimuove la capofila1 calcolata in modo erroneo
+                                // Quindi, rimuove la capofila2 calcolata in modo erroneo
                                 if (capofila2 != null) {
                                     // 1. Svuota la vecchia lista mantenendo lo stesso identico puntatore
                                     capofila2.clear();
                                 }
-                                // Valorizza l'id di C1L1 (capofila 1 livello 1)
+                                // Valorizza l'id di C2L1 (capofila 2 livello 1)
                                 c2.setId(count.getCod1());
-                                // Ottiene tutte le figlie L2 di C1L1
+                                // Ottiene tutte le figlie L2 di 21L1
                                 Vector<DepartmentBean> vS2 = this.getStructuresByStructure(user, c2, survey);
                                 // Smista le strutture trovate
                                 if (count.getExtraInfo().equals(CP2)) {
@@ -4390,6 +4390,55 @@ public class DBWrapper extends QueryImpl {
                             }   // <- altrimenti, se non esiste una L3 ma c'è una sola L2, non deve fare niente
                         }   // <- altrimenti, se esiste una struttura di livello 3 non deve fare niente
                     }
+                    /* === Strutture capofila 3 L2 multiple | TODO: Ottimizzare === */
+                    // Chiusura diretta senza warning
+                    try {
+                        rs2.close();
+                        pst.close();
+                    } catch (Exception e) {
+                        // Log o gestione silenziosa dell'eccezione durante la chiusura
+                        String msg = FOR_NAME + "Si e\' verificato un problema durante la chiusura delle risorse: " + e.getMessage();
+                        LOG.severe(msg);
+                    }
+                    // Se ci sono capofila 3 L2 multiple, deve sostituire la C3L2 trovata
+                    nextParam = NOTHING;
+                    pst = null;
+                    pst = con.prepareStatement(GET_STRUCTS_SIZE_BY_MEASURE);
+                    pst.clearParameters();
+                    pst.setString(++nextParam, measure.getCodice());
+                    pst.setString(++nextParam, CP3);
+                    pst.setInt(++nextParam, survey.getId());
+                    rs2 = pst.executeQuery();
+                    while (rs2.next()) {
+                        // Questo oggetto contiene i dati per determinare la situazione
+                        ItemBean count = new ItemBean();
+                        BeanUtil.populate(count, rs2);
+                        // Controlla se la struttura livello 3 è NULL
+                        if (count.getCod3() == NOTHING) {
+                            // Se è NOTHING (cioè NULL) esaminiamo il conteggio L2
+                            if (count.getCod2() > ELEMENT_LEV_1) {
+                                // Se il conteggio L2 è > 1 allora tutte le L2 di L1 sono capofila
+                                DepartmentBean c3 = new DepartmentBean();
+                                // Quindi, rimuove la capofila3 calcolata in modo erroneo
+                                if (capofila3 != null) {
+                                    // 1. Svuota la vecchia lista mantenendo lo stesso identico puntatore
+                                    capofila3.clear();
+                                }
+                                // Valorizza l'id di C3L1 (capofila 3 livello 1)
+                                c3.setId(count.getCod1());
+                                // Ottiene tutte le figlie L2 di C2L1
+                                Vector<DepartmentBean> vS2 = this.getStructuresByStructure(user, c3, survey);
+                                // Smista le strutture trovate
+                                if (count.getExtraInfo().equals(CP3)) {
+                                    // Trasforma le capofila da DepartmentBean a ArrayList
+                                    capofila3 = new ArrayList<>(vS2);
+                                    // Traccia l'esistenza di capofila L2 multiple
+                                    measure.setCapofila3Multiple(true);
+                                }
+                            }   // <- altrimenti, se non esiste una L3 ma c'è una sola L2, non deve fare niente
+                        }   // <- altrimenti, se esiste una struttura di livello 3 non deve fare niente
+                    }
+                    // Valorizza finalmente le capofila
                     measure.setCapofila(capofila1);
                     measure.setCapofila2(capofila2);
                     measure.setCapofila3(capofila3);
@@ -6439,7 +6488,6 @@ public class DBWrapper extends QueryImpl {
                     LOG.info(updateCounts.length + " tipologie di misura in transazione attiva.\n");
                     /* ******************************************************************************
                     ** === 4. QUERY contestuale di inserimento in misura_struttura (capofila 1) === */
-                    
                     ps1 = con.prepareStatement(INSERT_MEASURE_STRUCT);
                     // === Collegamento a struttura_liv1 ===
                     String sc1L1 = measure.get("sc1-1");
@@ -6448,9 +6496,8 @@ public class DBWrapper extends QueryImpl {
                     // Se la L2 è "tutte" deve fare molte query
                     if (sc1L2.equals("*")) {
                         // Se la C1L2 è "tutte" (*) vuol dire che la misura dev'essere propagata su tutte le C1L2
-
+                        String idC1L1AsString = sc1L1.substring(sc1L1.indexOf(DOT) + 1, sc1L1.indexOf(DASH));
                         // La capofila1-struttura_liv1 è obbligatoria
-                        String idC1L1AsString = sc1L1.substring(sc1L1.indexOf(DOT) + 1, sc1L1.indexOf('-'));
                         int idC1L1 = Integer.parseInt(idC1L1AsString);
                         // Rilevazione
                         CodeBean surveyAsBean = new CodeBean();
@@ -6618,50 +6665,85 @@ public class DBWrapper extends QueryImpl {
                     String sc3L4 = measure.get("sc3-4");
                     // Se non è vero che tutti questi valori sono vuoti
                     if (!(sc3L1.equals(VOID_STRING) && sc3L2.equals(VOID_STRING) && sc3L3.equals(VOID_STRING) && sc3L4.equals(VOID_STRING))) {
-                        // Fa la query
+                        // Prepara la query
                         ps3 = con.prepareStatement(INSERT_MEASURE_STRUCT);
-                        ps3.setString(++nextParam, CP3);
-                        // === Collegamento a struttura_liv1 ===
-                            if (!sc3L1.equals(VOID_STRING) && !sc3L1.equals(String.valueOf(NOTHING))) {
-                            String idAsString = sc3L1.substring(sc3L1.indexOf(DOT) + 1, sc3L1.indexOf('-'));
-                            int id = Integer.parseInt(idAsString);
-                            ps3.setInt(++nextParam, id);
+                        // Controlla subito il valore di C3L2 perché se la C3L2 è "tutte" deve fare molte query
+                        if (sc3L2.equals("*")) {
+                            // Se la C3L2 è "tutte" (*) vuol dire che la misura dev'essere propagata su tutte le C3L2
+                            String idC3L1AsString = sc3L1.substring(sc3L1.indexOf(DOT) + 1, sc3L1.indexOf(DASH));
+                            int idC3L1 = Integer.parseInt(idC3L1AsString);
+                            // Rilevazione
+                            CodeBean surveyAsBean = new CodeBean();
+                            surveyAsBean.setId(Integer.parseInt(survey.get(PARAM_SURVEY)));
+                            // Capofila 3
+                            DepartmentBean c3 = new DepartmentBean();
+                            c3.setId(idC3L1);
+                            // Ottiene tutte le figlie L2 di L1
+                            Vector<DepartmentBean> vS2 = this.getStructuresByStructure(user, c3, surveyAsBean);
+                            for (int i = 0; i < vS2.size(); i++) {
+                                DepartmentBean s2 = vS2.get(i);
+                                int s2id = s2.getId();
+                                ps3.setString(++nextParam, CP3);
+                                ps3.setInt(++nextParam, idC3L1);        // id capofila 2 livello 1
+                                ps3.setInt(++nextParam, s2id);          // id capofila 2 livello 2
+                                ps3.setNull(++nextParam, Types.NULL);   // id capofila 2 livello 3
+                                ps3.setNull(++nextParam, Types.NULL);   // id capofila 2 livello 4
+                                ps3.setString(++nextParam, code);       // codice misura
+                                /* === Collegamento a rilevazione === */
+                                ps3.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                                /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                                ps3.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                                ps3.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                                ps3.setInt(++nextParam, user.getUsrId());
+                                ps3.addBatch();
+                                nextParam = NOTHING;
+                            }
+                            updateCounts = ps3.executeBatch();
                         } else {
-                            ps3.setNull(++nextParam, Types.NULL);
+                            // Altrimenti la C3L2 dev'essere su una struttura specifica
+                            ps3.setString(++nextParam, CP3);
+                            // === Collegamento a struttura_liv1 ===
+                                if (!sc3L1.equals(VOID_STRING) && !sc3L1.equals(String.valueOf(NOTHING))) {
+                                String idAsString = sc3L1.substring(sc3L1.indexOf(DOT) + 1, sc3L1.indexOf(DASH));
+                                int id = Integer.parseInt(idAsString);
+                                ps3.setInt(++nextParam, id);
+                            } else {
+                                ps3.setNull(++nextParam, Types.NULL);
+                            }
+                            // === Collegamento a struttura_liv2 === 
+                            if (!sc3L2.equals(VOID_STRING)) {
+                                String idAsString = sc3L2.substring(sc3L2.indexOf(DOT) + 1, sc3L2.indexOf(DASH));
+                                int id = Integer.parseInt(idAsString);
+                                ps3.setInt(++nextParam, id);
+                            } else {
+                                ps3.setNull(++nextParam, Types.NULL);
+                            }
+                            // === Collegamento a struttura_liv3 === 
+                            if (!sc3L3.equals(VOID_STRING)) {
+                                String idAsString = sc3L3.substring(sc3L3.indexOf(DOT) + 1, sc3L3.indexOf(DASH));
+                                int id = Integer.parseInt(idAsString);
+                                ps3.setInt(++nextParam, id);
+                            } else {
+                                ps3.setNull(++nextParam, Types.NULL);
+                            }
+                            // === Collegamento a struttura_liv4 === 
+                            if (!sc3L4.equals(VOID_STRING)) {
+                                String idAsString = sc3L4.substring(sc3L4.indexOf(DOT) + 1, sc3L4.indexOf(DASH));
+                                int id = Integer.parseInt(idAsString);
+                                ps3.setInt(++nextParam, id);
+                            } else {
+                                ps3.setNull(++nextParam, Types.NULL);
+                            }
+                            ps3.setString(++nextParam, code);
+                            /* === Collegamento a rilevazione === */
+                            ps3.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                            /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                            ps3.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
+                            ps3.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
+                            ps3.setInt(++nextParam, user.getUsrId());
+                            // INVIO
+                            ps3.executeUpdate();
                         }
-                        // === Collegamento a struttura_liv2 === 
-                        if (!sc3L2.equals(VOID_STRING)) {
-                            String idAsString = sc3L2.substring(sc3L2.indexOf(DOT) + 1, sc3L2.indexOf('-'));
-                            int id = Integer.parseInt(idAsString);
-                            ps3.setInt(++nextParam, id);
-                        } else {
-                            ps3.setNull(++nextParam, Types.NULL);
-                        }
-                        // === Collegamento a struttura_liv3 === 
-                        if (!sc3L3.equals(VOID_STRING)) {
-                            String idAsString = sc3L3.substring(sc3L3.indexOf(DOT) + 1, sc3L3.indexOf('-'));
-                            int id = Integer.parseInt(idAsString);
-                            ps3.setInt(++nextParam, id);
-                        } else {
-                            ps3.setNull(++nextParam, Types.NULL);
-                        }
-                        // === Collegamento a struttura_liv4 === 
-                        if (!sc3L4.equals(VOID_STRING)) {
-                            String idAsString = sc3L4.substring(sc3L4.indexOf(DOT) + 1, sc3L4.indexOf('-'));
-                            int id = Integer.parseInt(idAsString);
-                            ps3.setInt(++nextParam, id);
-                        } else {
-                            ps3.setNull(++nextParam, Types.NULL);
-                        }
-                        ps3.setString(++nextParam, code);
-                        /* === Collegamento a rilevazione === */
-                        ps3.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
-                        /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
-                        ps3.setDate(++nextParam, lastModifiedDate); // accetta java.sql.Date
-                        ps3.setTime(++nextParam, lastModifiedTime); // accetta java.sql.Time
-                        ps3.setInt(++nextParam, user.getUsrId());
-                        // INVIO
-                        ps3.executeUpdate();
                     }
                     /* ****************************************************************************
                     ** === 7. QUERY contestuali di inserimento in misura_struttura (gregarie) === */
