@@ -121,7 +121,7 @@
         </c:forEach>
         <c:forEach var="cp2" items="${meas.capofila2}" varStatus="innerStatus">
         <c:choose>
-          <c:when test="${meas.capofilaMultiple}">
+          <c:when test="${meas.capofila2Multiple}">
             <li>
               <span class="badge badge-pill bg-warning text-black btn-small lightTable marginLeft align-middle">CAPOFILA 2</span>
               <img src="${initParam.urlDirectoryImmagini}str-l${cp2.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp2.livello}" /> 
@@ -140,6 +140,15 @@
         </c:choose>
         </c:forEach>
         <c:forEach var="cp3" items="${meas.capofila3}" varStatus="innerStatus">
+        <c:choose>
+          <c:when test="${meas.capofila3Multiple}">
+            <li>
+              <span class="badge badge-pill bg-info btn-small lightTable marginLeft align-middle">CAPOFILA 3</span>
+              <img src="${initParam.urlDirectoryImmagini}str-l${cp3.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp3.livello}" /> 
+              <c:out value="${cp3.prefisso}" /> <c:out value="${cp3.nome}" />
+            </li>
+          </c:when>
+          <c:otherwise>
           <c:if test="${innerStatus.count eq meas.capofila3.size()}">
             <li class="line">
               <img src="${initParam.urlDirectoryImmagini}str-l${cp3.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp3.livello}" /> 
@@ -147,6 +156,8 @@
               <span class="badge badge-pill bg-info btn-small lightTable marginLeft align-middle">CAPOFILA 3</span>
             </li>
           </c:if>
+          </c:otherwise>
+        </c:choose>
         </c:forEach>
         </ul>
         <h5 class="fw-bold text-dark border-bottom border-2 border-secondary">
