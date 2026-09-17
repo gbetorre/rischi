@@ -118,6 +118,7 @@
               </c:otherwise>
             </c:choose>
             </c:forEach>
+            <!-- Strutture Capofila 2 -->
             <c:forEach var="cp2" items="${ms.capofila2}" varStatus="innerStatus">
             <c:choose>
               <c:when test="${ms.capofila2Multiple}">
@@ -136,13 +137,24 @@
               </c:otherwise>
             </c:choose>
             </c:forEach>
+            <!-- Strutture Capofila 3 -->
             <c:forEach var="cp3" items="${ms.capofila3}" varStatus="innerStatus">
-              <c:if test="${innerStatus.count eq ms.capofila3.size()}">
+            <c:choose>
+              <c:when test="${ms.capofila3Multiple}">
                 <li>
                   <img src="${initParam.urlDirectoryImmagini}str-l${cp3.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp3.livello}" /> 
                   <c:out value="${cp3.prefisso}" /> <c:out value="${cp3.nome}" />
                 </li>
-              </c:if>
+              </c:when>
+              <c:otherwise>
+                <c:if test="${innerStatus.count eq ms.capofila3.size()}">
+                  <li>
+                    <img src="${initParam.urlDirectoryImmagini}str-l${cp3.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${cp3.livello}" /> 
+                    <c:out value="${cp3.prefisso}" /> <c:out value="${cp3.nome}" />
+                  </li>
+                </c:if>                  
+              </c:otherwise>
+            </c:choose>  
             </c:forEach>
               </ul>
             </td>
