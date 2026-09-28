@@ -4511,7 +4511,9 @@ public class DBWrapper extends QueryImpl {
      * <p>Dato un codice e una finestra temporale, restituisce 
      * una specifica misura, in funzione dei parametri ricevuti.<br />
      * In particolare: il target di almeno un indicatore deve trovarsi 
-     * in una data maggiore o uguale ad after e minore o uguale a before.</p>
+     * in una data maggiore o uguale ad after e minore o uguale a before.
+     * Se questo vincolo non viene rispettato, la misura viene caricata,
+     * ma, nel periodo da after a before, risulta priva di indicatori e misurazioni.</p>
      * 
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param code      il codice di una misura cercata oppure una stringa vuota in linguaggio SQL
@@ -4522,11 +4524,11 @@ public class DBWrapper extends QueryImpl {
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     public MeasureBean getMeasure(PersonBean user,
-                                             String code,
-                                             java.util.Date after,
-                                             java.util.Date before,
-                                             CodeBean survey)
-                                      throws WebStorageException {
+                                  String code,
+                                  java.util.Date after,
+                                  java.util.Date before,
+                                  CodeBean survey)
+                           throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
             ResultSet rs, rs1, rs2, rs3 = null;
@@ -4570,94 +4572,11 @@ public class DBWrapper extends QueryImpl {
                     }
                     measure.setTipologie(types);
                     /* === Strutture === */
-                    nextParam = NOTHING;
-                    pst = null;
-                    ArrayList<DepartmentBean> capofila1 = new ArrayList<>();
-                    ArrayList<DepartmentBean> capofila2 = new ArrayList<>();
-                    ArrayList<DepartmentBean> capofila3 = new ArrayList<>();
-                    ArrayList<DepartmentBean> gregarie = new ArrayList<>();
-                    pst = con.prepareStatement(GET_STRUCTS_BY_MEASURE);
-                    pst.clearParameters();
-                    pst.setString(++nextParam, measure.getCodice());
-                    pst.setString(++nextParam, String.valueOf(PER_CENT));
-                    pst.setInt(++nextParam, survey.getId());
-                    rs2 = pst.executeQuery();
-                    while (rs2.next()) {
-                        // Crea una struttura generica
-                        ItemBean st = new ItemBean();
-                        // La valorizza col risultato della query
-                        BeanUtil.populate(st, rs2);
-                        // Trasforma la capofila/gregaria da ItemBean a DepartmentBean
-                        DepartmentBean struttura = measure.getStruttura(st);
-                        // Smista le strutture trovate
-                        if (st.getExtraInfo().equals(CP1)) {
-                            // Trasforma la capofila da DepartmentBean a ArrayList
-                            capofila1 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(CP2)) {
-                            capofila2 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(CP3)) {
-                            capofila3 = measure.getCapofila(struttura);
-                        } else if (st.getExtraInfo().equals(GR)) {
-                            gregarie.add(struttura);
-                        } else {
-                            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero del ruolo di una struttura.\n";
-                            LOG.severe(msg);
-                            throw new WebStorageException(msg);
-                        }
-                    }
-                    /* === Strutture capofila L2 multiple | TODO: Ottimizzare === */
-                    // Chiusura diretta senza warning
-                    try {
-                        rs2.close();
-                        pst.close();
-                    } catch (Exception e) {
-                        // Log o gestione silenziosa dell'eccezione durante la chiusura
-                        String msg = FOR_NAME + "Si e\' verificato un problema durante la chiusura delle risorse: " + e.getMessage();
-                        LOG.severe(msg);
-                    }
-                    // Se ci sono capofila L2 multiple, deve sostituire la L2 trovata
-                    nextParam = NOTHING;
-                    pst = null;
-                    pst = con.prepareStatement(GET_STRUCTS_SIZE_BY_MEASURE);
-                    pst.clearParameters();
-                    pst.setString(++nextParam, measure.getCodice());
-                    pst.setString(++nextParam, CP1);
-                    pst.setInt(++nextParam, survey.getId());
-                    rs2 = pst.executeQuery();
-                    while (rs2.next()) {
-                        // Questo oggetto contiene i dati per determinare la situazione
-                        ItemBean count = new ItemBean();
-                        BeanUtil.populate(count, rs2);
-                        // Controlla se la struttura livello 3 è NULL
-                        if (count.getCod3() == NOTHING) {
-                            // Se è NOTHING (cioè NULL) esaminiamo il conteggio L2
-                            if (count.getCod2() > ELEMENT_LEV_1) {
-                                // Se il conteggio L2 è > 1 allora tutte le L2 di L1 sono capofila
-                                DepartmentBean c1 = new DepartmentBean();
-                                // Quindi, rimuove la capofila1 calcolata in modo erroneo
-                                if (capofila1 != null) {
-                                    // 1. Svuota la vecchia lista mantenendo lo stesso identico puntatore
-                                    capofila1.clear();
-                                }
-                                // Valorizza l'id di C1L1 (capofila 1 livello 1)
-                                c1.setId(count.getCod1());
-                                // Ottiene tutte le figlie L2 di C1L1
-                                Vector<DepartmentBean> vS2 = this.getStructuresByStructure(user, c1, survey);
-                                // Smista le strutture trovate
-                                if (count.getExtraInfo().equals(CP1)) {
-                                    // Trasforma le capofila da DepartmentBean a ArrayList
-                                    capofila1 = new ArrayList<>(vS2);
-                                    // Traccia l'esistenza di capofila L2 multiple
-                                    measure.setCapofilaMultiple(true);
-                                }
-                            }   // <- altrimenti, se non esiste una L3 ma c'è una sola L2, non deve fare niente
-                        }   // <- altrimenti, se esiste una struttura di livello 3 non deve fare niente
-                    }
-                    
-                    measure.setCapofila(capofila1);
-                    measure.setCapofila2(capofila2);
-                    measure.setCapofila3(capofila3);
-                    measure.setGregarie(gregarie);
+                    /* Le strutture non vengono caricate perché generalmente in
+                     * questo contesto non sono utili: qualora servissero
+                    ** aggiungere qui il recupero, basandosi sull'algoritmo
+                    ** che differenzia tra 1 sola capofila L2 ed L2 multiple
+                    ** (v. ArrayList<MeasureBean> getMeasures(PersonBean user, String code,int getAll, CodeBean survey)) */ 
                     /* === Fasi di attuazione della misura === */
                     nextParam = NOTHING;
                     pst = null;
@@ -5575,7 +5494,7 @@ public class DBWrapper extends QueryImpl {
                     // Valorizza il bean
                     BeanUtil.populate(data, rs);
                     // Recupera il tipo
-                    CodeBean tipo = ConfigManager.getIndicatorTypesAsMap().get(new Integer(data.getCod3()));
+                    CodeBean tipo = ConfigManager.getIndicatorTypesAsMap().get(Integer.valueOf(data.getCod3()));
                     // Recupera lo stato
                     CodeBean stato = new CodeBean(data.getCod4(), STATI_STRUTTURA[data.getCod4()], VOID_STRING, NOTHING);
                     // Recupera l'indicatore
