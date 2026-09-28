@@ -466,9 +466,9 @@ public class ConfigManager extends HttpServlet {
             // for each
             for (CodeBean type : indicatorTypes) {
                 // Chiave del dizionario dei tipi indicatore
-                Integer key = new Integer(type.getId());
+                Integer key = Integer.valueOf(type.getId());
                 // Valorizza la mappa contenente i tipi indicatore
-                indicatorTypesAsMap.put(key, type);                
+                indicatorTypesAsMap.put(key, type);
             }
         }
         catch (NullPointerException npe) {
