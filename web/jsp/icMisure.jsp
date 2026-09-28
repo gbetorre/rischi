@@ -101,6 +101,20 @@
     <div id="structsAccordion">
     <c:set var="flag" value="false" scope="page" />
     <c:forEach var="d" items="${structs}" varStatus="status">
+    <c:choose>
+      <c:when test="${d.livello eq 1}">
+        <c:set var="sliv1" value="${d.id}-${d.livello}" scope="page" />
+      </c:when>
+      <c:when test="${d.livello eq 2}">
+        <c:set var="sliv2" value="${d.id}-${d.livello}" scope="page" />
+      </c:when>
+      <c:when test="${d.livello eq 3}">
+        <c:set var="sliv3" value="${d.id}-${d.livello}" scope="page" />
+      </c:when>
+      <c:when test="${d.livello eq 4}">
+        <c:set var="sliv4" value="${d.id}-${d.livello}" scope="page" />
+      </c:when>
+    </c:choose>
       <c:if test="${d.misure.size() gt zero}">
       <c:set var="flag" value="true" scope="page" />
       <!-- Card -->
@@ -163,7 +177,7 @@
                     </a>
                   </td>
                   <td scope="row">
-                    <a href="${initParam.appName}/?q=ic&p=ind&mliv=${ms.codice}&r=${param['r']}&y=${selectedYear}" class="btn bgAct14 btn-spacer">
+                    <a href="${initParam.appName}/?q=ic&p=ind&mliv=${ms.codice}&sliv1=${sliv1}&sliv2=${sliv2}&sliv3=${sliv3}&sliv4=${sliv4}&r=${param['r']}&y=${selectedYear}" class="btn bgAct14 btn-spacer">
                       <i class="fas fa-ruler-combined"></i> Indicatori &nbsp;
                       <span class="badge badge-pill badge-light ${badgeStyle}" title="${ms.totIndicatori} Indicatori su ${ms.fasi.size()} Fasi">
                         <c:out value="${ms.totIndicatori}" />
@@ -171,7 +185,7 @@
                         <c:out value="${ms.fasi.size()}" />
                       </span>
                     </a>
-                    <a href="${initParam.appName}/?q=ic&p=mon&mliv=${ms.codice}&r=${param['r']}" class="btn bgAct11 btn-spacer text-black">
+                    <a href="${initParam.appName}/?q=ic&p=mon&mliv=${ms.codice}&sliv1=${sliv1}&sliv2=${sliv2}&sliv3=${sliv3}&sliv4=${sliv4}&r=${param['r']}&y=${selectedYear}" class="btn bgAct11 btn-spacer text-black">
                       <i class="fas fa-bars"></i> Misurazioni &nbsp;
                       <span class="badge badge-pill badge-light" title="Ci sono ${ms.totMisurazioni} misurazioni totali">
                         <c:out value="${ms.totMisurazioni}" />
