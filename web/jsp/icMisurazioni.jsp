@@ -9,7 +9,7 @@
     <h5 class="p-2 bgAct17 rounded popupMenu heading">
       <i class="fa-solid fa-umbrella ico-home" title="misura di prevenzione"></i>&nbsp; 
       <a href="${initParam.appName}/?q=ic&p=mes&mliv=${meas.codice}&r=${param['r']}" title="Dettagli della misura ${meas.codice}">
-        <c:out value="${meas.nome}" />
+        <c:out value="${meas.nome}" /> (${param['y']})
       </a>
       <a class="float-right badge badge-pill text-dark" href="${initParam.appName}/?q=ic&p=mes&mliv=${meas.codice}&r=${param['r']}">
         <c:out value="${meas.codice}" />
@@ -17,7 +17,7 @@
     </h5>
     <hr class="separatore" />
     <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
-      <li class="nav-item"><a class="nav-link" href="${initParam.appName}/?q=ic&p=ind&mliv=${meas.codice}&r=${param['r']}">Indicatori</a></li>
+      <li class="nav-item"><a class="nav-link" href="${initParam.appName}/?q=ic&p=ind&mliv=${meas.codice}&sliv1=${param['sliv1']}&sliv2=${param['sliv2']}&sliv3=${param['sliv3']}&sliv4=${param['sliv4']}&r=${param['r']}&y=${param['y']}">Indicatori</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Misurazioni</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="">Report</a></li>
     </ul>
@@ -28,9 +28,9 @@
       <thead class="thead-light">
         <tr>
           <th scope="col" width="15%">Fase</th>
-          <th scope="col" width="20%">Indicatore</th>
+          <th scope="col" width="20%">Indicatore ${param['y']}</th>
           <th scope="col" width="5%">Target</th>
-          <th scope="col" width="5%">Risultato</th>
+          <th scope="col" width="5%">Misurazione ${param['y']}</th>
           <th scope="col" width="*">Azioni</th>
           <th scope="col" width="10%">Motivazioni</th>
           <th scope="col" width="8%">Data Monitoraggio</th>
@@ -133,7 +133,7 @@
           <!-- misura aggiuntiva -->
           <td scope="row" class="bgAct21">
             <div class="btn-group align-items-center border-basso">
-              <a href="${initParam.appName}/?q=ic&p=imm&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" type="button" class="badge bgAct11 btn-small lightTable text-black align-middle refresh" title="Clicca per aggiungere una misurazione a questo indicatore">
+              <a href="${initParam.appName}/?q=ic&p=imm&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&sliv1=${param['sliv1']}&sliv2=${param['sliv2']}&sliv3=${param['sliv3']}&sliv4=${param['sliv4']}&r=${param['r']}" type="button" class="badge bgAct11 btn-small lightTable text-black align-middle refresh" title="Clicca per aggiungere una misurazione a questo indicatore">
                 <i class="fa-regular fa-square-plus"></i> MISURA
               </a>
             </div>
@@ -148,11 +148,11 @@
     </c:when>
     <c:otherwise>
     <div class="alert alert-danger">
-      <strong>Non sono state trovate misurazioni associate ad indicatori della misura corrente.</strong>
+      <strong>Non sono state trovate misurazioni associate ad indicatori della misura corrente entro l'anno ${param['y']}.</strong>
       <hr class="separapoco" />
       <p>
         Se si desidera aggiungere una misurazione, entrare nella
-        <a href="${initParam.appName}/?q=ic&p=ind&mliv=${meas.codice}&r=${param['r']}">
+        <a href="${initParam.appName}/?q=ic&p=ind&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}">
           pagina degli indicatori
         </a>
         della misura e cliccare sul bottone 
