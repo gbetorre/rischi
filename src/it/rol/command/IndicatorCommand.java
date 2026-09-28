@@ -400,7 +400,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                     // Recupera i rischi cui è associata
                                     risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
                                     // Personalizza le breadcrumbs
-                                    bC = loadBreadCrumbs(breadCrumbs, part, survey); 
+                                    bC = loadBreadCrumbs(breadCrumbs, part, survey, year); 
                                     // Imposta la pagina
                                     fileJspT = nomeFileMisura;
                                 }
@@ -413,7 +413,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                     // Recupera l'indicatore (incapsulato nella misura) in modo astorico
                                     measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
                                     // Personalizza le breadcrumbs
-                                    bC = loadBreadCrumbs(breadCrumbs, part, survey);
+                                    bC = loadBreadCrumbs(breadCrumbs, part, survey, year);
                                     // Imposta la pagina
                                     fileJspT = nomeFileDettaglio;
                                 } else {
@@ -423,7 +423,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                     // Recupera gli indicatori (nella misura) storicizzando in un dato anno solare
                                     measure = retrieveMeasure(user, codeMis, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
                                     // Personalizza le breadcrumbs
-                                    bC = loadBreadCrumbs(breadCrumbs, part, survey);
+                                    bC = loadBreadCrumbs(breadCrumbs, part, survey, year);
                                     // Imposta la pagina
                                     fileJspT = nomeFile.get(part);
                                 }
@@ -432,10 +432,12 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              *    ELENCO Misurazioni di una misura monitorata   *
                              * ------------------------------------------------ */
                             case PART_MONITOR: {
-                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                // Recupera gli indicatori (nella misura) storicizzando per un dato anno solare
+                                measure = retrieveMeasure(user, codeMis, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
+                                // Travasa le misurazioni incapsulate nella misura
                                 measurements = decantMeasurements(measure);
                                 // Personalizza le breadcrumbs
-                                bC = loadBreadCrumbs(breadCrumbs, part, survey);
+                                bC = loadBreadCrumbs(breadCrumbs, part, survey, year);
                                 // Imposta la pagina
                                 fileJspT = nomeFile.get(part);
                                 break;
@@ -449,7 +451,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 // Recupera la misurazione cercata
                                 measurement = db.getMeasurement(user, idMon, survey);
                                 // Personalizza le breadcrumbs
-                                bC = loadBreadCrumbs(breadCrumbs, PART_MONITOR, survey);
+                                bC = loadBreadCrumbs(breadCrumbs, PART_MONITOR, survey, year);
                                 // Aggiunta inoltre di una foglia
                                 bC = HomePageCommand.makeBreadCrumbs(bC, ELEMENT_LEV_1, "Misurazione");
                                 //bc
@@ -467,7 +469,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                     // Recupera i rischi cui è associata
                                     risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
                                     // Personalizza le breadcrumbs
-                                    bC = loadBreadCrumbs(breadCrumbs, part, survey); 
+                                    bC = loadBreadCrumbs(breadCrumbs, part, survey, year); 
                                     // Pagina
                                     fileJspT = nomeFile.get(part);
                                 }
@@ -690,12 +692,14 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
      * @param breadCrumbs   lista di breadcrumbs by default, da manipolare
      * @param part          valore del parametro di navigazione 'p'
      * @param survey        oggetto rilevazione
+     * @param year          anno di riferimento (per la contestualizzazione degli elementi storicizzati)
      * @return <code>LinkedList&lt;ItemBean&gt;</code> - breadcrumbs rimaneggiate
      * @throws CommandException se si verifica un problema nel recupero di un attributo obbligatorio
      */
     private static LinkedList<ItemBean> loadBreadCrumbs(LinkedList<ItemBean> breadCrumbs, 
                                                         String part,
-                                                        CodeBean survey) 
+                                                        CodeBean survey,
+                                                        int year) 
                                                  throws CommandException {
         LinkedList<ItemBean> bC = null;
         try {
@@ -710,7 +714,11 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                 bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Dettagli");
             } else if (part.equalsIgnoreCase(PART_INDICATOR)) {
                 // Url da sostituire al posto di quello di una breadcrumb esistente
-                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + AMPERSAND + "p" + EQ + PART_MEASURES + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
+                String url = ConfigManager.getAppName() + ROOT_QM + 
+                             ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + 
+                             AMPERSAND + "p" + EQ + PART_MEASURES + 
+                             AMPERSAND + PARAM_SURVEY + EQ + survey.getNome() +
+                             AMPERSAND + "y" + EQ + year;
                 // Preparazione nuova breadcrumb per puntare sulla command delle misure
                 ItemBean crumb = new ItemBean("Monitoraggio", "Monitoraggio", url, SUB_MENU);
                 // Sostituzione di una breadcrumb esistente con la nuova
@@ -719,7 +727,11 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                 bC = HomePageCommand.makeBreadCrumbs(bC, NOTHING, "Indicatori");
             } else if (part.equalsIgnoreCase(PART_MONITOR)) {
                 // Url da sostituire al posto di quello di una breadcrumb esistente
-                String url = ConfigManager.getAppName() + ROOT_QM + ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + AMPERSAND + "p" + EQ + PART_MEASURES + AMPERSAND + PARAM_SURVEY + EQ + survey.getNome();
+                String url = ConfigManager.getAppName() + ROOT_QM + 
+                             ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + 
+                             AMPERSAND + "p" + EQ + PART_MEASURES + 
+                             AMPERSAND + PARAM_SURVEY + EQ + survey.getNome() + 
+                             AMPERSAND + "y" + EQ + year;
                 // Preparazione nuova breadcrumb per puntare sulla command delle misure
                 ItemBean crumb = new ItemBean("Monitoraggio", "Monitoraggio", url, SUB_MENU);
                 // Sostituzione di una breadcrumb esistente con la nuova
