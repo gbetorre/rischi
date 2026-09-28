@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (39 versioni)
+### 2026 (40 versioni)
 
+- [2.8.0] (28/09/2026) Propagazione dei link delle strutture capofila e dell'anno di monitoraggio nelle relative pagine
 - [2.7.9] (17/09/2026) Implementazione facility di creazione di associazioni multiple per le capofila L2 di tipo 3 (capofila 3) data la loro capofila 3 L1
 - [2.7.8] (16/09/2026) Continuazione implementazione rivista facility di creazione di associazioni multiple a molte capofila L2 dato il suo ascendente L1
 - [2.7.7] (14/09/2026) Inizio implementazione rivista facility di creazione di associazioni multiple a molte capofila L2 dato il suo parent L1
