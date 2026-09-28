@@ -7,13 +7,13 @@
     <h5 class="p-2 bgAct17 rounded popupMenu heading">
       <i class="fa-solid fa-umbrella ico-home" title="misura di prevenzione"></i>&nbsp; 
       <a href="${initParam.appName}/?q=ic&p=mes&mliv=${meas.codice}&r=${param['r']}" title="Dettagli della misura ${meas.codice}">
-        <c:out value="${meas.nome}" />
+        <c:out value="${meas.nome} (${param['y']})" />
       </a>
     </h5>
     <hr class="separatore" />
     <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Indicatori</a></li>
-      <li class="nav-item"><a class="nav-link"  href="${initParam.appName}/?q=ic&p=mon&mliv=${meas.codice}&r=${param['r']}">Misurazioni</a></li>
+      <li class="nav-item"><a class="nav-link" href="${initParam.appName}/?q=ic&p=mon&mliv=${meas.codice}&sliv1=${param['sliv1']}&sliv2=${param['sliv2']}&sliv3=${param['sliv3']}&sliv4=${param['sliv4']}&r=${param['r']}&y=${param['y']}">Misurazioni</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="">Report</a></li>
     </ul>
     <hr class="separatore" />
@@ -48,7 +48,7 @@
           <c:choose>
           <c:when test="${not empty fase.indicatore}">
             <c:set var="totI" value="${totI + 1}" scope="page" />
-            <a href="${initParam.appName}/?q=ic&p=ind&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Modificato:${lastModified} ${fn:substring(fase.indicatore.oraUltimaModifica,0,5)}">
+            <a href="${initParam.appName}/?q=ic&p=ind&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" title="Modificato:${lastModified} ${fn:substring(fase.indicatore.oraUltimaModifica,0,5)}">
               <c:out value="${fase.indicatore.nome}"/>
             </a>
             <c:if test="${fase.indicatore.master}">
@@ -57,7 +57,7 @@
           </c:when>
           <c:otherwise>
             <div class="btn-group align-items-center">
-              <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" type="button" class="badge bg-success btn-small lightTable text-white  align-middle refresh" title="Aggiungi un indicatore alla misura &quot;${fn:substring(meas.nome, 0, 22)}...&quot; nel contesto della fase &quot;${fase.nome}&quot;">
+              <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&sliv1=${param['sliv1']}&sliv2=${param['sliv2']}&sliv3=${param['sliv3']}&sliv4=${param['sliv4']}&r=${param['r']}&y=${param['y']}" type="button" class="badge bg-success btn-small lightTable text-white  align-middle refresh" title="Aggiungi un indicatore alla misura &quot;${fn:substring(meas.nome, 0, 22)}...&quot; nel contesto della fase &quot;${fase.nome}&quot;">
                 <i class="fa-solid fa-square-plus"></i> INDICATORE
               </a>&nbsp;
             </div>
@@ -77,20 +77,20 @@
             <fmt:formatDate value="${fase.indicatore.dataTarget}" pattern="dd/MM/yyyy" />
           </td>
           <td scope="row">
-            <span class="badge border-basso textcolormaroon">
-              <c:out value="${fase.indicatore.tipo.nome}"/>
-            </span>
+            <span class="badge border-basso textcolormaroon"><c:out value="${fase.indicatore.tipo.nome}"/></span>
           </td>
+          <td scope="row" class="${bgcolor}">
+      <c:if test="${not empty fase.indicatore}">
           <c:set var="master" value="NO" scope="page" />
           <c:set var="bgcolor" value="bgcolor-non" scope="page" />
           <c:if test="${fase.indicatore.master}">
             <c:set var="master" value="SI" scope="page" />
             <c:set var="bgcolor" value="bgAct5" scope="page" />
           </c:if>
-          <td scope="row" class="${bgcolor}">
             <div class="form-check text-center">
               <strong><c:out value="${master}" /></strong>
             </div>
+      </c:if>
           </td>
       <c:if test="${not empty fase.indicatore}">
         <c:choose>
@@ -98,7 +98,7 @@
             <td scope="row" class="bgcolorgreen">
               <div class="form-check text-center">
                 <strong>
-                  <a href="${initParam.appName}/?q=ic&p=mon&mliv=${meas.codice}&r=${param['r']}" title="Clicca per visualizzare le misurazioni">
+                  <a href="${initParam.appName}/?q=ic&p=mon&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" title="Clicca per visualizzare le misurazioni">
                     SI&nbsp;
                     <span class="badge badge-warning align-items-center border-basso">
                       <c:out value="${fase.indicatore.totMisurazioni}" />
@@ -113,7 +113,7 @@
               <div class="form-check text-center">
                 <strong>NO</strong>
                 <div class="btn-group align-items-center border-basso">
-                  <a href="${initParam.appName}/?q=ic&p=imm&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" type="button" class="badge bgAct11 btn-small lightTable text-black align-middle refresh" title="Clicca per misurare questo indicatore">
+                  <a href="${initParam.appName}/?q=ic&p=imm&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" type="button" class="badge bgAct11 btn-small lightTable text-black align-middle refresh" title="Clicca per misurare questo indicatore">
                     <i class="fa-solid fa-pen-to-square"></i> MISURA
                   </a>
                 </div>
