@@ -98,7 +98,7 @@
             <td scope="row" class="bgcolorgreen">
               <div class="form-check text-center">
                 <strong>
-                  <a href="${initParam.appName}/?q=ic&p=mon&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" title="Clicca per visualizzare le misurazioni">
+                  <a href="${initParam.appName}/?q=ic&p=mon&mliv=${meas.codice}&sliv1=${param['sliv1']}&sliv2=${param['sliv2']}&sliv3=${param['sliv3']}&sliv4=${param['sliv4']}&r=${param['r']}&y=${param['y']}" title="Clicca per visualizzare le misurazioni">
                     SI&nbsp;
                     <span class="badge badge-warning align-items-center border-basso">
                       <c:out value="${fase.indicatore.totMisurazioni}" />
