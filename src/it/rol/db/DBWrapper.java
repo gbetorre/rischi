@@ -51,6 +51,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Types;
 import java.util.AbstractList;
@@ -4595,8 +4596,9 @@ public class DBWrapper extends QueryImpl {
                         BeanUtil.populate(fs, rs3);
                         // Cerca l'indicatore collegato eventualmente alla fase
                         IndicatorBean ind = getIndicatorByActivity(user, fs, after, before, survey);
-                        // Aggiunge l'indicatore alla fase se significativo
+                        // Assume che per una fase ci sia al più un indicatore nel lasso di tempo considerato
                         if (ind != null) {
+                            // Aggiunge l'indicatore alla fase se significativo
                             fs.setIndicatore(ind);
                         }
                         // Aggiunge la fase alla lista delle fasi di attuazione
@@ -7210,117 +7212,188 @@ public class DBWrapper extends QueryImpl {
     public void insertMeasurement(PersonBean user, 
                                   HashMap<String, LinkedHashMap<String, String>> params) 
                            throws WebStorageException {
+        // Il try-with-resources apre e CHIUDERÀ AUTOMATICAMENTE la connessione alla fine
         try (Connection con = rol_manager.getConnection()) {
             PreparedStatement pst = null;
+            PreparedStatement pst2 = null;
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
-            // Dizionario dei parametri contenente gli estremi del rischio da inserire
+            // Dizionario dei parametri contenente gli estremi della misurazione da inserire
             LinkedHashMap<String, String> mon = params.get(PART_INSERT_MEASUREMENT);
+            // Dizionario dei parametri contenente gli estremi della struttura che effettua la misurazione
+            LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
             try {
                 // Begin: ==>
                 con.setAutoCommit(false);
                 // TODO: Controllare se user è superuser
                 /* === Se siamo qui vuol dire che ok   === */ 
-                pst = con.prepareStatement(INSERT_MEASUREMENT);
+                // Passa Statement.RETURN_GENERATED_KEYS qui!
+                pst = con.prepareStatement(INSERT_MEASUREMENT, Statement.RETURN_GENERATED_KEYS);
+                // In questo modo l'INSERT restituisce l'ID generato dal Serial
                 pst.clearParameters();
-                 // Prepara i parametri per l'inserimento
-                try {
-                    // Definisce un indice per il numero di parametro da passare alla query
-                    int nextParam = NOTHING;
-                    /* === Risultato === */
-                    pst.setString(++nextParam, mon.get("valore"));
-                    /* === Azioni intraprese per raggiungere il risultato === */
-                    pst.setString(++nextParam, mon.get("azioni"));
-                    /* === Motivazioni del mancato raggiungimento del risultato === */
-                    String excuses = null;
-                    if (!mon.get("motivi").equals(VOID_STRING)) {
-                        excuses = new String(mon.get("motivi"));
-                        pst.setString(++nextParam, excuses);
-                    } else {
-                        // Dato facoltativo non inserito
-                        pst.setNull(++nextParam, Types.NULL);
-                    }
-                    /* === Domanda 1 === */
-                    String question1 = null;
-                    if (!mon.get("domanda1").equals(VOID_STRING)) {
-                        question1 = new String(mon.get("domanda1"));
-                        pst.setString(++nextParam, question1);
-                    } else {
-                        // Dato facoltativo non inserito
-                        pst.setNull(++nextParam, Types.NULL);
-                    }
-                    /* === Domanda 2 === */
-                    String question2 = null;
-                    if (!mon.get("domanda2").equals(VOID_STRING)) {
-                        question2 = new String(mon.get("domanda2"));
-                        pst.setString(++nextParam, question2);
-                    } else {
-                        // Dato facoltativo non inserito
-                        pst.setNull(++nextParam, Types.NULL);
-                    }
-                    /* === Domanda 3 === */
-                    String question3 = null;
-                    if (!mon.get("domanda3").equals(VOID_STRING)) {
-                        question3 = new String(mon.get("domanda3"));
-                        pst.setString(++nextParam, question3);
-                    } else {
-                        // Dato facoltativo non inserito
-                        pst.setNull(++nextParam, Types.NULL);
-                    }
-                    /* === Ultima misurazione === */
-                    pst.setBoolean(++nextParam, false);
-                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
-                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
-                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
-                    pst.setInt(++nextParam, user.getUsrId());
-                    /* === Riferimento all'indicatore === */
-                    pst.setInt(++nextParam, Integer.parseInt(mon.get("ind")));
-                    /* === Collegamento a rilevazione === */
-                    pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
-                    // CR (Carriage Return) o 0DH
-                    pst.executeUpdate();
-                } catch (NumberFormatException nfe) {
-                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
-                    LOG.severe(msg);
-                    throw new WebStorageException(msg, nfe);
-                } catch (ClassCastException cce) {
-                    String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di tipo.\n" + cce.getMessage();
-                    LOG.severe(msg);
-                    throw new WebStorageException(msg, cce);
-                } catch (ArrayIndexOutOfBoundsException aiobe) {
-                    String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
-                    LOG.severe(msg);
-                    throw new WebStorageException(msg, aiobe);
-                } catch (NullPointerException npe) {
-                    String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
-                    LOG.severe(msg);
-                    throw new WebStorageException(msg, npe);
-                } catch (Exception e) {
-                    String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
-                    LOG.severe(msg);
-                    throw new WebStorageException(msg, e);
+                /* =========================================================
+                 *       INSERIMENTO NELLA PRIMA TABELLA (misurazione)
+                 * ========================================================= */
+                // Definisce un indice per il numero di parametro da passare alla query
+                int nextParam = NOTHING;
+                /* === Risultato === */
+                pst.setString(++nextParam, mon.get("valore"));
+                /* === Azioni intraprese per raggiungere il risultato === */
+                pst.setString(++nextParam, mon.get("azioni"));
+                /* === Motivazioni del mancato raggiungimento del risultato === */
+                String excuses = null;
+                if (!mon.get("motivi").equals(VOID_STRING)) {
+                    excuses = new String(mon.get("motivi"));
+                    pst.setString(++nextParam, excuses);
+                } else {
+                    // Dato facoltativo non inserito
+                    pst.setNull(++nextParam, Types.NULL);
                 }
-                // End: <==
+                /* === Domanda 1 === */
+                String question1 = null;
+                if (!mon.get("domanda1").equals(VOID_STRING)) {
+                    question1 = new String(mon.get("domanda1"));
+                    pst.setString(++nextParam, question1);
+                } else {
+                    // Dato facoltativo non inserito
+                    pst.setNull(++nextParam, Types.NULL);
+                }
+                /* === Domanda 2 === */
+                String question2 = null;
+                if (!mon.get("domanda2").equals(VOID_STRING)) {
+                    question2 = new String(mon.get("domanda2"));
+                    pst.setString(++nextParam, question2);
+                } else {
+                    // Dato facoltativo non inserito
+                    pst.setNull(++nextParam, Types.NULL);
+                }
+                /* === Domanda 3 === */
+                String question3 = null;
+                if (!mon.get("domanda3").equals(VOID_STRING)) {
+                    question3 = new String(mon.get("domanda3"));
+                    pst.setString(++nextParam, question3);
+                } else {
+                    // Dato facoltativo non inserito
+                    pst.setNull(++nextParam, Types.NULL);
+                }
+                /* === Ultima misurazione === */
+                pst.setBoolean(++nextParam, false);
+                /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                pst.setInt(++nextParam, user.getUsrId());
+                /* === Riferimento all'indicatore === */
+                pst.setInt(++nextParam, Integer.parseInt(mon.get("ind")));
+                /* === Collegamento a rilevazione === */
+                pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                // CR (Carriage Return) o 0DH (esecuzione) prima INSERT
+                pst.executeUpdate();
+                // Recupera le chiavi generate tramite JDBC
+                int idSerial = DEFAULT_ID;
+                try (ResultSet generatedKeys = pst.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        idSerial = generatedKeys.getInt(ELEMENT_LEV_1);
+                    } else {
+                        String msg = FOR_NAME + "Inserimento fallito, nessun ID generato.\n";
+                        LOG.severe(msg); 
+                        throw new WebStorageException(msg);
+                    }
+                }
+                /* =========================================================
+                 * INSERIMENTO NELLA SECONDA TABELLA (misurazione_struttura)
+                 * ========================================================= */                   
+                pst2 = con.prepareStatement(INSERT_MEASUREMENT_STRUCTURE);
+                pst2.clearParameters();
+                // Sempre in transazione procede con la seconda query usando l'idGenerato
+                nextParam = NOTHING;
+                // Passiamo l'idSerial recuperato sopra come Chiave Primaria/Esterna
+                pst2.setInt(++nextParam, idSerial);
+                /* === Gestione dei parametri nullabili dei 4 livelli di organigramma === */
+                if (mon.get("liv1") != null) {
+                    pst2.setInt(++nextParam, Integer.parseInt(mon.get("liv1")));
+                } else {
+                    // Types.INTEGER indica esplicitamente al database il tipo di dato della colonna, mentre Types.NULL è un tipo generico
+                    pst2.setNull(++nextParam, Types.INTEGER);
+                    // Usare Types.NULL potrebbe portare a errori di tipo “Could not determine data type of parameter”
+                }
+                if (mon.get("liv2") != null) {
+                    pst2.setInt(++nextParam, Integer.parseInt(mon.get("liv2")));
+                } else {
+                    pst2.setNull(++nextParam, Types.INTEGER);
+                }
+                if (mon.get("liv3") != null) {
+                    pst2.setInt(++nextParam, Integer.parseInt(mon.get("liv3")));
+                } else {
+                    pst2.setNull(++nextParam, Types.INTEGER);
+                }
+                if (mon.get("liv4") != null) {
+                    pst2.setInt(++nextParam, Integer.parseInt(mon.get("liv4")));
+                } else {
+                    pst2.setNull(++nextParam, Types.INTEGER);
+                }
+                /* === Collegamento a rilevazione === */
+                pst2.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                pst2.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                pst2.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                pst2.setInt(++nextParam, user.getUsrId());                    
+                // Esecuzione seconda INSERT
+                pst2.executeUpdate();
+                // Se tutto è andato a buon fine, facciamo il COMMIT definitivo
                 con.commit();
-                pst.close();
-                pst = null;
+                // End: <==
             } catch (SQLException sqle) {
-                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                try { 
+                    con.rollback(); 
+                } catch (SQLException rbe) {
+                    // Evita lo swallowing loggando l'errore
+                    String msg = FOR_NAME + "Errore critico: impossibile effettuare il rollback della transazione.\n";
+                    LOG.severe(msg + rbe.getMessage());
+                }
+                String msg = FOR_NAME + "Problema nel codice SQL o nella transazione.\n";
                 LOG.severe(msg); 
                 throw new WebStorageException(msg + sqle.getMessage(), sqle);
-            } finally {
-                try {
-                    con.close();
-                } catch (NullPointerException npe) {
-                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                    LOG.severe(msg); 
-                    throw new WebStorageException(msg + npe.getMessage());
-                } catch (SQLException sqle) {
-                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException | NullPointerException e) {
+                // Cattura cumulativa delle eccezioni applicative
+                try { 
+                    con.rollback(); 
+                } catch (SQLException rbe) {
+                    // Evita lo swallowing loggando l'errore
+                    String msg = FOR_NAME + "Errore critico: impossibile effettuare il rollback della transazione.\n";
+                    LOG.severe(msg + rbe.getMessage());
                 }
+                String msg = FOR_NAME + "Errore di logica o conversione dati.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+            } finally {
+                // Chiudiamo esplicitamente gli statement per non lasciare cursori aperti su Postgres
+                if (pst != null) {
+                    try { 
+                        pst.close(); 
+                    } catch (SQLException sqle) {
+                        String msg = FOR_NAME + "Impossibile effettuare la chiusura dello statement.\n";
+                        LOG.severe(msg + sqle.getMessage());
+                    }
+                }
+                if (pst2 != null) {
+                    try { 
+                        pst2.close(); 
+                    } catch (SQLException sqle) {
+                        String msg = FOR_NAME + "Impossibile effettuare la chiusura dello statement.\n";
+                        LOG.severe(msg + sqle.getMessage());
+                    }
+                }
+                // Ripristina l'autoCommit prima di rimettere la connessione nel pool
+                try { 
+                    con.setAutoCommit(true); 
+                } catch (SQLException sqle) {
+                    String msg = FOR_NAME + "Impossibile ripristinare l'autoCommit della connessione.\n";
+                    LOG.severe(msg + sqle.getMessage());
+                }
+            // End Transazione: <==
             }
         } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
+            String msg = FOR_NAME + "Problema con la creazione/gestione della connessione.\n";
             LOG.severe(msg);
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         }
