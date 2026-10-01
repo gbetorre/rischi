@@ -291,6 +291,13 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         int idInd = parser.getIntParameter("idI", DEFAULT_ID);
         // Recupera o inizializza 'anno'
         int year = parser.getIntParameter("y", currentYear);
+        // Recupera o inizializza id_struttura_liv1
+        
+        // Recupera o inizializza id_struttura_liv2
+        
+        // Recupera o inizializza id_struttura_liv3
+        
+        // Recupera o inizializza id_struttura_liv4
         /* ******************************************************************** *
          *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
          * ******************************************************************** */
@@ -613,6 +620,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                    HashMap<String, LinkedHashMap<String, String>> formParams)
                             throws CommandException,
                                    AttributoNonValorizzatoException {
+        LinkedHashMap<String, String> struct = new LinkedHashMap<>();
         LinkedHashMap<String, String> survey = new LinkedHashMap<>();
         LinkedHashMap<String, String> measure = new LinkedHashMap<>();
         LinkedHashMap<String, String> indicator = null;
@@ -630,6 +638,14 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         survey.put(PARAM_SURVEY, String.valueOf(surveyAsBean.getId()));
         // Aggiunge il tutto al dizionario dei parametri
         formParams.put(PARAM_SURVEY, survey);
+        /* **************************************************** *
+         *     Caricamento parametri di Scelta Struttura        *
+         * **************************************************** */        
+        struct.put("liv1",  parser.getStringParameter("sliv1", VOID_STRING));
+        struct.put("liv2",  parser.getStringParameter("sliv2", VOID_STRING));
+        struct.put("liv3",  parser.getStringParameter("sliv3", VOID_STRING));
+        struct.put("liv4",  parser.getStringParameter("sliv4", VOID_STRING));
+        formParams.put(PART_SELECT_STR, struct);
         /* -------------------------------------------------------- *
          *  Ramo di INSERT di ulteriori informazioni da aggiungere  *
          *      a una misura (dettagli relativi al monitoraggio)    *
@@ -681,6 +697,11 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
             measurement.put("ultima",   parser.getStringParameter("mon-miles", String.valueOf(NOTHING)));
             measurement.put("data",     parser.getStringParameter("mon-data", dateAsString));
             measurement.put("ind",      parser.getStringParameter("mon-ind", VOID_STRING));
+            // Deve tenere traccia anche della struttura che sta effettuando il monitoraggio
+            measurement.put("liv1",     parser.getStringParameter("sliv1", VOID_STRING));
+            measurement.put("liv2",     parser.getStringParameter("sliv2", VOID_STRING));
+            measurement.put("liv3",     parser.getStringParameter("sliv3", VOID_STRING));
+            measurement.put("liv4",     parser.getStringParameter("sliv4", VOID_STRING));
             formParams.put(part, measurement);
         }
     }
@@ -767,7 +788,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
      * dettagli necessari al monitoraggio, quindi fasi e indicatori) 
      * dato il codice, la rilevazione e una finestra temporale entro la quale
      * gli indicatori devono far ricadere il proprio target (in caso contrario
-     * anche se soddisfano gli altri criteri non verranno estratti).</p>
+     * anche se soddisfano gli altri criteri non verranno estratti).<br>
+     * Questo metodo richiama l'omonimo metodo di MeasureCommand
+     * ma ne &egrave; la versione storicizzata.
      * 
      * @param user      utente loggato
      * @param code      codice della misura cercata
