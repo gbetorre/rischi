@@ -1592,10 +1592,17 @@ public interface Query extends Serializable {
     
     /**
      * <p><ul><li>Seleziona l'elenco di tutte le misurazioni collegate a un 
-     * indicatore di dato id, nel contesto di una rilevazione di dato id<br>
+     * indicatore di dato id, nel contesto di una rilevazione di dato id,
+     * collegate a una struttura di un livello arbitrario<br>
      * OPPURE</li>
      * <li>seleziona una specifica misurazione collegata agli specifici
-     * parametri di cui sopra.</li></ul></p>
+     * parametri di cui sopra.</li></ul>ù
+     * NOTA: se si vuol recuperare tutte le misurazioni, cio&egrave; anche 
+     * quelle "storiche" non collegate ad alcuna struttura, bisogna aggiungere
+     * in clausola:<pre>
+     * AND (MZS.id_struttura_liv1 = ? OR ... MZS.id_struttura_liv4 = ? <b>OR MZS.id_misurazione IS NULL</b>)"</pre>
+     * Al momento, infatti, la query ignora le vecchie misurazioni 
+     * prive di collegamento a struttura misurante.</p>
      */
     public static final String GET_MEASUREMENTS_BY_INDICATOR = 
             "SELECT DISTINCT" +
@@ -1611,9 +1618,15 @@ public interface Query extends Serializable {
             "   ,   MZ.ora_ultima_modifica              AS \"oraUltimaModifica\"" +
             "   FROM misurazione MZ" +
             "       INNER JOIN rilevazione S ON MZ.id_rilevazione = S.id" +
-            "   WHERE (MZ.id_indicatoremonitoraggio = ?) " +
+            "       LEFT JOIN misurazione_struttura MZS ON MZ.id = MZS.id_misurazione" +
+            //"       LEFT JOIN struttura_liv1 L1 ON MZS.id_struttura_liv1 = L1.id" +
+            //"       LEFT JOIN struttura_liv2 L2 ON MZS.id_struttura_liv2 = L2.id" +
+            //"       LEFT JOIN struttura_liv3 L3 ON MZS.id_struttura_liv3 = L3.id" +
+            //"       LEFT JOIN struttura_liv4 L4 ON MZS.id_struttura_liv4 = L4.id" +
+            "   WHERE MZ.id_indicatoremonitoraggio = ? " +
             "       AND MZ.id_rilevazione = ?" +
             "       AND (MZ.id = ? OR -1 = ?)" +
+            //"       AND (MZS.id_struttura_liv1 = ? OR MZS.id_struttura_liv2 = ? OR MZS.id_struttura_liv3 = ? OR MZS.id_struttura_liv4 = ?)" +
             "   ORDER BY MZ.data_ultima_modifica";
     
     /**
@@ -2322,6 +2335,33 @@ public interface Query extends Serializable {
             "   ,       ? " +       // id rilevazione
             "          )" ;
     
+    /**
+     * <p>Query per inserimento degli estremi della struttura che 
+     * effettua la misurazione di un indicatore di monitoraggio.</p>
+     */
+    public static final String INSERT_MEASUREMENT_STRUCTURE =
+            "INSERT INTO misurazione_struttura" +
+            "   (   id_misurazione" +
+            "   ,   id_struttura_liv1" +        
+            "   ,   id_struttura_liv2" +
+            "   ,   id_struttura_liv3" +
+            "   ,   id_struttura_liv4" +       
+            "   ,   id_rilevazione" +
+            "   ,   data_ultima_modifica" +
+            "   ,   ora_ultima_modifica " +
+            "   ,   id_usr_ultima_modifica" +
+            "   )" +
+            "   VALUES (? " +       // id_misurazione
+            "   ,       ? " +       // id_struttura_liv1
+            "   ,       ? " +       // id_struttura_liv2
+            "   ,       ? " +       // id_struttura_liv3
+            "   ,       ? " +       // id_struttura_liv4            
+            "   ,       ? " +       // id rilevazione
+            "   ,       ? " +       // data ultima modifica
+            "   ,       ? " +       // ora ultima modifica
+            "   ,       ? " +       // autore ultima modifica
+            "          )" ;
+
     /**
      * <p>Query per inserimento di un macroprocesso censito a fini
      * di mappatura, valutazione, gestione e monitoraggio del rischio corruttivo.
