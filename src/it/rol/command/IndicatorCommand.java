@@ -291,13 +291,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         int idInd = parser.getIntParameter("idI", DEFAULT_ID);
         // Recupera o inizializza 'anno'
         int year = parser.getIntParameter("y", currentYear);
-        // Recupera o inizializza id_struttura_liv1
-        
-        // Recupera o inizializza id_struttura_liv2
-        
-        // Recupera o inizializza id_struttura_liv3
-        
-        // Recupera o inizializza id_struttura_liv4
         /* ******************************************************************** *
          *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
          * ******************************************************************** */
@@ -427,8 +420,17 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 /* -------------------------------------------- *
                                  *        ELENCO indicatori di una misura       *
                                  * -------------------------------------------- */
+                                    // Dizionario dei parametri contenente gli estremi della struttura che effettua la misurazione
+                                    LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
+                                    // Crea un oggetto per contenere gli id delle strutture e il codice della misura
+                                    ItemBean codes = new ItemBean(codeMis, null, null, DEFAULT_ID);
+                                    // Salva nell'oggetto l'id della struttura che effettua il monitoraggio
+                                    codes.setCod1(Integer.parseInt(struct.get("liv1")));
+                                    codes.setCod2(Integer.parseInt(struct.get("liv2")));
+                                    codes.setCod3(Integer.parseInt(struct.get("liv3")));
+                                    codes.setCod4(Integer.parseInt(struct.get("liv4")));
                                     // Recupera gli indicatori (nella misura) storicizzando in un dato anno solare
-                                    measure = retrieveMeasure(user, codeMis, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
+                                    measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
                                     // Personalizza le breadcrumbs
                                     bC = loadBreadCrumbs(breadCrumbs, part, survey, year);
                                     // Imposta la pagina
@@ -439,8 +441,17 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              *    ELENCO Misurazioni di una misura monitorata   *
                              * ------------------------------------------------ */
                             case PART_MONITOR: {
+                                // Dizionario dei parametri contenente gli estremi della struttura che effettua la misurazione
+                                LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
+                                // Crea un oggetto per contenere gli id delle strutture e il codice della misura
+                                ItemBean codes = new ItemBean(codeMis, null, null, DEFAULT_ID);
+                                // Salva nell'oggetto l'id della struttura che effettua il monitoraggio
+                                codes.setCod1(Integer.parseInt(struct.get("liv1")));
+                                codes.setCod2(Integer.parseInt(struct.get("liv2")));
+                                codes.setCod3(Integer.parseInt(struct.get("liv3")));
+                                codes.setCod4(Integer.parseInt(struct.get("liv4")));
                                 // Recupera gli indicatori (nella misura) storicizzando per un dato anno solare
-                                measure = retrieveMeasure(user, codeMis, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
+                                measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
                                 // Travasa le misurazioni incapsulate nella misura
                                 measurements = decantMeasurements(measure);
                                 // Personalizza le breadcrumbs
@@ -640,11 +651,27 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         formParams.put(PARAM_SURVEY, survey);
         /* **************************************************** *
          *     Caricamento parametri di Scelta Struttura        *
-         * **************************************************** */        
-        struct.put("liv1",  parser.getStringParameter("sliv1", VOID_STRING));
-        struct.put("liv2",  parser.getStringParameter("sliv2", VOID_STRING));
-        struct.put("liv3",  parser.getStringParameter("sliv3", VOID_STRING));
-        struct.put("liv4",  parser.getStringParameter("sliv4", VOID_STRING));
+         * **************************************************** */
+        String sliv1 = parser.getStringParameter("sliv1", String.valueOf(NOTHING));
+        String sliv2 = parser.getStringParameter("sliv2", String.valueOf(NOTHING));
+        String sliv3 = parser.getStringParameter("sliv3", String.valueOf(NOTHING));
+        String sliv4 = parser.getStringParameter("sliv4", String.valueOf(NOTHING));
+        struct.put("liv1", sliv1);
+        struct.put("liv2", sliv2);
+        struct.put("liv3", sliv3);
+        struct.put("liv4", sliv4);        
+        if (sliv1.contains(DASH)) {
+            struct.put("liv1", sliv1.substring(NOTHING, sliv1.lastIndexOf(DASH)));
+        }
+        if (sliv2.contains(DASH)) {
+            struct.put("liv2", sliv2.substring(NOTHING, sliv2.lastIndexOf(DASH)));
+        }
+        if (sliv3.contains(DASH)) {
+            struct.put("liv3", sliv3.substring(NOTHING, sliv3.lastIndexOf(DASH)));
+        }
+        if (sliv4.contains(DASH)) {
+            struct.put("liv4", sliv4.substring(NOTHING, sliv4.lastIndexOf(DASH)));
+        }
         formParams.put(PART_SELECT_STR, struct);
         /* -------------------------------------------------------- *
          *  Ramo di INSERT di ulteriori informazioni da aggiungere  *
@@ -697,11 +724,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
             measurement.put("ultima",   parser.getStringParameter("mon-miles", String.valueOf(NOTHING)));
             measurement.put("data",     parser.getStringParameter("mon-data", dateAsString));
             measurement.put("ind",      parser.getStringParameter("mon-ind", VOID_STRING));
-            // Deve tenere traccia anche della struttura che sta effettuando il monitoraggio
-            measurement.put("liv1",     parser.getStringParameter("sliv1", VOID_STRING));
-            measurement.put("liv2",     parser.getStringParameter("sliv2", VOID_STRING));
-            measurement.put("liv3",     parser.getStringParameter("sliv3", VOID_STRING));
-            measurement.put("liv4",     parser.getStringParameter("sliv4", VOID_STRING));
             formParams.put(part, measurement);
         }
     }
@@ -793,7 +815,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
      * ma ne &egrave; la versione storicizzata.
      * 
      * @param user      utente loggato
-     * @param code      codice della misura cercata
+     * @param code      oggetto incapsulante il codice della misura cercata e altri dati
      * @param after     estremo inferiore dell'intervallo entro cui deve ricadere il target
      * @param before    estremo superiore dell'intervallo entro cui deve ricadere il target
      * @param survey    oggetto rilevazione
@@ -803,7 +825,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
      * @throws CommandException se si verifica un problema nel recupero di valori o in qualche altro tipo di puntamento
      */
     public static MeasureBean retrieveMeasure(PersonBean user, 
-                                              String code,
+                                              ItemBean code,
                                               java.util.Date after,
                                               java.util.Date before,
                                               CodeBean survey, 
