@@ -4517,7 +4517,7 @@ public class DBWrapper extends QueryImpl {
      * ma, nel periodo da after a before, risulta priva di indicatori e misurazioni.</p>
      * 
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param code      il codice di una misura cercata oppure una stringa vuota in linguaggio SQL
+     * @param code      oggetto incapsulante il codice di una misura cercata e l'id della struttura monitorante
      * @param after     estremo inferiore dell'intervallo entro cui deve ricadere il target dell'indicatore per essere estratto
      * @param before    estremo superiore dell'intervallo entro cui deve ricadere il target dell'indicatore per essere estratto
      * @param survey    oggetto contenente gli estremi della rilevazione
@@ -4525,7 +4525,7 @@ public class DBWrapper extends QueryImpl {
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     public MeasureBean getMeasure(PersonBean user,
-                                  String code,
+                                  ItemBean code,
                                   java.util.Date after,
                                   java.util.Date before,
                                   CodeBean survey)
@@ -4541,7 +4541,7 @@ public class DBWrapper extends QueryImpl {
                 pst = con.prepareStatement(GET_MEASURES);
                 pst.clearParameters();
                 pst.setInt(++nextParam, survey.getId());
-                pst.setString(++nextParam, code);
+                pst.setString(++nextParam, code.getNome());
                 pst.setInt(++nextParam, NOTHING);
                 rs = pst.executeQuery();
                 while (rs.next()) {
@@ -4595,7 +4595,7 @@ public class DBWrapper extends QueryImpl {
                         // La valorizza col risultato della query
                         BeanUtil.populate(fs, rs3);
                         // Cerca l'indicatore collegato eventualmente alla fase
-                        IndicatorBean ind = getIndicatorByActivity(user, fs, after, before, survey);
+                        IndicatorBean ind = getIndicatorByActivity(user, fs, code, after, before, survey);
                         // Assume che per una fase ci sia al più un indicatore nel lasso di tempo considerato
                         if (ind != null) {
                             // Aggiunge l'indicatore alla fase se significativo
@@ -4999,7 +4999,7 @@ public class DBWrapper extends QueryImpl {
      * capofila 3) ma non di tipo gregarie.</p>
      * <p>Il metodo prende in input due date, dateAfter e dateBefore.
      * Per comprendere il significato di questi parametri, bisogna capire come questi
-     * vengono macinati dalla query: p.es., se si seleziona l'anno 2025, la query
+     * vengono "macinati" dalla query: p.es., se si seleziona l'anno 2025, la query
      * lo interpreta nel seguente modo:<pre>
      * SELECT MS.codice, data_scadenza FROM misura MS 
      * INNER JOIN misuramonitoraggio MM ON MS.codice = MM.codice
@@ -5120,7 +5120,7 @@ public class DBWrapper extends QueryImpl {
                             // La valorizza col risultato della query
                             BeanUtil.populate(fs, rs2);
                             // Cerca l'indicatore collegato eventualmente alla fase
-                            IndicatorBean ind = getIndicatorByActivity(user, fs, dateAfter, dateBefore, survey);
+                            IndicatorBean ind = getIndicatorByActivity(user, fs, new ItemBean(), dateAfter, dateBefore, survey);
                             // Aggiunge l'indicatore alla fase se significativo
                             if (ind != null) {
                                 fs.setIndicatore(ind);
@@ -5211,7 +5211,7 @@ public class DBWrapper extends QueryImpl {
                     // La valorizza col risultato della query
                     BeanUtil.populate(fs, rs);
                     // Controlla se l'anno prima c'erano indicatori su questa fase
-                    IndicatorBean oldInd = getIndicatorByActivity(user, fs, from, to, survey);
+                    IndicatorBean oldInd = getIndicatorByActivity(user, fs, new ItemBean(), from, to, survey);
                     if (oldInd != null) {
                         oldInd.setTargetRivisto(String.valueOf(previousYear));
                         // Salva l'indicatore
@@ -5467,6 +5467,7 @@ public class DBWrapper extends QueryImpl {
      * 
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
      * @param fase      la fase di attuazione cui l'indicatore cercato puo' essere collegato
+     * @param codes     oggetto incapsulante id della struttura monitorante
      * @param since     data di inizio validita' del target (l'indicatore sara' estratto se ha data target successiva a since)
      * @param to        data di fine validita' del target (l'indicatore sara' estratto se ha data target precedente a to)
      * @param survey    oggetto contenente gli estremi della rilevazione
@@ -5475,6 +5476,7 @@ public class DBWrapper extends QueryImpl {
      */
     public IndicatorBean getIndicatorByActivity(PersonBean user,
                                                 ActivityBean fase,
+                                                ItemBean codes,
                                                 java.util.Date since,
                                                 java.util.Date to,
                                                 CodeBean survey)
@@ -5530,6 +5532,10 @@ public class DBWrapper extends QueryImpl {
                         pst.setInt(++nextParam, survey.getId());
                         pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
                         pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                        pst.setInt(++nextParam, codes.getCod1());
+                        pst.setInt(++nextParam, codes.getCod2());
+                        pst.setInt(++nextParam, codes.getCod3());
+                        pst.setInt(++nextParam, codes.getCod4());
                         rs2 = pst.executeQuery();
                         while (rs2.next()) {
                             MeasurementBean measurement = new MeasurementBean();
@@ -7309,25 +7315,25 @@ public class DBWrapper extends QueryImpl {
                 // Passiamo l'idSerial recuperato sopra come Chiave Primaria/Esterna
                 pst2.setInt(++nextParam, idSerial);
                 /* === Gestione dei parametri nullabili dei 4 livelli di organigramma === */
-                if (mon.get("liv1") != null) {
-                    pst2.setInt(++nextParam, Integer.parseInt(mon.get("liv1")));
+                if (struct.get("liv1") != null) {
+                    pst2.setInt(++nextParam, Integer.parseInt(struct.get("liv1")));
                 } else {
                     // Types.INTEGER indica esplicitamente al database il tipo di dato della colonna, mentre Types.NULL è un tipo generico
                     pst2.setNull(++nextParam, Types.INTEGER);
                     // Usare Types.NULL potrebbe portare a errori di tipo “Could not determine data type of parameter”
                 }
-                if (mon.get("liv2") != null) {
-                    pst2.setInt(++nextParam, Integer.parseInt(mon.get("liv2")));
+                if (struct.get("liv2") != null) {
+                    pst2.setInt(++nextParam, Integer.parseInt(struct.get("liv2")));
                 } else {
                     pst2.setNull(++nextParam, Types.INTEGER);
                 }
-                if (mon.get("liv3") != null) {
-                    pst2.setInt(++nextParam, Integer.parseInt(mon.get("liv3")));
+                if (struct.get("liv3") != null) {
+                    pst2.setInt(++nextParam, Integer.parseInt(struct.get("liv3")));
                 } else {
                     pst2.setNull(++nextParam, Types.INTEGER);
                 }
-                if (mon.get("liv4") != null) {
-                    pst2.setInt(++nextParam, Integer.parseInt(mon.get("liv4")));
+                if (struct.get("liv4") != null) {
+                    pst2.setInt(++nextParam, Integer.parseInt(struct.get("liv4")));
                 } else {
                     pst2.setNull(++nextParam, Types.INTEGER);
                 }
