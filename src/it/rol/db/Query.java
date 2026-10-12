@@ -1626,7 +1626,7 @@ public interface Query extends Serializable {
             "   WHERE MZ.id_indicatoremonitoraggio = ? " +
             "       AND MZ.id_rilevazione = ?" +
             "       AND (MZ.id = ? OR -1 = ?)" +
-            //"       AND (MZS.id_struttura_liv1 = ? OR MZS.id_struttura_liv2 = ? OR MZS.id_struttura_liv3 = ? OR MZS.id_struttura_liv4 = ?)" +
+            "       AND (MZS.id_struttura_liv1 = ? OR MZS.id_struttura_liv2 = ? OR MZS.id_struttura_liv3 = ? OR MZS.id_struttura_liv4 = ? OR MZS.id_misurazione IS NULL)" +
             "   ORDER BY MZ.data_ultima_modifica";
     
     /**
