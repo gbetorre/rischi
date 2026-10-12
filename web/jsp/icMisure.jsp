@@ -101,6 +101,10 @@
     <div id="structsAccordion">
     <c:set var="flag" value="false" scope="page" />
     <c:forEach var="d" items="${structs}" varStatus="status">
+    <c:set var="sliv1" value="" scope="page" />
+    <c:set var="sliv2" value="" scope="page" />
+    <c:set var="sliv3" value="" scope="page" />
+    <c:set var="sliv4" value="" scope="page" />
     <c:choose>
       <c:when test="${d.livello eq 1}">
         <c:set var="sliv1" value="${d.id}-${d.livello}" scope="page" />
