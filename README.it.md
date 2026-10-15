@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (41 versioni)
+### 2026 (42 versioni)
 
+- [2.8.2] (15/10/2026) Correzione di bug
 - [2.8.1] (12/10/2026) Inizio implementazione associazione tra struttura e monitoraggio
 - [2.8.0] (28/09/2026) Propagazione dei link delle strutture capofila e dell'anno di monitoraggio nelle relative pagine
 - [2.7.9] (17/09/2026) Implementazione facility di creazione di associazioni multiple per le capofila L2 di tipo 3 (capofila 3) data la loro capofila 3 L1
