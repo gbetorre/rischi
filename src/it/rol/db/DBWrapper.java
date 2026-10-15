@@ -4197,7 +4197,9 @@ public class DBWrapper extends QueryImpl {
      * trovate, oppure una specifica misura, in funzione dei parametri ricevuti.<br />
      * In particolare: <dl>
      * <dt>se si passa il codice della misura sul II parametro e 0 sul III parametro </dt>
-     * <dd>restituisce una lista vettoriale contenente la misura avente il codice ricevuto (se esiste), oppure una lista vuota (se non esiste)</dd>
+     * <dd>restituisce una lista vettoriale contenente come unico elemento 
+     * la misura avente il codice ricevuto (se esiste), 
+     * oppure una lista vuota (se non esiste)</dd>
      * <dt>se si passa una stringa SQL vuota sul II parametro e -1 sul III parametro</dt>
      * <dd>restituisce l'elenco completo delle misure di prevenzione trovate nella rilevazione passata sul IV parametro</dd>
      * <dt>se si passa UNIX_EPOCH (1° gennaio 1970) o una data molto vecchia sul 4° parametro</dt>
@@ -5312,6 +5314,10 @@ public class DBWrapper extends QueryImpl {
                         pst.setInt(++nextParam, survey.getId());
                         pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
                         pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv1
+                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv2
+                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv3
+                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv4
                         rs2 = pst.executeQuery();
                         while (rs2.next()) {
                             MeasurementBean measurement = new MeasurementBean();
@@ -5418,6 +5424,10 @@ public class DBWrapper extends QueryImpl {
                         pst.setInt(++nextParam, survey.getId());
                         pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
                         pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
+                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv1
+                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv2
+                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv3
+                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv4
                         rs2 = pst.executeQuery();
                         while (rs2.next()) {
                             MeasurementBean measurement = new MeasurementBean();
