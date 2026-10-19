@@ -48,9 +48,10 @@
             <c:when test="${not empty fase.indicatori}">
             <ul class="list-group half-wide float-right">
               <c:forEach var="indicatore" items="${fase.indicatori}" varStatus="statu">
+              <fmt:formatDate value="${indicatore.dataTarget}" pattern="yyyy" var="y" scope="page" />
               <li class="list-group-item ico-func">
-                <strong>Indicatore: </strong>
-                <a href="${initParam.appName}/?q=ic&p=ind&idI=${indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="" title="Visualizza dettagli indicatore">
+                <strong>Indicatore (${y}): </strong>
+                <a href="${initParam.appName}/?q=ic&p=ind&idI=${indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${y}" class="" title="Visualizza dettagli indicatore">
                   <c:out value="${indicatore.nome}" />
                 </a>&nbsp;
                 <c:if test="${indicatore.master}">
@@ -62,7 +63,7 @@
             </c:when>
             <c:otherwise>
               <div class="btn-group ico-func float-right">
-                <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="btn btn-primary" title="Aggiungi un indicatore alla misura &quot;${fn:substring(meas.nome, 0, 22)}...&quot; nel contesto della fase &quot;${fase.nome}&quot;">
+                <a href="${initParam.appName}/?q=ic&p=ini&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${requestScope.theCurrentYear}" class="btn btn-primary" title="Aggiungi un indicatore alla misura &quot;${fn:substring(meas.nome, 0, 22)}...&quot; nel contesto della fase &quot;${fase.nome}&quot; e relativamente all'anno corrente (${requestScope.theCurrentYear})">
                   <small><i class="fa-solid fa-square-plus"></i> Indicatore</small>
                 </a>&nbsp;
               </div>
