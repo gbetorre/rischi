@@ -7,7 +7,7 @@
     <h5 class="p-2 bgAct17 rounded popupMenu heading">
       <i class="fa-solid fa-umbrella ico-home" title="misura di prevenzione"></i>&nbsp; 
       <a href="${initParam.appName}/?q=ic&p=mes&mliv=${meas.codice}&r=${param['r']}" title="Dettagli della misura ${meas.codice}">
-        <c:out value="${meas.nome} (${param['y']})" />
+        <c:out value="${meas.nome} (per ${meas.gregarie.get(zero).nome} e anno ${param['y']})" />
       </a>
     </h5>
     <hr class="separatore" />
@@ -113,7 +113,7 @@
               <div class="form-check text-center">
                 <strong>NO</strong>
                 <div class="btn-group align-items-center border-basso">
-                  <a href="${initParam.appName}/?q=ic&p=imm&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" type="button" class="badge bgAct11 btn-small lightTable text-black align-middle refresh" title="Clicca per misurare questo indicatore">
+                  <a href="${initParam.appName}/?q=ic&p=imm&idI=${fase.indicatore.id}&idF=${fase.id}&mliv=${meas.codice}&sliv1=${param['sliv1']}&sliv2=${param['sliv2']}&sliv3=${param['sliv3']}&sliv4=${param['sliv4']}&r=${param['r']}&y=${param['y']}" type="button" class="badge bgAct11 btn-small lightTable text-black align-middle refresh" title="Clicca per misurare questo indicatore">
                     <i class="fa-solid fa-pen-to-square"></i> MISURA
                   </a>
                 </div>
