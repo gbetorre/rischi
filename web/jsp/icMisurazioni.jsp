@@ -9,7 +9,7 @@
     <h5 class="p-2 bgAct17 rounded popupMenu heading">
       <i class="fa-solid fa-umbrella ico-home" title="misura di prevenzione"></i>&nbsp; 
       <a href="${initParam.appName}/?q=ic&p=mes&mliv=${meas.codice}&r=${param['r']}" title="Dettagli della misura ${meas.codice}">
-        <c:out value="${meas.nome}" /> (${param['y']})
+        <c:out value="${meas.nome} (per ${meas.gregarie.get(zero).nome} e anno ${param['y']})" />
       </a>
       <a class="float-right badge badge-pill text-dark" href="${initParam.appName}/?q=ic&p=mes&mliv=${meas.codice}&r=${param['r']}">
         <c:out value="${meas.codice}" />
@@ -48,7 +48,7 @@
             <c:out value="${fase.nome}" />
           </td>
           <td scope="row" id="nameColumn" class="success bgAct${ind.tipo.id}">
-            <a href="${initParam.appName}/?q=ic&p=ind&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Vedi dettagli indicatore">
+            <a href="${initParam.appName}/?q=ic&p=ind&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" title="Vedi dettagli indicatore">
               <c:out value="${ind.nome}"/>
             </a>
             <c:if test="${ind.master}">
@@ -59,17 +59,17 @@
             </c:if>
           </td>
           <td scope="row" class="bgAct${ind.tipo.id} bgFade">
-            <a href="${initParam.appName}/?q=ic&p=ind&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Vedi dettagli indicatore">
+            <a href="${initParam.appName}/?q=ic&p=ind&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" title="Vedi dettagli indicatore">
               <c:out value="${ind.getLabel(ind.target)}" />
             </a>
           </td>
           <td scope="row">
-            <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="Consulta la misurazione">
+            <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" title="Consulta la misurazione">
               <c:out value="${ind.getLabel(mon.valore)}"/>
             </a>&nbsp;
           </td>
           <td scope="row" class="small">
-            <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" title="<c:out value="${d1}" escapeXml="false" />">
+            <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" title="<c:out value="${d1}" escapeXml="false" />">
               <c:out value="${mon.informativa}"/>
             </a>
           </td>
@@ -84,7 +84,7 @@
             <c:set var="d1" value="${fn:replace(mon.domanda1, doubleQuote, \"\")}" scope="page" />
             <div class="text-center">
               <span class="badge badge-success">
-                <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="text-white" title="<c:out value="${d1}" escapeXml="false" />">
+                <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" class="text-white" title="<c:out value="${d1}" escapeXml="false" />">
                   DOMANDA 1
                 </a>
               </span>
@@ -94,7 +94,7 @@
             <c:set var="d2" value="${fn:replace(mon.domanda2, doubleQuote, \"\")}" scope="page" />
             <div class="text-center">
               <span class="badge badge-success">
-                <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="text-white" title="${d2}">
+                <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" class="text-white" title="${d2}">
                   DOMANDA 2
                 </a>
               </span>
@@ -104,7 +104,7 @@
             <c:set var="d3" value="${fn:replace(mon.domanda3, doubleQuote, \"\")}" scope="page" />
             <div class="text-center">
               <span class="badge badge-success">
-                <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="text-white" title="${d3}">
+                <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" class="text-white" title="${d3}">
                   DOMANDA 3
                 </a>
               </span>
@@ -126,14 +126,14 @@
               <span class="small">nessuno</span>
             </c:if>
             </ol>
-            <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}" class="badge bg-primary btn-small lightTable text-white align-middle" title="Clicca per aggiungere un allegato alla misurazione (attualmente: ${mon.allegati.size()})">
+            <a href="${initParam.appName}/?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}" class="badge bg-primary btn-small lightTable text-white align-middle" title="Clicca per aggiungere un allegato alla misurazione (attualmente: ${mon.allegati.size()})">
               <i class="fas fa-plus"></i> Allegato
             </a>
           </td>
           <!-- misura aggiuntiva -->
           <td scope="row" class="bgAct21">
             <div class="btn-group align-items-center border-basso">
-              <a href="${initParam.appName}/?q=ic&p=imm&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&sliv1=${param['sliv1']}&sliv2=${param['sliv2']}&sliv3=${param['sliv3']}&sliv4=${param['sliv4']}&r=${param['r']}" type="button" class="badge bgAct11 btn-small lightTable text-black align-middle refresh" title="Clicca per aggiungere una misurazione a questo indicatore">
+              <a href="${initParam.appName}/?q=ic&p=imm&idI=${ind.id}&idF=${fase.id}&mliv=${meas.codice}&sliv1=${param['sliv1']}&sliv2=${param['sliv2']}&sliv3=${param['sliv3']}&sliv4=${param['sliv4']}&r=${param['r']}&y=${param['y']}" type="button" class="badge bgAct11 btn-small lightTable text-black align-middle refresh" title="Clicca per aggiungere una misurazione a questo indicatore">
                 <i class="fa-regular fa-square-plus"></i> MISURA
               </a>
             </div>
@@ -148,7 +148,7 @@
     </c:when>
     <c:otherwise>
     <div class="alert alert-danger">
-      <strong>Non sono state trovate misurazioni associate ad indicatori della misura corrente entro l'anno ${param['y']}.</strong>
+      <strong>Non sono state trovate misurazioni associate ad indicatori della misura corrente, sulla struttura corrente, entro l'anno ${param['y']}.</strong>
       <hr class="separapoco" />
       <p>
         Se si desidera aggiungere una misurazione, entrare nella
