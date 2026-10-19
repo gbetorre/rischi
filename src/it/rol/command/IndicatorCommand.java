@@ -378,6 +378,15 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                         LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
                         // Imposta il titolo pagina
                         tP = titleFile.get(part);
+                        // Dizionario dei parametri contenente gli estremi della struttura che effettua la misurazione
+                        LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
+                        // Crea un oggetto per contenere gli id delle strutture e il codice della misura
+                        ItemBean codes = new ItemBean(codeMis, null, null, DEFAULT_ID);
+                        // Salva nell'oggetto l'id della struttura che effettua il monitoraggio
+                        codes.setCod1(Integer.parseInt(struct.get("liv1")));
+                        codes.setCod2(Integer.parseInt(struct.get("liv2")));
+                        codes.setCod3(Integer.parseInt(struct.get("liv3")));
+                        codes.setCod4(Integer.parseInt(struct.get("liv4")));
                         // Gestione rami
                         switch (part) {
                             case PART_MEASURES:
@@ -411,7 +420,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                  *     DETTAGLI di un indicatore di dato id     *
                                  * -------------------------------------------- */
                                     // Recupera l'indicatore (incapsulato nella misura) in modo astorico
-                                    measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                    measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
                                     // Personalizza le breadcrumbs
                                     bC = loadBreadCrumbs(breadCrumbs, part, survey, year);
                                     // Imposta la pagina
@@ -420,15 +429,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 /* -------------------------------------------- *
                                  *        ELENCO indicatori di una misura       *
                                  * -------------------------------------------- */
-                                    // Dizionario dei parametri contenente gli estremi della struttura che effettua la misurazione
-                                    LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
-                                    // Crea un oggetto per contenere gli id delle strutture e il codice della misura
-                                    ItemBean codes = new ItemBean(codeMis, null, null, DEFAULT_ID);
-                                    // Salva nell'oggetto l'id della struttura che effettua il monitoraggio
-                                    codes.setCod1(Integer.parseInt(struct.get("liv1")));
-                                    codes.setCod2(Integer.parseInt(struct.get("liv2")));
-                                    codes.setCod3(Integer.parseInt(struct.get("liv3")));
-                                    codes.setCod4(Integer.parseInt(struct.get("liv4")));
                                     // Recupera gli indicatori (nella misura) storicizzando in un dato anno solare
                                     measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
                                     // Personalizza le breadcrumbs
@@ -441,15 +441,6 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              *    ELENCO Misurazioni di una misura monitorata   *
                              * ------------------------------------------------ */
                             case PART_MONITOR: {
-                                // Dizionario dei parametri contenente gli estremi della struttura che effettua la misurazione
-                                LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
-                                // Crea un oggetto per contenere gli id delle strutture e il codice della misura
-                                ItemBean codes = new ItemBean(codeMis, null, null, DEFAULT_ID);
-                                // Salva nell'oggetto l'id della struttura che effettua il monitoraggio
-                                codes.setCod1(Integer.parseInt(struct.get("liv1")));
-                                codes.setCod2(Integer.parseInt(struct.get("liv2")));
-                                codes.setCod3(Integer.parseInt(struct.get("liv3")));
-                                codes.setCod4(Integer.parseInt(struct.get("liv4")));
                                 // Recupera gli indicatori (nella misura) storicizzando per un dato anno solare
                                 measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
                                 // Travasa le misurazioni incapsulate nella misura
@@ -465,14 +456,13 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              * ------------------------------------------------ */
                             case PART_SELECT_MEASUREMENT:
                                 // Recupera gli estremi della misura, della fase e dell'indicatore
-                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
                                 // Recupera la misurazione cercata
-                                measurement = db.getMeasurement(user, idMon, survey);
+                                measurement = db.getMeasurement(user, codes, idMon, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey);
                                 // Personalizza le breadcrumbs
                                 bC = loadBreadCrumbs(breadCrumbs, PART_MONITOR, survey, year);
                                 // Aggiunta inoltre di una foglia
                                 bC = HomePageCommand.makeBreadCrumbs(bC, ELEMENT_LEV_1, "Misurazione");
-                                //bc
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
                                 break;                            
@@ -504,7 +494,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             /* ------  FORM inserimento nuova Misurazione ----- */
                             case PART_INSERT_MEASUREMENT:
                                 // Recupera l'indicatore cui si vuol aggiungere la misurazione
-                                measure = MeasureCommand.retrieveMeasure(user, codeMis, survey, db);
+                                measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
                                 break;
