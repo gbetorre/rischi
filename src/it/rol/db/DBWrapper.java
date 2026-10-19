@@ -4579,7 +4579,19 @@ public class DBWrapper extends QueryImpl {
                      * questo contesto non sono utili: qualora servissero
                     ** aggiungere qui il recupero, basandosi sull'algoritmo
                     ** che differenzia tra 1 sola capofila L2 ed L2 multiple
-                    ** (v. ArrayList<MeasureBean> getMeasures(PersonBean user, String code,int getAll, CodeBean survey)) */ 
+                    ** (v. ArrayList<MeasureBean> getMeasures(PersonBean user, String code,int getAll, CodeBean survey)) */
+                    DepartmentBean struct = new DepartmentBean();
+                    // Carica la struttura per mostrarla in etichetta ma senza verificarne il ruolo (la mette come gregaria)
+                    if (code.getCod2() > NOTHING) {
+                        struct = getStructure(user, code.getCod2(), ELEMENT_LEV_2, survey.getNome());
+                    } else if (code.getCod3() > NOTHING) {
+                        struct = getStructure(user, code.getCod3(), ELEMENT_LEV_3, survey.getNome());
+                    } else if (code.getCod4() > NOTHING) {
+                        struct = getStructure(user, code.getCod4(), ELEMENT_LEV_4, survey.getNome());
+                    }
+                    ArrayList<DepartmentBean> structs = new ArrayList<>();
+                    structs.add(struct);
+                    measure.setGregarie(structs);
                     /* === Fasi di attuazione della misura === */
                     nextParam = NOTHING;
                     pst = null;
@@ -5252,116 +5264,6 @@ public class DBWrapper extends QueryImpl {
     
     
     /**
-     * <p>Restituisce un indicatore di monitoraggio collegato ad una specifica
-     * fase di attuazione passata come parametro.</p>
-     * 
-     * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
-     * @param fase      la fase di attuazione cui l'indicatore cercato puo' essere collegato
-     * @param survey    oggetto contenente gli estremi della rilevazione
-     * @return <code>IndicatorBean</code> - l'indicatore di monitoraggio collegato alla fase
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
-     */
-    public IndicatorBean getIndicatorByActivity(PersonBean user,
-                                                ActivityBean fase,
-                                                CodeBean survey)
-                                         throws WebStorageException {
-        try (Connection con = rol_manager.getConnection()) {
-            PreparedStatement pst = null;
-            ResultSet rs, rs1, rs2 = null;
-            IndicatorBean indicator = null;
-            // TODO: Controllare se user è superuser
-            try {
-                int nextParam = NOTHING;
-                pst = con.prepareStatement(GET_INDICATOR_BY_ACTIVITY_RAW);
-                pst.clearParameters();
-                pst.setInt(++nextParam, fase.getId());
-                rs = pst.executeQuery();
-                if (rs.next()) {
-                    // Prepara il bean contenente i riferimenti
-                    ItemBean data = new ItemBean();
-                    // Valorizza il bean
-                    BeanUtil.populate(data, rs);
-                    // Recupera il tipo
-                    CodeBean tipo = ConfigManager.getIndicatorTypesAsMap().get(new Integer(data.getCod3()));
-                    // Recupera lo stato
-                    CodeBean stato = new CodeBean(data.getCod4(), STATI_STRUTTURA[data.getCod4()], VOID_STRING, NOTHING);
-                    // Recupera l'indicatore
-                    nextParam = NOTHING;
-                    pst = null;
-                    pst = con.prepareStatement(GET_INDICATOR_BY_ACTIVITY);
-                    pst.clearParameters();
-                    pst.setInt(++nextParam, fase.getId());
-                    pst.setInt(++nextParam, survey.getId());
-                    rs1 = pst.executeQuery();
-                    if (rs1.next()) {
-                        // Crea l'indicatore vuoto
-                        indicator = new IndicatorBean();
-                        // Valorizza il bean
-                        BeanUtil.populate(indicator, rs1);
-                        // Vi aggiunge il tipo
-                        indicator.setTipo(tipo);
-                        // Vi aggiunge lo stato
-                        indicator.setStato(stato);
-                        // Vi aggiunge la fase
-                        indicator.setFase(fase);
-                        // Cerca le misurazioni
-                        Vector<MeasurementBean> measurements = new Vector<>();
-                        nextParam = NOTHING;
-                        pst = null;
-                        pst = con.prepareStatement(GET_MEASUREMENTS_BY_INDICATOR);
-                        pst.clearParameters();
-                        pst.setInt(++nextParam, indicator.getId());
-                        pst.setInt(++nextParam, survey.getId());
-                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
-                        pst.setInt(++nextParam, GET_ALL_BY_CLAUSE);
-                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv1
-                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv2
-                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv3
-                        pst.setNull(++nextParam, Types.INTEGER); // id_struttura_liv4
-                        rs2 = pst.executeQuery();
-                        while (rs2.next()) {
-                            MeasurementBean measurement = new MeasurementBean();
-                            BeanUtil.populate(measurement, rs2);
-                            Vector<FileDocBean> attachments = getFileDoc("misurazione", "all", measurement.getId(), measurement.getId());
-                            measurement.setAllegati(attachments);
-                            measurement.setIndicatore(indicator);
-                            measurements.add(measurement);
-                        }
-                        indicator.setMisurazioni(measurements);
-                    }                    
-                }
-                // Just tries to engage the Garbage Collector
-                pst = null;
-                // Get out
-                return indicator;
-            } catch (SQLException sqle) {
-                String msg = FOR_NAME + "Bean non valorizzato; problema nella query.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + sqle.getMessage(), sqle);
-            } catch (AttributoNonValorizzatoException anve) {
-                String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di bean.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + anve.getMessage(), anve);
-            } finally {
-                try {
-                    con.close();
-                } catch (NullPointerException npe) {
-                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                    LOG.severe(msg);
-                    throw new WebStorageException(msg + npe.getMessage());
-                } catch (SQLException sqle) {
-                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
-                }
-            }
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Problema con la creazione della connessione.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        }
-    }
-    
-    
-    /**
      * <p>Restituisce elenco di indicatori di monitoraggio collegati 
      * ad una specifica fase di attuazione passata come parametro.</p>
      * 
@@ -5593,13 +5495,19 @@ public class DBWrapper extends QueryImpl {
      * <p>Restituisce una misurazione di dato id.</p>
      * 
      * @param user      oggetto rappresentante la persona loggata, di cui si vogliono verificare i diritti
+     * @param codes     oggetto incapsulante id della struttura monitorante
      * @param id        identificativo della misurazione cercata
+     * @param since     data di inizio validita' del target (l'indicatore sara' estratto se ha data target successiva a since)
+     * @param to        data di fine validita' del target (l'indicatore sara' estratto se ha data target precedente a to)
      * @param survey    oggetto contenente gli estremi della rilevazione
      * @return <code>MeasurementBean</code> - la misurazione cercata
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     public MeasurementBean getMeasurement(PersonBean user,
+                                          ItemBean codes,
                                           int id,
+                                          java.util.Date since,
+                                          java.util.Date to,
                                           CodeBean survey)
                                    throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
@@ -5648,7 +5556,7 @@ public class DBWrapper extends QueryImpl {
                             //indicator.setFase(phase);
                         }
                         // Arricchisce l'indicatore con gli altri dati
-                        indicator = getIndicatorByActivity(user, phase, survey);
+                        indicator = getIndicatorByActivity(user, phase, codes, since, to, survey);
                         // Arricchisce la misurazione con l'indicatore
                         measurement.setIndicatore(indicator);
                     }
@@ -7325,25 +7233,29 @@ public class DBWrapper extends QueryImpl {
                 // Passiamo l'idSerial recuperato sopra come Chiave Primaria/Esterna
                 pst2.setInt(++nextParam, idSerial);
                 /* === Gestione dei parametri nullabili dei 4 livelli di organigramma === */
-                if (struct.get("liv1") != null) {
-                    pst2.setInt(++nextParam, Integer.parseInt(struct.get("liv1")));
+                String liv1 = struct.get("liv1");
+                String liv2 = struct.get("liv2");
+                String liv3 = struct.get("liv3");
+                String liv4 = struct.get("liv4");
+                if (liv1 != null && !liv1.equals(String.valueOf(NOTHING))) {
+                    pst2.setInt(++nextParam, Integer.parseInt(liv1));
                 } else {
                     // Types.INTEGER indica esplicitamente al database il tipo di dato della colonna, mentre Types.NULL è un tipo generico
                     pst2.setNull(++nextParam, Types.INTEGER);
                     // Usare Types.NULL potrebbe portare a errori di tipo “Could not determine data type of parameter”
                 }
-                if (struct.get("liv2") != null) {
-                    pst2.setInt(++nextParam, Integer.parseInt(struct.get("liv2")));
+                if (liv2 != null && !liv2.equals(String.valueOf(NOTHING))) {
+                    pst2.setInt(++nextParam, Integer.parseInt(liv2));
                 } else {
                     pst2.setNull(++nextParam, Types.INTEGER);
                 }
-                if (struct.get("liv3") != null) {
-                    pst2.setInt(++nextParam, Integer.parseInt(struct.get("liv3")));
+                if (liv3 != null && !liv3.equals(String.valueOf(NOTHING))) {
+                    pst2.setInt(++nextParam, Integer.parseInt(liv3));
                 } else {
                     pst2.setNull(++nextParam, Types.INTEGER);
                 }
-                if (struct.get("liv4") != null) {
-                    pst2.setInt(++nextParam, Integer.parseInt(struct.get("liv4")));
+                if (liv4 != null && !liv4.equals(String.valueOf(NOTHING))) {
+                    pst2.setInt(++nextParam, Integer.parseInt(liv4));
                 } else {
                     pst2.setNull(++nextParam, Types.INTEGER);
                 }
