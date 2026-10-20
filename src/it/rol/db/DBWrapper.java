@@ -5061,6 +5061,8 @@ public class DBWrapper extends QueryImpl {
                     measures = new ArrayList<>();
                     // Prepara la capofila
                     DepartmentBean capofila = new DepartmentBean();
+                    // Prepara la capofila sotto forma di ItemBean (servirà al metodo di recupero indicatori)
+                    ItemBean capofilaAsItem = new ItemBean();
                     // Valorizza la capofila
                     BeanUtil.populate(capofila, rs);
                     // Recupera il padre (solo livelli 4 e 3)
@@ -5089,6 +5091,10 @@ public class DBWrapper extends QueryImpl {
                                     parent.setPadre(grandparent);
                                 }
                             }
+                            //capofilaAsItem.setCod1(NOTHING);
+                            //capofilaAsItem.setCod2(NOTHING);
+                            //capofilaAsItem.setCod3(NOTHING);
+                            capofilaAsItem.setCod4(capofila.getId());
                             break;
                         case ELEMENT_LEV_3:
                             pst = null;
@@ -5100,10 +5106,12 @@ public class DBWrapper extends QueryImpl {
                                 BeanUtil.populate(parent, rs3);
                                 capofila.setPadre(parent);
                             }
+                            capofilaAsItem.setCod3(capofila.getId());
                             break;
                         default:
-                            String msg = FOR_NAME + "Trovato un livello struttura (" + capofila.getLivello() +  ") di cui non interessa il padre." ;
-                            LOG.warning(msg);
+                            capofilaAsItem.setCod2(capofila.getId());
+                            //String msg = FOR_NAME + "Trovato un livello struttura (" + capofila.getLivello() +  ") di cui non interessa il padre." ;
+                            //LOG.warning(msg);
                             break;
                     }
                     // Recupera le misure di ogni struttura
@@ -5134,7 +5142,7 @@ public class DBWrapper extends QueryImpl {
                             // La valorizza col risultato della query
                             BeanUtil.populate(fs, rs2);
                             // Cerca l'indicatore collegato eventualmente alla fase
-                            IndicatorBean ind = getIndicatorByActivity(user, fs, new ItemBean(), dateAfter, dateBefore, survey);
+                            IndicatorBean ind = getIndicatorByActivity(user, fs, capofilaAsItem, dateAfter, dateBefore, survey);
                             // Aggiunge l'indicatore alla fase se significativo
                             if (ind != null) {
                                 fs.setIndicatore(ind);
