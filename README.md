@@ -431,7 +431,8 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
-- [2.8.3] (19/10/2026) [implementation link between measurement and structure](https://github.com/gbetorre/rischi/commits/main/?since=2026-10-19&until=2026-10-19)
+- [2.8.4] (20/10/2026) [Bug fix](https://github.com/gbetorre/rischi/commits/main/?since=2026-10-20&until=2026-10-20)
+- [2.8.3] (19/10/2026) [Implementation link between measurement and structure](https://github.com/gbetorre/rischi/commits/main/?since=2026-10-19&until=2026-10-19)
 - [2.8.2] (15/10/2026) [Bug fix](https://github.com/gbetorre/rischi/commits/main/?since=2026-10-15&until=2026-10-15)
 - [2.8.1] (12/10/2026) [First implementation to link a measurement to a structure](https://github.com/gbetorre/rischi/commits/main/?since=2026-10-12&until=2026-10-12)
 - [2.8.0] (28/09/2026) [Added year and structures links in monitoring pages](https://github.com/gbetorre/rischi/commits/main/?since=2026-09-28&until=2026-09-28)

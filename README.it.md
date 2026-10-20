@@ -540,6 +540,7 @@ e fornirvi il relativo significato e la relativa motivazione.
 
 ### 2026 (43 versioni)
 
+- [2.8.4] (20/10/2026) Corretto conteggio misurazioni declinate per struttura
 - [2.8.3] (19/10/2026) Aumento granularit&agrave; monitoraggio grazie all'introduzione dell'associazione tra struttura e misurazione
 - [2.8.2] (15/10/2026) Correzione di bug
 - [2.8.1] (12/10/2026) Inizio implementazione associazione tra struttura e monitoraggio
