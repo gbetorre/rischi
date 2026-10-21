@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (43 versioni)
+### 2026 (45 versioni)
 
+- [2.8.5] (21/10/2026) Propagazione dei link delle strutture capofila e dell'anno di monitoraggio; ottimizzazioni
 - [2.8.4] (20/10/2026) Corretto conteggio misurazioni declinate per struttura
 - [2.8.3] (19/10/2026) Aumento granularit&agrave; monitoraggio grazie all'introduzione dell'associazione tra struttura e misurazione
 - [2.8.2] (15/10/2026) Correzione di bug
