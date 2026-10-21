@@ -289,8 +289,12 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
         int idFas = parser.getIntParameter("idF", DEFAULT_ID);
         // Recupera o inizializza 'id indicatore'
         int idInd = parser.getIntParameter("idI", DEFAULT_ID);
-        // Recupera o inizializza 'anno'
+        // Recupera o inizializza 'anno' scelto durante la navigazione
         int year = parser.getIntParameter("y", currentYear);
+        // Calcola il primo giorno dell'anno dato come parametro di navigazione
+        java.util.Date firstDayOfYear = Utils.convert(Utils.getFirstDayOfYear(year));
+        // Calcola l'ultimo giorno dell'anno recuperato dai parametri di navigazione
+        java.util.Date lastDayOfYear = Utils.convert(Utils.getLastDayOfYear(year));
         /* ******************************************************************** *
          *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
          * ******************************************************************** */
@@ -325,6 +329,15 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                 params = new HashMap<>();
                 // Carica in ogni caso i parametri di navigazione
                 loadParams(part, req, params);
+                // Dizionario dei parametri contenente gli estremi della struttura che effettua la misurazione
+                LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
+                // Crea un oggetto per contenere gli id delle strutture e il codice della misura
+                ItemBean codes = new ItemBean(codeMis, null, null, DEFAULT_ID);
+                // Salva nell'oggetto l'id della struttura che effettua il monitoraggio
+                codes.setCod1(Integer.parseInt(struct.get("liv1")));
+                codes.setCod2(Integer.parseInt(struct.get("liv2")));
+                codes.setCod3(Integer.parseInt(struct.get("liv3")));
+                codes.setCod4(Integer.parseInt(struct.get("liv4")));
                 /* ======================= @PostMapping ======================= */
                 if (write) {
                     // Controlla quale azione vuole fare l'utente
@@ -361,8 +374,12 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             redirect = ConfigManager.getEntToken() + EQ + COMMAND_INDICATOR + 
                                        AMPERSAND + "p" + EQ + PART_MONITOR +
                                        AMPERSAND + "mliv" + EQ + codeMis + 
-                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur;
-                                       //+AMPERSAND + MESSAGE + EQ + "newRel#rischi-fattori-misure";
+                                       AMPERSAND + "sliv1" + EQ + codes.getCod1() +
+                                       AMPERSAND + "sliv2" + EQ + codes.getCod2() +
+                                       AMPERSAND + "sliv3" + EQ + codes.getCod3() +
+                                       AMPERSAND + "sliv4" + EQ + codes.getCod4() +
+                                       AMPERSAND + PARAM_SURVEY + EQ + codeSur +
+                                       AMPERSAND + "y" + EQ + year;
                         }
                     } else {
                         // Azione di default
@@ -375,18 +392,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                      * ------------------------------------------------ */
                     if (nomeFile.containsKey(part)) {
                         // Recupera le breadcrumbs
-                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                        LinkedList<ItemBean> breadCrumbs = Utils.castLinkedList(req.getAttribute("breadCrumbs"), ItemBean.class);
                         // Imposta il titolo pagina
                         tP = titleFile.get(part);
-                        // Dizionario dei parametri contenente gli estremi della struttura che effettua la misurazione
-                        LinkedHashMap<String, String> struct = params.get(PART_SELECT_STR);
-                        // Crea un oggetto per contenere gli id delle strutture e il codice della misura
-                        ItemBean codes = new ItemBean(codeMis, null, null, DEFAULT_ID);
-                        // Salva nell'oggetto l'id della struttura che effettua il monitoraggio
-                        codes.setCod1(Integer.parseInt(struct.get("liv1")));
-                        codes.setCod2(Integer.parseInt(struct.get("liv2")));
-                        codes.setCod3(Integer.parseInt(struct.get("liv3")));
-                        codes.setCod4(Integer.parseInt(struct.get("liv4")));
                         // Gestione rami
                         switch (part) {
                             case PART_MEASURES:
@@ -395,7 +403,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                 /* -------------------------------------------- *
                                  *    ELENCO Misure raggruppate per struttura   *
                                  * -------------------------------------------- */
-                                    structs = db.getMeasuresByStructs(user, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey);
+                                    structs = db.getMeasuresByStructs(user, firstDayOfYear, lastDayOfYear, survey);
                                     // Sostituisce "Indicatori" con Monitoraggio
                                     bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Monitoraggio");
                                     // Imposta la pagina
@@ -420,7 +428,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                  *     DETTAGLI di un indicatore di dato id     *
                                  * -------------------------------------------- */
                                     // Recupera l'indicatore (incapsulato nella misura) in modo astorico
-                                    measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
+                                    measure = retrieveMeasure(user, codes, firstDayOfYear, lastDayOfYear, survey, db);
                                     // Personalizza le breadcrumbs
                                     bC = loadBreadCrumbs(breadCrumbs, part, survey, year);
                                     // Imposta la pagina
@@ -430,7 +438,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                                  *        ELENCO indicatori di una misura       *
                                  * -------------------------------------------- */
                                     // Recupera gli indicatori (nella misura) storicizzando in un dato anno solare
-                                    measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
+                                    measure = retrieveMeasure(user, codes, firstDayOfYear, lastDayOfYear, survey, db);
                                     // Personalizza le breadcrumbs
                                     bC = loadBreadCrumbs(breadCrumbs, part, survey, year);
                                     // Imposta la pagina
@@ -442,7 +450,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              * ------------------------------------------------ */
                             case PART_MONITOR: {
                                 // Recupera gli indicatori (nella misura) storicizzando per un dato anno solare
-                                measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
+                                measure = retrieveMeasure(user, codes, firstDayOfYear, lastDayOfYear, survey, db);
                                 // Travasa le misurazioni incapsulate nella misura
                                 measurements = decantMeasurements(measure);
                                 // Personalizza le breadcrumbs
@@ -456,9 +464,9 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                              * ------------------------------------------------ */
                             case PART_SELECT_MEASUREMENT:
                                 // Recupera gli estremi della misura, della fase e dell'indicatore
-                                measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
+                                measure = retrieveMeasure(user, codes, firstDayOfYear, lastDayOfYear, survey, db);
                                 // Recupera la misurazione cercata
-                                measurement = db.getMeasurement(user, codes, idMon, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey);
+                                measurement = db.getMeasurement(user, codes, idMon, firstDayOfYear, lastDayOfYear, survey);
                                 // Personalizza le breadcrumbs
                                 bC = loadBreadCrumbs(breadCrumbs, PART_MONITOR, survey, year);
                                 // Aggiunta inoltre di una foglia
@@ -494,7 +502,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
                             /* ------  FORM inserimento nuova Misurazione ----- */
                             case PART_INSERT_MEASUREMENT:
                                 // Recupera l'indicatore cui si vuol aggiungere la misurazione
-                                measure = retrieveMeasure(user, codes, Utils.convert(Utils.getFirstDayOfYear(year)), Utils.convert(Utils.getLastDayOfYear(year)), survey, db);
+                                measure = retrieveMeasure(user, codes, firstDayOfYear, lastDayOfYear, survey, db);
                                 // Pagina
                                 fileJspT = nomeFile.get(part);
                                 break;
@@ -879,7 +887,7 @@ public class IndicatorCommand extends ItemBean implements Command, Constants {
             IndicatorBean ib = fs.getIndicatore();
             if (ib != null) {
                 // Recupera le sue misurazioni
-                Vector<MeasurementBean> mbv = (Vector<MeasurementBean>) ib.getMisurazioni();
+                Vector<MeasurementBean> mbv = ib.getMisurazioni();
                 // E le trasforma in una lista con order insertion (non sincronizzata)
                 for (MeasurementBean mb :  mbv) {
                     mbl.add(mb);
