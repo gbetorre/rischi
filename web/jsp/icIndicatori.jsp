@@ -7,8 +7,9 @@
     <h5 class="p-2 bgAct17 rounded popupMenu heading">
       <i class="fa-solid fa-umbrella ico-home" title="misura di prevenzione"></i>&nbsp; 
       <a href="${initParam.appName}/?q=ic&p=mes&mliv=${meas.codice}&r=${param['r']}" title="Dettagli della misura ${meas.codice}">
-        <c:out value="${meas.nome} (per ${meas.gregarie.get(zero).nome} e anno ${param['y']})" />
+        <c:out value="${meas.nome}" />
       </a>
+      (per ${meas.gregarie.get(zero).nome} e anno ${param['y']})
     </h5>
     <hr class="separatore" />
     <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
