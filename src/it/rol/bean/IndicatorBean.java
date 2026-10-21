@@ -119,7 +119,7 @@ public class IndicatorBean extends CodeBean {
     /** Numero di misurazioni presenti per l'indicatore */
     private int totMisurazioni;
     /** Elenco di misurazioni presenti per l'indicatore */
-    private Vector<?> misurazioni;
+    private Vector<MeasurementBean> misurazioni;
     /** Flag master */
     private boolean master;
     
@@ -530,7 +530,7 @@ public class IndicatorBean extends CodeBean {
      * Restituisce lista delle misurazioni che hanno rilevato i valori assunti da questo indicatore.
      * @return <code>Vector&lt;MeasurementBean&gt;</code> - elenco delle misurazioni che si riferiscono all'indicatore 
      */
-    public Vector<?> getMisurazioni() {
+    public Vector<MeasurementBean> getMisurazioni() {
         return misurazioni;
     }
 
@@ -538,7 +538,7 @@ public class IndicatorBean extends CodeBean {
      * Imposta la lista delle misurazioni che fanno riferimento all'indicatore.
      * @param misurazioni - elenco misurazioni da impostare
      */
-    public void setMisurazioni(Vector<?> misurazioni) {
+    public void setMisurazioni(Vector<MeasurementBean> misurazioni) {
         this.misurazioni = misurazioni;
     }
 
