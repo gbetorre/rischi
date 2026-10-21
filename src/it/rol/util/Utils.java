@@ -49,10 +49,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.MissingResourceException;
 import java.util.logging.Logger;
 
@@ -252,6 +254,41 @@ public class Utils implements Constants {
                 return defaultValue;
             }
         }
+    }
+    
+    
+    /**
+     * <p>Converte in modo sicuro un oggetto generico (tipicamente estratto dal 
+     * contesto di una richiesta o sessione) in una LinkedList tipizzata.<br>
+     * In questo modo la presente classe di utilit&agrave;:<ul>
+     * <li>Offre un metodo di utilit&agrave; per gestire collezioni di oggetti generici.</li>
+     * <li>Elimina i warning del compilatore 'Type safety: Unchecked cast' senza ricorrere a @SuppressWarnings.</li>
+     * <li>Esegue la validazione e il cast esplicito dei tipi a runtime tramite `isInstance` e `cast`</li></ul>
+     * Il metodo effettua una verifica dei tipi a runtime su ciascun elemento 
+     * della collezione estranea, filtrando solo quelli compatibili ed eliminando 
+     * alla radice i warning di type safety (Unchecked cast).<br>
+     * &Egrave; sufficiente passare l'oggetto generico sul primo parametro e 
+     * il tipo della sottoclasse cui si presume lo stesso sia castabile 
+     * sul secondo parametro. 
+     * Esempio:<pre>
+     * LinkedList<ItemBean> breadCrumbs = Utils.castLinkedList(req.getAttribute("breadCrumbs"), ItemBean.class);
+     * </pre></p>
+     *
+     * @param <T> il tipo di dati atteso all'interno della lista finale
+     * @param attributeValue l'oggetto generico da convertire, solitamente una Collection
+     * @param type la classe di riferimento del tipo T per effettuare il cast sicuro
+     * @return <code>LinkedList&lt;T&gt;</code> una nuova lista contenente solo gli elementi che è stato possibile convertire nel tipo richiesto
+     */
+    public static <T> LinkedList<T> castLinkedList(Object attributeValue, Class<T> type) {
+        LinkedList<T> result = new LinkedList<>();
+        if (attributeValue instanceof Collection<?>) {
+            for (Object obj : (Collection<?>) attributeValue) {
+                if (type.isInstance(obj)) {
+                    result.add(type.cast(obj));
+                }
+            }
+        }
+        return result;
     }
 
     /* ************************************************************************ *
