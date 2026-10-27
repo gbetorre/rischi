@@ -284,30 +284,7 @@ public class FileManager extends HttpServlet implements Constants {
             throw new ServletException(msg + e.getMessage(), e);
         }
         /* ******************************************************************** *
-         *  II - Control :: user MUST HAVE writable project(s) or writable dept *
-         * ******************************************************************** *
-        // Recupera i progetti su cui l'utente ha diritti di scrittura
-        @SuppressWarnings("unchecked")  // I'm confident about the types...
-        Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects"); 
-        // Recupera i dipartimenti in cui l'utente ha un ruolo superiore a TL
-        @SuppressWarnings("unchecked")
-        Vector<DepartmentBean> writableDepts = (Vector<DepartmentBean>) ses.getAttribute("writableDeparments");
-        // Se non ci sono progetti scrivibili ed è stata inviata una form post multipart c'è qualcosa che non va!!!
-        if (writablePrj == null) {
-            ses.invalidate();
-            String msg = FOR_NAME + "L\'utente ha tentato di caricare un file pero\' non sono stati trovati progetti scrivibili: problema!.\n";
-            log.severe(msg);
-            throw new ServletException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-        }
-        // Se è stato passato un id dipart ma l'utente non ha dipartimenti scrivibili, c'è qualcosa che non va!!
-        if (idDip > DEFAULT_ID && writableDepts == null) {
-            ses.invalidate();
-            String msg = FOR_NAME + "L\'utente ha tentato di caricare un file pero\' non sono stati trovati dipartimenti monitorabili: problema!.\n";
-            log.severe(msg);
-            throw new ServletException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-        }
-        /* ******************************************************************** *
-         *         III - Control :: token MUST BE among allowed tokens          *
+         *         II - Control :: token MUST BE among allowed tokens           *
          * ******************************************************************** */
         // Controlla che il token corrente sia abilitato all'upload
         if (!uploadCommands.contains(command)) {
@@ -316,7 +293,7 @@ public class FileManager extends HttpServlet implements Constants {
             throw new ServletException(msg);
         }
         /* ******************************************************************** *
-         *       IV - Control :: there's an id and MUST BE a valid id          *
+         *       III - Control :: there's an id and MUST BE a valid id          *
          * ******************************************************************** */
        /* if (entToken.equalsIgnoreCase(Query.PROJECT_PART) && idPrj > DEFAULT_ID) {
         	// Gestisce il caricamento degli allegati allo status di progetto
@@ -390,7 +367,6 @@ public class FileManager extends HttpServlet implements Constants {
      * @param res la HttpServletResponse utilizzata per indirizzare le risposte
      * @param parser ParameterParser contenente i parametri provenienti dalla pagina
      * @param user  utente loggato, per la memorizzazione dell'autore del caricamento
-     * @param writablePrj   elenco di progetti scribili dall'utente loggato, per controlli di autorizzazione
      * @throws ServletException java.lang.Throwable.Exception.ServletException che viene sollevata se manca un parametro di configurazione considerato obbligatorio o per via di qualche altro problema di puntamento
      * @throws IOException      java.io.IOException che viene sollevata se si verifica un puntamento a null o in genere nei casi in cui nella gestione del flusso informativo di questo metodo si verifica un problema
      */
@@ -418,7 +394,14 @@ public class FileManager extends HttpServlet implements Constants {
         // Recupera o inizializza il codice della misura
         String mes = parser.getStringParameter("mliv", VOID_STRING);
         // Recupera o inizializza il codice della rilevazione
-        String sur = parser.getStringParameter("r", VOID_STRING);        
+        String sur = parser.getStringParameter("r", VOID_STRING);
+        // Recupera o inizializza id delle strutture
+        String sliv1 = parser.getStringParameter("sliv1", VOID_STRING);
+        String sliv2 = parser.getStringParameter("sliv2", VOID_STRING);
+        String sliv3 = parser.getStringParameter("sliv3", VOID_STRING);
+        String sliv4 = parser.getStringParameter("sliv4", VOID_STRING);
+        // Recupera o inizializza 'anno' scelto durante la navigazione
+        int year = parser.getIntParameter("y", Utils.getCurrentYearAsInt());
         /* ******************************************************************** *
          *                      Effettua la connessione                         *
          * ******************************************************************** */
@@ -572,7 +555,15 @@ public class FileManager extends HttpServlet implements Constants {
                 db.postUpdateFileDoc(params);
             }
             req.setAttribute("message", "Upload has been done successfully!");
-            flush(req, res, templateJsp, "?q=ic&p=smm&nliv=" + idMon + "&idI=" + idInd + "&idF=" + idFas + "&mliv=" + mes + "&r=" + sur + "#Allegati");
+            flush(req, res, templateJsp, 
+                  "?q=ic&p=smm&nliv=" + idMon + 
+                  "&idI=" + idInd + 
+                  "&idF=" + idFas + 
+                  "&mliv=" + mes +
+                  "&sliv1=" + sliv1 + "&sliv2=" + sliv2 + "&sliv3=" + sliv3 + "&sliv4=" + sliv4 + 
+                  "&r=" + sur + 
+                  "&y=" + year + 
+                  "#Allegati");
         } catch (IllegalStateException e) {
             throw new ServletException("Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + e.getMessage(), e);
         } catch (NullPointerException e) {
