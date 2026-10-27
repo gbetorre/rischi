@@ -35,7 +35,12 @@
       <div class="panel-heading bgAct13">
         <div class="noHeader">
           <i class="fa-regular fa-pen-to-square"></i>&nbsp;
-          <c:out value="Inserimento monitoraggio" />
+          <c:out value="Inserimento monitoraggio ${param['y']}" />
+          <hr class="separapoco" />
+          <h5 class="text-dark border-bottom border-2 border-secondary">&nbsp;
+            <i class="fa fa-building" aria-hidden="true" title="struttura"></i>&nbsp;&nbsp;
+            Struttura monitorata: <strong>${meas.gregarie.get(zero).prefisso} ${meas.gregarie.get(zero).nome}</strong>
+          </h5> 
         </div>
       </div>
       <hr class="separatore" />
