@@ -149,11 +149,11 @@
     </c:when>
     <c:otherwise>
     <div class="alert alert-danger">
-      <strong>Non sono state trovate misurazioni associate ad indicatori della misura corrente, sulla struttura corrente, entro l'anno ${param['y']}.</strong>
+      <strong>Non sono state trovate misurazioni associate ad indicatori della <u>misura corrente</u>, sulla <u>struttura corrente</u>, entro l'anno <u>${param['y']}</u>.</strong>
       <hr class="separapoco" />
       <p>
         Se si desidera aggiungere una misurazione, entrare nella
-        <a href="${initParam.appName}/?q=ic&p=ind&mliv=${meas.codice}&r=${param['r']}&y=${param['y']}">
+        <a href="${initParam.appName}/?q=ic&p=ind&mliv=${meas.codice}&sliv1=${param['sliv1']}&sliv2=${param['sliv2']}&sliv3=${param['sliv3']}&sliv4=${param['sliv4']}&r=${param['r']}&y=${param['y']}">
           pagina degli indicatori
         </a>
         della misura e cliccare sul bottone 
