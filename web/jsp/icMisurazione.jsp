@@ -33,7 +33,12 @@
       <div class="panel-heading bgAct13">
         <div class="noHeader">
           <i class="fa-regular fa-pen-to-square"></i>&nbsp;
-          <c:out value="Aggiornamento monitoraggio" />
+          <c:out value="Aggiornamento monitoraggio ${param['y']}" />
+          <hr class="separapoco" />
+          <h5 class="text-dark border-bottom border-2 border-secondary">&nbsp;
+            <i class="fa fa-building" aria-hidden="true" title="struttura"></i>&nbsp;&nbsp;
+            Struttura monitorata: <strong>${meas.gregarie.get(zero).prefisso} ${meas.gregarie.get(zero).nome}</strong>
+          </h5> 
         </div>
       </div>
       <hr class="separatore" />
@@ -184,7 +189,7 @@
         </div>
       </div>
     </form>
-    <form accept-charset="ISO-8859-1" id="all-form" method="post" action="file?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${phas.id}&mliv=${meas.codice}&r=${param['r']}" enctype="multipart/form-data" class="modal" style="height:245px;">
+    <form accept-charset="ISO-8859-1" id="all-form" method="post" action="file?q=ic&p=smm&nliv=${mon.id}&idI=${ind.id}&idF=${phas.id}&mliv=${meas.codice}&sliv1=${param['sliv1']}&sliv2=${param['sliv2']}&sliv3=${param['sliv3']}&sliv4=${param['sliv4']}&y=${param['y']}&r=${param['r']}" enctype="multipart/form-data" class="modal" style="height:245px;">
       <input type="hidden" id="mon-id" name="mon-id" value="${mon.id}" />
       <input type="hidden" id="ind-id" name="ind-id" value="${ind.id}" />
       <h3 class="heading bg-warning">&nbsp;
