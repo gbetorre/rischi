@@ -759,7 +759,7 @@ Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/r
     - [ ] Spanish
 -->
 
-See also [open issues](https://github.com/gbetorre/rischi/issues) for a complete list of proposed functionalities (and known problems).
+See also [open issues](https://github.com/gbetorre/rischi/issues) and [pull requests](https://github.com/gbetorre/rischi/pulls?q=is%3Apr+state%3Aclosed) for a complete list of proposed functionalities (and known problems).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

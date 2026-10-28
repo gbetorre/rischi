@@ -965,7 +965,7 @@ Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/r
     - [ ] Spanish
 -->
 
-Vedi anche [open issues](https://github.com/gbetorre/rischi/issues) per una lista completa di funzionalit&agrave; proposte (e problemi conosciuti).
+Vedi anche le [pull requests](https://github.com/gbetorre/rischi/pulls?q=is%3Apr+state%3Aclosed) e le [open issues](https://github.com/gbetorre/rischi/issues) per una lista completa di funzionalit&agrave; proposte e problemi conosciuti.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
