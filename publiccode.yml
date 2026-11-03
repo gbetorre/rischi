@@ -27,7 +27,6 @@ description:
       ## Introduzione
 
 
-
       L'applicazione web per la mappatura dei rischi corruttivi `ROL-RMS` serve
 
       ad aiutare Enti, Pubbliche Amministrazioni, aziende partecipate – e
@@ -111,8 +110,6 @@ description:
 
       - Il software engineer 
 
-
-
       ​
 
 
@@ -179,7 +176,7 @@ description:
 
 
 
-      A quel punto, è possibile quindi rivolgere una serie di **quesiti **a
+      A quel punto, è possibile quindi rivolgere una serie di **quesiti** a
 
       responsabili ed operatori ubicati presso tali strutture, in merito ai
 
@@ -188,7 +185,7 @@ description:
 
       Attraverso l'analisi delle risposte a tali quesiti, l'applicazione
 
-      permette di ottenere, automaticamente, una serie di **indici **relativi a
+      permette di ottenere, automaticamente, una serie di **indici** relativi a
 
       specifici rischi corruttivi cui risultano esposti i processi organizzativi
 
@@ -196,9 +193,9 @@ description:
 
       applica specifici algoritmi che permettono di individuare il livello del
 
-      **PxI **(livello di rischio **Probabilità x Impatto**)** **di ogni
+      **PxI** (livello di rischio **Probabilità x Impatto**) **di ogni
 
-      processo esaminato.
+      processo esaminato**.
 
 
 
