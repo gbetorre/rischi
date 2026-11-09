@@ -138,6 +138,13 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * Form for adding/editing a note (summary assessment) to a PxI index
      */
     private static final String nomeFileNote =          "/jsp/prNotaForm.jsp";
+    /**
+     * Pagina a cui la command inoltra per mostrare la form di aggiunta/modifica 
+     * delle note ad un processo
+     * <hr>
+     * Form for adding/editing notes to a process
+     */
+    private static final String nomeFileNotes =         "/jsp/prNoteForm.jsp";
     /** 
      * Pagina di scelta del tipo di nuovo elemento da aggiungere
      * (Macroprocesso  | Processo | Sottoprocesso)
@@ -244,6 +251,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_INSERT_OUTPUT,        nomeFileAddOutput);
         nomeFile.put(PART_INSERT_SUBJECT,       nomeFileAddSubject);
         nomeFile.put(PART_UPDATE_ACTIVITY,      nomeFileUpdActivity);
+        nomeFile.put(PART_UPDATE_NOTES,         nomeFileNotes);
         /* Load the hashmap containing the titles of the pages                  */
         titleFile.put(PART_PROCESS,                         "Dettagli Processo");
         titleFile.put(PART_INPUT,                           "Input Processo");
@@ -251,15 +259,16 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         titleFile.put(PART_FACTORS,                         "Fattori Abilitanti");
         titleFile.put(PART_INSERT_F_R_P,                    "Fattore-Rischio-Processo");
         titleFile.put(PART_PI_NOTE,                         "Nota Giudizio Sintetico");       
-        titleFile.put(new Byte(ELEMENT_LEV_1).toString(),   "Nuovo Macroprocesso");
-        titleFile.put(new Byte(ELEMENT_LEV_2).toString(),   "Nuovo Processo");
-        titleFile.put(new Byte(ELEMENT_LEV_3).toString(),   "Nuovo Sottoprocesso");
+        titleFile.put(String.valueOf(ELEMENT_LEV_1),        "Nuovo Macroprocesso");
+        titleFile.put(String.valueOf(ELEMENT_LEV_2),        "Nuovo Processo");
+        titleFile.put(String.valueOf(ELEMENT_LEV_3),        "Nuovo Sottoprocesso");
         titleFile.put(PART_INSERT_INPUT,                    "Aggiunta Input");
         titleFile.put(PART_INSERT_ACTIVITY,                 "Gestione Fasi");
         titleFile.put(PART_INSERT_ACT_STRUCTS,              "Assegnazione Strutture/Soggetti");
         titleFile.put(PART_INSERT_OUTPUT,                   "Aggiunta Output");
         titleFile.put(PART_INSERT_SUBJECT,                  "Nuovo Soggetto");
         titleFile.put(PART_UPDATE_ACTIVITY,                 "Aggiornamento Fase");
+        titleFile.put(PART_UPDATE_NOTES,                    "Note Processo");
     }
 
 
@@ -272,7 +281,16 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      * <p>Manages the main flow.</p>
      * <p>Prepares the beans.</p>
      * <p>Passes the values that will be used by the application to the Request.</p>
-     *
+     * <pre>
+     * Chiamate GET:
+     *              'pliv0'     id area di rischio
+     *              'pliv1'     id macroprocesso
+     *              'pliv2'     id processo
+     *       oppure:
+     *              'pliv'      id macro/pro/sottoprocesso
+     *              'liv'       1 = macro | 2 = processo | 3 = sottoprocesso
+     * </pre>
+     * 
      * @param req la HttpServletRequest contenente la richiesta del client
      * @throws CommandException se si verifica un problema, tipicamente nell'accesso a campi non accessibili o in qualche altro tipo di puntamento
      */
@@ -666,6 +684,21 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                    .put(PARAM_SURVEY, codeSur);
                             redirect = dataUrl.getUrl();
                         /* ------------------------------------------------ *
+                         *  @PostMapping:: UPDATE process' Notes                     *
+                         * ------------------------------------------------ */
+                        } else if (part.equalsIgnoreCase(PART_UPDATE_NOTES)) {
+                            // Deve aggiungere al dizionario dei parametri quelli di activity
+                            loadParams(part, req, params);
+                            // Quando un processo viene scritto le note sono NULL
+                            db.updateNotes(user, params);
+                            // Prepara la redirect 
+                            dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                   .put("p", PART_PROCESS)
+                                   .put("pliv", idP)
+                                   .put("liv", ELEMENT_LEV_2)
+                                   .put(PARAM_SURVEY, codeSur);
+                            redirect =  dataUrl.getUrl();
+                        /* ------------------------------------------------ *
                          *  @PostMapping:: UPDATE an activity description   *
                          * ------------------------------------------------ */                            
                         } else if (part.equalsIgnoreCase(PART_UPDATE_ACTIVITY)) {
@@ -794,6 +827,14 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 pxi = db.getIndicatorPI(user, idP, survey);
                                 // Ha bisogno di personalizzare le breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nota");
+                                break;
+                            }
+                            /* ------   FORM: INSERT or UPDATE process notes ----- */
+                            case PART_UPDATE_NOTES: {
+                                // Deve recuperare e mostrare le note del processo
+                                pat = db.getProcessById(user, idP, survey);
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Note");
                                 break;
                             }
                             /* -----    FORM: New Macro/Process  -----          */
