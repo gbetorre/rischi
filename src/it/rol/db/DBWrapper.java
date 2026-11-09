@@ -8687,6 +8687,100 @@ public class DBWrapper extends QueryImpl {
     
     
     /**
+     * <p>Metodo per fare l'aggiornamento delle note di un processo_at.
+     * NOTA: viene fatta a monte una serie di assunzioni:<ol>
+     * <li>si assume che il processo sia gi&agrave; stato inserito
+     * (in altri termini, le note vengono sempre inserite a valle dell'inserimento
+     * di un processo, non contestualmente ad esso);</li>
+     * <li>le note sono memorizzate nel campo "attivita" dell'entit&agrave;
+     * processo (campo cos&iacute; chiamato per motivi storici e da non confondere
+     * con le attivit&agrave; del processo, che sono sottoscomposizioni del
+     * processo stesso)</li>
+     * </ul></p> 
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public void updateNotes(PersonBean user, 
+                            HashMap<String, LinkedHashMap<String, String>> params) 
+                     throws WebStorageException {
+        // Dizionario dei parametri contenente il codice della rilevazione
+        LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+        // Dizionario dei parametri del processo a cui è relativo il PxI
+        LinkedHashMap<String, String> proc = params.get(PART_PROCESS);
+        // Dizionario dei parametri della nota da aggiornare
+        LinkedHashMap<String, String> risk = params.get(PART_UPDATE_NOTES);
+        // TRY-WITH-RESOURCES: Apre e chiude AUTOMATICAMENTE sia la connessione che lo statement
+        try (Connection con = rol_manager.getConnection()) {
+            // Prepara la query
+            PreparedStatement pst = con.prepareStatement(UPDATE_NOTES_BY_PROCESS);
+            // BEGIN: ==>
+            con.setAutoCommit(false);
+            try {
+                // TODO: Controllare se user è superuser
+                // === Se siamo qui vuol dire che ok   === //
+                // Recupera l'identificativo del processo
+                int idP = Integer.valueOf(proc.get("liv2")).intValue();
+                // Recupera la nota
+                String note = risk.get("note");
+                // Prepara i parametri per l'inserimento
+                pst.clearParameters();
+                // Definisce l'indice del parametro da passare
+                int nextParam = NOTHING;
+                // === Note === //
+                pst.setString(++nextParam, note);
+                // === Campi automatici: id utente, ora ultima modifica, data ultima modifica === *
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                pst.setInt(++nextParam, user.getUsrId());
+                // === Riferimento a processo === //
+                pst.setInt(++nextParam, idP);
+                // === Collegamento a rilevazione === //
+                pst.setInt(++nextParam, Integer.parseInt(survey.get(PARAM_SURVEY)));
+                // Invio
+                pst.executeUpdate();
+                // END: <== Se tutto va bene, effettua il commit
+                con.commit();
+                pst.close();
+                pst = null;
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (ArrayIndexOutOfBoundsException aiobe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, aiobe);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, npe);
+        } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+        }
+    }
+    
+    
+    /**
      * <p>Metodo per fare l'aggiornamento dei numeri d'ordine delle attivit&agrave;.</p> 
      *
      * @param user      utente loggato
