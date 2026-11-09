@@ -263,15 +263,18 @@ public interface Constants extends Serializable {
      */
     public static final String PART_RESUME_QST          = "rqs";
     /**
-     * <p>Costante per il parametro identificante la funzione di aggiunta di un nuovo rischio.</p>
+     * <p>Costante per il parametro identificante la funzione di aggiunta 
+     * di un nuovo rischio.</p>
      */
     public static final String PART_INSERT_RISK         = "adr";
     /**
-     * <p>Costante per il parametro identificante la funzione di associazione tra un rischio e un processo.</p>
+     * <p>Costante per il parametro identificante la funzione di associazione 
+     * tra un rischio e un processo.</p>
      */
     public static final String PART_INSERT_RISK_PROCESS = "adp";
     /**
-     * <p>Costante per il parametro identificante la funzione di associazione tra un processo e un rischio.</p>
+     * <p>Costante per il parametro identificante la funzione di associazione 
+     * tra un processo e un rischio.</p>
      */
     public static final String PART_INSERT_PROCESS_RISK = "adk";
     /**
@@ -344,6 +347,11 @@ public interface Constants extends Serializable {
      * di un soggetto contingente.</p>
      */
     public static final String PART_INSERT_SUBJECT      = "isu";
+    /**
+     * <p>Costante per il parametro identificante la funzione di aggiornamento 
+     * delle note di un processo.</p>
+     */
+    public static final String PART_UPDATE_NOTES        = "upn";
     /**
      * <p>Costante per il parametro identificante la funzione di aggiornamento 
      * di una fase collegata ad un processo.</p>
