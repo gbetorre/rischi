@@ -9,15 +9,19 @@ $ cd git/rischi/
 
 $ git shortlog -sne > AUTHORS
 
-  1344	gbetorre <gianroberto.torre@gmail.com>
-     9	gbetorre <61409177+gbetorre@users.noreply.github.com>
+  2018  gbetorre <gianroberto.torre@gmail.com>
+   222  gbetorre <giovanroberto.torre@univr.it>
+    23  dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+     9  Gianroberto Torre <giovanroberto.torre@univr.it>
+     9  gbetorre <61409177+gbetorre@users.noreply.github.com>
 
 
-upon this one we get, instead:
+Using this one we get, instead:
 
 $ git log --format='%aN <%aE>' | sort -uf
 
+dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
 gbetorre <61409177+gbetorre@users.noreply.github.com>
 gbetorre <gianroberto.torre@gmail.com>
-
-
+gbetorre <giovanroberto.torre@univr.it>
+Gianroberto Torre <giovanroberto.torre@univr.it>
