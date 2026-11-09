@@ -1120,6 +1120,7 @@ public interface Query extends Serializable {
             "           PAT.id                          AS \"id\"" +
             "   ,       PAT.codice                      AS \"codice\"" +
             "   ,       PAT.nome                        AS \"nome\"" +
+            "   ,       PAT.attivita                    AS \"informativa\"" +
             "   , " +   Constants.ELEMENT_LEV_2 + "     AS \"livello\"" +
             "   ,       PAT.ordinale                    AS \"ordinale\"" +
             "   ,       PAT.id_rilevazione              AS \"idRilevazione\"" +
@@ -2667,6 +2668,18 @@ public interface Query extends Serializable {
             "   ,  id_usr_ultima_modifica = ?" +
             "   WHERE cod_indicatore = 'PxI'" +
             "       AND id_processo_at = ?" +
+            "       AND id_rilevazione = ?";
+    
+    /**
+     * <p>Query per aggiornamento delle note di un processo anticorruttivo.</p>
+     */
+    public static final String UPDATE_NOTES_BY_PROCESS =
+            "UPDATE processo_at" +
+            "   SET attivita  = ?" +
+            "   ,  data_ultima_modifica =   ?" +
+            "   ,  ora_ultima_modifica =    ?" +
+            "   ,  id_usr_ultima_modifica = ?" +
+            "   WHERE id = ?" +
             "       AND id_rilevazione = ?";
     
     /**
