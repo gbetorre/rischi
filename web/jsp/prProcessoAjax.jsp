@@ -150,8 +150,8 @@
           </c:forEach>
         </table>
         <div class="col-sm-12 centerlayout">
-          <a href="${initParam.appName}/?q=pr&p=iac&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn btn-success btn-lg" title="Aggiungi una nuova fase al processo corrente">
-            <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi Fase
+          <a href="${initParam.appName}/?q=pr&p=iac&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn bgAct11 btn-lg text-dark" title="Aggiungi una nuova fase al processo corrente">
+            <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi  &nbsp; Fase  &nbsp;
           </a> &nbsp;
           <a href="${initParam.appName}/?q=pr&p=iac&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}&ref=pro" class="btn btn-warning btn-lg text-dark text-decoration-none" id="resort" title="Modifica l'ordine delle fasi">
             <i class="fa-solid fa-sort"></i>    &nbsp;    Modifica Ordine
@@ -191,8 +191,16 @@
           </a>
         </div>
       </div>
-      <c:if test="${not empty inputs.get(0).extraInfo}">
       <hr class="separatore" />
+    <c:choose>
+      <c:when test="${empty inputs.get(0).extraInfo}">
+        <div class="col-sm-12 centerlayout">
+          <a href="${initParam.appName}/?q=pr&p=upn&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn bgAct14 btn-lg" title="Aggiungi una nuova nota al processo corrente">
+            <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Aggiungi &nbsp;Note&nbsp; &nbsp;
+          </a>
+        </div>
+      </c:when>
+      <c:otherwise>
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples bgAct3">
         <h3 class="bordo" id="outputs">
           NOTE SUL PROCESSO &nbsp;
@@ -200,8 +208,15 @@
         <div class="subfields active text-dark">
           <c:out value="${inputs.get(0).extraInfo}" escapeXml="false" />
         </div>
+                <hr class="separapoco" />
+        <div class="col-sm-12 centerlayout">
+          <a href="${initParam.appName}/?q=pr&p=upn&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=&pliv0=&r=${param['r']}" class="btn bgAct14 btn-lg" title="Modifica le note del processo corrente">
+            <i class="fa-solid fa-file-circle-plus"></i> &nbsp;Modifica &nbsp;Note
+          </a>
+        </div>
       </div>
-      </c:if>
+      </c:otherwise>
+    </c:choose>
       <hr class="separatore" />
       <section id="rischi-fattori-misure">
       <div class="p-3 p-md-4 border rounded-3 icon-demo-examples errorPwd">
