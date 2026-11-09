@@ -589,7 +589,7 @@ public class RiskCommand extends ItemBean implements Command, Constants {
         /* ---------------------------------------------------- *
          *    Caricamento parametri Aggiornamento Nota al PxI   *
          * ---------------------------------------------------- */
-        } else if (part.equals(PART_PI_NOTE)) {
+        } else if (part.equals(PART_PI_NOTE) || part.equals(PART_UPDATE_NOTES)) {
             // Recupera gli estremi della nota da aggiornare
             //String note = parser.getStringParameter("pi-note", VOID_STRING);
             risk.put("note", parser.getStringParameter("pi-note", VOID_STRING));
