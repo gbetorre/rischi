@@ -1588,7 +1588,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                             // Recupera i soggetti terzi collegati a tutti i processi at (necessari per calcolare il valore di I3)
                             HashMap<Integer, ArrayList<DepartmentBean>> subjectsAsMap = ReportCommand.retrieveSubjects(macrosat, user, codeSurvey, db);
                             // Calcola tutti i valori degli indicatori e li restituisce in una mappa, indicizzati per nome
-                            LinkedHashMap<String, InterviewBean> indicators = AuditCommand.compute(questionsByIndicator, answersByQuestions, AuditCommand.decantIndicators(indicatorsAsList), structsAsMap.get(new Integer(id)), subjectsAsMap.get(new Integer(id)));
+                            LinkedHashMap<String, InterviewBean> indicators = AuditCommand.compute(questionsByIndicator, answersByQuestions, AuditCommand.decantIndicators(indicatorsAsList), structsAsMap.get(Integer.valueOf(id)), subjectsAsMap.get( Integer.valueOf(id)));
                             // Aggiunge gli indicatori calcolati all'intervista in cui è coinvolto il processo
                             interview.setIndicatori(indicators);
                             // Aggiunge l'intervista con gli indicatori alla lista delle interviste che hanno riguardato il processo di dato id
