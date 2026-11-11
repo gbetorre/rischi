@@ -8713,13 +8713,12 @@ public class DBWrapper extends QueryImpl {
         // Dizionario dei parametri della nota da aggiornare
         LinkedHashMap<String, String> risk = params.get(PART_UPDATE_NOTES);
         // TRY-WITH-RESOURCES: Apre e chiude AUTOMATICAMENTE sia la connessione che lo statement
-        try (Connection con = rol_manager.getConnection()) {
-            // Prepara la query
-            PreparedStatement pst = con.prepareStatement(UPDATE_NOTES_BY_PROCESS);
+        try (Connection con = rol_manager.getConnection();
+             PreparedStatement pst = con.prepareStatement(UPDATE_NOTES_BY_PROCESS) ) {
             // BEGIN: ==>
             con.setAutoCommit(false);
+            // TODO: Controllare se user è superuser
             try {
-                // TODO: Controllare se user è superuser
                 // === Se siamo qui vuol dire che ok   === //
                 // Recupera l'identificativo del processo
                 int idP = Integer.valueOf(proc.get("liv2")).intValue();
@@ -8743,31 +8742,27 @@ public class DBWrapper extends QueryImpl {
                 pst.executeUpdate();
                 // END: <== Se tutto va bene, effettua il commit
                 con.commit();
-                pst.close();
-                pst = null;
-            } catch (NumberFormatException nfe) {
-                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
-                LOG.severe(msg);
-                throw new WebStorageException(msg, nfe);
-            } catch (ArrayIndexOutOfBoundsException aiobe) {
-                String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
-                LOG.severe(msg);
-                throw new WebStorageException(msg, aiobe);
-            } catch (SQLException sqle) {
-                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
-                LOG.severe(msg); 
-                throw new WebStorageException(msg + sqle.getMessage(), sqle);
-            } finally {
+            } catch (Exception e) {
+                String msg = null;
+                // In caso di QUALSIASI errore all'interno della transazione, esegue il rollback
                 try {
-                    con.close();
-                } catch (NullPointerException npe) {
-                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                    LOG.severe(msg); 
-                    throw new WebStorageException(msg + npe.getMessage());
-                } catch (SQLException sqle) {
-                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                    msg = FOR_NAME + "Si e\' verificata un\'eccezione nel metodo di aggiornamento delle note di un processo.\n Tento il rollback!\n";
+                    con.rollback();
+                } catch (SQLException ex) {
+                    msg = FOR_NAME + "Impossibile eseguire il rollback della transazione: " + ex.getMessage();
+                    LOG.warning(msg);
                 }
+                // Rilancia l'eccezione per farla catturare dai catch esterni dedicati al logging
+                throw new WebStorageException(msg, e);
             }
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+            LOG.severe(msg);
+            throw new WebStorageException(msg, nfe);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } catch (NullPointerException npe) {
                 String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
                 LOG.severe(msg);
