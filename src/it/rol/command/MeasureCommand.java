@@ -363,7 +363,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             // Travasa le strutture in una mappa piatta indicizzata per codice
                             flatStructs = AuditCommand.decantStructs(structs);
                             // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                            LinkedList<ItemBean> breadCrumbs = Utils.castLinkedList(req.getAttribute("breadCrumbs"), ItemBean.class);
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Nuova Misura");
                         } else if (part.equalsIgnoreCase(PART_INSERT_M_R_P)) {
                             /* ***************************************************** *
@@ -384,7 +384,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             // Raggruppa le misure suggerite per tipologia
                             measuresByType = decantMeasures(types, lessMeasures);
                             // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                            LinkedList<ItemBean> breadCrumbs = Utils.castLinkedList(req.getAttribute("breadCrumbs"), ItemBean.class);
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_2, "Nuovo legame P-R-M");
                         } else if (part.equalsIgnoreCase(PART_UPDATE_MEASURE)) {
                             /* ************************************************ *
@@ -395,7 +395,7 @@ public class MeasureCommand extends ItemBean implements Command, Constants {
                             // Recupera i rischi cui è associata
                             risksByMeasure = db.getRisksByMeasure(user, codeMis, survey);
                             // Ha bisogno di personalizzare le breadcrumbs
-                            LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                            LinkedList<ItemBean> breadCrumbs = Utils.castLinkedList(req.getAttribute("breadCrumbs"), ItemBean.class);
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Aggiorna Misura");
                         }
                         // Imposta la jsp
