@@ -5,7 +5,7 @@
 <c:set var="mats" value="${requestScope.macroProcessi}" scope="page" />
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
     <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/2.1.5/features/searchHighlight/dataTables.searchHighlight.css">
-    <h3 class="mt-1 m-0 font-weight-bold float-left">Report misure e rischi</h3>
+    <h3 class="mt-1 m-0 font-weight-bold float-left">Report misure previste</h3>
     <a href="${mesCSV}" class="float-right badge badge-pill lightTable bgAct20" title="Scarica il dataset dei processi organizzativi con PxI iniziale e PxI mitigato (stima)">
       <i class="fas fa-download"></i>Scarica i dati
     </a>
@@ -18,7 +18,7 @@
               <th width="15%">Macroprocesso</th>
               <th width="15%">Processo</th>
               <th width="25%">Rischi Potenziali</th>
-              <th width="15%">Misure</th>
+              <th width="15%">Misure Previste</th>
               <th width="15%">Giudizio sintetico</th>
               <th width="15%">PxI mitigato (stima)</th>
             </tr>
