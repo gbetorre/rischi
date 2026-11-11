@@ -12,13 +12,14 @@
         <table class="table table-striped table-bordered table-hover" id="listMis">
           <thead class="thead-light">
             <tr class="thin">
-              <th width="10%">Macroprocesso</th>
-              <th width="15%">Processo</th>
-              <th width="20%">Rischi Potenziali</th>
+              <th width="5%">Macroprocesso</th>
+              <th width="14%">Processo</th>
+              <th width="15%">Rischi Potenziali</th>
               <th width="15%">Misure Previste</th>
               <th width="15%">Misure Applicate</th>
               <th width="13%">Giudizio Sintetico</th>
-              <th width="12%">PxI mitigato (monitoraggio)</th>
+              <th width="10%">PxI mitigato (stima)</th>
+              <th width="13%">PxI mitigato (monitoraggio)</th>
             </tr>
           </thead>
           <tbody>
@@ -102,6 +103,9 @@
                     </a>
                   </span>
                 </div>
+              </td>
+              <td class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (stima)').informativa)}">
+                <c:out value="${pat.indicatori.get('PxI (stima)').informativa}" />
               </td>
               <td class="text-center reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI (reale)').informativa)}">
                 <c:out value="${pat.indicatori.get('PxI (reale)').informativa}" />
