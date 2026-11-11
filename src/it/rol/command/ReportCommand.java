@@ -73,6 +73,7 @@ import it.rol.bean.RiskBean;
 import it.rol.exception.AttributoNonValorizzatoException;
 import it.rol.exception.CommandException;
 import it.rol.exception.WebStorageException;
+import it.rol.util.Utils;
 
 
 /**
@@ -263,7 +264,8 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                     }
                     matsWithIndicators = retrieveIndicators(matsWithoutIndicators, user, codeSur, NOTHING, db);
                     // Recupera le breadcrumbs
-                    LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                 // Recupera le breadcrumbs
+                    LinkedList<ItemBean> breadCrumbs = Utils.castLinkedList(req.getAttribute("breadCrumbs"), ItemBean.class);
                     // Decide il valore di p
                     switch (part.toLowerCase()) {
                         /* -------   SHOW Report Analitico Indicatori   ------- */
@@ -598,7 +600,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                     // Estrae i rischi di un dato processo in una data rilevazione
                     risks = db.getRisksByProcess(user, pat, survey);
                     // Setta nella mappa la lista appena calcolata
-                    risksByPat.put(new Integer(pat.getId()), risks);
+                    risksByPat.put(Integer.valueOf(pat.getId()), risks);
                 }
             }
         } catch (WebStorageException wse) {
@@ -767,11 +769,13 @@ public class ReportCommand extends ItemBean implements Command, Constants {
       
       
       /**
-       * <p>Ricevuta una ArrayList (albero, vista gerarchica)
+       * <p><pre>Ricevuta</pre> 
+       * una ArrayList (albero, vista gerarchica)
        * di tutti macroprocessi censiti a fini anticorruttivi
        * trovati in base a una rilevazione il cui identificativo 
        * viene accettato come argomento, ma i cui figli non contengono
-       * al proprio interno i rischi, restituisce una mappa di rischi 
+       * al proprio interno i rischi, 
+       * <pre>restituisce</pre> una mappa di rischi 
        * associati a ciascun processo, indicizzata per il processo stesso,
        * e in cui il valore del PxI del processo, idealmente estensibile 
        * a tutti i rischi del processo stesso, viene mitigato, per ogni rischio, 
@@ -803,29 +807,48 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                    for (ProcessBean pat : mat.getProcessi()) {
                        // Estrae i rischi di un dato processo in una data rilevazione
                        risks = db.getRisksByProcess(user, pat, survey);
-                       // Gestisce il caso di un processo a cui non sono ancora stati collegati i rischi
+                       // Testa se non ci si trovi nel caso di un processo a cui non sono ancora stati collegati i rischi
                        if (risks != null && !risks.isEmpty()) {
                            // Resetta il vettore dei rischi mitigati
                            mitigatingRisks = new ArrayList<>();
-                           // Per ogni rischio
+                           // Calcolo dei PxI stimati (quelli che si otterrebbero se le misure previste fossero tutte applicate) 
                            for (RiskBean risk : risks) {
-                               ArrayList<MeasureBean> appliedMeasures = null;
-                               if (risk.getMisure() != null && !risk.getMisure().isEmpty()) {
-                                   appliedMeasures = MeasureCommand.monitor(user, survey, db, (ArrayList<MeasureBean>) risk.getMisure());
-                                   risk.setMisureMonitorate(appliedMeasures);
-                                   InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), appliedMeasures);
+                               if (risk.getMisure() != null) {
+                                   InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), (ArrayList<MeasureBean>) risk.getMisure());
                                    risk.setLivello(mitigatedPI.getInformativa());
                                } else {
                                    risk.setLivello(pat.getIndicatori().get(PI).getInformativa());
                                }
                                mitigatingRisks.add(risk);
                            }
-                           // Passa la lista dei PxI mitigati al metodo che ricalcola il PxI mitigato
-                           InterviewBean pim = MeasureCommand.computePIMitigated(PIR, mitigatingRisks);
+                           // Passa la lista dei PxI mitigati al metodo che ricalcola il PxI generale
+                           InterviewBean pim = MeasureCommand.computePIMitigated(PIM, mitigatingRisks);
                            // Recupera la lista degli indicatori caricati nel processo
                            LinkedHashMap<String, InterviewBean>  indicatori = pat.getIndicatori();
                            // Imposta il PxI ricalcolato come indicatore aggiuntivo nel processo corrente
-                           indicatori.put(PIR, pim);
+                           indicatori.put(PIM, pim);
+                           // Resetta il vettore dei rischi mitigati
+                           mitigatingRisks = new ArrayList<>();
+                           // Per ogni rischio
+                           for (RiskBean risk : risks) {
+                               // Resetta il vettore delle misure applicate
+                               ArrayList<MeasureBean> appliedMeasures = null;
+                               // Testa se ci sono misure (previste)...
+                               if (risk.getMisure() != null && !risk.getMisure().isEmpty()) {
+                                   // Ricava il vettore delle misure effettivamente applicate
+                                   appliedMeasures = MeasureCommand.monitor(user, survey, db, (ArrayList<MeasureBean>) risk.getMisure());
+                                   risk.setMisureMonitorate(appliedMeasures);
+                                   InterviewBean mitigatedPI = MeasureCommand.mitigate(pat.getIndicatori().get(PI), appliedMeasures);
+                                   risk.setLivello(mitigatedPI.getInformativa());
+                               } else { // Se non ci sono misure (previste) il PxI sarà uguale a quello calcolato in origine
+                                   risk.setLivello(pat.getIndicatori().get(PI).getInformativa());
+                               }
+                               mitigatingRisks.add(risk);
+                           }
+                           // Passa la lista dei PxI monitorati al metodo che ricalcola il PxI complessivo
+                           InterviewBean pir = MeasureCommand.computePIMitigated(PIR, mitigatingRisks);
+                           // Imposta il PxI ricalcolato come indicatore aggiuntivo nel processo corrente
+                           indicatori.put(PIR, pir);
                            // Ricarica gli indicatori corredati del nuovo PxI mitigato
                            pat.setIndicatori(indicatori);
                            // Setta nella mappa la lista di rischi con PxI mitigati calcolata
