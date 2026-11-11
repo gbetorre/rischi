@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (47 versioni)
+### 2026 (48 versioni)
 
+- [2.8.8] (11/11/2026) Aggiunta della colonna "PxI mitigato (stima)" al report del monitoraggio
 - [2.8.7] (09/11/2026) Implementazione delle funzioni di inserimento/modifica del campo note sul processo organizzativo
 - [2.8.6] (27/10/2026) Propagazione dei link delle strutture capofila e dell'anno di monitoraggio; correzione di link e aggiunta di etichette
 - [2.8.5] (21/10/2026) Propagazione dei link delle strutture capofila e dell'anno di monitoraggio; ottimizzazioni
