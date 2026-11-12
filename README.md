@@ -28,7 +28,7 @@
     ·
     <a href="https://github.com/gbetorre/rischi/pulls">Request Feature</a>
     ·
-    <a href="https://github.com/gbetorre/rischi/blob/master/README.it.md">Need Italian?&nbsp;<img src="https://github.com/gbetorre/rischi/blob/main/web/img/italy.png" alt="IT" width="40" height="40"></a>
+    <a href="https://github.com/gbetorre/rischi/blob/main/README.it.md">Need Italian?&nbsp;<img src="https://github.com/gbetorre/rischi/blob/main/web/img/italy.png" alt="IT" width="40" height="40"></a>
   </p>
 </div>
 
@@ -761,6 +761,8 @@ Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/r
     - [ ] Spanish
 -->
 
+[![issues][issues-shield]][issues-url]
+[![pull][pull-shield]][pull-url]
 See also [open issues](https://github.com/gbetorre/rischi/issues) and [pull requests](https://github.com/gbetorre/rischi/pulls?q=is%3Apr+state%3Aclosed) for a complete list of proposed functionalities (and known problems).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -790,6 +792,10 @@ See also [open issues](https://github.com/gbetorre/rischi/issues) and [pull requ
 [indicator-sample01]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample01.png
 [indicator-sample02]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample02.png
 [indicator-sample03]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample03.png
+[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
+[issues-url]: https://github.com/gbetorre/rischi/issues
+[pull-shield]: https://img.shields.io/badge/pull-request?style=for-the-badge
+[pull-url]: https://github.com/gbetorre/rischi/pulls?q=is%3Apr+state%3Aclosed
 [pxi]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/PxI.PNG
 [question-domains]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/questions-domains.png
 [dashboard-risk]:   https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/dashboard-pxi.png
@@ -809,8 +815,6 @@ See also [open issues](https://github.com/gbetorre/rischi/issues) and [pull requ
 [schema-physical]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/DB-circular.png
 [class-diagram]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/class-diagram.png
 [list-features]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/features.png
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
 [license-shield]: https://img.shields.io/badge/license-GPL-blue
 [license-url]: https://github.com/gbetorre/rischi/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
