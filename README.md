@@ -793,7 +793,7 @@ See also [open issues](https://github.com/gbetorre/rischi/issues) and [pull requ
 [indicator-sample02]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample02.png
 [indicator-sample03]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/indicator-sample03.png
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/gbetorre/rischi/issues
+[issues-url]: https://github.com/gbetorre/rischi/issues?q=is%3Aissue+state%3Aclosed
 [pull-shield]: https://img.shields.io/badge/pull-request?style=for-the-badge
 [pull-url]: https://github.com/gbetorre/rischi/pulls?q=is%3Apr+state%3Aclosed
 [pxi]: https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/PxI.PNG
