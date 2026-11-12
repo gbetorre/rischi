@@ -967,6 +967,8 @@ Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/r
     - [ ] Spanish
 -->
 
+[![issues][issues-shield]][issues-url]
+[![pull][pull-shield]][pull-url]
 Vedi anche le [pull requests](https://github.com/gbetorre/rischi/pulls?q=is%3Apr+state%3Aclosed) e le [open issues](https://github.com/gbetorre/rischi/issues) per una lista completa di funzionalit&agrave; proposte e problemi conosciuti.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -1018,8 +1020,10 @@ Vedi anche le [pull requests](https://github.com/gbetorre/rischi/pulls?q=is%3Apr
 [schema-physical]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/DB-circular.png
 [class-diagram]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/class-diagram.png
 [list-features]:  https://github.com/gbetorre/rischi/blob/main/web/img/screenshot/features.png
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
+[issues-shield]: https://img.shields.io/badge/issues-chiuse:_1-yellow?style=for-the-badge
+[issues-url]: https://github.com/gbetorre/rischi/issues?q=is%3Aissue+state%3Aclosed
+[pull-shield]: https://img.shields.io/badge/pull-request:_25-brightgreen?style=for-the-badge
+[pull-url]: https://github.com/gbetorre/rischi/pulls?q=is%3Apr+state%3Aclosed
 [license-shield]: https://img.shields.io/badge/license-GPL-blue
 [license-url]: https://github.com/gbetorre/rischi/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
