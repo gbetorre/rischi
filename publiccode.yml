@@ -2,8 +2,8 @@ publiccodeYmlVersion: "0.2"
 name: ROL-RMS
 url: https://github.com/gbetorre/rischi
 landingURL: https://github.com/gbetorre/rischi/blob/main/rol/index.html
-softwareVersion: 2.8.8
-releaseDate: 2026-11-11
+softwareVersion: 2.8.9
+releaseDate: 2026-11-17
 logo: https://github.com/gbetorre/rischi/blob/main/rol/images/logo.png
 platforms:
   - web
@@ -384,7 +384,7 @@ description:
 
 
 
-      Allo stato attuale (versione di riferimento: `2.8.8, novembre 2026`) il
+      Allo stato attuale (versione di riferimento: `2.8.9, novembre 2026`) il
 
       software è già pronto per essere adattato, con un minimo adeguamento, a
 
