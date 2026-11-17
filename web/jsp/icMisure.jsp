@@ -8,6 +8,9 @@
   <c:set var="selectedYear" value="${requestScope.theCurrentYear}" />
 </c:if>
 <c:choose>
+  <c:when test="${selectedYear eq '2027'}">
+    <c:set var="sel2027" value="selected" scope="page" />
+  </c:when>
   <c:when test="${selectedYear eq '2026'}">
     <c:set var="sel2026" value="selected" scope="page" />
   </c:when>
@@ -19,9 +22,6 @@
   </c:when>
   <c:when test="${selectedYear eq '2023'}">
     <c:set var="sel2023" value="selected" scope="page" />
-  </c:when>
-  <c:when test="${selectedYear eq '2022'}">
-    <c:set var="sel2022" value="selected" scope="page" />
   </c:when>
 </c:choose>
     <style>
@@ -89,11 +89,11 @@
     <!-- TODO: make dynamic -->
     <span class="form-custom float-right">
       <select id="myPlans" class="wide" onchange="viewPlan()">
+        <option value="2027" ${sel2027}>2027</option>
         <option value="2026" ${sel2026}>2026</option>
         <option value="2025" ${sel2025}>2025</option>
         <option value="2024" ${sel2024}>2024</option>
         <option value="2023" ${sel2023}>2023</option>
-        <option value="2022" ${sel2022}>2022</option>
       </select>
     </span>
     <hr class="riga"/>
