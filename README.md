@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.8.9] (17/11/2026) [First implementation to contextualize historically the monitoring report](https://github.com/gbetorre/rischi/commits/main/?since=2026-11-17&until=2026-11-17)
 - [2.8.8] (11/11/2026) [Improvement to monitoring report](https://github.com/gbetorre/rischi/commits/main/?since=2026-11-11&until=2026-11-11)
 - [2.8.7] (09/11/2026) [Implementation facility to add/modify notes to a process](https://github.com/gbetorre/rischi/commits/main/?since=2026-11-09&until=2026-11-09)
 - [2.8.6] (27/10/2026) [Added year and structures links; code improvements](https://github.com/gbetorre/rischi/commits/main/?since=2026-10-27&until=2026-10-27)
@@ -763,6 +764,7 @@ Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/r
 
 [![issues][issues-shield]][issues-url]
 [![pull][pull-shield]][pull-url]
+
 See also [open issues](https://github.com/gbetorre/rischi/issues) and [pull requests](https://github.com/gbetorre/rischi/pulls?q=is%3Apr+state%3Aclosed) for a complete list of proposed functionalities (and known problems).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

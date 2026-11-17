@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (48 versioni)
+### 2026 (49 versioni)
 
+- [2.8.9] (17/11/2026) Inizio implementazione storicizzazione del report del monitoraggio
 - [2.8.8] (11/11/2026) Aggiunta della colonna "PxI mitigato (stima)" al report del monitoraggio
 - [2.8.7] (09/11/2026) Implementazione delle funzioni di inserimento/modifica del campo note sul processo organizzativo
 - [2.8.6] (27/10/2026) Propagazione dei link delle strutture capofila e dell'anno di monitoraggio; correzione di link e aggiunta di etichette
@@ -956,6 +957,8 @@ Software Engineer: Giovanroberto Torre - [@GianroTorres](https://twitter.com/Gia
 Corruptive risk Analyst: Alberto Maria Arena Agostino - [albertomaria.arenaagostino](https://www.univr.it/it/contatti/albertomaria.arenaagostino) - albertomaria.arenaagostino@univr.it
 
 Project Link: [https://github.com/gbetorre/rischi](https://github.com/gbetorre/rischi)
+
+Pubblicato sul catalogo del software a riuso: [permalink](https://catalogo-software.developers.italia.it/software/e87a5c40-7c1c-4723-b7c4-d495dacfb50a)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
