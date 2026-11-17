@@ -4,8 +4,39 @@
 <%@ include file="URL.jspf" %>
 <c:set var="mats" value="${requestScope.macroProcessi}" scope="page" />
 <c:set var="risks" value="${requestScope.rischi}" scope="page" />
+<c:set var="selectedYear" value="${param['y']}" />
+<c:if test="${empty selectedYear}">
+  <c:set var="selectedYear" value="${requestScope.theCurrentYear}" />
+</c:if>
+<c:choose>
+  <c:when test="${selectedYear eq '2027'}">
+    <c:set var="sel2027" value="selected" scope="page" />
+  </c:when>
+  <c:when test="${selectedYear eq '2026'}">
+    <c:set var="sel2026" value="selected" scope="page" />
+  </c:when>
+  <c:when test="${selectedYear eq '2025'}">
+    <c:set var="sel2025" value="selected" scope="page" />
+  </c:when>
+  <c:when test="${selectedYear eq '2024'}">
+    <c:set var="sel2024" value="selected" scope="page" />
+  </c:when>
+  <c:when test="${selectedYear eq '2023'}">
+    <c:set var="sel2023" value="selected" scope="page" />
+  </c:when>
+</c:choose>
     <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/2.1.5/features/searchHighlight/dataTables.searchHighlight.css">
     <h3 class="mt-1 m-0 font-weight-bold float-left">Report misure monitorate</h3>
+    <!-- TODO: make dynamic -->
+    <span class="form-custom bgAct3 float-right">
+      <select id="myPlans" class="wide" onchange="viewPlan()">
+        <option value="2027" ${sel2027}>2027</option>
+        <option value="2026" ${sel2026}>2026</option>
+        <option value="2025" ${sel2025}>2025</option>
+        <option value="2024" ${sel2024}>2024</option>
+        <option value="2023" ${sel2023}>2023</option>
+      </select>
+    </span>
     <hr class="riga"/>
     <div class="col-md-offset-1">
       <div class="table-responsive">
@@ -149,6 +180,27 @@
           "searchHighlight": true
         });
       });
+
+      function viewPlan() {
+        var y = document.getElementById("myPlans");
+        showLoader();
+        window.self.location.href = '${initParam.appName}/?q=ic&p=mes&r=${param['r']}&y=' + y.value;
+      }
+        
+      function showLoader(){
+          $('body').append('<div style="" id="loadingDiv"><div class="loader">Loading...</div></div>');
+      }
+  
+      $(window).on('load', function(){
+          setTimeout(removeLoader, 200); //wait for page load PLUS two seconds.
+      });
+  
+      function removeLoader(){
+          $( "#loadingDiv" ).fadeOut(500, function() {
+            // fadeOut complete. Remove the loading div
+            $( "#loadingDiv" ).remove(); //makes page more lightweight 
+          });  
+        }
     </script>
     <script src="https://cdn.datatables.net/plug-ins/2.1.5/features/searchHighlight/dataTables.searchHighlight.min.js"></script>
     <script src="https://bartaz.github.io/sandbox.js/jquery.highlight.js"></script>
