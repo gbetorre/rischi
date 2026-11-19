@@ -49,13 +49,13 @@
               <nav class="navbar navbar-expand-sm bg-light justify-content-center">
                 <ul class="navbar-nav">
                   <li class="nav-item"><a class="nav-link" href="#">  | </a></li>
-            <c:set var="ids" value="" scope="page" />
-            <c:forEach var="fase" items="${fasi}" varStatus="status">
-              <c:set var="ids" value="${ids}.${fase.id}" scope="page" />
+              <c:set var="ids" value="" scope="page" />
+              <c:forEach var="fase" items="${fasi}" varStatus="status">
+                <c:set var="ids" value="${ids}.${fase.id}" scope="page" />
                   <li class="nav-item">
                     <a class="nav-link" href="#fase${status.count}">fase ${status.count} &nbsp; | </a>
                   </li>
-            </c:forEach>
+              </c:forEach>
                 </ul>
               </nav>
               <hr class="separatore" />
@@ -86,19 +86,29 @@
                   <span class="badge badge-pill float-right"><c:out value="${fase.strutture.size()}" /> </span>
                 </strong>
               </div>
-              <div class="content-holder bgAct31">&nbsp;
-                Strutture di organigramma gi&agrave; associate:
+              <div class="content-holder bgAct31">
+                <span class="bgAct2">&nbsp;
+                  Strutture di organigramma gi&agrave; associate:&nbsp;
+                </span>
                 <c:if test="${empty fase.strutture}">
                   <span class="textcolormaroon"><em>Nessuna</em></span>
                 </c:if>
                 <ul class="list-group">
                 <c:forEach var="str" items="${fase.strutture}">
-                  <li class="list-group-item reportAct bgAct28">
-                    <span class="marginLeft">
+                  <li class="list-group-item reportAct bgAct28 d-flex justify-content-between align-items-center py-1">
+                    <span class="marginLeft d-flex align-items-center">
                       <img src="${initParam.urlDirectoryImmagini}str-l${str.livello}.png" class="ico-small" alt="icona" title="Struttura di livello ${str.livello}" />
+                      &nbsp;
                       <c:out value="${str.prefisso}" escapeXml="false" />&nbsp; 
                       <c:out value="${str.nome}" escapeXml="false" />
                     </span>
+                    
+            <span class="float-right ">
+              <a href="#" class="btn btnNav btn-danger bgAct10 text-dark badge lightTable align-center" >
+                Elimina
+              </a>
+            </span>
+                    
                   </li>
                 </c:forEach>
                 </ul>                
