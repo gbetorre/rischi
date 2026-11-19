@@ -175,6 +175,12 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
      */
     private static final String nomeFileAddStructs =    "/jsp/prStruttureForm.jsp";
     /** 
+     * Pagina contenente la form per staccare strutture/soggetti da fasi
+     * <hr>
+     * Form for detaching structures/subjects to phase
+     */
+    private static final String nomeFileUpdStruct =    "/jsp/prStrutturaForm.jsp";
+    /** 
      * Pagina contenente la form per inserimento output di processo_at
      * <hr>
      * Form for entering process output
@@ -252,6 +258,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_INSERT_SUBJECT,       nomeFileAddSubject);
         nomeFile.put(PART_UPDATE_ACTIVITY,      nomeFileUpdActivity);
         nomeFile.put(PART_UPDATE_NOTES,         nomeFileNotes);
+        nomeFile.put(PART_UPDATE_ACT_STRUCT,    nomeFileUpdStruct);
         /* Load the hashmap containing the titles of the pages                  */
         titleFile.put(PART_PROCESS,                         "Dettagli Processo");
         titleFile.put(PART_INPUT,                           "Input Processo");
@@ -269,6 +276,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         titleFile.put(PART_INSERT_SUBJECT,                  "Nuovo Soggetto");
         titleFile.put(PART_UPDATE_ACTIVITY,                 "Aggiornamento Fase");
         titleFile.put(PART_UPDATE_NOTES,                    "Note Processo");
+        titleFile.put(PART_UPDATE_ACT_STRUCT,               "Dissociazione strutture");
     }
 
 
@@ -715,6 +723,21 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                    .put("pliv0", parser.getStringParameter("pliv0", VOID_STRING))
                                    .put(PARAM_SURVEY, codeSur);
                             redirect =  dataUrl.getUrl();
+                        /* ------------------------------------------------ *
+                         *  @PM:: (UPDATE) Detach structure from activity   *
+                         * ------------------------------------------------ */                            
+                        } else if (part.equalsIgnoreCase(PART_UPDATE_ACT_STRUCT)) {
+                            // Deve aggiungere al dizionario dei parametri quelli di activity
+                            loadParams(part, req, params);
+                            // Aggiorna la fase di processo (attività)
+                            //db.updateActivityStructure(user, params);
+                            //case "load":// Salva (-> Reload)
+                            dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
+                                   .put("p", PART_INSERT_ACT_STRUCTS)
+                                   .put("pliv", pliv)
+                                   .put("liv", ELEMENT_LEV_2)
+                                   .put(PARAM_SURVEY, codeSur);
+                            redirect = dataUrl.getUrl();
                         }
                     }
                 /* ======================== @GetMapping ======================= */
@@ -722,7 +745,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                     // The ‘p’ parameter allows you to delve deeper
                     if (nomeFile.containsKey(part)) {
                         // Retrieve the breadcrumbs
-                        LinkedList<ItemBean> breadCrumbs = (LinkedList<ItemBean>) req.getAttribute("breadCrumbs");
+                        LinkedList<ItemBean> breadCrumbs = Utils.castLinkedList(req.getAttribute("breadCrumbs"), ItemBean.class);
                         // Define a default for the page to serve
                         fileJspT = nomeFile.get(part);
                         // Title of the HTML page
@@ -898,6 +921,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 break;
                             }
                             /* ---    FORM: Link Structures to Activities  ---  */
+                            case PART_UPDATE_ACT_STRUCT:
                             case PART_INSERT_ACT_STRUCTS: {
                                 // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                                 processElements = new ConcurrentHashMap<>();
@@ -952,6 +976,29 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, titleFile.get(part));
                                 break;
                             }
+                            /* ---    FORM: Create Subject  ---  *
+                            case PART_UPDATE_ACT_STRUCT: {
+                                // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
+                                processElements = new ConcurrentHashMap<>();
+                                // Recupera il processo corrente
+                                pat = db.getProcessById(user, idP, survey);
+                                // Recupera Attività estratte in base al processo
+                                ArrayList<ActivityBean> activitiesByPat = db.getActivities(user, idP, ELEMENT_LEV_2, survey);
+                                // Imposta nella tabella la lista ricavata
+                                retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
+                                // Recupera le strutture della rilevazione corrente
+                                structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
+                                // Recupera solo i soggetti contingenti di tipo master
+                                //subjects = db.getSubjects(user, true, !Query.GET_ALL, survey);
+                                // Ha bisogno di personalizzare le breadcrumbs
+                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, titleFile.get(part));
+                                break;
+                            }
+                            /* Other values are not admitted                    */
+                            default:
+                                String msg = FOR_NAME + "Valore di 'part' non valido!.\n";
+                                LOG.severe(msg);
+                                throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
                         }
                     } else {
                         // Viene richiesta la visualizzazione di un elenco di macroprocessi
@@ -1220,6 +1267,11 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 formParams.put(part, subject);
                 break;
             }
+            /* Other values are not admitted                    */
+            default:
+                String msg = FOR_NAME + "Valore di 'part' non valido!.\n";
+                LOG.severe(msg);
+                throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
         }
     }
     
@@ -1314,58 +1366,6 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
             throw new CommandException(msg + e.getMessage(), e);
         }
         return (ArrayList<ProcessBean>) pats;
-    }
-
-    
-    /**
-     * <p>Interfaccia alternativa (semplificata) del metodo che restituisce 
-     * di tutti processi figli di macroprocessi censiti dall'anticorruzione 
-     * nel contesto di una data rilevazione senza necessit&agrave; 
-     * che il chiamante passi un'istanza di WebStorage.
-     * Aggiunge anche gli indicatori (recuperati da cache) ad ogni processo recuperato.</p>
-     *
-     * @param codeSurvey    il codice della rilevazione
-     * @param user          utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
-     * @return <code>ArrayList&lt;ProcessBean&gt;</code> - lista di macroprocessi recuperati
-     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
-     */
-    private static ArrayList<ProcessBean> retrieveProcessAtBySurvey(PersonBean user,
-                                                                    String codeSurvey)
-                                                             throws CommandException {
-        ArrayList<ProcessBean> patsWithoutIndicators = null;
-        ArrayList<ProcessBean> patsWithIndicators = new ArrayList<>();
-        try {
-            // Crea una istanza di WebStorage
-            DBWrapper db = new DBWrapper();
-            // Usa il metodo apposito
-            patsWithoutIndicators = retrieveProcessAtBySurvey(user, codeSurvey, db);
-            // Cicla sui processi
-            for (ProcessBean pat : patsWithoutIndicators) {
-                // Recupera le interviste in cui il processo è stato esaminato
-                ArrayList<InterviewBean> listaInterviste = retrieveInterviews(user, pat.getId(), ELEMENT_LEV_2, codeSurvey, db);
-                // Recupera gli indicatori corretti (calcolati a runtime e privi solo delle note)
-                LinkedHashMap<String, InterviewBean> listaIndicatori = AuditCommand.compare(listaInterviste);
-                // Recupera le note e le aggiunge al PxI
-                LinkedHashMap<String, InterviewBean> indicators = (LinkedHashMap<String, InterviewBean>) retrieveIndicators(user, listaIndicatori, pat.getId(), ELEMENT_LEV_2, codeSurvey, db);
-                // Aggiunge gli indicatori al processo corrente
-                pat.setIndicatori(indicators);
-                // Aggiunge il processo corrente alla lista dei processi corredati di indicatori
-                patsWithIndicators.add(pat);
-            }
-        } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nell\'istanziare una WebStorage.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + wse.getMessage(), wse);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + npe.getMessage(), npe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + e.getMessage(), e);
-        }
-        return patsWithIndicators;
     }
     
 
@@ -1895,7 +1895,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         for (int i = 0; i < processes.size(); i++) {
             try {
                 ProcessBean process = processes.elementAt(i);
-                Integer processIdAsInteger = new Integer(process.getId());
+                Integer processIdAsInteger = Integer.valueOf(process.getId());
                 userProcesses.put(processIdAsInteger, process);
             } catch (AttributoNonValorizzatoException anve) {
                 String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio del bean, probabilmente l\'id.\n" + anve.getMessage();
@@ -2164,7 +2164,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                         // Determina quanti zeri c'erano nel codice originale
                         int leadingZeros = actPart.length() - Integer.toString(number).length();
                         // Costruisce una nuova parte numerica aggiungendo uno zero iniziale sse <10
-                        String newNumberPart = String.format("%0" + (leadingZeros + Integer.toString(number).length()) + "d", new Integer(number));
+                        String newNumberPart = String.format("%0" + (leadingZeros + Integer.toString(number).length()) + "d", Integer.valueOf(number));
                         // Genera il nuovo codice
                         String nextCode = prefix + DOT + matPart + DOT + patPart + DOT + newNumberPart;
                         // Abbina il nuovo codice al nome definito dall'utente
