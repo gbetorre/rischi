@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (49 versioni)
+### 2026 (50 versioni)
 
+- [2.9.0] (19/11/2026) Inizio implementazione funzione di eliminazione logica dell'associazione tra una struttura/soggetto e un'attivit&agrave; di processo
 - [2.8.9] (17/11/2026) Inizio implementazione storicizzazione del report del monitoraggio
 - [2.8.8] (11/11/2026) Aggiunta della colonna "PxI mitigato (stima)" al report del monitoraggio
 - [2.8.7] (09/11/2026) Implementazione delle funzioni di inserimento/modifica del campo note sul processo organizzativo
