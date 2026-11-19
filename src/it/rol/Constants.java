@@ -363,6 +363,11 @@ public interface Constants extends Serializable {
      */
     public static final String PART_UPDATE_MEASURE      = "upm";
     /**
+     * <p>Costante per il parametro identificante la funzione di distacco di una
+     * struttura da una fase di processo.</p>
+     */
+    public static final String PART_UPDATE_ACT_STRUCT    = "uas";
+    /**
      * <p>Costante per il parametro identificante la parte di 
      * aggiunta/aggiornamento nota PxI (giudizio sintetico).</p>
      */
