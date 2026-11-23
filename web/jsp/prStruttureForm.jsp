@@ -45,16 +45,21 @@
           </div>
           <hr class="separapoco" />
           <div class="row">
-            <div class="content-holder col-sm-10" style="border:none;">
-              <nav class="navbar navbar-expand-sm bg-light justify-content-center">
+            <div class="content-holder col-sm-10 border-0">
+              <nav class="navbar navbar-expand-sm navbar-light bg-light justify-content-center py-1 rounded">
+              <span class="text-muted small mr-2">Vai a:</span>
                 <ul class="navbar-nav">
-                  <li class="nav-item"><a class="nav-link" href="#">  | </a></li>
+                <!-- <li class="nav-item d-flex align-items-center text-muted">|</li> -->
               <c:set var="ids" value="" scope="page" />
               <c:forEach var="fase" items="${fasi}" varStatus="status">
                 <c:set var="ids" value="${ids}.${fase.id}" scope="page" />
-                  <li class="nav-item">
-                    <a class="nav-link" href="#fase${status.count}">fase ${status.count} &nbsp; | </a>
+                  <li class="nav-item"><!-- nav-link text-primary font-weight-bold px-2 -->
+                    <a class="btn btn-sm btn-light border text-dark font-weight-bold mx-1 py-0 px-2" href="#fase${status.count}">
+                      fase ${status.count}
+                    </a>
                   </li>
+                  <li class="nav-item d-flex align-items-center text-muted">&nbsp;</li>
+                  <!-- <li class="nav-item d-flex align-items-center text-muted">|</li> -->
               </c:forEach>
                 </ul>
               </nav>
@@ -71,15 +76,17 @@
             </div>
           </div>
           <input type="hidden" id="act-ids" name="ids" value="${ids}" />
+          <hr class="separapoco" />
         <c:forEach var="fase" items="${fasi}" varStatus="status">
           <input type="hidden" id="act-id${fase.id}" name="id-${fase.id}" value="${fase.id}" />
-          <hr class="separatore" />
+          
           <div class="content-holder col-sm-10">
             <div class="str-container">
               <div class="reportRow form-control bgAct3" id="fase${status.count}">
                 <span class="bgAct">&nbsp;Fase <c:out value="${status.count}" />:</span>
                 &nbsp;<c:out value="${fase.nome}" />
               </div>
+              <hr class="separapoco" />
               <div class="bgAct26 text-white form-custom marginNarrow">
                 <strong> 
                   &nbsp;Strutture
@@ -104,7 +111,7 @@
                     </span>
                     
             <span class="float-right ">
-              <a href="#" class="btn btnNav btn-danger bgAct10 text-dark badge lightTable align-center" >
+              <a href="${initParam.appName}/?q=pr&p=uas&liv=${param['liv']}&pliv=${process.id}&pliv1=${param['pliv1']}&pliv0=${param['pliv0']}&idA=${fase.id}&r=${param['r']}" title="Vai alla funzione di cancellazione" class="btn btnNav btn-danger bgAct10 text-dark badge lightTable align-center" >
                 Elimina
               </a>
             </span>
@@ -140,18 +147,25 @@
                   <span class="badge badge-pill float-right"><c:out value="${fase.soggetti.size()}" /> </span>
                 </strong>
               </div>
-              <div class="content-holder bgAct31">&nbsp;
-                Soggetti contingenti gi&agrave; associati:
+              <div class="content-holder bgAct31">
+                <span class="bgAct2">&nbsp;
+                  Soggetti contingenti gi&agrave; associati:
+                </span>
                 <c:if test="${empty fase.soggetti}">
                   <span class="textcolormaroon"><em>Nessuno</em></span>
                 </c:if>                
                 <ul class="list-group">
                 <c:forEach var="sub" items="${fase.soggetti}">
-                  <li class="list-group-item bgAct29" title="${sub.informativa}">
+                  <li class="list-group-item bgAct29 d-flex justify-content-between align-items-center py-1" title="${sub.informativa}">
                     <span class="marginLeft">
                       <img src="${initParam.urlDirectoryImmagini}person-fill.png" class="ico-small" alt="icona" title="Soggetto contingente" /> 
                       <c:out value="${sub.nome}" escapeXml="false" />
                     </span>
+                    <span class="float-right ">
+              <a href="${initParam.appName}/?q=pr&p=uas&liv=${param['liv']}&pliv=${process.id}&pliv1=${param['pliv1']}&pliv0=${param['pliv0']}&idA=${fase.id}&r=${param['r']}" title="Vai alla funzione di cancellazione" class="btn btnNav btn-danger bgAct10 text-dark badge lightTable align-center" >
+                Elimina
+              </a>
+            </span>
                   </li>
                 </c:forEach>
                 </ul>
@@ -168,7 +182,9 @@
             </div>
             <hr class="separapoco" />
           </div>
+           <div class="content-holder col-sm-10 border-0">
           <hr class="separatore" />
+          </div>
       </c:forEach>
           <hr class="separapoco" />
           <div class="row">
