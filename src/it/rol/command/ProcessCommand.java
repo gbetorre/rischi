@@ -258,7 +258,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_INSERT_SUBJECT,       nomeFileAddSubject);
         nomeFile.put(PART_UPDATE_ACTIVITY,      nomeFileUpdActivity);
         nomeFile.put(PART_UPDATE_NOTES,         nomeFileNotes);
-        nomeFile.put(PART_UPDATE_ACT_STRUCT,    nomeFileUpdStruct);
+        nomeFile.put(PART_UPDATE_ACT_STRSUB,    nomeFileUpdStruct);
         /* Load the hashmap containing the titles of the pages                  */
         titleFile.put(PART_PROCESS,                         "Dettagli Processo");
         titleFile.put(PART_INPUT,                           "Input Processo");
@@ -276,7 +276,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
         titleFile.put(PART_INSERT_SUBJECT,                  "Nuovo Soggetto");
         titleFile.put(PART_UPDATE_ACTIVITY,                 "Aggiornamento Fase");
         titleFile.put(PART_UPDATE_NOTES,                    "Note Processo");
-        titleFile.put(PART_UPDATE_ACT_STRUCT,               "Dissociazione strutture");
+        titleFile.put(PART_UPDATE_ACT_STRSUB,               "Dissociazione strutture");
     }
 
 
@@ -726,16 +726,19 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                         /* ------------------------------------------------ *
                          *  @PM:: (UPDATE) Detach structure from activity   *
                          * ------------------------------------------------ */                            
-                        } else if (part.equalsIgnoreCase(PART_UPDATE_ACT_STRUCT)) {
+                        } else if (part.equalsIgnoreCase(PART_UPDATE_ACT_STRSUB)) {
                             // Deve aggiungere al dizionario dei parametri quelli di activity
                             loadParams(part, req, params);
                             // Aggiorna la fase di processo (attività)
-                            //db.updateActivityStructure(user, params);
+                            db.updateActivityStrSub(user, params);
                             //case "load":// Salva (-> Reload)
                             dataUrl.put(ConfigManager.getEntToken(), COMMAND_PROCESS)
-                                   .put("p", PART_INSERT_ACT_STRUCTS)
+                                   .put("p", PART_UPDATE_ACT_STRSUB)
+                                   .put("liv", parser.getStringParameter("liv", "2"))
                                    .put("pliv", pliv)
-                                   .put("liv", ELEMENT_LEV_2)
+                                   .put("pliv1", parser.getStringParameter("pliv1", VOID_STRING))
+                                   .put("pliv0", parser.getStringParameter("pliv0", VOID_STRING))
+                                   .put("idA", parser.getStringParameter("idA", VOID_STRING))
                                    .put(PARAM_SURVEY, codeSur);
                             redirect = dataUrl.getUrl();
                         }
@@ -921,7 +924,7 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 break;
                             }
                             /* ---    FORM: Link Structures to Activities  ---  */
-                            case PART_UPDATE_ACT_STRUCT:
+                            case PART_UPDATE_ACT_STRSUB:
                             case PART_INSERT_ACT_STRUCTS: {
                                 // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
                                 processElements = new ConcurrentHashMap<>();
@@ -972,24 +975,6 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                                 flatStructs = AuditCommand.decantStructs(structs);
                                 // Recupera tutti i soggetti contingenti 
                                 subjects = db.getSubjects(user, !Query.GET_ALL, Query.GET_ALL, survey);
-                                // Ha bisogno di personalizzare le breadcrumbs
-                                bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, titleFile.get(part));
-                                break;
-                            }
-                            /* ---    FORM: Create Subject  ---  *
-                            case PART_UPDATE_ACT_STRUCT: {
-                                // Istanzia generica tabella in cui devono essere settate le liste di items afferenti al processo
-                                processElements = new ConcurrentHashMap<>();
-                                // Recupera il processo corrente
-                                pat = db.getProcessById(user, idP, survey);
-                                // Recupera Attività estratte in base al processo
-                                ArrayList<ActivityBean> activitiesByPat = db.getActivities(user, idP, ELEMENT_LEV_2, survey);
-                                // Imposta nella tabella la lista ricavata
-                                retrieveProcess(user, new ArrayList<>(), activitiesByPat, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), processElements, survey);
-                                // Recupera le strutture della rilevazione corrente
-                                structs = DepartmentCommand.retrieveStructures(codeSur, user, db);
-                                // Recupera solo i soggetti contingenti di tipo master
-                                //subjects = db.getSubjects(user, true, !Query.GET_ALL, survey);
                                 // Ha bisogno di personalizzare le breadcrumbs
                                 bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, NOTHING, titleFile.get(part));
                                 break;
@@ -1265,6 +1250,65 @@ public class ProcessCommand extends ItemBean implements Command, Constants {
                 subject.put("str-4",  parser.getStringParameter("sliv4", VOID_STRING));
                 // Aggiunge la struttura coi valori alla mappa generale dei parametri
                 formParams.put(part, subject);
+                break;
+            }
+            /* ---------------------------------------------------- *
+             *                INSERT Subject Parameters             *
+             * ---------------------------------------------------- */
+            case (PART_UPDATE_ACT_STRSUB): {
+                LinkedHashMap<String, String> strsub = new LinkedHashMap<>();
+                // Prefissi convenzionali (v. prStrutturaForm.jsp)
+                final String PREFIX_SUB = "id_soggetto_contingente-";
+                final String PREFIX_STR = "id_struttura_liv";
+                char liv = BLANK_SPACE;
+                /* Inizializzazione della LinkedHashMap.
+                 * In Java, il metodo put(key, value) di una HashMap sovrascrive 
+                 * automaticamente il valore precedente se la chiave esiste già 
+                 * nella mappa, sostituendolo con quello nuovo senza creare duplicati.
+                 * In più, inizializzare i valori a stringa vuota "" è molto efficiente 
+                 * dal punto di vista della memoria: in Java i literal "" vengono 
+                 * presi tutti dallo String Pool (è sempre lo stesso identico 
+                 * oggetto in memoria, quindi zero allocazioni extra).          */
+                // Id Soggetto contingente
+                strsub.put("idsu",  VOID_STRING);
+                // Struttura da scollegare
+                strsub.put("idst",  VOID_STRING);
+                strsub.put("str-1", VOID_STRING);
+                strsub.put("str-2", VOID_STRING);
+                strsub.put("str-3", VOID_STRING);
+                strsub.put("str-4", VOID_STRING);
+                // Id attività
+                strsub.put("idac", parser.getStringParameter("ac-id", VOID_STRING));
+                // Recupera l'azione dell'utente
+                String action = req.getParameter("detach");
+                // Soggetto contingente
+                if (action != null) {
+                    if (action.regionMatches(Query.GET_ALL, NOTHING, PREFIX_SUB, NOTHING, PREFIX_SUB.length())) {
+                        // Caso 1: id_soggetto_contingente-<ID>
+                        strsub.put("idsu", action.substring(PREFIX_SUB.length()));
+                    } else if (action.regionMatches(true, 0, PREFIX_STR, 0, PREFIX_STR.length())) {
+                        // Caso 2: id_struttura_liv<LIV>-<ID>
+                        int idxLivello = PREFIX_STR.length(); // Indice subito dopo "id_struttura_liv"
+                        // Verifica che la stringa sia lunga abbastanza da contenere il livello e il trattino '-'
+                        if (action.length() > idxLivello + 2 && action.charAt(idxLivello + 1) == '-') {
+                            liv = action.charAt(idxLivello);
+                            if (liv >= '1' && liv <= '4') {
+                                // Estrae l'ID saltando il carattere del livello e il trattino '-' (+ 2)
+                                strsub.put("str-" + liv, action.substring(idxLivello + 2));
+                                // Id Struttura (pleonastica, sta già in str-2 | str-3 | str-4)
+                                strsub.put("idst", action.substring(idxLivello + 2));
+                            }
+                        }
+                    }
+                }
+                // Livello Struttura
+                if (liv != BLANK_SPACE) {
+                    strsub.put("levl", String.valueOf(liv));
+                } else {
+                    strsub.put("levl", VOID_STRING);
+                }
+                // Aggiunge gli estremi della relazione da scollegare alla mappa generale
+                formParams.put(part, strsub);
                 break;
             }
             /* Other values are not admitted                    */
