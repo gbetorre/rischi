@@ -366,7 +366,7 @@ public interface Constants extends Serializable {
      * <p>Costante per il parametro identificante la funzione di distacco di una
      * struttura da una fase di processo.</p>
      */
-    public static final String PART_UPDATE_ACT_STRUCT    = "uas";
+    public static final String PART_UPDATE_ACT_STRSUB    = "uas";
     /**
      * <p>Costante per il parametro identificante la parte di 
      * aggiunta/aggiornamento nota PxI (giudizio sintetico).</p>
