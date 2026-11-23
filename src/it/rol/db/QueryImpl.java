@@ -614,4 +614,41 @@ public class QueryImpl implements Query, Constants {
         return GET_MEASURE_BY_STRUCT;
     }
 
+
+    /**
+     * @see Query#queryUpdateActivityStrSub(int, int, int, int, int, int, int, int)
+     */
+    @Override
+    public String queryUpdateActivityStrSub(int lev, 
+                                            int idl,
+                                            int ids,
+                                            int ida,
+                                            int idr,
+                                            java.sql.Date date,
+                                            java.sql.Time time,
+                                            int idu) {
+        String clause = null;
+        if (lev == 4) {
+            clause = " AND id_struttura_liv4 = " + idl;
+        } else if (lev == 3) {
+            clause = " AND id_struttura_liv3 = " + idl;
+        } else if (lev == 2) {
+            clause = " AND id_struttura_liv2 = " + idl;
+        } else if (lev == 1) {
+            clause = " AND id_struttura_liv1 = " + idl;
+        } else if (lev == 0) {
+            clause = " AND id_soggetto_contingente = " + ids;
+        } 
+        final String UPDATE_ACTIVITY_STRSUB =
+                "UPDATE struttura_attivita" +
+                        "   SET id_rilevazione  = 2" +
+                        "   ,  data_ultima_modifica =   '" + date + "'" +
+                        "   ,  ora_ultima_modifica =    '" + time + "'" +
+                        "   ,  id_usr_ultima_modifica =" + idu +
+                        "   WHERE id_attivita = " + ida +
+                        clause + 
+                        "       AND id_rilevazione = " + idr;
+        return UPDATE_ACTIVITY_STRSUB;
+    }
+    
 }
