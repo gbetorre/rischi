@@ -2720,6 +2720,18 @@ public interface Query extends Serializable {
             "   WHERE codice = ?" +
             "       AND id_rilevazione = ?";
 
+    /* ************************************************************************* *
+     *Interfacce di metodi che costruiscono dinamicamente Query di Aggiornamento *
+     ****************************************************************************/
+    
+    /**
+     * <p>TODO COMMENTO</p> 
+     * 
+    // TODO COMMENTO
+     * @return <code>String</code> - la query che aggiorna la relazione
+     */
+    public String queryUpdateActivityStrSub(int lev, int idl, int ids, int ida, int idr, java.sql.Date date, java.sql.Time time, int idu);
+    
     /* ********************************************************************** *
      *                         Query di eliminazione                          *
      * ********************************************************************** */
