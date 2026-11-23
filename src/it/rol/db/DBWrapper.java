@@ -9044,6 +9044,88 @@ public class DBWrapper extends QueryImpl {
 
     
     /**
+     * <p>Metodo per effettuare la cancellazione logica della relazione
+     * tra un'attivit&agrave; (fase di processo) e una struttura o un 
+     * soggetto contingente.</p> 
+     *
+     * @param user      utente loggato
+     * @param params    mappa contenente i parametri di navigazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    public void updateActivityStrSub(PersonBean user, 
+                                     HashMap<String, LinkedHashMap<String, String>> params) 
+                              throws WebStorageException {
+        try (Connection con = rol_manager.getConnection()) {
+            PreparedStatement pst = null;
+            // Dizionario dei parametri contenente il codice della rilevazione
+            LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
+            // Dizionario dei parametri della nota da aggiornare
+            LinkedHashMap<String, String> strsub = params.get(PART_UPDATE_ACT_STRSUB);
+            try {
+                // BEGIN: ==>
+                con.setAutoCommit(false);
+                // TODO: Controllare se user è superuser
+                // === Se siamo qui vuol dire che ok   === //
+                int lev = NOTHING, idL = NOTHING, idS = NOTHING;
+                // Recupera l'identificativo dell'attività
+                int idA = Integer.valueOf(strsub.get("idac")).intValue();
+                // Recupera il livello
+                String levAsString = strsub.get("levl");
+                // Se non c'è il livello vuol dire che c'è il soggetto contingente
+                if (levAsString.equals(VOID_STRING)) {
+                    idS = Integer.valueOf(strsub.get("idsu")).intValue();
+                } else { // Altrimenti c'è la struttura
+                    lev = Integer.valueOf(levAsString).intValue();
+                    idL = Integer.valueOf(strsub.get("idst")).intValue();
+                }
+                // Recupera valori dei campi automatici: id utente, ora ultima modifica, data ultima modifica === *
+                java.sql.Date date = Utils.convert(Utils.convert(Utils.getCurrentDate()));
+                java.sql.Time time = Utils.getCurrentTime();
+                int idU = user.getUsrId();
+                int idR = Integer.parseInt(survey.get(PARAM_SURVEY));
+                // Prepara la query
+                String query = queryUpdateActivityStrSub(lev, idL, idS, idA, idR, date, time, idU);
+                // Prepara i parametri per l'inserimento
+                //pst.clearParameters();
+                pst = con.prepareStatement(query);
+                // Invio
+                pst.executeUpdate();
+                // END: <==
+                con.commit();
+                pst.close();
+                pst = null;
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } finally {
+                try {
+                    con.close();
+                } catch (NullPointerException npe) {
+                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + npe.getMessage());
+                } catch (SQLException sqle) {
+                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                }
+            }
+        } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, npe);
+        } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+        }
+    }
+    
+    
+    /**
      * <p>Aggiorna le informazioni relative alla dimensione di un file, i cui 
      * estremi vengono comunicati in un dictionary passato come argomento.</p>
      * <p>Notare che, almeno nel contesto di <code>Java 7</code>, con cui 
