@@ -1,11 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="URL.jspf" %>
-<c:set var="structs" value="${requestScope.strutture}" scope="page" />
-<c:set var="subjects" value="${requestScope.soggetti}" scope="page" />
-<c:set var="dir" value="${structs.get(zero)}" />
-<c:set var="cen" value="${structs.get(zero+1)}" />
-<c:set var="dip" value="${structs.get(zero+2)}" />
 <c:set var="process" value="${requestScope.pat}" scope="page" />
 <c:set var="fasi" value="${requestScope.listaFasi}" scope="page" />
     <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
@@ -43,17 +38,18 @@
               </a>
             </div>
           </div>
-          <hr class="separapoco" />
-          <input type="hidden" id="act-ids" name="ids" value="${ids}" />
+          <hr class="separatore" />
         <c:forEach var="fase" items="${fasi}" varStatus="status">
           <div class="row">
             <c:if test="${fase.id eq param['idA']}">
-            <input type="hidden" id="act-id-${fase.id}" name="idA" value="${fase.id}" />
+            <input type="hidden" id="act-id" name="ac-id" value="${fase.id}" />
             <div class="col-sm-10 mx-auto px-0">
               <div class="str-container">
                 <div class="reportRow form-control bgAct3" id="fase${status.count}">
-                  <span class="bgAct">&nbsp;Fase <c:out value="${status.count}" />:</span>
-                  &nbsp;<c:out value="${fase.nome}" />
+                  <a href="${initParam.appName}/?q=pr&p=ias&liv=${param['liv']}&pliv=${process.id}&pliv1=${param['pliv1']}&pliv0=${param['pliv0']}&idA=${fase.id}&r=${param['r']}#fase${status.count}">
+                    <span class="bgAct">&nbsp;Fase <c:out value="${status.count}" />:</span>
+                    &nbsp;<c:out value="${fase.nome}" />
+                  </a>
                 </div>
                 <div class="bgAct26 text-white form-custom marginNarrow">
                   <strong> 
@@ -88,7 +84,7 @@
                   </c:forEach>
                   </ul>                
                 </div>
-                <hr class="separatore" />
+                
               </div>
               <div class="str-container">
                 <div class="bgAct26 text-white form-custom marginNarrow">
@@ -97,14 +93,16 @@
                     <span class="badge badge-pill float-right"><c:out value="${fase.soggetti.size()}" /> </span>
                   </strong>
                 </div>
-                <div class="content-holder bgAct31">&nbsp;
-                  Soggetti contingenti gi&agrave; associati:
+                <div class="content-holder bgAct31">
+                  <span class="bgAct2">&nbsp;
+                    Soggetti contingenti gi&agrave; associati:
+                  </span>
                   <c:if test="${empty fase.soggetti}">
                     <span class="textcolormaroon"><em>Nessuno</em></span>
                   </c:if>                
                   <ul class="list-group">
                   <c:forEach var="sub" items="${fase.soggetti}">
-                    <li class="list-group-item bgAct29" title="${sub.informativa}">
+                    <li class="list-group-item bgAct29 d-flex justify-content-between align-items-center py-1" title="${sub.informativa}">
                       <span class="marginLeft">
                         <img src="${initParam.urlDirectoryImmagini}person-fill.png" class="ico-small" alt="icona" title="Soggetto contingente" /> 
                         <c:out value="${sub.nome}" escapeXml="false" />
@@ -127,185 +125,7 @@
             </c:if>
             </div>
         </c:forEach>
-          <hr class="separapoco" />
-          <div class="row">
-            <div class="col-sm-5">
-              <button type="submit" class="btn btnNav align-left" id="btn-save" name="action" value="save">
-                <i class="far fa-save"></i>  Salva ed esci &nbsp;<i class="fa-solid fa-arrow-up-from-bracket"></i>
-              </button>
-            </div>
-            <div class="col-sm-3">
-              <button type="submit" class="btn btnNav bgAct22 align-left" id="btn-save" name="action" value="load">
-                <i class="far fa-save"></i>  Salva &nbsp;<i class="fa-solid fa-repeat"></i>
-              </button>
-            </div>
-            <div class="col-sm-4">
-              <button type="submit" class="btn btnNav bgAct14 float-right" id="btn-save" name="action" value="cont">
-                <i class="far fa-save"></i>  Salva e continua  <i class="fa-solid fa-circle-chevron-right"></i>
-              </button>
-            </div>
-          </div>
         </div>
         <hr class="separatore" />
       </form>
     </div>
-    <script>
-    /* Dichiarazione e inizializzazione flag che verrà modificato solo in caso di modifica stato form */
-    /* Flag modified if the form status changes */
-    let formChanged = false;
-    /* Cambia il valore di un flag in caso lo stato dei campi della form sia diverso da quello iniziale (apertura pagina) */
-    /* Change the value of a flag if the status of the form fields is different from the initial one 
-    (which means that we have when the page has finished loading) */
-    function markFormChanged() {
-        formChanged = true;
-    }
-    /* Protegge dalla perdita di dati immessi ma non salvati */
-    /* Protects against the loss of data that has been entered but not saved */
-    function showSubjForm() {
-        var url = "${initParam.appName}/?q=pr&p=isu&liv=${param['liv']}&pliv=${param['pliv']}&pliv1=${param['pliv1']}&pliv0=${param['pliv0']}&r=${param['r']}";
-        if(formChanged) {
-            if (confirm('Dati non salvati. Continuare?')) {
-                window.location.href = url;
-            }
-            // Cancel = stays on page (no else needed)
-        } else {
-            window.location.href = url;
-        }
-    }
-    
-    function blank() {
-        return "<option value=''>-- Nessuna --</option>";
-    }
-    </script>
-<c:set var="singleQuote" value="'" scope="page" />
-<c:set var="singleQuoteEsc" value="''" scope="page" />
-<c:set var="doubleQuote" value='"' scope="page" />
-<c:set var="doubleQuoteEsc" value='\\"' scope="page" />
-<c:set var="nullQuoteEsc" value="" scope="page" />
-<script>
-$(document).ready(function() {
-    let struttureLiv1 = [
-      "${dir.nome} (${dir.id})",
-      "${cen.nome} (${cen.id})",
-      "${dip.nome} (${dip.id})"
-    ];
-    let struttureLiv2 = [
-    <c:forEach var="l2" items="${dir.figlie}">
-      "<c:if test="${not empty l2.prefisso}">${l2.prefisso} </c:if>${l2.nome} (${l2.id})",
-    </c:forEach>
-    <c:forEach var="l2" items="${cen.figlie}">
-      <c:set var="l2nome" value="${fn:replace(l2.nome, singleQuote, singleQuoteEsc)}" scope="page" />
-      <c:set var="l2nome" value="${fn:replace(l2nome, doubleQuote, nullQuoteEsc)}" scope="page" />
-      "<c:if test="${not empty l2.prefisso}">${l2.prefisso} </c:if>${l2nome} (${l2.id})",
-    </c:forEach>
-    <c:forEach var="l2" items="${dip.figlie}">
-      "<c:if test="${not empty l2.prefisso}">${l2.prefisso} </c:if>${l2.nome} (${l2.id})",
-    </c:forEach>
-    ];
-    let struttureLiv3 = [
-        <c:forEach var="l2" items="${dir.figlie}">
-          <c:forEach var="l3" items="${l2.figlie}">
-          "<c:if test="${not empty l3.prefisso}">${l3.prefisso} </c:if>${l3.nome} (${l3.id})",
-          </c:forEach>
-        </c:forEach>
-        <c:forEach var="l2" items="${cen.figlie}">
-          <c:forEach var="l3" items="${l2.figlie}">
-          <c:set var="l3nome" value="${fn:replace(l3.nome, doubleQuote, nullQuoteEsc)}" scope="page" />
-          "<c:if test="${not empty l3.prefisso}">${l3.prefisso} </c:if>${l3nome} (${l3.id})",
-          </c:forEach>
-        </c:forEach>
-        <c:forEach var="l2" items="${dip.figlie}">
-          <c:forEach var="l3" items="${l2.figlie}">
-          "<c:if test="${not empty l3.prefisso}">${l3.prefisso} </c:if>${l3.nome} (${l3.id})",
-          </c:forEach>
-        </c:forEach>
-        ];
-    let struttureLiv4 = [
-        <c:forEach var="l2" items="${dir.figlie}">
-          <c:forEach var="l3" items="${l2.figlie}">
-            <c:forEach var="l4" items="${l3.figlie}">
-            "<c:if test="${not empty l4.prefisso}">${l4.prefisso} </c:if>${l4.nome} (${l4.id})",
-            </c:forEach>
-          </c:forEach>
-        </c:forEach>
-        <c:forEach var="l2" items="${cen.figlie}">
-          <c:forEach var="l3" items="${l2.figlie}">
-            <c:forEach var="l4" items="${l3.figlie}">
-            <c:set var="l4nome" value="${fn:replace(l4.nome, doubleQuote, nullQuoteEsc)}" scope="page" />
-            "<c:if test="${not empty l4.prefisso}">${l4.prefisso} </c:if>${l4nome} (${l4.id})",
-            </c:forEach>
-          </c:forEach>
-        </c:forEach>
-        <c:forEach var="l2" items="${dip.figlie}">
-          <c:forEach var="l3" items="${l2.figlie}">
-            <c:forEach var="l4" items="${l3.figlie}">
-            "<c:if test="${not empty l4.prefisso}">${l4.prefisso} </c:if>${l4.nome} (${l4.id})",
-            </c:forEach>
-          </c:forEach>
-        </c:forEach>
-        ];
-    let soggetti = [
-        <c:forEach var="sc" items="${soggetti}">
-        "${sc.nome} (${sc.id})",
-        </c:forEach>
-      ];
-    $( function() {
-      $(".sLiv1").autocomplete({
-          source: struttureLiv1,
-          minLength: 1
-        });
-      $(".sLiv2").autocomplete({
-          source: struttureLiv2,
-          minLength: 1
-        });
-      $(".sLiv3").autocomplete({
-          source: struttureLiv3,
-          minLength: 1
-        });
-      $(".sLiv4").autocomplete({
-          source: struttureLiv4,
-          minLength: 1
-        });
-      $(".sCont").autocomplete({
-          source: soggetti,
-          minLength: 1
-        });
-    });
-
-    $('#btn-save').click(function (e){
-        e.preventDefault;
-    });
-    
-    $('#ias-form').validate ({
-        rules: {
-        <c:forEach var="fase" items="${fasi}" varStatus="status">
-          'liv1-${fase.id}': {
-              checkFormat: true
-          },
-          'liv2-${fase.id}': {
-              checkFormat: true
-          },
-          'liv3-${fase.id}': {
-              checkFormat: true
-          },
-          'liv4-${fase.id}': {
-              checkFormat: true
-          },
-        </c:forEach>
-        }, 
-        submitHandler: function (form) {
-          return true;
-        }
-    });
-    
-    $.validator.addMethod("checkFormat", function(value, element) {
-        // The string can be void or must have at least one character before ) AND ) at the end of the string
-        const regex = /^(?:\s*|.*\))$/;
-        // Test the value against the regex
-        if (regex.test(value)) {
-          return true; // Valid string
-        }
-      }, "Inserire un valore scelto dall'elenco");
-    
-});
-</script>
