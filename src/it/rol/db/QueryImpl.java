@@ -616,7 +616,7 @@ public class QueryImpl implements Query, Constants {
 
 
     /**
-     * @see Query#queryUpdateActivityStrSub(int, int, int, int, int, int, int, int)
+     * @see Query#queryUpdateActivityStrSub(int, int, int, int, int, date, time, int)
      */
     @Override
     public String queryUpdateActivityStrSub(int lev, 
@@ -628,20 +628,20 @@ public class QueryImpl implements Query, Constants {
                                             java.sql.Time time,
                                             int idu) {
         String clause = null;
-        if (lev == 4) {
+        if (lev == ELEMENT_LEV_4) {
             clause = " AND id_struttura_liv4 = " + idl;
-        } else if (lev == 3) {
+        } else if (lev == ELEMENT_LEV_3) {
             clause = " AND id_struttura_liv3 = " + idl;
-        } else if (lev == 2) {
+        } else if (lev == ELEMENT_LEV_2) {
             clause = " AND id_struttura_liv2 = " + idl;
-        } else if (lev == 1) {
+        } else if (lev == ELEMENT_LEV_1) {
             clause = " AND id_struttura_liv1 = " + idl;
-        } else if (lev == 0) {
+        } else if (lev == NOTHING) {
             clause = " AND id_soggetto_contingente = " + ids;
         } 
         final String UPDATE_ACTIVITY_STRSUB =
                 "UPDATE struttura_attivita" +
-                        "   SET id_rilevazione  = 2" +
+                        "   SET id_rilevazione  = " + ELEMENT_LEV_2 +
                         "   ,  data_ultima_modifica =   '" + date + "'" +
                         "   ,  ora_ultima_modifica =    '" + time + "'" +
                         "   ,  id_usr_ultima_modifica =" + idu +
