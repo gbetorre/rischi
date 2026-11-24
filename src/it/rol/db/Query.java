@@ -2725,9 +2725,22 @@ public interface Query extends Serializable {
      ****************************************************************************/
     
     /**
-     * <p>TODO COMMENTO</p> 
+     * <p>Costruisce dinamicamente la query che effettua la cancellazione logica
+     * della relazione tra una struttura o un soggetto contingente e una
+     * attivit&agrave; di processo.<br>
+     * Per `cancellazione logica` si intende la dissociazione della relazione
+     * dalla rilevazione corrente per agganciarla a una rilevazione fantasma
+     * (rilevazione di sviluppo e test) che non verr&agrave; mai invocata
+     * dai reali link dell'applicazione web.</p> 
      * 
-    // TODO COMMENTO
+     * @param lev eventuale livello della struttura da dissociare (livello 0 implica `soggetto contingente`) 
+     * @param idl id della struttura di organigramma da dissociare
+     * @param ids id del soggetto terzo/contingente da dissociare
+     * @param ida id dell'attivit&agrave; su cui operare la cancellazione logica
+     * @param idr id della rilevazione reale
+     * @param date data di aggiornamento
+     * @param time ora di aggiornamento
+     * @param idu id utente che compie l'operazione
      * @return <code>String</code> - la query che aggiorna la relazione
      */
     public String queryUpdateActivityStrSub(int lev, int idl, int ids, int ida, int idr, java.sql.Date date, java.sql.Time time, int idu);
