@@ -9056,15 +9056,19 @@ public class DBWrapper extends QueryImpl {
                                      HashMap<String, LinkedHashMap<String, String>> params) 
                               throws WebStorageException {
         try (Connection con = rol_manager.getConnection()) {
-            PreparedStatement pst = null;
+            if (con == null) {
+                String msg = FOR_NAME + "Connessione al database non disponibile (null).\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg);
+            }
             // Dizionario dei parametri contenente il codice della rilevazione
             LinkedHashMap<String, String> survey = params.get(PARAM_SURVEY);
             // Dizionario dei parametri della nota da aggiornare
             LinkedHashMap<String, String> strsub = params.get(PART_UPDATE_ACT_STRSUB);
-            try {
-                // BEGIN: ==>
-                con.setAutoCommit(false);
-                // TODO: Controllare se user è superuser
+            // BEGIN: ==>
+            con.setAutoCommit(false);
+            // TODO: Controllare se user è superuser
+            try {                
                 // === Se siamo qui vuol dire che ok   === //
                 int lev = NOTHING, idL = NOTHING, idS = NOTHING;
                 // Recupera l'identificativo dell'attività
@@ -9073,10 +9077,10 @@ public class DBWrapper extends QueryImpl {
                 String levAsString = strsub.get("levl");
                 // Se non c'è il livello vuol dire che c'è il soggetto contingente
                 if (levAsString.equals(VOID_STRING)) {
-                    idS = Integer.valueOf(strsub.get("idsu")).intValue();
+                    idS = Integer.parseInt(strsub.get("idsu"));
                 } else { // Altrimenti c'è la struttura
-                    lev = Integer.valueOf(levAsString).intValue();
-                    idL = Integer.valueOf(strsub.get("idst")).intValue();
+                    lev = Integer.parseInt(levAsString);
+                    idL = Integer.parseInt(strsub.get("idst"));
                 }
                 // Recupera valori dei campi automatici: id utente, ora ultima modifica, data ultima modifica === *
                 java.sql.Date date = Utils.convert(Utils.convert(Utils.getCurrentDate()));
@@ -9085,42 +9089,55 @@ public class DBWrapper extends QueryImpl {
                 int idR = Integer.parseInt(survey.get(PARAM_SURVEY));
                 // Prepara la query
                 String query = queryUpdateActivityStrSub(lev, idL, idS, idA, idR, date, time, idU);
-                // Prepara i parametri per l'inserimento
-                //pst.clearParameters();
-                pst = con.prepareStatement(query);
-                // Invio
-                pst.executeUpdate();
+                // Try-with-resources annidato per il PreparedStatement
+                try (PreparedStatement pst = con.prepareStatement(query)) {
+                    pst.executeUpdate();
+                }
                 // END: <==
                 con.commit();
-                pst.close();
-                pst = null;
-            } catch (NumberFormatException nfe) {
-                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
-                LOG.severe(msg);
-                throw new WebStorageException(msg, nfe);
-            } catch (SQLException sqle) {
-                String msg = FOR_NAME + "Problema nel codice SQL o nella chiusura dello statement.\n";
-                LOG.severe(msg); 
-                throw new WebStorageException(msg + sqle.getMessage(), sqle);
-            } finally {
+            } catch (Exception e) {
+                // Esegue il rollback prima che la connessione venga chiusa dal try-with-resources esterno
                 try {
-                    con.close();
-                } catch (NullPointerException npe) {
-                    String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                    LOG.severe(msg); 
-                    throw new WebStorageException(msg + npe.getMessage());
+                    con.rollback();
+                } catch (SQLException rollbackEx) {
+                    String rollbackMsg = FOR_NAME + "Errore critico durante il rollback della transazione.\n" + rollbackEx.getMessage();
+                    LOG.severe(rollbackMsg);
+                    e.addSuppressed(rollbackEx);
+                }
+                // Gestione differenziata delle eccezioni per differenziare i messaggi di log
+                if (e instanceof NumberFormatException) {
+                    String msg = FOR_NAME + "Si e' verificato un problema nella conversione di interi.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                } else if (e instanceof SQLException) {
+                    String msg = FOR_NAME + "Problema nel codice SQL o nell'esecuzione dello statement.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                } else if (e instanceof NullPointerException) {
+                    String msg = FOR_NAME + "Si e' verificato un problema in un puntamento a null.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                } else {
+                    String msg = FOR_NAME + "Si e' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
+            } finally {
+                // Ripristina lo stato di default dell'autocommit (utile per il ritorno della connessione nel connection pool)
+                try {
+                    con.setAutoCommit(true);
                 } catch (SQLException sqle) {
-                    throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                    LOG.warning(FOR_NAME + "Impossibile ripristinare autoCommit a true: " + sqle.getMessage());
                 }
             }
-        } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
-                LOG.severe(msg);
-                throw new WebStorageException(msg, npe);
+        } catch (WebStorageException wse) {
+            // Rilancia direttamente le WebStorageException già formattate
+            throw wse;
         } catch (Exception e) {
-                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
-                LOG.severe(msg);
-                throw new WebStorageException(msg, e);
+            // Cattura eventuali eccezioni in fase di apertura/chiusura della Connection
+            String msg = FOR_NAME + "Problema nella gestione della connessione al database.\n" + e.getMessage();
+            LOG.severe(msg);
+            throw new WebStorageException(msg, e);
         }
     }
     
