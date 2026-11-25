@@ -9,7 +9,7 @@ $ cd git/rischi/
 
 $ git shortlog -sne > AUTHORS
 
-  2064  gbetorre <gianroberto.torre@gmail.com>
+  2092  gbetorre <gianroberto.torre@gmail.com>
    222  gbetorre <giovanroberto.torre@univr.it>
     24  dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
      9  Gianroberto Torre <giovanroberto.torre@univr.it>
@@ -26,4 +26,4 @@ gbetorre <gianroberto.torre@gmail.com>
 gbetorre <giovanroberto.torre@univr.it>
 Gianroberto Torre <giovanroberto.torre@univr.it>
 
-(Timestamp: Tue Nov 17 02:36:30 PM CET 2026)
+(Timestamp: Wed Nov 25 02:08:55 PM CET 2026)
