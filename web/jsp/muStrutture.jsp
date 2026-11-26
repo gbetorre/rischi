@@ -17,7 +17,7 @@
       });
     });
     </script>
-    <h3 class="mt-1 m-0 font-weight-bold float-left">Report strutture e rischi</h3>
+    <h3 class="mt-1 m-0 font-weight-bold float-left">Report riepilogativo</h3>
     <a href="${mtrRTF}" class="float-right badge badge-pill lightTable" title="Scarica il report in formato RTF">
       <i class="fas fa-download"></i>Scarica report
     </a>
@@ -36,22 +36,23 @@
         <table class="table table-striped table-bordered table-hover" id="listStr">
           <thead class="thead-light">
             <tr class="thin">
-              <th width="15%">Macroprocesso</th>
-              <th width="15%">Processo</th>
-              <th width="25%">Rischi Potenziali</th>
+              <th width="8%">Macroprocesso</th>
+              <th width="13%">Processo</th>
+              <th width="20%">Rischi Potenziali</th>
+              <th width="19%">Misure Previste</th>
               <th width="15%">Strutture</th>
               <th width="15%">Soggetti</th>
-              <th width="15%">Giudizio sintetico</th>
+              <th width="10%">Giudizio sintetico</th>
             </tr>
           </thead>
           <tbody>
           <c:forEach var="mat" items="${mats}">
             <c:forEach var="pat" items="${mat.processi}" varStatus="status">
             <tr class="active thin">
-              <td width="15%" class="verticalCenter reportRow">
+              <td class="verticalCenter reportRow">
                 <c:out value="${mat.nome}" />
               </td>
-              <td width="15%" class="verticalCenter reportRow">
+              <td class="verticalCenter reportRow">
                 <a href="${initParam.appName}/?q=pr&p=pro&pliv=${pat.id}&liv=${pat.livello}&r=${param['r']}" title="Vedi dettagli Processo">
                   <c:out value="${pat.nome}" />
                 </a>
@@ -63,7 +64,7 @@
                   </span>
                 </div>
               </td>
-              <td width="25%">
+              <td>
                 <ul class="list-group list-group-flush">
                   <c:set var="rsks" value="${risks.get(pat)}" scope="page" />
                   <c:forEach var="rsk" items="${rsks}">
@@ -79,7 +80,20 @@
                   </c:forEach>
                 </ul>
               </td>
-              <td width="15%">
+              <td>
+                <ul class="list-group list-group-flush">
+                 <c:set var="rsks" value="${risks.get(pat)}" scope="page" />
+                 <c:forEach var="rsk" items="${rsks}">
+                   <c:forEach var="mes" items="${rsk.misure}">
+                  <li class="list-group-item">
+                    <img src="${initParam.urlDirectoryImmagini}mis-${mes.carattere.informativa}.png" class="ico-small" alt="icona" title="Misura ${mes.carattere.nome}" /> 
+                    <c:out value="${mes.nome}" />
+                  </li>
+                   </c:forEach>
+                 </c:forEach>
+                </ul>
+              </td>
+              <td>
                 <ul class="list-group list-group-flush">
                  <c:set var="strs" value="${structs.get(pat.id)}" scope="page" />
                   <c:forEach var="str" items="${strs}">
@@ -90,7 +104,7 @@
                   </c:forEach>
                 </ul>
               </td>
-              <td width="15%">
+              <td>
                 <ul class="list-group list-group-flush">
                   <c:set var="subs" value="${subjs.get(pat.id)}" scope="page" />
                   <c:forEach var="sub" items="${subs}">
@@ -108,7 +122,7 @@
                   </c:forEach>
                   </ul>
               </td>
-              <td width="15%" class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)}">
+              <td class="text-center verticalCenter reportRow bgcolor-${fn:toLowerCase(pat.indicatori.get('PxI').informativa)}">
                 <c:out value="${pat.indicatori.get('PxI').informativa}" />
                 <hr class="riga" />
                 <div class="lightTable subfields">
