@@ -1212,7 +1212,12 @@ public class Data extends HttpServlet implements Constants {
                           "}\n" +
                           "\t{\\doccomm https://at.univr.it/rischi/}\n" +
                         "}\n" +
-                        "{\\colortbl ;\\red255\\green255\\blue0;\\red255\\green0\\blue0;}\n" +
+                        "{\\colortbl ;" +
+                        "\\red255\\green255\\blue0;" +     // 1: Giallo (LIVELLI_RISCHIO[2] - MEDIO)
+                        "\\red255\\green0\\blue0;" +       // 2: Rosso (LIVELLI_RISCHIO[3] - ALTO)
+                        "\\red146\\green208\\blue80;" +    // 3: Verde chiaro (LIVELLI_RISCHIO[1] - BASSO) - oppure \red0\green255\blue0;
+                        "\\red173\\green216\\blue230;" +   // 4: Azzurro chiaro (LIVELLI_RISCHIO[0] - MINIMO) - oppure \red0\green255\blue255;
+                        "\\red192\\green0\\blue0;}\n" +       // 5: Rosso scuro (LIVELLI_RISCHIO[4] - ALTISSIMO)
                         "{\\*\\generator Riched20 10.0.19041}\n";
                     String thead =
                         pageSetup +
@@ -1220,14 +1225,14 @@ public class Data extends HttpServlet implements Constants {
                         "\\trowd\\trgaph70\\trleft5\\trqc\\trbrdrl\\brdrs\\brdrw10 \n" +
                         "\\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \n" + 
                         "\\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n" +
-                        cellDef + "\\cellx2100" +   // Col 1: Area di rischio (larghezza 2100)
-                        cellDef + "\\cellx4200" +   // Col 2: Macroprocesso (larghezza 2100)
-                        cellDef + "\\cellx6200" +   // Col 3: Processo (larghezza 2000)
-                        cellDef + "\\cellx8600" +   // Col 4: Rischi Potenziali (larghezza 2400)
-                        cellDef + "\\cellx10600" +  // Col 5: Misure Previste (larghezza 2000)
-                        cellDef + "\\cellx12400" +  // Col 6: Strutture (larghezza 1800)
-                        cellDef + "\\cellx14000" +  // Col 7: Soggetti (larghezza 1600)
-                        cellDef + "\\cellx15400 \n" + // Col 8: Giudizio sintetico (larghezza 1400)
+                        cellDef + "\\cellx1680" +    // Col 1: Area di rischio (larghezza 1680: -20%)
+                        cellDef + "\\cellx3570" +    // Col 2: Macroprocesso (larghezza 1890: -10%)
+                        cellDef + "\\cellx5570" +    // Col 3: Processo (larghezza 2000)
+                        cellDef + "\\cellx7970" +    // Col 4: Rischi Potenziali (larghezza 2400)
+                        cellDef + "\\cellx9970" +    // Col 5: Misure Previste (larghezza 2000)
+                        cellDef + "\\cellx11770" +   // Col 6: Strutture (larghezza 1800)
+                        cellDef + "\\cellx13370" +   // Col 7: Soggetti (larghezza 1600)
+                        cellDef + "\\cellx15400 \n" + // Col 8: Giudizio sintetico (larghezza 2030: +630)
                         "\\pard\\intbl\\widctlpar\\qc\\b\\f1\\fs22 \n" +
                         "Area di rischio \\cell \n" +
                         "Macroprocesso \\cell \n" + 
@@ -1242,13 +1247,13 @@ public class Data extends HttpServlet implements Constants {
                         "\\trowd\\trgaph70\\trleft5\\trqc\\trrh5103\\trbrdrl\\brdrs\\brdrw10 \n" + 
                         "\\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \n" + 
                         "\\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n" +
-                        cellDef + "\\cellx2100" +
-                        cellDef + "\\cellx4200" +
-                        cellDef + "\\cellx6200" +
-                        cellDef + "\\cellx8600" +
-                        cellDef + "\\cellx10600" +  // <-- Nuova colonna (5ª)
-                        cellDef + "\\cellx12400" +
-                        cellDef + "\\cellx14000" +
+                        cellDef + "\\cellx1680" +
+                        cellDef + "\\cellx3570" +
+                        cellDef + "\\cellx5570" +
+                        cellDef + "\\cellx7970" +
+                        cellDef + "\\cellx9970" +
+                        cellDef + "\\cellx11770" +
+                        cellDef + "\\cellx13370" +
                         cellDef + "\\cellx15400 \n" +
                         "\\pard\\intbl\\widctlpar\\qc\\b0\\highlight0 \n";
                 StringBuffer content = new StringBuffer();
@@ -1430,16 +1435,18 @@ public class Data extends HttpServlet implements Constants {
      * @return valore di highlight da stampare nel documento
      */
     public static String getHighlight(String riskLevel) {
-        if (riskLevel.equals(LIVELLI_RISCHIO[0])) {
-            return "\\highlight4";
-        } else if (riskLevel.equals(LIVELLI_RISCHIO[1])) {
+        if (riskLevel == null) {
             return "\\highlight0";
-        } else if (riskLevel.equals(LIVELLI_RISCHIO[2])) {
+        } else if (riskLevel.equals(LIVELLI_RISCHIO[0])) {          // MINIMO -> Azzurro (indice 4)
+            return "\\highlight4";
+        } else if (riskLevel.equals(LIVELLI_RISCHIO[1])) {          // BASSO -> Verde (indice 3)
+            return "\\highlight3";
+        } else if (riskLevel.equals(LIVELLI_RISCHIO[2])) {          // MEDIO -> Giallo (indice 1)
             return "\\highlight1";
-        } else if (riskLevel.equals(LIVELLI_RISCHIO[3])) {
+        } else if (riskLevel.equals(LIVELLI_RISCHIO[3])) {          // ALTO -> Rosso (indice 2)
             return "\\highlight2";
-        } else if (riskLevel.equals(LIVELLI_RISCHIO[4])) {
-            return "\\highlight13";
+        } else if (LIVELLI_RISCHIO.length > 4 && riskLevel.equals(LIVELLI_RISCHIO[4])) { // ALTISSIMO -> Rosso scuro (indice 5)
+            return "\\highlight5";
         } else {
             return "\\highlight0";
         }
