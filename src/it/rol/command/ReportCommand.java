@@ -179,7 +179,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
         nomeFile.put(PART_MEASURES,     nomeFileMisure);
         nomeFile.put(PART_MONITOR,      nomeFileMonitor);
         nomeFile.put(PART_GRAPHICS,     nomeFileGraphics);
-        // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
+        // Carica la hashmap contenente i titoli pagina in funzione dei parametri
         titleFile.put(PART_SEARCH,      "Ricerca personalizzata");
         titleFile.put(PART_PROCESS,     "Report analitico PxI");
         titleFile.put(PART_RISKS,       "Report PxI mitigati");
@@ -273,7 +273,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                             bC = HomePageCommand.makeBreadCrumbs(breadCrumbs, ELEMENT_LEV_1, "Report PxI");
                             break;
                         }
-                        /* -------  SHOW Report Sintetico tabella MDM   ------- */
+                        /* -------  SHOW Report Tabella MDM   ------- */
                         case PART_SELECT_STR: {
                             // Recupera le strutture indicizzate per identificativo di processo
                             structs = retrieveStructures(matsWithoutIndicators, user, codeSur, db);
@@ -829,7 +829,7 @@ public class ReportCommand extends ItemBean implements Command, Constants {
                            indicatori.put(PIM, pim);
                            // Resetta il vettore dei rischi mitigati
                            mitigatingRisks = new ArrayList<>();
-                           // Per ogni rischio
+                           // Calcolo dei PxI monitorati (quelli che ottenuti dalle misure effettivamente applicate)
                            for (RiskBean risk : risks) {
                                // Resetta il vettore delle misure applicate
                                ArrayList<MeasureBean> appliedMeasures = null;
