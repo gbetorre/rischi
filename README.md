@@ -431,6 +431,7 @@ in the case of the current application, in fact, version numbers have only the s
 
 ### 2026
 
+- [2.9.2] (26/11/2026) [Addition of recommended measures in the general summary report ](https://github.com/gbetorre/rischi/commits/main/?since=2026-11-26&until=2026-11-26)
 - [2.9.1] (23/11/2026) [Implementation facility for the logical removal of a relationship between a structure/entity and a process activity](https://github.com/gbetorre/rischi/commits/main/?since=2026-11-23&until=2026-11-23)
 - [2.9.0] (19/11/2026) [First implementation for the logical removal of a relationship between a structure/entity and a process activity](https://github.com/gbetorre/rischi/commits/main/?since=2026-11-19&until=2026-11-19)
 - [2.8.9] (17/11/2026) [First implementation to contextualize historically the monitoring report](https://github.com/gbetorre/rischi/commits/main/?since=2026-11-17&until=2026-11-17)

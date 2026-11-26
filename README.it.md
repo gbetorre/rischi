@@ -538,8 +538,9 @@ e fornirvi il relativo significato e la relativa motivazione.
 - ...
 -->
 
-### 2026 (51 versioni)
+### 2026 (52 versioni)
 
+- [2.9.2] (26/11/2026) Aggiunta colonna misure previste a report tabellare PxI e relativo export su file RTF
 - [2.9.1] (23/11/2026) Completamento implementazione funzione di eliminazione logica dell'associazione tra una struttura/soggetto e un'attivit&agrave; di processo
 - [2.9.0] (19/11/2026) Inizio implementazione funzione di eliminazione logica dell'associazione tra una struttura/soggetto e un'attivit&agrave; di processo
 - [2.8.9] (17/11/2026) Inizio implementazione storicizzazione del report del monitoraggio
