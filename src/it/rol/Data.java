@@ -72,6 +72,7 @@ import com.oreilly.servlet.ParameterParser;
 import it.rol.bean.DepartmentBean;
 import it.rol.bean.InterviewBean;
 import it.rol.bean.ItemBean;
+import it.rol.bean.MeasureBean;
 import it.rol.bean.PersonBean;
 import it.rol.bean.ProcessBean;
 import it.rol.bean.QuestionBean;
@@ -1187,6 +1188,11 @@ public class Data extends HttpServlet implements Constants {
                     // Soggetti contingenti indicizzati per id processo_at
                     HashMap<Integer, ArrayList<?>> subjects = map.get(TIPI_LISTE[7]);
                     // Preprazione file RTF
+                    String cellDef = "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n";
+                    // Impostazione pagina A4 Orizzontale (29.7cm x 21cm) con margini da ~1.2cm (700 twips)
+                    String pageSetup = 
+                        "\\paperw16838\\paperh11906\\landscape\n" +
+                        "\\margl700\\margr700\\margt700\\margb700\n";
                     String prolog = "{\\rtf1 \\ansi \\ansicpg1252\\deff0\\nouicompat\\deflang1040 \n";
                     String header = 
                         "{\\fonttbl\n" + 
@@ -1195,7 +1201,7 @@ public class Data extends HttpServlet implements Constants {
                           "\t{\\f2\\fnil\\fcharset0 Calibri;}\n" + 
                         "}\n" +
                         "{\\info\n" +
-                          "\t{\\title Report Strutture e Rischi}\n" +
+                          "\t{\\title Report Riepilogativo per PIAO}\n" +
                           "\t{\\author Giovanroberto Torre}\n" +
                           //"\t{\\company Athenaeum}\n" +
                           "\t{\\creatim\\yr" + new Integer(now.get(Calendar.YEAR)).toString() +  
@@ -1209,23 +1215,25 @@ public class Data extends HttpServlet implements Constants {
                         "{\\colortbl ;\\red255\\green255\\blue0;\\red255\\green0\\blue0;}\n" +
                         "{\\*\\generator Riched20 10.0.19041}\n";
                     String thead =
+                        pageSetup +
                         "\\viewkind4\\uc1\n" +
                         "\\trowd\\trgaph70\\trleft5\\trqc\\trbrdrl\\brdrs\\brdrw10 \n" +
                         "\\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \n" + 
                         "\\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n" +
-                        "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" + 
-                        "\\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx10186 \n" +
+                        cellDef + "\\cellx2100" +   // Col 1: Area di rischio (larghezza 2100)
+                        cellDef + "\\cellx4200" +   // Col 2: Macroprocesso (larghezza 2100)
+                        cellDef + "\\cellx6200" +   // Col 3: Processo (larghezza 2000)
+                        cellDef + "\\cellx8600" +   // Col 4: Rischi Potenziali (larghezza 2400)
+                        cellDef + "\\cellx10600" +  // Col 5: Misure Previste (larghezza 2000)
+                        cellDef + "\\cellx12400" +  // Col 6: Strutture (larghezza 1800)
+                        cellDef + "\\cellx14000" +  // Col 7: Soggetti (larghezza 1600)
+                        cellDef + "\\cellx15400 \n" + // Col 8: Giudizio sintetico (larghezza 1400)
                         "\\pard\\intbl\\widctlpar\\qc\\b\\f1\\fs22 \n" +
                         "Area di rischio \\cell \n" +
                         "Macroprocesso \\cell \n" + 
                         "Processo \\cell \n" +
                         "Rischi Potenziali \\cell \n" +
+                        "Misure Previste \\cell \n" + // <-- Nuova colonna
                         "Strutture \\cell \n" + 
                         "Soggetti \\cell \n" + 
                         "Giudizio sintetico \\cell \n" +
@@ -1234,14 +1242,14 @@ public class Data extends HttpServlet implements Constants {
                         "\\trowd\\trgaph70\\trleft5\\trqc\\trrh5103\\trbrdrl\\brdrs\\brdrw10 \n" + 
                         "\\trbrdrt\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \n" + 
                         "\\trpaddl70\\trpaddr70\\trpaddfl3\\trpaddfr3\n" +
-                        "\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx1810\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx3427\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx4767\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx6476\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx7874\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx9182\\clvertalc\\clbrdrl\\brdrw10\\brdrs\\clbrdrt\\brdrw10\\brdrs\\clbrdrr\\brdrw10\\brdrs\\clbrdrb\\brdrw10\\brdrs \n" +
-                        "\\cellx10186 \n" +
+                        cellDef + "\\cellx2100" +
+                        cellDef + "\\cellx4200" +
+                        cellDef + "\\cellx6200" +
+                        cellDef + "\\cellx8600" +
+                        cellDef + "\\cellx10600" +  // <-- Nuova colonna (5ª)
+                        cellDef + "\\cellx12400" +
+                        cellDef + "\\cellx14000" +
+                        cellDef + "\\cellx15400 \n" +
                         "\\pard\\intbl\\widctlpar\\qc\\b0\\highlight0 \n";
                 StringBuffer content = new StringBuffer();
                     content.append(prolog);         // RFT file starts
@@ -1254,13 +1262,16 @@ public class Data extends HttpServlet implements Constants {
                             ArrayList<DepartmentBean> processSubjs = (ArrayList<DepartmentBean>) subjects.get(Integer.valueOf(p.getId()));
                             // <tr>
                             content.append(tr);
+                            // Area di rischio
                             content.append(p.getAreaRischio());
                             content.append("\\cell ");
+                            // Macroprocesso
                             content.append(m.getNome()
                                             .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
                                             .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
                                             .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
                             content.append("\\cell ");
+                            // Processo
                             content.append(p.getNome()
                                             .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
                                             .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
@@ -1280,6 +1291,20 @@ public class Data extends HttpServlet implements Constants {
                                 content.append("\\pard\\intbl\\widctlpar\\par\n");
                             }
                             content.append("\\cell \n");
+                            // Misure previste
+                            for (RiskBean r : processRisks) {
+                                for (MeasureBean  ms : r.getMisure()) {
+                                    content.append("(" + ms.getCarattere().getInformativa() + ")").append(BLANK_SPACE);
+                                    content.append(ms.getNome()
+                                                    .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
+                                                    .replace(ENGLISH_DOUBLE_QUOTE_OPEN, QUOTE)
+                                                    .replace(ENGLISH_DOUBLE_QUOTE_CLOSE, QUOTE));
+                                    content.append("\\par\n");
+                                    content.append("\\pard\\intbl\\widctlpar\\par\n");
+                                }
+                            }
+                            content.append("\\cell \n");
+                            // Strutture
                             for (DepartmentBean s : processStructs) {
                                 content.append(s.getPrefisso()).append(BLANK_SPACE);
                                 content.append(s.getNome()
@@ -1290,6 +1315,7 @@ public class Data extends HttpServlet implements Constants {
                                 content.append("\\pard\\intbl\\widctlpar\\par\n");
                             }
                             content.append("\\cell \n");
+                            // Soggetti
                             for (DepartmentBean t : processSubjs) {
                                 content.append(t.getNome()
                                                 .replace(ENGLISH_SINGLE_QUOTE, APOSTROPHE)
@@ -1299,6 +1325,7 @@ public class Data extends HttpServlet implements Constants {
                                 content.append("\\pard\\intbl\\widctlpar\\par\n");
                             }
                             content.append("\\cell \n");
+                            // Giudizio sintetico
                             if (p.getIndicatori() != null && !p.getIndicatori().isEmpty()) {
                                 content.append("\\qc");
                                 content.append(getHighlight(p.getIndicatori().get("PxI").getInformativa()));
