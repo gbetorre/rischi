@@ -10093,84 +10093,90 @@ public class DBWrapper extends QueryImpl {
      * @param username      login dell'utente (username usato per accedere)
      * @throws WebStorageException se si verifica un problema SQL o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null" })
     public void manageAccess(String username)
                       throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        CodeBean accessRow = null;
-        int nextParam = NOTHING;
-        try {
-            // Ottiene la connessione
-            con = rol_manager.getConnection();
-            // Verifica se la login abbia già fatto un accesso
-            pst = con.prepareStatement(GET_ACCESSLOG_BY_LOGIN);
-            pst.clearParameters();
-            pst.setString(++nextParam, username);
-            rs = pst.executeQuery();
-            if (rs.next()) {    // Esiste già un accesso: lo aggiorna
-                accessRow = new CodeBean();
-                BeanUtil.populate(accessRow, rs);
-                pst = null;
+        // TRY-WITH-RESOURCES: Apre e chiude AUTOMATICAMENTE connessione e primo Statement di lettura
+        try (Connection con = rol_manager.getConnection();
+             PreparedStatement pstSelect = con.prepareStatement(GET_ACCESSLOG_BY_LOGIN)) {
+            int nextParam = NOTHING;
+            pstSelect.clearParameters();
+            pstSelect.setString(++nextParam, username);
+            // TRY-WITH-RESOURCES: Chiude AUTOMATICAMENTE anche il ResultSet
+            try (ResultSet rs = pstSelect.executeQuery()) {
+                // BEGIN: ==> Avvia la transazione prima di leggere/scrivere
                 con.setAutoCommit(false);
-                pst = con.prepareStatement(UPDATE_ACCESSLOG_BY_USER);
-                pst.clearParameters();
-                pst.setString(nextParam, username);
-                // Campi automatici: ora ultimo accesso, data ultimo accesso
-                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
-                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
-                pst.setInt(++nextParam, accessRow.getId());
-                pst.executeUpdate();
+                if (rs.next()) {    // Esiste già un accesso: LO AGGIORNA
+                    CodeBean accessRow = new CodeBean();
+                    BeanUtil.populate(accessRow, rs);
+                    try (PreparedStatement pstUpdate = con.prepareStatement(UPDATE_ACCESSLOG_BY_USER)) {
+                        pstUpdate.clearParameters();
+                        // Nota: qui nextParam vale già 1 (come nel codice originale)
+                        pstUpdate.setString(nextParam, username);
+                        /* === Campi automatici   === */ 
+                        // Non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                        pstUpdate.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                        // Non accetta una Stringa, ma un oggetto java.sql.Time
+                        pstUpdate.setTime(++nextParam, Utils.getCurrentTime());
+                        pstUpdate.setInt(++nextParam, accessRow.getId());
+                        pstUpdate.executeUpdate();
+                    } catch (AttributoNonValorizzatoException anve) {
+                        String msg = FOR_NAME + "Probabile problema nel recupero dell'id dell\'ultimo accesso\n";
+                        LOG.severe(msg);
+                        throw new WebStorageException(msg + anve.getMessage(), anve);
+                    }
+                } else {            // Non esiste un accesso: NE CREA 1 NUOVO
+                    try (PreparedStatement pstInsert = con.prepareStatement(INSERT_ACCESSLOG_BY_USER)) {
+                        pstInsert.clearParameters();
+                        int nextVal = getMax("access_log") + ELEMENT_LEV_1;
+                        // Nota: qui nextParam vale già 1
+                        pstInsert.setInt(nextParam, nextVal);
+                        pstInsert.setString(++nextParam, username);
+                        pstInsert.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                        pstInsert.setTime(++nextParam, Utils.getCurrentTime());
+                        pstInsert.executeUpdate();
+                    }
+                }
+                // END: <== Se tutto va bene, effettua il commit
                 con.commit();
-            } else {            // Non esiste un accesso: ne crea uno nuovo
-                // Chiude e annulla il PreparedStatement rimasto inutilizzato
-                pst.close();
-                pst = null;
-                // BEGIN;
-                con.setAutoCommit(false);
-                pst = con.prepareStatement(INSERT_ACCESSLOG_BY_USER);
-                pst.clearParameters();
-                int nextVal = getMax("access_log") + 1;
-                pst.setInt(nextParam, nextVal);
-                pst.setString(++nextParam, username);
-                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
-                pst.setTime(++nextParam, Utils.getCurrentTime());
-                pst.executeUpdate();
-                // END;
-                con.commit();
+            } catch (Exception e) {
+                // In caso di QUALSIASI errore all'interno della transazione, esegue il rollback
+                try {
+                    LOG.warning(FOR_NAME + "Si e' verificata un'eccezione nel metodo manageAccess. Tento il rollback!");
+                    con.rollback();
+                } catch (SQLException ex) {
+                    LOG.warning(FOR_NAME + "Impossibile eseguire il rollback della transazione: " + ex.getMessage());
+                }
+                // Smista subito l'eccezione nel tipo corretto senza rilanciare 'e' generico
+                if (e instanceof AttributoNonValorizzatoException) {
+                    String msg = FOR_NAME + "Probabile problema nel recupero dell'id dell'ultimo accesso\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                } else if (e instanceof SQLException || e instanceof NumberFormatException || e instanceof NullPointerException) {
+                    String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                } else {
+                    String msg = FOR_NAME + "Si e' verificato un problema.\n" + e.getMessage();
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg, e);
+                }
             }
-            String msg = "Si e\' loggato l\'utente: " + username +
+            // Logging
+            String msg = "Si e' loggato l'utente: " + username +
                          " in data:" + Utils.format(Utils.getCurrentDate()) +
                          " alle ore:" + Utils.getCurrentTime() +
                          ".\n";
             LOG.info(msg);
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Probabile problema nel recupero dell'id dell\'ultimo accesso\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (WebStorageException wse) {
+            throw wse;    
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
             LOG.severe(msg);
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } catch (NumberFormatException nfe) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e' verificato un problema.\n" + e.getMessage();
             LOG.severe(msg);
-            throw new WebStorageException(msg + nfe.getMessage(), nfe);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
-            LOG.severe(msg);
-            throw new WebStorageException(msg + npe.getMessage(), npe);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg);
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
+            throw new WebStorageException(msg, e);
         }
     }
 
